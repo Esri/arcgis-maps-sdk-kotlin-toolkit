@@ -37,10 +37,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -68,15 +64,13 @@ fun ExpandableCard(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
-    initialExpandedState: Boolean = true,
+    expandableCardState: ExpandableCardState = rememberExpandableCardState(),
     padding: PaddingValues = PaddingValues(16.dp),
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
     typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit = {}
 ) {
-    var expanded by rememberSaveable { mutableStateOf(initialExpandedState) }
-
     ExpandableCardTheme(
         colorScheme = colorScheme,
         shapes = shapes,
@@ -100,14 +94,14 @@ fun ExpandableCard(
                     colors = colorScheme,
                     shapes = shapes,
                     typography = typography,
-                    isExpanded = expanded
+                    isExpanded = expandableCardState.isExpanded,
                 ) {
                     if (toggleable) {
-                        expanded = !expanded
+                        expandableCardState.toggle()
                     }
                 }
 
-                AnimatedVisibility(visible = expanded) {
+                AnimatedVisibility(visible = expandableCardState.isExpanded) {
                     content()
                 }
 
