@@ -106,7 +106,7 @@ internal fun FeatureResultsDetailsScreen(
 private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: (UtilityElement) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(assetTypeList[0].assetType.name, value = assetTypeList.size.toString()) {
+            ExpandableCardWithLabel(assetTypeList[0].assetType.name, contentTitle = assetTypeList.size.toString()) {
                 Column {
                     assetTypeList.forEach { utilityElement ->
                         HorizontalDivider()
