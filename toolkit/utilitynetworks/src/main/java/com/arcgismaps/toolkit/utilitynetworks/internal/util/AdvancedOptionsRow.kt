@@ -165,7 +165,6 @@ private fun AdvancedOptionsRowPreview() {
                 isEnabled = newState
             },
             modifier = Modifier
-                .semantics { contentDescription = "switch" }
                 .padding(horizontal = 4.dp),
             enabled = isEnabled
         )
