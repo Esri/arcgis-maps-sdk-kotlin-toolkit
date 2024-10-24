@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.UpButton
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
@@ -74,8 +73,6 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 @Composable
 internal fun StartingPointDetailsScreen(
     startingPoint: StartingPoint,
-    showResultsTab: Boolean,
-    onBackToResults: () -> Unit,
     onZoomTo: () -> Unit,
     onDelete: () -> Unit,
     onFractionChanged: (StartingPoint, Float) -> Unit,
@@ -85,6 +82,7 @@ internal fun StartingPointDetailsScreen(
     BackHandler {
         onBackPressed()
     }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -93,15 +91,6 @@ internal fun StartingPointDetailsScreen(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
-
-            if (showResultsTab) {
-                TabRow(onBackToResults, 0)
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(25.dp)
-                )
-            }
 
             UpButton(stringResource(id = R.string.starting_points), onBackPressed)
 

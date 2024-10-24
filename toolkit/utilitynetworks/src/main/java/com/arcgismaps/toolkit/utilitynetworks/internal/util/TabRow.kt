@@ -18,35 +18,31 @@ package com.arcgismaps.toolkit.utilitynetworks.internal.util
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 
 @Composable
 internal fun TabRow(
-    onTabSelected: () -> Unit,
-    selectedIndex: Int
+    selectedIndex: Int,
+    onNavigateTo: (Pair<Int, TraceNavRoute>) -> Unit
 ) {
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(selectedIndex) }
-    val newTrace = stringResource(R.string.new_trace)
-    val results = stringResource(R.string.results)
-    val tabItems = rememberSaveable { listOf(newTrace, results) }
+    val tabItems = listOf(
+        stringResource(R.string.new_trace) to TraceNavRoute.TraceOptions,
+        stringResource(R.string.results) to TraceNavRoute.TraceResults
+    )
 
-    TabRow(selectedTabIndex = selectedTabIndex) {
-        tabItems.forEachIndexed { index, title ->
+    TabRow(selectedTabIndex = selectedIndex) {
+        tabItems.forEachIndexed { index, tab ->
             Tab(
-                selected = index == selectedTabIndex,
+                selected = index == selectedIndex,
                 onClick = {
-                    if (index != selectedTabIndex) {
-                        onTabSelected()
-                        selectedTabIndex = index
+                    if (index != selectedIndex) {
+                        onNavigateTo(index to tab.second)
                     }
                 },
-                text = { Text(title) }
+                text = { Text(tab.first) }
             )
         }
     }

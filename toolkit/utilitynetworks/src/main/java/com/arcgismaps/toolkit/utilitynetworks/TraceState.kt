@@ -659,6 +659,15 @@ public class TraceState(
     internal fun setCurrentError(error: Throwable) {
         _currentError = error
     }
+
+    /**
+     * Signal if the TabRow should be shown.
+     *
+     * @since 200.6.0
+     */
+    internal fun showTabRow(): Boolean {
+        return _completedTraces.isNotEmpty()
+    }
 }
 
 /**
