@@ -414,6 +414,20 @@ public class TraceState(
         }
     }
 
+    /**
+     * Add a starting point for a utility network trace.
+     *
+     * @param arcGISFeature the feature to use as the starting point
+     * @param mapPoint the map point to indicate the location of the starting point
+     * @since 200.6.0
+     */
+    public fun addStartingPoint(arcGISFeature: ArcGISFeature, mapPoint: Point? = null) {
+        processAndAddStartingPoint(arcGISFeature, mapPoint).getOrElse {
+            setCurrentError(it)
+            showScreen(TraceNavRoute.TraceError)
+        }
+    }
+
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
@@ -444,7 +458,7 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point?): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: return@runCatchingCancellable
 
@@ -458,8 +472,9 @@ public class TraceState(
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            utilityElement.fractionAlongEdge =
-                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: 0.5
+            utilityElement.fractionAlongEdge = mapPoint?.let { mapPoint ->
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() }
+            } ?: 0.5
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
@@ -467,7 +482,7 @@ public class TraceState(
         }
 
         val graphic = Graphic(
-            geometry = mapPoint,
+            geometry = mapPoint ?: featureGeometry?.extent?.center,
             symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, currentTraceGraphicsColor, 20.0f)
         )
         graphicsOverlay.graphics.add(graphic)
