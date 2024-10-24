@@ -661,11 +661,11 @@ public class TraceState(
     }
 
     /**
-     * Signal if the result screen should be shown.
+     * Signal if the TabRow should be shown.
      *
      * @since 200.6.0
      */
-    internal fun showResults(): Boolean {
+    internal fun showTabRow(): Boolean {
         return _completedTraces.isNotEmpty()
     }
 }

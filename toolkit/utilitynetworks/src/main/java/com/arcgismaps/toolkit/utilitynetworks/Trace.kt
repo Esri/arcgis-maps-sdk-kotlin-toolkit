@@ -101,7 +101,7 @@ public fun Trace(
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
                     }
-                    if (traceState.showResults()) {
+                    if (traceState.showTabRow()) {
                         TabRow(
                             selectedTabIndex,
                             onNavigateTo = {
