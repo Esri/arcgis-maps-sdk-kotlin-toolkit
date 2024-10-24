@@ -63,7 +63,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
@@ -233,7 +232,7 @@ private fun TraceConfiguration(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Filled.Done,
-                        contentDescription = "Selected icon",
+                        contentDescription = stringResource(R.string.selected_icon),
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }

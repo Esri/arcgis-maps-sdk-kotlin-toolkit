@@ -29,7 +29,7 @@ import androidx.compose.runtime.setValue
  * In most cases, this will be created using [rememberExpandableCardState].
  * @since 200.6.0
  */
-class ExpandableCardState constructor(initialExpandedState: Boolean) {
+class ExpandableCardState internal constructor(initialExpandedState: Boolean) {
     /**
      * The expanded state of the [ExpandableCard].
      * @since 200.6.0
