@@ -315,6 +315,7 @@ public class TraceState(
         var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
         var currentTraceElementResultsAsFeatures: List<ArcGISFeature> = emptyList()
+        var currentTraceElementResultsExtent: Envelope? = null
         var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
         for (result in traceResults) {
@@ -323,6 +324,9 @@ public class TraceState(
                 is UtilityElementTraceResult -> {
                     currentTraceElementResults = result.elements
                     currentTraceElementResultsAsFeatures = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
+                    if (currentTraceElementResultsAsFeatures.isNotEmpty()) {
+                        currentTraceElementResultsExtent = getResultFeaturesExtent(currentTraceElementResultsAsFeatures)
+                    }
                 }
                 // Function results
                 is UtilityFunctionTraceResult -> {
@@ -359,7 +363,7 @@ public class TraceState(
             configuration = traceConfiguration,
             startingPoints = _currentTraceStartingPoints.toList(),
             geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
-            resultsGraphicExtent = currentTraceResultGeometriesExtent,
+            resultsExtent = currentTraceElementResultsExtent ?: currentTraceResultGeometriesExtent,
             resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
             featureResults = currentTraceElementResults,
             featureResultsAsFeatures = currentTraceElementResultsAsFeatures,
@@ -391,18 +395,25 @@ public class TraceState(
         _currentTraceZoomToResults.value = true
     }
 
+    private fun getResultFeaturesExtent(features: List<ArcGISFeature>): Envelope? {
+        val geometries = features.mapNotNull { feature ->
+            feature.geometry?.takeIf { !it.isEmpty }
+        }
+        return getGeometriesExtent(geometries)
+    }
+
     private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
         val geometries = listOf(
             utilityGeometryTraceResult.polygon,
             utilityGeometryTraceResult.polyline,
             utilityGeometryTraceResult.multipoint
         ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
-            }
+            geometry?.takeIf { !it.isEmpty }
         }
+        return getGeometriesExtent(geometries)
+    }
+
+    private fun getGeometriesExtent(geometries: Iterable<Geometry>): Envelope? {
         val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
         val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
 
@@ -679,7 +690,7 @@ public class TraceState(
 
     internal suspend fun zoomToSelectedTrace() {
         val currentTrace = completedTraces[_selectedCompletedTraceIndex.value]
-        val extent = currentTrace.resultsGraphicExtent ?: return
+        val extent = currentTrace.resultsExtent ?: return
         mapViewProxy.setViewpointAnimated(
             Viewpoint(extent.extent),
             1.0.seconds,
@@ -794,7 +805,7 @@ internal data class TraceRun(
     val configuration: UtilityNamedTraceConfiguration,
     val startingPoints: List<StartingPoint>,
     val geometryResultsGraphics: List<Graphic>,
-    val resultsGraphicExtent: Envelope? = null,
+    val resultsExtent: Envelope? = null,
     var resultGraphicColor: androidx.compose.ui.graphics.Color,
     val featureResults: List<UtilityElement>,
     val featureResultsAsFeatures: List<ArcGISFeature>,
