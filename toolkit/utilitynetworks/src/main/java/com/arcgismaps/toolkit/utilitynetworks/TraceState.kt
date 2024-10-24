@@ -501,7 +501,6 @@ public class TraceState(
                         processAndAddStartingPoint(feature, mapPoint).getOrElse {
                             setCurrentError(it)
                             _addStartingPointMode.value = AddStartingPointMode.Stopped
-                            _isIdentifyInProcess.value = false
                             showScreen(TraceNavRoute.TraceError)
                             return
                         }
@@ -510,7 +509,6 @@ public class TraceState(
                 if (currentTraceStartingPoints.size > sizeBefore) {
                     // If the size of the starting points has changed, then the starting point was added
                     _addStartingPointMode.value = AddStartingPointMode.Stopped
-                    _isIdentifyInProcess.value = false
                     showScreen(TraceNavRoute.TraceOptions)
                 }
             }
