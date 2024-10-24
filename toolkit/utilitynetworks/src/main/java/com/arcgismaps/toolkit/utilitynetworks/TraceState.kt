@@ -385,7 +385,6 @@ public class TraceState(
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
-        _isTaskInProgress.value = false
     }
 
     private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
