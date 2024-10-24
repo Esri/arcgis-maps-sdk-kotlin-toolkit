@@ -53,7 +53,7 @@ internal fun Title(
     var expanded by rememberSaveable { mutableStateOf(false) }
     Row(
         modifier = Modifier
-            .padding(bottom = 8.dp)
+            .padding(bottom = 16.dp)
             .clickable { expanded = !expanded },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
