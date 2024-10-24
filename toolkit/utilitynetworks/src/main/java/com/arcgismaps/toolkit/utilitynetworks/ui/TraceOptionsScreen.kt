@@ -98,19 +98,12 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column (modifier = Modifier.padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column {
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
             LazyColumn(
                 modifier = Modifier
-                    .padding(vertical = 3.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -122,11 +115,7 @@ internal fun TraceOptionsScreen(
                         onConfigSelected(newConfig)
                     }
                 }
-                item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
-                }
+
                 item {
                     StartingPoints(
                         startingPoints,
@@ -135,11 +124,7 @@ internal fun TraceOptionsScreen(
                         onStartingPointSelected,
                     )
                 }
-                item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
-                }
+
                 item {
                     AdvancedOptions(
                         onNameChange = onNameChange,
@@ -154,12 +139,10 @@ internal fun TraceOptionsScreen(
                     )
                 }
             }
-            Button(
-                onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty()
-            ) {
-                Text(stringResource(id = R.string.trace))
-            }
+            PerformTraceButton(
+                enabled = selectedConfig != null,
+                onClicked = onPerformTraceButtonClicked
+            )
         }
     }
 }
@@ -249,13 +232,12 @@ private fun AddStartingPointButtonPreview() {
 @Composable
 private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
     ElevatedButton(
-        onClick = {
-            showAddStartingPointScreen()
-        },
+        onClick = { showAddStartingPointScreen() },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(horizontal = 4.dp)),
-        colors = ButtonDefaults.elevatedButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+            .padding(horizontal = 8.dp),
+        colors = ButtonDefaults.elevatedButtonColors()
+            .copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
@@ -278,16 +260,21 @@ private fun StartingPoints(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(bottom = 20.dp)
+    ) {
         AddStartingPointButton {
             showAddStartingPointScreen()
         }
-        Spacer(modifier = Modifier
-            .height(4.dp)
-            .fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(4.dp)
+                .fillMaxWidth()
+        )
         ExpandableCard(
             title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
-            padding = PaddingValues(horizontal = 4.dp)
+            padding = PaddingValues()
         ) {
             Column {
                 startingPoints.forEach {
@@ -323,7 +310,7 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         expandableCardState = rememberExpandableCardState(isExpanded = false),
-        padding = PaddingValues(horizontal = 4.dp)
+        padding = PaddingValues()
     ) {
         Column {
             if (showName) {
@@ -388,6 +375,22 @@ internal fun AdvancedOptions(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PerformTraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Button(
+            onClick = { onClicked() },
+            enabled = enabled
+        ) {
+            Text(stringResource(id = R.string.trace))
         }
     }
 }

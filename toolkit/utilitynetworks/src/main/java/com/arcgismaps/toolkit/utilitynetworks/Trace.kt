@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -44,8 +45,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
-
-internal const val traceSurfaceContentDescription: String = "trace component surface"
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -72,7 +71,8 @@ public fun Trace(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = traceSurfaceContentDescription }
+            .padding(horizontal = 16.dp)
+            .semantics { contentDescription = localContext.getString(R.string.trace_component_surface) }
     ) {
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
