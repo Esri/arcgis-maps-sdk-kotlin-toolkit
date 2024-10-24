@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.Manifest
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +52,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -65,6 +67,7 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.rememberBarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -114,6 +117,7 @@ public sealed class ValidationErrorVisibility {
  * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
  * - [AttachmentsFormElement]
  * - [FieldFormElement] with the following [FormInput] types -
+ *     * [BarcodeScannerFormInput]
  *     * [ComboBoxFormInput]
  *     * [DateTimePickerFormInput]
  *     * [RadioButtonsFormInput]
@@ -123,7 +127,12 @@ public sealed class ValidationErrorVisibility {
  * - [GroupFormElement]
  * - [TextFormElement]
  *
- * Note : Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner is provided.
+ * The scanner requires the [Manifest.permission.CAMERA] permission to be granted. Similarly, for
+ * adding any attachments, camera permissions are required. If the permissions are not granted, then
+ * the specific functionality is disabled in the form.
+ *
+ * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
  * currently supported. A default attachments editing support is provided using the
  * [FeatureForm.defaultAttachmentsElement] property.
  *
@@ -434,6 +443,10 @@ internal fun rememberFieldState(
                 form = form,
                 scope = scope
             )
+        }
+
+        is BarcodeScannerFormInput -> {
+            rememberBarcodeTextFieldState(field = element, form = form, scope = scope)
         }
 
         is DateTimePickerFormInput -> {

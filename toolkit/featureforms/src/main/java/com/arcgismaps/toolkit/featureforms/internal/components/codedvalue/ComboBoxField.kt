@@ -66,10 +66,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -114,10 +116,10 @@ internal fun ComboBoxField(
     BaseTextField(
         text = currentState.getNameForCodedValue(value.data),
         onValueChange = {
-            // usually only triggered on a "clear" action
-            // this value will be an empty string and the type conversion must be handled
-            // by the state object
-            currentState.onValueChanged(it)
+            // only valid action on the field is to clear the value, so pass in null
+            if (it.isEmpty()) {
+                currentState.onValueChanged(null)
+            }
         },
         modifier = modifier,
         readOnly = true,
@@ -166,6 +168,8 @@ internal fun ComboBoxDialog(
 ) {
     val configuration = LocalConfiguration.current
     val windowSizeClass = computeWindowSizeClasses(LocalContext.current)
+    // check if the initial value is out of the domain of the coded values
+    val outOfDomain = initialValue != null && !values.containsKey(initialValue)
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
@@ -281,43 +285,48 @@ internal fun ComboBoxDialog(
                     items(filteredList.count()) {
                         val code = filteredList.keys.elementAt(it)
                         val name = filteredList.getValue(code)
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = name,
-                                    style = if (name == noValueLabel) LocalTextStyle.current.copy(
-                                        fontStyle = FontStyle.Italic,
-                                        fontWeight = FontWeight.Light
-                                    )
-                                    else LocalTextStyle.current
-                                )
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    // if the no value label was selected, set the value to be empty
-                                    if (name == noValueLabel) {
-                                        onValueChange(null)
-                                    } else {
-                                        onValueChange(code)
-                                    }
-                                }
-                                .semantics {
-                                    contentDescription = if (name == noValueLabel) {
-                                        "no value row"
-                                    } else {
-                                        "$name list item"
-                                    }
-                                },
-                            trailingContent = {
-                                if ((code == initialValue) || ((name == noValueLabel) && (initialValue == null))) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Check,
-                                        contentDescription = "list item check"
-                                    )
+                        val textStyle = LocalTextStyle.current.copy(
+                            fontStyle = if (name == noValueLabel) FontStyle.Italic else FontStyle.Normal,
+                            fontWeight = if (name == noValueLabel) FontWeight.Light else FontWeight.Normal
+                        )
+                        ComboBoxListItem(
+                            name = name,
+                            textStyle = textStyle,
+                            isChecked = (code == initialValue) || ((name == noValueLabel) && (initialValue == null)),
+                            modifier = Modifier.semantics {
+                                contentDescription = if (name == noValueLabel) {
+                                    "no value row"
+                                } else {
+                                    "$name list item"
                                 }
                             }
-                        )
+                        ) {
+                            // if the no value label was selected, set the value to null
+                            if (name == noValueLabel) {
+                                onValueChange(null)
+                            } else {
+                                onValueChange(code)
+                            }
+                        }
+                    }
+                    if (outOfDomain) {
+                        item {
+                            HorizontalDivider()
+                            Column(
+                                modifier = Modifier.padding(10.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.unsupported_type),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                ComboBoxListItem(
+                                    name = initialValue.toString(),
+                                    isChecked = true,
+                                    textStyle = LocalTextStyle.current.copy(fontStyle = FontStyle.Italic),
+                                    onClick = {}
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -325,7 +334,38 @@ internal fun ComboBoxDialog(
     }
 }
 
-@Preview
+@Composable
+private fun ComboBoxListItem(
+    name: String,
+    isChecked: Boolean,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current,
+    onClick: () -> Unit
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = name,
+                style = textStyle
+            )
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+        trailingContent = {
+            if (isChecked) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = "list item check"
+                )
+            }
+        }
+    )
+}
+
+@Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
 private fun ComboBoxDialogPreview() {
     ComboBoxDialog(
@@ -364,7 +404,7 @@ private fun ComboBoxPreview() {
             required = MutableStateFlow(false),
             visible = MutableStateFlow(true),
             fieldType = FieldType.Text,
-            codedValues = listOf(),
+            codedValues = emptyMap(),
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
         ),

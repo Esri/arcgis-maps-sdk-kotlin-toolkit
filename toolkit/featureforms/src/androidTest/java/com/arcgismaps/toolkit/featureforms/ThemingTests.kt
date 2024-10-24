@@ -37,7 +37,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ThemingTests : FeatureFormTestRunner(
-    uri = "https://www.arcgis.com/home/item.html?id=615e8fe546ef4d139fb9298515c2f40a",
+    uri = "https://www.arcgis.com/home/item.html?id=9c7ee7cd979c434896684bf507cca75d",
     objectId = 1
 ) {
     @get:Rule

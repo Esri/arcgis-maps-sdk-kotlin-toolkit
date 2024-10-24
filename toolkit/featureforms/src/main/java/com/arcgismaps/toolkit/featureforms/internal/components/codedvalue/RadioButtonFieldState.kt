@@ -25,6 +25,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 
 internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
@@ -49,14 +50,12 @@ internal class RadioButtonFieldState(
 
     /**
      * Returns true if the initial value is not in the [codedValues]. This should
-     * trigger a fallback to a ComboBox. If the [value] is false then this returns false.
+     * trigger a fallback to a ComboBox. If the [value] is null then this returns false.
      */
     val shouldFallback = if (initialValue == null) {
         false
     } else {
-        !codedValues.any {
-            it.name == value.value.data
-        }
+        !codedValues.contains(initialValue)
     }
 
     companion object {
@@ -88,7 +87,7 @@ internal class RadioButtonFieldState(
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
                         fieldType = formElement.fieldType,
-                        codedValues = input.codedValues,
+                        codedValues = input.codedValues.toMap(),
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
                     ),
@@ -125,7 +124,7 @@ internal fun rememberRadioButtonFieldState(
             required = field.isRequired,
             visible = field.isVisible,
             fieldType = field.fieldType,
-            codedValues = input.codedValues,
+            codedValues = input.codedValues.toMap(),
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),

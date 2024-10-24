@@ -23,6 +23,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import com.arcgismaps.data.CodedValue
 
 /**
  * Changes the visual output of the placeholder and label properties of a TextField. Using this
@@ -84,3 +85,10 @@ internal fun Number?.format(digits: Int = 2): String =
         is Float -> "%.${digits}f".format(this)
         else -> "$this"
     }
+
+/**
+ * Converts a list of [CodedValue]s to a map of ([CodedValue.code],[CodedValue.name]).
+ */
+internal fun List<CodedValue>.toMap(): Map<Any?, String> {
+    return associateBy(CodedValue::code, CodedValue::name)
+}

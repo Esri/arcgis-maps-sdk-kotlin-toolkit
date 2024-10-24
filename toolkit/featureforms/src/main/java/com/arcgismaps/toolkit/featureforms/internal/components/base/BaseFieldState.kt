@@ -166,8 +166,8 @@ internal abstract class BaseFieldState<T>(
         // infer that a value change event comes from a user interaction and hence treat it as a
         // focus event
         wasFocused = true
-        // set the ui state immediately
-        _value.value = Value(input)
+        // set the ui state immediately with the current error if any
+        _value.value = Value(input, _value.value.error)
         // update the attributes
         updateValue(typeConverter(input))
         // evaluate expressions

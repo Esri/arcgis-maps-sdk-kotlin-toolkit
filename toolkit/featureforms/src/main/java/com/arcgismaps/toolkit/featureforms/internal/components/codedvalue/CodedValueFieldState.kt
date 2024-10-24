@@ -38,7 +38,7 @@ internal open class CodedValueFieldProperties(
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     val fieldType: FieldType,
-    val codedValues: List<CodedValue>,
+    val codedValues: Map<Any?, String>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
 ) : FieldProperties<Any?>(label, placeholder, description, value, validationErrors, required, editable, visible)
@@ -46,6 +46,9 @@ internal open class CodedValueFieldProperties(
 /**
  * A class to handle the state of any coded value type. Essential properties are inherited
  * from the [BaseFieldState].
+ *
+ * When calling [CodedValueFieldState.onValueChanged], to indicate a no value option or clearing the
+ * value, pass in null.
  *
  * @param id Unique identifier for the field.
  * @param properties the [CodedValueFieldProperties] associated with this state.
@@ -76,9 +79,9 @@ internal abstract class CodedValueFieldState(
     evaluateExpressions = evaluateExpressions
 ) {
     /**
-     * The list of coded values associated with this field.
+     * The map of coded values associated with this field.
      */
-    val codedValues: List<CodedValue> = properties.codedValues
+    val codedValues: Map<Any?, String> = properties.codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
@@ -97,12 +100,11 @@ internal abstract class CodedValueFieldState(
     val fieldType: FieldType = properties.fieldType
 
     /**
-     * Returns the name of the [code] if it is present in [codedValues] else returns an empty string.
+     * Returns the name of the [code] if it is present in [codedValues]. If not, it returns the
+     * [code] as a string. If [code] is null, it returns an empty string.
      */
     fun getNameForCodedValue(code: Any?): String {
-        return codedValues.find {
-            it.code.toString() == code.toString()
-        }?.name ?: ""
+        return codedValues[code] ?: code?.toString().orEmpty()
     }
 
     override fun typeConverter(input: Any?): Any? {

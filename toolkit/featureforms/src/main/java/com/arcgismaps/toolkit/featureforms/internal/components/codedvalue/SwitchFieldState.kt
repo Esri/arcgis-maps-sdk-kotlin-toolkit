@@ -61,7 +61,10 @@ internal class SwitchFieldProperties(
     editable,
     visible,
     fieldType,
-    listOf(onValue, offValue),
+    mapOf(
+        onValue.code to onValue.name,
+        offValue.code to offValue.name
+    ),
     showNoValueOption,
     noValueLabel
 )

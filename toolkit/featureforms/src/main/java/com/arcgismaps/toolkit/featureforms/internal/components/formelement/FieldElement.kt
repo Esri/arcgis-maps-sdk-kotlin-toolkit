@@ -19,6 +19,8 @@ package com.arcgismaps.toolkit.featureforms.internal.components.formelement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextField
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxField
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxFieldState
@@ -38,6 +40,10 @@ internal fun <T> FieldElement(state: BaseFieldState<T>) {
         when (state) {
             is FormTextFieldState -> {
                 FormTextField(state = state)
+            }
+
+            is BarcodeTextFieldState -> {
+                BarcodeTextField(state = state)
             }
 
             is DateTimeFieldState -> {
