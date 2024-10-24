@@ -44,11 +44,15 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
@@ -107,7 +111,17 @@ private fun GroupElement(
                 modifier = Modifier.background(colors.bodyColor)
             ) {
                 fieldStates.forEach {
-                    FieldElement(state = it.getState<BaseFieldState<*>>())
+                    when (it.formElement) {
+                        is TextFormElement -> TextFormElement(
+                            state = it.getState<TextFormElementState>(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                        )
+
+                        is FieldFormElement -> FieldElement(it.getState<BaseFieldState<*>>())
+                        else -> {}
+                    }
                 }
             }
         }
