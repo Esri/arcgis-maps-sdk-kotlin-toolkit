@@ -52,12 +52,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
+import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -121,6 +123,7 @@ internal fun StartingPointRow(
     val contentSizeWidth = with(density) { contentWidth.toPx() }
     var layoutWidth by rememberSaveable { mutableIntStateOf(0) }
     var neutralOffset = 0f
+    val featureIcon = stringResource(id = R.string.feature_icon)
 
     if (!state.offset.isNaN() && state.offset < DELETE_THRESHOLD) {
         // delete if dragged all the way across
@@ -144,7 +147,7 @@ internal fun StartingPointRow(
                         .align(Alignment.CenterVertically)
                         .width(50.dp)
                         .padding(15.dp),
-                    contentDescription = null,
+                    contentDescription = featureIcon,
                 )
         }
         Box(
@@ -254,6 +257,7 @@ private fun DeletableRow(
     modifier: Modifier = Modifier,
     onTap: () -> Unit = {}
 ) {
+    val delete = stringResource(id = R.string.delete)
     Row(
         modifier = modifier
             .background(if (isActive) Color.Red else Color.Unspecified)
@@ -266,7 +270,7 @@ private fun DeletableRow(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(14.dp),
-            contentDescription = null,
+            contentDescription = delete,
         )
     }
 }

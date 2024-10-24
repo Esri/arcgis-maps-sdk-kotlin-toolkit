@@ -144,9 +144,11 @@ private fun TraceResultPager(
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit
 ) {
+    val selectPreviousResult = stringResource(id = R.string.select_previous_result)
+    val selectNextResult = stringResource(id = R.string.select_next_result)
     Icon(
         imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-        contentDescription = "back",
+        contentDescription = selectPreviousResult,
         modifier = Modifier.clickable {
             onSelectPreviousTraceResult()
         },
@@ -159,7 +161,7 @@ private fun TraceResultPager(
     )
     Icon(
         imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-        contentDescription = "forward",
+        contentDescription = selectNextResult,
         modifier = Modifier.clickable {
             onSelectNextTraceResult()
         },

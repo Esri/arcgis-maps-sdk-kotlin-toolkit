@@ -198,6 +198,8 @@ private fun TraceConfigurations(
         mutableStateOf(false)
     }
     ReadOnlyTextField(stringResource(id = R.string.trace_configuration), modifier = Modifier.padding(horizontal = 4.dp))
+    val selected = stringResource(id = R.string.selected)
+    val moreOptions = stringResource(id = R.string.more_options)
     Column(
         modifier = Modifier
             .padding(horizontal = 4.dp)
@@ -225,7 +227,7 @@ private fun TraceConfigurations(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = "Edit icon",
+                        contentDescription = moreOptions,
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }
@@ -245,7 +247,7 @@ private fun TraceConfigurations(
                                 {
                                     Icon(
                                         imageVector = Icons.Filled.Done,
-                                        contentDescription = "Done icon",
+                                        contentDescription = selected,
                                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                                     )
                                 }
@@ -360,6 +362,7 @@ internal fun AdvancedOptions(
         initialExpandedState = false,
         padding = PaddingValues(horizontal = 4.dp)
     ) {
+        val zoomToResultDescription = stringResource(id = R.string.zoom_to_result_description)
         Column {
             if (showName) {
                 val focusManager = LocalFocusManager.current
@@ -416,7 +419,7 @@ internal fun AdvancedOptions(
                             onZoomRequested(newState)
                         },
                         modifier = Modifier
-                            .semantics { contentDescription = "switch" }
+                            .semantics { contentDescription = zoomToResultDescription }
                             .padding(horizontal = 4.dp),
                         enabled = true,
                         interactionSource = interactionSource

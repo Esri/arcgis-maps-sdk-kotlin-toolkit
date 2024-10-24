@@ -27,13 +27,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.R
 
 @Composable
 internal fun UpButton(title: String,
                      onBackPressed: () -> Unit
 ) {
+    val goBack = stringResource(id = R.string.go_back)
     Row(
         modifier = Modifier.clickable { onBackPressed() },
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -42,7 +45,7 @@ internal fun UpButton(title: String,
         Icon(
             modifier = Modifier.padding(start = 10.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = "back",
+            contentDescription = goBack,
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
