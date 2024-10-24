@@ -25,25 +25,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCardState
+import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 
+/**
+ * Composable that displays an expandable card with a label and its content.
+ *
+ * @since 200.6.0
+ */
 @Composable
-internal fun ExpandableCardWithLabel(title: String, value: String, content: @Composable () -> Unit) {
+internal fun ExpandableCardWithLabel(
+    labelText: String,
+    contentTitle: String,
+    expandableCardState: ExpandableCardState = rememberExpandableCardState(false),
+    content: @Composable () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
     ) {
         Text(
-            title,
+            labelText,
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
         )
         ExpandableCard(
-            initialExpandedState = false,
-            title = value,
+            expandableCardState = expandableCardState,
+            title = contentTitle,
             padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 4.dp)
         ) {
             content()
         }
