@@ -41,7 +41,6 @@ import com.arcgismaps.toolkit.utilitynetworks.R
  */
 @Composable
 internal fun AddStartingPointScreen(
-    isIdentifyInProcess: Boolean,
     onStopPointSelection: () -> Unit
 ) {
     BackHandler {
@@ -50,9 +49,6 @@ internal fun AddStartingPointScreen(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
-            if (isIdentifyInProcess) {
-                LinearProgressIndicator()
-            }
 
             Spacer(
                 modifier = Modifier

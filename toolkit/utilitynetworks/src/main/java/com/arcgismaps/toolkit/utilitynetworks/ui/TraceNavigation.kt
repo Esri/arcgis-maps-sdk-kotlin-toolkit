@@ -54,7 +54,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
                 showResultsTab = traceState.completedTraces.isNotEmpty(),
-                isTraceInProgress = traceState.isTraceInProgress.value,
+                isTraceInProgress = traceState.isTaskInProgress.value,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
@@ -95,7 +95,6 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
-                isIdentifyInProcess = traceState.isIdentifyInProcess.value,
                 onStopPointSelection = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)

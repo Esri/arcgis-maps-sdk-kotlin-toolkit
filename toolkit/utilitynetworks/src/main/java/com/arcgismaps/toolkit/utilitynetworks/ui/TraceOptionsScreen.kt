@@ -115,10 +115,6 @@ internal fun TraceOptionsScreen(
 
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
-            if (isTraceInProgress) {
-                LinearProgressIndicator()
-            }
-
             if (showResultsTab) {
                 TabRow(onBackToResults, 0)
                 Spacer(
