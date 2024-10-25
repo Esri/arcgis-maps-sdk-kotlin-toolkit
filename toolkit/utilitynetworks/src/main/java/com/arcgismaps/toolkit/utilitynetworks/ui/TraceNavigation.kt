@@ -53,10 +53,15 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                 defaultTraceName = traceState.currentTraceName.value,
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
+                showResultsTab = traceState.completedTraces.isNotEmpty(),
+                isTraceInProgress = traceState.isTaskInProgress.value,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)
+                            if (traceState.currentTraceZoomToResults.value) {
+                                traceState.zoomToSelectedTrace()
+                            }
                             onTabSwitch(1)
                         }.onFailure {
                             traceState.setCurrentError(it)

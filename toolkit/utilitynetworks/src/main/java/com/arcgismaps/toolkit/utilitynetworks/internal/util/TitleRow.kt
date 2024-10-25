@@ -77,7 +77,7 @@ internal fun Title(
                 Icon(
                     modifier = Modifier.padding(end = 10.dp),
                     imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = ""
+                    contentDescription = stringResource(R.string.more_options)
                 )
             }
         }

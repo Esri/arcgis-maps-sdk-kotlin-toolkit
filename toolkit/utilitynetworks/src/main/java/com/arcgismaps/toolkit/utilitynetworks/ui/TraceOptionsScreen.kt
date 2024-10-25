@@ -39,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -89,6 +90,8 @@ internal fun TraceOptionsScreen(
     defaultTraceName: String,
     selectedColor: Color,
     zoomToResult: Boolean,
+    showResultsTab: Boolean,
+    isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
@@ -123,9 +126,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     StartingPoints(
@@ -136,9 +141,11 @@ internal fun TraceOptionsScreen(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     AdvancedOptions(
@@ -156,7 +163,7 @@ internal fun TraceOptionsScreen(
             }
             Button(
                 onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty()
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not()
             ) {
                 Text(stringResource(id = R.string.trace))
             }
@@ -221,7 +228,7 @@ private fun TraceConfiguration(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Filled.Done,
-                        contentDescription = stringResource(R.string.selected_icon),
+                        contentDescription = stringResource(R.string.selected),
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }
@@ -325,6 +332,7 @@ internal fun AdvancedOptions(
         expandableCardState = rememberExpandableCardState(isExpanded = false),
         padding = PaddingValues(horizontal = 4.dp)
     ) {
+        val zoomToResultDescription = stringResource(id = R.string.zoom_to_result_description)
         Column {
             if (showName) {
                 val focusManager = LocalFocusManager.current
@@ -381,7 +389,7 @@ internal fun AdvancedOptions(
                             onZoomRequested(newState)
                         },
                         modifier = Modifier
-                            .semantics { contentDescription = "switch" }
+                            .semantics { contentDescription = zoomToResultDescription }
                             .padding(horizontal = 4.dp),
                         enabled = true,
                         interactionSource = interactionSource
