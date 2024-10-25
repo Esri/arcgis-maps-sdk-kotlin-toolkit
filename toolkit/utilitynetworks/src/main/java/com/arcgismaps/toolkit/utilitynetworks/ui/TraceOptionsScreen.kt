@@ -39,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -91,6 +92,7 @@ internal fun TraceOptionsScreen(
     selectedColor: Color,
     zoomToResult: Boolean,
     showResultsTab: Boolean,
+    isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
     onBackToResults: () -> Unit,
@@ -134,9 +136,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     StartingPoints(
@@ -147,9 +151,11 @@ internal fun TraceOptionsScreen(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     AdvancedOptions(
@@ -167,7 +173,7 @@ internal fun TraceOptionsScreen(
             }
             Button(
                 onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty()
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not()
             ) {
                 Text(stringResource(id = R.string.trace))
             }
