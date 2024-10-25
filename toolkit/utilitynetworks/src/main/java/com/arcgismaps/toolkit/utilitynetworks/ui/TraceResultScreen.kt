@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

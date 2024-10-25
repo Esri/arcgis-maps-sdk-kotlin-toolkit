@@ -71,7 +71,7 @@ public class TraceState(
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy
 ) {
-    private val fullScreenNavRoutes = listOf(TraceNavRoute.AddStartingPoint)
+    private val navRoutesWithNoTabRow = listOf(TraceNavRoute.AddStartingPoint)
 
     private var _currentError: Throwable? = null
     internal val currentError: Throwable?
@@ -672,7 +672,7 @@ public class TraceState(
      * @since 200.6.0
      */
     internal fun showTabRow(): Boolean {
-        return _completedTraces.isNotEmpty() && !fullScreenNavRoutes.contains(currentScreen.value)
+        return _completedTraces.isNotEmpty() && !navRoutesWithNoTabRow.contains(currentScreen.value)
     }
 }
 
