@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.utilitynetworks.internal.util
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -37,12 +38,14 @@ internal fun UpButton(title: String,
                      onBackPressed: () -> Unit
 ) {
     Row(
-        modifier = Modifier.clickable { onBackPressed() },
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, bottom = 16.dp)
+            .clickable { onBackPressed() },
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            modifier = Modifier.padding(start = 10.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
             contentDescription = stringResource(id = R.string.go_back),
             tint = MaterialTheme.colorScheme.primary
