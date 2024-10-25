@@ -304,7 +304,6 @@ public class TraceState(
                     currentTraceStartingPoints.map { it.utilityElement })
 
             val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-                _isTaskInProgress.value = false
                 throw it
             }
 
