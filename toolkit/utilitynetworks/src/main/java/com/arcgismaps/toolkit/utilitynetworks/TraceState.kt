@@ -390,8 +390,7 @@ public class TraceState(
                 geometryTraceResult = currentTraceGeometryResults
             ).also {
                 _completedTraces.add(it)
-                updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
-                updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, true)
+                updateSelectedTraceIndexGraphicsAndFeatures(_completedTraces.size - 1)
             }
 
             resetCurrentTrace()
@@ -466,15 +465,16 @@ public class TraceState(
         }
     }
 
-    private fun updateSelectedTraceIndexAndGraphics(newIndex: Int) {
-        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+    private fun updateSelectedTraceIndexGraphicsAndFeatures(newIndex: Int) {
+        updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, false)
         _selectedCompletedTraceIndex.value = newIndex
-        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+        updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, true)
     }
 
-    private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
+    private fun updateSelectedStateForTraceResultsGraphicsAndFeatures(index: Int, isSelected: Boolean) {
         _completedTraces[index].geometryResultsGraphics.forEach { it.isSelected = isSelected }
         _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
+        updateFeatureSelection(_completedTraces[index].featureResultsGroupByLayers, isSelected)
     }
 
     /**
@@ -484,7 +484,7 @@ public class TraceState(
      * @param isSelected true to select the features, false to unselect
      * @since 200.6.0
      */
-    private fun updateFeatureSelectionForTraceResults(
+    private fun updateFeatureSelection(
         featuresGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>>,
         isSelected: Boolean,
     ) {
@@ -594,17 +594,13 @@ public class TraceState(
 
     internal fun selectNextCompletedTrace() {
         if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
-            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value + 1].featureResultsGroupByLayers, true)
-            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, false)
-            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
+            updateSelectedTraceIndexGraphicsAndFeatures(_selectedCompletedTraceIndex.value + 1)
         }
     }
 
     internal fun selectPreviousCompletedTrace() {
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value - 1].featureResultsGroupByLayers, true)
-            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, false)
-            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
+            updateSelectedTraceIndexGraphicsAndFeatures(_selectedCompletedTraceIndex.value - 1)
         }
     }
 
@@ -696,11 +692,11 @@ public class TraceState(
         val selectedTrace = _completedTraces[_selectedCompletedTraceIndex.value]
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
-        updateFeatureSelectionForTraceResults(selectedTrace.featureResultsGroupByLayers, false)
+        updateFeatureSelection(selectedTrace.featureResultsGroupByLayers, false)
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
             _selectedCompletedTraceIndex.value -= 1
-            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+            updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, true)
         }
     }
 
