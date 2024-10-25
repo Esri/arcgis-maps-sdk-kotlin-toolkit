@@ -142,6 +142,9 @@ public class TraceState(
     private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf(0)
     internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
+    private var _isTaskInProgress: MutableState<Boolean> = mutableStateOf(false)
+    internal val isTaskInProgress: State<Boolean> = _isTaskInProgress
+
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
@@ -293,98 +296,105 @@ public class TraceState(
      * @since 200.6.0
      */
     internal suspend fun trace(): Result<Unit> = runCatchingCancellable {
-        // Run a trace
-        val traceConfiguration = selectedTraceConfiguration.value
-            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
+        withProgressIndicator {
+            // Run a trace
+            val traceConfiguration = selectedTraceConfiguration.value
+                ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
 
-        if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE)
-        }
+            if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
+                throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE)
+            }
 
-        if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO)
-        }
+            if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
+                throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO)
+            }
 
-        val utilityTraceParameters =
-            UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
+            val utilityTraceParameters =
+                UtilityTraceParameters(
+                    traceConfiguration,
+                    currentTraceStartingPoints.map { it.utilityElement })
 
-        val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-            throw it
-        }
+            val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
+                throw it
+            }
 
-        var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
-        var currentTraceElementResults: List<UtilityElement> = emptyList()
-        var currentTraceElementResultsAsFeatures: List<ArcGISFeature> = emptyList()
-        var currentTraceElementResultsExtent: Envelope? = null
-        var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
+            var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
+            var currentTraceElementResults: List<UtilityElement> = emptyList()
+            var currentTraceElementResultsAsFeatures: List<ArcGISFeature> = emptyList()
+            var currentTraceElementResultsExtent: Envelope? = null
+            var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
-        for (result in traceResults) {
-            when (result) {
-                // Feature results
-                is UtilityElementTraceResult -> {
-                    currentTraceElementResults = result.elements
-                    currentTraceElementResultsAsFeatures = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
-                    if (currentTraceElementResultsAsFeatures.isNotEmpty()) {
-                        currentTraceElementResultsExtent = getResultFeaturesExtent(currentTraceElementResultsAsFeatures)
+            for (result in traceResults) {
+                when (result) {
+                    // Feature results
+                    is UtilityElementTraceResult -> {
+                        currentTraceElementResults = result.elements
+                        currentTraceElementResultsAsFeatures = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
+                        if (currentTraceElementResultsAsFeatures.isNotEmpty()) {
+                            currentTraceElementResultsExtent = getResultFeaturesExtent(currentTraceElementResultsAsFeatures)
+                        }
                     }
-                }
-                // Function results
-                is UtilityFunctionTraceResult -> {
-                    currentTraceFunctionResults = result.functionOutputs
-                }
-                // Geometry results
-                is UtilityGeometryTraceResult -> {
-                    result.polygon?.let { polygon ->
-                        val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, currentTraceGraphicsColor)
-                        graphicsOverlay.graphics.add(graphic)
-                        currentTraceGeometryResultsGraphics.add(graphic)
+                    // Function results
+                    is UtilityFunctionTraceResult -> {
+                        currentTraceFunctionResults = result.functionOutputs
                     }
-                    result.polyline?.let { polyline ->
-                        val graphic = createGraphicForSimpleLineSymbol(polyline, SimpleLineSymbolStyle.Dash, currentTraceGraphicsColor)
-                        graphicsOverlay.graphics.add(graphic)
-                        currentTraceGeometryResultsGraphics.add(graphic)
+                    // Geometry results
+                    is UtilityGeometryTraceResult -> {
+                        result.polygon?.let { polygon ->
+                            val graphic = createGraphicForSimpleLineSymbol(
+                                polygon,
+                                SimpleLineSymbolStyle.Solid,
+                                currentTraceGraphicsColor
+                            )
+                            graphicsOverlay.graphics.add(graphic)
+                            currentTraceGeometryResultsGraphics.add(graphic)
+                        }
+                        result.polyline?.let { polyline ->
+                            val graphic = createGraphicForSimpleLineSymbol(
+                                polyline,
+                                SimpleLineSymbolStyle.Dash,
+                                currentTraceGraphicsColor
+                            )
+                            graphicsOverlay.graphics.add(graphic)
+                            currentTraceGeometryResultsGraphics.add(graphic)
+                        }
+                        result.multipoint?.let { multipoint ->
+                            val graphic = createGraphicForSimpleLineSymbol(
+                                multipoint,
+                                SimpleLineSymbolStyle.Dot,
+                                currentTraceGraphicsColor
+                            )
+                            graphicsOverlay.graphics.add(graphic)
+                            currentTraceGeometryResultsGraphics.add(graphic)
+                        }
+                        currentTraceGeometryResults = result
                     }
-                    result.multipoint?.let { multipoint ->
-                        val graphic = createGraphicForSimpleLineSymbol(multipoint, SimpleLineSymbolStyle.Dot, currentTraceGraphicsColor)
-                        graphicsOverlay.graphics.add(graphic)
-                        currentTraceGeometryResultsGraphics.add(graphic)
-                    }
-                    currentTraceGeometryResults = result
                 }
             }
-        }
 
-        val currentTraceResultGeometriesExtent = currentTraceGeometryResults?.let {
-            getResultGeometriesExtent(it)
-        }
-
-        currentTraceRun = TraceRun(
-            name = _currentTraceName.value,
-            configuration = traceConfiguration,
-            startingPoints = _currentTraceStartingPoints.toList(),
-            geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
-            resultsExtent = currentTraceElementResultsExtent ?: currentTraceResultGeometriesExtent,
-            resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
-            featureResults = currentTraceElementResults,
-            featureResultsAsFeatures = currentTraceElementResultsAsFeatures,
-            functionResults = currentTraceFunctionResults,
-            geometryTraceResult = currentTraceGeometryResults
-        ).also {
-            _completedTraces.add(it)
-            updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
-            selectFeatures(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsAsFeatures)
-        }
-
-        if (_currentTraceZoomToResults.value) {
-            currentTraceResultGeometriesExtent?.let {
-                mapViewProxy.setViewpointAnimated(
-                    Viewpoint(it),
-                    2.0.seconds,
-                    AnimationCurve.EaseOutCirc
-                )
+            val currentTraceResultGeometriesExtent = currentTraceGeometryResults?.let {
+                getResultGeometriesExtent(it)
             }
+
+            currentTraceRun = TraceRun(
+                name = _currentTraceName.value,
+                configuration = traceConfiguration,
+                startingPoints = _currentTraceStartingPoints.toList(),
+                geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
+                resultsExtent = currentTraceElementResultsExtent ?: currentTraceResultGeometriesExtent,
+                resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
+                featureResults = currentTraceElementResults,
+                featureResultsAsFeatures = currentTraceElementResultsAsFeatures,
+                functionResults = currentTraceFunctionResults,
+                geometryTraceResult = currentTraceGeometryResults
+            ).also {
+                _completedTraces.add(it)
+                updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
+                selectFeatures(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsAsFeatures)
+            }
+
+            resetCurrentTrace()
         }
-        resetCurrentTrace()
     }
 
     private fun resetCurrentTrace() {
@@ -521,7 +531,7 @@ public class TraceState(
         )
     }
 
-    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) = withProgressIndicator {
         val result = mapViewProxy.identifyLayers(
             screenCoordinate = screenCoordinate,
             tolerance = 10.dp
@@ -681,6 +691,7 @@ public class TraceState(
         val selectedTrace = _completedTraces[_selectedCompletedTraceIndex.value]
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
+        mapFeatureLayers.forEach { it.unselectFeatures(selectedTrace.featureResultsAsFeatures) }
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
             _selectedCompletedTraceIndex.value -= 1
@@ -705,6 +716,15 @@ public class TraceState(
      */
     internal fun setCurrentError(error: Throwable) {
         _currentError = error
+    }
+
+    private inline fun withProgressIndicator(block: () -> Unit) {
+        _isTaskInProgress.value = true
+        return try {
+            block()
+        } finally {
+            _isTaskInProgress.value = false
+        }
     }
 }
 
