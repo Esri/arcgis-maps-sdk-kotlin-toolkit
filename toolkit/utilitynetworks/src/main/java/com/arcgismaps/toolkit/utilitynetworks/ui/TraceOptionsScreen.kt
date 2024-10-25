@@ -238,7 +238,7 @@ private fun TraceConfiguration(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Filled.Done,
-                        contentDescription = stringResource(R.string.selected_icon),
+                        contentDescription = stringResource(R.string.selected),
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }
@@ -342,6 +342,7 @@ internal fun AdvancedOptions(
         expandableCardState = rememberExpandableCardState(isExpanded = false),
         padding = PaddingValues(horizontal = 4.dp)
     ) {
+        val zoomToResultDescription = stringResource(id = R.string.zoom_to_result_description)
         Column {
             if (showName) {
                 val focusManager = LocalFocusManager.current
@@ -398,7 +399,7 @@ internal fun AdvancedOptions(
                             onZoomRequested(newState)
                         },
                         modifier = Modifier
-                            .semantics { contentDescription = "switch" }
+                            .semantics { contentDescription = zoomToResultDescription }
                             .padding(horizontal = 4.dp),
                         enabled = true,
                         interactionSource = interactionSource

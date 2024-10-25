@@ -288,7 +288,7 @@ private fun TerminalConfiguration(
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "Edit icon",
+                            contentDescription = stringResource(id = R.string.edit_terminal_configuration),
                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                         )
                     }
@@ -309,7 +309,7 @@ private fun TerminalConfiguration(
                                     {
                                         Icon(
                                             imageVector = Icons.Filled.Done,
-                                            contentDescription = "Done icon",
+                                            contentDescription = stringResource(id = R.string.selected),
                                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                                         )
                                     }
