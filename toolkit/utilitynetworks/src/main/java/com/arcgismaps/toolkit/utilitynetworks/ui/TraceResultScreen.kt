@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
@@ -144,11 +145,9 @@ private fun TraceResultPager(
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit
 ) {
-    val selectPreviousResult = stringResource(id = R.string.select_previous_result)
-    val selectNextResult = stringResource(id = R.string.select_next_result)
     Icon(
         imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-        contentDescription = selectPreviousResult,
+        contentDescription = stringResource(id = R.string.select_previous_result),
         modifier = Modifier.clickable {
             onSelectPreviousTraceResult()
         },
@@ -161,7 +160,7 @@ private fun TraceResultPager(
     )
     Icon(
         imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-        contentDescription = selectNextResult,
+        contentDescription = stringResource(id = R.string.select_next_result),
         modifier = Modifier.clickable {
             onSelectNextTraceResult()
         },
@@ -182,7 +181,7 @@ private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGr
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.feature_results), contentTitle = featureResults.size.toString()) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
@@ -225,7 +224,7 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.function_results), contentTitle = functionResults.size.toString()) {
                 Column {
                     functionResults.forEach { functionResult ->
                         HorizontalDivider()
@@ -271,7 +270,7 @@ internal fun AdvancedOptions(
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
-        initialExpandedState = false,
+        expandableCardState = rememberExpandableCardState(false),
         padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {

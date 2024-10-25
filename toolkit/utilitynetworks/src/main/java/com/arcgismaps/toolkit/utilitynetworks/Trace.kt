@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -69,7 +70,6 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceToolContentDescription }
     ) {
-        val error = stringResource(id = R.string.error)
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
@@ -91,10 +91,17 @@ public fun Trace(
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
                         val errorMessage = exception.getErrorMessage(localContext)
                         Row {
-                            Icon(Icons.Default.Info, contentDescription = error, tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Info,
+                                contentDescription = stringResource(id = R.string.error),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                             Spacer(modifier = Modifier.size(8.dp))
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
+                    }
+                    if (traceState.isTaskInProgress.value) {
+                        LinearProgressIndicator()
                     }
                     TraceNavHost(traceState)
                 }

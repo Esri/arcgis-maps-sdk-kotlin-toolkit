@@ -54,10 +54,14 @@ internal fun TraceNavHost(traceState: TraceState) {
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
                 showResultsTab = traceState.completedTraces.isNotEmpty(),
+                isTraceInProgress = traceState.isTaskInProgress.value,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)
+                            if (traceState.currentTraceZoomToResults.value) {
+                                traceState.zoomToSelectedTrace()
+                            }
                         }.onFailure {
                             traceState.setCurrentError(it)
                             traceState.showScreen(TraceNavRoute.TraceError)
@@ -127,20 +131,6 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 onClearAllResults = {
                     traceState.showScreen(TraceNavRoute.ClearResults)
-                }
-            )
-        }
-        composable(TraceNavRoute.FeatureResultsDetails.name) {
-            val coroutineScope = rememberCoroutineScope()
-            FeatureResultsDetailsScreen(
-                selectedGroupName = traceState.selectedAssetGroupName,
-                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
-                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
-                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
-                onFeatureSelected = {
-                    coroutineScope.launch {
-                        traceState.zoomToUtilityElement(it)
-                    }
                 }
             )
         }

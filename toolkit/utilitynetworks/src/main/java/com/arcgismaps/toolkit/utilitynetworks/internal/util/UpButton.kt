@@ -36,7 +36,6 @@ import com.arcgismaps.toolkit.utilitynetworks.R
 internal fun UpButton(title: String,
                      onBackPressed: () -> Unit
 ) {
-    val goBack = stringResource(id = R.string.go_back)
     Row(
         modifier = Modifier.clickable { onBackPressed() },
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -45,7 +44,7 @@ internal fun UpButton(title: String,
         Icon(
             modifier = Modifier.padding(start = 10.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = goBack,
+            contentDescription = stringResource(id = R.string.go_back),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(

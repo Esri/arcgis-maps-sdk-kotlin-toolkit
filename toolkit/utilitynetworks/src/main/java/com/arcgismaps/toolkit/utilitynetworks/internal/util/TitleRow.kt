@@ -51,7 +51,6 @@ internal fun Title(
     showZoomToOption: Boolean = true,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val moreOptions = stringResource(R.string.more_options)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,7 +77,7 @@ internal fun Title(
                 Icon(
                     modifier = Modifier.padding(end = 10.dp),
                     imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = moreOptions
+                    contentDescription = stringResource(R.string.more_options)
                 )
             }
         }

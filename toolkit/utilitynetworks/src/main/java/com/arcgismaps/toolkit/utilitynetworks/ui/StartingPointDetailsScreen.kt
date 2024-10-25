@@ -249,9 +249,6 @@ private fun TerminalConfiguration(
         mutableStateOf(startingPoint.utilityElement.terminal?.name)
     }
 
-    val editTerminalConfiguration = stringResource(id = R.string.edit_terminal_configuration)
-    val selected = stringResource(id = R.string.selected)
-
     Column {
         Spacer(
             modifier = Modifier
@@ -291,7 +288,7 @@ private fun TerminalConfiguration(
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
-                            contentDescription = editTerminalConfiguration,
+                            contentDescription = stringResource(id = R.string.edit_terminal_configuration),
                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                         )
                     }
@@ -312,7 +309,7 @@ private fun TerminalConfiguration(
                                     {
                                         Icon(
                                             imageVector = Icons.Filled.Done,
-                                            contentDescription = selected,
+                                            contentDescription = stringResource(id = R.string.selected),
                                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                                         )
                                     }
