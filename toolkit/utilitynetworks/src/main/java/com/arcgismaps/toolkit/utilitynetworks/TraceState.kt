@@ -320,7 +320,7 @@ public class TraceState(
 
             var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
             var currentTraceElementResults: List<UtilityElement> = emptyList()
-            var currentTraceElementResultsAsFeatures: List<ArcGISFeature> = emptyList()
+            var currentTraceFeatureResultsGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>> = emptyMap()
             var currentTraceElementResultsExtent: Envelope? = null
             var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
@@ -329,10 +329,11 @@ public class TraceState(
                     // Feature results
                     is UtilityElementTraceResult -> {
                         currentTraceElementResults = result.elements
-                        currentTraceElementResultsAsFeatures = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
-                        if (currentTraceElementResultsAsFeatures.isNotEmpty()) {
-                            currentTraceElementResultsExtent = getResultFeaturesExtent(currentTraceElementResultsAsFeatures)
+                        val featuresForElements = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
+                        if (featuresForElements.isNotEmpty()) {
+                            currentTraceElementResultsExtent = getResultFeaturesExtent(featuresForElements)
                         }
+                        currentTraceFeatureResultsGroupByLayers = featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                     }
                     // Function results
                     is UtilityFunctionTraceResult -> {
@@ -384,13 +385,13 @@ public class TraceState(
                 resultsExtent = currentTraceElementResultsExtent ?: currentTraceResultGeometriesExtent,
                 resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
                 featureResults = currentTraceElementResults,
-                featureResultsAsFeatures = currentTraceElementResultsAsFeatures,
+                featureResultsGroupByLayers = currentTraceFeatureResultsGroupByLayers,
                 functionResults = currentTraceFunctionResults,
                 geometryTraceResult = currentTraceGeometryResults
             ).also {
                 _completedTraces.add(it)
                 updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
-                selectFeatures(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsAsFeatures)
+                updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, true)
             }
 
             resetCurrentTrace()
@@ -476,17 +477,24 @@ public class TraceState(
         _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
     }
 
-    private fun selectFeatures(
-        selectFeatures: List<ArcGISFeature>,
-        unselectFeatures: List<ArcGISFeature>? = null,
+    /**
+     * Selects or unselects the features on the map.
+     *
+     * @param featuresGroupByLayers the map of features grouped by layers
+     * @param isSelected true to select the features, false to unselect
+     * @since 200.6.0
+     */
+    private fun updateFeatureSelectionForTraceResults(
+        featuresGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>>,
+        isSelected: Boolean,
     ) {
-        mapFeatureLayers
-            .forEach { featureLayer ->
-                if (unselectFeatures != null) {
-                    featureLayer.unselectFeatures(unselectFeatures)
-                }
-                featureLayer.selectFeatures(selectFeatures)
+        featuresGroupByLayers.forEach { (featureLayer, features) ->
+            if (isSelected) {
+                featureLayer.selectFeatures(features)
+            } else {
+                featureLayer.unselectFeatures(features)
             }
+        }
     }
 
     /**
@@ -586,20 +594,16 @@ public class TraceState(
 
     internal fun selectNextCompletedTrace() {
         if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
-            selectFeatures(
-                _completedTraces[_selectedCompletedTraceIndex.value + 1].featureResultsAsFeatures,
-                _completedTraces[_selectedCompletedTraceIndex.value].featureResultsAsFeatures
-            )
+            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value + 1].featureResultsGroupByLayers, true)
+            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, false)
             updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
         }
     }
 
     internal fun selectPreviousCompletedTrace() {
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            selectFeatures(
-                _completedTraces[_selectedCompletedTraceIndex.value - 1].featureResultsAsFeatures,
-                _completedTraces[_selectedCompletedTraceIndex.value].featureResultsAsFeatures
-            )
+            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value - 1].featureResultsGroupByLayers, true)
+            updateFeatureSelectionForTraceResults(_completedTraces[_selectedCompletedTraceIndex.value].featureResultsGroupByLayers, false)
             updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
         }
     }
@@ -683,6 +687,7 @@ public class TraceState(
         _completedTraces.clear()
         _selectedCompletedTraceIndex.value = 0
         currentTraceGeometryResultsGraphics.clear()
+        mapFeatureLayers.forEach { it.clearSelection() }
         _currentTraceStartingPoints.clear()
         graphicsOverlay.graphics.clear()
     }
@@ -691,7 +696,7 @@ public class TraceState(
         val selectedTrace = _completedTraces[_selectedCompletedTraceIndex.value]
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
-        mapFeatureLayers.forEach { it.unselectFeatures(selectedTrace.featureResultsAsFeatures) }
+        updateFeatureSelectionForTraceResults(selectedTrace.featureResultsGroupByLayers, false)
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
             _selectedCompletedTraceIndex.value -= 1
@@ -828,7 +833,7 @@ internal data class TraceRun(
     val resultsExtent: Envelope? = null,
     var resultGraphicColor: androidx.compose.ui.graphics.Color,
     val featureResults: List<UtilityElement>,
-    val featureResultsAsFeatures: List<ArcGISFeature>,
+    val featureResultsGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?
 )
