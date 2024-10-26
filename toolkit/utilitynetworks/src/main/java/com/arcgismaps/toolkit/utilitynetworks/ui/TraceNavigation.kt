@@ -59,10 +59,10 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)
+                            onTabSwitch(1)
                             if (traceState.currentTraceZoomToResults.value) {
                                 traceState.zoomToSelectedTrace()
                             }
-                            onTabSwitch(1)
                         }.onFailure {
                             traceState.setCurrentError(it)
                             traceState.showScreen(TraceNavRoute.TraceError)
