@@ -87,7 +87,11 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
-            val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
+            if (traceResults.isEmpty()) {
+                return@Column
+            }
+
+            val selectedTraceRun = traceResults[selectedTraceRunIndex]
             var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
             TabRow(onBackToNewTrace, 1)

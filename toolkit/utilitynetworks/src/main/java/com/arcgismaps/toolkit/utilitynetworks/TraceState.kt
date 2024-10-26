@@ -648,6 +648,8 @@ public class TraceState(
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
             _selectedCompletedTraceIndex.value -= 1
             updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+        } else if (_selectedCompletedTraceIndex.value == 0 && _completedTraces.isNotEmpty()) {
+            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
     }
 
