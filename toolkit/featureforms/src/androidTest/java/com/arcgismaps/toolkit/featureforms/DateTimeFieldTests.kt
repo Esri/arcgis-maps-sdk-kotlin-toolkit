@@ -184,7 +184,6 @@ class DateTimeFieldTests : FeatureFormTestRunner(
         // find the field with the the label
         val dateTimeField = composeTestRule.onNodeWithText(formElement!!.label)
         dateTimeField.assertIsDisplayed()
-        dateTimeField.performTextClearance()
 
         val helper = dateTimeField.onChildWithContentDescription("supporting text")
         val helperMatcher = hasText("Enter the Date for the Apollo 11 launch")
