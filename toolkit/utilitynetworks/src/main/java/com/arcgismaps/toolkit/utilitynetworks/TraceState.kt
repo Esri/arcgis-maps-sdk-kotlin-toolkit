@@ -321,7 +321,7 @@ public class TraceState(
             var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
             var currentTraceElementResults: List<UtilityElement> = emptyList()
             var currentTraceFeatureResultsGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>> = emptyMap()
-            var currentTraceElementResultsExtent: Envelope? = null
+            var currentTraceResultsExtent: Envelope? = null
             var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
             for (result in traceResults) {
@@ -331,7 +331,7 @@ public class TraceState(
                         currentTraceElementResults = result.elements
                         val featuresForElements = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
                         if (featuresForElements.isNotEmpty()) {
-                            currentTraceElementResultsExtent = getResultFeaturesExtent(featuresForElements)
+                            currentTraceResultsExtent = getResultFeaturesExtent(featuresForElements)
                         }
                         currentTraceFeatureResultsGroupByLayers = featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                     }
@@ -373,7 +373,7 @@ public class TraceState(
                 }
             }
 
-            val currentTraceResultGeometriesExtent = currentTraceGeometryResults?.let {
+            currentTraceResultsExtent = currentTraceResultsExtent ?: currentTraceGeometryResults?.let {
                 getResultGeometriesExtent(it)
             }
 
@@ -382,7 +382,7 @@ public class TraceState(
                 configuration = traceConfiguration,
                 startingPoints = _currentTraceStartingPoints.toList(),
                 geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
-                resultsExtent = currentTraceElementResultsExtent ?: currentTraceResultGeometriesExtent,
+                resultsExtent = currentTraceResultsExtent,
                 resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
                 featureResults = currentTraceElementResults,
                 featureResultsGroupByLayers = currentTraceFeatureResultsGroupByLayers,
