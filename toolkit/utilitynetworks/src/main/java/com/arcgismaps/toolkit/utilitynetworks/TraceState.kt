@@ -59,6 +59,8 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -330,10 +332,14 @@ public class TraceState(
                     is UtilityElementTraceResult -> {
                         currentTraceElementResults = result.elements
                         val featuresForElements = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
-                        if (featuresForElements.isNotEmpty()) {
-                            currentTraceResultsExtent = getResultFeaturesExtent(featuresForElements)
+                        withContext(Dispatchers.Default) {
+                            if (featuresForElements.isNotEmpty()) {
+                                currentTraceResultsExtent =
+                                    getResultFeaturesExtent(featuresForElements)
+                            }
+                            currentTraceFeatureResultsGroupByLayers =
+                                featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                         }
-                        currentTraceFeatureResultsGroupByLayers = featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                     }
                     // Function results
                     is UtilityFunctionTraceResult -> {
