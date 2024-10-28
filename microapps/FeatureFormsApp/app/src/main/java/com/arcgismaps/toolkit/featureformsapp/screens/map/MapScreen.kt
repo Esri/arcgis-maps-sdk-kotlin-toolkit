@@ -87,10 +87,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.ArcGISSublayer
@@ -114,7 +116,6 @@ import kotlinx.coroutines.withContext
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     val uiState by mapViewModel.uiState
-    val context = LocalContext.current
     val (featureForm, errorVisibility) = remember(uiState) {
         when (uiState) {
             is UIState.Editing -> {
@@ -122,9 +123,24 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 Pair(state.featureForm, state.validationErrorVisibility)
             }
 
+            is UIState.Validating -> {
+                val state = (uiState as UIState.Validating)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
+            is UIState.FinishingEdits -> {
+                val state = (uiState as UIState.FinishingEdits)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
             is UIState.Committing -> {
+                val state = (uiState as UIState.Committing)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
+            is UIState.Error -> {
                 Pair(
-                    (uiState as UIState.Committing).featureForm,
+                    (uiState as UIState.Error).featureForm,
                     ValidationErrorVisibility.Automatic
                 )
             }
@@ -157,21 +173,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                         showDiscardEditsDialog = true
                     },
                     onSave = {
-                        scope.launch {
-                            mapViewModel.commitEdits().onFailure {
-                                Log.w("Forms", "Applying edits failed : ${it.message}")
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        "Applying edits failed : ${it.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
-                        }
-                    }) {
-                    onBackPressed()
-                }
+                        scope.launch { mapViewModel.commitEdits() }
+                    },
+                    onBackPressed = onBackPressed
+                )
                 if (uiState is UIState.Loading) {
                     LinearProgressIndicator(
                         modifier = Modifier
@@ -218,10 +223,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     }
     when (uiState) {
-        is UIState.Committing -> {
-            SubmitForm(errors = (uiState as UIState.Committing).errors) {
-                mapViewModel.cancelCommit()
-            }
+        is UIState.Validating, is UIState.FinishingEdits, is UIState.Committing -> {
+            ProgressDialog()
         }
 
         is UIState.Switching -> {
@@ -231,14 +234,14 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             )
         }
 
-        is UIState.NoFeatureFormDefinition -> {
-            NoFormDefinitionDialog(
-                onConfirm = {
-                    mapViewModel.setDefaultState()
+        is UIState.Error -> {
+            ErrorDialog(
+                error = uiState as UIState.Error,
+                onContinue = {
+                    mapViewModel.cancelCommit()
                 },
-                onCancel = {
-                    mapViewModel.setDefaultState()
-                    onBackPressed()
+                onDismissRequest = {
+                    mapViewModel.rollbackEdits()
                 }
             )
         }
@@ -351,7 +354,11 @@ fun FeatureItem(
                 color = Color.White
             ) {
                 bitmap?.let {
-                    Image(bitmap = bitmap!!.asImageBitmap(), contentDescription = null, modifier = Modifier.padding(10.dp))
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
             }
         },
@@ -428,40 +435,6 @@ fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
     )
 }
 
-@Composable
-fun NoFormDefinitionDialog(
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.no_featureform_found),
-                    modifier = Modifier.weight(1f)
-                )
-                Image(imageVector = Icons.Rounded.Warning, contentDescription = null)
-            }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text(text = stringResource(R.string.okay))
-            }
-        },
-        dismissButton = {
-            Button(onClick = onCancel) {
-                Text(text = stringResource(R.string.exit))
-            }
-        },
-        text = {
-            Text(text = stringResource(R.string.no_featureform_description))
-        }
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopFormBar(
@@ -509,124 +482,61 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
-    if (errors.isEmpty()) {
-        // show a progress dialog if no errors are present
-        BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
-            Card(modifier = Modifier.wrapContentSize()) {
-                Column(
-                    modifier = Modifier.padding(15.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = "Saving..")
-                }
+fun ProgressDialog() {
+    BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
+        Card(modifier = Modifier.wrapContentSize()) {
+            Column(
+                modifier = Modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(text = "Saving..")
             }
         }
-    } else {
-        // show all the validation errors in a dialog
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            modifier = Modifier.heightIn(max = 600.dp),
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(onClick = onDismissRequest) {
-                        Text(text = stringResource(R.string.view))
-                    }
-                }
-            },
-            title = {
-                Column {
-                    Text(
-                        text = stringResource(R.string.the_form_has_errors),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.errors_must_be_fixed_to_submit_this_form),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-            },
-            text = {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(15.dp)) {
-                        Text(
-                            text = stringResource(R.string.attributes_failed, errors.count()),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        LazyColumn(
-                            modifier = Modifier,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            items(errors.count()) { index ->
-                                val errorString =
-                                    "${errors[index].fieldName} : ${errors[index].error.getString()}"
-                                Text(text = errorString, color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    }
-                }
-            }
-        )
     }
 }
 
 @Composable
-fun FeatureFormValidationException.getString(): String {
-    return when (this) {
-        is FeatureFormValidationException.IncorrectValueTypeException -> {
-            stringResource(id = R.string.value_must_be_of_correct_type)
-        }
-
-        is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
-            stringResource(id = R.string.date_less_than_minimum)
-        }
-
-        is FeatureFormValidationException.MaxCharConstraintException -> {
-            stringResource(id = R.string.maximum_character_length_exceeded)
-        }
-
-        is FeatureFormValidationException.MaxDateTimeConstraintException -> {
-            stringResource(id = R.string.date_exceeds_maximum)
-        }
-
-        is FeatureFormValidationException.MaxNumericConstraintException -> {
-            stringResource(id = R.string.exceeds_maximum_value)
-        }
-
-        is FeatureFormValidationException.MinCharConstraintException -> {
-            stringResource(id = R.string.minimum_character_length_not_met)
-        }
-
-        is FeatureFormValidationException.MinNumericConstraintException -> {
-            stringResource(id = R.string.less_than_minimum_value)
-        }
-
-        is FeatureFormValidationException.NullNotAllowedException -> {
-            stringResource(id = R.string.value_must_not_be_empty)
-        }
-
-        is FeatureFormValidationException.OutOfDomainException -> {
-            stringResource(id = R.string.value_must_be_within_domain)
-        }
-
-        is FeatureFormValidationException.RequiredException -> {
-            stringResource(id = R.string.required)
-        }
-
-        is FeatureFormValidationException.UnknownFeatureFormException -> {
-            stringResource(id = R.string.unknown_error)
-        }
-    }
+fun ErrorDialog(
+    error: UIState.Error,
+    onContinue: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(onClick = onContinue) {
+                Text(text = stringResource(R.string.edit))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.discard))
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = "Warning",
+                tint = MaterialTheme.colorScheme.error
+            )
+        },
+        title = {
+            Column {
+                Text(text = error.title, style = MaterialTheme.typography.headlineMedium)
+                Text(text = error.subTitle, style = MaterialTheme.typography.titleMedium)
+            }
+        },
+        text = {
+            // enable scrolling for the error details
+            LazyColumn {
+                item { Text(text = error.details) }
+            }
+        },
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+    )
 }
 
 fun getWindowSize(context: Context): WindowSizeClass {
