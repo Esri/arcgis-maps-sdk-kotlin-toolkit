@@ -74,7 +74,7 @@ public fun Trace(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
-            .semantics { contentDescription = localContext.getString(R.string.trace_component_surface) }
+            .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {

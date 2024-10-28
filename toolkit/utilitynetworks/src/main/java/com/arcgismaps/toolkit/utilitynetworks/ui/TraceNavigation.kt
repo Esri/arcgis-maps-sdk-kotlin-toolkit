@@ -51,6 +51,7 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                 configurations = configs,
                 startingPoints = traceState.currentTraceStartingPoints,
                 defaultTraceName = traceState.currentTraceName.value,
+                selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
                 isTraceInProgress = traceState.isTaskInProgress.value,
                 onPerformTraceButtonClicked = {
@@ -116,8 +117,8 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                 },
                 onDeleteResult = {
                     if (traceState.completedTraces.size == 1) {
-                        traceState.showScreen(TraceNavRoute.TraceOptions)
                         traceState.clearSelectedTraceResult()
+                        traceState.showScreen(TraceNavRoute.TraceOptions)
                     } else {
                         traceState.clearSelectedTraceResult()
                     }
