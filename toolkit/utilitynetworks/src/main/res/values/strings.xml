@@ -43,7 +43,6 @@
     <string name="clear_all_results_confirmation">All trace results will be lost.</string>
     <string name="object_id">Object ID: %s</string>
     <string name="selected_icon">Selected</string>
-    <string name="trace_component_surface">trace component surface</string>
 <!--Trace Tool Errors-->
     <string name="no_utility_network_found">No Utility Network found.</string>
     <string name="no_trace_configurations_found">No trace configurations found.</string>
@@ -53,4 +52,5 @@
     <string name="one_or_more_starting_points_already_exists">One or more starting points already exist.</string>
     <string name="could_not_create_drawable_from_feature_symbol">Could not create drawable from feature symbol.</string>
     <string name="no_configuration_selected">No Configuration Selected</string>
+    <string name="trace_component">Trace component</string>
 </resources>

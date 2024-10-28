@@ -60,7 +60,7 @@ class TraceToolTests : TraceToolTestRunner(
      */
     @Test
     fun testTraceToolSurface() {
-        val surface = composeTestRule.onNodeWithContentDescription(context.getString(R.string.trace_component_surface))
+        val surface = composeTestRule.onNodeWithContentDescription(context.getString(R.string.trace_component))
         surface.assertExists("the base surface of the Trace tool composable does not exist")
     }
 }
