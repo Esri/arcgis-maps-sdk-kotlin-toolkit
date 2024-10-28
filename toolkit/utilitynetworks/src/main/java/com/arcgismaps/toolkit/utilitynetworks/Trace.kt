@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -96,10 +98,17 @@ public fun Trace(
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
                         val errorMessage = exception.getErrorMessage(localContext)
                         Row {
-                            Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Info,
+                                contentDescription = stringResource(id = R.string.error),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                             Spacer(modifier = Modifier.size(8.dp))
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
+                    }
+                    if (traceState.isTaskInProgress.value) {
+                        LinearProgressIndicator()
                     }
                     if (traceState.showTabRow()) {
                         TabRow(

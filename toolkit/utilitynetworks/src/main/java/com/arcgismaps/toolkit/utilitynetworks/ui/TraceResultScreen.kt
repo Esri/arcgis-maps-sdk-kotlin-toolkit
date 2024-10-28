@@ -136,7 +136,7 @@ private fun TraceResultPager(
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = "back",
+            contentDescription = stringResource(id = R.string.select_previous_result),
             modifier = Modifier.clickable {
                 onSelectPreviousTraceResult()
             },
@@ -149,7 +149,7 @@ private fun TraceResultPager(
         )
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-            contentDescription = "forward",
+            contentDescription = stringResource(id = R.string.select_next_result),
             modifier = Modifier.clickable {
                 onSelectNextTraceResult()
             },
