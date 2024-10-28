@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISMapImageLayer
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
@@ -87,13 +88,19 @@ fun MainScreen() {
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
+    val graphicsOverlays = remember {
+        mutableListOf<GraphicsOverlay>().apply {
+            add(GraphicsOverlay())
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
             arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
-            translationFactor = 2000.0,
+            translationFactor = 750.0,//2000.0,
             modifier = Modifier.fillMaxSize(),
-            clippingDistance = 750.0,
+            //clippingDistance = 750.0,
+            graphicsOverlays = graphicsOverlays,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             sceneViewInteractionOptions = interactionOptions,
             onInitializationStatusChanged = {

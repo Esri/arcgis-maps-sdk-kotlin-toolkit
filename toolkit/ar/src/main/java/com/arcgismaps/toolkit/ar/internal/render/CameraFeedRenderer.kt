@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import android.view.MotionEvent
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -223,13 +224,18 @@ internal class CameraFeedRenderer(
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         val tap = lastTap ?: return
-        val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
+        val hit = frame.hitTest(tap).apply {
+            this.forEachIndexed { index, hitResult ->
+                Log.d("CameraFeedRenderer", "Hit result $index: ${hitResult.trackable}")
+            }
+        }.firstOrNull { it.trackable is Plane || it.trackable is Point }
         onTap(hit)
         lastTap = null
     }
 
     fun onClick(it: MotionEvent) {
         lastTap = it
+        Log.d("CameraFeedRenderer", "Tap detected at ${it.x}, ${it.y}")
     }
 
     /**

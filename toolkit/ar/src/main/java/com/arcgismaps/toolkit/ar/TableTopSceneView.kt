@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.ar
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -45,6 +47,9 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -54,6 +59,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
@@ -76,6 +82,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.HitResult
 import com.google.ar.core.Pose
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
@@ -237,7 +244,7 @@ public fun TableTopSceneView(
                 arSessionWrapper = arSessionWrapper,
                 onFrame = { frame, displayRotation ->
                     arCoreAnchor?.let { anchor ->
-                        val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                        val transMatrix = identityMatrix - anchor.pose.translation.let {
                             TransformationMatrix.createWithQuaternionAndTranslation(
                                 0.0,
                                 0.0,
@@ -248,9 +255,39 @@ public fun TableTopSceneView(
                                 it[2].toDouble()
                             )
                         }
+                        val scaledTransMatrix = TransformationMatrix.createWithQuaternionAndTranslation(
+                            transMatrix.quaternionX,
+                            transMatrix.quaternionY,
+                            transMatrix.quaternionZ,
+                            transMatrix.quaternionW,
+                            transMatrix.translationX * translationFactor,
+                            transMatrix.translationY * translationFactor,
+                            transMatrix.translationZ * translationFactor
+                        )
+
+                        val anchorPosition2 =
+                            transMatrix + cameraController.originCamera.value.transformationMatrix
+
+                        graphicsOverlays.firstOrNull()?.let {
+                            Camera(anchorPosition2).location.let { point ->
+                                val latLon = Point(
+                                    point.x,
+                                    point.y,
+                                    0.0,
+                                    point.spatialReference
+                                )
+                                latLon.showAsGraphic(it)
+
+                                Log.d("ArcGISSceneLocation", "latLon: ${latLon.x} ${latLon.y} ${latLon.z} ${latLon.spatialReference?.wkText}")
+                                Log.d("ArcGISSceneLocation", "agsSce: ${arcGISSceneAnchor.x} ${arcGISSceneAnchor.y} ${arcGISSceneAnchor.z} ${arcGISSceneAnchor.spatialReference?.wkText}")
+                            }
+                        }
+
                         val cameraPosition =
-                            anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                            transMatrix + frame.camera.displayOrientedPose.transformationMatrix
                         cameraController.transformationMatrix = cameraPosition
+
+
                         val imageIntrinsics = frame.camera.imageIntrinsics
                         tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                             imageIntrinsics.focalLength[0],
@@ -276,6 +313,44 @@ public fun TableTopSceneView(
                             arCoreAnchor = hitResult.createAnchor()
                             // stop rendering planes
                             visualizePlanes = false
+
+                            val scenePoint = hitResult.toArcGISSceneLocation(
+                                cameraController.originCamera.value,
+                                translationFactor
+                            )
+                            //Log.d("ArcGISSceneLocation", "ScenePoint: ${scenePoint?.x} ${scenePoint?.y} ${scenePoint?.z}")
+                            graphicsOverlays.firstOrNull()?.let { graphicsOverlay ->
+                                scenePoint?.let { point ->
+                                    val latLon = Point(
+                                        point.x,
+                                        point.y,
+                                        0.0,
+                                        point.spatialReference
+                                    )
+//                                    Log.d("ArcGISSceneLocation", "latLon: ${latLon.x} ${latLon.y} ${latLon.z} ${latLon.spatialReference?.wkText}")
+//                                    Log.d("ArcGISSceneLocation", "agsSce: ${arcGISSceneAnchor.x} ${arcGISSceneAnchor.y} ${arcGISSceneAnchor.z} ${arcGISSceneAnchor.spatialReference?.wkText}")
+
+                                    latLon.showAsGraphic(graphicsOverlay, com.arcgismaps.Color.green)
+
+
+//                                    graphicsOverlay.graphics.add(
+//                                        Graphic(
+//                                            latLon,
+//                                            SimpleMarkerSceneSymbol(
+//                                                SimpleMarkerSceneSymbolStyle.Cylinder,
+//                                                com.arcgismaps.Color.red,
+//                                                height = 1000.0,
+//                                                width = 10.0,
+//                                                depth = 10.0
+//                                            )
+////                                            SimpleMarkerSymbol().apply {
+////                                                color = com.arcgismaps.Color.red
+////                                                size = 30f
+////                                            }
+//                                        )
+//                                    )
+                                }
+                            }
                         }
                     }
                 },
@@ -411,3 +486,39 @@ private val Pose.transformationMatrix: TransformationMatrix
             translation[2].toDouble()
         )
     }
+
+private fun HitResult.toArcGISSceneLocation(originCamera: Camera, translationFactor: Double): Point? =
+    this.hitPose.translation?.let { translationVector ->
+        val transMatrix = TransformationMatrix.createWithQuaternionAndTranslation(
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            translationVector[0].toDouble(),
+            translationVector[1].toDouble(),
+            translationVector[2].toDouble()
+        )
+        val scaledTransMatrix = TransformationMatrix.createWithQuaternionAndTranslation(
+            transMatrix.quaternionX,
+            transMatrix.quaternionY,
+            transMatrix.quaternionZ,
+            transMatrix.quaternionW,
+            transMatrix.translationX * translationFactor,
+            transMatrix.translationY * translationFactor,
+            transMatrix.translationZ * translationFactor
+        )
+        val calculatedMatrix = originCamera.transformationMatrix + scaledTransMatrix
+        Camera(calculatedMatrix).location
+    }
+
+private fun Point.showAsGraphic(graphicsOverlay: GraphicsOverlay, color: com.arcgismaps.Color = com.arcgismaps.Color.red) =
+    graphicsOverlay.graphics.add(Graphic(
+        this,
+        SimpleMarkerSceneSymbol(
+            SimpleMarkerSceneSymbolStyle.Cylinder,
+            color,
+            height = 1000.0,
+            width = 10.0,
+            depth = 10.0
+        )
+    ))
