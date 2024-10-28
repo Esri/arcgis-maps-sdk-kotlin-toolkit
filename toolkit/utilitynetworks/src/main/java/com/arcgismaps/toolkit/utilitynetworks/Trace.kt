@@ -34,6 +34,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 /**
@@ -59,6 +63,7 @@ public fun Trace(
     val initializationStatus by traceState.initializationStatus
     val localContext = LocalContext.current
     val traceToolContentDescription = stringResource(R.string.trace_component)
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(traceState) {
         traceState.initialize()
@@ -103,7 +108,21 @@ public fun Trace(
                     if (traceState.isTaskInProgress.value) {
                         LinearProgressIndicator()
                     }
-                    TraceNavHost(traceState)
+                    if (traceState.showTabRow()) {
+                        TabRow(
+                            selectedTabIndex,
+                            onNavigateTo = {
+                                selectedTabIndex = it.first
+                                traceState.showScreen(it.second)
+                            }
+                        )
+                    }
+                    TraceNavHost(
+                        traceState,
+                        onTabSwitch = {
+                            selectedTabIndex = it
+                        }
+                    )
                 }
             }
         }
