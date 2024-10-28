@@ -72,7 +72,6 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -95,7 +94,6 @@ internal fun TraceOptionsScreen(
     isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
-    onBackToResults: () -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
@@ -113,14 +111,6 @@ internal fun TraceOptionsScreen(
 
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
-            if (showResultsTab) {
-                TabRow(onBackToResults, 0)
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                )
-            }
             LazyColumn(
                 modifier = Modifier
                     .padding(vertical = 3.dp)

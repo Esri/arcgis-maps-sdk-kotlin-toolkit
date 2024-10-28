@@ -71,6 +71,7 @@ public class TraceState(
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy
 ) {
+    private val navRoutesWithNoTabRow = listOf(TraceNavRoute.AddStartingPoint)
 
     private var _currentError: Throwable? = null
     internal val currentError: Throwable?
@@ -145,6 +146,10 @@ public class TraceState(
     internal val isTaskInProgress: State<Boolean> = _isTaskInProgress
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
+
+    private var _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
+    private val currentScreen: State<TraceNavRoute> = _currentScreen
+
     /**
      * The default name of the trace.
      *
@@ -221,6 +226,7 @@ public class TraceState(
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
+        _currentScreen.value = screen
         navigateToRoute?.invoke(screen)
     }
 
@@ -677,6 +683,15 @@ public class TraceState(
         } finally {
             _isTaskInProgress.value = false
         }
+    }
+
+    /**
+     * Signal if the TabRow should be shown.
+     *
+     * @since 200.6.0
+     */
+    internal fun showTabRow(): Boolean {
+        return _completedTraces.isNotEmpty() && !navRoutesWithNoTabRow.contains(currentScreen.value)
     }
 }
 
