@@ -41,6 +41,7 @@ internal sealed class ValidationErrorState(
     data object NotAWholeNumber : ValidationErrorState()
     data object NotInCodedValueDomain : ValidationErrorState()
     data object NullNotAllowed : ValidationErrorState()
+    data object NotAGuid : ValidationErrorState()
 
     @ReadOnlyComposable
     @Composable
@@ -109,6 +110,10 @@ internal sealed class ValidationErrorState(
 
             is NotAWholeNumber -> {
                 stringResource(id = R.string.value_must_be_a_whole_number)
+            }
+
+            is NotAGuid -> {
+                stringResource(id = R.string.value_must_be_a_guid)
             }
 
             NotInCodedValueDomain -> {
