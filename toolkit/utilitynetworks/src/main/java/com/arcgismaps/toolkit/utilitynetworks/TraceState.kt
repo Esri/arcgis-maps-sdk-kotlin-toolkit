@@ -336,9 +336,9 @@ public class TraceState(
                             if (featuresForElements.isNotEmpty()) {
                                 currentTraceResultsExtent =
                                     getResultFeaturesExtent(featuresForElements)
+                                currentTraceFeatureResultsGroupByLayers =
+                                    featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                             }
-                            currentTraceFeatureResultsGroupByLayers =
-                                featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
                         }
                     }
                     // Function results
