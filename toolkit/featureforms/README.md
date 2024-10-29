@@ -7,7 +7,7 @@
 The `FeatureForm` toolkit component enables users to display and edit feature attributes and attachments in a layer using the `FeatureForm` API.
 FeatureForms can be authored as part of the web map using [Field Maps Designer](https://www.arcgis.com/apps/fieldmaps/) or using Map Viewer. This allows a simplified user experience to edit feature attribute data on the web map.
 
-More information about edit attributes using forms can be found [here](https://next.sites.afd.arcgis.com/kotlin/edit-features/edit-attribute-values/).
+More information about editing attributes using forms can be found [here](https://next.sites.afd.arcgis.com/kotlin/edit-features/edit-attribute-values/).
 
 ## Features
 
@@ -37,7 +37,7 @@ val featureForm = FeatureForm(feature, featureFormDefinition)
 
 #### Creating a FeatureForm UI in Compose
 
-A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable with the `FeaureForm` object. The FeatureForm should be displayed in a container. It's visibility and the container are external and should be controlled by the calling Composable.
+A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable with the `FeaureForm` object. The FeatureForm should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin  
 @Composable  
@@ -69,8 +69,8 @@ fun MyComposable(viewModel : MyViewModel) {
     MyContainer(modifier = Modifier) {
         FeatureForm(    
             featureForm = featureForm,  
-            modifier = Modifier.fillMaxSize()  
-	    )  
+            modifier = Modifier.fillMaxSize()
+        )  
     }  
 }
 ```  

@@ -125,7 +125,7 @@ sealed class UIState {
 
 /**
  * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
- * the actual message string use [FeatureFormValidationException.getString] in the composition.
+ * the actual message string use [FeatureFormValidationException.getMessage] in the composition.
  */
 data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException) {
     override fun toString(): String = "$fieldName: ${error.getMessage()}"
