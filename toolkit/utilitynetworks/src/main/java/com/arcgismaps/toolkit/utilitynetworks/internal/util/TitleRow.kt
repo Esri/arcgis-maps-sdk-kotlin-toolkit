@@ -71,7 +71,7 @@ internal fun Title(
             Icon(
                 modifier = Modifier.padding(end = 10.dp),
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = ""
+                contentDescription = stringResource(R.string.more_options)
             )
             MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
                 DropdownMenu(
@@ -89,9 +89,8 @@ internal fun Title(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Outlined.LocationOn, contentDescription = stringResource(
-                                        R.string.zoom_to
-                                    )
+                                    Icons.Outlined.LocationOn,
+                                    contentDescription = stringResource(R.string.zoom_to)
                                 )
                             }
                         )
@@ -104,9 +103,8 @@ internal fun Title(
                         },
                         leadingIcon = {
                             Icon(
-                                Icons.Outlined.Clear, contentDescription = stringResource(
-                                    R.string.delete
-                                )
+                                Icons.Outlined.Clear,
+                                contentDescription = stringResource(R.string.delete)
                             )
                         }
                     )

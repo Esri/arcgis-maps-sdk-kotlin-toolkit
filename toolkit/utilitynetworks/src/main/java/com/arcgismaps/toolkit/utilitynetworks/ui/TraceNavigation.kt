@@ -54,7 +54,7 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
                 isTraceInProgress = traceState.isTaskInProgress.value,
-                onPerformTraceButtonClicked = {
+                onTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)

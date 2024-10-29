@@ -39,7 +39,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -94,7 +93,7 @@ internal fun TraceOptionsScreen(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
-    onPerformTraceButtonClicked: () -> Unit,
+    onTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
     onNameChange: (String) -> Unit,
     onColorChanged: (Color) -> Unit,
@@ -139,9 +138,9 @@ internal fun TraceOptionsScreen(
                     )
                 }
             }
-            PerformTraceButton(
-                enabled = selectedConfig != null,
-                onClicked = onPerformTraceButtonClicked
+            TraceButton(
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+                onClicked = onTraceButtonClicked
             )
         }
     }
@@ -381,7 +380,7 @@ internal fun AdvancedOptions(
 }
 
 @Composable
-private fun PerformTraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
+private fun TraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
