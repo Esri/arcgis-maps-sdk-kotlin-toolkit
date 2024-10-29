@@ -58,7 +58,6 @@ import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 @Composable
 public fun Trace(
     traceState: TraceState,
-    @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
     val initializationStatus by traceState.initializationStatus
@@ -71,7 +70,7 @@ public fun Trace(
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
