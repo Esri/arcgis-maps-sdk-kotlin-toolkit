@@ -84,12 +84,14 @@ internal fun TraceResultScreen(
             val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
             var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
-            TraceResultPager(
-                selectedTraceRunIndex,
-                traceResults.size,
-                onSelectPreviousTraceResult,
-                onSelectNextTraceResult
-            )
+            if (traceResults.size > 1) {
+                TraceResultPager(
+                    selectedTraceRunIndex,
+                    traceResults.size,
+                    onSelectPreviousTraceResult,
+                    onSelectNextTraceResult
+                )
+            }
 
             Title(
                 selectedTraceRun.name,
