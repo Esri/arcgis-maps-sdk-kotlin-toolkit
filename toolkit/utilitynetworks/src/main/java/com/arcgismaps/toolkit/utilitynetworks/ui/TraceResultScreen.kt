@@ -89,15 +89,18 @@ internal fun TraceResultScreen(
             val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
             var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TraceResultPager(
-                    selectedTraceRunIndex,
-                    traceResults.size,
-                    onSelectPreviousTraceResult,
-                    onSelectNextTraceResult
-                )
+            if (traceResults.size > 1) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TraceResultPager(
+                        selectedTraceRunIndex,
+                        traceResults.size,
+                        onSelectPreviousTraceResult,
+                        onSelectNextTraceResult
+                    )
+                }
             }
 
             Title(
