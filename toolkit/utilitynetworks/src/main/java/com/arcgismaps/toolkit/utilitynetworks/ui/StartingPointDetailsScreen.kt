@@ -122,7 +122,7 @@ private fun FractionAlongEdgeSlider(
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
     Column(
         modifier = Modifier
-            .padding(start= 16.dp, end = 16.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Text(
             modifier = Modifier.padding(start = 8.dp),
@@ -213,7 +213,8 @@ private fun TerminalConfiguration(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Text(
@@ -222,68 +223,69 @@ private fun TerminalConfiguration(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.tertiary
         )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
-                    .border(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
+                .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-                    shape = RoundedCornerShape(5.dp))
-                    .background(color = MaterialTheme.colorScheme.background)
-                    .clickable {
-                        showDropdown = !showDropdown
-                    },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ReadOnlyTextField(
-                    text = selectedTerminalName ?: "",
-                    modifier = Modifier.clickable {
-                        showDropdown = !showDropdown
-                    },
-                    trailingIcon = {
-                        Box {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = stringResource(id = R.string.edit_terminal_configuration),
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                                DropdownMenu(
-                                    expanded = showDropdown,
-                                    offset = DpOffset(16.dp, 0.dp),
-                                    onDismissRequest = { showDropdown = false }) {
-                                    startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                ReadOnlyTextField(
-                                                    text = utilityTerminal.name,
-                                                    leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
-                                                        {
-                                                            Icon(
-                                                                imageVector = Icons.Filled.Done,
-                                                                contentDescription = stringResource(id = R.string.selected),
-                                                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                                            )
-                                                        }
-                                                    } else {
-                                                        null
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .background(color = MaterialTheme.colorScheme.background)
+                .clickable {
+                    showDropdown = !showDropdown
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ReadOnlyTextField(
+                text = selectedTerminalName ?: "",
+                modifier = Modifier.clickable {
+                    showDropdown = !showDropdown
+                },
+                trailingIcon = {
+                    Box {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = stringResource(id = R.string.edit_terminal_configuration),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+                            DropdownMenu(
+                                expanded = showDropdown,
+                                offset = DpOffset(16.dp, 0.dp),
+                                onDismissRequest = { showDropdown = false }) {
+                                startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            ReadOnlyTextField(
+                                                text = utilityTerminal.name,
+                                                leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
+                                                    {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Done,
+                                                            contentDescription = stringResource(id = R.string.selected),
+                                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                        )
                                                     }
-                                                )
-                                            },
-                                            onClick = {
-                                                selectedTerminalName = utilityTerminal.name
-                                                onTerminalSelected(utilityTerminal)
-                                                showDropdown = false
-                                            },
-                                            contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
-                                        )
-                                    }
+                                                } else {
+                                                    null
+                                                }
+                                            )
+                                        },
+                                        onClick = {
+                                            selectedTerminalName = utilityTerminal.name
+                                            onTerminalSelected(utilityTerminal)
+                                            showDropdown = false
+                                        },
+                                        contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
+                                    )
                                 }
                             }
                         }
                     }
-                )
-            }
+                }
+            )
         }
     }
+}
