@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,7 +39,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -81,34 +79,28 @@ internal fun StartingPointDetailsScreen(
         onBackPressed()
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+    Column {
+        UpButton(stringResource(id = R.string.starting_points), onBackPressed)
+
+        Title(startingPoint.name, onZoomTo, onDelete)
+
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            UpButton(stringResource(id = R.string.starting_points), onBackPressed)
-
-            Title(startingPoint.name, onZoomTo, onDelete)
-
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
-                    item {
-                        FractionAlongEdgeSlider(startingPoint, onFractionChanged)
-                    }
-                } else if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction
-                    && startingPoint.utilityElement.terminal != null
-                    && !startingPoint.utilityElement.assetType.terminalConfiguration?.terminals.isNullOrEmpty()
-                ) {
-                    item {
-                        TerminalConfiguration(startingPoint, onTerminalSelected)
-                    }
-                }
+            if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
                 item {
-                    Attributes(startingPoint)
+                    FractionAlongEdgeSlider(startingPoint, onFractionChanged)
                 }
+            } else if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction
+                && startingPoint.utilityElement.terminal != null
+                && !startingPoint.utilityElement.assetType.terminalConfiguration?.terminals.isNullOrEmpty()
+            ) {
+                item {
+                    TerminalConfiguration(startingPoint, onTerminalSelected)
+                }
+            }
+            item {
+                Attributes(startingPoint)
             }
         }
     }

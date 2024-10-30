@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +33,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -79,45 +77,43 @@ internal fun TraceResultScreen(
         onBackToNewTrace()
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column {
-            val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
-            var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
+    Column {
+        val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
+        var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
-            if (traceResults.size > 1) {
-                TraceResultPager(
-                    selectedTraceRunIndex,
-                    traceResults.size,
-                    onSelectPreviousTraceResult,
-                    onSelectNextTraceResult
+        if (traceResults.size > 1) {
+            TraceResultPager(
+                selectedTraceRunIndex,
+                traceResults.size,
+                onSelectPreviousTraceResult,
+                onSelectNextTraceResult
+            )
+        }
+
+        Title(
+            selectedTraceRun.name,
+            onZoomTo = onZoomToResults,
+            onDelete = onDeleteResult,
+            showZoomToOption = selectedTraceRun.geometryTraceResult != null
+        )
+        LazyColumn {
+            item {
+                FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
+            }
+            item {
+                FunctionResult(selectedTraceRun.functionResults)
+            }
+            item {
+                AdvancedOptions(
+                    selectedColor = selectedColor,
+                    onColorChanged = {
+                        selectedColor = it
+                        onColorChanged(it)
+                    }
                 )
             }
-
-            Title(
-                selectedTraceRun.name,
-                onZoomTo = onZoomToResults,
-                onDelete = onDeleteResult,
-                showZoomToOption = selectedTraceRun.geometryTraceResult != null
-            )
-            LazyColumn {
-                item {
-                    FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
-                }
-                item {
-                    FunctionResult(selectedTraceRun.functionResults)
-                }
-                item {
-                    AdvancedOptions(
-                        selectedColor = selectedColor,
-                        onColorChanged = {
-                            selectedColor = it
-                            onColorChanged(it)
-                        }
-                    )
-                }
-                item {
-                    ClearAllResultsButton(onClearAllResults)
-                }
+            item {
+                ClearAllResultsButton(onClearAllResults)
             }
         }
     }
@@ -132,7 +128,8 @@ private fun TraceResultPager(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth().padding(bottom = 16.dp),
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -171,39 +168,35 @@ private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGr
         .filter { it.isNotEmpty() }
         .distinct()
 
-    Surface(modifier = Modifier.fillMaxWidth()) {
+    ExpandableCardWithLabel(
+        labelText = stringResource(R.string.feature_results),
+        contentTitle = featureResults.size.toString()
+    ) {
         Column {
-            ExpandableCardWithLabel(
-                labelText = stringResource(R.string.feature_results),
-                contentTitle = featureResults.size.toString()
-            ) {
-                Column {
-                    assetGroupNames.forEach { assetGroupName ->
-                        HorizontalDivider()
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                                .clickable { onFeatureAssetGroupSelected(assetGroupName) },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = assetGroupName,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = elementsInAssetGroup(
-                                        assetGroupName,
-                                        featureResults
-                                    ).size.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+            assetGroupNames.forEach { assetGroupName ->
+                HorizontalDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                        .clickable { onFeatureAssetGroupSelected(assetGroupName) },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = assetGroupName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = elementsInAssetGroup(
+                                assetGroupName,
+                                featureResults
+                            ).size.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
@@ -217,39 +210,35 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 
 @Composable
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
-    Surface(modifier = Modifier.fillMaxWidth()) {
+    ExpandableCardWithLabel(
+        labelText = stringResource(R.string.function_results),
+        contentTitle = functionResults.size.toString()
+    ) {
         Column {
-            ExpandableCardWithLabel(
-                labelText = stringResource(R.string.function_results),
-                contentTitle = functionResults.size.toString()
-            ) {
-                Column {
-                    functionResults.forEach { functionResult ->
-                        HorizontalDivider()
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = functionResult.function.networkAttribute.name,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = functionResult.function.functionType::class.simpleName ?: "",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color.Gray
-                                )
-                                val result = when (functionResult.result) {
-                                    is Double -> formatDouble(functionResult.result as Double)
-                                    else -> stringResource(R.string.not_available)
-                                }
-                                Text(text = result, style = MaterialTheme.typography.titleMedium)
-                            }
+            functionResults.forEach { functionResult ->
+                HorizontalDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = functionResult.function.networkAttribute.name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = functionResult.function.functionType::class.simpleName ?: "",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray
+                        )
+                        val result = when (functionResult.result) {
+                            is Double -> formatDouble(functionResult.result as Double)
+                            else -> stringResource(R.string.not_available)
                         }
+                        Text(text = result, style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }

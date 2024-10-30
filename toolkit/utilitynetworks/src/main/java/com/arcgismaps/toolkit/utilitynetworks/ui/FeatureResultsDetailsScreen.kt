@@ -20,10 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -31,7 +28,6 @@ import androidx.compose.material.icons.sharp.ZoomInMap
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -60,31 +56,26 @@ internal fun FeatureResultsDetailsScreen(
         onBackToResults()
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            UpButton(stringResource(id = R.string.feature_results), onBackToResults)
+    Column {
+        UpButton(stringResource(id = R.string.feature_results), onBackToResults)
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = selectedGroupName,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            LazyColumn {
-                item {
-                    FeatureList(elementListWithSelectedGroupName, onFeatureSelected)
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = selectedGroupName,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        LazyColumn {
+            item {
+                FeatureList(elementListWithSelectedGroupName, onFeatureSelected)
             }
         }
     }
@@ -92,29 +83,27 @@ internal fun FeatureResultsDetailsScreen(
 
 @Composable
 private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: (UtilityElement) -> Unit) {
-    Surface(modifier = Modifier.fillMaxWidth()) {
-        ExpandableCardWithLabel(assetTypeList[0].assetType.name, contentTitle = assetTypeList.size.toString()) {
-            Column {
-                assetTypeList.forEach { utilityElement ->
-                    HorizontalDivider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                            .clickable { onFeatureSelected(utilityElement) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Sharp.ZoomInMap,
-                            contentDescription = stringResource(R.string.zoom_in),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            modifier = Modifier.padding(start = 10.dp),
-                            text = stringResource(R.string.object_id, utilityElement.objectId),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+    ExpandableCardWithLabel(assetTypeList[0].assetType.name, contentTitle = assetTypeList.size.toString()) {
+        Column {
+            assetTypeList.forEach { utilityElement ->
+                HorizontalDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                        .clickable { onFeatureSelected(utilityElement) },
+                ) {
+                    Icon(
+                        imageVector = Icons.Sharp.ZoomInMap,
+                        contentDescription = stringResource(R.string.zoom_in),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 10.dp),
+                        text = stringResource(R.string.object_id, utilityElement.objectId),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }

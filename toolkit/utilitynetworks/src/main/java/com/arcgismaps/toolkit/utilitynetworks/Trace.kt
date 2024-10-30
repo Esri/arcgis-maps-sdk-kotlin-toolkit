@@ -78,8 +78,7 @@ public fun Trace(
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
-                    modifier = Modifier
-                        .size(100.dp),
+                    modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -88,8 +87,7 @@ public fun Trace(
 
             else -> {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = modifier,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
