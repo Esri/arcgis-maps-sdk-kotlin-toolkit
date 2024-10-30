@@ -71,6 +71,7 @@ public class TraceState(
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy
 ) {
+    private val navRoutesWithNoTabRow = listOf(TraceNavRoute.AddStartingPoint)
 
     private var _currentError: Throwable? = null
     internal val currentError: Throwable?
@@ -145,6 +146,10 @@ public class TraceState(
     internal val isTaskInProgress: State<Boolean> = _isTaskInProgress
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
+
+    private var _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
+    private val currentScreen: State<TraceNavRoute> = _currentScreen
+
     /**
      * The default name of the trace.
      *
@@ -221,6 +226,7 @@ public class TraceState(
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
+        _currentScreen.value = screen
         navigateToRoute?.invoke(screen)
     }
 
@@ -424,6 +430,20 @@ public class TraceState(
         }
     }
 
+    /**
+     * Add a starting point for a utility network trace.
+     *
+     * @param arcGISFeature the feature to use as the starting point
+     * @param mapPoint the map point to indicate the location of the starting point
+     * @since 200.6.0
+     */
+    public fun addStartingPoint(arcGISFeature: ArcGISFeature, mapPoint: Point? = null) {
+        processAndAddStartingPoint(arcGISFeature, mapPoint).getOrElse {
+            setCurrentError(it)
+            showScreen(TraceNavRoute.TraceError)
+        }
+    }
+
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
@@ -454,7 +474,7 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point?): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: return@runCatchingCancellable
 
@@ -468,8 +488,9 @@ public class TraceState(
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            utilityElement.fractionAlongEdge =
-                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: 0.5
+            utilityElement.fractionAlongEdge = mapPoint?.let { mapPoint ->
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() }
+            } ?: 0.5
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
@@ -477,7 +498,7 @@ public class TraceState(
         }
 
         val graphic = Graphic(
-            geometry = mapPoint,
+            geometry = mapPoint ?: featureGeometry?.extent?.center,
             symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, currentTraceGraphicsColor, 20.0f)
         )
         graphicsOverlay.graphics.add(graphic)
@@ -679,6 +700,15 @@ public class TraceState(
         } finally {
             _isTaskInProgress.value = false
         }
+    }
+
+    /**
+     * Signal if the TabRow should be shown.
+     *
+     * @since 200.6.0
+     */
+    internal fun showTabRow(): Boolean {
+        return _completedTraces.isNotEmpty() && !navRoutesWithNoTabRow.contains(currentScreen.value)
     }
 }
 

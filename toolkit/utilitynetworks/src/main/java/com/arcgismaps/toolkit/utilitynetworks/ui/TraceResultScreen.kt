@@ -23,10 +23,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -55,7 +53,6 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
@@ -83,9 +80,7 @@ internal fun TraceResultScreen(
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 10.dp)) {
+        Column {
 
             if (traceResults.isEmpty()) {
                 return@Column
@@ -94,11 +89,7 @@ internal fun TraceResultScreen(
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
             var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
-            TabRow(onBackToNewTrace, 1)
-
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (traceResults.size > 1) {
                 TraceResultPager(
                     selectedTraceRunIndex,
                     traceResults.size,
@@ -119,11 +110,6 @@ internal fun TraceResultScreen(
                 }
                 item {
                     FunctionResult(selectedTraceRun.functionResults)
-                }
-                item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
                 }
                 item {
                     AdvancedOptions(
@@ -149,27 +135,34 @@ private fun TraceResultPager(
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit
 ) {
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-        contentDescription = stringResource(id = R.string.select_previous_result),
-        modifier = Modifier.clickable {
-            onSelectPreviousTraceResult()
-        },
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Text(
-        modifier = Modifier.padding(20.dp),
-        text = getTraceCounterString(selectedTraceRunIndex + 1, traceResultsSize),
-        style = MaterialTheme.typography.titleLarge
-    )
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-        contentDescription = stringResource(id = R.string.select_next_result),
-        modifier = Modifier.clickable {
-            onSelectNextTraceResult()
-        },
-        tint = MaterialTheme.colorScheme.primary
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth().padding(bottom = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+            contentDescription = stringResource(id = R.string.select_previous_result),
+            modifier = Modifier.clickable {
+                onSelectPreviousTraceResult()
+            },
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            text = getTraceCounterString(selectedTraceRunIndex + 1, traceResultsSize),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            contentDescription = stringResource(id = R.string.select_next_result),
+            modifier = Modifier.clickable {
+                onSelectNextTraceResult()
+            },
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
 }
 
 private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: Int): String {
@@ -185,7 +178,10 @@ private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGr
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.feature_results), contentTitle = featureResults.size.toString()) {
+            ExpandableCardWithLabel(
+                labelText = stringResource(R.string.feature_results),
+                contentTitle = featureResults.size.toString()
+            ) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
@@ -228,7 +224,10 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.function_results), contentTitle = functionResults.size.toString()) {
+            ExpandableCardWithLabel(
+                labelText = stringResource(R.string.function_results),
+                contentTitle = functionResults.size.toString()
+            ) {
                 Column {
                     functionResults.forEach { functionResult ->
                         HorizontalDivider()
@@ -239,7 +238,10 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = functionResult.function.networkAttribute.name, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = functionResult.function.networkAttribute.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = functionResult.function.functionType::class.simpleName ?: "",
@@ -275,7 +277,7 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         expandableCardState = rememberExpandableCardState(false),
-        padding = PaddingValues(horizontal = 4.dp)
+        padding = PaddingValues()
     ) {
         Column {
             // Color picker
@@ -301,7 +303,7 @@ private fun ClearAllResultsButton(onClearAllResults: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
+            .padding(top = 8.dp)
     ) {
         Button(onClick = onClearAllResults) {
             Text(stringResource(R.string.clear_all_results))
