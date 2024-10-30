@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -62,7 +63,6 @@ public fun Trace(
 ) {
     val initializationStatus by traceState.initializationStatus
     val localContext = LocalContext.current
-    val traceToolContentDescription = stringResource(R.string.trace_component)
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(traceState) {
@@ -73,7 +73,8 @@ public fun Trace(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = traceToolContentDescription }
+            .padding(horizontal = 16.dp)
+            .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
@@ -85,6 +86,7 @@ public fun Trace(
                     CircularProgressIndicator()
                 }
             }
+
             else -> {
                 Column(
                     modifier = Modifier

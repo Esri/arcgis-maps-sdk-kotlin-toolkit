@@ -64,25 +64,13 @@ internal fun FeatureResultsDetailsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 10.dp)
         ) {
-
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(25.dp)
-            )
-
             UpButton(stringResource(id = R.string.feature_results), onBackToResults)
 
-            Spacer(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(20.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+                    .padding(bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -105,29 +93,27 @@ internal fun FeatureResultsDetailsScreen(
 @Composable
 private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: (UtilityElement) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth()) {
-        Column {
-            ExpandableCardWithLabel(assetTypeList[0].assetType.name, contentTitle = assetTypeList.size.toString()) {
-                Column {
-                    assetTypeList.forEach { utilityElement ->
-                        HorizontalDivider()
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                                .clickable { onFeatureSelected(utilityElement) },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Sharp.ZoomInMap,
-                                contentDescription = stringResource(R.string.zoom_in),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                modifier = Modifier.padding(start = 10.dp),
-                                text = stringResource(R.string.object_id, utilityElement.objectId),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+        ExpandableCardWithLabel(assetTypeList[0].assetType.name, contentTitle = assetTypeList.size.toString()) {
+            Column {
+                assetTypeList.forEach { utilityElement ->
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                            .clickable { onFeatureSelected(utilityElement) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Sharp.ZoomInMap,
+                            contentDescription = stringResource(R.string.zoom_in),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 10.dp),
+                            text = stringResource(R.string.object_id, utilityElement.objectId),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }

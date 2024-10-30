@@ -25,10 +25,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -86,31 +84,14 @@ internal fun StartingPointDetailsScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top,
+                .fillMaxWidth(),
         ) {
 
             UpButton(stringResource(id = R.string.starting_points), onBackPressed)
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-            )
-
             Title(startingPoint.name, onZoomTo, onDelete)
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-            )
-
             LazyColumn(
-                modifier = Modifier
-                    .padding(vertical = 3.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
@@ -139,24 +120,21 @@ private fun FractionAlongEdgeSlider(
     onFractionChanged: (StartingPoint, Float) -> Unit
 ) {
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
-    Column {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-        )
-
+    Column(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+    ) {
         Text(
-            modifier = Modifier.padding(start = 24.dp),
+            modifier = Modifier.padding(start = 8.dp),
             text = stringResource(id = R.string.fraction_along_edge),
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.tertiary
         )
         Box(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(15.dp)
+                    shape = RoundedCornerShape(16.dp)
                 )
         ) {
             Slider(
@@ -173,24 +151,22 @@ private fun FractionAlongEdgeSlider(
 
 @Composable
 private fun Attributes(startingPoint: StartingPoint) {
-    Column {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-        )
+    Column(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .fillMaxWidth()
+    ) {
         Text(
-            modifier = Modifier.padding(start = 24.dp),
+            modifier = Modifier.padding(start = 8.dp),
             text = stringResource(id = R.string.attributes),
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.tertiary
         )
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(15.dp)
+                    shape = RoundedCornerShape(16.dp)
                 )
         ) {
             val attributes = startingPoint.feature.attributes.toSortedMap().toList()
@@ -198,19 +174,17 @@ private fun Attributes(startingPoint: StartingPoint) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp)
+                        .padding(8.dp)
                         .background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.padding(start = 10.dp),
                         text = attribute.first,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        modifier = Modifier.padding(end = 10.dp),
                         text = attribute.second as? String ?: "",
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
@@ -218,7 +192,7 @@ private fun Attributes(startingPoint: StartingPoint) {
                     )
                 }
                 if (index < attributes.size - 1) {
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
                 }
             }
         }
@@ -238,84 +212,80 @@ private fun TerminalConfiguration(
         mutableStateOf(startingPoint.utilityElement.terminal?.name)
     }
 
-    Column {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-        )
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+    ) {
         Text(
-            modifier = Modifier.padding(start = 24.dp),
+            modifier = Modifier.padding(start = 8.dp),
             text = stringResource(id = R.string.terminal_configuration),
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.tertiary
         )
-        Column(
+        Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(5.dp)
                 )
                 .background(color = MaterialTheme.colorScheme.background)
+                .clickable {
+                    showDropdown = !showDropdown
+                },
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
-                    .clickable {
-                        showDropdown = !showDropdown
-                    },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ReadOnlyTextField(
-                    text = selectedTerminalName ?: "",
-                    modifier = Modifier.clickable {
-                        showDropdown = !showDropdown
-                    },
-                    trailingIcon = {
+            ReadOnlyTextField(
+                text = selectedTerminalName ?: "",
+                modifier = Modifier.clickable {
+                    showDropdown = !showDropdown
+                },
+                trailingIcon = {
+                    Box {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = stringResource(id = R.string.edit_terminal_configuration),
                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                         )
-                    }
-                )
-            }
-        }
-        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-            DropdownMenu(
-                expanded = showDropdown,
-                offset = DpOffset(16.dp, 0.dp),
-                onDismissRequest = { showDropdown = false }) {
-                startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
-                    DropdownMenuItem(
-                        text = {
-                            ReadOnlyTextField(
-                                text = utilityTerminal.name,
-                                leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
-                                    {
-                                        Icon(
-                                            imageVector = Icons.Filled.Done,
-                                            contentDescription = stringResource(id = R.string.selected),
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                        )
-                                    }
-                                } else {
-                                    null
+                        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+                            DropdownMenu(
+                                expanded = showDropdown,
+                                offset = DpOffset(16.dp, 0.dp),
+                                onDismissRequest = { showDropdown = false }) {
+                                startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            ReadOnlyTextField(
+                                                text = utilityTerminal.name,
+                                                leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
+                                                    {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Done,
+                                                            contentDescription = stringResource(id = R.string.selected),
+                                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                                        )
+                                                    }
+                                                } else {
+                                                    null
+                                                }
+                                            )
+                                        },
+                                        onClick = {
+                                            selectedTerminalName = utilityTerminal.name
+                                            onTerminalSelected(utilityTerminal)
+                                            showDropdown = false
+                                        },
+                                        contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
+                                    )
                                 }
-                            )
-                        },
-                        onClick = {
-                            selectedTerminalName = utilityTerminal.name
-                            onTerminalSelected(utilityTerminal)
-                            showDropdown = false
-                        },
-                        contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
-                    )
+                            }
+                        }
+                    }
                 }
-            }
+            )
         }
     }
 }

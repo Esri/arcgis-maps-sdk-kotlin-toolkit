@@ -39,7 +39,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -90,30 +89,22 @@ internal fun TraceOptionsScreen(
     defaultTraceName: String,
     selectedColor: Color,
     zoomToResult: Boolean,
-    showResultsTab: Boolean,
     isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
-    onPerformTraceButtonClicked: () -> Unit,
+    onTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
     onNameChange: (String) -> Unit,
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column (modifier = Modifier.padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column {
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
             LazyColumn(
                 modifier = Modifier
-                    .padding(vertical = 3.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -126,25 +117,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
-                    )
-                }
-                item {
                     StartingPoints(
                         startingPoints,
                         onAddStartingPointButtonClicked,
                         onStartingPointRemoved,
                         onStartingPointSelected,
-                    )
-                }
-                item {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
                     )
                 }
                 item {
@@ -161,12 +138,10 @@ internal fun TraceOptionsScreen(
                     )
                 }
             }
-            Button(
-                onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not()
-            ) {
-                Text(stringResource(id = R.string.trace))
-            }
+            TraceButton(
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+                onClicked = onTraceButtonClicked
+            )
         }
     }
 }
@@ -256,13 +231,12 @@ private fun AddStartingPointButtonPreview() {
 @Composable
 private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
     ElevatedButton(
-        onClick = {
-            showAddStartingPointScreen()
-        },
+        onClick = { showAddStartingPointScreen() },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(horizontal = 4.dp)),
-        colors = ButtonDefaults.elevatedButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+            .padding(horizontal = 8.dp),
+        colors = ButtonDefaults.elevatedButtonColors()
+            .copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
@@ -285,16 +259,21 @@ private fun StartingPoints(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(bottom = 20.dp)
+    ) {
         AddStartingPointButton {
             showAddStartingPointScreen()
         }
-        Spacer(modifier = Modifier
-            .height(4.dp)
-            .fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(4.dp)
+                .fillMaxWidth()
+        )
         ExpandableCard(
             title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
-            padding = PaddingValues(horizontal = 4.dp)
+            padding = PaddingValues()
         ) {
             Column {
                 startingPoints.forEach {
@@ -330,7 +309,7 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         expandableCardState = rememberExpandableCardState(isExpanded = false),
-        padding = PaddingValues(horizontal = 4.dp)
+        padding = PaddingValues()
     ) {
         val zoomToResultDescription = stringResource(id = R.string.zoom_to_result_description)
         Column {
@@ -396,6 +375,22 @@ internal fun AdvancedOptions(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Button(
+            onClick = { onClicked() },
+            enabled = enabled
+        ) {
+            Text(stringResource(id = R.string.trace))
         }
     }
 }

@@ -43,6 +43,7 @@ internal fun ExpandableCardWithLabel(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(bottom = 16.dp)
     ) {
         Text(
             labelText,
