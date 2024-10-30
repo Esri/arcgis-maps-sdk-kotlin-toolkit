@@ -665,8 +665,10 @@ public class TraceState(
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
-        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            _selectedCompletedTraceIndex.value -= 1
+        if (_selectedCompletedTraceIndex.value > 0 || (_selectedCompletedTraceIndex.value == 0 && _completedTraces.isNotEmpty())) {
+            if (_selectedCompletedTraceIndex.value > 0) {
+                _selectedCompletedTraceIndex.value -= 1
+            }
             updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
     }
