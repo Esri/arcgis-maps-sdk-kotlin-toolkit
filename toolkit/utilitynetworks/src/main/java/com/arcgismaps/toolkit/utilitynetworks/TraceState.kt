@@ -145,11 +145,10 @@ public class TraceState(
     private var _isTaskInProgress: MutableState<Boolean> = mutableStateOf(false)
     internal val isTaskInProgress: State<Boolean> = _isTaskInProgress
 
-    private var _currentTraceName: MutableState<String> = mutableStateOf("")
-
     private var _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     private val currentScreen: State<TraceNavRoute> = _currentScreen
 
+    private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
      *

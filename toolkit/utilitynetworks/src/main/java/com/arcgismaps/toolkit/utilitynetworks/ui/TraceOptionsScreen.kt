@@ -323,7 +323,7 @@ internal fun AdvancedOptions(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    var text by rememberSaveable { mutableStateOf(defaultTraceName) }
+                    var text by remember(defaultTraceName) { mutableStateOf(defaultTraceName) }
                     OutlinedTextField(
                         value = text,
                         onValueChange = { newValue ->
