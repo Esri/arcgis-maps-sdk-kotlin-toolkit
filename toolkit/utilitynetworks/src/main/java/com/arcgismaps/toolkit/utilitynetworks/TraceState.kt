@@ -211,7 +211,7 @@ public class TraceState(
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
             throw error
         }
-        _traceConfigurations.value = traceConfigResult.getOrThrow()
+        _traceConfigurations.value = traceConfigResult.getOrThrow().sortedBy { it.name }
 
         _initializationStatus.value = InitializationStatus.Initialized
     }

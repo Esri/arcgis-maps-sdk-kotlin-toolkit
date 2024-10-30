@@ -167,7 +167,7 @@ private fun TraceConfigurations(
     onTraceSelected: (Int) -> Unit
 ) {
     val expandableCardState = rememberExpandableCardState(false)
-    var selectedConfigIndex by rememberSaveable { mutableIntStateOf(-1) }
+    var selectedConfigIndex by remember(selectedConfigName) { mutableIntStateOf(configs.indexOf(selectedConfigName)) }
     ExpandableCardWithLabel(
         expandableCardState = expandableCardState,
         labelText = stringResource(id = R.string.trace_configuration),
