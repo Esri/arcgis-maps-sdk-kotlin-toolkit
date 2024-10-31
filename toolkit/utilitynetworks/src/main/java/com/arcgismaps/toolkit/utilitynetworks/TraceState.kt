@@ -58,6 +58,8 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -228,6 +230,12 @@ public class TraceState(
     internal fun showScreen(screen: TraceNavRoute) {
         _currentScreen.value = screen
         navigateToRoute?.invoke(screen)
+    }
+
+    internal suspend fun navigateOnMainThread(screen: TraceNavRoute) {
+        withContext(Dispatchers.Main) {
+            showScreen(screen)
+        }
     }
 
     /**
@@ -534,7 +542,8 @@ public class TraceState(
                 if (currentTraceStartingPoints.size > sizeBefore) {
                     // If the size of the starting points has changed, then the starting point was added
                     _addStartingPointMode.value = AddStartingPointMode.Stopped
-                    showScreen(TraceNavRoute.TraceOptions)
+//                    showScreen(TraceNavRoute.TraceOptions)
+                    navigateOnMainThread(TraceNavRoute.TraceOptions)
                 }
             }
         }

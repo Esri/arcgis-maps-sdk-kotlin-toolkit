@@ -18,11 +18,21 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -42,12 +52,17 @@ class TraceToolTests : TraceToolTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val timeoutMillis = 10000L
+
     @Before
     fun setContent() = runTest {
         composeTestRule.setContent {
-            Trace(
-                traceState = traceState
-            )
+            val traceToolUsageScenarios = TraceToolUsageScenarios()
+            traceToolUsageScenarios.MapViewWithTraceInBottomSheet(map, mapviewProxy, graphicsOverlay) {
+                Trace(
+                    traceState = traceState
+                )
+            }
         }
     }
 
@@ -63,4 +78,60 @@ class TraceToolTests : TraceToolTestRunner(
         val surface = composeTestRule.onNodeWithContentDescription(context.getString(R.string.trace_component))
         surface.assertExists("the base surface of the Trace tool composable does not exist")
     }
+
+    val mapPoint = Point(-9815341.663288785, 5130279.426830624, SpatialReference(3857))
+
+    /**
+     * Given a Trace composable
+     * When
+     * Then
+     *
+     * @since 200.6.0
+     */
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testTrace() = runTest {
+//        val surface = composeTestRule.onNodeWithContentDescription(context.getString(R.string.trace_component))
+//        surface.assertExists("the base surface of the Trace tool composable does not exist")
+
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(context.getString(R.string.trace_configuration)),
+            timeoutMillis = timeoutMillis
+        )
+        val traceConfigurations = composeTestRule.onNodeWithText(context.getString(R.string.no_configuration_selected))
+        traceConfigurations.performClick()
+
+        val downStreamTrace = composeTestRule.onNodeWithText("Downstream Trace")
+        downStreamTrace.performClick()
+
+        val addNewStartingPointButton = composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point))
+        addNewStartingPointButton.performClick()
+
+        withContext(Dispatchers.Default) {
+            traceState.addStartingPoint(mapPoint)
+        }
+
+
+//        val cancelAddStartingPointModeButton = composeTestRule.onNodeWithText(context.getString(R.string.cancel_starting_point_selection))
+//        cancelAddStartingPointModeButton.performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText("Underground Single Phase"),
+            timeoutMillis = timeoutMillis
+        )
+
+        val startingPointNode = composeTestRule.onNodeWithText("Underground Single Phase")
+        startingPointNode.assertExists("Starting Point node does not exist")
+
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText("Downstream"),
+            timeoutMillis = timeoutMillis
+        )
+//        traceConfigurations.onChildAt(0).performClick()
+//        composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point)).performClick()
+
+
+
+    }
+
 }
