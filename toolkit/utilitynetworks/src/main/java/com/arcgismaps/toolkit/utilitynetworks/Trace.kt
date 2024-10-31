@@ -108,7 +108,6 @@ private fun TraceContainer(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
-            .fillMaxSize()
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         Column(
