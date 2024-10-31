@@ -43,6 +43,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.FieldType
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
@@ -51,6 +53,14 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * Composable that renders a [FieldFormElement] with a [BarcodeScannerFormInput].
+ *
+ * @param state The [BarcodeTextFieldState] that represents the barcode text field.
+ * @param onBarcodeAccessoryClicked The click listener for the barcode accessory button. If null,
+ * the default barcode scanner experience will be used. This can be used to override the default
+ * behavior and provide a custom barcode scanning experience.
+ */
 @Composable
 internal fun BarcodeTextField(
     state: BarcodeTextFieldState,

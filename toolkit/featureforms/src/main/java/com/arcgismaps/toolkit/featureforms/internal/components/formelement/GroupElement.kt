@@ -44,7 +44,9 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
@@ -57,11 +59,19 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 
+/**
+ * A composable that displays a [GroupFormElement].
+ *
+ * @param state The [BaseGroupState] that represents the group form element.
+ * @param modifier The modifier to apply to this layout.
+ * @param onFormElementClick An event for any form elements within the group that support delegated
+ * tap actions. If null, the default tap action defined internally by the form element will be used.
+ */
 @Composable
 internal fun GroupElement(
     state: BaseGroupState,
     modifier: Modifier = Modifier,
-    onFieldElementClick: ((FieldFormElement) -> Unit)?
+    onFormElementClick: ((FormElement) -> Unit)?
 ) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
@@ -74,7 +84,7 @@ internal fun GroupElement(
             onClick = {
                 state.setExpanded(!state.expanded.value)
             },
-            onFieldElementClick = onFieldElementClick
+            onFormElementClick = onFormElementClick
         )
     }
 }
@@ -87,7 +97,7 @@ private fun GroupElement(
     fieldStates: FormStateCollection,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    onFieldElementClick: ((FieldFormElement) -> Unit)?
+    onFormElementClick: ((FormElement) -> Unit)?
 ) {
     val colors = LocalColorScheme.current.groupElementColors
     Card(
@@ -124,10 +134,11 @@ private fun GroupElement(
 
                         is FieldFormElement -> FieldElement(
                             it.getState<BaseFieldState<*>>(),
-                            onClick = onFieldElementClick?.let { event ->
-                                { event(it.formElement as FieldFormElement) }
+                            onClick = onFormElementClick?.let { onClick ->
+                                { onClick(it.formElement) }
                             }
                         )
+
                         else -> {}
                     }
                 }
@@ -198,7 +209,7 @@ private fun GroupElementPreview() {
             fieldStates = MutableFormStateCollection(),
             modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
             onClick = {},
-            onFieldElementClick = null
+            onFormElementClick = null
         )
     }
 }

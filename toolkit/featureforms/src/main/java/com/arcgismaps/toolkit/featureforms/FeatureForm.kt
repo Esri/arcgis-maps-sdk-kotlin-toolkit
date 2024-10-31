@@ -56,9 +56,9 @@ import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
@@ -127,10 +127,15 @@ public sealed class ValidationErrorVisibility {
  * - [GroupFormElement]
  * - [TextFormElement]
  *
- * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner is provided.
- * The scanner requires the [Manifest.permission.CAMERA] permission to be granted. Similarly, for
- * adding any attachments, camera permissions are required. If the permissions are not granted, then
- * the specific functionality is disabled in the form.
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
+ * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
+ * A callback is also provided via the [onBarcodeAccessoryClicked] parameter, which is invoked with
+ * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
+ * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
+ * value to update the field value.
+ *
+ * For adding any attachments, camera permissions are required. If the permissions are not granted,
+ * then the specific functionality is disabled in the form.
  *
  * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
  * currently supported. A default attachments editing support is provided using the
@@ -152,6 +157,9 @@ public sealed class ValidationErrorVisibility {
  * indicates errors are only visible once the respective field gains focus.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
+ * @param onBarcodeAccessoryClicked A callback that is invoked when the barcode accessory is clicked.
+ * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
+ * default barcode scanner is used.
  *
  * @since 200.4.0
  */
@@ -213,7 +221,7 @@ private fun FeatureForm(
             // expressions evaluated, load attachments
             formElements.value = featureForm.elements
         },
-        onFieldElementClicked = onBarcodeAccessoryClicked
+        onBarcodeAccessoryClicked = onBarcodeAccessoryClicked
     )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -252,7 +260,7 @@ private fun FeatureFormBody(
     states: FormStateCollection,
     modifier: Modifier = Modifier,
     onExpressionsEvaluated: () -> Unit,
-    onFieldElementClicked: ((FieldFormElement) -> Unit)?
+    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -287,9 +295,11 @@ private fun FeatureFormBody(
                         is FieldFormElement -> {
                             FieldElement(
                                 state = entry.getState<BaseFieldState<*>>(),
-                                onClick = onFieldElementClicked?.let { onClick ->
-                                    { onClick(entry.formElement as FieldFormElement) }
-                                },
+                                // set the onClick callback for the field element only if provided
+                                onClick = handleFieldFormElementTapAction(
+                                    entry.formElement as FieldFormElement,
+                                    onBarcodeAccessoryClicked
+                                ),
                             )
                         }
 
@@ -299,7 +309,10 @@ private fun FeatureFormBody(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 15.dp, vertical = 10.dp),
-                                onFieldElementClick = onFieldElementClicked
+                                // set the onClick callback for the group element only if provided
+                                onFormElementClick = handleFormElementTapAction(
+                                    onBarcodeAccessoryClicked
+                                )
                             )
                         }
 
@@ -335,6 +348,55 @@ private fun FeatureFormBody(
         form.evaluateExpressions()
         initialEvaluation = true
         onExpressionsEvaluated()
+    }
+}
+
+/**
+ * Handles the tap action for a [FormElement] based on the  input type and the provided tap
+ * actions.
+ *
+ * This will potentially handle taps for any input types that provide custom tap actions.
+ *
+ * @param fieldFormElement the [FieldFormElement] to handle the tap action for.
+ * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
+ * with a [BarcodeScannerFormInput] is tapped.
+ */
+private fun handleFieldFormElementTapAction(
+    fieldFormElement: FieldFormElement,
+    barcodeTapAction: ((FieldFormElement) -> Unit)?
+): (() -> Unit)? {
+    return when (fieldFormElement.input) {
+        is BarcodeScannerFormInput -> {
+            barcodeTapAction?.let {
+                { it(fieldFormElement) }
+            }
+        }
+
+        else -> null
+    }
+}
+
+/**
+ * Handles the tap action for a [FormElement] based on the provided tap actions.
+ *
+ * This will potentially handle taps for any form element types that provide custom tap actions.
+ *
+ * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
+ * with a [BarcodeScannerFormInput] is tapped.
+ */
+private fun handleFormElementTapAction(
+    barcodeTapAction: ((FieldFormElement) -> Unit)?
+): ((FormElement) -> Unit)? {
+    return when {
+        barcodeTapAction != null -> {
+            { formElement ->
+                if (formElement is FieldFormElement) {
+                    handleFieldFormElementTapAction(formElement, barcodeTapAction)?.invoke()
+                }
+            }
+        }
+
+        else -> null
     }
 }
 

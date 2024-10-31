@@ -40,8 +40,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
  * the [BaseFieldState].
  *
  * @param state The [BaseFieldState] that represents the form element.
- * @param onClick The click listener for any elements that support delegated tap actions. For example,
- * [BarcodeTextField] has an accessory that can be tapped to open a barcode scanner.
+ * @param onClick An event for any elements that support delegated tap actions. If null, the
+ * default tap action defined by the element will be used.
  */
 @Composable
 internal fun <T> FieldElement(

@@ -122,6 +122,40 @@ class BarcodeTests : FeatureFormTestRunner(
     }
 
     /**
+     * Given a `FeatureForm` with a `FieldFormElement` in a `GroupFormElement` and a custom barcode click action
+     * When the scan icon on a barcode form element is clicked
+     * Then the custom barcode click action is triggered
+     * And the correct `FieldFormElement` is passed to the custom barcode click action
+     */
+    @Test
+    fun testGroupCustomBarcodeClickAction() = runTest {
+        var fieldFormElement: FieldFormElement? = null
+        composeTestRule.setContent {
+            FeatureForm(
+                featureForm = featureForm,
+                onBarcodeAccessoryClicked = {
+                    // Custom barcode click event
+                    fieldFormElement = it
+                }
+            )
+        }
+        val barcodeElement = composeTestRule.onNodeWithText("Barcode in Group")
+        // Check the barcode form element is displayed
+        barcodeElement.assertIsDisplayed()
+        // Check the scan icon is displayed
+        val scanIcon = barcodeElement.onChildWithContentDescription("scan barcode")
+        scanIcon.assertIsDisplayed()
+        scanIcon.performClick()
+        // Check the custom barcode click action is triggered
+        assertThat(fieldFormElement).isNotNull()
+        assertThat(fieldFormElement!!.label).isEqualTo("Barcode in Group")
+        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val barcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(barcodeScannerFormInput.maxLength).isEqualTo(25)
+        assertThat(barcodeScannerFormInput.minLength).isEqualTo(10)
+    }
+
+    /**
      * Given a `FeatureForm` with `FieldFormElement` and no custom barcode click action
      * When the scan icon on a barcode form element is clicked
      * Then the default barcode click action is triggered
@@ -141,6 +175,27 @@ class BarcodeTests : FeatureFormTestRunner(
         val scanIcon = barcodeFormElement.onChildWithContentDescription("scan barcode")
         scanIcon.assertIsDisplayed()
         scanIcon.performClick()
+        // Check the default barcode scanner is displayed
+        val scanner = composeTestRule.onNodeWithContentDescription("MLKit Barcode Scanner")
+        scanner.assertIsDisplayed()
+    }
+
+    @Test
+    fun testDefaultBarcodeClickActionInGroup() = runTest {
+        composeTestRule.setContent {
+            FeatureForm(
+                featureForm = featureForm,
+                onBarcodeAccessoryClicked = null
+            )
+        }
+        val barcodeElement = composeTestRule.onNodeWithText("Barcode in Group")
+        // Check the barcode form element is displayed
+        barcodeElement.assertIsDisplayed()
+        // Check the scan icon is displayed
+        val scanIcon = barcodeElement.onChildWithContentDescription("scan barcode")
+        scanIcon.assertIsDisplayed()
+        scanIcon.performClick()
+        // Check the default barcode scanner is displayed
         val scanner = composeTestRule.onNodeWithContentDescription("MLKit Barcode Scanner")
         scanner.assertIsDisplayed()
     }
