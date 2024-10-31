@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -31,6 +33,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Before
@@ -53,11 +57,12 @@ class TraceToolTests : TraceToolTestRunner(
     val composeTestRule = createComposeRule()
 
     private val timeoutMillis = 10000L
+    private val mapPoint = Point(-9815243.889962832, 5130551.535605657, SpatialReference(3857))
 
     @Before
     fun setContent() = runTest {
+        val traceToolUsageScenarios = TraceToolUsageScenarios()
         composeTestRule.setContent {
-            val traceToolUsageScenarios = TraceToolUsageScenarios()
             traceToolUsageScenarios.MapViewWithTraceInBottomSheet(map, mapviewProxy, graphicsOverlay) {
                 Trace(
                     traceState = traceState
@@ -79,26 +84,27 @@ class TraceToolTests : TraceToolTestRunner(
         surface.assertExists("the base surface of the Trace tool composable does not exist")
     }
 
-//    val mapPoint = Point(-9815341.663288785, 5130279.426830624, SpatialReference(3857))
-    val mapPoint = Point(-9815243.889962832, 5130551.535605657, SpatialReference(3857))
-
     /**
      * Given a Trace composable
-     * When
-     * Then
+     * When a trace configuration is selected and a starting point is added
+     * Then the trace button is enabled and can be clicked to perform a trace
      *
      * @since 200.6.0
      */
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testTrace() = runTest {
-//        val surface = composeTestRule.onNodeWithContentDescription(context.getString(R.string.trace_component))
-//        surface.assertExists("the base surface of the Trace tool composable does not exist")
+        // Wait for all the layers in the map to load to perform identify successfully
+        Thread.sleep(5000L)
 
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasText(context.getString(R.string.trace_configuration)),
             timeoutMillis = timeoutMillis
         )
+
+        val traceButton = composeTestRule.onNodeWithText(context.getString(R.string.trace))
+        traceButton.assertIsNotEnabled()
+
         val traceConfigurations = composeTestRule.onNodeWithText(context.getString(R.string.no_configuration_selected))
         traceConfigurations.performClick()
 
@@ -108,29 +114,18 @@ class TraceToolTests : TraceToolTestRunner(
         val addNewStartingPointButton = composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point))
         addNewStartingPointButton.performClick()
 
-        traceState.addStartingPoint(mapPoint)
-
-
-//        val cancelAddStartingPointModeButton = composeTestRule.onNodeWithText(context.getString(R.string.cancel_starting_point_selection))
-//        cancelAddStartingPointModeButton.performClick()
+        composeTestRule.runOnUiThread {
+            runBlocking {
+                traceState.addStartingPoint(mapPoint)
+            }
+        }
 
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasText("Underground Three Phase"),
-            timeoutMillis = 20000L
+            timeoutMillis = timeoutMillis
         )
 
-        val startingPointNode = composeTestRule.onNodeWithText("Underground Three Phase")
-        startingPointNode.assertExists("Starting Point node does not exist")
-
-//        composeTestRule.waitUntilExactlyOneExists(
-//            matcher = hasText("Downstream"),
-//            timeoutMillis = timeoutMillis
-//        )
-//        traceConfigurations.onChildAt(0).performClick()
-//        composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point)).performClick()
-
-
-
+        traceButton.assertIsEnabled()
+        traceButton.performClick()
     }
-
 }
