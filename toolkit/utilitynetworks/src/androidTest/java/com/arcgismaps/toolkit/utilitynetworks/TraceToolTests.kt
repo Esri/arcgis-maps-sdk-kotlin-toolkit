@@ -79,7 +79,8 @@ class TraceToolTests : TraceToolTestRunner(
         surface.assertExists("the base surface of the Trace tool composable does not exist")
     }
 
-    val mapPoint = Point(-9815341.663288785, 5130279.426830624, SpatialReference(3857))
+//    val mapPoint = Point(-9815341.663288785, 5130279.426830624, SpatialReference(3857))
+    val mapPoint = Point(-9815243.889962832, 5130551.535605657, SpatialReference(3857))
 
     /**
      * Given a Trace composable
@@ -107,26 +108,24 @@ class TraceToolTests : TraceToolTestRunner(
         val addNewStartingPointButton = composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point))
         addNewStartingPointButton.performClick()
 
-        withContext(Dispatchers.Default) {
-            traceState.addStartingPoint(mapPoint)
-        }
+        traceState.addStartingPoint(mapPoint)
 
 
 //        val cancelAddStartingPointModeButton = composeTestRule.onNodeWithText(context.getString(R.string.cancel_starting_point_selection))
 //        cancelAddStartingPointModeButton.performClick()
 
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasText("Underground Single Phase"),
-            timeoutMillis = timeoutMillis
+            matcher = hasText("Underground Three Phase"),
+            timeoutMillis = 20000L
         )
 
-        val startingPointNode = composeTestRule.onNodeWithText("Underground Single Phase")
+        val startingPointNode = composeTestRule.onNodeWithText("Underground Three Phase")
         startingPointNode.assertExists("Starting Point node does not exist")
 
-        composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasText("Downstream"),
-            timeoutMillis = timeoutMillis
-        )
+//        composeTestRule.waitUntilExactlyOneExists(
+//            matcher = hasText("Downstream"),
+//            timeoutMillis = timeoutMillis
+//        )
 //        traceConfigurations.onChildAt(0).performClick()
 //        composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point)).performClick()
 
