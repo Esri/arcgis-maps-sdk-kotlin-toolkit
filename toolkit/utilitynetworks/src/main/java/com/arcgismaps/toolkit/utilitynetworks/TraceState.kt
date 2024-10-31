@@ -145,11 +145,10 @@ public class TraceState(
     private var _isTaskInProgress: MutableState<Boolean> = mutableStateOf(false)
     internal val isTaskInProgress: State<Boolean> = _isTaskInProgress
 
-    private var _currentTraceName: MutableState<String> = mutableStateOf("")
-
     private var _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     private val currentScreen: State<TraceNavRoute> = _currentScreen
 
+    private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
      *
@@ -211,7 +210,7 @@ public class TraceState(
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
             throw error
         }
-        _traceConfigurations.value = traceConfigResult.getOrThrow()
+        _traceConfigurations.value = traceConfigResult.getOrThrow().sortedBy { it.name }
 
         _initializationStatus.value = InitializationStatus.Initialized
     }
@@ -666,8 +665,10 @@ public class TraceState(
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
-        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            _selectedCompletedTraceIndex.value -= 1
+        if (_selectedCompletedTraceIndex.value > 0 || (_selectedCompletedTraceIndex.value == 0 && _completedTraces.isNotEmpty())) {
+            if (_selectedCompletedTraceIndex.value > 0) {
+                _selectedCompletedTraceIndex.value -= 1
+            }
             updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
     }

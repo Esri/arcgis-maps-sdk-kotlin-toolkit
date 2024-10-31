@@ -77,46 +77,58 @@ internal fun TraceResultScreen(
         onBackToNewTrace()
     }
 
-    Column {
-        val selectedTraceRun = remember(selectedTraceRunIndex) { traceResults[selectedTraceRunIndex] }
-        var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
+    if (traceResults.isNotEmpty()) {
+        Column {
 
-        if (traceResults.size > 1) {
-            TraceResultPager(
-                selectedTraceRunIndex,
-                traceResults.size,
-                onSelectPreviousTraceResult,
-                onSelectNextTraceResult
-            )
-        }
-
-        Title(
-            selectedTraceRun.name,
-            onZoomTo = onZoomToResults,
-            onDelete = onDeleteResult,
-            showZoomToOption = selectedTraceRun.geometryTraceResult != null
-        )
-        LazyColumn {
-            item {
-                FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
-            }
-            item {
-                FunctionResult(selectedTraceRun.functionResults)
-            }
-            item {
-                AdvancedOptions(
-                    selectedColor = selectedColor,
-                    onColorChanged = {
-                        selectedColor = it
-                        onColorChanged(it)
-                    }
+            val selectedTraceRun = traceResults[selectedTraceRunIndex]
+            var selectedColor by remember(selectedTraceRunIndex) {
+                mutableStateOf(
+                    selectedTraceRun.resultGraphicColor
                 )
             }
-            item {
-                ClearAllResultsButton(onClearAllResults)
+
+            if (traceResults.size > 1) {
+                TraceResultPager(
+                    selectedTraceRunIndex,
+                    traceResults.size,
+                    onSelectPreviousTraceResult,
+                    onSelectNextTraceResult
+                )
+            }
+
+            Title(
+                selectedTraceRun.name,
+                onZoomTo = onZoomToResults,
+                onDelete = onDeleteResult,
+                showZoomToOption = selectedTraceRun.geometryTraceResult != null
+            )
+            LazyColumn {
+                item {
+                    FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
+                }
+                item {
+                    FunctionResult(selectedTraceRun.functionResults)
+                }
+                item {
+                    AdvancedOptions(
+                        selectedColor = selectedColor,
+                        onColorChanged = {
+                            selectedColor = it
+                            onColorChanged(it)
+                        }
+                    )
+                }
+                item {
+                    ClearAllResultsButton(onClearAllResults)
+                }
             }
         }
-    }
+    } else {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Column {
+                // Don't show anything if there are no trace results
+            }
+        }
 }
 
 @Composable
