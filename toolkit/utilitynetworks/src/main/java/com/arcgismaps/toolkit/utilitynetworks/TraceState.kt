@@ -232,12 +232,6 @@ public class TraceState(
         navigateToRoute?.invoke(screen)
     }
 
-    internal suspend fun navigateOnMainThread(screen: TraceNavRoute) {
-        withContext(Dispatchers.Main) {
-            showScreen(screen)
-        }
-    }
-
     /**
      * Returns the location on the polyline nearest to the tap location.
      * The location is returned as a fraction along the polyline.
@@ -542,8 +536,7 @@ public class TraceState(
                 if (currentTraceStartingPoints.size > sizeBefore) {
                     // If the size of the starting points has changed, then the starting point was added
                     _addStartingPointMode.value = AddStartingPointMode.Stopped
-//                    showScreen(TraceNavRoute.TraceOptions)
-                    navigateOnMainThread(TraceNavRoute.TraceOptions)
+                    showScreen(TraceNavRoute.TraceOptions)
                 }
             }
         }

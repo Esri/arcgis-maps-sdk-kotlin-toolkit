@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworktraceapp.screens
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -90,7 +89,6 @@ fun MainScreen(viewModel: TraceViewModel) {
                 .padding(padding)
                 .fillMaxSize(),
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                Log.i("MainScreen -", "${singleTapConfirmedEvent.mapPoint?.x}, ${singleTapConfirmedEvent.mapPoint?.y}, ${singleTapConfirmedEvent.mapPoint?.spatialReference?.wkid}")
                 singleTapConfirmedEvent.mapPoint?.let {
                     coroutineScope.launch {
                         viewModel.traceState.addStartingPoint(it)
