@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -34,15 +35,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
-
-internal const val traceSurfaceContentDescription: String = "trace component surface"
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -59,6 +63,7 @@ public fun Trace(
 ) {
     val initializationStatus by traceState.initializationStatus
     val localContext = LocalContext.current
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(traceState) {
         traceState.initialize()
@@ -68,7 +73,8 @@ public fun Trace(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = traceSurfaceContentDescription }
+            .padding(horizontal = 16.dp)
+            .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
@@ -80,6 +86,7 @@ public fun Trace(
                     CircularProgressIndicator()
                 }
             }
+
             else -> {
                 Column(
                     modifier = Modifier
@@ -91,7 +98,11 @@ public fun Trace(
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
                         val errorMessage = exception.getErrorMessage(localContext)
                         Row {
-                            Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Info,
+                                contentDescription = stringResource(id = R.string.error),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                             Spacer(modifier = Modifier.size(8.dp))
                             Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
@@ -99,7 +110,21 @@ public fun Trace(
                     if (traceState.isTaskInProgress.value) {
                         LinearProgressIndicator()
                     }
-                    TraceNavHost(traceState)
+                    if (traceState.showTabRow()) {
+                        TabRow(
+                            selectedTabIndex,
+                            onNavigateTo = {
+                                selectedTabIndex = it.first
+                                traceState.showScreen(it.second)
+                            }
+                        )
+                    }
+                    TraceNavHost(
+                        traceState,
+                        onTabSwitch = {
+                            selectedTabIndex = it
+                        }
+                    )
                 }
             }
         }

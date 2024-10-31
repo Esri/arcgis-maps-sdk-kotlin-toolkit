@@ -39,7 +39,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -72,7 +71,6 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -91,39 +89,22 @@ internal fun TraceOptionsScreen(
     defaultTraceName: String,
     selectedColor: Color,
     zoomToResult: Boolean,
-    showResultsTab: Boolean,
     isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
-    onBackToResults: () -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
-    onPerformTraceButtonClicked: () -> Unit,
+    onTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
     onNameChange: (String) -> Unit,
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column (modifier = Modifier.padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column {
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
-            if (showResultsTab) {
-                TabRow(onBackToResults, 0)
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(15.dp)
-                )
-            }
             LazyColumn(
                 modifier = Modifier
-                    .padding(vertical = 3.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -136,25 +117,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
-                    )
-                }
-                item {
                     StartingPoints(
                         startingPoints,
                         onAddStartingPointButtonClicked,
                         onStartingPointRemoved,
                         onStartingPointSelected,
-                    )
-                }
-                item {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
                     )
                 }
                 item {
@@ -171,12 +138,10 @@ internal fun TraceOptionsScreen(
                     )
                 }
             }
-            Button(
-                onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not()
-            ) {
-                Text(stringResource(id = R.string.trace))
-            }
+            TraceButton(
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+                onClicked = onTraceButtonClicked
+            )
         }
     }
 }
@@ -202,7 +167,7 @@ private fun TraceConfigurations(
     onTraceSelected: (Int) -> Unit
 ) {
     val expandableCardState = rememberExpandableCardState(false)
-    var selectedConfigIndex by rememberSaveable { mutableIntStateOf(-1) }
+    var selectedConfigIndex by remember(selectedConfigName) { mutableIntStateOf(configs.indexOf(selectedConfigName)) }
     ExpandableCardWithLabel(
         expandableCardState = expandableCardState,
         labelText = stringResource(id = R.string.trace_configuration),
@@ -238,7 +203,7 @@ private fun TraceConfiguration(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Filled.Done,
-                        contentDescription = stringResource(R.string.selected_icon),
+                        contentDescription = stringResource(R.string.selected),
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }
@@ -266,13 +231,12 @@ private fun AddStartingPointButtonPreview() {
 @Composable
 private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
     ElevatedButton(
-        onClick = {
-            showAddStartingPointScreen()
-        },
+        onClick = { showAddStartingPointScreen() },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(horizontal = 4.dp)),
-        colors = ButtonDefaults.elevatedButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+            .padding(horizontal = 8.dp),
+        colors = ButtonDefaults.elevatedButtonColors()
+            .copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
@@ -295,16 +259,21 @@ private fun StartingPoints(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(bottom = 20.dp)
+    ) {
         AddStartingPointButton {
             showAddStartingPointScreen()
         }
-        Spacer(modifier = Modifier
-            .height(4.dp)
-            .fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(4.dp)
+                .fillMaxWidth()
+        )
         ExpandableCard(
             title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
-            padding = PaddingValues(horizontal = 4.dp)
+            padding = PaddingValues()
         ) {
             Column {
                 startingPoints.forEach {
@@ -340,8 +309,9 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         expandableCardState = rememberExpandableCardState(isExpanded = false),
-        padding = PaddingValues(horizontal = 4.dp)
+        padding = PaddingValues()
     ) {
+        val zoomToResultDescription = stringResource(id = R.string.zoom_to_result_description)
         Column {
             if (showName) {
                 val focusManager = LocalFocusManager.current
@@ -353,7 +323,7 @@ internal fun AdvancedOptions(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    var text by rememberSaveable { mutableStateOf(defaultTraceName) }
+                    var text by remember(defaultTraceName) { mutableStateOf(defaultTraceName) }
                     OutlinedTextField(
                         value = text,
                         onValueChange = { newValue ->
@@ -398,13 +368,29 @@ internal fun AdvancedOptions(
                             onZoomRequested(newState)
                         },
                         modifier = Modifier
-                            .semantics { contentDescription = "switch" }
+                            .semantics { contentDescription = zoomToResultDescription }
                             .padding(horizontal = 4.dp),
                         enabled = true,
                         interactionSource = interactionSource
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Button(
+            onClick = { onClicked() },
+            enabled = enabled
+        ) {
+            Text(stringResource(id = R.string.trace))
         }
     }
 }

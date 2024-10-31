@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.utilitynetworks.internal.util
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -27,22 +28,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.R
 
 @Composable
 internal fun UpButton(title: String,
                      onBackPressed: () -> Unit
 ) {
     Row(
-        modifier = Modifier.clickable { onBackPressed() },
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, bottom = 16.dp)
+            .clickable { onBackPressed() },
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            modifier = Modifier.padding(start = 10.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = "back",
+            contentDescription = stringResource(id = R.string.go_back),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(

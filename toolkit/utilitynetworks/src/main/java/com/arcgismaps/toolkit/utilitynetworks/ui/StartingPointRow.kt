@@ -52,12 +52,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
+import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -144,7 +146,7 @@ internal fun StartingPointRow(
                         .align(Alignment.CenterVertically)
                         .width(50.dp)
                         .padding(15.dp),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.feature_icon),
                 )
         }
         Box(
@@ -266,7 +268,7 @@ private fun DeletableRow(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(14.dp),
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.delete),
         )
     }
 }
