@@ -124,6 +124,7 @@ private fun TraceContainer(
                 is InitializationStatus.FailedToInitialize -> {
                     val errorMessage = initializationStatus.error.getErrorMessage(localContext)
                     NonRecoveredErrorIndicator(errorMessage)
+                    content()
                 }
 
                 else -> {
