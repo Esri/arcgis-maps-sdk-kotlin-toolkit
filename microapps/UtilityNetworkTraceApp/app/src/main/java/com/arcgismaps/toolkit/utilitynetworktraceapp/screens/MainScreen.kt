@@ -72,7 +72,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 label = "trace tool",
                 modifier = Modifier.heightIn(min = 0.dp, max = 350.dp)
             ) {
-                Trace(viewModel.traceState)
+                Trace(traceState = viewModel.traceState)
             }
         },
         modifier = Modifier.fillMaxSize(),

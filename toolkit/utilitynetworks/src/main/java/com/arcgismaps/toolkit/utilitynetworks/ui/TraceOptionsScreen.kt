@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -41,7 +40,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -99,50 +97,48 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column {
-            var currentSelectedColor by remember { mutableStateOf(selectedColor) }
+    Column {
+        var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    TraceConfigurations(
-                        configurations,
-                        selectedConfig,
-                    ) { newConfig ->
-                        onConfigSelected(newConfig)
-                    }
-                }
-                item {
-                    StartingPoints(
-                        startingPoints,
-                        onAddStartingPointButtonClicked,
-                        onStartingPointRemoved,
-                        onStartingPointSelected,
-                    )
-                }
-                item {
-                    AdvancedOptions(
-                        onNameChange = onNameChange,
-                        onColorChanged = {
-                            currentSelectedColor = it
-                            onColorChanged(it)
-                        },
-                        defaultTraceName = defaultTraceName,
-                        selectedColor = currentSelectedColor,
-                        zoomToResult = zoomToResult,
-                        onZoomRequested = onZoomRequested
-                    )
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                TraceConfigurations(
+                    configurations,
+                    selectedConfig,
+                ) { newConfig ->
+                    onConfigSelected(newConfig)
                 }
             }
-            TraceButton(
-                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
-                onClicked = onTraceButtonClicked
-            )
+            item {
+                StartingPoints(
+                    startingPoints,
+                    onAddStartingPointButtonClicked,
+                    onStartingPointRemoved,
+                    onStartingPointSelected,
+                )
+            }
+            item {
+                AdvancedOptions(
+                    onNameChange = onNameChange,
+                    onColorChanged = {
+                        currentSelectedColor = it
+                        onColorChanged(it)
+                    },
+                    defaultTraceName = defaultTraceName,
+                    selectedColor = currentSelectedColor,
+                    zoomToResult = zoomToResult,
+                    onZoomRequested = onZoomRequested
+                )
+            }
         }
+        TraceButton(
+            enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+            onClicked = onTraceButtonClicked
+        )
     }
 }
 
