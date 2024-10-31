@@ -129,7 +129,7 @@ public sealed class ValidationErrorVisibility {
  *
  * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
  * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
- * A callback is also provided via the [onBarcodeAccessoryClicked] parameter, which is invoked with
+ * A callback is also provided via the [onBarcodeAccessoryClick] parameter, which is invoked with
  * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
  * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
  * value to update the field value.
