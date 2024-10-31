@@ -19,8 +19,11 @@ package com.arcgismaps.toolkit.featureforms
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import kotlinx.coroutines.runBlocking
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,7 +44,7 @@ class BarcodeTests : FeatureFormTestRunner(
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-barcode-input-type
      */
     @Test
-    fun testBarcodeTextField(): Unit = runBlocking {
+    fun testBarcodeTextField() = runTest {
         composeTestRule.setContent {
             FeatureForm(featureForm = featureForm)
         }
@@ -60,5 +63,27 @@ class BarcodeTests : FeatureFormTestRunner(
         barcodeFormElement.performTextInput("https://runtimecoretest.maps.arcgis.com/apps/mapviewer/index.html?layers=a9155494098147b9be2fc52bcf825224")
         // Check for validation error
         barcodeFormElement.onChildWithText("Maximum 50 characters").assertIsDisplayed()
+    }
+
+    @Test
+    fun testCustomBarcodeClickEvent() = runTest {
+        var fieldFormElement : FieldFormElement? = null
+        composeTestRule.setContent {
+            FeatureForm(
+                featureForm = featureForm,
+                onBarcodeAccessoryClicked = {
+                    // Custom barcode click event
+                    fieldFormElement = it
+                }
+            )
+        }
+        val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
+        // Check the barcode form element is displayed
+        barcodeFormElement.assertIsDisplayed()
+        // Check the scan icon is displayed
+        val scanIcon = barcodeFormElement.onChildWithContentDescription("scan barcode")
+        scanIcon.assertIsDisplayed()
+        scanIcon.performClick()
+        assertThat(fieldFormElement).isNotNull()
     }
 }

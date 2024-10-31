@@ -52,7 +52,10 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun BarcodeTextField(state: BarcodeTextFieldState) {
+internal fun BarcodeTextField(
+    state: BarcodeTextFieldState,
+    onBarcodeAccessoryClicked: (() -> Unit)?
+) {
     val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
@@ -101,7 +104,10 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
                     }
                 }
                 BarcodeScannerButton {
-                    dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
+                    // if the consumer has provided a click listener, invoke it
+                    // otherwise, request the barcode scanner dialog
+                    onBarcodeAccessoryClicked?.invoke()
+                        ?: dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
                 }
             }
         }
@@ -145,6 +151,7 @@ private fun BarcodeTextFieldPreview() {
             scope = scope,
             updateValue = {},
             evaluateExpressions = { Result.success(emptyList()) },
-        )
+        ),
+        null
     )
 }

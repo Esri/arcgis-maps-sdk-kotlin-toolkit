@@ -34,7 +34,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 
 @Composable
-internal fun <T> FieldElement(state: BaseFieldState<T>) {
+internal fun <T> FieldElement(
+    state: BaseFieldState<T>,
+    onClick: (() -> Unit)?
+) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
         when (state) {
@@ -43,7 +46,10 @@ internal fun <T> FieldElement(state: BaseFieldState<T>) {
             }
 
             is BarcodeTextFieldState -> {
-                BarcodeTextField(state = state)
+                BarcodeTextField(
+                    state = state,
+                    onBarcodeAccessoryClicked = onClick
+                )
             }
 
             is DateTimeFieldState -> {

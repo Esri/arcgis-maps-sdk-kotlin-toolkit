@@ -161,7 +161,8 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography()
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+    onBarcodeAccessoryClicked: (FieldFormElement) -> Unit = {}
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -170,7 +171,8 @@ public fun FeatureForm(
         FeatureForm(
             stateData = stateData,
             modifier = modifier,
-            validationErrorVisibility = validationErrorVisibility
+            validationErrorVisibility = validationErrorVisibility,
+            onBarcodeAccessoryClicked = onBarcodeAccessoryClicked
         )
     }
 }
@@ -189,7 +191,8 @@ internal data class StateData(@Stable val featureForm: FeatureForm)
 private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)?
 ) {
     val featureForm = stateData.featureForm
     // hold the list of form elements in a mutable state to make them observable
@@ -205,11 +208,13 @@ private fun FeatureForm(
     FeatureFormBody(
         form = featureForm,
         states = states,
-        modifier = modifier
-    ) {
-        // expressions evaluated, load attachments
-        formElements.value = featureForm.elements
-    }
+        modifier = modifier,
+        onExpressionsEvaluated = {
+            // expressions evaluated, load attachments
+            formElements.value = featureForm.elements
+        },
+        onFieldElementClicked = onBarcodeAccessoryClicked
+    )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
@@ -246,7 +251,8 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
-    onExpressionsEvaluated: () -> Unit
+    onExpressionsEvaluated: () -> Unit,
+    onFieldElementClicked: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -279,7 +285,12 @@ private fun FeatureFormBody(
                 item {
                     when (entry.formElement) {
                         is FieldFormElement -> {
-                            FieldElement(state = entry.getState<BaseFieldState<*>>())
+                            FieldElement(
+                                state = entry.getState<BaseFieldState<*>>(),
+                                onClick = {
+                                    onFieldElementClicked?.invoke(entry.formElement as FieldFormElement)
+                                }
+                            )
                         }
 
                         is GroupFormElement -> {
