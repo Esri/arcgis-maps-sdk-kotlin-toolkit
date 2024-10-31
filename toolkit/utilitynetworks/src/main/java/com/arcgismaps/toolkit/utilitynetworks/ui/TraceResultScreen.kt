@@ -124,11 +124,10 @@ internal fun TraceResultScreen(
             }
         }
     } else {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column {
-                // Don't show anything if there are no trace results
-            }
+        Column {
+            // Don't show anything if there are no trace results
         }
+    }
 }
 
 @Composable
