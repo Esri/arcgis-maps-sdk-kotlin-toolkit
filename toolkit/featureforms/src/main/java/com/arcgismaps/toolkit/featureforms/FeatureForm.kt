@@ -381,23 +381,15 @@ internal fun rememberStates(
             }
 
             is GroupFormElement -> {
-                val fieldStateCollection = MutableFormStateCollection()
-                element.elements.forEach {
-                    if (it is FieldFormElement) {
-                        val state = rememberFieldState(
-                            element = it,
-                            form = form,
-                            scope = scope
-                        )
-                        if (state != null) {
-                            fieldStateCollection.add(it, state)
-                        }
-                    }
-                }
+                val stateCollection = rememberStates(
+                    form = form,
+                    elements = element.elements,
+                    scope = scope
+                )
                 val groupState = rememberBaseGroupState(
                     form = form,
                     groupElement = element,
-                    fieldStates = fieldStateCollection
+                    fieldStates = stateCollection
                 )
                 states.add(element, groupState)
             }
