@@ -157,7 +157,7 @@ public sealed class ValidationErrorVisibility {
  * indicates errors are only visible once the respective field gains focus.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
- * @param onBarcodeAccessoryClicked A callback that is invoked when the barcode accessory is clicked.
+ * @param onBarcodeAccessoryClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
  *
@@ -170,7 +170,7 @@ public fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)? = null
+    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)? = null
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -180,7 +180,7 @@ public fun FeatureForm(
             stateData = stateData,
             modifier = modifier,
             validationErrorVisibility = validationErrorVisibility,
-            onBarcodeAccessoryClicked = onBarcodeAccessoryClicked
+            onBarcodeAccessoryClick = onBarcodeAccessoryClick
         )
     }
 }
@@ -200,7 +200,7 @@ private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)?
+    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)?
 ) {
     val featureForm = stateData.featureForm
     // hold the list of form elements in a mutable state to make them observable
@@ -221,7 +221,7 @@ private fun FeatureForm(
             // expressions evaluated, load attachments
             formElements.value = featureForm.elements
         },
-        onBarcodeAccessoryClicked = onBarcodeAccessoryClicked
+        onBarcodeAccessoryClick = onBarcodeAccessoryClick
     )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -260,7 +260,7 @@ private fun FeatureFormBody(
     states: FormStateCollection,
     modifier: Modifier = Modifier,
     onExpressionsEvaluated: () -> Unit,
-    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)?
+    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -297,8 +297,8 @@ private fun FeatureFormBody(
                                 state = entry.getState<BaseFieldState<*>>(),
                                 // set the onClick callback for the field element only if provided
                                 onClick = handleFieldFormElementTapAction(
-                                    entry.formElement as FieldFormElement,
-                                    onBarcodeAccessoryClicked
+                                    fieldFormElement = entry.formElement as FieldFormElement,
+                                    barcodeTapAction = onBarcodeAccessoryClick
                                 ),
                             )
                         }
@@ -311,7 +311,7 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp),
                                 // set the onClick callback for the group element only if provided
                                 onFormElementClick = handleFormElementTapAction(
-                                    onBarcodeAccessoryClicked
+                                    barcodeTapAction = onBarcodeAccessoryClick
                                 )
                             )
                         }
