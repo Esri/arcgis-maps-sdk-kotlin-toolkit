@@ -58,10 +58,12 @@ class TraceToolTests : TraceToolTestRunner(
     fun setContent() = runTest {
         val traceToolUsageScenarios = TraceToolUsageScenarios()
         composeTestRule.setContent {
-            traceToolUsageScenarios.MapViewWithTraceInBottomSheet(map, mapviewProxy, graphicsOverlay) {
-                Trace(
-                    traceState = traceState
-                )
+            traceToolUsageScenarios.MapViewWithTraceInBottomSheet(
+                map,
+                mapviewProxy,
+                graphicsOverlay
+            ) {
+                Trace(traceState = traceState)
             }
         }
     }
@@ -100,13 +102,15 @@ class TraceToolTests : TraceToolTestRunner(
         val traceButton = composeTestRule.onNodeWithText(context.getString(R.string.trace))
         traceButton.assertIsNotEnabled()
 
-        val traceConfigurations = composeTestRule.onNodeWithText(context.getString(R.string.no_configuration_selected))
+        val traceConfigurations =
+            composeTestRule.onNodeWithText(context.getString(R.string.no_configuration_selected))
         traceConfigurations.performClick()
 
         val downStreamTrace = composeTestRule.onNodeWithText("Downstream Trace")
         downStreamTrace.performClick()
 
-        val addNewStartingPointButton = composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point))
+        val addNewStartingPointButton =
+            composeTestRule.onNodeWithText(context.getString(R.string.add_starting_point))
         addNewStartingPointButton.performClick()
 
         composeTestRule.runOnUiThread {
