@@ -20,12 +20,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,21 +44,18 @@ internal fun AddStartingPointScreen(
         onStopPointSelection()
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+        )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(5.dp)
-            )
-
-            Button(
-                onClick = {
-                    onStopPointSelection()
-                }) {
-                Text(text = stringResource(id = R.string.cancel_starting_point_selection))
-            }
+        Button(
+            onClick = {
+                onStopPointSelection()
+            }) {
+            Text(text = stringResource(id = R.string.cancel_starting_point_selection))
         }
     }
 }

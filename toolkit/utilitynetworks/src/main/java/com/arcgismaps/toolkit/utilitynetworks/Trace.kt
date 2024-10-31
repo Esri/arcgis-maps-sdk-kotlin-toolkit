@@ -58,7 +58,6 @@ import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 @Composable
 public fun Trace(
     traceState: TraceState,
-    @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
     val initializationStatus by traceState.initializationStatus
@@ -71,7 +70,7 @@ public fun Trace(
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
@@ -79,8 +78,7 @@ public fun Trace(
         when (initializationStatus) {
             InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
-                    modifier = Modifier
-                        .size(100.dp),
+                    modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -89,8 +87,7 @@ public fun Trace(
 
             else -> {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = modifier,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {

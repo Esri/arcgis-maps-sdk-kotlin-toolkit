@@ -15,8 +15,6 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.internal.util
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -37,24 +35,20 @@ internal fun TabRow(
         stringResource(R.string.new_trace) to TraceNavRoute.TraceOptions,
         stringResource(R.string.results) to TraceNavRoute.TraceResults
     )
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp)
+    TabRow(
+        selectedTabIndex = selectedIndex,
+        modifier = Modifier.padding(bottom = 16.dp)
     ) {
-        TabRow(selectedTabIndex = selectedIndex) {
-            tabItems.forEachIndexed { index, tab ->
-                Tab(
-                    selected = index == selectedIndex,
-                    onClick = {
-                        if (index != selectedIndex) {
-                            onNavigateTo(index to tab.second)
-                        }
-                    },
-                    text = { Text(tab.first) }
-                )
-            }
+        tabItems.forEachIndexed { index, tab ->
+            Tab(
+                selected = index == selectedIndex,
+                onClick = {
+                    if (index != selectedIndex) {
+                        onNavigateTo(index to tab.second)
+                    }
+                },
+                text = { Text(tab.first) }
+            )
         }
-
     }
 }
