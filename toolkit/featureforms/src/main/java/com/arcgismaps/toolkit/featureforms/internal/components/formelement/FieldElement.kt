@@ -19,6 +19,8 @@ package com.arcgismaps.toolkit.featureforms.internal.components.formelement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -33,6 +35,14 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTime
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 
+/**
+ * Composable that renders a [FieldFormElement] based on the type of its [FormInput] indicated by
+ * the [BaseFieldState].
+ *
+ * @param state The [BaseFieldState] that represents the form element.
+ * @param onClick The click listener for any elements that support delegated tap actions. For example,
+ * [BarcodeTextField] has an accessory that can be tapped to open a barcode scanner.
+ */
 @Composable
 internal fun <T> FieldElement(
     state: BaseFieldState<T>,

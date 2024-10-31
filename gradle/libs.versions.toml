@@ -11,6 +11,8 @@ androidxHiltNavigationCompose = "1.2.0"
 androidxLifecycle = "2.7.0"
 androidxMaterialIcons = "1.6.6"
 androidxTestExt = "1.1.5"
+androidXTestRunner = "1.6.2"
+androidXTestRules = "1.6.1"
 androidxWindow = "1.2.0"
 binaryCompatibilityValidator = "0.14.0"
 compileSdk = "34"
@@ -61,6 +63,8 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3Exoplayer" }
 androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidXTestRunner" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidXTestRules" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "androidxWindow" }
@@ -141,4 +145,9 @@ unitTest = [
     "junit",
     "kotlinx-coroutines-test",
     "truth"
+]
+
+androidXTest = [
+    "androidx-test-runner",
+    "androidx-test-rules"
 ]

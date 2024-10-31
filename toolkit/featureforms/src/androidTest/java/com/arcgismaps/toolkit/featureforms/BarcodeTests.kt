@@ -16,11 +16,15 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.rule.GrantPermissionRule
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -33,6 +37,11 @@ class BarcodeTests : FeatureFormTestRunner(
 ) {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    // Grant camera permission for barcode scanning
+    @get:Rule
+    val runtimePermissionRule: GrantPermissionRule =
+        GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
     /**
      * Test case 11.1:
@@ -65,9 +74,15 @@ class BarcodeTests : FeatureFormTestRunner(
         barcodeFormElement.onChildWithText("Maximum 50 characters").assertIsDisplayed()
     }
 
+    /**
+     * Given a `FeatureForm` with `FieldFormElement` and a custom barcode click action
+     * When the scan icon on a barcode form element is clicked
+     * Then the custom barcode click action is triggered
+     * And the correct `FieldFormElement` is passed to the custom barcode click action
+     */
     @Test
-    fun testCustomBarcodeClickEvent() = runTest {
-        var fieldFormElement : FieldFormElement? = null
+    fun testCustomBarcodeClickAction() = runTest {
+        var fieldFormElement: FieldFormElement? = null
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
@@ -77,6 +92,48 @@ class BarcodeTests : FeatureFormTestRunner(
                 }
             )
         }
+        val firstBarcodeElement = composeTestRule.onNodeWithText("Barcode")
+        // Check the barcode form element is displayed
+        firstBarcodeElement.assertIsDisplayed()
+        // Check the scan icon is displayed
+        val firstScanIcon = firstBarcodeElement.onChildWithContentDescription("scan barcode")
+        firstScanIcon.assertIsDisplayed()
+        firstScanIcon.performClick()
+        // Check the custom barcode click action is triggered
+        assertThat(fieldFormElement).isNotNull()
+        assertThat(fieldFormElement!!.label).isEqualTo("Barcode")
+        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val barcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(barcodeScannerFormInput.maxLength).isEqualTo(50)
+
+        val secondBarcodeElement = composeTestRule.onNodeWithText("Model Number")
+        // Check the barcode form element is displayed
+        secondBarcodeElement.assertIsDisplayed()
+        // Check the scan icon is displayed
+        val secondScanIcon = secondBarcodeElement.onChildWithContentDescription("scan barcode")
+        secondScanIcon.assertIsDisplayed()
+        secondScanIcon.performClick()
+        // Check the custom barcode click action is triggered
+        assertThat(fieldFormElement).isNotNull()
+        assertThat(fieldFormElement!!.label).isEqualTo("Model Number")
+        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val secondBarcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(secondBarcodeScannerFormInput.maxLength).isEqualTo(10)
+    }
+
+    /**
+     * Given a `FeatureForm` with `FieldFormElement` and no custom barcode click action
+     * When the scan icon on a barcode form element is clicked
+     * Then the default barcode click action is triggered
+     */
+    @Test
+    fun testDefaultBarcodeClickAction() = runTest {
+        composeTestRule.setContent {
+            FeatureForm(
+                featureForm = featureForm,
+                onBarcodeAccessoryClicked = null
+            )
+        }
         val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
         // Check the barcode form element is displayed
         barcodeFormElement.assertIsDisplayed()
@@ -84,6 +141,7 @@ class BarcodeTests : FeatureFormTestRunner(
         val scanIcon = barcodeFormElement.onChildWithContentDescription("scan barcode")
         scanIcon.assertIsDisplayed()
         scanIcon.performClick()
-        assertThat(fieldFormElement).isNotNull()
+        val scanner = composeTestRule.onNodeWithContentDescription("MLKit Barcode Scanner")
+        scanner.assertIsDisplayed()
     }
 }

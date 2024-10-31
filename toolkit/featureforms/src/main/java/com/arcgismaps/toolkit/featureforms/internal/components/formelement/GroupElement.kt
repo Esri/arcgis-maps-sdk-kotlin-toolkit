@@ -60,7 +60,8 @@ import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 @Composable
 internal fun GroupElement(
     state: BaseGroupState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFieldElementClick: ((FieldFormElement) -> Unit)?
 ) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
@@ -72,7 +73,8 @@ internal fun GroupElement(
             modifier = modifier,
             onClick = {
                 state.setExpanded(!state.expanded.value)
-            }
+            },
+            onFieldElementClick = onFieldElementClick
         )
     }
 }
@@ -84,7 +86,8 @@ private fun GroupElement(
     expanded: Boolean,
     fieldStates: FormStateCollection,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFieldElementClick: ((FieldFormElement) -> Unit)?
 ) {
     val colors = LocalColorScheme.current.groupElementColors
     Card(
@@ -119,7 +122,12 @@ private fun GroupElement(
                                 .padding(horizontal = 15.dp, vertical = 10.dp)
                         )
 
-                        is FieldFormElement -> FieldElement(it.getState<BaseFieldState<*>>())
+                        is FieldFormElement -> FieldElement(
+                            it.getState<BaseFieldState<*>>(),
+                            onClick = onFieldElementClick?.let { event ->
+                                { event(it.formElement as FieldFormElement) }
+                            }
+                        )
                         else -> {}
                     }
                 }
@@ -189,7 +197,8 @@ private fun GroupElementPreview() {
             expanded = false,
             fieldStates = MutableFormStateCollection(),
             modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-            onClick = {}
+            onClick = {},
+            onFieldElementClick = null
         )
     }
 }

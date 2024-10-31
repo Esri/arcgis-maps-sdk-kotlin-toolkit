@@ -162,7 +162,7 @@ public fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-    onBarcodeAccessoryClicked: (FieldFormElement) -> Unit = {}
+    onBarcodeAccessoryClicked: ((FieldFormElement) -> Unit)? = null
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -287,9 +287,9 @@ private fun FeatureFormBody(
                         is FieldFormElement -> {
                             FieldElement(
                                 state = entry.getState<BaseFieldState<*>>(),
-                                onClick = {
-                                    onFieldElementClicked?.invoke(entry.formElement as FieldFormElement)
-                                }
+                                onClick = onFieldElementClicked?.let { onClick ->
+                                    { onClick(entry.formElement as FieldFormElement) }
+                                },
                             )
                         }
 
@@ -298,7 +298,8 @@ private fun FeatureFormBody(
                                 state = entry.getState(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                                    .padding(horizontal = 15.dp, vertical = 10.dp),
+                                onFieldElementClick = onFieldElementClicked
                             )
                         }
 
