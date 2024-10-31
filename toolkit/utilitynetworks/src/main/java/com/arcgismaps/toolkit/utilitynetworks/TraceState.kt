@@ -36,6 +36,7 @@ import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.GroupLayer
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
@@ -58,6 +59,8 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -167,6 +170,16 @@ public class TraceState(
 
     private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     internal var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
+
+    private val mapFeatureLayers by lazy {
+        arcGISMap.operationalLayers
+            .filterIsInstance<FeatureLayer>()
+            .plus(
+                arcGISMap.operationalLayers
+                    .filterIsInstance<GroupLayer>()
+                    .flatMap { it.layers.filterIsInstance<FeatureLayer>() }
+            )
+    }
 
     private var navigateToRoute: ((TraceNavRoute) -> Unit)? = null
 
@@ -314,6 +327,8 @@ public class TraceState(
 
             var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
             var currentTraceElementResults: List<UtilityElement> = emptyList()
+            var currentTraceFeatureResultsGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>> = emptyMap()
+            var currentTraceResultsExtent: Envelope? = null
             var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
             for (result in traceResults) {
@@ -321,6 +336,15 @@ public class TraceState(
                     // Feature results
                     is UtilityElementTraceResult -> {
                         currentTraceElementResults = result.elements
+                        val featuresForElements = utilityNetwork.getFeaturesForElements(currentTraceElementResults).getOrThrow()
+                        withContext(Dispatchers.Default) {
+                            if (featuresForElements.isNotEmpty()) {
+                                currentTraceResultsExtent =
+                                    getResultFeaturesExtent(featuresForElements)
+                                currentTraceFeatureResultsGroupByLayers =
+                                    featuresForElements.groupBy { it.featureTable?.layer as FeatureLayer }
+                            }
+                        }
                     }
                     // Function results
                     is UtilityFunctionTraceResult -> {
@@ -360,7 +384,7 @@ public class TraceState(
                 }
             }
 
-            val currentTraceResultGeometriesExtent = currentTraceGeometryResults?.let {
+            currentTraceResultsExtent = currentTraceResultsExtent ?: currentTraceGeometryResults?.let {
                 getResultGeometriesExtent(it)
             }
 
@@ -369,14 +393,15 @@ public class TraceState(
                 configuration = traceConfiguration,
                 startingPoints = _currentTraceStartingPoints.toList(),
                 geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
-                resultsGraphicExtent = currentTraceResultGeometriesExtent,
+                resultsExtent = currentTraceResultsExtent,
                 resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
                 featureResults = currentTraceElementResults,
+                featureResultsGroupByLayers = currentTraceFeatureResultsGroupByLayers,
                 functionResults = currentTraceFunctionResults,
                 geometryTraceResult = currentTraceGeometryResults
             ).also {
                 _completedTraces.add(it)
-                updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
+                updateSelectedTraceIndexGraphicsAndFeatures(_completedTraces.size - 1)
             }
 
             resetCurrentTrace()
@@ -391,18 +416,25 @@ public class TraceState(
         _currentTraceZoomToResults.value = true
     }
 
+    private fun getResultFeaturesExtent(features: List<ArcGISFeature>): Envelope? {
+        val geometries = features.mapNotNull { feature ->
+            feature.geometry?.takeIf { !it.isEmpty }
+        }
+        return getGeometriesExtent(geometries)
+    }
+
     private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
         val geometries = listOf(
             utilityGeometryTraceResult.polygon,
             utilityGeometryTraceResult.polyline,
             utilityGeometryTraceResult.multipoint
         ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
-            }
+            geometry?.takeIf { !it.isEmpty }
         }
+        return getGeometriesExtent(geometries)
+    }
+
+    private fun getGeometriesExtent(geometries: Iterable<Geometry>): Envelope? {
         val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
         val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
 
@@ -458,15 +490,36 @@ public class TraceState(
         }
     }
 
-    private fun updateSelectedTraceIndexAndGraphics(newIndex: Int) {
-        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+    private fun updateSelectedTraceIndexGraphicsAndFeatures(newIndex: Int) {
+        updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, false)
         _selectedCompletedTraceIndex.value = newIndex
-        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+        updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, true)
     }
 
-    private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
+    private fun updateSelectedStateForTraceResultsGraphicsAndFeatures(index: Int, isSelected: Boolean) {
         _completedTraces[index].geometryResultsGraphics.forEach { it.isSelected = isSelected }
         _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
+        updateFeatureSelection(_completedTraces[index].featureResultsGroupByLayers, isSelected)
+    }
+
+    /**
+     * Selects or unselects the features on the map.
+     *
+     * @param featuresGroupByLayers the map of features grouped by layers
+     * @param isSelected true to select the features, false to unselect
+     * @since 200.6.0
+     */
+    private fun updateFeatureSelection(
+        featuresGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>>,
+        isSelected: Boolean,
+    ) {
+        featuresGroupByLayers.forEach { (featureLayer, features) ->
+            if (isSelected) {
+                featureLayer.selectFeatures(features)
+            } else {
+                featureLayer.unselectFeatures(features)
+            }
+        }
     }
 
     /**
@@ -567,13 +620,13 @@ public class TraceState(
 
     internal fun selectNextCompletedTrace() {
         if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
-            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
+            updateSelectedTraceIndexGraphicsAndFeatures(_selectedCompletedTraceIndex.value + 1)
         }
     }
 
     internal fun selectPreviousCompletedTrace() {
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
+            updateSelectedTraceIndexGraphicsAndFeatures(_selectedCompletedTraceIndex.value - 1)
         }
     }
 
@@ -656,6 +709,7 @@ public class TraceState(
         _completedTraces.clear()
         _selectedCompletedTraceIndex.value = 0
         currentTraceGeometryResultsGraphics.clear()
+        mapFeatureLayers.forEach { it.clearSelection() }
         _currentTraceStartingPoints.clear()
         graphicsOverlay.graphics.clear()
     }
@@ -664,18 +718,19 @@ public class TraceState(
         val selectedTrace = _completedTraces[_selectedCompletedTraceIndex.value]
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
+        updateFeatureSelection(selectedTrace.featureResultsGroupByLayers, false)
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
         if (_selectedCompletedTraceIndex.value > 0 || (_selectedCompletedTraceIndex.value == 0 && _completedTraces.isNotEmpty())) {
             if (_selectedCompletedTraceIndex.value > 0) {
                 _selectedCompletedTraceIndex.value -= 1
             }
-            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+            updateSelectedStateForTraceResultsGraphicsAndFeatures(_selectedCompletedTraceIndex.value, true)
         }
     }
 
     internal suspend fun zoomToSelectedTrace() {
         val currentTrace = completedTraces[_selectedCompletedTraceIndex.value]
-        val extent = currentTrace.resultsGraphicExtent ?: return
+        val extent = currentTrace.resultsExtent ?: return
         mapViewProxy.setViewpointAnimated(
             Viewpoint(extent.extent),
             1.0.seconds,
@@ -808,9 +863,10 @@ internal data class TraceRun(
     val configuration: UtilityNamedTraceConfiguration,
     val startingPoints: List<StartingPoint>,
     val geometryResultsGraphics: List<Graphic>,
-    val resultsGraphicExtent: Envelope? = null,
+    val resultsExtent: Envelope? = null,
     var resultGraphicColor: androidx.compose.ui.graphics.Color,
     val featureResults: List<UtilityElement>,
+    val featureResultsGroupByLayers: Map<FeatureLayer, List<ArcGISFeature>>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?
 )
