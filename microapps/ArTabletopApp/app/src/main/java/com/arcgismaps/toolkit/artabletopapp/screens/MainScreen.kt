@@ -38,11 +38,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
-import com.arcgismaps.mapping.layers.ArcGISMapImageLayer
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
@@ -56,23 +56,28 @@ import kotlin.math.roundToInt
 @Composable
 fun MainScreen() {
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+        ArcGISScene(BasemapStyle.ArcGISDarkGrayBase).apply {
             operationalLayers.addAll(
                 listOf(
-                    // New York Transit Frequency
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/UrbanObservatory_NYC_TransitFrequency/MapServer"),
-                    // New York Industrial Area
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/New_York_Industrial/MapServer"),
-                    // New York Population Density
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/4yjifSiIG17X0gW4/arcgis/rest/services/NewYorkCity_PopDensity/MapServer"),
-                    // New York Buildings
-                    ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Buildings_NewYork_17/SceneServer")
+//                    // New York Transit Frequency
+//                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/UrbanObservatory_NYC_TransitFrequency/MapServer"),
+//                    // New York Industrial Area
+//                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/New_York_Industrial/MapServer"),
+//                    // New York Population Density
+//                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/4yjifSiIG17X0gW4/arcgis/rest/services/NewYorkCity_PopDensity/MapServer"),
+//                    // New York Buildings
+//                    ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Buildings_NewYork_17/SceneServer")
+
+                    // Building shells
+                    ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+
                 )
             )
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
                 )
+                //opacity = 0f
             }
         }
     }
@@ -96,10 +101,10 @@ fun MainScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
-            translationFactor = 750.0,//2000.0,
+            arcGISSceneAnchor = Point(-122.68350326165559, 45.53257485106716, 0.0, SpatialReference.wgs84()),//Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
+            translationFactor = 1000.0,//750.0,//2000.0,
             modifier = Modifier.fillMaxSize(),
-            //clippingDistance = 750.0,
+            clippingDistance = 400.0,
             graphicsOverlays = graphicsOverlays,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             sceneViewInteractionOptions = interactionOptions,
