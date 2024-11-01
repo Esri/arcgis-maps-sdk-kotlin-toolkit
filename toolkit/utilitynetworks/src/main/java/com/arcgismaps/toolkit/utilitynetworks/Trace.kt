@@ -67,7 +67,7 @@ public fun Trace(
         traceState.initialize()
     }
 
-    TraceContainer(
+    TraceScaffold(
         initializationStatus = initializationStatus,
         displayLinearProgressIndicator = traceState.isTaskInProgress.value,
         modifier = modifier,
@@ -95,7 +95,7 @@ public fun Trace(
 }
 
 @Composable
-private fun TraceContainer(
+private fun TraceScaffold(
     initializationStatus: InitializationStatus,
     displayLinearProgressIndicator: Boolean,
     modifier: Modifier = Modifier,
