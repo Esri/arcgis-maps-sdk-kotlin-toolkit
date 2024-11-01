@@ -82,15 +82,15 @@ class TraceToolTests : TraceToolTestRunner(
     }
 
     /**
-     * Given a Trace composable
-     * When a trace configuration is selected and a starting point is added
-     * Then the trace button is enabled and can be clicked to perform a trace
+     * Given a Trace composable,
+     * When a trace configuration is selected and a starting point is added,
+     * Then the trace button is enabled, the trace is executed, and the results are displayed.
      *
      * @since 200.6.0
      */
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun testTrace() = runTest {
+    fun testRunningADownStreamTrace() = runTest {
         // Wait for all the layers in the map to load to perform identify successfully
         Thread.sleep(5000L)
 
@@ -100,6 +100,7 @@ class TraceToolTests : TraceToolTestRunner(
         )
 
         val traceButton = composeTestRule.onNodeWithText(context.getString(R.string.trace))
+        // make sure the trace button is disabled
         traceButton.assertIsNotEnabled()
 
         val traceConfigurations =
@@ -123,8 +124,27 @@ class TraceToolTests : TraceToolTestRunner(
             matcher = hasText("Underground Three Phase"),
             timeoutMillis = timeoutMillis
         )
-
+        // make sure the trace button is enabled
         traceButton.assertIsEnabled()
-        traceButton.performClick()
+        // execute trace
+        traceState.trace()
+        // navigate to the results screen
+        composeTestRule.runOnUiThread {
+            runBlocking {
+                traceState.showScreen(TraceNavRoute.TraceResults)
+            }
+        }
+        // wait for the results screen to load
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText("Downstream Trace 1"),
+            timeoutMillis = timeoutMillis
+        )
+        // make sure the feature results are displayed
+        composeTestRule.onNodeWithText(context.getString(R.string.feature_results)).assertExists()
+        composeTestRule.onNodeWithText("4").assertExists()
+
+        // make sure the function results are displayed
+        composeTestRule.onNodeWithText(context.getString(R.string.function_results)).assertExists()
+        composeTestRule.onNodeWithText("6").assertExists()
     }
 }
