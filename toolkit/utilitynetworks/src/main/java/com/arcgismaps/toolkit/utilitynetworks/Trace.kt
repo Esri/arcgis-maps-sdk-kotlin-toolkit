@@ -49,7 +49,7 @@ import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 /**
- * A composable UI component to set up and run a [trace](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.utilitynetworks/-utility-network/trace.html?)
+ * A composable UI component to set up and run a [trace](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.utilitynetworks/-utility-network/trace.html)
  * workflow on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
  *
  * @since 200.6.0
