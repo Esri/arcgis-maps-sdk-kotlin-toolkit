@@ -47,22 +47,12 @@ open class TraceToolTestRunner(
     internal val traceState: TraceState
         get() = _traceState ?: throw IllegalStateException("trace state is not initialized")
 
-    private var _map: ArcGISMap = ArcGISMap(PortalItem(Portal.arcGISOnline(connection = Portal.Connection.Anonymous), itemId))
-    internal val map: ArcGISMap
-        get() = _map
-
-    private var _mapviewProxy: MapViewProxy = MapViewProxy()
-    internal val mapviewProxy: MapViewProxy
-        get() = _mapviewProxy
-
-    private var _graphicsOverlay: GraphicsOverlay = GraphicsOverlay()
-    internal val graphicsOverlay: GraphicsOverlay
-        get() = _graphicsOverlay
+    internal val map: ArcGISMap = ArcGISMap(PortalItem(Portal.arcGISOnline(connection = Portal.Connection.Anonymous), itemId))
+    internal val mapviewProxy: MapViewProxy = MapViewProxy()
+    internal val graphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 
     // Create a CountDownLatch to wait for the draw status change
-    private val _drawStatusLatch = CountDownLatch(1)
-    internal val drawStatusLatch
-        get() = _drawStatusLatch
+    internal val drawStatusLatch = CountDownLatch(1)
 
     @Before
     fun setup(): Unit = runTest {
