@@ -116,7 +116,10 @@ private fun TraceScaffold(
         ) {
             when (initializationStatus) {
                 is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
-                    Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator()
                     }
                 }
