@@ -87,6 +87,7 @@ apiValidation {
     // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
     // compiler.
     val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.utilitynetworks.BuildConfig",
         "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
