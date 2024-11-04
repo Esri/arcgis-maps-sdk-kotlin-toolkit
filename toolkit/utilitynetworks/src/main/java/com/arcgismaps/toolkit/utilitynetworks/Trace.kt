@@ -49,8 +49,8 @@ import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 /**
- * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
- * on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
+ * A composable UI component to set up and run a [trace](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.utilitynetworks/-utility-network/trace.html)
+ * workflow on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
  *
  * @since 200.6.0
  */
@@ -61,13 +61,48 @@ public fun Trace(
     modifier: Modifier = Modifier
 ) {
     val initializationStatus by traceState.initializationStatus
-    val localContext = LocalContext.current
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(traceState) {
         traceState.initialize()
     }
 
+    TraceScaffold(
+        initializationStatus = initializationStatus,
+        displayLinearProgressIndicator = traceState.isTaskInProgress.value,
+        modifier = modifier,
+        tabRow = if (traceState.showTabRow()) {
+            {
+                TabRow(
+                    selectedTabIndex,
+                    onNavigateTo = {
+                        selectedTabIndex = it.first
+                        traceState.showScreen(it.second)
+                    }
+                )
+            }
+        } else {
+            null
+        }
+    ) {
+        TraceNavHost(
+            traceState,
+            onTabSwitch = {
+                selectedTabIndex = it
+            }
+        )
+    }
+}
+
+@Composable
+private fun TraceScaffold(
+    initializationStatus: InitializationStatus,
+    displayLinearProgressIndicator: Boolean,
+    modifier: Modifier = Modifier,
+    tabRow: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit
+) {
+    val localContext = LocalContext.current
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = modifier
@@ -75,56 +110,51 @@ public fun Trace(
             .padding(horizontal = 16.dp)
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
-        when (initializationStatus) {
-            InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
-                Box(
-                    modifier = modifier,
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            else -> {
-                Column(
-                    modifier = modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
-                        val exception =
-                            (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
-                        val errorMessage = exception.getErrorMessage(localContext)
-                        Row {
-                            Icon(
-                                Icons.Default.Info,
-                                contentDescription = stringResource(id = R.string.error),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Text(errorMessage, color = MaterialTheme.colorScheme.error)
-                        }
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            when (initializationStatus) {
+                is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                    Box(
+                        modifier = modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                    if (traceState.isTaskInProgress.value) {
+                }
+
+                is InitializationStatus.FailedToInitialize -> {
+                    val errorMessage = initializationStatus.error.getErrorMessage(localContext)
+                    NonRecoveredErrorIndicator(errorMessage)
+                    content()
+                }
+
+                else -> {
+                    if (displayLinearProgressIndicator) {
                         LinearProgressIndicator()
                     }
-                    if (traceState.showTabRow()) {
-                        TabRow(
-                            selectedTabIndex,
-                            onNavigateTo = {
-                                selectedTabIndex = it.first
-                                traceState.showScreen(it.second)
-                            }
-                        )
-                    }
-                    TraceNavHost(
-                        traceState,
-                        onTabSwitch = {
-                            selectedTabIndex = it
-                        }
-                    )
+                    tabRow?.invoke()
+                    content()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NonRecoveredErrorIndicator(errorMessage: String) {
+    Row {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = stringResource(id = R.string.error),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = errorMessage,
+            color = MaterialTheme.colorScheme.error
+        )
     }
 }
 
