@@ -250,7 +250,7 @@ public data class ReadOnlyFieldColors(
  * @since 200.5.0
  */
 @Immutable
-public data class GroupElementColors internal constructor(
+public data class GroupElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
     public val outlineColor: Color,
