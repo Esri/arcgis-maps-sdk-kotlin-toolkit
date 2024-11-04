@@ -21,9 +21,9 @@ To see it in action, check out the microapp <TODO - link>.
 - A composable function that displays a camera feed overlayed by a [SceneView](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/geoview-compose/src/main/java/com/arcgismaps/toolkit/geoviewcompose/SceneView.kt).
 - Detects physical horizontal surfaces in the camera feed, which a user can select by tapping on the screen. The tap location determines where the scene data is anchored on the detected surface.
 - Provides parameters specific to table top scenarios to configure the placement and visualization of scene data:
-    - `arcGISSceneAnchor` - a point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
-    - `translationFactor` - determines how many meters the scene view translates as the device moves in the AR experience.
-    - `clippingDistance` - the distance in meters that the ArcGIS Scene data will be clipped around the `arcGISSceneAnchor`.
+    - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
+    - `translationFactor` - Determines how many meters the scene view translates as the device moves. A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`. The virtual content width is the real-world size of the scene content and the desired physical content width is the physical table top width. The virtual content width is determined by the clipping distance in meters around the camera. For example, in order to setup a table top scene where scene data should be displayed by up to 500 meter around the `arcGISSceneAnchor` and this data should be placed on a physical table that is 1 meter wide: `translation factor = 500 meter / 1 meter`.
+    - `clippingDistance` - The distance in meters that the ArcGIS Scene data will be clipped around the `arcGISSceneAnchor`.
 - Provides parameters to configure and interact with the `SceneView`, such specifying an `ArcGISScene`, graphics overlays, lighting etc.
 - A `TableTopSceneViewProxy` can be passed to the `TableTopSceneView` composable function to perform operations such as identify, setting a viewpoint etc.
 - A `TableTopSceneViewScope` provided as the receiver by the `TableTopSceneView`'s `content` lambda can be used to display a callout.
