@@ -25,6 +25,7 @@ import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import java.util.concurrent.CountDownLatch
 
 /**
  * A test runner for utility network tests. This class is responsible for loading the map with the
@@ -57,6 +58,11 @@ open class TraceToolTestRunner(
     private var _graphicsOverlay: GraphicsOverlay = GraphicsOverlay()
     internal val graphicsOverlay: GraphicsOverlay
         get() = _graphicsOverlay
+
+    // Create a CountDownLatch to wait for the draw status change
+    private val _drawStatusLatch = CountDownLatch(1)
+    internal val drawStatusLatch
+        get() = _drawStatusLatch
 
     @Before
     fun setup(): Unit = runTest {

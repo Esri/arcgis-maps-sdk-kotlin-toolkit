@@ -36,6 +36,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.TimeUnit
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -61,7 +62,8 @@ class TraceToolTests : TraceToolTestRunner(
             traceToolUsageScenarios.MapViewWithTraceInBottomSheet(
                 map,
                 mapviewProxy,
-                graphicsOverlay
+                graphicsOverlay,
+                { drawStatusLatch.countDown() }
             ) {
                 Trace(traceState = traceState)
             }
@@ -91,8 +93,9 @@ class TraceToolTests : TraceToolTestRunner(
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testRunningADownStreamTrace() = runTest {
-        // Wait for all the layers in the map to load to perform identify successfully
-        Thread.sleep(5000L)
+        // For all the layers in the map to be done drawing to perform identify successfully
+        // We wait for the mapview draw status to change to completed
+        drawStatusLatch.await(10, TimeUnit.SECONDS)
 
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasText(context.getString(R.string.trace_configuration)),

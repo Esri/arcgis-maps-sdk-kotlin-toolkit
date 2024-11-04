@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
@@ -32,6 +33,7 @@ class TraceToolUsageScenarios {
         arcGISMap: ArcGISMap,
         mapViewProxy: MapViewProxy,
         graphicsOverlay: GraphicsOverlay,
+        onDrawStatusCompleted: () -> Unit,
         trace: @Composable () -> Unit
     ) {
 
@@ -67,6 +69,11 @@ class TraceToolUsageScenarios {
                     graphicsOverlays = listOf(graphicsOverlay),
                     modifier = Modifier
                         .fillMaxSize(),
+                    onDrawStatusChanged = { drawStatus ->
+                        if (drawStatus == DrawStatus.Completed) {
+                            onDrawStatusCompleted()
+                        }
+                    }
                 )
             }
         }
