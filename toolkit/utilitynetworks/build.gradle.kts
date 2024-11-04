@@ -88,7 +88,14 @@ apiValidation {
     // compiler.
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt"
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$AddStartingPointScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceErrorDialogKt",
+        "com.arcgismaps.toolkit.utilitynetworks.internal.util.ComposableSingletons\$TitleRowKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
