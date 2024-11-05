@@ -164,10 +164,10 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticatorImpl(it, modifier)
+                UsernamePasswordAuthenticatorDialog(it, modifier)
             }
         } else {
-            UsernamePasswordAuthenticatorImpl(it, modifier)
+            UsernamePasswordAuthenticator(it, modifier)
         }
     }
 

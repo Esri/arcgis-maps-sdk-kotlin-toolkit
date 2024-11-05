@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * @since 200.6.0
  */
 @Composable
-internal fun UsernamePasswordAuthenticatorImpl(
+internal fun UsernamePasswordAuthenticatorDialog(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
