@@ -1,6 +1,6 @@
 # ArcGIS Maps SDK for Kotlin Toolkit
 
-The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the new ArcGIS Maps SDK for Kotlin.
+The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the ArcGIS Maps SDK for Kotlin.
 
 ## Toolkit Components
 
@@ -11,6 +11,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
+* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
 ## API Reference
 
@@ -49,6 +50,7 @@ implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-ar")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.
