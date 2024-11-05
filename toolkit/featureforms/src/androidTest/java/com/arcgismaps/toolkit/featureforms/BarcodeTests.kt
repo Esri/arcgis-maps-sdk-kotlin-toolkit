@@ -86,7 +86,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryTap = {
+                onBarcodeButtonClick = {
                     // Custom barcode click event
                     fieldFormElement = it
                 }
@@ -133,7 +133,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryTap = {
+                onBarcodeButtonClick = {
                     // Custom barcode click event
                     fieldFormElement = it
                 }
@@ -165,7 +165,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryTap = null
+                onBarcodeButtonClick = null
             )
         }
         val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
@@ -190,7 +190,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryTap = null
+                onBarcodeButtonClick = null
             )
         }
         val barcodeElement = composeTestRule.onNodeWithText("Barcode in Group")
