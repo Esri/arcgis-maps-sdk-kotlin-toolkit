@@ -10,7 +10,7 @@ View the API Reference for the AR module [here](https://developers.arcgis.com/ko
 
 The `TableTopSceneView` composable function renders `ArcGISScene` content anchored to a physical surface, as if it were a 3D-printed model.
 
-<TODO - screen shot>
+![Screenshot](screenshot.png)
 
 ### Features
 
