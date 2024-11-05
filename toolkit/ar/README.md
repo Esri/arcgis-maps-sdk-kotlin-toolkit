@@ -8,13 +8,9 @@ View the API Reference for the AR module [here](https://developers.arcgis.com/ko
 
 ## TableTopSceneView
 
-The `TableTopSceneView` component renders `ArcGISScene` content anchored to a physical surface, as if it were a 3D-printed model.
+The `TableTopSceneView` composable function renders `ArcGISScene` content anchored to a physical surface, as if it were a 3D-printed model.
 
 <TODO - screen shot>
-
-### Behaviour
-
-To see it in action, check out the microapp <TODO - link>.
 
 ### Features
 
@@ -22,12 +18,122 @@ To see it in action, check out the microapp <TODO - link>.
 - Detects physical horizontal surfaces in the camera feed, which a user can select by tapping on the screen. The tap location determines where the scene data is anchored on the detected surface.
 - Provides parameters specific to table top scenarios to configure the placement and visualization of scene data:
     - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
-    - `translationFactor` - Determines how many meters the scene view translates as the device moves. A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`. The virtual content width is the real-world size of the scene content and the desired physical content width is the physical table top width. The virtual content width is determined by the clipping distance in meters around the camera. For example, in order to setup a table top scene where scene data should be displayed by up to 500 meter around the `arcGISSceneAnchor` and this data should be placed on a physical table that is 1 meter wide: `translation factor = 500 meter / 1 meter`.
+    - `translationFactor` - Determines how many meters the scene view translates as the device moves. A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`. The virtual content width is the real-world size of the scene content and the desired physical content width is the physical table top width. The virtual content width is determined by the clipping distance in meters around the camera. For example, in order to setup a table top scene where scene data should be displayed within a 400 meter radius around the `arcGISSceneAnchor` and be placed on a table top that is 1 meter wide: `translation factor = 400 meter / 1 meter`.
     - `clippingDistance` - The distance in meters that the ArcGIS Scene data will be clipped around the `arcGISSceneAnchor`.
 - Provides parameters to configure and interact with the `SceneView`, such specifying an `ArcGISScene`, graphics overlays, lighting etc.
-- A `TableTopSceneViewProxy` can be passed to the `TableTopSceneView` composable function to perform operations such as identify, setting a viewpoint etc.
+- A `TableTopSceneViewProxy` can be passed to the `TableTopSceneView` composable function to perform operations such as identify.
 - A `TableTopSceneViewScope` provided as the receiver by the `TableTopSceneView`'s `content` lambda can be used to display a callout.
+
+### Prerequisites
+
+`TableTopSceneView` requires ARCore, thus it requires an ARCore supported device that has installed Google Play Services for AR. For more details see the [ARCore documentation](https://developers.google.com/ar/develop/java/enable-arcore).
+Note - the `TableTopSceneView` checks for availability of ARCore automatically. If ARCore is not supported by the device, the `TableTopSceneView` will fail to initialize with `TableTopSceneViewStatus.FailedToInitialize`.
 
 ### Usage
 
-TODO
+The `TableTopSceneView` requires camera permissions, which are requested by default when the `TableTopSceneView` enters composition. The following camera-related settings need to be specified in the `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.CAMERA" />
+
+<!-- Limits app visibility in the Google Play Store to ARCore supported devices
+    (https://developers.google.com/ar/devices). -->
+<uses-feature android:name="android.hardware.camera.ar" />
+<uses-feature
+    android:name="android.hardware.camera"
+    android:required="true" />
+```
+
+Configure an `ArcGISScene` with the data you want to render in the table top scene:
+
+```kotlin
+
+@Composable
+fun MainScreen() {
+    ...
+    val arcGISScene = remember {
+        ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
+            operationalLayers.add(
+                ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+            )
+            baseSurface = Surface().apply {
+                elevationSources.add(
+                    ElevationSource.fromTerrain3dService()
+                )
+            }
+        }
+    }
+    ...
+}
+```
+
+Define a location in your scene that should serve as the anchor point with the table top surface:
+
+```kotlin
+val arcGISSceneAnchor = remember {
+    Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
+}
+```
+
+Determine a translation factor and clipping distance for your scene data as described above. Call the `TableTopSceneView` composable function with these parameters:
+
+```kotlin
+TableTopSceneView(
+    arcGISScene = arcGISScene,
+    arcGISSceneAnchor = arcGISSceneAnchor,
+    translationFactor = 400.0,
+    modifier = Modifier.fillMaxSize(),
+    clippingDistance = 400.0,
+    ...
+)
+```
+
+Pass an `onInitializationStatusChanged` callback to the `TableTopSceneView` composable function to get notified about initialization status changes.
+
+```kotlin
+TableTopSceneView(
+    arcGISScene = arcGISScene,
+    arcGISSceneAnchor = arcGISSceneAnchor,
+    translationFactor = 1000.0,
+    modifier = Modifier.fillMaxSize(),
+    clippingDistance = 400.0,
+    onInitializationStatusChanged = { status ->
+       updateStatus(status)
+    },
+    ...
+)
+```
+
+Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` and display a `Callout` on the tapped location:
+
+```kotlin
+var tappedLocation by remember { mutableStateOf<Point?>(null) }
+
+TableTopSceneView(
+    arcGISScene = arcGISScene,
+    arcGISSceneAnchor = arcGISSceneAnchor,
+    translationFactor = 1000.0,
+    modifier = Modifier.fillMaxSize(),
+    clippingDistance = 400.0,
+    onInitializationStatusChanged = { status ->
+       updateStatus(status)
+    },
+    onSingleTapConfirmed = {
+        val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
+        location?.let { point ->
+            tappedLocation = point
+        }
+    }
+    ...
+) {
+    tappedLocation?.let {
+        Callout(location = it, modifier = Modifier.wrapContentSize()) {
+            Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
+        }
+    }
+}
+```
+
+### Behaviour
+
+To see it in action, check out the microapp <TODO - link>.
