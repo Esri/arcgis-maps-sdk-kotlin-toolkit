@@ -20,7 +20,7 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
     - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
     - `translationFactor` - Determines how many meters the scene view translates as the device moves. A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`. The virtual content width is the real-world size of the scene content and the desired physical content width is the physical table top width. The virtual content width is determined by the clipping distance in meters around the camera. For example, in order to setup a table top scene where scene data should be displayed within a 400 meter radius around the `arcGISSceneAnchor` and be placed on a table top that is 1 meter wide: `translation factor = 400 meter / 1 meter`.
     - `clippingDistance` - The distance in meters that the ArcGIS Scene data will be clipped around the `arcGISSceneAnchor`.
-- Provides parameters to configure and interact with the `SceneView`, such specifying an `ArcGISScene`, graphics overlays, lighting etc.
+- Provides parameters to configure and interact with the `SceneView`, such as specifying an `ArcGISScene`, graphics overlays, lighting etc.
 - A `TableTopSceneViewProxy` can be passed to the `TableTopSceneView` composable function to perform operations such as identify.
 - A `TableTopSceneViewScope` provided as the receiver by the `TableTopSceneView`'s `content` lambda can be used to display a callout.
 
@@ -88,13 +88,13 @@ TableTopSceneView(
 )
 ```
 
-Pass an `onInitializationStatusChanged` callback to the `TableTopSceneView` composable function to get notified about initialization status changes.
+Pass a `onInitializationStatusChanged` callback to the `TableTopSceneView` composable function to get notified about initialization status changes.
 
 ```kotlin
 TableTopSceneView(
     arcGISScene = arcGISScene,
     arcGISSceneAnchor = arcGISSceneAnchor,
-    translationFactor = 1000.0,
+    translationFactor = 400.0,
     modifier = Modifier.fillMaxSize(),
     clippingDistance = 400.0,
     onInitializationStatusChanged = { status ->
@@ -104,7 +104,7 @@ TableTopSceneView(
 )
 ```
 
-Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` and display a `Callout` on the tapped location:
+Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` events and display a `Callout` at the tapped location:
 
 ```kotlin
 var tappedLocation by remember { mutableStateOf<Point?>(null) }
@@ -112,7 +112,7 @@ var tappedLocation by remember { mutableStateOf<Point?>(null) }
 TableTopSceneView(
     arcGISScene = arcGISScene,
     arcGISSceneAnchor = arcGISSceneAnchor,
-    translationFactor = 1000.0,
+    translationFactor = 400.0,
     modifier = Modifier.fillMaxSize(),
     clippingDistance = 400.0,
     onInitializationStatusChanged = { status ->
@@ -136,4 +136,4 @@ TableTopSceneView(
 
 ### Behaviour
 
-To see it in action, check out the microapp <TODO - link>.
+To see it in action, check out the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp).
