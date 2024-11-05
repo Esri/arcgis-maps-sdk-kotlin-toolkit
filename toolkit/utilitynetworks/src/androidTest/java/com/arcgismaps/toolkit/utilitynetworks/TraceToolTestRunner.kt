@@ -25,6 +25,7 @@ import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import java.util.concurrent.CountDownLatch
 
 /**
  * A test runner for utility network tests. This class is responsible for loading the map with the
@@ -46,6 +47,13 @@ open class TraceToolTestRunner(
     internal val traceState: TraceState
         get() = _traceState ?: throw IllegalStateException("trace state is not initialized")
 
+    internal val map: ArcGISMap = ArcGISMap(PortalItem(Portal.arcGISOnline(connection = Portal.Connection.Anonymous), itemId))
+    internal val mapviewProxy: MapViewProxy = MapViewProxy()
+    internal val graphicsOverlay: GraphicsOverlay = GraphicsOverlay()
+
+    // Create a CountDownLatch to wait for the draw status change
+    internal val drawStatusLatch = CountDownLatch(1)
+
     @Before
     fun setup(): Unit = runTest {
         // If the utility network is already initialized, return
@@ -59,15 +67,6 @@ open class TraceToolTestRunner(
             ).getOrThrow()
 
         ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
-
-        val map = ArcGISMap(
-            PortalItem(
-                Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-                itemId
-            )
-        )
-        val graphicsOverlay = GraphicsOverlay()
-        val mapviewProxy = MapViewProxy()
         _traceState = TraceState(map, graphicsOverlay, mapviewProxy)
     }
 }
