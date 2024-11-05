@@ -77,10 +77,13 @@ fun MainScreen() {
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
+    val arcGISSceneAnchor = remember {
+        Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference),
+            arcGISSceneAnchor = arcGISSceneAnchor,
             translationFactor = 400.0,
             modifier = Modifier.fillMaxSize(),
             clippingDistance = 400.0,
