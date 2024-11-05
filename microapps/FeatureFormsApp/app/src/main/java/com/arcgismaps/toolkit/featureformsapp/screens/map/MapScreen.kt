@@ -19,12 +19,15 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,8 +39,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,14 +57,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +77,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -72,10 +86,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.layers.ArcGISSublayer
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
@@ -85,17 +107,15 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     val uiState by mapViewModel.uiState
-    val context = LocalContext.current
-    val windowSize = getWindowSize(context)
     val (featureForm, errorVisibility) = remember(uiState) {
         when (uiState) {
             is UIState.Editing -> {
@@ -103,9 +123,24 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 Pair(state.featureForm, state.validationErrorVisibility)
             }
 
+            is UIState.Validating -> {
+                val state = (uiState as UIState.Validating)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
+            is UIState.FinishingEdits -> {
+                val state = (uiState as UIState.FinishingEdits)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
             is UIState.Committing -> {
+                val state = (uiState as UIState.Committing)
+                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
+            }
+
+            is UIState.Error -> {
                 Pair(
-                    (uiState as UIState.Committing).featureForm,
+                    (uiState as UIState.Error).featureForm,
                     ValidationErrorVisibility.Automatic
                 )
             }
@@ -138,25 +173,16 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                         showDiscardEditsDialog = true
                     },
                     onSave = {
-                        scope.launch {
-                            mapViewModel.commitEdits().onFailure {
-                                Log.w("Forms", "Applying edits failed : ${it.message}")
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        "Applying edits failed : ${it.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
-                        }
-                    }) {
-                    onBackPressed()
-                }
+                        scope.launch { mapViewModel.commitEdits() }
+                    },
+                    onBackPressed = onBackPressed
+                )
                 if (uiState is UIState.Loading) {
-                    LinearProgressIndicator(modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter))
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                    )
                 }
             }
         }
@@ -170,6 +196,14 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 .fillMaxSize(),
             onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
         )
+        // show pick a feature dialog if the layer is a sublayer
+        if (uiState is UIState.SelectFeature) {
+            SelectFeatureDialog(
+                state = uiState as UIState.SelectFeature,
+                onSelectFeature = mapViewModel::selectFeature,
+                onDismissRequest = mapViewModel::setDefaultState
+            )
+        }
         AnimatedVisibility(
             visible = featureForm != null,
             enter = slideInVertically { h -> h },
@@ -181,41 +215,16 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             val rememberedForm = remember(this, isSwitching) {
                 featureForm!!
             }
-            val bottomSheetState = rememberStandardBottomSheetState(
-                initialValue = SheetValue.PartiallyExpanded,
-                confirmValueChange = { it != SheetValue.Hidden },
-                skipHiddenState = false
+            FeatureFormSheet(
+                featureForm = rememberedForm,
+                errorVisibility = errorVisibility,
+                modifier = Modifier.padding(padding)
             )
-            SheetLayout(
-                windowSizeClass = windowSize,
-                sheetOffsetY = { bottomSheetState.requireOffset() },
-                modifier = Modifier.padding(padding),
-                maxWidth = BottomSheetMaxWidth,
-            ) { layoutWidth, layoutHeight ->
-                StandardBottomSheet(
-                    state = bottomSheetState,
-                    peekHeight = 40.dp,
-                    expansionHeight = SheetExpansionHeight(0.5f),
-                    sheetSwipeEnabled = true,
-                    shape = RoundedCornerShape(5.dp),
-                    layoutHeight = layoutHeight.toFloat(),
-                    sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
-                ) {
-                    // set bottom sheet content to the FeatureForm
-                    FeatureForm(
-                        featureForm = rememberedForm,
-                        modifier = Modifier.fillMaxSize(),
-                        validationErrorVisibility = errorVisibility
-                    )
-                }
-            }
         }
     }
     when (uiState) {
-        is UIState.Committing -> {
-            SubmitForm(errors = (uiState as UIState.Committing).errors) {
-                mapViewModel.cancelCommit()
-            }
+        is UIState.Validating, is UIState.FinishingEdits, is UIState.Committing -> {
+            ProgressDialog()
         }
 
         is UIState.Switching -> {
@@ -225,14 +234,14 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             )
         }
 
-        is UIState.NoFeatureFormDefinition -> {
-            NoFormDefinitionDialog(
-                onConfirm = {
-                    mapViewModel.setDefaultState()
+        is UIState.Error -> {
+            ErrorDialog(
+                error = uiState as UIState.Error,
+                onContinue = {
+                    mapViewModel.cancelCommit()
                 },
-                onCancel = {
-                    mapViewModel.setDefaultState()
-                    onBackPressed()
+                onDismissRequest = {
+                    mapViewModel.rollbackEdits()
                 }
             )
         }
@@ -251,7 +260,156 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         )
     }
+}
 
+@Composable
+fun SelectFeatureDialog(
+    state: UIState.SelectFeature,
+    onSelectFeature: (ArcGISFeature) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val features = state.features
+    val lazyListState = rememberLazyListState()
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 50.dp)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(15.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = stringResource(R.string.multiple_features, state.featureCount),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = stringResource(R.string.select_a_feature_to_edit),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                HorizontalDivider(thickness = 2.dp)
+                Spacer(modifier = Modifier.height(5.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScrollbar(lazyListState),
+                    state = lazyListState
+                ) {
+                    features.keys.forEachIndexed { index, layer ->
+                        item {
+                            Text(
+                                text = layer,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(vertical = 5.dp)
+                            )
+                        }
+                        items(features[layer]!!) { feature ->
+                            FeatureItem(
+                                feature = feature,
+                                onClick = {
+                                    onSelectFeature(feature)
+                                }
+                            )
+                        }
+                        if (index < features.keys.size - 1) {
+                            item {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 10.dp),
+                                    thickness = 2.dp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FeatureItem(
+    feature: ArcGISFeature,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    ListItem(
+        headlineContent = {
+            Text(text = feature.label)
+        },
+        leadingContent = {
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
+                // set the color of the surface to white since the bitmap does not support
+                // dark mode
+                color = Color.White
+            ) {
+                bitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
+        ),
+        modifier = modifier.clickable {
+            onClick()
+        }
+    )
+    LaunchedEffect(feature) {
+        bitmap = feature.getSymbol(context.resources)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FeatureFormSheet(
+    featureForm: FeatureForm,
+    errorVisibility: ValidationErrorVisibility,
+    modifier: Modifier = Modifier,
+) {
+    val windowSize = getWindowSize(LocalContext.current)
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        confirmValueChange = { it != SheetValue.Hidden },
+        skipHiddenState = false
+    )
+    SheetLayout(
+        windowSizeClass = windowSize,
+        sheetOffsetY = { bottomSheetState.requireOffset() },
+        modifier = modifier,
+        maxWidth = BottomSheetMaxWidth,
+    ) { layoutWidth, layoutHeight ->
+        StandardBottomSheet(
+            state = bottomSheetState,
+            peekHeight = 40.dp,
+            expansionHeight = SheetExpansionHeight(0.5f),
+            sheetSwipeEnabled = true,
+            shape = RoundedCornerShape(5.dp),
+            layoutHeight = layoutHeight.toFloat(),
+            sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
+        ) {
+            // set bottom sheet content to the FeatureForm
+            FeatureForm(
+                featureForm = featureForm,
+                modifier = Modifier.fillMaxSize(),
+                validationErrorVisibility = errorVisibility
+            )
+        }
+    }
 }
 
 @Composable
@@ -273,37 +431,6 @@ fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
         },
         text = {
             Text(text = stringResource(R.string.all_changes_will_be_lost))
-        }
-    )
-}
-
-@Composable
-fun NoFormDefinitionDialog(
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = stringResource(R.string.no_featureform_found), modifier = Modifier.weight(1f))
-                Image(imageVector = Icons.Rounded.Warning, contentDescription = null)
-            }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text(text = stringResource(R.string.okay))
-            }
-        },
-        dismissButton = {
-            Button(onClick = onCancel) {
-                Text(text = stringResource(R.string.exit))
-            }
-        },
-        text = {
-            Text(text = stringResource(R.string.no_featureform_description))
         }
     )
 }
@@ -336,7 +463,10 @@ fun TopFormBar(
                 }
             } else {
                 IconButton(onClick = onBackPressed) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
                 }
             }
         },
@@ -352,130 +482,61 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
-    if (errors.isEmpty()) {
-        // show a progress dialog if no errors are present
-        BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
-            Card(modifier = Modifier.wrapContentSize()) {
-                Column(
-                    modifier = Modifier.padding(15.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = "Saving..")
-                }
+fun ProgressDialog() {
+    BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
+        Card(modifier = Modifier.wrapContentSize()) {
+            Column(
+                modifier = Modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(text = "Saving..")
             }
         }
-    } else {
-        // show all the validation errors in a dialog
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            modifier = Modifier.heightIn(max = 600.dp),
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(onClick = onDismissRequest) {
-                        Text(text = stringResource(R.string.view))
-                    }
-                }
-            },
-            title = {
-                Column {
-                    Text(
-                        text = stringResource(R.string.the_form_has_errors),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.errors_must_be_fixed_to_submit_this_form),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-            },
-            text = {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(15.dp)) {
-                        Text(
-                            text = stringResource(R.string.attributes_failed, errors.count()),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        LazyColumn(
-                            modifier = Modifier,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            items(errors.count()) { index ->
-                                val errorString =
-                                    "${errors[index].fieldName} : ${errors[index].error.getString()}"
-                                Text(text = errorString, color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    }
-                }
-            }
-        )
     }
 }
 
 @Composable
-fun FeatureFormValidationException.getString(): String {
-    return when (this) {
-        is FeatureFormValidationException.IncorrectValueTypeException -> {
-            stringResource(id = R.string.value_must_be_of_correct_type)
-        }
-
-        is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
-            stringResource(id = R.string.date_less_than_minimum)
-        }
-
-        is FeatureFormValidationException.MaxCharConstraintException -> {
-            stringResource(id = R.string.maximum_character_length_exceeded)
-        }
-
-        is FeatureFormValidationException.MaxDateTimeConstraintException -> {
-            stringResource(id = R.string.date_exceeds_maximum)
-        }
-
-        is FeatureFormValidationException.MaxNumericConstraintException -> {
-            stringResource(id = R.string.exceeds_maximum_value)
-        }
-
-        is FeatureFormValidationException.MinCharConstraintException -> {
-            stringResource(id = R.string.minimum_character_length_not_met)
-        }
-
-        is FeatureFormValidationException.MinNumericConstraintException -> {
-            stringResource(id = R.string.less_than_minimum_value)
-        }
-
-        is FeatureFormValidationException.NullNotAllowedException -> {
-            stringResource(id = R.string.value_must_not_be_empty)
-        }
-
-        is FeatureFormValidationException.OutOfDomainException -> {
-            stringResource(id = R.string.value_must_be_within_domain)
-        }
-
-        is FeatureFormValidationException.RequiredException -> {
-            stringResource(id = R.string.required)
-        }
-
-        is FeatureFormValidationException.UnknownFeatureFormException -> {
-            stringResource(id = R.string.unknown_error)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun TopFormBarPreview() {
-    TopFormBar("Map", false)
+fun ErrorDialog(
+    error: UIState.Error,
+    onContinue: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(onClick = onContinue) {
+                Text(text = stringResource(R.string.edit))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.discard))
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = "Warning",
+                tint = MaterialTheme.colorScheme.error
+            )
+        },
+        title = {
+            Column {
+                Text(text = error.title, style = MaterialTheme.typography.headlineMedium)
+                Text(text = error.subTitle, style = MaterialTheme.typography.titleMedium)
+            }
+        },
+        text = {
+            // enable scrolling for the error details
+            LazyColumn {
+                item { Text(text = error.details) }
+            }
+        },
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+    )
 }
 
 fun getWindowSize(context: Context): WindowSizeClass {
@@ -484,4 +545,54 @@ fun getWindowSize(context: Context): WindowSizeClass {
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
     return WindowSizeClass.compute(width / density, height / density)
+}
+
+/**
+ * Returns the label of the feature. If the feature has a name attribute, it will return that.
+ * If the feature has an objectid attribute, it will return "Object ID : <objectid>". If neither
+ * of these attributes are present, it will return "Unnamed Feature".
+ */
+val ArcGISFeature.label: String
+    get() {
+        return if (attributes["name"] != null) {
+            attributes["name"] as String
+        } else if (attributes["objectid"] != null) {
+            "Object ID : ${attributes["objectid"]}"
+        } else {
+            "Unnamed Feature"
+        }
+    }
+
+/**
+ * Returns the symbol of the feature as a bitmap. If the feature's layer is a subtype feature layer,
+ * it will return the symbol of the sublayer that the feature belongs to. If the feature's layer is
+ * a feature layer, it will return the symbol of the feature layer.
+ *
+ * If the symbol cannot be created, it will return null.
+ */
+suspend fun ArcGISFeature.getSymbol(resources: Resources): Bitmap? {
+    val renderer = when (featureTable?.layer) {
+        is SubtypeFeatureLayer -> sublayer?.renderer
+        is FeatureLayer -> (featureTable?.layer as? FeatureLayer)?.renderer
+        else -> null
+    }
+    val symbol = renderer?.getSymbol(this) ?: return null
+    return symbol.createSwatch(resources.displayMetrics.density).getOrNull()?.bitmap
+}
+
+/**
+ * Returns the sublayer that the feature belongs to. If the feature's layer is not a subtype feature
+ * layer, it will return null.
+ */
+val ArcGISFeature.sublayer: ArcGISSublayer?
+    get() {
+        val subtypeFeatureLayer = featureTable?.layer as? SubtypeFeatureLayer ?: return null
+        val code = getFeatureSubtype()?.code ?: return null
+        return subtypeFeatureLayer.getSublayerWithSubtypeCode(code)
+    }
+
+@Preview
+@Composable
+private fun TopFormBarPreview() {
+    TopFormBar("Map", false)
 }

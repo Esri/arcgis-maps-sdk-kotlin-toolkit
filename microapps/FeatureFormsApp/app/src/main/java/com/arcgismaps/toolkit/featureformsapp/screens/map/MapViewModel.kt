@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.ArcGISMap
@@ -36,8 +37,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.layers.GroupLayer
-import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
@@ -65,11 +65,6 @@ sealed class UIState {
     data object Loading : UIState()
 
     /**
-     * No feature form definition available.
-     */
-    data object NoFeatureFormDefinition : UIState()
-
-    /**
      * Currently selecting a new Feature
      */
     data class Switching(
@@ -87,19 +82,54 @@ sealed class UIState {
     ) : UIState()
 
     /**
-     * Commit in progress state for the [featureForm] with validation errors [errors].
+     * Validating state for the [featureForm].
+     */
+    data class Validating(
+        val featureForm: FeatureForm
+    ) : UIState()
+
+    /**
+     * Finishing edits state for the [featureForm].
+     */
+    data class FinishingEdits(
+        val featureForm: FeatureForm
+    ) : UIState()
+
+    /**
+     * Committing the edits with the service for the [featureForm].
      */
     data class Committing(
+        val featureForm: FeatureForm
+    ) : UIState()
+
+    /**
+     * State to select a feature from the [features] map. The [featureCount] is the total number of
+     * features identified. This state is used when multiple features are identified at a single
+     * point.
+     */
+    data class SelectFeature(
+        val features: Map<String, List<ArcGISFeature>>,
+        val featureCount: Int
+    ) : UIState()
+
+    /**
+     * Indicates an error state with the given [error].
+     */
+    data class Error(
         val featureForm: FeatureForm,
-        val errors: List<ErrorInfo>
+        val title: String,
+        val details: String,
+        val subTitle: String = ""
     ) : UIState()
 }
 
 /**
  * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
- * the actual message string use [FeatureFormValidationException.getString] in the composition.
+ * the actual message string use [FeatureFormValidationException.getMessage] in the composition.
  */
-data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
+data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException) {
+    override fun toString(): String = "$fieldName: ${error.getMessage()}"
+}
 
 /**
  * Base class for context aware AndroidViewModel. This class must have only a single application
@@ -133,20 +163,9 @@ class MapViewModel @Inject constructor(
 
     init {
         scope.launch {
-            // check if this map has a FeatureFormDefinition on any of its layers
-            checkFeatureFormDefinition()
-        }
-    }
-
-    private suspend fun checkFeatureFormDefinition() {
-        map.load()
-        val layer = map.operationalLayers.firstOrNull {
-            it.hasFeatureFormDefinition()
-        }
-        _uiState.value = if (layer == null) {
-            UIState.NoFeatureFormDefinition
-        } else {
-            UIState.NotEditing
+            // load the map and set the UI state to not editing
+            map.load()
+            _uiState.value = UIState.NotEditing
         }
     }
 
@@ -158,141 +177,111 @@ class MapViewModel @Inject constructor(
      *
      * @return a Result indicating success, or any error encountered.
      */
-    suspend fun commitEdits(): Result<Unit> {
-        val state = (_uiState.value as? UIState.Editing)
-            ?: return Result.failure(IllegalStateException("Not in editing state"))
-        // build the list of errors
-        val errors = mutableListOf<ErrorInfo>()
-        val featureForm = state.featureForm
-        featureForm.validationErrors.value.forEach { entry ->
-            entry.value.forEach { error ->
-                featureForm.elements.getFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value || formElement.hasValueExpression) {
-                        errors.add(
-                            ErrorInfo(
-                                formElement.label,
-                                error as FeatureFormValidationException
-                            )
-                        )
-                    }
-                }
-            }
-        }
-        // set the state to committing with the errors if any
-        _uiState.value = UIState.Committing(
-            featureForm = featureForm,
-            errors = errors
-        )
-        // if there are no errors then update the feature
-        return if (errors.isEmpty()) {
-            val serviceFeatureTable =
-                featureForm.feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
-                    IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
-                )
-            var result = Result.success(Unit)
-            featureForm.finishEditing().onSuccess {
-                serviceFeatureTable.serviceGeodatabase?.let { database ->
-                    if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
-                        database.applyEdits().onFailure {
-                            result = Result.failure(it)
-                        }
-                    } else {
-                        serviceFeatureTable.applyEdits().onFailure {
-                            result = Result.failure(it)
-                        }
-                    }
-                }
-                featureForm.feature.refresh()
-                // unselect the feature after the edits have been saved
-                (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
-            }.onFailure {
-                result = Result.failure(it)
-            }
-            // set the state to not editing since the feature was updated successfully
-            _uiState.value = UIState.NotEditing
-            result
-        } else {
-            // even though there are errors send a success result since the operation was successful
-            // and the control is back with the UI
-            Result.success(Unit)
-        }
+    suspend fun commitEdits() {
+        val editingState = _uiState.value as? UIState.Editing ?: return
+        validateEdits(editingState.featureForm)
+
+        val validatingState = _uiState.value as? UIState.Validating ?: return
+        finishEdits(validatingState.featureForm)
+
+        val finishingState = _uiState.value as? UIState.FinishingEdits ?: return
+        applyEditsToService(finishingState.featureForm)
     }
 
     /**
-     * Cancels the commit if the current state is [UIState.Committing] and sets the ui state to
-     * [UIState.Editing].
+     * Cancels the commit if the current state is [UIState.Error] and sets the ui state to
+     * [UIState.Editing]. This is useful when the user wants to cancel the commit and continue
+     * editing the feature.
      */
-    fun cancelCommit(): Result<Unit> {
-        val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
-            IllegalStateException("Not in committing state")
-        )
+    fun cancelCommit() {
+        val featureForm = when (val state = _uiState.value) {
+            is UIState.Error -> state.featureForm
+            else -> return
+        }
         // set the state back to an editing state while showing all errors using
         // ValidationErrorVisibility.Always
         _uiState.value = UIState.Editing(
-            previousState.featureForm,
+            featureForm,
             validationErrorVisibility = ValidationErrorVisibility.Visible
         )
-        return Result.success(Unit)
     }
 
-    fun selectNewFeature() =
+    /**
+     * Selects the new feature from the [UIState.Switching] state and sets the UI state to
+     * [UIState.Editing].
+     */
+    fun selectNewFeature() {
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             prevState.oldState.featureForm.discardEdits()
             val layer = prevState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
             layer.clearSelection()
             layer.selectFeature(prevState.newFeature)
-            _uiState.value =
-                UIState.Editing(
-                    featureForm = FeatureForm(
-                        prevState.newFeature,
-                        layer.featureFormDefinition!!
-                    )
-                )
+            _uiState.value = UIState.Editing(
+                featureForm = FeatureForm(prevState.newFeature)
+            )
         }
-
-    fun continueEditing() =
-        (_uiState.value as? UIState.Switching)?.let { prevState ->
-            _uiState.value = prevState.oldState
-        }
-
-    fun rollbackEdits(): Result<Unit> {
-        (_uiState.value as? UIState.Editing)?.let {
-            it.featureForm.discardEdits()
-            // unselect the feature
-            (it.featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
-            _uiState.value = UIState.NotEditing
-            return Result.success(Unit)
-        } ?: return Result.failure(IllegalStateException("Not in editing state"))
     }
 
+    /**
+     * Continues editing the previous feature from the [UIState.Switching] state.
+     */
+    fun continueEditing() = (_uiState.value as? UIState.Switching)?.let { prevState ->
+        _uiState.value = prevState.oldState
+    }
+
+    /**
+     * Rolls back any edits on the current feature and sets the UI state to not editing.
+     */
+    fun rollbackEdits() {
+        val featureForm = when (val state = _uiState.value) {
+            is UIState.Editing -> state.featureForm
+            is UIState.Error -> state.featureForm
+            else -> return
+        }
+        // discard the edits
+        featureForm.discardEdits()
+        // unselect the feature
+        (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
+        _uiState.value = UIState.NotEditing
+    }
+
+    /**
+     * Handles the single tap event on the map. Identifies the layers at the given screen coordinate
+     * and sets the UI state to select a feature if multiple features are identified.
+     */
     fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+        // do not identify layers if the state is editing
+        if (_uiState.value is UIState.Editing) return
         scope.launch {
             proxy.identifyLayers(
                 screenCoordinate = singleTapEvent.screenCoordinate,
-                tolerance = 22.dp,
-                returnPopupsOnly = false
+                tolerance = 10.dp,
+                returnPopupsOnly = false,
+                maximumResults = null
             ).onSuccess { results ->
+                val context = getApplication<Application>().applicationContext
                 try {
-                    results.forEach { result ->
-                        result.geoElements.firstOrNull {
-                            it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                        }?.let {
-                            if (_uiState.value is UIState.Editing) {
-                                val currentState = _uiState.value as UIState.Editing
-                                val newFeature = it as ArcGISFeature
-                                _uiState.value = UIState.Switching(
-                                    oldState = currentState,
-                                    newFeature = newFeature
-                                )
-                            } else if (_uiState.value is UIState.NotEditing) {
-                                val feature = it as ArcGISFeature
-                                val layer = feature.featureTable!!.layer as FeatureLayer
-                                val featureForm =
-                                    FeatureForm(feature, layer.featureFormDefinition!!)
-                                // select the feature
-                                layer.selectFeature(feature)
-                                // set the UI to an editing state with the FeatureForm
-                                _uiState.value = UIState.Editing(featureForm)
+                    if (results.isNotEmpty()) {
+                        val layerFeatures = results.getAllFeatures()
+                        when (val featureCount = layerFeatures.getFeatureCount()) {
+                            0 -> {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "No Features found.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+
+                            1 -> {
+                                // select the feature if there is only one
+                                selectFeature(layerFeatures.values.first().first())
+                            }
+
+                            else -> {
+                                // set the UI to select a feature from the list
+                                _uiState.value = UIState.SelectFeature(layerFeatures, featureCount)
                             }
                         }
                     }
@@ -300,8 +289,8 @@ class MapViewModel @Inject constructor(
                     e.printStackTrace()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            getApplication<Application>().applicationContext,
-                            "failed to create a FeatureForm for the feature",
+                            context,
+                            "Failed to create a FeatureForm for the feature",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -310,8 +299,152 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Selects the feature and sets the UI state to editing. If the current state is [UIState.Editing]
+     * then the state is switched to [UIState.Switching] to allow switching between features.
+     */
+    fun selectFeature(feature: ArcGISFeature) {
+        when (_uiState.value) {
+            is UIState.SelectFeature, UIState.NotEditing -> {
+                // if the current state is selecting a feature or not editing then select the feature
+                val layer = feature.featureTable!!.layer as FeatureLayer
+                val featureForm = FeatureForm(feature)
+                // select the feature
+                layer.selectFeature(feature)
+                // set the UI to an editing state with the FeatureForm
+                _uiState.value = UIState.Editing(featureForm)
+                scope.launch {
+                    // set the viewpoint to the feature extent
+                    feature.geometry?.let {
+                        proxy.setViewpointGeometry(it.extent, 50.0)
+                    }
+                }
+            }
+
+            is UIState.Editing -> {
+                // if the current state is editing then switch to the switching state
+                val currentState = _uiState.value as UIState.Editing
+                _uiState.value = UIState.Switching(
+                    oldState = currentState,
+                    newFeature = feature
+                )
+            }
+
+            else -> return
+        }
+    }
+
+    /**
+     * Sets the UI state to not editing.
+     */
     fun setDefaultState() {
         _uiState.value = UIState.NotEditing
+    }
+
+    /**
+     * Validates the edits in the [featureForm] and sets the UI state to error if there are any
+     * validation errors.
+     */
+    private fun validateEdits(featureForm: FeatureForm) {
+        _uiState.value = UIState.Validating(featureForm)
+        val validationErrors = filterErrors(featureForm)
+        if (validationErrors.isNotEmpty()) {
+            val errorText = validationErrors.joinToString(separator = "\n\n") { "$it" }
+            _uiState.value = UIState.Error(
+                featureForm,
+                title = "The Form has errors",
+                subTitle = "There are ${validationErrors.count()} validation errors." +
+                    "These must be fixed to submit the form.",
+                details = errorText
+            )
+        }
+    }
+
+    /**
+     * Finishes the edits in the [featureForm] and sets the UI state to error if there are any
+     * errors.
+     */
+    private suspend fun finishEdits(featureForm: FeatureForm) {
+        _uiState.value = UIState.FinishingEdits(featureForm)
+        featureForm.finishEditing().onFailure {
+            _uiState.value = UIState.Error(
+                featureForm,
+                title = "Failed to save edits to the database",
+                details = it.message ?: it.javaClass.simpleName
+            )
+        }
+    }
+
+    /**
+     * Applies the edits in the [featureForm]'s table to the service and sets the UI state to error
+     * if there are any errors.
+     *
+     * If there are no errors, the feature is refreshed and the UI state is set to not editing.
+     */
+    private suspend fun applyEditsToService(featureForm: FeatureForm) {
+        _uiState.value = UIState.Committing(featureForm)
+        val serviceFeatureTable = featureForm.feature.featureTable as? ServiceFeatureTable ?: run {
+            _uiState.value = UIState.Error(
+                featureForm,
+                title = "Failed to sync edits with the service",
+                details = "Cannot save edits without a ServiceFeatureTable"
+            )
+            return
+        }
+        // check if the service supports applyEdits using the service geodatabase
+        val canUseServiceGeodatabaseApplyEdits =
+            serviceFeatureTable.serviceGeodatabase?.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true
+        val errors = mutableListOf<Throwable>()
+        if (canUseServiceGeodatabaseApplyEdits) {
+            serviceFeatureTable.serviceGeodatabase!!.applyEdits()
+                .onSuccess { featureTableEditResults ->
+                    // build a list of edit results from the feature table edit results
+                    errors.addAll(
+                        featureTableEditResults.flatMap {
+                            it.editResults.asSequence()
+                        }.errors
+                    )
+                }
+                .onFailure { errors.add(it) }
+        } else {
+            serviceFeatureTable.applyEdits().onSuccess { featureEditResults ->
+                errors.addAll(featureEditResults.errors)
+            }.onFailure {
+                errors.add(it)
+            }
+        }
+        // if there are errors then set the UI state to error
+        if (errors.isNotEmpty()) {
+            val errorText = errors.joinToString(separator = "\n") { it.message ?: "Unknown error" }
+            _uiState.value = UIState.Error(
+                featureForm,
+                title = "Failed to sync edits with the service",
+                details = errorText
+            )
+            return
+        }
+        // refresh the feature after the edits have been saved
+        featureForm.feature.refresh()
+        // unselect the feature after the edits have been saved
+        (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
+        // set the UI state to not editing
+        _uiState.value = UIState.NotEditing
+    }
+
+    /**
+     * Filters the validation errors in the [featureForm] to show only the errors for the editable
+     * fields and fields with value expressions.
+     */
+    private fun filterErrors(featureForm: FeatureForm): List<ErrorInfo> = buildList {
+        featureForm.validationErrors.value.forEach { entry ->
+            entry.value.forEach { error ->
+                featureForm.elements.getFieldFormElement(entry.key)?.let { formElement ->
+                    if (formElement.isEditable.value || formElement.hasValueExpression) {
+                        add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -319,40 +452,68 @@ class MapViewModel @Inject constructor(
  * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
  * null is returned.
  */
-fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
-    val fieldElements = filterIsInstance<FieldFormElement>()
-    val element = if (fieldElements.isNotEmpty()) {
-        fieldElements.firstNotNullOfOrNull {
-            if (it.fieldName == fieldName) it else null
-        }
-    } else {
-        null
-    }
+fun List<FormElement>.getFieldFormElement(fieldName: String): FieldFormElement? {
+    for (element in this) {
+        when (element) {
+            is FieldFormElement -> if (element.fieldName == fieldName) return element
+            is GroupFormElement -> element.elements.getFieldFormElement(fieldName)
+                ?.let { return it }
 
-    return element ?: run {
-        val groupElements = filterIsInstance<GroupFormElement>()
-        if (groupElements.isNotEmpty()) {
-            groupElements.firstNotNullOfOrNull {
-                it.elements.getFormElement(fieldName)
-            }
-        } else {
-            null
+            else -> continue
         }
+    }
+    return null
+}
+
+/**
+ * Returns all the [ArcGISFeature]s from the [IdentifyLayerResult] list including the sublayer
+ * results. The result is a map of layer name to a list of features.
+ */
+fun List<IdentifyLayerResult>.getAllFeatures(): Map<String, List<ArcGISFeature>> {
+    val map = mutableMapOf<String, List<ArcGISFeature>>()
+    forEach { result ->
+        // check if the result has sublayer results and recursively get all features
+        if (result.sublayerResults.isNotEmpty()) {
+            map += result.sublayerResults.getAllFeatures()
+        }
+        // find the ArcGISFeatures
+        result.geoElements.forEach { geoElement ->
+            if (geoElement is ArcGISFeature) {
+                val layerName = result.layerContent.name
+                map[layerName] = map[layerName]?.plus(geoElement) ?: listOf(geoElement)
+            }
+        }
+    }
+    return map
+}
+
+/**
+ * Returns the total number of features in the map.
+ */
+fun Map<String, List<ArcGISFeature>>.getFeatureCount(): Int {
+    return values.sumOf { it.size }
+}
+
+/**
+ * Returns the additional message if present or the message of the exception. If the exception is
+ * a [FeatureFormValidationException.RequiredException] then the message is "Field is required".
+ */
+fun FeatureFormValidationException.getMessage(): String {
+    return when (this) {
+        is FeatureFormValidationException.RequiredException -> "Field is required"
+        else -> additionalMessage ?: message
     }
 }
 
 /**
- * Returns true if the layer has a feature form definition. If the layer is a [GroupLayer] then
- * this function will return true if any of the layers in the group have a feature form definition.
+ * Returns a list of all the errors in the list of [FeatureEditResult]s that have an error
+ * including the attachment results that have an error.
  */
-private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when(this) {
-    is FeatureLayer -> {
-        load()
-        featureFormDefinition != null
+val List<FeatureEditResult>.errors: List<Throwable>
+    get() = mapNotNull { editResult ->
+        editResult.error
+    } + flatMap {
+        it.attachmentResults.mapNotNull { editResult ->
+            editResult.error
+        }
     }
-    is GroupLayer -> {
-        load()
-        layers.any { it.hasFeatureFormDefinition() }
-    }
-    else -> false
-}
