@@ -124,7 +124,7 @@ public fun FeatureForm(
         validationErrorVisibility = validationErrorVisibility,
         colorScheme = FeatureFormDefaults.colorScheme(),
         typography = FeatureFormDefaults.typography(),
-        onBarcodeAccessoryClick = null
+        onBarcodeAccessoryTap = null
     )
 }
 
@@ -146,7 +146,7 @@ public fun FeatureForm(
         validationErrorVisibility = validationErrorVisibility,
         colorScheme = colorScheme,
         typography = typography,
-        onBarcodeAccessoryClick = null
+        onBarcodeAccessoryTap = null
     )
 }
 
@@ -171,8 +171,8 @@ public fun FeatureForm(
  *
  * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
  * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
- * A callback is also provided via the [onBarcodeAccessoryClick] parameter, which is invoked with
- * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
+ * A callback is also provided via the [onBarcodeAccessoryTap] parameter, which is invoked with
+ * the [FieldFormElement] when its barcode accessory is tapped. This can be used to provide a custom
  * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
  * value to update the field value.
  *
@@ -199,7 +199,7 @@ public fun FeatureForm(
  * indicates errors are only visible once the respective field gains focus.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
- * @param onBarcodeAccessoryClick A callback that is invoked when the barcode accessory is clicked.
+ * @param onBarcodeAccessoryTap A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
  *
@@ -212,7 +212,7 @@ public fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)? = null
+    onBarcodeAccessoryTap: ((FieldFormElement) -> Unit)? = null
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -222,7 +222,7 @@ public fun FeatureForm(
             stateData = stateData,
             modifier = modifier,
             validationErrorVisibility = validationErrorVisibility,
-            onBarcodeAccessoryClick = onBarcodeAccessoryClick
+            onBarcodeAccessoryTap = onBarcodeAccessoryTap
         )
     }
 }
@@ -242,7 +242,7 @@ private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)?
+    onBarcodeAccessoryTap: ((FieldFormElement) -> Unit)?
 ) {
     val featureForm = stateData.featureForm
     // hold the list of form elements in a mutable state to make them observable
@@ -263,7 +263,7 @@ private fun FeatureForm(
             // expressions evaluated, load attachments
             formElements.value = featureForm.elements
         },
-        onBarcodeAccessoryClick = onBarcodeAccessoryClick
+        onBarcodeAccessoryTap = onBarcodeAccessoryTap
     )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -302,7 +302,7 @@ private fun FeatureFormBody(
     states: FormStateCollection,
     modifier: Modifier = Modifier,
     onExpressionsEvaluated: () -> Unit,
-    onBarcodeAccessoryClick: ((FieldFormElement) -> Unit)?
+    onBarcodeAccessoryTap: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -340,7 +340,7 @@ private fun FeatureFormBody(
                                 // set the onClick callback for the field element only if provided
                                 onClick = handleFieldFormElementTapAction(
                                     fieldFormElement = entry.formElement as FieldFormElement,
-                                    barcodeTapAction = onBarcodeAccessoryClick
+                                    barcodeTapAction = onBarcodeAccessoryTap
                                 ),
                             )
                         }
@@ -353,7 +353,7 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp),
                                 // set the onClick callback for the group element only if provided
                                 onFormElementClick = handleFormElementTapAction(
-                                    barcodeTapAction = onBarcodeAccessoryClick
+                                    barcodeTapAction = onBarcodeAccessoryTap
                                 )
                             )
                         }

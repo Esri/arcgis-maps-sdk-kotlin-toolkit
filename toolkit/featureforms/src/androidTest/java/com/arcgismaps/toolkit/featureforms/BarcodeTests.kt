@@ -86,7 +86,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryClick = {
+                onBarcodeAccessoryTap = {
                     // Custom barcode click event
                     fieldFormElement = it
                 }
@@ -133,7 +133,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryClick = {
+                onBarcodeAccessoryTap = {
                     // Custom barcode click event
                     fieldFormElement = it
                 }
@@ -165,7 +165,7 @@ class BarcodeTests : FeatureFormTestRunner(
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryClick = null
+                onBarcodeAccessoryTap = null
             )
         }
         val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
@@ -180,12 +180,17 @@ class BarcodeTests : FeatureFormTestRunner(
         scanner.assertIsDisplayed()
     }
 
+    /**
+     * Given a `FeatureForm` with a `FieldFormElement` in a `GroupFormElement` and no custom barcode click action
+     * When the scan icon on a barcode form element is clicked
+     * Then the default barcode click action is triggered
+     */
     @Test
     fun testDefaultBarcodeClickActionInGroup() = runTest {
         composeTestRule.setContent {
             FeatureForm(
                 featureForm = featureForm,
-                onBarcodeAccessoryClick = null
+                onBarcodeAccessoryTap = null
             )
         }
         val barcodeElement = composeTestRule.onNodeWithText("Barcode in Group")
