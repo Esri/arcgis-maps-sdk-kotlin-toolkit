@@ -108,6 +108,48 @@ public sealed class ValidationErrorVisibility {
     public object Visible : ValidationErrorVisibility()
 }
 
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
+    level = DeprecationLevel.HIDDEN
+)
+@Composable
+public fun FeatureForm(
+    featureForm: FeatureForm,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+) {
+    FeatureForm(
+        featureForm = featureForm,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility,
+        colorScheme = FeatureFormDefaults.colorScheme(),
+        typography = FeatureFormDefaults.typography(),
+        onBarcodeAccessoryClick = null
+    )
+}
+
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that provides the barcode accessory tap callback.",
+    level = DeprecationLevel.HIDDEN
+)
+@Composable
+public fun FeatureForm(
+    featureForm: FeatureForm,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+) {
+    FeatureForm(
+        featureForm = featureForm,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility,
+        colorScheme = colorScheme,
+        typography = typography,
+        onBarcodeAccessoryClick = null
+    )
+}
+
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
