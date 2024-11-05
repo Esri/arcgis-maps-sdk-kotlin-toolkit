@@ -54,7 +54,7 @@ import kotlin.math.roundToInt
 @Composable
 fun MainScreen() {
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
+        ArcGISScene().apply {
             operationalLayers.add(
                 ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
             )
@@ -62,6 +62,7 @@ fun MainScreen() {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
                 )
+                opacity = 0f
             }
         }
     }
