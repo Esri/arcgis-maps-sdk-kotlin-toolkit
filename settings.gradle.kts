@@ -28,19 +28,25 @@ pluginManagement {
 val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
     .run { this == "true" }
 
-// The version of the ArcGIS Maps SDK for Kotlin dependency
-val sdkVersionNumber: String = if (finalBuild) {
-    // for final build we depend on the same version of the SDK as the version we are building.
-    providers.gradleProperty("versionNumber").orNull
-        ?: throw IllegalStateException("versionNumber must be set to publish")
-} else {
-    // otherwise use the version found in gradle.properties
-    providers.gradleProperty("sdkVersionNumber").orNull
-        ?: throw IllegalStateException("sdkVersionNumber must be set")
-}
+// The version of the ArcGIS Maps SDK for Kotlin dependency.
+// First look for the version number provided via command line (for CI builds), if not found,
+// take the one defined in gradle.properties.
+val sdkVersionNumber: String =
+    providers.gradleProperty("versionNumber").orNull?.let { versionFromCommandLine ->
+        versionFromCommandLine
+    } ?: providers.gradleProperty("sdkVersionNumber").orNull?.let { versionFromFile ->
+        versionFromFile
+    } ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
 
-// The build number of the ArcGIS Maps SDK for Kotlin dependency from gradle.properties
-val sdkBuildNumber: String by settings
+// The build number of the ArcGIS Maps SDK for Kotlin dependency.
+// First look for the version number provided via command line (for CI builds), if not found,
+// take the one defined in gradle.properties.
+val sdkBuildNumber: String =
+    providers.gradleProperty("buildNumber").orNull?.let { versionFromCommandLine ->
+        versionFromCommandLine
+    } ?: providers.gradleProperty("sdkBuildNumber").orNull?.let { versionFromFile ->
+        versionFromFile
+    } ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -65,10 +71,11 @@ dependencyResolutionManagement {
         create("arcgis") {
             val versionAndBuild = if (finalBuild) {
                 logger.warn(
-                    "requested release candidate for the SDK dependency $sdkVersionNumber"
+                    "Requested release candidate for the SDK dependency $sdkVersionNumber"
                 )
                 sdkVersionNumber
             } else {
+                logger.info("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
                 "$sdkVersionNumber-$sdkBuildNumber"
             }
 
