@@ -42,6 +42,9 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  *
  * All Authentication components will be displayed in full screen. See [DialogAuthenticator] for alternate behavior.
  *
+ * Note: It is possible to move the Authentication UI when displaying the keyboard by setting the flag
+ * `android:windowSoftInputMode="adjustResize"` in your `AndroidManifest.xml` for the corresponding activity.
+ *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
