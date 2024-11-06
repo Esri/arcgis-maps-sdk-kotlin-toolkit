@@ -31,6 +31,7 @@ val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "fal
 // The version of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
+// CI builds pass -PversionNumber=${BUILDVER}
 val sdkVersionNumber: String =
     providers.gradleProperty("versionNumber").orNull
         ?: providers.gradleProperty("sdkVersionNumber").orNull
@@ -39,6 +40,7 @@ val sdkVersionNumber: String =
 // The build number of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
+// CI builds pass -PbuildNumber=${BUILDNUM}
 val sdkBuildNumber: String =
     providers.gradleProperty("buildNumber").orNull
         ?: providers.gradleProperty("sdkBuildNumber").orNull
