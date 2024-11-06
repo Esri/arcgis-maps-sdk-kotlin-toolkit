@@ -151,7 +151,7 @@ private fun AuthenticatorDelegate(
     pendingServerTrustChallenge?.let {
         if (container != null) {
             container {
-                ServerTrustAuthenticator(it, modifier)
+                ServerTrustAuthenticatorDialog(it, modifier)
             }
         } else {
             ServerTrustAuthenticator(it, modifier)
