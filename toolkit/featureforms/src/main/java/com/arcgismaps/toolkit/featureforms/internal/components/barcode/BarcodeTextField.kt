@@ -23,11 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -90,16 +87,6 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // show clear button if there is text in the field
-                if (value.data.isNotEmpty()) {
-                    IconButton(onClick = { state.onValueChanged("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "clear text",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
                 BarcodeScannerButton {
                     dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
                 }
@@ -110,12 +97,14 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
 
 @Composable
 private fun BarcodeScannerButton(onClick: () -> Unit) {
-    val tintColor = MaterialTheme.colorScheme.onSurface
+    val tintColor = Color(0xFF1E88E5)
     Box(modifier = Modifier.padding(8.dp)) {
         Image(
             painter = painterResource(id = R.drawable.barcode_scanner),
             contentDescription = "scan barcode",
-            modifier = Modifier.clickable { onClick() },
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { onClick() },
             colorFilter = ColorFilter.tint(tintColor)
         )
     }
@@ -132,7 +121,7 @@ private fun BarcodeTextFieldPreview() {
                 label = "Barcode",
                 placeholder = "Scan barcode",
                 description = "Scan barcode to populate",
-                value = MutableStateFlow(""),
+                value = MutableStateFlow("01234F1234"),
                 required = MutableStateFlow(true),
                 editable = MutableStateFlow(true),
                 visible = MutableStateFlow(true),

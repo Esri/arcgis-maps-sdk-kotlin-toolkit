@@ -52,8 +52,6 @@ class BarcodeTests : FeatureFormTestRunner(
         barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
         barcodeFormElement.performTextInput("https://esri.com")
-        // Check the clear icon is displayed
-        barcodeFormElement.onChildWithContentDescription("clear text").assertIsDisplayed()
         // Check the scan icon is displayed
         barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
