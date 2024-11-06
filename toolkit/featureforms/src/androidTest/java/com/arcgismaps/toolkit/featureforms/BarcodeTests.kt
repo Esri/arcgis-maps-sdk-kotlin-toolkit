@@ -35,7 +35,7 @@ class BarcodeTests : FeatureFormTestRunner(
      * Test case 11.1:
      * Given a `FeatureForm` with a `BarcodeScannerFormInput`
      * When the `FeatureForm` is displayed
-     * Then the barcode form element is displayed with the scan and clear icons
+     * Then the barcode form element is displayed with the scan icon
      * And receives length validation errors when the input length is out of range
      *
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-barcode-input-type
