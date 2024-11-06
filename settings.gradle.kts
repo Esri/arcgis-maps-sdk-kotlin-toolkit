@@ -73,7 +73,7 @@ dependencyResolutionManagement {
                 )
                 sdkVersionNumber
             } else {
-                logger.info("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
+                logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
                 "$sdkVersionNumber-$sdkBuildNumber"
             }
 
