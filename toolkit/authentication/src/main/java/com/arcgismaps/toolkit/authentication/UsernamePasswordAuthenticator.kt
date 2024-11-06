@@ -82,11 +82,30 @@ public fun UsernamePasswordAuthenticator(
 ) {
     val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
     val hostName = usernamePasswordChallenge.hostname
+    val focusManager = LocalFocusManager.current
+    var usernameFieldText by rememberSaveable { mutableStateOf("") }
+    var passwordFieldText by rememberSaveable { mutableStateOf("") }
+
+    fun submitUsernamePassword() {
+        if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
+            usernamePasswordChallenge.continueWithCredentials(
+                usernameFieldText,
+                passwordFieldText
+            )
+            passwordFieldText = ""
+        }
+    }
+
+    val keyboardActions = remember {
+        KeyboardActions(
+            onSend = { submitUsernamePassword() }
+        )
+    }
+
 
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -109,31 +128,13 @@ public fun UsernamePasswordAuthenticator(
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val focusManager = LocalFocusManager.current
-            var usernameFieldText by rememberSaveable { mutableStateOf("") }
-            var passwordFieldText by rememberSaveable { mutableStateOf("") }
-
-            fun submitUsernamePassword() {
-                if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
-                    usernamePasswordChallenge.continueWithCredentials(
-                        usernameFieldText,
-                        passwordFieldText
-                    )
-                    passwordFieldText = ""
-                }
-            }
-
-            val keyboardActions = remember {
-                KeyboardActions(
-                    onSend = { submitUsernamePassword() }
-                )
-            }
             if (additionalInfo != null) {
                 Text(text = additionalInfo, style = MaterialTheme.typography.labelLarge.copy(color = Color.Red))
             }
@@ -163,6 +164,7 @@ public fun UsernamePasswordAuthenticator(
             )
             Spacer(modifier = Modifier.height(32.dp))
             Column (
+                modifier = Modifier.padding(horizontal = 32.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
