@@ -32,21 +32,17 @@ val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "fal
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
 val sdkVersionNumber: String =
-    providers.gradleProperty("versionNumber").orNull?.let { versionFromCommandLine ->
-        versionFromCommandLine
-    } ?: providers.gradleProperty("sdkVersionNumber").orNull?.let { versionFromFile ->
-        versionFromFile
-    } ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
+    providers.gradleProperty("versionNumber").orNull
+        ?: providers.gradleProperty("sdkVersionNumber").orNull
+        ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
 
 // The build number of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
 val sdkBuildNumber: String =
-    providers.gradleProperty("buildNumber").orNull?.let { versionFromCommandLine ->
-        versionFromCommandLine
-    } ?: providers.gradleProperty("sdkBuildNumber").orNull?.let { versionFromFile ->
-        versionFromFile
-    } ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
+    providers.gradleProperty("buildNumber").orNull
+        ?: providers.gradleProperty("sdkBuildNumber").orNull
+        ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
