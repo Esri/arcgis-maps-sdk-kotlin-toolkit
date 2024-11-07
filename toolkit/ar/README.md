@@ -1,4 +1,4 @@
-# Display scenes in augmented reality
+# Display scenes in Augmented Reality
 
 Augmented reality experiences are designed to "augment" the physical world with virtual content that respects real world scale, position, and orientation of a device. In the case of AR in the Kotlin Toolkit, a SceneView displays 3D geographic data as virtual content on top of a camera feed which represents the real, physical world.
 
@@ -52,7 +52,7 @@ Configure an `ArcGISScene` with the data you want to render in the table top sce
 fun MainScreen() {
     ...
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
+        ArcGISScene().apply {
             operationalLayers.add(
                 ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
             )
