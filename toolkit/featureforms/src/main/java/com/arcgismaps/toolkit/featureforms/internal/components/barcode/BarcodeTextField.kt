@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -98,15 +96,14 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
 
 @Composable
 private fun BarcodeScannerButton(onClick: () -> Unit) {
-    val tintColor = if (isSystemInDarkTheme()) Color(0xFF90CAF9) else Color(0xFF1E88E5)
     Box(modifier = Modifier.padding(8.dp)) {
         Image(
             painter = painterResource(id = R.drawable.barcode_scanner),
             contentDescription = "scan barcode",
             modifier = Modifier
-                .size(24.dp)
+                .size(BarcodeTextFieldDefaults.barcodeIconSize)
                 .clickable { onClick() },
-            colorFilter = ColorFilter.tint(tintColor)
+            colorFilter = ColorFilter.tint(BarcodeTextFieldDefaults.barcodeIconTintColor)
         )
     }
 }
