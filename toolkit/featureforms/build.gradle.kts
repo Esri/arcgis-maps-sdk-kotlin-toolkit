@@ -128,5 +128,6 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.bundles.androidXTest)
     debugImplementation(libs.bundles.debug)
 }
