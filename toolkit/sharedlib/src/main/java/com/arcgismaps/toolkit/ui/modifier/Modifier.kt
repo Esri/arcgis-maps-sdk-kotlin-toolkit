@@ -14,11 +14,11 @@
  *  limitations under the License.
  */
 
-package com.arcgismaps.toolkit.popup.internal.ui
+package com.arcgismaps.toolkit.ui.modifier
 
 import androidx.compose.ui.Modifier
 
-internal fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
+fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
     if (condition) {
         then()
     } else {

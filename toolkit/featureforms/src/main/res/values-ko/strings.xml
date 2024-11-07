@@ -113,4 +113,6 @@
     <string name="attachment_too_large">파일이 너무 큽니다. 크기가 50MB 미만인 파일을 추가하세요.</string>
     <string name="attachment_is_empty">비어 있는 파일은 지원되지 않음</string>
     <string name="download_empty_file">비어 있는 파일은 다운로드할 수 없음</string>
+    <string name="attachment_deleted">%1s이(가) 성공적으로 삭제됨</string>
+    <string name="attachment_size_limit_exceeded">%1$s보다 큰 첨부 파일은 다운로드할 수 없음</string>
 </resources>
