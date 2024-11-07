@@ -21,11 +21,12 @@ package com.arcgismaps.toolkit.authentication
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,50 +45,14 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 
 /**
- * Displays a trust or distrust server prompt to the user.
+ * Displays a trust or distrust server prompt to the user in a Dialog.
  *
  * @param serverTrustChallenge the pending [ServerTrustChallenge] that initiated this prompt.
  * @param modifier the [Modifier] to be applied to this ServerTrustAuthenticator.
- * @since 200.2.0
+ * @since 200.6.0
  */
 @Composable
-internal fun ServerTrustAuthenticatorDialog_NourVersion(
-    serverTrustChallenge: ServerTrustChallenge,
-    modifier: Modifier = Modifier
-) {
-    AlertDialog(modifier = modifier, text = {
-        Text(
-            text = buildAnnotatedString {
-                val hostname = serverTrustChallenge.challenge.hostname
-                val string = stringResource(
-                    id = R.string.server_trust_message,
-                    hostname
-                )
-                val startIdx = string.indexOf(hostname)
-                val endIdx = startIdx + hostname.length
-                append(string)
-                addStyle(
-                    SpanStyle(
-                        fontFamily = FontFamily.Monospace,
-                    ), startIdx, endIdx
-                )
-            },
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Start
-        )
-    }, onDismissRequest = { serverTrustChallenge.distrust() }, confirmButton = {
-        TextButton(onClick = { serverTrustChallenge.trust() }) {
-            Text(text = stringResource(id = R.string.allow_connection))
-        }
-    }, dismissButton = {
-        TextButton(onClick = { serverTrustChallenge.distrust() }) {
-            Text(stringResource(id = R.string.cancel))
-        }
-    })
-}
-
-@Composable
-internal fun ServerTrustAuthenticatorDialog_Erick(
+internal fun ServerTrustAuthenticatorDialog(
     serverTrustChallenge: ServerTrustChallenge,
     modifier: Modifier = Modifier
 ) {
@@ -99,7 +61,7 @@ internal fun ServerTrustAuthenticatorDialog_Erick(
             serverTrustChallenge.distrust()
         }
     ) {
-        ServerTrustAuthenticator(
+        ServerTrustAuthenticatorImpl(
             serverTrustChallenge.challenge.hostname,
             modifier,
             onConfirm = { serverTrustChallenge.trust() },
@@ -108,9 +70,38 @@ internal fun ServerTrustAuthenticatorDialog_Erick(
     }
 }
 
+/**
+ * Displays a trust or distrust server prompt to the user.
+ *
+ * @param serverTrustChallenge the pending [ServerTrustChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this ServerTrustAuthenticator.
+ * @since 200.6.0
+ */
 @Composable
-private fun ServerTrustAuthenticator(
-    hostName: String,
+internal fun ServerTrustAuthenticator(
+    serverTrustChallenge: ServerTrustChallenge,
+    modifier: Modifier = Modifier
+) {
+    ServerTrustAuthenticatorImpl(
+        serverTrustChallenge.challenge.hostname,
+        modifier,
+        onConfirm = { serverTrustChallenge.trust() },
+        onCancel = { serverTrustChallenge.distrust() }
+    )
+}
+
+/**
+ * Displays a trust or distrust server prompt to the user.
+ *
+ * @param hostname the hostname of the server to trust.
+ * @param modifier the [Modifier] to be applied to this ServerTrustAuthenticator.
+ * @param onConfirm the callback to be invoked when the user confirms the trust.
+ * @param onCancel the callback to be invoked when the user cancels the trust.
+ * @since 200.6.0
+ */
+@Composable
+private fun ServerTrustAuthenticatorImpl(
+    hostname: String,
     modifier: Modifier = Modifier,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
@@ -123,31 +114,17 @@ private fun ServerTrustAuthenticator(
     ) {
         Column(
             modifier = modifier
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
             Text(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 16.dp, bottom = 16.dp),
-                text = buildAnnotatedString {
-                    val string = stringResource(
-                        id = R.string.server_trust_message,
-                        hostName
-                    )
-                    val startIdx = string.indexOf(hostName)
-                    val endIdx = startIdx + hostName.length
-                    append(string)
-                    addStyle(
-                        SpanStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = MaterialTheme.typography.titleMedium.fontSize
-                        ), startIdx, endIdx
-                    )
-                },
-                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 24.dp),
+                text = stringResource(id = R.string.server_trust_message, hostname),
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Start,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
@@ -155,17 +132,15 @@ private fun ServerTrustAuthenticator(
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
-                TextButton(onClick = {
-                    onConfirm()
-                }) {
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(onClick = { onConfirm() }) {
                     Text(
-                        modifier = Modifier.padding(0.dp),
                         text = stringResource(id = R.string.allow_connection),
-                        style = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center)
-
+                        style = MaterialTheme.typography.labelLarge.copy(textAlign = TextAlign.Right),
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -176,33 +151,42 @@ private fun ServerTrustAuthenticator(
 
 @Preview
 @Composable
-private fun ServerTrustAuthenticator_Erick_Preview() {
+private fun ServerTrustAuthenticator_Preview() {
     val modifier = Modifier
     Surface(modifier = modifier.fillMaxSize()) {
-        ServerTrustAuthenticator("https://www.arcgis.com", modifier = modifier, {}, {})
+        ServerTrustAuthenticatorImpl(
+            hostname = "https://www.arcgis.com",
+            modifier = Modifier,
+            onCancel = {},
+            onConfirm = {}
+        )
     }
 }
 
 @Preview
 @Composable
-private fun ServerTrustAuthenticatorDialog_Erick_Preview() {
-    val modifier = Modifier/*.fillMaxSize()*/
-//        .background(Color.Green)
-//        .padding(16.dp)
-    ServerTrustAuthenticatorDialog_Erick(
+private fun ServerTrustAuthenticatorDialogPreview() {
+    ServerTrustAuthenticatorDialog(
         serverTrustChallenge = ServerTrustChallenge(
             NetworkAuthenticationChallenge(
                 "https://www.arcgis.com",
                 NetworkAuthenticationType.ServerTrust,
-                Throwable()
-            ), {}), modifier
+                Throwable("Untrusted Host")
+            )
+        ) {}
     )
 }
 
-@Preview(locale = "hu")
+@Preview(locale = "de") // Preview in German for long translations
 @Composable
-private fun ServerTrustAuthenticatorDialog_Erick_Preview_LONG() {
+private fun ServerTrustAuthenticatorDialog2() {
     Dialog(onDismissRequest = {}) {
-        ServerTrustAuthenticator("https://www.arcgis.com", modifier = Modifier, {}, {})
+        ServerTrustAuthenticatorImpl(
+            hostname = "https://www.arcgis.com",
+            modifier = Modifier,
+            onCancel = {},
+            onConfirm = {}
+        )
     }
 }
+
