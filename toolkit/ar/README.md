@@ -44,6 +44,14 @@ The `TableTopSceneView` requires camera permissions, which are requested by defa
     android:required="true" />
 ```
 
+If ARCore is not optional for your application to function (as is the case with the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp)), you also need to add the following to your `AndroidManifest.xml`:
+
+```xml
+<!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
+    to be installed, as the app does not include any non-AR features. -->
+<meta-data android:name="com.google.ar.core" android:value="required" />
+```
+
 Configure an `ArcGISScene` with the data you want to render in the table top scene:
 
 ```kotlin
