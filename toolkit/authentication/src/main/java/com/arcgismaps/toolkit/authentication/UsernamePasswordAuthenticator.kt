@@ -100,11 +100,7 @@ internal fun UsernamePasswordAuthenticatorDelegate(
     modifier: Modifier = Modifier
 ) {
     val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
             additionalInfo = additionalInfo ?: "",
@@ -179,9 +175,10 @@ private fun UsernamePasswordAuthenticatorImpl(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
         )
-        Box(modifier = Modifier
-            .height(24.dp)
-            .fillMaxWidth(),
+        Box(
+            modifier = Modifier
+                .height(24.dp)
+                .fillMaxWidth(),
             contentAlignment = Alignment.BottomStart
         ) {
             if (additionalInfo.isNotEmpty()) {
