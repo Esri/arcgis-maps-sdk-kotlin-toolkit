@@ -26,8 +26,8 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
 
 ### Prerequisites
 
-`TableTopSceneView` requires ARCore, thus it requires an ARCore supported device that has installed Google Play Services for AR. For more details see the [ARCore documentation](https://developers.google.com/ar/develop/java/enable-arcore).
-Note - the `TableTopSceneView` checks for availability of ARCore automatically. If ARCore is not supported by the device, the `TableTopSceneView` will fail to initialize with `TableTopSceneViewStatus.FailedToInitialize`.
+`TableTopSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `TableTopSceneView`. For an example see how it is done in the micro app's [MainActivity](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/microapps/ArTabletopApp/app/src/main/java/com/arcgismaps/toolkit/artabletopapp/MainActivity.kt).
+Note - the `TableTopSceneView` checks for availability of ARCore when it enters the composition. If ARCore is not supported by the device or not installed, the `TableTopSceneView` will fail to initialize with `TableTopSceneViewStatus.FailedToInitialize`.
 
 ### Usage
 
