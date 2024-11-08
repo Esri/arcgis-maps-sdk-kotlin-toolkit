@@ -152,26 +152,36 @@ private fun ServerTrustAuthenticatorImpl(
     }
 }
 
+@Preview
+@Composable
+private fun ServerTrustAuthenticatorImpl_Preview() {
+    ServerTrustAuthenticatorImpl(
+        "https://www.arcgis.com",
+        onConfirm = {},
+        onCancel = {}
+    )
+}
 
 @Preview
 @Composable
 private fun ServerTrustAuthenticator_Preview() {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        ServerTrustAuthenticator(
-            serverTrustChallenge = ServerTrustChallenge(
-                NetworkAuthenticationChallenge(
-                    "https://www.arcgis.com",
-                    NetworkAuthenticationType.ServerTrust,
-                    Throwable("Untrusted Host")
-                )
-            ) {}
-        )
-    }
+    val modifier = Modifier
+    ServerTrustAuthenticator(
+        serverTrustChallenge = ServerTrustChallenge(
+            NetworkAuthenticationChallenge(
+                "https://www.arcgis.com",
+                NetworkAuthenticationType.ServerTrust,
+                Throwable("Untrusted Host")
+            )
+        ) {},
+        modifier = modifier
+    )
 }
 
 @Preview
 @Composable
 private fun ServerTrustAuthenticatorDialogPreview() {
+    val modifier = Modifier
     ServerTrustAuthenticatorDialog(
         serverTrustChallenge = ServerTrustChallenge(
             NetworkAuthenticationChallenge(
@@ -179,7 +189,8 @@ private fun ServerTrustAuthenticatorDialogPreview() {
                 NetworkAuthenticationType.ServerTrust,
                 Throwable("Untrusted Host")
             )
-        ) {}
+        ) {},
+        modifier = modifier
     )
 }
 
