@@ -61,12 +61,19 @@ internal fun ServerTrustAuthenticatorDialog(
             serverTrustChallenge.distrust()
         }
     ) {
-        ServerTrustAuthenticatorImpl(
-            serverTrustChallenge.challenge.hostname,
-            modifier,
-            onConfirm = { serverTrustChallenge.trust() },
-            onCancel = { serverTrustChallenge.distrust() }
-        )
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            ServerTrustAuthenticatorImpl(
+                serverTrustChallenge.challenge.hostname,
+                modifier,
+                onConfirm = { serverTrustChallenge.trust() },
+                onCancel = { serverTrustChallenge.distrust() }
+            )
+        }
     }
 }
 
@@ -106,43 +113,36 @@ private fun ServerTrustAuthenticatorImpl(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = modifier
+            .padding(24.dp)
     ) {
-        Column(
-            modifier = modifier
-                .padding(24.dp)
+        Text(
+            modifier = Modifier.padding(bottom = 24.dp),
+            text = stringResource(id = R.string.server_trust_message, hostname),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Start,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                modifier = Modifier.padding(bottom = 24.dp),
-                text = stringResource(id = R.string.server_trust_message, hostname),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Start,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+            TextButton(
+                onClick = { onCancel() }
             ) {
-                TextButton(
-                    onClick = { onCancel() }
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.cancel),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                TextButton(onClick = { onConfirm() }) {
-                    Text(
-                        text = stringResource(id = R.string.allow_connection),
-                        style = MaterialTheme.typography.labelLarge.copy(textAlign = TextAlign.Right),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+                Text(
+                    text = stringResource(id = R.string.cancel),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            TextButton(onClick = { onConfirm() }) {
+                Text(
+                    text = stringResource(id = R.string.allow_connection),
+                    style = MaterialTheme.typography.labelLarge.copy(textAlign = TextAlign.Right),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -152,13 +152,15 @@ private fun ServerTrustAuthenticatorImpl(
 @Preview
 @Composable
 private fun ServerTrustAuthenticator_Preview() {
-    val modifier = Modifier
-    Surface(modifier = modifier.fillMaxSize()) {
-        ServerTrustAuthenticatorImpl(
-            hostname = "https://www.arcgis.com",
-            modifier = Modifier,
-            onCancel = {},
-            onConfirm = {}
+    Surface(modifier = Modifier.fillMaxSize()) {
+        ServerTrustAuthenticator(
+            serverTrustChallenge = ServerTrustChallenge(
+                NetworkAuthenticationChallenge(
+                    "https://www.arcgis.com",
+                    NetworkAuthenticationType.ServerTrust,
+                    Throwable("Untrusted Host")
+                )
+            ) {}
         )
     }
 }
@@ -179,14 +181,15 @@ private fun ServerTrustAuthenticatorDialogPreview() {
 
 @Preview(locale = "de") // Preview in German for long translations
 @Composable
-private fun ServerTrustAuthenticatorDialog2() {
-    Dialog(onDismissRequest = {}) {
-        ServerTrustAuthenticatorImpl(
-            hostname = "https://www.arcgis.com",
-            modifier = Modifier,
-            onCancel = {},
-            onConfirm = {}
-        )
-    }
+private fun ServerTrustAuthenticatorDialogPreviewLocale() {
+    ServerTrustAuthenticatorDialog(
+        serverTrustChallenge = ServerTrustChallenge(
+            NetworkAuthenticationChallenge(
+                "https://www.arcgis.com",
+                NetworkAuthenticationType.ServerTrust,
+                Throwable("Untrusted Host")
+            )
+        ) {}
+    )
 }
 
