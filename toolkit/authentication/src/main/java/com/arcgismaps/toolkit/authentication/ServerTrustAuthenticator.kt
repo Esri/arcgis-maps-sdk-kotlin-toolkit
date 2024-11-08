@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -89,7 +90,7 @@ internal fun ServerTrustAuthenticator(
     serverTrustChallenge: ServerTrustChallenge,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         ServerTrustAuthenticatorImpl(
             serverTrustChallenge.challenge.hostname,
             modifier,
@@ -117,17 +118,16 @@ private fun ServerTrustAuthenticatorImpl(
 ) {
     Column(
         modifier = modifier
-            .padding(24.dp)
-            .fillMaxSize(),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            modifier = Modifier.padding(bottom = 24.dp),
             text = stringResource(id = R.string.server_trust_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start,
         )
+        Spacer(modifier = Modifier.height(24.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -138,15 +138,14 @@ private fun ServerTrustAuthenticatorImpl(
             ) {
                 Text(
                     text = stringResource(id = R.string.cancel),
-                    style = MaterialTheme.typography.labelLarge
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             TextButton(onClick = { onConfirm() }) {
                 Text(
                     text = stringResource(id = R.string.allow_connection),
-                    style = MaterialTheme.typography.labelLarge.copy(textAlign = TextAlign.Right),
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.End
                 )
             }
         }

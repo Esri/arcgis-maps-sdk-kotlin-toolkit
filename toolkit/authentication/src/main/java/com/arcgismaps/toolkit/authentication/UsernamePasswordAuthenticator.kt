@@ -206,6 +206,7 @@ private fun UsernamePasswordAuthenticatorImpl(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(
                 onClick = { onCancel() }
