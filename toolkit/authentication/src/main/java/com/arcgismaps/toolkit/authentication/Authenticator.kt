@@ -70,7 +70,7 @@ public fun Authenticator(
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * Server trust prompts and username/password prompts will be displayed in an [AlertDialog].
+ * Server trust prompts and username/password prompts will be displayed in an [androidx.compose.ui.window.Dialog].
  * All other prompts are displayed in full screen.
  *
  * For alternate behavior, see the [Authenticator] component.
@@ -96,26 +96,22 @@ public fun DialogAuthenticator(
             authenticatorState = authenticatorState,
             modifier = modifier,
             onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
-        ) { authenticationPrompt ->
-            authenticationPrompt()
-        }
-
+            useDialog = true
+        )
     }
 }
 
 /**
  * Listens for [AuthenticatorState] changes and displays the corresponding authentication component on the screen.
  *
- * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticator], then it
- * should be defined in the [container] lambda. Additionally, the argument should be invoked inside this container
- * otherwise this will not work.
- *
  * @sample [DialogAuthenticator]
  * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to be applied to the Authenticator.
+ * @param useDialog if true, the prompts will be displayed in an Dialog. Otherwise, the prompts will be displayed
+ * in full screen.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
- * @param container if not null, the passed component will be used as a container for [ServerTrustAuthenticator] and
  * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
@@ -123,8 +119,8 @@ public fun DialogAuthenticator(
 private fun AuthenticatorDelegate(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
+    useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
-    container: (@Composable (@Composable () -> Unit) -> Unit)? = null
 ) {
 
     val hasActivePrompt =
@@ -145,10 +141,8 @@ private fun AuthenticatorDelegate(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        if (container != null) {
-            container {
-                ServerTrustAuthenticatorDialog(it, modifier)
-            }
+        if (useDialog) {
+            ServerTrustAuthenticatorDialog(it, modifier)
         } else {
             ServerTrustAuthenticator(it, modifier)
         }
@@ -158,10 +152,8 @@ private fun AuthenticatorDelegate(
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        if (container != null) {
-            container {
-                UsernamePasswordAuthenticatorDialog(it, modifier)
-            }
+        if (useDialog) {
+            UsernamePasswordAuthenticatorDialog(it, modifier)
         } else {
             UsernamePasswordAuthenticator(it, modifier)
         }
