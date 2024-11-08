@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -93,14 +92,12 @@ public fun DialogAuthenticator(
     val showDialog =
         authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
-        Surface {
-            AuthenticatorDelegate(
-                authenticatorState = authenticatorState,
-                modifier = modifier,
-                onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
-            ) { authenticationPrompt ->
-                authenticationPrompt()
-            }
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
+        ) { authenticationPrompt ->
+            authenticationPrompt()
         }
 
     }
@@ -166,7 +163,7 @@ private fun AuthenticatorDelegate(
                 UsernamePasswordAuthenticatorDialog(it, modifier)
             }
         } else {
-            UsernamePasswordAuthenticatorDelegate(it, modifier)
+            UsernamePasswordAuthenticator(it, modifier)
         }
     }
 
