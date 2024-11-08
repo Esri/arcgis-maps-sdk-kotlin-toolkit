@@ -82,17 +82,23 @@ import java.time.Instant
 import kotlin.coroutines.resume
 
 /**
- * Displays a [SceneView] in a tabletop AR environment.
+ * A scene view that provides an augmented reality table top experience.
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
- * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] where the AR scene will initially be centered
- * @param translationFactor the factor defines how much the scene view translates as the device moves.
+ * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] used to anchor the scene with a physical surface.
+ * @param translationFactor determines how many meters the scene view translates as the device moves.
+ * A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`.
+ * The virtual content width is the real-world size of the scene content and the desired physical content width is the physical
+ * table top width. The virtual content width is determined by the [clippingDistance] in meters around the [arcGISSceneAnchor].
+ * For example, in order to setup a table top scene where scene data should be displayed within a 400 meter radius around
+ * the [arcGISSceneAnchor] and be placed on a table top that is 1 meter wide: `translation factor = 400 meter / 1 meter`.
  * @param modifier Modifier to be applied to the TableTopSceneView
- * @param clippingDistance the clipping distance in meters around the camera. A null means that no data will be clipped.
+ * @param clippingDistance the clipping distance in meters around the [arcGISSceneAnchor]. A null means that no data will be clipped.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
  * If set to `true`, the camera permission will be requested automatically when the composable is
- * first displayed. The default value is `true`.
+ * first displayed. The default value is `true`. Set to false if your application takes care of requesting camera permissions before
+ * displaying the TableTopSceneView.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint

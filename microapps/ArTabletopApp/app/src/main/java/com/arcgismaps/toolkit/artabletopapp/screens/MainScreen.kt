@@ -42,7 +42,6 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
-import com.arcgismaps.mapping.layers.ArcGISMapImageLayer
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.toolkit.ar.TableTopSceneView
@@ -55,23 +54,15 @@ import kotlin.math.roundToInt
 @Composable
 fun MainScreen() {
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            operationalLayers.addAll(
-                listOf(
-                    // New York Transit Frequency
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/UrbanObservatory_NYC_TransitFrequency/MapServer"),
-                    // New York Industrial Area
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/New_York_Industrial/MapServer"),
-                    // New York Population Density
-                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/4yjifSiIG17X0gW4/arcgis/rest/services/NewYorkCity_PopDensity/MapServer"),
-                    // New York Buildings
-                    ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Buildings_NewYork_17/SceneServer")
-                )
+        ArcGISScene().apply {
+            operationalLayers.add(
+                ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
             )
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
                 )
+                opacity = 0f
             }
         }
     }
@@ -87,13 +78,16 @@ fun MainScreen() {
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
+    val arcGISSceneAnchor = remember {
+        Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
-            translationFactor = 2000.0,
+            arcGISSceneAnchor = arcGISSceneAnchor,
+            translationFactor = 400.0,
             modifier = Modifier.fillMaxSize(),
-            clippingDistance = 750.0,
+            clippingDistance = 400.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             sceneViewInteractionOptions = interactionOptions,
             onInitializationStatusChanged = {
