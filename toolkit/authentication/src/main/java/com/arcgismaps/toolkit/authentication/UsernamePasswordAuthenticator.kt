@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.authentication
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,8 +71,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * @since 200.2.0
  */
 @Deprecated(
-    message = "This function will be made internal in a future release and should not be used directly. " +
-            "The Authenticator composable will display UsernamePasswordAuthenticator automatically.",
+    message = "This function will be removed with the next major version change of the toolkit and should not be used directly." +
+            "The Authenticator composable displays UsernamePasswordAuthenticator automatically.",
     level = DeprecationLevel.WARNING
 )
 @Composable
@@ -81,34 +80,16 @@ public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    UsernamePasswordAuthenticatorDelegate(
-        usernamePasswordChallenge = usernamePasswordChallenge,
-        modifier = modifier
-    )
-}
-
-/**
- * Displays a username and password prompt to the user.
- *
- * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
- * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
- * @since 200.2.0
- */
-@Composable
-internal fun UsernamePasswordAuthenticatorDelegate(
-    usernamePasswordChallenge: UsernamePasswordChallenge,
-    modifier: Modifier = Modifier
-) {
     val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
-    Column(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
             additionalInfo = additionalInfo ?: "",
-            modifier = modifier,
             onCancel = { usernamePasswordChallenge.cancel() },
             onConfirm = { username, password ->
                 usernamePasswordChallenge.continueWithCredentials(username, password)
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -164,34 +145,33 @@ private fun UsernamePasswordAuthenticatorImpl(
         )
     }
     val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        if (additionalInfo.isNotEmpty()) {
+            Text(
+                text = additionalInfo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Text(
             text = stringResource(id = R.string.username_password_login_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
         )
-        Box(
-            modifier = Modifier
-                .height(24.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            if (additionalInfo.isNotEmpty()) {
-                Text(
-                    text = additionalInfo,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,6 +185,7 @@ private fun UsernamePasswordAuthenticatorImpl(
                 label = { Text(text = stringResource(id = R.string.username_label)) },
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,8 +204,8 @@ private fun UsernamePasswordAuthenticatorImpl(
         }
         Spacer(modifier = Modifier.height(24.dp))
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
-            modifier = Modifier.fillMaxWidth()
         ) {
             TextButton(
                 onClick = { onCancel() }
@@ -263,27 +244,42 @@ private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: ()
 
 @Preview
 @Composable
+private fun UsernamePasswordAuthenticatorImplPreview() {
+    val modifier = Modifier
+    UsernamePasswordAuthenticatorImpl(
+        hostname = "https://www.arcgis.com/",
+        additionalInfo = "Invalid username or password.",
+        onConfirm = { _, _ -> },
+        onCancel = {},
+        modifier = modifier
+    )
+}
+
+@Preview
+@Composable
 private fun UsernamePasswordAuthenticatorPreview() {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        UsernamePasswordAuthenticatorDelegate(
-            usernamePasswordChallenge = UsernamePasswordChallenge(
-                url = "https://www.arcgis.com/",
-                onUsernamePasswordReceived = { _, _ -> },
-                onCancel = {}
-            )
-        )
-    }
+    val modifier = Modifier
+    UsernamePasswordAuthenticator(
+        usernamePasswordChallenge = UsernamePasswordChallenge(
+            url = "https://www.arcgis.com/",
+            onUsernamePasswordReceived = { _, _ -> },
+            onCancel = {}
+        ),
+        modifier = modifier
+    )
 }
 
 @Preview
 @Composable
 private fun UsernamePasswordAuthenticatorDialogPreview() {
+    val modifier = Modifier
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com/",
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
-        )
+        ),
+        modifier = modifier
     )
 }
 
