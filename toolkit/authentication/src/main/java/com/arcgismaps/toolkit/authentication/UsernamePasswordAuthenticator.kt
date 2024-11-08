@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.authentication
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,11 +31,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -177,11 +175,23 @@ private fun UsernamePasswordAuthenticatorImpl(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            modifier = Modifier.padding(bottom = 24.dp),
             text = stringResource(id = R.string.username_password_login_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
         )
+        Box(modifier = Modifier
+            .height(24.dp)
+            .fillMaxWidth(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            if (additionalInfo.isNotEmpty()) {
+                Text(
+                    text = additionalInfo,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -196,24 +206,6 @@ private fun UsernamePasswordAuthenticatorImpl(
                     imeAction = ImeAction.Next
                 ),
                 label = { Text(text = stringResource(id = R.string.username_label)) },
-                trailingIcon = {
-                    if (additionalInfo.isNotEmpty()) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Additional Info",
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
-                supportingText = {
-                    if (additionalInfo.isNotEmpty()) {
-                        Text(
-                            text = additionalInfo,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
                 singleLine = true
             )
             OutlinedTextField(
@@ -229,24 +221,6 @@ private fun UsernamePasswordAuthenticatorImpl(
                 keyboardActions = keyboardActions,
                 label = { Text(text = stringResource(id = R.string.password_label)) },
                 singleLine = true,
-                trailingIcon = {
-                    if (additionalInfo.isNotEmpty()) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Additional Info",
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
-                supportingText = {
-                    if (additionalInfo.isNotEmpty()) {
-                        Text(
-                            text = additionalInfo,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
                 visualTransformation = PasswordVisualTransformation(),
             )
         }
