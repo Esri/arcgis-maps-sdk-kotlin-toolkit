@@ -59,8 +59,7 @@ public fun Authenticator(
     Surface {
         AuthenticatorDelegate(
             authenticatorState = authenticatorState,
-            // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier,
             onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
         )
     }
@@ -164,10 +163,10 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticatorImpl(it, modifier)
+                UsernamePasswordAuthenticatorDialog(it, modifier)
             }
         } else {
-            UsernamePasswordAuthenticatorImpl(it, modifier)
+            UsernamePasswordAuthenticatorDelegate(it, modifier)
         }
     }
 
