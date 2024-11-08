@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,18 +90,12 @@ internal fun ServerTrustAuthenticator(
     serverTrustChallenge: ServerTrustChallenge,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        ServerTrustAuthenticatorImpl(
-            serverTrustChallenge.challenge.hostname,
-            modifier,
-            onConfirm = { serverTrustChallenge.trust() },
-            onCancel = { serverTrustChallenge.distrust() }
-        )
-    }
+    ServerTrustAuthenticatorImpl(
+        serverTrustChallenge.challenge.hostname,
+        modifier,
+        onConfirm = { serverTrustChallenge.trust() },
+        onCancel = { serverTrustChallenge.distrust() }
+    )
 }
 
 /**
@@ -121,7 +116,9 @@ private fun ServerTrustAuthenticatorImpl(
 ) {
     Column(
         modifier = modifier
-            .padding(24.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             modifier = Modifier.padding(bottom = 24.dp),

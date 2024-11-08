@@ -172,7 +172,9 @@ private fun UsernamePasswordAuthenticatorImpl(
     val focusManager = LocalFocusManager.current
     Column(
         modifier = modifier
-            .padding(24.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             modifier = Modifier.padding(bottom = 24.dp),
