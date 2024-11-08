@@ -88,7 +88,7 @@ TableTopSceneView(
 )
 ```
 
-Pass a `onInitializationStatusChanged` callback to the `TableTopSceneView` composable function to get notified about initialization status changes.
+Pass an `onInitializationStatusChanged` callback to the `TableTopSceneView` composable function to get notified about initialization status changes.
 
 ```kotlin
 TableTopSceneView(
