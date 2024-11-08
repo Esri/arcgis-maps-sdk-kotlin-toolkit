@@ -89,12 +89,18 @@ internal fun ServerTrustAuthenticator(
     serverTrustChallenge: ServerTrustChallenge,
     modifier: Modifier = Modifier
 ) {
-    ServerTrustAuthenticatorImpl(
-        serverTrustChallenge.challenge.hostname,
-        modifier,
-        onConfirm = { serverTrustChallenge.trust() },
-        onCancel = { serverTrustChallenge.distrust() }
-    )
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        ServerTrustAuthenticatorImpl(
+            serverTrustChallenge.challenge.hostname,
+            modifier,
+            onConfirm = { serverTrustChallenge.trust() },
+            onCancel = { serverTrustChallenge.distrust() }
+        )
+    }
 }
 
 /**
