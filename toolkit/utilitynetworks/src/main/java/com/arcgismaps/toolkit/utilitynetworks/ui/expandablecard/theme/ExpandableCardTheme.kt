@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.arcgismaps.toolkit.ui.expandablecard.theme
+package com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -27,12 +27,12 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCard
 
 /**
  * CompositionLocal used to pass a [ExpandableCardColorScheme] down the tree.
  */
-val LocalExpandableCardColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
+internal val LocalExpandableCardColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
     compositionLocalOf {
         DefaultThemeTokens.colorScheme
     }
@@ -40,7 +40,7 @@ val LocalExpandableCardColorScheme: ProvidableCompositionLocal<ExpandableCardCol
 /**
  * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
  */
-val LocalExpandableCardShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
+internal val LocalExpandableCardShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
     compositionLocalOf {
         DefaultThemeTokens.shapes
     }
@@ -48,7 +48,7 @@ val LocalExpandableCardShapes: ProvidableCompositionLocal<ExpandableCardShapes> 
 /**
  * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
  */
-val LocalExpandableCardTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
+internal val LocalExpandableCardTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
     compositionLocalOf {
         DefaultThemeTokens.typography
     }
@@ -130,7 +130,7 @@ internal fun ExpandableCardTheme(
  * @since 200.6.0
  */
 @Immutable
-data class ExpandableCardColorScheme internal constructor(
+internal data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
     val headerButtonTextColor: Color,
     val headerBackgroundColor: Color,
@@ -146,7 +146,7 @@ data class ExpandableCardColorScheme internal constructor(
  * @since 200.6.0
  */
 @Immutable
-class ExpandableCardShapes internal constructor(
+internal class ExpandableCardShapes internal constructor(
     val containerShape: RoundedCornerShape,
     val headerInternalPadding: Dp,
     val borderThickness: Dp
@@ -160,7 +160,7 @@ class ExpandableCardShapes internal constructor(
  * @since 200.6.0
  */
 @Immutable
-class ExpandableCardTypography internal constructor(
+internal class ExpandableCardTypography internal constructor(
     val titleStyle: TextStyle,
     val descriptionStyle: TextStyle
 )

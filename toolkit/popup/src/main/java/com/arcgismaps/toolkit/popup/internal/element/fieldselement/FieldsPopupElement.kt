@@ -40,9 +40,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
+import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.LocalExpandableCardColorScheme
+import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.LocalExpandableCardTypography
 
 /**
  * Composable that displays the fields of a popup element.

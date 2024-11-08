@@ -56,9 +56,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
-import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
-import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
+import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.AnchoredDraggableState
+import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.DraggableAnchors
+import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.anchoredDraggable
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay

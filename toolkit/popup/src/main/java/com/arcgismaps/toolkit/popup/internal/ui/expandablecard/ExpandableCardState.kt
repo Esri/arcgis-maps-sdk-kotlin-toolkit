@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.ui.expandablecard
+package com.arcgismaps.toolkit.popup.internal.ui.expandablecard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,7 +29,7 @@ import androidx.compose.runtime.setValue
  * In most cases, this will be created using [rememberExpandableCardState].
  * @since 200.6.0
  */
-class ExpandableCardState internal constructor(initialExpandedState: Boolean) {
+internal class ExpandableCardState internal constructor(initialExpandedState: Boolean) {
     /**
      * The expanded state of the [ExpandableCard].
      * @since 200.6.0
@@ -54,7 +54,7 @@ class ExpandableCardState internal constructor(initialExpandedState: Boolean) {
  * @since 200.6.0
  */
 @Composable
-fun rememberExpandableCardState(
+internal fun rememberExpandableCardState(
     isExpanded: Boolean = true
 ): ExpandableCardState {
     return rememberSaveable(

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.ui.expandablecard
+package com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -44,14 +44,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
-import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardShapes
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTypography
-import com.arcgismaps.toolkit.ui.modifier.applyIf
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.DefaultThemeTokens.shapes
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.DefaultThemeTokens.typography
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.ExpandableCardColorScheme
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.ExpandableCardDefaults
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.ExpandableCardShapes
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.ExpandableCardTheme
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.ExpandableCardTypography
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -59,7 +58,7 @@ import com.arcgismaps.toolkit.ui.modifier.applyIf
  * @since 200.5.0
  */
 @Composable
-fun ExpandableCard(
+internal fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
     description: (@Composable () -> Unit)? = null,
@@ -222,3 +221,10 @@ private fun ExpandableCardPreview() {
         )
     }
 }
+
+private fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
+    if (condition) {
+        then()
+    } else {
+        this
+    }

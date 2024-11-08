@@ -62,13 +62,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -291,7 +291,7 @@ private fun StartingPoints(
  */
 @Composable
 internal fun AdvancedOptions(
-    @Suppress("unused_parameter") modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     showName: Boolean = true,
     showZoomToResult: Boolean = true,
     defaultTraceName: String,

@@ -18,7 +18,7 @@
 
 @file:Suppress("PrimitiveInCollection")
 
-package com.arcgismaps.toolkit.ui.gestures
+package com.arcgismaps.toolkit.utilitynetworks.ui.gestures
 
 /**
  * This is a copy of androidx.compose.foundation.gestures.AnchoredDraggable until that API is
@@ -69,7 +69,7 @@ import kotlin.math.roundToInt
  *
  * See the DraggableAnchors factory method to construct drag anchors using a default implementation.
  */
-interface DraggableAnchors<T> {
+internal interface DraggableAnchors<T> {
 
     /**
      * Get the anchor position for an associated [value]
@@ -118,7 +118,7 @@ interface DraggableAnchors<T> {
  * corresponding [Float] positions. This [DraggableAnchorsConfig] is used to construct an immutable
  * [DraggableAnchors] instance later on.
  */
-class DraggableAnchorsConfig<T> {
+internal class DraggableAnchorsConfig<T> {
 
     internal val anchors = mutableMapOf<T, Float>()
 
@@ -140,7 +140,7 @@ class DraggableAnchorsConfig<T> {
  * @return A new [DraggableAnchors] instance with the anchor positions set by the `builder`
  *   function.
  */
-fun <T : Any> DraggableAnchors(
+internal fun <T : Any> DraggableAnchors(
     builder: DraggableAnchorsConfig<T>.() -> Unit
 ): DraggableAnchors<T> = MapDraggableAnchors(DraggableAnchorsConfig<T>().apply(builder).anchors)
 
@@ -164,7 +164,7 @@ fun <T : Any> DraggableAnchors(
  *   [Modifier.draggable].
  */
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
-fun <T> Modifier.anchoredDraggable(
+internal fun <T> Modifier.anchoredDraggable(
     state: AnchoredDraggableState<T>,
     orientation: Orientation,
     enabled: Boolean = true,
@@ -188,7 +188,7 @@ fun <T> Modifier.anchoredDraggable(
  * @see [AnchoredDraggableState.anchoredDrag] to learn how to start the anchored drag and get the
  *   access to this scope.
  */
-interface AnchoredDragScope {
+internal interface AnchoredDragScope {
     /**
      * Assign a new value for an offset value for [AnchoredDraggableState].
      *
@@ -218,7 +218,7 @@ interface AnchoredDragScope {
  * @param confirmValueChange Optional callback invoked to confirm or veto a pending state change.
  */
 @Stable
-class AnchoredDraggableState<T>(
+internal class AnchoredDraggableState<T>(
     initialValue: T,
     internal val positionalThreshold: (totalDistance: Float) -> Float,
     internal val velocityThreshold: () -> Float,

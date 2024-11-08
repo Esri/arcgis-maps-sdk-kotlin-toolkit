@@ -77,7 +77,8 @@ apiValidation {
     // compiler.
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.popup.internal.ui.ComposableSingletons\$ExpandableCardKt",
-        "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt"
+        "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt",
+        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
@@ -85,7 +86,6 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(project(":sharedlib"))
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))

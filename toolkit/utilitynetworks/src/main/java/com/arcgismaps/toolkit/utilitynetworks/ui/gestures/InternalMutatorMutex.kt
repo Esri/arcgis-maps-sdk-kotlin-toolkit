@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.ui.gestures
+package com.arcgismaps.toolkit.utilitynetworks.ui.gestures
 
 /**
  * This is a copy of androidx.compose.foundation.gestures.InternalMutatorMutex until that API is
