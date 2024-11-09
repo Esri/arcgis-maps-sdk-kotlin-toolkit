@@ -96,7 +96,8 @@ apiValidation {
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceErrorDialogKt",
-        "com.arcgismaps.toolkit.utilitynetworks.internal.util.ComposableSingletons\$TitleRowKt"
+        "com.arcgismaps.toolkit.utilitynetworks.internal.util.ComposableSingletons\$TitleRowKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
@@ -104,7 +105,6 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(project(":sharedlib"))
     implementation(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

@@ -16,7 +16,7 @@
 
 @file:Suppress("unused")
 
-package com.arcgismaps.toolkit.ui.expandablecard.theme
+package com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
@@ -26,8 +26,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.colorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.DefaultThemeTokens.colorScheme
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme.DefaultThemeTokens.shapes
 
 /**
  * Provides a default [ExpandableCardColorScheme] via [colorScheme] and a default [ExpandableCardShapes]

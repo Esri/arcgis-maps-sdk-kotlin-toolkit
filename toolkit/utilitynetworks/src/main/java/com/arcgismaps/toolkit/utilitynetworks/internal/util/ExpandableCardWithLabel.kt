@@ -24,9 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCardState
-import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCardState
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.rememberExpandableCardState
 
 /**
  * Composable that displays an expandable card with a label and its content.

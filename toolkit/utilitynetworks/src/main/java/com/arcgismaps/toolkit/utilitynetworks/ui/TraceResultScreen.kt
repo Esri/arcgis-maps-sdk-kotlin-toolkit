@@ -44,8 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow

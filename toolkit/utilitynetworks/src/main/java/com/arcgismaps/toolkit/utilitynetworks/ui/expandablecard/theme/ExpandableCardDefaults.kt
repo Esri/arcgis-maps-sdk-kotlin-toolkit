@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.arcgismaps.toolkit.ui.expandablecard.theme
+package com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ExpandableCard
 
 /**
  * Contains the default values used by [ExpandableCard].
