@@ -22,10 +22,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.Bookmark
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
-import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -34,8 +31,6 @@ import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Used to perform operations on a [TableTopSceneView].
@@ -224,39 +219,6 @@ public class TableTopSceneViewProxy internal constructor(internal val sceneViewP
         sceneViewProxy.identifyLayers(screenCoordinate, tolerance, returnPopupsOnly, maximumResults)
 
     /**
-     * Animate the TableTopSceneView's viewpoint to the viewpoint of the bookmark.
-     *
-     * @param bookmark bookmark to set
-     * @return a [Result] indicating whether the viewpoint was successfully set.
-     * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.6.0
-     */
-    public suspend fun setBookmark(bookmark: Bookmark): Result<Boolean> =
-        sceneViewProxy.setBookmark(bookmark)
-
-    /**
-     * Change the TableTopSceneView to the new viewpoint. The viewpoint is updated instantaneously.
-     *
-     * @param viewpoint the new viewpoint
-     * @since 200.6.0
-     */
-    public fun setViewpoint(viewpoint: Viewpoint): Unit = sceneViewProxy.setViewpoint(viewpoint)
-
-    /**
-     * Animate the TableTopSceneView to the new viewpoint, taking the given duration to complete the navigation.
-     *
-     * @param viewpoint the new viewpoint
-     * @param duration the duration of the animation
-     * @return a [Result] indicating whether the viewpoint was successfully set.
-     * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.6.0
-     */
-    public suspend fun setViewpointAnimated(
-        viewpoint: Viewpoint,
-        duration: Duration = 0.25.seconds
-    ): Result<Boolean> = sceneViewProxy.setViewpointAnimated(viewpoint, duration)
-
-    /**
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
@@ -342,27 +304,4 @@ public class TableTopSceneViewProxy internal constructor(internal val sceneViewP
      */
     public val fieldOfViewDistortionRatio: Double?
         get() = sceneViewProxy.fieldOfViewDistortionRatio
-
-    /**
-     * Change the TableTopSceneView to the viewpoint specified by the given camera.
-     * The viewpoint is updated instantaneously.
-     *
-     * @param camera the new camera
-     * @since 200.6.0
-     */
-    public fun setViewpointCamera(camera: Camera): Unit = sceneViewProxy.setViewpointCamera(camera)
-
-    /**
-     * Animate the TableTopSceneView to the viewpoint specified by the given camera using the specified duration.
-     *
-     * @param camera the new camera
-     * @param duration the duration of the animation
-     * @return a [Result] indicating whether the viewpoint was successfully set.
-     * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.6.0
-     */
-    public suspend fun setViewpointCameraAnimated(
-        camera: Camera,
-        duration: Duration = 0.25.seconds
-    ): Result<Boolean> = sceneViewProxy.setViewpointCameraAnimated(camera, duration)
 }

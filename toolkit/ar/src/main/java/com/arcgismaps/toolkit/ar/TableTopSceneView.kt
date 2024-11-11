@@ -105,7 +105,6 @@ import kotlin.coroutines.resume
  * type of [ViewpointType.BoundingGeometry]
  * @param graphicsOverlays graphics overlays used by this TableTopSceneView
  * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView
- * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this TableTopSceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView
  * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView
  * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise
@@ -150,7 +149,6 @@ public fun TableTopSceneView(
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     tableTopSceneViewProxy: TableTopSceneViewProxy = remember { TableTopSceneViewProxy() },
-    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
@@ -295,6 +293,12 @@ public fun TableTopSceneView(
             )
         }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
+            // Disable interaction, which is not supported in TableTop scenarios
+            val interactionOptions = remember {
+                SceneViewInteractionOptions().apply {
+                    this.isEnabled = false
+                }
+            }
             SceneView(
                 arcGISScene = arcGISScene,
                 modifier = Modifier.fillMaxSize(),
@@ -302,7 +306,7 @@ public fun TableTopSceneView(
                 onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
                 graphicsOverlays = graphicsOverlays,
                 sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-                sceneViewInteractionOptions = sceneViewInteractionOptions,
+                sceneViewInteractionOptions = interactionOptions,
                 viewLabelProperties = viewLabelProperties,
                 selectionProperties = selectionProperties,
                 isAttributionBarVisible = isAttributionBarVisible,
