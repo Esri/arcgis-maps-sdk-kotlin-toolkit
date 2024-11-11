@@ -39,11 +39,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
-import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus

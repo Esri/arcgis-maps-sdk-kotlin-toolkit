@@ -22,10 +22,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.Bookmark
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
-import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -34,8 +31,6 @@ import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Used to perform operations on a [TableTopSceneView].
