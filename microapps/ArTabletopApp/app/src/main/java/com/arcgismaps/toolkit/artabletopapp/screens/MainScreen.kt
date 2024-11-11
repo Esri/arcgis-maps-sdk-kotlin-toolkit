@@ -66,15 +66,6 @@ fun MainScreen() {
             }
         }
     }
-    // disable pan/zoom/rotate interaction. These interactions can behave unexpectedly in TableTop scenarios
-    val interactionOptions = remember {
-        SceneViewInteractionOptions().apply {
-            this.isPanEnabled = false
-            this.isZoomEnabled = false
-            this.isRotateEnabled = false
-            this.isFlingEnabled = false
-        }
-    }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
@@ -89,7 +80,6 @@ fun MainScreen() {
             modifier = Modifier.fillMaxSize(),
             clippingDistance = 400.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
-            sceneViewInteractionOptions = interactionOptions,
             onInitializationStatusChanged = {
                 initializationStatus = it
             },
