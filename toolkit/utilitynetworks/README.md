@@ -31,7 +31,7 @@ Ensure the MapView's [ArcGISMap](https://developers.arcgis.com/kotlin/api-refere
 To display an ArcGISMap containing a UtilityNetwork, create a new `TraceState` object.
 
 ```kotlin  
-  // in this example, the ArcGISMap object and the TraceState object is hoisted in the ViewModel
+  // In this example, the ArcGISMap object and the TraceState object are hoisted in the ViewModel
   class MyComposablesViewModel : ViewModel() {
     val arcGISMap = ArcGISMap(
         PortalItem(
