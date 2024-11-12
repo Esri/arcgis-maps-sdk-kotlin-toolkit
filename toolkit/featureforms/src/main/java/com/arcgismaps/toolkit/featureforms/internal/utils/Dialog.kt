@@ -45,6 +45,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.Galler
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -156,6 +158,8 @@ internal sealed class DialogType {
         val formAttachment: FormAttachment,
         val name: String,
     ) : DialogType()
+
+    data class BarcodeScanner(val stateId: Int) : DialogType()
 }
 
 /**
@@ -178,7 +182,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             ComboBoxDialog(
                 initialValue = state.value.value.data,
-                values = state.codedValues.associateBy({ it.code }, { it.name }),
+                values = state.codedValues,
                 label = state.label,
                 description = state.description,
                 isRequired = state.isRequired.collectAsState().value,
@@ -325,6 +329,24 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
         }
 
+        is DialogType.BarcodeScanner -> {
+            val stateId = (dialogType as DialogType.BarcodeScanner).stateId
+            val state = states[stateId] as? BarcodeTextFieldState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            BarcodeScanner(
+                onScan = {
+                    state.onValueChanged(it)
+                    dialogRequester.dismissDialog()
+                },
+                onDismiss = {
+                    dialogRequester.dismissDialog()
+                }
+            )
+        }
+
         else -> {
             // clear focus from the originating tapped field
             if (dialogType == null) {
@@ -357,7 +379,15 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     val width = metrics.bounds.width()
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
-    return WindowSizeClass.compute(width / density, height / density)
+    try {
+        val windowSizeClass = WindowSizeClass.compute(width / density, height / density)
+        return windowSizeClass
+    } catch (ex : IllegalArgumentException) {
+        // if the calculation has thrown an exception due to width or height being negative (like
+        // in a preview), then use a default size of 400x900dp which indicates a compact size
+        // representing 99.96% of phones in portrait
+        return WindowSizeClass.compute(400F, 900F)
+    }
 }
 
 internal fun showError(context: Context, message: String) {

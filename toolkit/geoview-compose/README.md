@@ -161,6 +161,6 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
 - [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `MapView`
-- [SceneView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
+- [SceneView CalloutApp](../../microapps/SceneViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
 
 

@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Il file è troppo grande. Aggiungi un file di dimensioni inferiori a 50 MB.</string>
     <string name="attachment_is_empty">I file vuoti non sono supportati</string>
     <string name="download_empty_file">Impossibile scaricare file vuoti</string>
+    <string name="attachment_deleted">%1s eliminato con successo</string>
+    <string name="attachment_size_limit_exceeded">Gli allegati più grandi di %1$s non possono essere scaricati</string>
 </resources>

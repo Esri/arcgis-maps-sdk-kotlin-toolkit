@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Filen er for stor. Tilføj en fil, der er mindre end 50 MB.</string>
     <string name="attachment_is_empty">Tomme filer understøttes ikke</string>
     <string name="download_empty_file">Tomme filer kan ikke downloades</string>
+    <string name="attachment_deleted">%1s er slettet</string>
+    <string name="attachment_size_limit_exceeded">Vedhæftede filer, der er større end %1$s, kan ikke downloades</string>
 </resources>

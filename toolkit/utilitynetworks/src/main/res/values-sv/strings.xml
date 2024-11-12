@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">Nytt spår</string>
+    <string name="results">Resultat</string>
+    <string name="trace_configuration">Spårningskonfiguration</string>
+    <string name="starting_points">Startpunkter</string>
+    <string name="advanced_options">Avancerade alternativ</string>
+    <string name="name">Namn</string>
+    <string name="color">Färg</string>
+    <string name="zoom_to_result">Zooma till resultat</string>
+    <string name="trace">Spåra</string>
+    <string name="add_starting_point">Lägg till ny startpunkt</string>
+    <string name="cancel_starting_point_selection">Avbryt val av startpunkt</string>
+    <string name="trace_result_with_count">Spåra %1$d av %2$d</string>
+    <string name="feature_results">Geoobjektresultat</string>
+    <string name="function_results">Funktionsresultat</string>
+    <string name="clear_all_results">Rensa alla resultat</string>
+</resources>

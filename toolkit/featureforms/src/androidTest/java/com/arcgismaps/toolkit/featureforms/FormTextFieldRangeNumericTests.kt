@@ -34,7 +34,7 @@ import org.junit.Test
  * Tests for FormTextFields whose backing FormFeatureElement is associated with a numeric field and attribute type.
  */
 class FormTextFieldRangeNumericTests : FeatureFormTestRunner(
-    uri = "https://www.arcgis.com/home/item.html?id=225ffaf1091d48fcbe31be0146808b2b",
+    uri = "https://www.arcgis.com/home/item.html?id=c6a4789e5dd64bc48941d8478c5940d2",
     objectId = 1
 ) {
     private val supportingTextSemanticLabel = "supporting text"

@@ -73,12 +73,15 @@ fun MainScreen(modifier: Modifier) {
         ) {
             val coroutineScope = rememberCoroutineScope()
             // show the compass and pass the mapRotation state data
-            Compass(rotation = mapRotation) {
-                // reset the Composable MapView viewpoint rotation to point north
-                coroutineScope.launch {
-                    mapViewProxy.setViewpointRotation(0.0)
+            Compass(
+                rotation = mapRotation,
+                onClick = {
+                    // reset the Composable MapView viewpoint rotation to point north
+                    coroutineScope.launch {
+                        mapViewProxy.setViewpointRotation(0.0)
+                    }
                 }
-            }
+            )
         }
     }
 }

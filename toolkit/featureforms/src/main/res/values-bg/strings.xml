@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Файлът е твърде голям. Моля, добавете файл по-малък от 50 MB.</string>
     <string name="attachment_is_empty">Не се поддържат празни файлове</string>
     <string name="download_empty_file">Празни файлове не могат да бъдат свалени</string>
+    <string name="attachment_deleted">%1s беше изтрит успешно</string>
+    <string name="attachment_size_limit_exceeded">Прикачени файлове, по-големи от %1$s не могат да бъдат изтеглени</string>
 </resources>
