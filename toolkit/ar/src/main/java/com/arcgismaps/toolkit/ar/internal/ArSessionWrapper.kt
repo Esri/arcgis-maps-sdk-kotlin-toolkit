@@ -45,7 +45,17 @@ internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleO
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
+        configureSession()
         session.resume()
+    }
+
+    private fun configureSession() {
+        session.configure(Config(session).apply {
+            lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+
+            // We only want to detect horizontal planes.
+            setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
+        })
     }
 }
 
@@ -56,10 +66,5 @@ internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleO
  */
 @Composable
 internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember {
-    ArSessionWrapper(applicationContext).apply {
-        session.configure(Config(session).apply {
-            // We only want to detect horizontal planes.
-            setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
-        })
-    }
+    ArSessionWrapper(applicationContext)
 }
