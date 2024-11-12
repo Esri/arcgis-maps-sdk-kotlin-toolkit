@@ -69,7 +69,7 @@ public fun Authenticator(
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * Server trust prompts and username/password prompts will be displayed in an dialog.
+ * Server trust prompts and username/password prompts will be displayed in a dialog.
  * All other prompts are displayed in full screen.
  *
  * For alternate behavior, see the [Authenticator] component.
