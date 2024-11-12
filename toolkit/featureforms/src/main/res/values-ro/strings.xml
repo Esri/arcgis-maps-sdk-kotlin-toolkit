@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Fișierul este prea mare. Adăugați un fișier de mai puțin de 50 MB.</string>
     <string name="attachment_is_empty">Fișierele goale nu sunt acceptate</string>
     <string name="download_empty_file">Fișierele goale nu pot fi descărcate</string>
+    <string name="attachment_deleted">%1s a fost șters cu succes</string>
+    <string name="attachment_size_limit_exceeded">Fișierele atașate mai mari de %1$s nu pot fi descărcate</string>
 </resources>

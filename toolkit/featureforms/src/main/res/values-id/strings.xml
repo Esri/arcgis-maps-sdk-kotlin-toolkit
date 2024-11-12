@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Ukuran File terlalu besar. Silakan tambahkan file yang lebih kecil dari 50 MB.</string>
     <string name="attachment_is_empty">File kosong tidak didukung</string>
     <string name="download_empty_file">File kosong tidak dapat diunduh</string>
+    <string name="attachment_deleted">%1s berhasil dihapus</string>
+    <string name="attachment_size_limit_exceeded">Lampiran yang lebih besar dari %1$s tidak bisa diunduh</string>
 </resources>

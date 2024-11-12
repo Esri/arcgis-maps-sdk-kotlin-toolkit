@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Datoteka je prevelika. Dodajte datoteko manjšo od 50 MB.</string>
     <string name="attachment_is_empty">Prazne datoteke niso podprte</string>
     <string name="download_empty_file">Praznih datotek ni mogoče prenesti</string>
+    <string name="attachment_deleted">%1s je bilo uspešno izbrisano</string>
+    <string name="attachment_size_limit_exceeded">Prilog večjih od %1$s ni mogoče prenesti</string>
 </resources>
