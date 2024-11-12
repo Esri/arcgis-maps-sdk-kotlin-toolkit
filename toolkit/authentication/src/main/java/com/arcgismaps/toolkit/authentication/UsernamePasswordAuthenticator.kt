@@ -94,6 +94,13 @@ public fun UsernamePasswordAuthenticator(
     }
 }
 
+/**
+ * Displays a username and password prompt to the user in a dialog.
+ *
+ * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
+ * @since 200.2.0
+ */
 @Composable
 internal fun UsernamePasswordAuthenticatorDialog(
     usernamePasswordChallenge: UsernamePasswordChallenge,
@@ -286,7 +293,7 @@ private fun UsernamePasswordAuthenticatorDialogPreview() {
 
 @Preview(locale = "de")
 @Composable
-private fun UsernamePasswordAuthenticatorDialogPreviewLocale() {
+private fun UsernamePasswordAuthenticatorDialogLocalePreview() {
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com/",

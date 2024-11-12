@@ -83,7 +83,7 @@ internal fun ServerTrustAuthenticatorDialog(
  *
  * @param serverTrustChallenge the pending [ServerTrustChallenge] that initiated this prompt.
  * @param modifier the [Modifier] to be applied to this ServerTrustAuthenticator.
- * @since 200.6.0
+ * @since 200.2.0
  */
 @Composable
 internal fun ServerTrustAuthenticator(
@@ -154,7 +154,7 @@ private fun ServerTrustAuthenticatorImpl(
 
 @Preview
 @Composable
-private fun ServerTrustAuthenticatorImpl_Preview() {
+private fun ServerTrustAuthenticatorImplPreview() {
     ServerTrustAuthenticatorImpl(
         "https://www.arcgis.com",
         onConfirm = {},
@@ -164,7 +164,7 @@ private fun ServerTrustAuthenticatorImpl_Preview() {
 
 @Preview
 @Composable
-private fun ServerTrustAuthenticator_Preview() {
+private fun ServerTrustAuthenticatorPreview() {
     val modifier = Modifier
     ServerTrustAuthenticator(
         serverTrustChallenge = ServerTrustChallenge(
@@ -196,7 +196,7 @@ private fun ServerTrustAuthenticatorDialogPreview() {
 
 @Preview(locale = "de") // Preview in German for long translations
 @Composable
-private fun ServerTrustAuthenticatorDialogPreviewLocale() {
+private fun ServerTrustAuthenticatorDialogLocalePreview() {
     ServerTrustAuthenticatorDialog(
         serverTrustChallenge = ServerTrustChallenge(
             NetworkAuthenticationChallenge(

@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -70,7 +69,7 @@ public fun Authenticator(
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * Server trust prompts and username/password prompts will be displayed in an [androidx.compose.ui.window.Dialog].
+ * Server trust prompts and username/password prompts will be displayed in an dialog.
  * All other prompts are displayed in full screen.
  *
  * For alternate behavior, see the [Authenticator] component.
@@ -89,16 +88,12 @@ public fun DialogAuthenticator(
     modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
-    val showDialog =
-        authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
-    if (showDialog) {
-        AuthenticatorDelegate(
-            authenticatorState = authenticatorState,
-            modifier = modifier,
-            onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
-            useDialog = true
-        )
-    }
+    AuthenticatorDelegate(
+        authenticatorState = authenticatorState,
+        modifier = modifier,
+        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
+        useDialog = true
+    )
 }
 
 /**
@@ -107,7 +102,7 @@ public fun DialogAuthenticator(
  * @sample [DialogAuthenticator]
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to be applied to the Authenticator.
- * @param useDialog if true, the prompts will be displayed in an Dialog. Otherwise, the prompts will be displayed
+ * @param useDialog if true, the prompts will be displayed in an dialog. Otherwise, the prompts will be displayed
  * in full screen.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
