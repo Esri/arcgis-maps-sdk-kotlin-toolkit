@@ -55,6 +55,10 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         set(value) {
             setGeoView(value)
             field = value
+
+            // sync up the manual rendering state as it may have been set before the SceneView was
+            // initialized
+            value?.isManualRenderingEnabled = _isManualRenderingEnabled
         }
 
     /**
@@ -65,11 +69,6 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      */
     internal fun setSceneView(sceneView: com.arcgismaps.mapping.view.SceneView?) {
         this.sceneView = sceneView
-        sceneView?.apply {
-            // sync up the manual rendering state as it may have been set before the SceneView was
-            // initialized
-            setManualRenderingEnabled(_isManualRenderingEnabled)
-        }
     }
 
     private val nullSceneViewErrorMessage: String =
