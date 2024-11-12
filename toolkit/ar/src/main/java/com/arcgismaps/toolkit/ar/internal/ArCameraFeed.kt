@@ -41,7 +41,7 @@ import com.google.ar.core.Session
 /**
  * Renders the AR camera feed using a [GLSurfaceView].
  *
- * @param arSessionWrapper an [ArSessionWrapper] that provides an ARCore [Session].
+ * @param session an ARCore [Session].
  * @param onFrame a callback that is invoked every frame.
  * @param onTapWithHitResult a callback that is invoked when the user taps the screen and a hit is detected.
  * @param visualizePlanes whether to visualize detected planes.
@@ -50,7 +50,7 @@ import com.google.ar.core.Session
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ArCameraFeed(
-    arSessionWrapper: ArSessionWrapper,
+    session: Session,
     onFrame: (Frame, Int) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit,
@@ -63,7 +63,7 @@ internal fun ArCameraFeed(
     val cameraFeedRenderer = remember {
         CameraFeedRenderer(
             context,
-            arSessionWrapper.session,
+            session,
             context.assets,
             onFrame,
             onTapWithHitResult,
