@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -237,60 +238,63 @@ public fun TableTopSceneView(
                 }
             }
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-            ArCameraFeed(
-                arSessionWrapper = arSessionWrapper,
-                onFrame = { frame, displayRotation ->
-                    arCoreAnchor?.let { anchor ->
-                        val anchorPosition = identityMatrix - anchor.pose.translation.let {
-                            TransformationMatrix.createWithQuaternionAndTranslation(
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                it[0].toDouble(),
-                                it[1].toDouble(),
-                                it[2].toDouble()
-                            )
-                        }
-                        val cameraPosition =
-                            anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
-                        cameraController.transformationMatrix = cameraPosition
-                        val imageIntrinsics = frame.camera.imageIntrinsics
-                        tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                            imageIntrinsics.focalLength[0],
-                            imageIntrinsics.focalLength[1],
-                            imageIntrinsics.principalPoint[0],
-                            imageIntrinsics.principalPoint[1],
-                            imageIntrinsics.imageDimensions[0].toFloat(),
-                            imageIntrinsics.imageDimensions[1].toFloat(),
-                            deviceOrientation = when (displayRotation) {
-                                0 -> DeviceOrientation.Portrait
-                                90 -> DeviceOrientation.LandscapeRight
-                                180 -> DeviceOrientation.ReversePortrait
-                                270 -> DeviceOrientation.LandscapeLeft
-                                else -> DeviceOrientation.Portrait
+            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
+            session.value?.let { arSession ->
+                ArCameraFeed(
+                    session = arSession,
+                    onFrame = { frame, displayRotation ->
+                        arCoreAnchor?.let { anchor ->
+                            val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                                TransformationMatrix.createWithQuaternionAndTranslation(
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    1.0,
+                                    it[0].toDouble(),
+                                    it[1].toDouble(),
+                                    it[2].toDouble()
+                                )
                             }
-                        )
-                        tableTopSceneViewProxy.sceneViewProxy.renderFrame()
-                    }
-                },
-                onTapWithHitResult = { hit ->
-                    hit?.let { hitResult ->
-                        if (arCoreAnchor == null) {
-                            arCoreAnchor = hitResult.createAnchor()
-                            // stop rendering planes
-                            visualizePlanes = false
+                            val cameraPosition =
+                                anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                            cameraController.transformationMatrix = cameraPosition
+                            val imageIntrinsics = frame.camera.imageIntrinsics
+                            tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                                imageIntrinsics.focalLength[0],
+                                imageIntrinsics.focalLength[1],
+                                imageIntrinsics.principalPoint[0],
+                                imageIntrinsics.principalPoint[1],
+                                imageIntrinsics.imageDimensions[0].toFloat(),
+                                imageIntrinsics.imageDimensions[1].toFloat(),
+                                deviceOrientation = when (displayRotation) {
+                                    0 -> DeviceOrientation.Portrait
+                                    90 -> DeviceOrientation.LandscapeRight
+                                    180 -> DeviceOrientation.ReversePortrait
+                                    270 -> DeviceOrientation.LandscapeLeft
+                                    else -> DeviceOrientation.Portrait
+                                }
+                            )
+                            tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
-                    }
-                },
-                onFirstPlaneDetected = {
-                    initializationStatus.update(
-                        TableTopSceneViewStatus.Initialized,
-                        onInitializationStatusChanged
-                    )
-                },
-                visualizePlanes = visualizePlanes
-            )
+                    },
+                    onTapWithHitResult = { hit ->
+                        hit?.let { hitResult ->
+                            if (arCoreAnchor == null) {
+                                arCoreAnchor = hitResult.createAnchor()
+                                // stop rendering planes
+                                visualizePlanes = false
+                            }
+                        }
+                    },
+                    onFirstPlaneDetected = {
+                        initializationStatus.update(
+                            TableTopSceneViewStatus.Initialized,
+                            onInitializationStatusChanged
+                        )
+                    },
+                    visualizePlanes = visualizePlanes
+                )
+            }
         }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
             // Disable interaction, which is not supported in TableTop scenarios
