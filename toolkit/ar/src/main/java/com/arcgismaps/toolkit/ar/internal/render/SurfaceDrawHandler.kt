@@ -26,7 +26,7 @@ import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler.Renderer
  * This class is intended to be used with a [GLSurfaceView].
  * The [Renderer] interface must be implemented to provide the rendering logic.
  *
- * This class is based on the [BackgroundRenderer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/kotlin/helloar/HelloArRenderer.kt)
+ * This class is based on the [SampleRender](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/SampleRender.java)
  * and the [HelloArRenderer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/kotlin/helloar/HelloArRenderer.kt)
  * classes from Google's Hello AR sample app.
  *
