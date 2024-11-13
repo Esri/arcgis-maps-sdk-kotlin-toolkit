@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Ange %1$d tecken</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Ange %1$d tecken</item>
+        <item quantity="other">Ange %1$d tecken</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Värdet måste ha %1$d tecken</item>
+        <item quantity="other">Värdet måste ha %1$d tecken</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Ange %1$d till %2$d tecken</string>
+    <string name="value_must_be_from_to_characters">Värdet måste vara %1$d till %2$d tecken</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Maximum %1$d tecken</item>
+        <item quantity="other">Maximum %1$d tecken</item>
+    </plurals>
     <string name="maximum_n_chars">Maximum %1$d tecken</string>
     <string name="no_value">Inget värde</string>
     <string name="enter_value">Ange värde</string>
@@ -28,6 +40,7 @@
     <string name="done">Klart</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Ange ett värde mellan %1$s och %2$s</string>
+    <string name="value_must_be_from_to">Värdet måste vara från %1$s till %2$s</string>
     <string name="less_than_min_value">Mindre än minimivärdet %1$s</string>
     <string name="exceeds_max_value">Överskrider maximalt värde %1$s</string>
     <string name="value_must_be_a_whole_number">Värdet måste vara ett heltal</string>
@@ -87,9 +100,19 @@
     <string name="ff_time_picker_minute_text_field">för minuter</string>
     <string name="ff_time_picker_period_toggle_description">Välj FM eller EM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Ta ett foto</string>
+    <string name="add_from_gallery">Lägg till från galleriet</string>
     <string name="rename">Byt namn</string>
     <string name="delete">Ta bort</string>
     <string name="rename_attachment">Byt namn på bilaga</string>
     <string name="name">Namn</string>
+    <string name="add_file">Lägg till från filer</string>
+    <string name="attachment_error">Det uppstod ett fel när bilagan skulle läggas till</string>
+    <string name="no_app_found">Ingen applikation hittades som kan öppna den här filtypen.</string>
+    <string name="attachment_too_large">Filen är för stor. Lägg till en fil som är mindre än 50 MB.</string>
+    <string name="attachment_is_empty">Tomma filer stöds inte</string>
+    <string name="download_empty_file">Tomma filer kan inte laddas ner</string>
+    <string name="attachment_deleted">%1s har tagits bort</string>
+    <string name="attachment_size_limit_exceeded">Bilagor större än %1$s kan inte hämtas</string>
 </resources>

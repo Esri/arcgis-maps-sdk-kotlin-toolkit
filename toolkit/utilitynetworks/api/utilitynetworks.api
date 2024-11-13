@@ -1,0 +1,89 @@
+public abstract class com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$None : com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$Started : com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$Started;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$Stopped : com/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode$Stopped;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initialized : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initializing : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/TraceKt {
+	public static final fun Trace (Lcom/arcgismaps/toolkit/utilitynetworks/TraceState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/toolkit/geoviewcompose/MapViewProxy;)V
+	public final fun addStartingPoint (Lcom/arcgismaps/data/ArcGISFeature;Lcom/arcgismaps/geometry/Point;)V
+	public final fun addStartingPoint (Lcom/arcgismaps/geometry/Point;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun addStartingPoint$default (Lcom/arcgismaps/toolkit/utilitynetworks/TraceState;Lcom/arcgismaps/data/ArcGISFeature;Lcom/arcgismaps/geometry/Point;ILjava/lang/Object;)V
+	public final fun getAddStartingPointMode ()Landroidx/compose/runtime/State;
+	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt {
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$utilitynetworks_release ()Lkotlin/jvm/functions/Function3;
+}
+

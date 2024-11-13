@@ -61,7 +61,7 @@ function convertTemplateApp {
 function addToSettings {
     # remove the final "app" from the componentName, then add "-app" to get the projectName
     local projectName="${componentName%app}-app"
-    echo "include (\":${projectName}\")" >> settings.gradle.kts
+    echo "include(\":${projectName}\")" >> settings.gradle.kts
     echo "project(\":${projectName}\").projectDir = File(rootDir, \"microapps/${appDirName}/app\")" >>  settings.gradle.kts
 }
 
@@ -76,13 +76,14 @@ echo "Please enter the name of the new microapp in CamelCase without spaces."
 read name
 
 componentName="${name,,}"
+componentName="${componentName%app}"
 composableFunctionName="${name^}"
 appDirName="${composableFunctionName}"
 if [[ ! "${appDirName}" =~ .+App$ ]] ; then
     appDirName="${composableFunctionName}App"
 fi
 
-echo copying and converting app files, estimated time 1 minute.
+echo copying and converting app files, componentName $componentName composableFunctionName $composableFunctionName estimated time 1 minute.
 copyTemplateApp
 convertTemplateApp
 addToSettings

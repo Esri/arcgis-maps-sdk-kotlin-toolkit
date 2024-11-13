@@ -18,22 +18,25 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,11 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -53,85 +54,135 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * Displays a username and password prompt to the user.
  *
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
  * @since 200.2.0
  */
+@Deprecated(
+    message = "This function will be removed with the next major version change of the toolkit and should not be used directly." +
+            "The Authenticator composable displays UsernamePasswordAuthenticator automatically.",
+    level = DeprecationLevel.WARNING
+)
 @Composable
 public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
+    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
+    Surface(modifier = Modifier.fillMaxSize()) {
+        UsernamePasswordAuthenticatorImpl(
+            hostname = usernamePasswordChallenge.hostname,
+            additionalInfo = additionalInfo ?: "",
+            onCancel = { usernamePasswordChallenge.cancel() },
+            onConfirm = { username, password ->
+                usernamePasswordChallenge.continueWithCredentials(username, password)
+            },
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * Displays a username and password prompt to the user in a dialog.
+ *
+ * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
+ * @since 200.2.0
+ */
+@Composable
+internal fun UsernamePasswordAuthenticatorDialog(
+    usernamePasswordChallenge: UsernamePasswordChallenge,
+    modifier: Modifier = Modifier
+) {
+    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
+
+    Dialog(onDismissRequest = { usernamePasswordChallenge.cancel() }) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            UsernamePasswordAuthenticatorImpl(
+                hostname = usernamePasswordChallenge.hostname,
+                additionalInfo = additionalInfo ?: "",
+                onConfirm = { username, password ->
+                    usernamePasswordChallenge.continueWithCredentials(username, password)
+                },
+                onCancel = { usernamePasswordChallenge.cancel() },
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun UsernamePasswordAuthenticatorImpl(
+    hostname: String,
+    modifier: Modifier = Modifier,
+    additionalInfo: String = "",
+    onConfirm: (username: String, password: String) -> Unit,
+    onCancel: () -> Unit
+) {
+    var usernameFieldText by rememberSaveable { mutableStateOf("") }
+    var passwordFieldText by rememberSaveable { mutableStateOf("") }
+
+    fun submitUsernamePassword() {
+        if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
+            onConfirm(usernameFieldText, passwordFieldText)
+            passwordFieldText = ""
+        }
+    }
+
+    val keyboardActions = remember {
+        KeyboardActions(
+            onSend = { submitUsernamePassword() }
+        )
+    }
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
+        if (additionalInfo.isNotEmpty()) {
+            Text(
+                text = additionalInfo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Text(
-            text = buildAnnotatedString {
-                val url = usernamePasswordChallenge.url
-                val loginMessage = stringResource(id = R.string.username_password_login_message, url)
-                val urlStart = loginMessage.indexOf(url)
-                val urlEnd = urlStart + url.length
-                append(loginMessage)
-                addStyle(
-                    style = SpanStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize
-                    ),
-                    urlStart,
-                    urlEnd
-                )
-            },
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
+            text = stringResource(id = R.string.username_password_login_message, hostname),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Start
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val focusManager = LocalFocusManager.current
-            var usernameFieldText by rememberSaveable { mutableStateOf("") }
-            var passwordFieldText by rememberSaveable { mutableStateOf("") }
 
-            fun submitUsernamePassword() {
-                if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
-                    usernamePasswordChallenge.continueWithCredentials(
-                        usernameFieldText,
-                        passwordFieldText
-                    )
-                    passwordFieldText = ""
-                }
-            }
-
-            val keyboardActions = remember {
-                KeyboardActions(
-                    onSend = { submitUsernamePassword() }
-                )
-            }
-            if (additionalInfo != null) {
-                Text(text = additionalInfo, style = MaterialTheme.typography.labelLarge.copy(color = Color.Red))
-            }
             OutlinedTextField(
-                modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
                 value = usernameFieldText,
                 onValueChange = { it: String -> usernameFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -141,8 +192,11 @@ public fun UsernamePasswordAuthenticator(
                 label = { Text(text = stringResource(id = R.string.username_label)) },
                 singleLine = true
             )
+            Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
                 value = passwordFieldText,
                 onValueChange = { it: String -> passwordFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -152,26 +206,26 @@ public fun UsernamePasswordAuthenticator(
                 keyboardActions = keyboardActions,
                 label = { Text(text = stringResource(id = R.string.password_label)) },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
             )
-            Spacer(modifier = Modifier.height(32.dp))
-            Column (
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { onCancel() }
             ) {
-                Button(
-                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
-                    enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
-                    onClick = { submitUsernamePassword() }
-                ) {
-                    Text(stringResource(id = R.string.login))
-                }
-                Button(
-                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
-                    onClick = { usernamePasswordChallenge.cancel() }
-                ) {
-                    Text(stringResource(id = R.string.cancel))
-                }
+                Text(stringResource(id = R.string.cancel))
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            TextButton(
+                enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
+                onClick = { submitUsernamePassword() }
+            ) {
+                Text(stringResource(id = R.string.login))
             }
         }
     }
@@ -194,3 +248,57 @@ private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: ()
             }
         } else false
     }
+
+
+@Preview
+@Composable
+private fun UsernamePasswordAuthenticatorImplPreview() {
+    val modifier = Modifier
+    UsernamePasswordAuthenticatorImpl(
+        hostname = "https://www.arcgis.com/",
+        additionalInfo = "Invalid username or password.",
+        onConfirm = { _, _ -> },
+        onCancel = {},
+        modifier = modifier
+    )
+}
+
+@Preview
+@Composable
+private fun UsernamePasswordAuthenticatorPreview() {
+    val modifier = Modifier
+    UsernamePasswordAuthenticator(
+        usernamePasswordChallenge = UsernamePasswordChallenge(
+            url = "https://www.arcgis.com/",
+            onUsernamePasswordReceived = { _, _ -> },
+            onCancel = {}
+        ),
+        modifier = modifier
+    )
+}
+
+@Preview
+@Composable
+private fun UsernamePasswordAuthenticatorDialogPreview() {
+    val modifier = Modifier
+    UsernamePasswordAuthenticatorDialog(
+        usernamePasswordChallenge = UsernamePasswordChallenge(
+            url = "https://www.arcgis.com/",
+            onUsernamePasswordReceived = { _, _ -> },
+            onCancel = {}
+        ),
+        modifier = modifier
+    )
+}
+
+@Preview(locale = "de")
+@Composable
+private fun UsernamePasswordAuthenticatorDialogLocalePreview() {
+    UsernamePasswordAuthenticatorDialog(
+        usernamePasswordChallenge = UsernamePasswordChallenge(
+            url = "https://www.arcgis.com/",
+            onUsernamePasswordReceived = { _, _ -> },
+            onCancel = {}
+        )
+    )
+}

@@ -19,6 +19,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
@@ -50,9 +51,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
-    }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
@@ -79,7 +77,8 @@ apiValidation {
     // compiler.
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.popup.internal.ui.ComposableSingletons\$ExpandableCardKt",
-        "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt"
+        "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt",
+        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
     )
 
     ignoredClasses.addAll(composableSingletons)

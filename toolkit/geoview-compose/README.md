@@ -118,7 +118,7 @@ An example of how to identify features and graphics is available in the [MapView
 
 ### Display a Callout
 
-To display a Callout, use the `content` lambda on `MapView` to call the Callout from the provided `MapViewScope`:
+To display a Callout, use the `content` lambda parameter of the `MapView` or `SceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L120) composable function: 
 
 ```kotlin
 MapView(
@@ -161,6 +161,6 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
 - [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `MapView`
-- [SceneView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
+- [SceneView CalloutApp](../../microapps/SceneViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
 
 

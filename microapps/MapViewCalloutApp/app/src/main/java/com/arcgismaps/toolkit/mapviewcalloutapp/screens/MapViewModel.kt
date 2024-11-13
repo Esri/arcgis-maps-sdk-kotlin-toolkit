@@ -101,10 +101,13 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    fun clearTapLocationAndGeoElement() {
+    fun clearTapLocationAndGraphic() {
         _tapLocation.value = null
-        _selectedGeoElement.value = null
         tapLocationGraphicsOverlay.graphics.clear()
+    }
+
+    fun clearSelectedGeoElement() {
+        _selectedGeoElement.value = null
     }
 
     fun setTapLocation(tapLocation: Point?, nullTapLocation: Boolean) {
@@ -136,19 +139,10 @@ class MapViewModel : ViewModel() {
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
                     _selectedLayerName.value = identifyLayerResultList[0].layerContent.name
+                } else {
+                    _selectedGeoElement.value = null
                 }
             }
-        }
-    }
-
-    /**
-     * Recenter the viewpoint to the given [mapPoint]
-     */
-    fun recenterMap(mapPoint: Point?) {
-        viewModelScope.launch {
-            mapViewProxy.setViewpointAnimated(
-                viewpoint = Viewpoint(mapPoint!!)
-            )
         }
     }
 }

@@ -19,6 +19,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.binary.compatibility.validator) apply true
@@ -55,9 +56,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
@@ -97,7 +95,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt"
+        "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
     )
     
     ignoredClasses.addAll(composableSingletons)
@@ -106,6 +105,7 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -118,6 +118,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons)
+    implementation(libs.bundles.camerax)
+    implementation(libs.mlkit.barcode.scanning)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

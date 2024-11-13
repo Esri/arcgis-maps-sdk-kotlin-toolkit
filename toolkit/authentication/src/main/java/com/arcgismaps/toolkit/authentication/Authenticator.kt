@@ -23,15 +23,9 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -63,8 +57,7 @@ public fun Authenticator(
     Surface {
         AuthenticatorDelegate(
             authenticatorState = authenticatorState,
-            // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier,
             onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
         )
     }
@@ -76,7 +69,7 @@ public fun Authenticator(
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * Server trust prompts and username/password prompts will be displayed in an [AlertDialog].
+ * Server trust prompts and username/password prompts will be displayed in a dialog.
  * All other prompts are displayed in full screen.
  *
  * For alternate behavior, see the [Authenticator] component.
@@ -89,45 +82,31 @@ public fun Authenticator(
  * @see Authenticator
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
-    val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
-    if (showDialog) {
-        Surface {
-            AuthenticatorDelegate(
-                authenticatorState = authenticatorState,
-                modifier = modifier,
-                onPendingOAuthUserSignIn,
-            ) { authenticationPrompt ->
-                BasicAlertDialog(
-                    onDismissRequest = authenticatorState::dismissAll,
-                    modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
-                ) {
-                    authenticationPrompt()
-                }
-            }
-        }
-    }
+    AuthenticatorDelegate(
+        authenticatorState = authenticatorState,
+        modifier = modifier,
+        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
+        useDialog = true
+    )
 }
 
 /**
  * Listens for [AuthenticatorState] changes and displays the corresponding authentication component on the screen.
  *
- * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticator], then it
- * should be defined in the [container] lambda. Additionally, the argument should be invoked inside this container
- * otherwise this will not work.
- *
  * @sample [DialogAuthenticator]
  * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to be applied to the Authenticator.
+ * @param useDialog if true, the prompts will be displayed in an dialog. Otherwise, the prompts will be displayed
+ * in full screen.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
- * @param container if not null, the passed component will be used as a container for [ServerTrustAuthenticator] and
  * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
@@ -135,14 +114,15 @@ public fun DialogAuthenticator(
 private fun AuthenticatorDelegate(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
+    useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
-    container: (@Composable (@Composable () -> Unit) -> Unit)? = null
 ) {
 
-    val hasActivePrompt = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
+    val hasActivePrompt =
+        authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
     BackHandler(enabled = hasActivePrompt) {
-            authenticatorState.dismissAll()
+        authenticatorState.dismissAll()
     }
 
     val pendingOAuthUserSignIn =
@@ -156,10 +136,8 @@ private fun AuthenticatorDelegate(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        if (container != null) {
-            container {
-                ServerTrustAuthenticator(it, modifier)
-            }
+        if (useDialog) {
+            ServerTrustAuthenticatorDialog(it, modifier)
         } else {
             ServerTrustAuthenticator(it, modifier)
         }
@@ -169,10 +147,8 @@ private fun AuthenticatorDelegate(
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        if (container != null) {
-            container {
-                UsernamePasswordAuthenticator(it, modifier)
-            }
+        if (useDialog) {
+            UsernamePasswordAuthenticatorDialog(it, modifier)
         } else {
             UsernamePasswordAuthenticator(it, modifier)
         }
