@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * A GPU-side texture. This class is based on the [Texture](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/kotlin/helloar/HelloArRenderer.kt)
+ * A GPU-side texture. This class is based on the [Texture](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Texture.java)
  * from Google's Hello AR sample app.
  *
  * @since 200.6.0
