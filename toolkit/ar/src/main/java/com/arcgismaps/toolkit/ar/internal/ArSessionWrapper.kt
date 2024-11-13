@@ -24,28 +24,45 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleObserver {
-    val session: Session = Session(applicationContext)
+internal class ArSessionWrapper(private val applicationContext: Context) : DefaultLifecycleObserver {
+
+    private val _session = MutableStateFlow<Session?>(null)
+    val session: StateFlow<Session?> = _session.asStateFlow()
 
     override fun onDestroy(owner: LifecycleOwner) {
-        super.onDestroy(owner)
-        session.close()
+        session.value?.close()
+        _session.value = null
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        super.onPause(owner)
-        session.pause()
+        session.value?.pause()
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        super.onResume(owner)
+        val session = this.session.value ?: Session(applicationContext)
+        configureSession()
         session.resume()
+        _session.value = session
+    }
+
+    private fun configureSession() {
+        session.value?.configure(
+            session.value?.config?.apply {
+                lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+
+                // We only want to detect horizontal planes.
+                setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
+            }
+        )
     }
 }
 
@@ -56,10 +73,5 @@ internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleO
  */
 @Composable
 internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember {
-    ArSessionWrapper(applicationContext).apply {
-        session.configure(Config(session).apply {
-            // We only want to detect horizontal planes.
-            setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
-        })
-    }
+    ArSessionWrapper(applicationContext)
 }
