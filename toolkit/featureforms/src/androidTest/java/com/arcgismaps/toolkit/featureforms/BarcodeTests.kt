@@ -47,7 +47,7 @@ class BarcodeTests : FeatureFormTestRunner(
      * Test case 11.1:
      * Given a `FeatureForm` with a `BarcodeScannerFormInput`
      * When the `FeatureForm` is displayed
-     * Then the barcode form element is displayed with the scan and clear icons
+     * Then the barcode form element is displayed with the scan icon
      * And receives length validation errors when the input length is out of range
      *
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-barcode-input-type
@@ -64,8 +64,6 @@ class BarcodeTests : FeatureFormTestRunner(
         barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
         barcodeFormElement.performTextInput("https://esri.com")
-        // Check the clear icon is displayed
-        barcodeFormElement.onChildWithContentDescription("clear text").assertIsDisplayed()
         // Check the scan icon is displayed
         barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input

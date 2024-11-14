@@ -23,11 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -103,16 +99,6 @@ internal fun BarcodeTextField(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // show clear button if there is text in the field
-                if (value.data.isNotEmpty()) {
-                    IconButton(onClick = { state.onValueChanged("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "clear text",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
                 BarcodeScannerButton {
                     // if the consumer has provided a click listener, invoke it
                     // otherwise, request the barcode scanner dialog
@@ -126,13 +112,14 @@ internal fun BarcodeTextField(
 
 @Composable
 private fun BarcodeScannerButton(onClick: () -> Unit) {
-    val tintColor = MaterialTheme.colorScheme.onSurface
     Box(modifier = Modifier.padding(8.dp)) {
         Image(
             painter = painterResource(id = R.drawable.barcode_scanner),
             contentDescription = "scan barcode",
-            modifier = Modifier.clickable { onClick() },
-            colorFilter = ColorFilter.tint(tintColor)
+            modifier = Modifier
+                .size(BarcodeTextFieldDefaults.barcodeIconSize)
+                .clickable { onClick() },
+            colorFilter = ColorFilter.tint(BarcodeTextFieldDefaults.barcodeIconTintColor)
         )
     }
 }
@@ -148,7 +135,7 @@ private fun BarcodeTextFieldPreview() {
                 label = "Barcode",
                 placeholder = "Scan barcode",
                 description = "Scan barcode to populate",
-                value = MutableStateFlow(""),
+                value = MutableStateFlow("01234F1234"),
                 required = MutableStateFlow(true),
                 editable = MutableStateFlow(true),
                 visible = MutableStateFlow(true),
