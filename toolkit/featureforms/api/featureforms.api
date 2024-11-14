@@ -1,7 +1,7 @@
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormKt {
 	public static final synthetic fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Landroidx/compose/runtime/Composer;II)V
 	public static final synthetic fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
-	public static final fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility {
