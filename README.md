@@ -11,6 +11,8 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
+* **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
+* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
 ## API Reference
 
@@ -43,12 +45,15 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.5.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.6.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-utilitynetworks")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-ar")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.

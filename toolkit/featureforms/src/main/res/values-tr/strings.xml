@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Dosya fazla büyük. Lütfen 50 MB\'den küçük bir dosya ekleyin.</string>
     <string name="attachment_is_empty">Boş dosyalar desteklenmez</string>
     <string name="download_empty_file">Boş dosyalar indirilemez</string>
+    <string name="attachment_deleted">%1s başarıyla silindi</string>
+    <string name="attachment_size_limit_exceeded">%1$s\'den büyük ekler indirilemez</string>
 </resources>
