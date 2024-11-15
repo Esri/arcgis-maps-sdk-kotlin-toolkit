@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
  */
 internal object BarcodeTextFieldDefaults {
 
-    val barcodeIconTintColor : Color
+    val barcodeIconTintColor: Color
         @Composable
         get() = if (isSystemInDarkTheme()) barcodeIconDarkTintColor else barcodeIconLightTintColor
 
