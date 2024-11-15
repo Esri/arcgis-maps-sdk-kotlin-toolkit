@@ -197,11 +197,11 @@ public fun FeatureForm(
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
- * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
- * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
+ * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
  * @since 200.4.0
  */
@@ -210,9 +210,9 @@ public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
