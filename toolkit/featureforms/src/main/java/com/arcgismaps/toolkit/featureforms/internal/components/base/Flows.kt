@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -110,10 +111,16 @@ private fun createValidationErrorStates(
                 }
 
                 is FeatureFormValidationException.IncorrectValueTypeException -> {
-                    if (formElement.fieldType.isFloatingPoint) {
-                        add(ValidationErrorState.NotANumber)
-                    } else if (formElement.fieldType.isIntegerType) {
-                        add(ValidationErrorState.NotAWholeNumber)
+                    when {
+                        formElement.fieldType.isFloatingPoint -> {
+                            add(ValidationErrorState.NotANumber)
+                        }
+                        formElement.fieldType.isIntegerType -> {
+                            add(ValidationErrorState.NotAWholeNumber)
+                        }
+                        formElement.fieldType is FieldType.Guid -> {
+                            add(ValidationErrorState.NotAGuid)
+                        }
                     }
                 }
 
