@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.artabletopapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,32 +31,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen() {
+    val arcGISSceneLayer = remember {
+        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+    }
     val arcGISScene = remember {
         ArcGISScene().apply {
-            operationalLayers.add(
-                ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
-            )
+            operationalLayers.add(arcGISSceneLayer)
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
@@ -65,11 +72,13 @@ fun MainScreen() {
         }
     }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
-    var tappedLocation by remember { mutableStateOf<Point?>(null) }
+    //var tappedLocation by remember { mutableStateOf<Point?>(null) }
+    var identifiedBuilding by remember { mutableStateOf<ArcGISFeature?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val arcGISSceneAnchor = remember {
         Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
     }
+    val coroutineScope = rememberCoroutineScope()
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
@@ -82,15 +91,33 @@ fun MainScreen() {
                 initializationStatus = it
             },
             onSingleTapConfirmed = {
-                val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
-                location?.let { point ->
-                    tappedLocation = point
+                arcGISSceneLayer.clearSelection()
+                coroutineScope.launch {
+                    identifiedBuilding = arcGISSceneLayer.identifyBuilding(
+                        it.screenCoordinate,
+                        tableTopSceneViewProxy
+                    )
+                    identifiedBuilding?.let {
+                        it.load().getOrThrow()
+
+                        arcGISSceneLayer.selectFeature(it)
+                        Log.d("CalloutTest", "attributes after load: ${it.attributes}")
+                        arcGISSceneLayer.getSelectedFeatures().onSuccess { queryResult ->
+                            Log.d("CalloutTest", "geometry type: ${queryResult.geometryType}")
+                        }
+                    }
                 }
             }
         ) {
-            tappedLocation?.let {
-                Callout(location = it, modifier = Modifier.wrapContentSize()) {
-                    Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
+//            tappedLocation?.let {
+//                Callout(location = it, modifier = Modifier.wrapContentSize()) {
+//                    Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
+//                }
+//            }
+            identifiedBuilding?.let {
+                Log.d("CalloutTest", "Content lambda: ${it.attributes["OBJECTID"]}")
+                Callout(it) {
+                    Text("Building ID: ${it.attributes["OBJECTID"]}")
                 }
             }
         }
@@ -157,4 +184,16 @@ fun TextWithScrim(text: String) {
     ) {
         Text(text = text)
     }
+}
+
+suspend fun ArcGISSceneLayer.identifyBuilding(screenLocation: ScreenCoordinate, proxy: TableTopSceneViewProxy): ArcGISFeature? {
+    var identifiedFeature: ArcGISFeature? = null
+    proxy.identify(this, screenLocation, 50.dp).onSuccess { identifyLayerResult ->
+        identifyLayerResult.geoElements.firstOrNull()?.let { geoElement ->
+            identifiedFeature = geoElement as ArcGISFeature
+        }
+    }.onFailure {
+        Log.i("ArTabletopApp", "Failed to identify building: $it")
+    }
+    return identifiedFeature
 }
