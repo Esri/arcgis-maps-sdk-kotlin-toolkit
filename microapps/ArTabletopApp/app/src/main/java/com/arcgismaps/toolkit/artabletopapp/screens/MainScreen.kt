@@ -91,15 +91,15 @@ fun MainScreen() {
             onInitializationStatusChanged = {
                 initializationStatus = it
             },
-            onSingleTapConfirmed = {
+            onSingleTapConfirmed = { tap ->
                 arcGISSceneLayer.clearSelection()
                 coroutineScope.launch {
                     identifiedBuilding = arcGISSceneLayer.identifyBuilding(
-                        it.screenCoordinate,
+                        tap.screenCoordinate,
                         tableTopSceneViewProxy
                     )
-                    identifiedBuilding?.let {
-                        arcGISSceneLayer.selectFeature(it.feature)
+                    identifiedBuilding?.let { identifiedBuilding ->
+                        arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
                     }
                 }
             }
