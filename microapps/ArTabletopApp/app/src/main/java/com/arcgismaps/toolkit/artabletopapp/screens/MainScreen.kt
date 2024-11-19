@@ -69,13 +69,17 @@ fun MainScreen() {
             }
         }
     }
-    val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
-    var identifiedBuilding by remember { mutableStateOf<IdentifiedBuilding?>(null) }
-    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val arcGISSceneAnchor = remember {
         Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
     }
+
+    // Tracks the currently selected building
+    var identifiedBuilding by remember { mutableStateOf<IdentifiedBuilding?>(null) }
+
+    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
+    val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     val coroutineScope = rememberCoroutineScope()
+
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
@@ -101,7 +105,6 @@ fun MainScreen() {
             }
         ) {
             identifiedBuilding?.let {
-                Log.d("CalloutTest", "Content lambda: ${it.feature.attributes["OBJECTID"]}")
                 Callout(it.location) {
                     Text("Building ID: ${it.feature.attributes["OBJECTID"]}")
                 }
@@ -109,6 +112,7 @@ fun MainScreen() {
         }
     }
 
+    // Show an overlay with instructions or progress indicator based on the initialization status
     when (val status = initializationStatus) {
         is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
         is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
