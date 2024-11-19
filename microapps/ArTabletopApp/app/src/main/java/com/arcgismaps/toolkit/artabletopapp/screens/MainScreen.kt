@@ -189,7 +189,6 @@ private suspend fun ArcGISSceneLayer.identifyBuilding(
     proxy: TableTopSceneViewProxy
 ): IdentifiedBuilding? {
     val identifyLayerResult = proxy.identify(this, screenCoordinate, 50.dp).getOrElse {
-        Log.w("ArTabletopApp", "Failed to identify building: $it")
         return null
     }
     val identifiedFeature =
