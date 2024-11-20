@@ -68,13 +68,3 @@ dependencies {
     androidTestImplementation(project(mapOf("path" to ":composable-map")))
     debugImplementation(libs.bundles.debug)
 }
-
-tasks.withType<Test> {
-    doLast {
-        val testResultsDir = file("$buildDir/test-results")
-        if (testResultsDir.listFiles()?.isEmpty() == true) {
-            reports.html.required.set(false)
-            reports.junitXml.required.set(false)
-        }
-    }
-}

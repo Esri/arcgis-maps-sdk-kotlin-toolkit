@@ -93,13 +93,3 @@ dependencies {
     androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.mockk.android)
 }
-
-tasks.withType<Test> {
-    doLast {
-        val testResultsDir = file("$buildDir/test-results")
-        if (testResultsDir.listFiles()?.isEmpty() == true) {
-            reports.html.required.set(false)
-            reports.junitXml.required.set(false)
-        }
-    }
-}

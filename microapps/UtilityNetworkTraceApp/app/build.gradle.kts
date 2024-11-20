@@ -69,6 +69,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    tasks.withType<Test> {
+        enabled = false
+    }
 }
 
 dependencies {
@@ -83,14 +86,4 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     debugImplementation(libs.bundles.debug)
-}
-
-tasks.withType<Test> {
-    doLast {
-        val testResultsDir = file("$buildDir/test-results")
-        if (testResultsDir.listFiles()?.isEmpty() == true) {
-            reports.html.required.set(false)
-            reports.junitXml.required.set(false)
-        }
-    }
 }

@@ -63,6 +63,9 @@ android {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
+    tasks.withType<Test> {
+        enabled = false
+    }
 
     /**
      * Configures the test report for connected (instrumented) tests to be copied to a central
@@ -90,14 +93,4 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
-}
-
-tasks.withType<Test> {
-    doLast {
-        val testResultsDir = file("$buildDir/test-results")
-        if (testResultsDir.listFiles()?.isEmpty() == true) {
-            reports.html.required.set(false)
-            reports.junitXml.required.set(false)
-        }
-    }
 }

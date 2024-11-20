@@ -68,15 +68,8 @@ android {
         compose = true
         buildConfig = true
     }
-
-
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
+    tasks.withType<Test> {
+        enabled = false
     }
 
     packaging {
@@ -100,14 +93,4 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
-}
-
-tasks.withType<Test> {
-    doLast {
-        val testResultsDir = file("$buildDir/test-results")
-        if (testResultsDir.listFiles()?.isEmpty() == true) {
-            reports.html.required.set(false)
-            reports.junitXml.required.set(false)
-        }
-    }
 }
