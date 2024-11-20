@@ -19,6 +19,9 @@ package com.arcgismaps.toolkit.indoors
 
 import android.view.View
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import com.arcgismaps.mapping.floor.FloorLevel
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.mapping.floor.FloorSite
 import com.arcgismaps.mapping.view.GeoView
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +64,7 @@ import kotlinx.coroutines.launch
  */
 public sealed interface FloorFilterState {
     public val floorManager: StateFlow<FloorManager?>
+    public val initializationStatus: State<InitializationStatus>
     public val sites: List<FloorSite>
     public val facilities: List<FloorFacility>
 
@@ -96,6 +101,16 @@ private class FloorFilterStateImpl(
 
     private val _onLevelChanged: MutableStateFlow<FloorLevel?> = MutableStateFlow(null)
     override val onLevelChanged: StateFlow<FloorLevel?> = _onLevelChanged.asStateFlow()
+
+    private val _initializationStatus: MutableState<InitializationStatus> =
+        mutableStateOf(InitializationStatus.NotInitialized)
+
+    /**
+     * The status of the initialization of the state object.
+     *
+     * @since 200.6.0
+     */
+    override val initializationStatus: State<InitializationStatus> = _initializationStatus
 
     /**
      * The list of [FloorLevel]s from the [FloorManager].
@@ -237,6 +252,47 @@ private class FloorFilterStateImpl(
         }.onFailure {
             return
         }
+    }
+
+    /**
+     * Initializes the state object by loading the map, the Utility Networks contained in the map
+     * and its trace configurations.
+     *
+     * @return the [Result] indicating if the initialization was successful or not
+     * @since 200.6.0
+     */
+    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+        if (_initializationStatus.value is InitializationStatus.Initialized) {
+            return Result.success(Unit)
+        }
+        _initializationStatus.value = InitializationStatus.Initializing
+        arcGISMap.load().getOrElse {
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+            throw it
+        }
+        val utilityNetworks = arcGISMap.utilityNetworks
+        if (utilityNetworks.isEmpty()) {
+            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND)
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+            throw error
+        }
+
+        utilityNetworks.forEach { utilityNetwork ->
+            utilityNetwork.load().getOrElse {
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+                throw it
+            }
+        }
+        _utilityNetwork = utilityNetworks.first()
+        val traceConfigResult = utilityNetwork.queryNamedTraceConfigurations()
+        if (traceConfigResult.isFailure || traceConfigResult.getOrNull().isNullOrEmpty()) {
+            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+            throw error
+        }
+        _traceConfigurations.value = traceConfigResult.getOrThrow().sortedBy { it.name }
+
+        _initializationStatus.value = InitializationStatus.Initialized
     }
 
     /**
@@ -397,6 +453,41 @@ public fun FloorFilterState(
     FloorFilterStateImpl(geoModel, coroutineScope, uiProperties, onSelectionChangedListener)
 
 /**
+ * Represents the status of the initialization of the state object.
+ *
+ * @since 200.6.0
+ */
+public sealed class InitializationStatus {
+    /**
+     * The state object is initialized and ready to use.
+     *
+     * @since 200.6.0
+     */
+    public data object Initialized : InitializationStatus()
+
+    /**
+     * The state object is initializing.
+     *
+     * @since 200.6.0
+     */
+    public data object Initializing : InitializationStatus()
+
+    /**
+     * The state object is not initialized.
+     *
+     * @since 200.6.0
+     */
+    public data object NotInitialized : InitializationStatus()
+
+    /**
+     * The state object failed to initialize.
+     *
+     * @since 200.6.0
+     */
+    public data class FailedToInitialize(val error: Throwable) : InitializationStatus()
+}
+
+/**
  * The selection that was made by the user
  *
  * @since 200.2.0
@@ -448,3 +539,19 @@ public data class UIProperties(
     var buttonSize: Size = Size(60.dp.value, 40.dp.value),
     var typography: Typography = Typography()
 )
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()
