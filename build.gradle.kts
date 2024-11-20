@@ -90,11 +90,8 @@ testAggregation {
     getModulesExcept(
         "bom",
         "kdoc",
-        "microapps-lib",
-        "template",
-        "template-app",
-        "utility-network-trace-app",
-        "composable-map").forEach {
+        "microapps-lib"
+    ).forEach {
         this.modules.include(project(":$it"))
     }
 }

@@ -91,3 +91,12 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }
+
+tasks.withType<Test> {
+    doLast {
+        if (testResultsDir.listFiles()?.isEmpty() == true) {
+            reports.html.required.set(false)
+            reports.junitXml.required.set(false)
+        }
+    }
+}

@@ -85,3 +85,12 @@ dependencies {
     androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
 }
+
+tasks.withType<Test> {
+    doLast {
+        if (testResultsDir.listFiles()?.isEmpty() == true) {
+            reports.html.required.set(false)
+            reports.junitXml.required.set(false)
+        }
+    }
+}
