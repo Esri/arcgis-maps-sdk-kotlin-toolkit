@@ -112,7 +112,7 @@ internal object ComboBoxDialogDefaults {
         get() = MaterialTheme.typography.labelMedium.copy(
             fontWeight = FontWeight.Light
         )
-    
+
     val searchInputFieldSupportingTextStyle
         @Composable
         get() = MaterialTheme.typography.labelSmall
@@ -265,9 +265,12 @@ private fun Header(label: String, onDismissRequest: () -> Unit, modifier: Modifi
         )
         IconButton(
             onClick = onDismissRequest,
-            Modifier.width(closeIconSize).wrapContentSize().semantics {
-                contentDescription = "combo box dialog close button"
-            }
+            Modifier
+                .width(closeIconSize)
+                .wrapContentSize()
+                .semantics {
+                    contentDescription = "combo box dialog close button"
+                }
         ) {
             Icon(
                 imageVector = Icons.Outlined.Close,
