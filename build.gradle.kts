@@ -90,6 +90,7 @@ testAggregation {
     getModulesExcept(
         "bom",
         "kdoc",
+        "template",
         "microapps-lib",
         "composable-map"
     ).forEach {
