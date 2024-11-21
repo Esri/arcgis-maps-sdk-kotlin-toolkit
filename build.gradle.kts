@@ -44,7 +44,7 @@ buildscript {
 
     val githubAction: Boolean = (project.properties["githubAction"] ?: "false")
         .run { this == "true" }
-    
+
     if (githubAction) {
         check(project.hasProperty("sdkVersionNumber"))
         project.logger.info("github action build requested with SDK version ${project.properties["sdkVersionNumber"]}")

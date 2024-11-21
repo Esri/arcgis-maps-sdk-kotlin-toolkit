@@ -73,9 +73,15 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("arcgis") {
             val versionAndBuild = if (finalBuild || githubActionBuild) {
-                logger.warn(
-                    "Requested release candidate for the SDK dependency $sdkVersionNumber"
-                )
+                if (finalBuild) {
+                    logger.warn(
+                        "Requested release candidate for the SDK dependency $sdkVersionNumber"
+                    )
+                } else {
+                    logger.warn(
+                        "Requested released version $sdkVersionNumber of the SDK dependency"
+                    )
+                }
                 sdkVersionNumber
             } else {
                 logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
