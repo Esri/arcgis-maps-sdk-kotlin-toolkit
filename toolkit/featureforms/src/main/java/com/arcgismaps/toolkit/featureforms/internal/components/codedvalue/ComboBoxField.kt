@@ -111,7 +111,7 @@ private fun ComboBoxPreview() {
             label = "Types",
             placeholder = "",
             description = "Select the tree species",
-            value = MutableStateFlow("Birch"),
+            value = MutableStateFlow(""),
             validationErrors = MutableStateFlow(emptyList()),
             editable = MutableStateFlow(true),
             required = MutableStateFlow(false),

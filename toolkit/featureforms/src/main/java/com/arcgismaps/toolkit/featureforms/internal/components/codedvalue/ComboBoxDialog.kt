@@ -375,7 +375,7 @@ private fun UnsupportedItem(value: String, modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Text(
-            text = stringResource(R.string.unsupported_type),
+            text = stringResource(R.string.unsupported_value),
             style = MaterialTheme.typography.labelMedium
         )
         ComboBoxListItem(
