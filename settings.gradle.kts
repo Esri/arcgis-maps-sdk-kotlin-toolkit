@@ -24,6 +24,11 @@ pluginManagement {
     }
 }
 
+// For github actions the build is not able to access our internal maven repo, use a released SDK.
+val githubActionBuild: Boolean = (providers.gradleProperty("githubAction").orNull ?: "false")
+    .run { this == "true" }
+
+
 // For finalBuilds ignore the build number and pick up the released version of the SDK dependency
 val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
     .run { this == "true" }
@@ -67,7 +72,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("arcgis") {
-            val versionAndBuild = if (finalBuild) {
+            val versionAndBuild = if (finalBuild || githubActionBuild) {
                 logger.warn(
                     "Requested release candidate for the SDK dependency $sdkVersionNumber"
                 )
