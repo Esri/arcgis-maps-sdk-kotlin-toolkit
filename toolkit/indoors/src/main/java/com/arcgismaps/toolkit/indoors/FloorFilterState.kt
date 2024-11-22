@@ -36,7 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Represents the state for the FloorFilter.
@@ -77,6 +76,7 @@ public sealed interface FloorFilterState {
 
     public val uiProperties: UIProperties
 
+    public suspend fun initialize(): Result<Unit>
     public fun getSelectedSite(): FloorSite?
     public fun getSelectedFacility(): FloorFacility?
 }
@@ -88,7 +88,6 @@ public sealed interface FloorFilterState {
  */
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
-    coroutineScope: CoroutineScope,
     override var uiProperties: UIProperties,
     var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
@@ -227,72 +226,38 @@ private class FloorFilterStateImpl(
             }
         }
 
-    init {
-        coroutineScope.launch {
-            loadFloorManager()
-        }
-    }
-
     /**
-     * Loads the floorManager when the Map is loaded.
-     *
-     * @since 200.2.0
-     */
-    private suspend fun loadFloorManager() {
-        geoModel.load().onSuccess {
-            val floorManager: FloorManager = geoModel.floorManager
-                ?: return
-            floorManager.load().onSuccess {
-                _floorManager.value = floorManager
-                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
-                filterMap()
-            }.onFailure {
-                return
-            }
-        }.onFailure {
-            return
-        }
-    }
-
-    /**
-     * Initializes the state object by loading the map, the Utility Networks contained in the map
-     * and its trace configurations.
+     * Initializes the state object by loading the GeoModel and the GeoModel's FloorManager.
      *
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.6.0
      */
-    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+    override suspend fun initialize(): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
         _initializationStatus.value = InitializationStatus.Initializing
-        arcGISMap.load().getOrElse {
-            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
-            throw it
-        }
-        val utilityNetworks = arcGISMap.utilityNetworks
-        if (utilityNetworks.isEmpty()) {
-            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND)
-            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-            throw error
-        }
-
-        utilityNetworks.forEach { utilityNetwork ->
-            utilityNetwork.load().getOrElse {
+        geoModel.load().onSuccess {
+            val floorManager: FloorManager? = geoModel.floorManager
+            if (floorManager == null) {
+                val error = FloorFilterException(FloorFilterError.GEOMODEL_HAS_NO_FLOOR_AWARE_DATA)
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                throw error
+            }
+            floorManager.load().onSuccess {
+                _floorManager.value = floorManager
+                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
+                filterMap()
+                _initializationStatus.value = InitializationStatus.Initialized
+                return Result.success(Unit)
+            }.onFailure {
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
                 throw it
             }
+        }.onFailure {
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+            throw it
         }
-        _utilityNetwork = utilityNetworks.first()
-        val traceConfigResult = utilityNetwork.queryNamedTraceConfigurations()
-        if (traceConfigResult.isFailure || traceConfigResult.getOrNull().isNullOrEmpty()) {
-            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
-            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-            throw error
-        }
-        _traceConfigurations.value = traceConfigResult.getOrThrow().sortedBy { it.name }
-
-        _initializationStatus.value = InitializationStatus.Initialized
     }
 
     /**
@@ -444,13 +409,33 @@ public enum class ButtonPosition {
  *        with the Site or Facilities extent whenever a new Site or Facility is selected
  * @since 200.2.0
  */
+@Deprecated(
+    "Use the factory function without the coroutineScope parameter",
+    ReplaceWith("FloorFilterState(geoModel, uiProperties, onSelectionChangedListener)")
+)
 public fun FloorFilterState(
     geoModel: GeoModel,
     coroutineScope: CoroutineScope,
     uiProperties: UIProperties = UIProperties(),
     onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, uiProperties, onSelectionChangedListener)
+    FloorFilterStateImpl(geoModel, uiProperties, onSelectionChangedListener)
+
+/**
+ * Factory function for the creating FloorFilterState.
+ *
+ * @param geoModel the floor aware geoModel that drives the [FloorFilter]
+ * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
+ * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
+ *        with the Site or Facilities extent whenever a new Site or Facility is selected
+ * @since 200.6.0
+ */
+public fun FloorFilterState(
+    geoModel: GeoModel,
+    uiProperties: UIProperties = UIProperties(),
+    onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
+): FloorFilterState =
+    FloorFilterStateImpl(geoModel, uiProperties, onSelectionChangedListener)
 
 /**
  * Represents the status of the initialization of the state object.

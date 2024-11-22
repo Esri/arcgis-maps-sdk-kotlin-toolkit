@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.indoors
 
 import android.view.View
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,15 +28,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -109,8 +117,12 @@ public fun FloorFilter(
     floorFilterState: FloorFilterState,
     modifier: Modifier = Modifier
 ) {
-    // display the floor filter only if the floor manager is loaded
-    if (floorFilterState.floorManager.collectAsStateWithLifecycle().value == null) return
+    val context = LocalContext.current
+    val initializationStatus by floorFilterState.initializationStatus
+
+    LaunchedEffect(floorFilterState) {
+        floorFilterState.initialize()
+    }
 
     // keep an instance of the UI properties
     val uiProperties = floorFilterState.uiProperties
@@ -127,25 +139,102 @@ public fun FloorFilter(
                 .background(color = uiProperties.backgroundColor),
             verticalArrangement = Arrangement.Center
         ) {
+            when (initializationStatus) {
+                is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                    Box(
+                        modifier = modifier
+                            .height(uiProperties.buttonSize.height.dp)
+                            .width(uiProperties.buttonSize.width.dp),
+                        contentAlignment = Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(uiProperties.buttonSize.height.dp * 0.5f))
+                    }
+                }
 
-            // displays only the selected floor when enabled
-            var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
+                is InitializationStatus.FailedToInitialize -> {
+                    val errorMessage = (initializationStatus as InitializationStatus.FailedToInitialize).error.getErrorMessage(context)
+                    Box(
+                        modifier = modifier
+                            .height(uiProperties.buttonSize.height.dp)
+                            .width(uiProperties.buttonSize.width.dp),
+                        contentAlignment = Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ErrorOutline,
+                            contentDescription = stringResource(id = R.string.geomodel_has_no_floor_aware_data),
+                            modifier = Modifier.clickable {
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            },
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
-            // boolean toggle to display the site facility selector dialog
-            var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
+                else -> {
+                    // display the floor filter
+                    FloorFilterContent(floorFilterState, uiProperties, modifier)
+                }
+            }
+        }
+    }
+}
 
-            // boolean toggle to display either the sites selector or the facilities selector in the site facility selector dialog,
-            // display sites selector by default when set to false, and sites selector when set to true.
-            var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
+@Composable
+internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties: UIProperties, modifier: Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // displays only the selected floor when enabled
+        var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
 
-            // get the current selected facility
-            val selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+        // boolean toggle to display the site facility selector dialog
+        var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
-            // get the selected level ID
-            val selectedLevelID = floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
+        // boolean toggle to display either the sites selector or the facilities selector in the site facility selector dialog,
+        // display sites selector by default when set to false, and sites selector when set to true.
+        var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
-            // if no facility is selected, only display site-facility selector button
-            if (selectedFacility == null) {
+        // get the current selected facility
+        val selectedFacility =
+            floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+
+        // get the selected level ID
+        val selectedLevelID =
+            floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
+
+        // if no facility is selected, only display site-facility selector button
+        if (selectedFacility == null) {
+            SiteFacilityButton(
+                modifier,
+                floorFilterState,
+                isSiteAndFacilitySelectorVisible,
+                isFacilitiesSelectorVisible,
+                uiProperties,
+                onSiteFacilitySelectorVisibilityChanged = { isVisible ->
+                    isSiteAndFacilitySelectorVisible = isVisible
+                },
+                onFacilitiesSelectorVisible = { isVisible ->
+                    isFacilitiesSelectorVisible = isVisible
+                }
+            )
+            return
+        }
+
+        // display close button if set to top, if not display facilities button
+        if (uiProperties.closeButtonPosition == ButtonPosition.Top) {
+            // check if close button is set to visible and not collapsed
+            if (uiProperties.closeButtonVisibility == View.VISIBLE &&
+                !isFloorsCollapsed &&
+                selectedFacility.levels.isNotEmpty()
+            ) {
+                FloorListCloseButton(
+                    modifier,
+                    uiProperties.buttonSize,
+                    onClick = { isFloorsCollapsed = true })
+            }
+        } else {
+            if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
                 SiteFacilityButton(
                     modifier,
                     floorFilterState,
@@ -159,95 +248,65 @@ public fun FloorFilter(
                         isFacilitiesSelectorVisible = isVisible
                     }
                 )
-                return@Surface
             }
+        }
 
-            // display close button if set to top, if not display facilities button
-            if (uiProperties.closeButtonPosition == ButtonPosition.Top) {
-                // check if close button is set to visible and not collapsed
-                if (uiProperties.closeButtonVisibility == View.VISIBLE &&
-                    !isFloorsCollapsed &&
-                    selectedFacility.levels.isNotEmpty()
-                ) {
-                    FloorListCloseButton(
-                        modifier,
-                        uiProperties.buttonSize,
-                        onClick = { isFloorsCollapsed = true })
-                }
+        if (selectedLevelID != null) {
+            if (!isFloorsCollapsed) {
+                // display a list of floor levels in the selected facility
+                FloorListColumn(
+                    modifier = modifier.weight(1f, false),
+                    currentFacility = selectedFacility,
+                    selectedLevelID = selectedLevelID,
+                    uiProperties = uiProperties,
+                    onFloorLevelSelected = { index: Int ->
+                        // update the selected level ID on click
+                        floorFilterState.selectedLevelId = selectedFacility.levels[index].id
+                    }
+                )
+
             } else {
-                if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(
-                        modifier,
-                        floorFilterState,
-                        isSiteAndFacilitySelectorVisible,
-                        isFacilitiesSelectorVisible,
-                        uiProperties,
-                        onSiteFacilitySelectorVisibilityChanged = { isVisible ->
-                            isSiteAndFacilitySelectorVisible = isVisible
-                        },
-                        onFacilitiesSelectorVisible = { isVisible ->
-                            isFacilitiesSelectorVisible = isVisible
-                        }
-                    )
-                }
-            }
-
-            if (selectedLevelID != null) {
-                if (!isFloorsCollapsed) {
-                    // display a list of floor levels in the selected facility
-                    FloorListColumn(
-                        modifier = modifier.weight(1f,false),
-                        currentFacility = selectedFacility,
-                        selectedLevelID = selectedLevelID,
-                        uiProperties = uiProperties,
-                        onFloorLevelSelected = { index: Int ->
-                            // update the selected level ID on click
-                            floorFilterState.selectedLevelId = selectedFacility.levels[index].id
-                        }
-                    )
-
-                } else {
-                    val selectedLevelName = selectedFacility.levels.find { it.id == selectedLevelID }?.let {
+                val selectedLevelName =
+                    selectedFacility.levels.find { it.id == selectedLevelID }?.let {
                         it.shortName.ifBlank { it.levelNumber }
                     }
-                    // display only the selected floor level
-                    FloorLevelSelectButton(
-                        index = 0,
-                        selected = true,
-                        floorText = selectedLevelName.toString(),
-                        uiProperties = uiProperties,
-                        onFloorLevelSelected = {
-                            // display all floor levels when clicked
-                            isFloorsCollapsed = false
-                        }
-                    )
-                }
+                // display only the selected floor level
+                FloorLevelSelectButton(
+                    index = 0,
+                    selected = true,
+                    floorText = selectedLevelName.toString(),
+                    uiProperties = uiProperties,
+                    onFloorLevelSelected = {
+                        // display all floor levels when clicked
+                        isFloorsCollapsed = false
+                    }
+                )
             }
+        }
 
-            // display close button if set to bottom, if not display facilities button
-            if (uiProperties.closeButtonPosition == ButtonPosition.Bottom) {
-                // check if close button is set to visible and not collapsed
-                if (uiProperties.closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
-                    FloorListCloseButton(modifier, uiProperties.buttonSize, onClick = {
-                        isFloorsCollapsed = true
-                    })
-                }
-            } else {
-                if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(
-                        modifier,
-                        floorFilterState,
-                        isSiteAndFacilitySelectorVisible,
-                        isFacilitiesSelectorVisible,
-                        uiProperties,
-                        onSiteFacilitySelectorVisibilityChanged = { isVisible ->
-                            isSiteAndFacilitySelectorVisible = isVisible
-                        },
-                        onFacilitiesSelectorVisible = { isVisible ->
-                            isFacilitiesSelectorVisible = isVisible
-                        }
-                    )
-                }
+        // display close button if set to bottom, if not display facilities button
+        if (uiProperties.closeButtonPosition == ButtonPosition.Bottom) {
+            // check if close button is set to visible and not collapsed
+            if (uiProperties.closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
+                FloorListCloseButton(modifier, uiProperties.buttonSize, onClick = {
+                    isFloorsCollapsed = true
+                })
+            }
+        } else {
+            if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
+                SiteFacilityButton(
+                    modifier,
+                    floorFilterState,
+                    isSiteAndFacilitySelectorVisible,
+                    isFacilitiesSelectorVisible,
+                    uiProperties,
+                    onSiteFacilitySelectorVisibilityChanged = { isVisible ->
+                        isSiteAndFacilitySelectorVisible = isVisible
+                    },
+                    onFacilitiesSelectorVisible = { isVisible ->
+                        isFacilitiesSelectorVisible = isVisible
+                    }
+                )
             }
         }
     }
