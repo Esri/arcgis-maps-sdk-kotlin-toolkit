@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.indoors
 
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -153,6 +154,7 @@ public fun FloorFilter(
 
                 is InitializationStatus.FailedToInitialize -> {
                     val errorMessage = (initializationStatus as InitializationStatus.FailedToInitialize).error.getErrorMessage(context)
+                    Log.e("FloorFilter", errorMessage)
                     Box(
                         modifier = modifier
                             .height(uiProperties.buttonSize.height.dp)
