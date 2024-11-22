@@ -82,10 +82,10 @@ dependencyResolutionManagement {
                         "Requested released version $sdkVersionNumber of the SDK dependency"
                     )
                 }
-                sdkVersionNumber
+                "200.5.0"//sdkVersionNumber
             } else {
                 logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
-                "$sdkVersionNumber-$sdkBuildNumber"
+                "200.5.0"//"$sdkVersionNumber-$sdkBuildNumber"
             }
 
             version("mapsSdk", versionAndBuild)
