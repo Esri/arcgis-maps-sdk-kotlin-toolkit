@@ -48,6 +48,7 @@ buildscript {
     if (githubAction) {
         check(project.hasProperty("sdkVersionNumber"))
         project.extra.set("versionNumber", "UNUSED")
+        project.extra.set("buildNumber", "UNUSED")
         project.logger.info("github action build requested with SDK version ${project.properties["sdkVersionNumber"]}")
     } else if (finalBuild) {
         check(project.hasProperty("versionNumber"))
