@@ -42,7 +42,15 @@ buildscript {
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }
 
-    if (finalBuild) {
+    val githubAction: Boolean = (project.properties["githubAction"] ?: "false")
+        .run { this == "true" }
+
+    if (githubAction) {
+        check(project.hasProperty("sdkVersionNumber"))
+        project.extra.set("versionNumber", "UNUSED")
+        project.extra.set("buildNumber", "UNUSED")
+        project.logger.info("github action build requested with SDK version ${project.properties["sdkVersionNumber"]}")
+    } else if (finalBuild) {
         check(project.hasProperty("versionNumber"))
         project.logger.info("release candidate build requested version ${project.properties["versionNumber"]}")
     } else if (!project.hasProperty("versionNumber") && !project.hasProperty("buildNum")) {
