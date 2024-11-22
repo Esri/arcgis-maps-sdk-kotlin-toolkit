@@ -173,6 +173,7 @@ private fun createValidationErrorStates(
     var (hasMinCharError, hasMaxCharError) = Pair(false, false)
     return buildList {
         errors.forEach { error ->
+            // add the appropriate error state based on the type of error
             when (error) {
                 is FeatureFormValidationException.RequiredException -> {
                     add(ValidationErrorState.Required)
@@ -238,12 +239,17 @@ private fun createValidationErrorStates(
                     }
                 }
             }
-            if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput || formElement.input is BarcodeScannerFormInput) {
-                if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
-                    add(handleCharConstraints(formElement))
-                } else if (hasMinRangeError || hasMaxRangeError) {
-                    add(handleNumericConstraints(formElement))
+            // check and add length/range constraints based validation rules
+            when (formElement.input) {
+                is TextBoxFormInput, is TextAreaFormInput, is BarcodeScannerFormInput -> {
+                    if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
+                        add(handleCharConstraints(formElement))
+                    } else if (hasMinRangeError || hasMaxRangeError) {
+                        add(handleNumericConstraints(formElement))
+                    }
                 }
+
+                else -> { /* no constraints to check */ }
             }
         }
     }
