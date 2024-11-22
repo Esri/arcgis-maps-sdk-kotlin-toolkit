@@ -246,6 +246,9 @@ private class FloorFilterStateImpl(
             }
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
+                // make sure the UI gets updated with the values for SelectedSiteId, SelectedFacilityId
+                // and SelectedLevelId that were applied before initialization
+                setSelectedValuesAppliedBeforeInitialization()
                 // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
                 filterMap()
                 _initializationStatus.value = InitializationStatus.Initialized
@@ -257,6 +260,25 @@ private class FloorFilterStateImpl(
         }.onFailure {
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
             throw it
+        }
+    }
+
+    /**
+     * Sets the selected values that were applied before initialization by the user.
+     *
+     * @since 200.6.0
+     */
+    private fun setSelectedValuesAppliedBeforeInitialization() {
+        if (_selectedSiteId != null) {
+            selectedSiteId = _selectedSiteId
+        }
+        if (_selectedFacilityId != null) {
+            selectedFacilityId = _selectedFacilityId
+        }
+        if (_selectedLevelId != null) {
+            val temp = _selectedLevelId
+            _selectedLevelId = null
+            selectedLevelId = temp
         }
     }
 
