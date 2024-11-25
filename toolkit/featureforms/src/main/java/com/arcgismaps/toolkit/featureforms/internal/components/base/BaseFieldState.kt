@@ -156,13 +156,12 @@ internal abstract class BaseFieldState<T>(
     val domain = properties.domain
 
     /**
-     * Helper text indicates instructions or constraints for the field. This is derived from the
-     * properties of the input type of the field. This is only populated when the field
-     * is focused as indicated by [isFocused]. If the field is not focused, this will be
-     * [ValidationErrorState.NoError].
+     * Text that indicates instructions or constraints for the field. This is derived from the
+     * properties of the input type of the field.
      */
-    var helperText: ValidationErrorState by mutableStateOf(ValidationErrorState.NoError)
-        private set
+    val helperText: ValidationErrorState by lazy {
+        calculateHelperText()
+    }
 
     init {
         scope.launch {
@@ -177,13 +176,7 @@ internal abstract class BaseFieldState<T>(
         }
         scope.launch {
             // validate when focus changes
-            isFocused.collect { focus ->
-                helperText = if (focus && description.isEmpty()) {
-                    // if the field is focused, update the helper text
-                    calculateHelperText()
-                } else {
-                    ValidationErrorState.NoError
-                }
+            isFocused.collect {
                 updateValueWithValidation(_value.value.data, validationErrors.value)
             }
         }
@@ -280,28 +273,30 @@ internal abstract class BaseFieldState<T>(
     abstract fun typeConverter(input: T): Any?
 
     /**
-     * This method is called when the field is focused and the description is empty to provide
-     * helper text for the field. The default implementation only handles a [RangeDomain] with
-     * numeric fields. Override this method to provide custom helper text.
+     * This method is called when [helperText] is accessed to provide the helper text for the field.
+     * The default implementation only handles a [RangeDomain] with numeric fields. Override this
+     * method to provide custom helper text.
      */
     open fun calculateHelperText(): ValidationErrorState {
-        return if (fieldType.isNumeric && domain is RangeDomain) {
-            val (min: Number?, max: Number?) = when {
-                fieldType.isIntegerType -> {
-                    val tuple = domain.asLongTuple
-                    Pair(tuple.min, tuple.max)
-                }
+        return when {
+            fieldType.isNumeric && domain is RangeDomain -> {
+                val (min: Number?, max: Number?) = when {
+                    fieldType.isIntegerType -> {
+                        val tuple = domain.asLongTuple
+                        Pair(tuple.min, tuple.max)
+                    }
 
-                fieldType.isFloatingPoint -> {
-                    val tuple = domain.asDoubleTuple
-                    Pair(tuple.min, tuple.max)
-                }
+                    fieldType.isFloatingPoint -> {
+                        val tuple = domain.asDoubleTuple
+                        Pair(tuple.min, tuple.max)
+                    }
 
-                else -> Pair(null, null)
+                    else -> Pair(null, null)
+                }
+                handleNumericConstraints(min, max, hasValueExpression)
             }
-            handleNumericConstraints(min, max, hasValueExpression)
-        } else {
-            ValidationErrorState.NoError
+
+            else -> ValidationErrorState.NoError
         }
     }
 }
