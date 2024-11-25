@@ -32,6 +32,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationEr
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.handleCharConstraints
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -104,13 +105,12 @@ internal class BarcodeTextFieldState(
     }
 
     override fun calculateHelperText(): ValidationErrorState {
-        // Call the base class implementation
-        val validationState = super.calculateHelperText()
-        // If no errors from base class, perform additional validation
-        return if (validationState is ValidationErrorState.NoError) {
+        // If field type is text, handle character constraints
+        return if (fieldType == FieldType.Text) {
             handleCharConstraints(minLength, maxLength, hasValueExpression)
         } else {
-            validationState
+            // Otherwise, call the super class method which handles numeric constraints
+            super.calculateHelperText()
         }
     }
 

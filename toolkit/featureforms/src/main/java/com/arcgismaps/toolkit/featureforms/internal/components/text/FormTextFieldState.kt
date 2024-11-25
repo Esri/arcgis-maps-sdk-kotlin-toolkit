@@ -122,13 +122,12 @@ internal class FormTextFieldState(
     }
 
     override fun calculateHelperText(): ValidationErrorState {
-        // Call the base class implementation
-        val validationState = super.calculateHelperText()
-        // If no errors from base class, perform additional validation
-        return if (validationState is ValidationErrorState.NoError) {
+        // If field type is text, handle character constraints
+        return if (fieldType == FieldType.Text) {
             handleCharConstraints(minLength, maxLength, hasValueExpression)
         } else {
-            validationState
+            // Otherwise, call the super class method which handles numeric constraints
+            super.calculateHelperText()
         }
     }
 

@@ -157,7 +157,10 @@ internal abstract class BaseFieldState<T>(
 
     /**
      * Text that indicates instructions or constraints for the field. This is derived from the
-     * properties of the input type of the field.
+     * properties of field and represented as a [ValidationErrorState]. See [calculateHelperText]
+     * on how to provide custom helper text.
+     *
+     * Use [ValidationErrorState.getString] to get the actual text from within a composition.
      */
     val helperText: ValidationErrorState by lazy {
         calculateHelperText()
