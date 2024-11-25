@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.Manifest
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -51,18 +52,22 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.rememberBarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -75,7 +80,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
@@ -101,10 +108,80 @@ public sealed class ValidationErrorVisibility {
     public object Visible : ValidationErrorVisibility()
 }
 
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
+    level = DeprecationLevel.HIDDEN
+)
+@Composable
+public fun FeatureForm(
+    featureForm: FeatureForm,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+) {
+    FeatureForm(
+        featureForm = featureForm,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility,
+        colorScheme = FeatureFormDefaults.colorScheme(),
+        typography = FeatureFormDefaults.typography(),
+        onBarcodeButtonClick = null
+    )
+}
+
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that provides the barcode accessory tap callback.",
+    level = DeprecationLevel.HIDDEN
+)
+@Composable
+public fun FeatureForm(
+    featureForm: FeatureForm,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+) {
+    FeatureForm(
+        featureForm = featureForm,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility,
+        colorScheme = colorScheme,
+        typography = typography,
+        onBarcodeButtonClick = null
+    )
+}
+
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
- * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
+ * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
+ *
+ * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
+ * - [AttachmentsFormElement]
+ * - [FieldFormElement] with the following [FormInput] types -
+ *     * [BarcodeScannerFormInput]
+ *     * [ComboBoxFormInput]
+ *     * [DateTimePickerFormInput]
+ *     * [RadioButtonsFormInput]
+ *     * [SwitchFormInput]
+ *     * [TextAreaFormInput]
+ *     * [TextBoxFormInput]
+ * - [GroupFormElement]
+ * - [TextFormElement]
+ *
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
+ * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
+ * A callback is also provided via the [onBarcodeButtonClick] parameter, which is invoked with
+ * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
+ * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
+ * value to update the field value.
+ *
+ * For adding any attachments, camera permissions are required. If the permissions are not granted,
+ * then the specific functionality is disabled in the form.
+ *
+ * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
+ * currently supported. A default attachments editing support is provided using the
+ * [FeatureForm.defaultAttachmentsElement] property.
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
@@ -120,6 +197,9 @@ public sealed class ValidationErrorVisibility {
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
+ * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
+ * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
+ * default barcode scanner is used.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
@@ -130,8 +210,9 @@ public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography()
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -140,7 +221,8 @@ public fun FeatureForm(
         FeatureForm(
             stateData = stateData,
             modifier = modifier,
-            validationErrorVisibility = validationErrorVisibility
+            validationErrorVisibility = validationErrorVisibility,
+            onBarcodeButtonClick = onBarcodeButtonClick
         )
     }
 }
@@ -159,7 +241,8 @@ internal data class StateData(@Stable val featureForm: FeatureForm)
 private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
 ) {
     val featureForm = stateData.featureForm
     // hold the list of form elements in a mutable state to make them observable
@@ -175,11 +258,13 @@ private fun FeatureForm(
     FeatureFormBody(
         form = featureForm,
         states = states,
-        modifier = modifier
-    ) {
-        // expressions evaluated, load attachments
-        formElements.value = featureForm.elements
-    }
+        modifier = modifier,
+        onExpressionsEvaluated = {
+            // expressions evaluated, load attachments
+            formElements.value = featureForm.elements
+        },
+        onBarcodeButtonClick = onBarcodeButtonClick
+    )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
@@ -216,7 +301,8 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
-    onExpressionsEvaluated: () -> Unit
+    onExpressionsEvaluated: () -> Unit,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -249,7 +335,14 @@ private fun FeatureFormBody(
                 item {
                     when (entry.formElement) {
                         is FieldFormElement -> {
-                            FieldElement(state = entry.getState<BaseFieldState<*>>())
+                            FieldElement(
+                                state = entry.getState<BaseFieldState<*>>(),
+                                // set the onClick callback for the field element only if provided
+                                onClick = handleFieldFormElementTapAction(
+                                    fieldFormElement = entry.formElement as FieldFormElement,
+                                    barcodeTapAction = onBarcodeButtonClick
+                                ),
+                            )
                         }
 
                         is GroupFormElement -> {
@@ -257,7 +350,11 @@ private fun FeatureFormBody(
                                 state = entry.getState(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                                    .padding(horizontal = 15.dp, vertical = 10.dp),
+                                // set the onClick callback for the group element only if provided
+                                onFormElementClick = handleFormElementTapAction(
+                                    barcodeTapAction = onBarcodeButtonClick
+                                )
                             )
                         }
 
@@ -265,6 +362,15 @@ private fun FeatureFormBody(
                             AttachmentFormElement(
                                 state = entry.getState(),
                                 Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
+
+                        is TextFormElement -> {
+                            TextFormElement(
+                                state = entry.getState(),
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
@@ -284,6 +390,55 @@ private fun FeatureFormBody(
         form.evaluateExpressions()
         initialEvaluation = true
         onExpressionsEvaluated()
+    }
+}
+
+/**
+ * Handles the tap action for a [FormElement] based on the  input type and the provided tap
+ * actions.
+ *
+ * This will potentially handle taps for any input types that provide custom tap actions.
+ *
+ * @param fieldFormElement the [FieldFormElement] to handle the tap action for.
+ * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
+ * with a [BarcodeScannerFormInput] is tapped.
+ */
+private fun handleFieldFormElementTapAction(
+    fieldFormElement: FieldFormElement,
+    barcodeTapAction: ((FieldFormElement) -> Unit)?
+): (() -> Unit)? {
+    return when (fieldFormElement.input) {
+        is BarcodeScannerFormInput -> {
+            barcodeTapAction?.let {
+                { it(fieldFormElement) }
+            }
+        }
+
+        else -> null
+    }
+}
+
+/**
+ * Handles the tap action for a [FormElement] based on the provided tap actions.
+ *
+ * This will potentially handle taps for any form element types that provide custom tap actions.
+ *
+ * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
+ * with a [BarcodeScannerFormInput] is tapped.
+ */
+private fun handleFormElementTapAction(
+    barcodeTapAction: ((FieldFormElement) -> Unit)?
+): ((FormElement) -> Unit)? {
+    return when {
+        barcodeTapAction != null -> {
+            { formElement ->
+                if (formElement is FieldFormElement) {
+                    handleFieldFormElementTapAction(formElement, barcodeTapAction)?.invoke()
+                }
+            }
+        }
+
+        else -> null
     }
 }
 
@@ -331,25 +486,22 @@ internal fun rememberStates(
             }
 
             is GroupFormElement -> {
-                val fieldStateCollection = MutableFormStateCollection()
-                element.elements.forEach {
-                    if (it is FieldFormElement) {
-                        val state = rememberFieldState(
-                            element = it,
-                            form = form,
-                            scope = scope
-                        )
-                        if (state != null) {
-                            fieldStateCollection.add(it, state)
-                        }
-                    }
-                }
+                val stateCollection = rememberStates(
+                    form = form,
+                    elements = element.elements,
+                    scope = scope
+                )
                 val groupState = rememberBaseGroupState(
                     form = form,
                     groupElement = element,
-                    fieldStates = fieldStateCollection
+                    fieldStates = stateCollection
                 )
                 states.add(element, groupState)
+            }
+
+            is TextFormElement -> {
+                val state = rememberTextFormElementState(element, form)
+                states.add(element, state)
             }
 
             else -> {}
@@ -399,6 +551,10 @@ internal fun rememberFieldState(
                 form = form,
                 scope = scope
             )
+        }
+
+        is BarcodeScannerFormInput -> {
+            rememberBarcodeTextFieldState(field = element, form = form, scope = scope)
         }
 
         is DateTimePickerFormInput -> {

@@ -19,6 +19,10 @@ package com.arcgismaps.toolkit.featureforms.internal.components.formelement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextField
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxField
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxFieldState
@@ -31,13 +35,31 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTime
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 
+/**
+ * Composable that renders a [FieldFormElement] based on the type of its [FormInput] indicated by
+ * the [BaseFieldState].
+ *
+ * @param state The [BaseFieldState] that represents the form element.
+ * @param onClick An event for any elements that support delegated tap actions. If null, the
+ * default tap action defined by the element will be used.
+ */
 @Composable
-internal fun <T> FieldElement(state: BaseFieldState<T>) {
+internal fun <T> FieldElement(
+    state: BaseFieldState<T>,
+    onClick: (() -> Unit)?
+) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
         when (state) {
             is FormTextFieldState -> {
                 FormTextField(state = state)
+            }
+
+            is BarcodeTextFieldState -> {
+                BarcodeTextField(
+                    state = state,
+                    onBarcodeAccessoryClicked = onClick
+                )
             }
 
             is DateTimeFieldState -> {

@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Adjon meg %1$d karaktert</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Adjon meg %1$d karaktert</item>
+        <item quantity="other">Adjon meg %1$d karaktert</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Az értéknek %1$d karakternek kell lennie</item>
+        <item quantity="other">Az értéknek %1$d karakternek kell lennie</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Adjon meg %1$d–%2$d karaktert</string>
+    <string name="value_must_be_from_to_characters">Az értéknek %1$d–%2$d karakter között kell lennie</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Maximum %1$d karakter</item>
+        <item quantity="other">Maximum %1$d karakter</item>
+    </plurals>
     <string name="maximum_n_chars">Maximum %1$d karakter</string>
     <string name="no_value">Nincs érték</string>
     <string name="enter_value">Adja meg az értéket</string>
@@ -28,6 +40,7 @@
     <string name="done">Kész</string>
     <string name="filter">Szűrő %1$s</string>
     <string name="numeric_range_helper_text">Adjon meg egy %1$s és %2$s közötti értéket</string>
+    <string name="value_must_be_from_to">Az értéknek %1$s és %2$s között kell lennie</string>
     <string name="less_than_min_value">Kisebb, mint a minimális %1$s érték</string>
     <string name="exceeds_max_value">Több, mint a maximális %1$s érték</string>
     <string name="value_must_be_a_whole_number">Az értéknek egész számnak kell lennie</string>
@@ -87,9 +100,19 @@
     <string name="ff_time_picker_minute_text_field">perchez</string>
     <string name="ff_time_picker_period_toggle_description">DE/DU kiválasztása</string>
     <string name="ff_time_picker_pm">DU</string>
+
     <string name="take_photo">Fénykép készítése</string>
+    <string name="add_from_gallery">Hozzáadás a galériából</string>
     <string name="rename">Átnevezés</string>
     <string name="delete">Törlés</string>
     <string name="rename_attachment">Csatolmány átnevezése</string>
     <string name="name">Név</string>
+    <string name="add_file">Hozzáadás fájlokból</string>
+    <string name="attachment_error">Hiba a csatolmány hozzáadásakor</string>
+    <string name="no_app_found">Nem található alkalmazás ezen fájltípus megnyitásához.</string>
+    <string name="attachment_too_large">A fájl túl nagy. Kérjük, 50 MB-nál kisebb fájlokat adjon hozzá.</string>
+    <string name="attachment_is_empty">Az üres fájlok nincsenek támogatva</string>
+    <string name="download_empty_file">Az üres fájlok nem tölthetők le</string>
+    <string name="attachment_deleted">A(z) %1s törlése megtörtént</string>
+    <string name="attachment_size_limit_exceeded">A(z) %1$s méretnél nagyobb csatolmányok nem tölthetők le</string>
 </resources>

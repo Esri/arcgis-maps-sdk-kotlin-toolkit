@@ -16,8 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -109,10 +111,16 @@ private fun createValidationErrorStates(
                 }
 
                 is FeatureFormValidationException.IncorrectValueTypeException -> {
-                    if (formElement.fieldType.isFloatingPoint) {
-                        add(ValidationErrorState.NotANumber)
-                    } else if (formElement.fieldType.isIntegerType) {
-                        add(ValidationErrorState.NotAWholeNumber)
+                    when {
+                        formElement.fieldType.isFloatingPoint -> {
+                            add(ValidationErrorState.NotANumber)
+                        }
+                        formElement.fieldType.isIntegerType -> {
+                            add(ValidationErrorState.NotAWholeNumber)
+                        }
+                        formElement.fieldType is FieldType.Guid -> {
+                            add(ValidationErrorState.NotAGuid)
+                        }
                     }
                 }
 
@@ -148,14 +156,14 @@ private fun createValidationErrorStates(
                     }
                 }
             }
-            if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput) {
+            if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput || formElement.input is BarcodeScannerFormInput) {
                 if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
-                    val (min, max) = if (formElement.input is TextBoxFormInput) {
-                        val input = formElement.input as TextBoxFormInput
-                        Pair(input.minLength.toInt(), input.maxLength.toInt())
-                    } else {
-                        val input = formElement.input as TextAreaFormInput
-                        Pair(input.minLength.toInt(), input.maxLength.toInt())
+                    val (min, max) = when (val input = formElement.input) {
+                        is TextBoxFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+                        is TextAreaFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+                        is BarcodeScannerFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+                        // logical edge case, should never happen
+                        else -> Pair(0, 256)
                     }
                     if (min > 0 && max > 0) {
                         if (min == max) {

@@ -66,7 +66,7 @@ class UsernamePasswordTests {
         runBlocking {
             ArcGISEnvironment.authenticationManager.signOut()
         }
-        ArcGISEnvironment.configureArcGISHttpClient {  }
+        ArcGISEnvironment.configureArcGISHttpClient { }
     }
 
     @After
@@ -110,7 +110,7 @@ class UsernamePasswordTests {
         composeTestRule.setContent {
             UsernamePasswordAuthenticator(
                 UsernamePasswordChallenge(
-                    url = "https://arcgis.com",
+                    url = "arcgis.com",
                     onUsernamePasswordReceived = { _, _ -> },
                     onCancel = {}
                 )
@@ -118,21 +118,25 @@ class UsernamePasswordTests {
         }
         advanceUntilIdle()
         // verify the login button is disabled when the fields are empty
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+            .assertIsNotEnabled()
         // verify the login button is disabled when only the username field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+            .assertIsNotEnabled()
         // verify the login button is disabled when only the password field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextClearance()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
             .performTextInput("testPassword")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+            .assertIsNotEnabled()
         // verify it is enabled when both are filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsEnabled()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+            .assertIsEnabled()
     }
 
     /**
@@ -152,7 +156,7 @@ class UsernamePasswordTests {
     @Test
     fun keyboardActions() = runTest {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
-        every { usernamePasswordChallengeMock.url } returns "https://arcgis.com"
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
         every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
@@ -163,10 +167,12 @@ class UsernamePasswordTests {
         // ensure the dialog prompt is displayed as expected
         advanceUntilIdle()
         // verify that clicking on the username field displays the keyboard with ImeAction.Next
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label)).performClick()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+            .performClick()
         composeTestRule.onNode(hasImeAction(ImeAction.Next)).assertExists()
         // verify that clicking on the password field displays the keyboard with ImeAction.Send
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label)).performClick()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+            .performClick()
         composeTestRule.onNode(hasImeAction(ImeAction.Send)).assertExists()
         // verify that clicking on ImeAction.Send will not submit the form when the fields are empty
         composeTestRule.onNode(hasImeAction(ImeAction.Send)).performImeAction()
@@ -231,7 +237,7 @@ class UsernamePasswordTests {
                 DialogAuthenticator(authenticatorState = authenticatorState)
             }
 
-            val hostname = "https://arcgis.com"
+            val hostname = "arcgis.com"
             val challenge = NetworkAuthenticationChallenge(
                 hostname = hostname,
                 networkAuthenticationType = NetworkAuthenticationType.UsernamePassword,
@@ -287,7 +293,7 @@ class UsernamePasswordTests {
                 DialogAuthenticator(authenticatorState = authenticatorState)
             }
             // issue the challenge
-            val hostname = "https://arcgis.com"
+            val hostname = "arcgis.com"
             val challenge = makeMockArcGISAuthenticationChallenge()
             val challengeResponse = async {
                 authenticatorState.handleArcGISAuthenticationChallenge(challenge)
@@ -336,7 +342,14 @@ class UsernamePasswordTests {
             // AuthenticatorState will call TokenCredential.createWithChallenge internally, but this call
             // will fail if we don't mock it because we have mocked the ArcGISAuthenticationChallenge.
             mockkObject(TokenCredential)
-            coEvery { TokenCredential.createWithChallenge(allAny(), allAny(), allAny(), allAny()) } returns Result.success(mockk<TokenCredential>())
+            coEvery {
+                TokenCredential.createWithChallenge(
+                    allAny(),
+                    allAny(),
+                    allAny(),
+                    allAny()
+                )
+            } returns Result.success(mockk<TokenCredential>())
 
             // issue another challenge
             val challengeResponse2 = async {

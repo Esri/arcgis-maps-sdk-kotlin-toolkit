@@ -77,7 +77,7 @@ function _run_gradle_task() {
   if [ "${verbose}" == "true" ]; then
     gradle_flags+="--info "
   fi
-
+ 
   if ! ./gradlew ${gradle_flags} ${task} ${extra_gradle_flags}; then
     echo
     echo "error: Something went wrong when running gradle"
