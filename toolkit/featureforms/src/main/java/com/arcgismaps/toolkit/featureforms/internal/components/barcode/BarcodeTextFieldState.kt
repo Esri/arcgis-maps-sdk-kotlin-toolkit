@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -42,7 +43,8 @@ internal class BarcodeFieldProperties(
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     validationErrors: StateFlow<List<ValidationErrorState>>,
-    val fieldType: FieldType,
+    fieldType: FieldType,
+    domain: Domain?,
     val minLength: Int,
     val maxLength: Int,
 ) : FieldProperties<String>(
@@ -53,7 +55,9 @@ internal class BarcodeFieldProperties(
     validationErrors,
     required,
     editable,
-    visible
+    visible,
+    fieldType,
+    domain
 )
 
 internal class BarcodeTextFieldState(
@@ -73,11 +77,6 @@ internal class BarcodeTextFieldState(
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
 ) {
-    /**
-     * The [FieldType] of the field.
-     */
-    val fieldType = properties.fieldType
-
     /**
      * The minimum length of the field.
      */
@@ -129,6 +128,7 @@ internal class BarcodeTextFieldState(
                         visible = field.isVisible,
                         validationErrors = field.mapValidationErrors(scope),
                         fieldType = field.fieldType,
+                        domain = field.domain,
                         minLength = input.minLength.toInt(),
                         maxLength = input.maxLength.toInt()
                     ),
@@ -166,6 +166,7 @@ internal fun rememberBarcodeTextFieldState(
             visible = field.isVisible,
             validationErrors = field.mapValidationErrors(scope),
             fieldType = field.fieldType,
+            domain = field.domain,
             minLength = (field.input as BarcodeScannerFormInput).minLength.toInt(),
             maxLength = (field.input as BarcodeScannerFormInput).maxLength.toInt()
         ),

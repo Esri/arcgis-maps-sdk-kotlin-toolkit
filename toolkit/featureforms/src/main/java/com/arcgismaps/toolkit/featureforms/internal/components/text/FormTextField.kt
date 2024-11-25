@@ -39,7 +39,7 @@ internal fun FormTextField(
     val showCharacterCount = state.minLength > 0 || state.maxLength > 0
     // if any errors are present, show the error as the supporting text
     val supportingText = if (!isError) {
-        state.description
+        state.description.ifEmpty { state.helperText.getString() }
     } else {
        value.error.getString()
     }
