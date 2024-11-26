@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.ContextCompat.getString
 
 /**
- * Enum class to represent the different error messages that can be thrown by the Trace tool.
+ * Enum class to represent the different error messages that can be thrown by the FloorFilter.
  *
  * @since 200.6.0
  */
@@ -13,7 +13,7 @@ internal enum class FloorFilterError(val resId: Int) {
 }
 
 /**
- * Exception class to represent the different [floorFilterError] that can be thrown by the Trace tool.
+ * Exception class to represent the different [floorFilterError] that can be thrown by the FloorFilter.
  *
  * @since 200.6.0
  */

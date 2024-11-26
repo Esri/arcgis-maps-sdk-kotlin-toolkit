@@ -246,8 +246,8 @@ private class FloorFilterStateImpl(
             }
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
-                // make sure the UI gets updated with the values for SelectedSiteId, SelectedFacilityId
-                // and SelectedLevelId that were applied before initialization
+                // make sure the UI gets updated with the values for selectedSiteId, selectedFacilityId
+                // and selectedLevelId that were applied before initialization
                 setSelectedValuesAppliedBeforeInitialization()
                 // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
                 filterMap()

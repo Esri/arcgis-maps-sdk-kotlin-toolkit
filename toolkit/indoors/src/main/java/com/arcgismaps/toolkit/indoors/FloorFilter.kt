@@ -158,16 +158,18 @@ public fun FloorFilter(
                     Box(
                         modifier = modifier
                             .height(uiProperties.buttonSize.height.dp)
-                            .width(uiProperties.buttonSize.width.dp),
+                            .width(uiProperties.buttonSize.width.dp)
+                            .clickable {
+                                Toast
+                                    .makeText(context, errorMessage, Toast.LENGTH_SHORT)
+                                    .show()
+                            },
                         contentAlignment = Center
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.ErrorOutline,
                             contentDescription = stringResource(id = R.string.geomodel_has_no_floor_aware_data),
-                            modifier = Modifier.clickable {
-                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                            },
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -220,7 +222,7 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
                     isFacilitiesSelectorVisible = isVisible
                 }
             )
-            return
+            return@Column
         }
 
         // display close button if set to top, if not display facilities button
