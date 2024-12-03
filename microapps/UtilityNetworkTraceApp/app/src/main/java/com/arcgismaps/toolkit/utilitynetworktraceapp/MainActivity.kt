@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
     var initialized by remember { mutableStateOf(false) }
+    var isInitializationError by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
@@ -83,33 +85,48 @@ fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(tokenCred)
             initialized = true
         } catch (e: Exception) {
+            isInitializationError = true
             Log.e("UtilityNetworkTraceApp", e.toString())
         }
     }
-    if (initialized) {
-        Scaffold(
-            topBar = { TopAppBar(title = { Text("UtilityNetworkTraceApp") }) }
-        ) {
-            Box(Modifier.padding(it)) {
-                MainScreen(traceViewModel)
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("UtilityNetworkTraceApp") }) }
+    ) {
+        Box(Modifier.padding(it)) {
+            when {
+                initialized -> {
+                    MainScreen(traceViewModel)
+                }
+                isInitializationError -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = stringResource(id = R.string.error),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = stringResource(id = R.string.failed_to_create_token_credential),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
             }
-        }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                Icons.Default.Info,
-                contentDescription = stringResource(id = R.string.error),
-                tint = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = stringResource(id = R.string.failed_to_create_token_credential),
-                color = MaterialTheme.colorScheme.error
-            )
         }
     }
 }
