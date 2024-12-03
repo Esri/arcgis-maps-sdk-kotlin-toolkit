@@ -104,7 +104,7 @@ fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            Icons.Default.Info,
+                            imageVector = Icons.Default.Info,
                             contentDescription = stringResource(id = R.string.error),
                             tint = MaterialTheme.colorScheme.error
                         )
