@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -27,18 +29,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ArcGISFeatureTable
+import com.arcgismaps.data.DrawingTool
 import com.arcgismaps.data.FeatureEditResult
+import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.geometry.GeometryType
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
@@ -112,6 +122,10 @@ sealed class UIState {
         val featureCount: Int
     ) : UIState()
 
+    data class AddFeature(
+        val layerTemplates: List<LayerTemplates>
+    ) : UIState()
+
     /**
      * Indicates an error state with the given [error].
      */
@@ -122,6 +136,16 @@ sealed class UIState {
         val subTitle: String = ""
     ) : UIState()
 }
+
+data class LayerTemplates(
+    val layer: FeatureLayer,
+    val templates: List<TemplateRow>
+)
+
+data class TemplateRow(
+    val template: FeatureTemplate,
+    val bitmap: Bitmap?
+)
 
 /**
  * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
@@ -332,6 +356,49 @@ class MapViewModel @Inject constructor(
 
             else -> return
         }
+    }
+
+    suspend fun addNewFeature() {
+        val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
+        val layerTemplates = mutableListOf<LayerTemplates>()
+        layers.forEach { layer ->
+            val table = layer.featureTable as? ServiceFeatureTable
+            table?.load()?.onSuccess {
+                if (table.canAdd() && table.geometryType == GeometryType.Point) {
+                    val templates = table.featureTypes.flatMap {
+                        it.templates
+                    }.map { template ->
+                        val bitmap = table.createFeature(template, Point(0.0, 0.0))
+                            .getSymbol(getApplication<Application>().resources)
+                        TemplateRow(template, bitmap)
+                    }
+                    layerTemplates.add(
+                        LayerTemplates(
+                            layer,
+                            templates
+                        )
+                    )
+                }
+            }
+        }
+        _uiState.value = UIState.AddFeature(layerTemplates)
+    }
+
+    suspend fun addFeature(template: FeatureTemplate, layer: FeatureLayer, point: Point) {
+        val table = layer.featureTable as? ServiceFeatureTable ?: return
+        val location = proxy.screenToLocationOrNull(
+            ScreenCoordinate(point.x, point.y)
+        )
+        val feature = table.createFeature(template, location)
+        table.addFeature(feature).onFailure {
+            Log.e("TAG", "addFeature:", it)
+        }.onSuccess {
+            Log.e("TAG", "addFeature: success", )
+            //table.applyEdits()
+        }
+        val featureForm = FeatureForm(feature)
+        layer.selectFeature(feature)
+        _uiState.value = UIState.Editing(featureForm)
     }
 
     /**
