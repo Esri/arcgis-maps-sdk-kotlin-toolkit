@@ -218,6 +218,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 visible = uiState is UIState.NotEditing,
                 modifier = Modifier.align(Alignment.BottomEnd)
             ) {
+                // show the add feature button when the user is not editing
                 FloatingActionButton(
                     onClick = {
                         scope.launch { mapViewModel.addNewFeature() }
@@ -255,6 +256,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 val rememberedState = remember(this) {
                     uiState as UIState.AddFeature
                 }
+                // show the add feature sheet when the user wants to add a new feature
                 AddFeatureSheet(
                     onDismissRequest = { mapViewModel.setDefaultState() },
                     onSelected = { template, layer, point ->
