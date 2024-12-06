@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.ArcGISFeatureTable
-import com.arcgismaps.data.DrawingTool
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
@@ -39,7 +37,6 @@ import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
@@ -48,7 +45,6 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
@@ -139,11 +135,16 @@ sealed class UIState {
 
 data class LayerTemplates(
     val layer: FeatureLayer,
-    val templates: List<TemplateRow>
+    val templates: List<TemplateRow>,
+    val defaultFeatureRow: DefaultFeatureRow?
 )
 
 data class TemplateRow(
     val template: FeatureTemplate,
+    val bitmap: Bitmap?
+)
+
+data class DefaultFeatureRow(
     val bitmap: Bitmap?
 )
 
@@ -358,24 +359,41 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetches the feature templates for the layers in the map and sets the UI state to add a new
+     * feature.
+     */
     suspend fun addNewFeature() {
         val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
         val layerTemplates = mutableListOf<LayerTemplates>()
         layers.forEach { layer ->
             val table = layer.featureTable as? ServiceFeatureTable
             table?.load()?.onSuccess {
+                // check if the layer can add features and is a point layer
                 if (table.canAdd() && table.geometryType == GeometryType.Point) {
+                    // get the templates for the layer
                     val templates = table.featureTypes.flatMap {
                         it.templates
                     }.map { template ->
+                        // create a feature with the template to get the symbol
                         val bitmap = table.createFeature(template, Point(0.0, 0.0))
                             .getSymbol(getApplication<Application>().resources)
                         TemplateRow(template, bitmap)
                     }
+                    // create a default feature row if there are no templates
+                    var defaultFeatureRow: DefaultFeatureRow? = null
+                    if (templates.isEmpty()) {
+                        val defaultFeature =
+                            table.createFeature(emptyMap(), Point(0.0, 0.0)) as ArcGISFeature
+                        // create a default feature row with the default feature symbol
+                        defaultFeatureRow =
+                            DefaultFeatureRow(defaultFeature.getSymbol(getApplication<Application>().resources))
+                    }
                     layerTemplates.add(
                         LayerTemplates(
-                            layer,
-                            templates
+                            layer = layer,
+                            templates = templates,
+                            defaultFeatureRow = defaultFeatureRow
                         )
                     )
                 }
@@ -384,21 +402,30 @@ class MapViewModel @Inject constructor(
         _uiState.value = UIState.AddFeature(layerTemplates)
     }
 
-    suspend fun addFeature(template: FeatureTemplate, layer: FeatureLayer, point: Point) {
+    /**
+     * Adds a new feature to the [layer] at the given [point] with the [template] if provided. If
+     * the template is null then a new default feature is crated.
+     */
+    suspend fun addFeature(template: FeatureTemplate?, layer: FeatureLayer, point: Point) {
         val table = layer.featureTable as? ServiceFeatureTable ?: return
         val location = proxy.screenToLocationOrNull(
             ScreenCoordinate(point.x, point.y)
         )
-        val feature = table.createFeature(template, location)
-        table.addFeature(feature).onFailure {
-            Log.e("TAG", "addFeature:", it)
-        }.onSuccess {
-            Log.e("TAG", "addFeature: success", )
-            //table.applyEdits()
+        val feature = if (template != null) {
+            // create a feature with the template
+            table.createFeature(template, location)
+        } else {
+            // create a default feature
+            table.createFeature(emptyMap(), location) as ArcGISFeature
         }
-        val featureForm = FeatureForm(feature)
-        layer.selectFeature(feature)
-        _uiState.value = UIState.Editing(featureForm)
+        table.addFeature(feature).onSuccess {
+            // select the feature and open a FeatureForm for editing the feature
+            val featureForm = FeatureForm(feature)
+            layer.selectFeature(feature)
+            _uiState.value = UIState.Editing(featureForm)
+        }.onFailure {
+            Log.e("MapViewModel", "Failed to add feature", it)
+        }
     }
 
     /**
