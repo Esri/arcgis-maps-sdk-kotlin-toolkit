@@ -100,9 +100,6 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     Popup(stateData, modifier)
 }
 
-@Composable
-public fun RemoveMe() {}
-
 /**
  * Maintain list of attachments outside of SDK
  * https://devtopia.esri.com/runtime/apollo/issues/681

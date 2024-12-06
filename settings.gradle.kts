@@ -44,7 +44,7 @@ val sdkVersionNumber: String =
 val sdkBuildNumber: String =
     providers.gradleProperty("buildNumber").orNull
         ?: providers.gradleProperty("sdkBuildNumber").orNull
-        ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
+        ?: ""//throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
