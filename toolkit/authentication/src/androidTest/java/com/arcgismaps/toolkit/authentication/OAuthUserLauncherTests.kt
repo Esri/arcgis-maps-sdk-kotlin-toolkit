@@ -194,7 +194,7 @@ class OAuthUserLauncherTestActivity : ComponentActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         viewModel.authenticatorState.completeOAuthSignIn(intent)
     }

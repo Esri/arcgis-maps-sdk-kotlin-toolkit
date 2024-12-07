@@ -723,30 +723,29 @@ private fun Modifier.drawCalloutContainer(
     leaderWidth: Float,
     leaderHeight: Float,
     minSize: DpSize
-) = then(
-    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-        // Set bottom padding to ensure the leader is visible
-        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
-        .drawWithCache {
-            onDrawBehind {
-                // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
-                // Fill the path's shape with the Callout's background color
-                drawPath(
-                    path = path,
-                    color = backgroundColor,
-                    style = Fill
-                )
-                // Outline the path's shape with the Callout's stroke color
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    style = Stroke(width = strokeBorderWidth)
-                )
-            }
+) = this
+    .sizeIn(minWidth = minSize.width, minHeight = minSize.height)
+    // Set bottom padding to ensure the leader is visible
+    .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
+    .drawWithCache {
+        onDrawBehind {
+            // Define the Path of the callout
+            val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
+            // Fill the path's shape with the Callout's background color
+            drawPath(
+                path = path,
+                color = backgroundColor,
+                style = Fill
+            )
+            // Outline the path's shape with the Callout's stroke color
+            drawPath(
+                path = path,
+                color = strokeColor,
+                style = Stroke(width = strokeBorderWidth)
+            )
         }
-        .padding(calloutContentPadding)
-)
+    }
+    .padding(calloutContentPadding)
 
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
