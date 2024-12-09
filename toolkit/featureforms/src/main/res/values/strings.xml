@@ -18,17 +18,29 @@
 
 <resources>
     <plurals name="enter_n_chars">
+        <item quantity="zero">Enter %1$d character</item>
         <item quantity="one">Enter %1$d character</item>
+        <item quantity="two">Enter %1$d characters</item>
+        <item quantity="few">Enter %1$d characters</item>
+        <item quantity="many">Enter %1$d characters</item>
         <item quantity="other">Enter %1$d characters</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Value must be %1$d character</item>
         <item quantity="one">Value must be %1$d character</item>
+        <item quantity="two">Value must be %1$d characters</item>
+        <item quantity="few">Value must be %1$d characters</item>
+        <item quantity="many">Value must be %1$d characters</item>
         <item quantity="other">Value must be %1$d characters</item>
     </plurals>
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
     <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximum %1$d character</item>
         <item quantity="one">Maximum %1$d character</item>
+        <item quantity="two">Maximum %1$d characters</item>
+        <item quantity="few">Maximum %1$d characters</item>
+        <item quantity="many">Maximum %1$d characters</item>
         <item quantity="other">Maximum %1$d characters</item>
     </plurals>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
