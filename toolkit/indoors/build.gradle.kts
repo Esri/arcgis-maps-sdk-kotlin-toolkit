@@ -53,6 +53,8 @@ android {
     }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
+        // remove this disable when strings.xml lint error is fixed via localization
+        disable += "MissingTranslation"
     }
 }
 
