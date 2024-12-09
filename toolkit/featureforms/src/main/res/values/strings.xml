@@ -47,8 +47,11 @@
         <item quantity="many">Maximum %1$d characters</item>
         <item quantity="other">Maximum %1$d characters</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
@@ -111,12 +114,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Hour</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d hours</string>
     <string name="ff_time_picker_hour_selection">Select hour</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
     <string name="ff_time_picker_hour_text_field">for hour</string>
     <string name="ff_time_picker_minute">Minute</string>
     <string name="ff_time_picker_minute_selection">Select minutes</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minutes</string>
     <string name="ff_time_picker_minute_text_field">for minutes</string>
     <string name="ff_time_picker_period_toggle_description">Select AM or PM</string>
