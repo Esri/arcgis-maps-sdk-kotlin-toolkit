@@ -1,0 +1,81 @@
+public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
+	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
+	public abstract fun dismissAll ()V
+	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
+	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingOAuthUserSignIn ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
+}
+
+public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
+	public static final fun AuthenticatorState (ZZ)Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;
+	public static synthetic fun AuthenticatorState$default (ZZILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;
+	public static final fun completeOAuthSignIn (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroid/content/Intent;)V
+}
+
+public final class com/arcgismaps/toolkit/authentication/ClientCertificateChallenge {
+	public static final field $stable I
+	public fun <init> (Landroid/security/KeyChainAliasCallback;Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Landroid/security/KeyChainAliasCallback;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Landroid/security/KeyChainAliasCallback;Lkotlin/jvm/functions/Function0;)Lcom/arcgismaps/toolkit/authentication/ClientCertificateChallenge;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/ClientCertificateChallenge;Landroid/security/KeyChainAliasCallback;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/ClientCertificateChallenge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKeyChainAliasCallback ()Landroid/security/KeyChainAliasCallback;
+	public final fun getOnCancel ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/ExtensionsKt {
+	public static final fun launchCustomTabs (Landroid/app/Activity;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)V
+	public static final fun signOut (Lcom/arcgismaps/httpcore/authentication/AuthenticationManager;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity : androidx/activity/ComponentActivity {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun handleRedirectIntent (Landroid/content/Intent;)V
+	public fun onCreate (Landroid/os/Bundle;)V
+	public fun onWindowFocusChanged (Z)V
+}
+
+public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$Contract : androidx/activity/result/contract/ActivityResultContract {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun createIntent (Landroid/content/Context;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)Landroid/content/Intent;
+	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
+	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/ServerTrustChallenge {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/httpcore/authentication/NetworkAuthenticationChallenge;Lkotlin/jvm/functions/Function1;)V
+	public final fun distrust ()V
+	public final fun getChallenge ()Lcom/arcgismaps/httpcore/authentication/NetworkAuthenticationChallenge;
+	public final fun trust ()V
+}
+
+public final class com/arcgismaps/toolkit/authentication/UsernamePasswordAuthenticatorKt {
+	public static final fun UsernamePasswordAuthenticator (Lcom/arcgismaps/toolkit/authentication/UsernamePasswordChallenge;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/authentication/UsernamePasswordChallenge {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;)V
+	public final fun cancel ()V
+	public final fun continueWithCredentials (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getAdditionalMessage ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getHostname ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun setAdditionalMessage (Ljava/lang/String;)V
+}
+
