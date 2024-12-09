@@ -17,6 +17,8 @@
   -->
 
 <resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
         <item quantity="zero">Enter %1$d character</item>
         <item quantity="one">Enter %1$d character</item>
@@ -25,6 +27,8 @@
         <item quantity="many">Enter %1$d characters</item>
         <item quantity="other">Enter %1$d characters</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
         <item quantity="zero">Value must be %1$d character</item>
         <item quantity="one">Value must be %1$d character</item>
@@ -33,8 +37,8 @@
         <item quantity="many">Value must be %1$d characters</item>
         <item quantity="other">Value must be %1$d characters</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
-    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
         <item quantity="zero">Maximum %1$d character</item>
         <item quantity="one">Maximum %1$d character</item>
@@ -43,6 +47,8 @@
         <item quantity="many">Maximum %1$d characters</item>
         <item quantity="other">Maximum %1$d characters</item>
     </plurals>
+    <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
+    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
