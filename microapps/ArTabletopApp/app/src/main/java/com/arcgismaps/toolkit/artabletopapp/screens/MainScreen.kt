@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,17 +40,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.geometry.Envelope
+import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,7 +68,7 @@ fun MainScreen() {
         ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
     }
     val arcGISScene = remember {
-        ArcGISScene().apply {
+        ArcGISScene(BasemapStyle.ArcGISTopographic).apply {
             operationalLayers.add(arcGISSceneLayer)
             baseSurface = Surface().apply {
                 elevationSources.add(
@@ -78,7 +88,17 @@ fun MainScreen() {
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     val coroutineScope = rememberCoroutineScope()
-
+    val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
+    LaunchedEffect(Unit) {
+        arcGISScene.loadStatus.filter { it.isTerminal }.collect {
+            graphicsOverlays.first().graphics.addAll(listOf(
+                Graphic(
+                    arcGISSceneAnchor,
+                    SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbolStyle.Sphere, com.arcgismaps.Color.red, height = 10.0, width = 10.0, depth = 10.0)
+                )
+            ))
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
@@ -101,7 +121,15 @@ fun MainScreen() {
                         arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
                     }
                 }
-            }
+
+                graphicsOverlays.first().graphics.add(
+                    Graphic(
+                        tableTopSceneViewProxy.screenToBaseSurface(tap.screenCoordinate) ?: return@TableTopSceneView,
+                        SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbolStyle.Cube, com.arcgismaps.Color.green, 10.0, 10.0, 10.0)
+                    )
+                )
+            },
+            graphicsOverlays = graphicsOverlays
         ) {
             identifiedBuilding?.let {
                 Callout(it.location) {
@@ -202,3 +230,13 @@ private suspend fun ArcGISSceneLayer.identifyBuilding(
  * @since 200.6.0
  */
 private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: Point)
+
+val ArcGISScene.center: Point
+    get() {
+        var envelope = Envelope(0.0, 0.0, 0.0, 0.0, spatialReference = this.spatialReference)
+        operationalLayers.forEach { layer ->
+            envelope =
+                layer.fullExtent?.let { it -> GeometryEngine.union(envelope, it) }?.extent ?: envelope
+        }
+        return envelope.center
+    }

@@ -46,6 +46,8 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -54,6 +56,7 @@ import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
@@ -241,17 +244,7 @@ public fun TableTopSceneView(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.translation.let {
-                                TransformationMatrix.createWithQuaternionAndTranslation(
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    it[0].toDouble(),
-                                    it[1].toDouble(),
-                                    it[2].toDouble()
-                                )
-                            }
+                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
                             cameraController.transformationMatrix = cameraPosition
@@ -280,6 +273,17 @@ public fun TableTopSceneView(
                                 arCoreAnchor = hitResult.createAnchor()
                                 // stop rendering planes
                                 visualizePlanes = false
+                                val anchorPos = identityMatrix - arCoreAnchor!!.pose.transformationMatrix
+                                graphicsOverlays.first().graphics.add(Graphic(
+                                    Point(anchorPos.translationX, anchorPos.translationY, anchorPos.translationZ, arcGISScene.spatialReference),
+                                    SimpleMarkerSceneSymbol(
+                                        SimpleMarkerSceneSymbolStyle.Diamond,
+                                        com.arcgismaps.Color.cyan,
+                                        10.0,
+                                        10.0,
+                                        10.0
+                                    )
+                                ))
                             }
                         }
                     },
@@ -412,12 +416,12 @@ private fun MutableState<TableTopSceneViewStatus>.update(
 private val Pose.transformationMatrix: TransformationMatrix
     get() {
         return TransformationMatrix.createWithQuaternionAndTranslation(
-            rotationQuaternion[0].toDouble(),
-            rotationQuaternion[1].toDouble(),
-            rotationQuaternion[2].toDouble(),
-            rotationQuaternion[3].toDouble(),
-            translation[0].toDouble(),
-            translation[1].toDouble(),
-            translation[2].toDouble()
+            qx().toDouble(),
+            qy().toDouble(),
+            qz().toDouble(),
+            qw().toDouble(),
+            tx().toDouble(),
+            ty().toDouble(),
+            tz().toDouble()
         )
     }
