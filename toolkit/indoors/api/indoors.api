@@ -65,6 +65,7 @@ public final class com/arcgismaps/toolkit/indoors/FloorFilterSelection$Type$Floo
 public abstract interface class com/arcgismaps/toolkit/indoors/FloorFilterState {
 	public abstract fun getFacilities ()Ljava/util/List;
 	public abstract fun getFloorManager ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getInitializationStatus ()Landroidx/compose/runtime/State;
 	public abstract fun getOnFacilityChanged ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getOnLevelChanged ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getSelectedFacility ()Lcom/arcgismaps/mapping/floor/FloorFacility;
@@ -74,14 +75,57 @@ public abstract interface class com/arcgismaps/toolkit/indoors/FloorFilterState 
 	public abstract fun getSelectedSiteId ()Ljava/lang/String;
 	public abstract fun getSites ()Ljava/util/List;
 	public abstract fun getUiProperties ()Lcom/arcgismaps/toolkit/indoors/UIProperties;
+	public abstract fun initialize-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setSelectedFacilityId (Ljava/lang/String;)V
 	public abstract fun setSelectedLevelId (Ljava/lang/String;)V
 	public abstract fun setSelectedSiteId (Ljava/lang/String;)V
 }
 
 public final class com/arcgismaps/toolkit/indoors/FloorFilterStateKt {
+	public static final fun FloorFilterState (Lcom/arcgismaps/mapping/GeoModel;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
 	public static final fun FloorFilterState (Lcom/arcgismaps/mapping/GeoModel;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
+	public static synthetic fun FloorFilterState$default (Lcom/arcgismaps/mapping/GeoModel;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
 	public static synthetic fun FloorFilterState$default (Lcom/arcgismaps/mapping/GeoModel;Lkotlinx/coroutines/CoroutineScope;Lcom/arcgismaps/toolkit/indoors/UIProperties;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/indoors/FloorFilterState;
+}
+
+public abstract class com/arcgismaps/toolkit/indoors/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/indoors/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/indoors/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/indoors/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/indoors/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/indoors/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/indoors/InitializationStatus$Initialized : com/arcgismaps/toolkit/indoors/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/indoors/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/indoors/InitializationStatus$Initializing : com/arcgismaps/toolkit/indoors/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/indoors/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/indoors/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/indoors/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/indoors/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/arcgismaps/toolkit/indoors/UIProperties {

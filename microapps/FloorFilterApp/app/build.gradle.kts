@@ -57,6 +57,10 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
+    lint {
+        // remove this disable when strings.xml lint error is fixed via localization
+        disable += "MissingTranslation"
+    }
 }
 
 // context receivers are not experimental anymore, but AS thinks they are.
