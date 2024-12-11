@@ -47,6 +47,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
     }
