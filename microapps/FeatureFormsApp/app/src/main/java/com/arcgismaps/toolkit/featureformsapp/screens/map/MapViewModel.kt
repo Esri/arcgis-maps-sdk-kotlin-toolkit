@@ -186,6 +186,8 @@ class MapViewModel @Inject constructor(
     val uiState: State<UIState>
         get() = _uiState
 
+    private val viewpointScale = 1_000.0
+
     init {
         scope.launch {
             // load the map and set the UI state to not editing
@@ -421,6 +423,11 @@ class MapViewModel @Inject constructor(
         table.addFeature(feature).onSuccess {
             // select the feature and open a FeatureForm for editing the feature
             val featureForm = FeatureForm(feature)
+            if (location != null) {
+                // set the viewpoint to the feature location
+                proxy.setViewpointCenter(location)
+                proxy.setViewpointScale(viewpointScale)
+            }
             layer.selectFeature(feature)
             _uiState.value = UIState.Editing(featureForm)
         }.onFailure {
