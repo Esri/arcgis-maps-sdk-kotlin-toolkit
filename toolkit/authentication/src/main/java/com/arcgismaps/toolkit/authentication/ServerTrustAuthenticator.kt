@@ -119,9 +119,14 @@ private fun ServerTrustAuthenticatorImpl(
     Column(
         modifier = modifier
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = stringResource(id = R.string.server_trust_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Start
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(id = R.string.server_trust_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
@@ -144,8 +149,6 @@ private fun ServerTrustAuthenticatorImpl(
             TextButton(onClick = { onConfirm() }) {
                 Text(
                     text = stringResource(id = R.string.allow_connection),
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.End
                 )
             }
         }
