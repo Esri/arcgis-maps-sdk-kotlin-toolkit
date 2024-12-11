@@ -55,12 +55,9 @@ android {
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
+            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
-    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
@@ -71,11 +68,7 @@ android {
 
 //https://youtrack.jetbrains.com/issue/KTIJ-21063
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlin {
-        compilerOptions {
-            freeCompilerArgs.add("-Xcontext-receiverst")
-        }
-    }
+    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {
