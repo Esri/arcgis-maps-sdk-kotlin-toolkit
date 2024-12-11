@@ -40,7 +40,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -66,7 +65,9 @@ android {
 // context receivers are not experimental anymore, but AS thinks they are.
 //https://youtrack.jetbrains.com/issue/KTIJ-21063
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-receivers")
+    }
 }
 
 dependencies {
