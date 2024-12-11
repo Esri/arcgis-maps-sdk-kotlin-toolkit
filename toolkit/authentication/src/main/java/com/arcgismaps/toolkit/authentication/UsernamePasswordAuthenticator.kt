@@ -156,7 +156,7 @@ private fun UsernamePasswordAuthenticatorImpl(
     Column(
         modifier = modifier
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
         if (additionalInfo.isNotEmpty()) {
@@ -168,6 +168,12 @@ private fun UsernamePasswordAuthenticatorImpl(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        Text(
+            text = stringResource(id = R.string.username_password_login_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Start
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(id = R.string.username_password_login_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
@@ -225,7 +231,7 @@ private fun UsernamePasswordAuthenticatorImpl(
                 enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
                 onClick = { submitUsernamePassword() }
             ) {
-                Text(stringResource(id = R.string.login))
+                Text(stringResource(id = R.string.signin))
             }
         }
     }

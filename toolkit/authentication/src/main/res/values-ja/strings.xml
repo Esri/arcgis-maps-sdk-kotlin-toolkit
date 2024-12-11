@@ -26,5 +26,5 @@
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">パスワード</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">ログイン</string>
+    <string name="signin">ログイン</string>
 </resources>

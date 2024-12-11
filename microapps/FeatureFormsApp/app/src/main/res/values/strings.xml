@@ -17,7 +17,7 @@
     <string name="app_name">FeatureFormsApp</string>
     <string name="edit_feature">Edit Feature</string>
     <string name="agol_portal_url">https://www.arcgis.com</string>
-    <string name="login">Login</string>
+    <string name="signin">Login</string>
     <string name="cancel">Cancel</string>
     <string name="enter_enterprise_url">"Enter an URL for ArcGIS Enterprise"</string>
     <string name="signing_in">Signing in..</string>
