@@ -156,7 +156,6 @@ private fun UsernamePasswordAuthenticatorImpl(
     Column(
         modifier = modifier
             .padding(24.dp),
-        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
         if (additionalInfo.isNotEmpty()) {
