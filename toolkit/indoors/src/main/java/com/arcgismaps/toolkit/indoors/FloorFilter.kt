@@ -204,14 +204,14 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         // get the current selected site
         val selectedSite = floorFilterState.onSiteChanged.collectAsStateWithLifecycle().value
 
-        // Reset isFloorsCollapsed to false whenever a new site is selected
-        LaunchedEffect(selectedSite) {
-            isFloorsCollapsed = false
-        }
-
         // get the current selected facility
         val selectedFacility =
             floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+
+        // Reset isFloorsCollapsed to false whenever a new site or facility is selected
+        LaunchedEffect(selectedSite, selectedFacility) {
+            isFloorsCollapsed = false
+        }
 
         // get the selected level ID
         val selectedLevelID =
