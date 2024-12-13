@@ -68,6 +68,7 @@ public abstract interface class com/arcgismaps/toolkit/indoors/FloorFilterState 
 	public abstract fun getInitializationStatus ()Landroidx/compose/runtime/State;
 	public abstract fun getOnFacilityChanged ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getOnLevelChanged ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getOnSiteChanged ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getSelectedFacility ()Lcom/arcgismaps/mapping/floor/FloorFacility;
 	public abstract fun getSelectedFacilityId ()Ljava/lang/String;
 	public abstract fun getSelectedLevelId ()Ljava/lang/String;
