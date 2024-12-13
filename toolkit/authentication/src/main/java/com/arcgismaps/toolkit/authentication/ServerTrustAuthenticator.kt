@@ -38,6 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -128,7 +131,20 @@ private fun ServerTrustAuthenticatorImpl(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(id = R.string.server_trust_message, hostname),
+            text = buildAnnotatedString {
+                val string = stringResource(
+                    id = R.string.server_trust_message,
+                    hostname
+                )
+                val startIdx = string.indexOf(hostname)
+                val endIdx = startIdx + hostname.length
+                append(string)
+                addStyle(
+                    SpanStyle(
+                        fontWeight = FontWeight.Bold
+                    ), startIdx, endIdx
+                )
+            },
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start,
         )
@@ -149,13 +165,14 @@ private fun ServerTrustAuthenticatorImpl(
             TextButton(onClick = { onConfirm() }) {
                 Text(
                     text = stringResource(id = R.string.allow_connection),
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
     }
 }
 
-@Preview
+@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 @Composable
 private fun ServerTrustAuthenticatorImplPreview() {
     ServerTrustAuthenticatorImpl(
