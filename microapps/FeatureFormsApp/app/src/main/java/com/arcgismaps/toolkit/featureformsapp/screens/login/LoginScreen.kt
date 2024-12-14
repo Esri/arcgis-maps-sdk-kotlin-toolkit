@@ -249,7 +249,7 @@ fun PortalURLForm(
                     Button(onClick = {
                         onSubmit(url)
                     }) {
-                        Text(text = stringResource(R.string.signin))
+                        Text(text = stringResource(R.string.login))
                     }
                 }
             }
