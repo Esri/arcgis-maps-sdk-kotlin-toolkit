@@ -24,11 +24,15 @@
     <!-- This text is on a button that can fit 40 chars -->
     <string name="allow_connection">Allow connection</string>
     <string name="username_password_login_title">Authentication required</string>
-    <string name="username_password_login_message">You need to sign in to access %1$s</string>
+    <string name="username_password_login_message">%2$sYou need to sign in to access %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Username</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Password</string>
     <!-- This text is on a button that can fit 24 chars -->
     <string name="signin">Sign in</string>
+
+    <!--UsernamePassword Authenticator Error messages-->
+    <string name="authentication_failed">Authentication Failed.</string>
+    <string name="invalid_username_password">Invalid username or password.</string>
 </resources>

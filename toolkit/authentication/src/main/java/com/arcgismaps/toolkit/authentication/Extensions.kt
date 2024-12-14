@@ -19,8 +19,10 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
+import android.content.Context
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import com.arcgismaps.exceptions.NetworkAuthenticationException
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
@@ -77,4 +79,18 @@ internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boole
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
     }.launchUrl(this, Uri.parse(authorizeUrl))
+}
+
+/**
+ * Localizes the error message for the provided [Throwable].
+ *
+ * @param context the [Context] used to localize the error message.
+ * @since 200.7.0
+ */
+internal fun Throwable.getLocalizedName(context: Context): String {
+    return when (this) {
+        is NetworkAuthenticationException.UnauthorizedException, is NetworkAuthenticationException.ForbiddenException ->
+            context.getString(R.string.invalid_username_password)
+        else -> context.getString(R.string.authentication_failed)
+    }
 }
