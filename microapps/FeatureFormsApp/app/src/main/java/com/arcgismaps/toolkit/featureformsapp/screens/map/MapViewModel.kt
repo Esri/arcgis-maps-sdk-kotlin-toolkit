@@ -421,6 +421,14 @@ class MapViewModel @Inject constructor(
         table.addFeature(feature).onSuccess {
             // select the feature and open a FeatureForm for editing the feature
             val featureForm = FeatureForm(feature)
+            if (location != null) {
+                // set the viewpoint to the feature location
+                proxy.setViewpointCenter(location)
+                // set the viewpoint scale if the layer has a min scale
+                layer.minScale?.let { scale ->
+                    proxy.setViewpointScale(scale)
+                }
+            }
             layer.selectFeature(feature)
             _uiState.value = UIState.Editing(featureForm)
         }.onFailure {
