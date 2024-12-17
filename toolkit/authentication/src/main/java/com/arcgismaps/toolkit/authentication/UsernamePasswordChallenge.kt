@@ -39,13 +39,7 @@ public class UsernamePasswordChallenge(
 
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
-    @Deprecated(
-        message = "Use signInException to get additional message",
-        level = DeprecationLevel.WARNING,
-    )
     public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
-    private val _sigInException: MutableStateFlow<Throwable?> = MutableStateFlow(null)
-    public val signInException: StateFlow<Throwable?> = _sigInException.asStateFlow()
     public val hostname: String by lazy {
         Uri.parse(url).host ?: url
     }
@@ -78,15 +72,7 @@ public class UsernamePasswordChallenge(
      *
      * @since 200.2.0
      */
-    @Deprecated(
-        message = "Use signInException to get additional message",
-        level = DeprecationLevel.WARNING,
-    )
     public fun setAdditionalMessage(message: String?) {
         _additionalMessage.value = message
-    }
-
-    public fun setSignInException(exception: Throwable) {
-        _sigInException.value = exception
     }
 }

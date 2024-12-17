@@ -52,12 +52,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -84,13 +80,11 @@ public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val signInException = usernamePasswordChallenge.signInException.collectAsStateWithLifecycle().value
-
+    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
     Surface(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
-            additionalInfo =  signInException?.getLocalizedName(context)?: "",
+            additionalInfo = additionalInfo ?: "",
             onCancel = { usernamePasswordChallenge.cancel() },
             onConfirm = { username, password ->
                 usernamePasswordChallenge.continueWithCredentials(username, password)
@@ -112,8 +106,7 @@ internal fun UsernamePasswordAuthenticatorDialog(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val signInException = usernamePasswordChallenge.signInException.collectAsStateWithLifecycle().value
+    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
 
     Dialog(onDismissRequest = { usernamePasswordChallenge.cancel() }) {
         Card(
@@ -124,7 +117,7 @@ internal fun UsernamePasswordAuthenticatorDialog(
         ) {
             UsernamePasswordAuthenticatorImpl(
                 hostname = usernamePasswordChallenge.hostname,
-                additionalInfo =  signInException?.getLocalizedName(context)?: "",
+                additionalInfo = additionalInfo ?: "",
                 onConfirm = { username, password ->
                     usernamePasswordChallenge.continueWithCredentials(username, password)
                 },
@@ -165,6 +158,15 @@ private fun UsernamePasswordAuthenticatorImpl(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        if (additionalInfo.isNotEmpty()) {
+            Text(
+                text = additionalInfo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Text(
             text = stringResource(id = R.string.username_password_login_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -172,21 +174,7 @@ private fun UsernamePasswordAuthenticatorImpl(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = buildAnnotatedString {
-                val string = stringResource(
-                    id = R.string.username_password_login_message,
-                    hostname,
-                    if (additionalInfo.isNotEmpty()) "$additionalInfo " else ""
-                )
-                append(string)
-                val startIdx = string.indexOf(hostname)
-                val endIdx = startIdx + hostname.length
-                addStyle(
-                    SpanStyle(
-                        fontWeight = FontWeight.Bold
-                    ), startIdx, endIdx
-                )
-            },
+            text = stringResource(id = R.string.username_password_login_message, hostname),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
         )
@@ -266,7 +254,8 @@ private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: ()
         } else false
     }
 
-@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
+
+@Preview
 @Composable
 private fun UsernamePasswordAuthenticatorImplPreview() {
     val modifier = Modifier

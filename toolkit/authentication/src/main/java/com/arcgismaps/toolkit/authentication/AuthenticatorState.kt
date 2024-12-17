@@ -202,10 +202,10 @@ private class AuthenticatorStateImpl(
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
+        var error: Throwable = IllegalStateException("Authentication failed.")
         return awaitUsernamePassword(challenge.requestUrl)
             // map UsernamePassword values to an ArcGISAuthenticationChallengeResponse
             .map { usernamePassword ->
-                var error = challenge.cause
                 // usernamePassword is null if the user presses "cancel"
                 if (usernamePassword == null) return@map ArcGISAuthenticationChallengeResponse.Cancel
                 val credential =
@@ -222,7 +222,7 @@ private class AuthenticatorStateImpl(
                 return@map if (credential != null) {
                     ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
                 } else {
-                    _pendingUsernamePasswordChallenge.value?.setSignInException(error)
+                    _pendingUsernamePasswordChallenge.value?.setAdditionalMessage("Invalid username or password.")
                     null
                 }
             }
@@ -236,7 +236,7 @@ private class AuthenticatorStateImpl(
             // Cancels collection when the first value is received.
             .firstOrNull()
             // If after 5 tries we don't get any valid credentials, we will just fail.
-            ?: ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(challenge.cause)
+            ?: ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(error)
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
