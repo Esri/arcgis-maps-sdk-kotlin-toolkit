@@ -54,6 +54,9 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -158,23 +161,31 @@ private fun UsernamePasswordAuthenticatorImpl(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        if (additionalInfo.isNotEmpty()) {
-            Text(
-                text = additionalInfo,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.error,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
         Text(
             text = stringResource(id = R.string.username_password_login_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Start
         )
         Spacer(modifier = Modifier.height(16.dp))
+        if (additionalInfo.isNotEmpty()) {
+            Text(
+                text = additionalInfo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
         Text(
-            text = stringResource(id = R.string.username_password_login_message, hostname),
+            text = buildAnnotatedString {
+                val string = stringResource(id = R.string.username_password_login_message, hostname)
+                append(string)
+                string.indexOf(hostname).takeIf { it >= 0 }?.let { startIdx ->
+                    addStyle(
+                        style = SpanStyle(fontWeight = FontWeight.Bold),
+                        start = startIdx,
+                        end = startIdx + hostname.length
+                    )
+                }
+            },
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
         )
@@ -255,12 +266,12 @@ private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: ()
     }
 
 
-@Preview
+@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 @Composable
 private fun UsernamePasswordAuthenticatorImplPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticatorImpl(
-        hostname = "https://www.arcgis.com/",
+        hostname = "https://www.arcgis.com",
         additionalInfo = "Invalid username or password.",
         onConfirm = { _, _ -> },
         onCancel = {},
@@ -274,7 +285,7 @@ private fun UsernamePasswordAuthenticatorPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticator(
         usernamePasswordChallenge = UsernamePasswordChallenge(
-            url = "https://www.arcgis.com/",
+            url = "https://www.arcgis.com",
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
@@ -288,7 +299,7 @@ private fun UsernamePasswordAuthenticatorDialogPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
-            url = "https://www.arcgis.com/",
+            url = "https://www.arcgis.com",
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
