@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.ar
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -237,16 +239,17 @@ public fun TableTopSceneView(
                     arSessionWrapper.onDestroy(lifecycleOwner)
                 }
             }
-            val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
+            var identityMatrix by remember { mutableStateOf(TransformationMatrix.createIdentityMatrix()) }
             val session = arSessionWrapper.session.collectAsStateWithLifecycle()
             session.value?.let { arSession ->
                 ArCameraFeed(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
+                            val anchorPosition = identityMatrix - anchor.pose.extractTranslation().transformationMatrix
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                            Log.e("AR", "Camera Position after adding: Q: ${cameraPosition.quaternionX}, ${cameraPosition.quaternionY}, ${cameraPosition.quaternionZ}, ${cameraPosition.quaternionW} T: ${cameraPosition.translationX}, ${cameraPosition.translationY}, ${cameraPosition.translationZ}")
                             cameraController.transformationMatrix = cameraPosition
                             val imageIntrinsics = frame.camera.imageIntrinsics
                             tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
@@ -257,31 +260,39 @@ public fun TableTopSceneView(
                                 imageIntrinsics.imageDimensions[0].toFloat(),
                                 imageIntrinsics.imageDimensions[1].toFloat(),
                                 deviceOrientation = when (displayRotation) {
-                                    0 -> DeviceOrientation.Portrait
-                                    90 -> DeviceOrientation.LandscapeRight
-                                    180 -> DeviceOrientation.ReversePortrait
-                                    270 -> DeviceOrientation.LandscapeLeft
+                                    0 -> DeviceOrientation.LandscapeLeft
+                                    90 -> DeviceOrientation.Portrait
+                                    180 -> DeviceOrientation.LandscapeRight
+                                    270 -> DeviceOrientation.ReversePortrait
                                     else -> DeviceOrientation.Portrait
                                 }
                             )
+                            Log.e("AR", "Image Intrinsics: ${imageIntrinsics.focalLength[0]}, ${imageIntrinsics.focalLength[1]}, ${imageIntrinsics.principalPoint[0]}, ${imageIntrinsics.principalPoint[1]}, ${imageIntrinsics.imageDimensions[0]}, ${imageIntrinsics.imageDimensions[1]}, ${displayRotation}")
                             tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
                     },
                     onTapWithHitResult = { hit ->
                         hit?.let { hitResult ->
                             if (arCoreAnchor == null) {
-                                arCoreAnchor = hitResult.createAnchor()
+                                identityMatrix = TransformationMatrix.createIdentityMatrix()
+                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation()).also {
+                                    val rotatedPose = it.pose.rotateVector(floatArrayOf(0f, 0f, 0f))
+                                    Log.e("ArCoreAnchor", "Rotated Pose: (${rotatedPose[0]},${rotatedPose[1]},${rotatedPose[2]})")
+                                }
                                 // stop rendering planes
                                 visualizePlanes = false
                                 val anchorPos = identityMatrix - arCoreAnchor!!.pose.transformationMatrix
+                                Log.e("AR", "Initial Anchor Position: Q: ${anchorPos.quaternionX}, ${anchorPos.quaternionY}, ${anchorPos.quaternionZ}, ${anchorPos.quaternionW} T: ${anchorPos.translationX}, ${anchorPos.translationY}, ${anchorPos.translationZ}")
+                                val location = cameraController.originCamera.value.transformationMatrix + arCoreAnchor!!.pose.transformationMatrix
+                                val pt = Camera(location).location
                                 graphicsOverlays.first().graphics.add(Graphic(
-                                    Point(anchorPos.translationX, anchorPos.translationY, anchorPos.translationZ, arcGISScene.spatialReference),
+                                    pt,
                                     SimpleMarkerSceneSymbol(
-                                        SimpleMarkerSceneSymbolStyle.Diamond,
+                                        SimpleMarkerSceneSymbolStyle.Cylinder,
                                         com.arcgismaps.Color.cyan,
-                                        10.0,
-                                        10.0,
-                                        10.0
+                                        1000.0,
+                                        5.0,
+                                        5.0
                                     )
                                 ))
                             }

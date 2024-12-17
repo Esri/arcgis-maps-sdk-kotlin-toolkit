@@ -44,13 +44,12 @@ import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -67,19 +66,21 @@ fun MainScreen() {
     val arcGISSceneLayer = remember {
         ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
     }
+    val sr = arcGISSceneLayer.spatialReference
+    val arcGISSceneAnchor = remember {
+        Point(-122.68350326165559, 45.53257485106716, 10.0, sr)
+    }
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISTopographic).apply {
-            operationalLayers.add(arcGISSceneLayer)
+        ArcGISScene().apply {
+//            operationalLayers.add(arcGISSceneLayer)
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
                 )
-                opacity = 0f
+//                opacity = 0f
             }
+            initialViewpoint = Viewpoint(arcGISSceneAnchor, 1000.0)
         }
-    }
-    val arcGISSceneAnchor = remember {
-        Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
     }
 
     // Tracks the currently selected building
@@ -103,9 +104,9 @@ fun MainScreen() {
         TableTopSceneView(
             arcGISScene = arcGISScene,
             arcGISSceneAnchor = arcGISSceneAnchor,
-            translationFactor = 400.0,
+            translationFactor = 2000.0,
             modifier = Modifier.fillMaxSize(),
-            clippingDistance = 400.0,
+            clippingDistance = 750.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             onInitializationStatusChanged = {
                 initializationStatus = it

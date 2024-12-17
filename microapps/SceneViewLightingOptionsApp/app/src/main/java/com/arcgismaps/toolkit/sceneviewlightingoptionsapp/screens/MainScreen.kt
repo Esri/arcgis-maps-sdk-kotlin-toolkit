@@ -50,8 +50,10 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
@@ -65,33 +67,18 @@ import java.time.ZoneOffset
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val arcGISSceneLayer = remember {
+        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+    }
     val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            // add base surface for elevation data
-            val surface = Surface()
-            surface.elevationSources.add(
-                ArcGISTiledElevationSource(
-                    "https://elevation3d.arcgis" +
-                            ".com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+        ArcGISScene().apply {
+            operationalLayers.add(arcGISSceneLayer)
+            baseSurface = Surface().apply {
+                elevationSources.add(
+                    ElevationSource.fromTerrain3dService()
                 )
-            )
-            baseSurface = surface
-            val point = Point(
-                -73.0815,
-                -49.3272,
-                4059.0,
-                SpatialReference.wgs84()
-            )
-            initialViewpoint = Viewpoint(
-                center = point,
-                scale = 17000.0,
-                camera = Camera(
-                    locationPoint = point,
-                    heading = 11.0,
-                    pitch = 82.0,
-                    roll = 0.0
-                )
-            )
+                opacity = 0f
+            }
         }
     }
 
