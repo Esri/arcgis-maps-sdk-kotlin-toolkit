@@ -76,13 +76,6 @@ android {
     }
 }
 
-//https://youtrack.jetbrains.com/issue/KTIJ-21063
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-receivers")
-    }
-}
-
 dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
