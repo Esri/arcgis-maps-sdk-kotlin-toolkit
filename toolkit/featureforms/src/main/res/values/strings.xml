@@ -62,7 +62,7 @@
     <string name="ok">OK</string>
     <string name="done">Done</string>
     <string name="filter">Filter %1$s</string>
-    <string name="search">Search %1$s</string>
+    <string name="search">Search</string>
     <string name="numeric_range_helper_text">Enter value from %1$s to %2$s</string>
     <string name="value_must_be_from_to">Value must be from %1$s to %2$s</string>
     <string name="less_than_min_value">Less than minimum value %1$s</string>
