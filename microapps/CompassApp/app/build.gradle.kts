@@ -57,7 +57,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -74,11 +73,6 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
-}
-
-//https://youtrack.jetbrains.com/issue/KTIJ-21063
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {

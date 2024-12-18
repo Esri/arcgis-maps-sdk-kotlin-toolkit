@@ -59,7 +59,6 @@ android {
         // context receivers are used by the MapInterface for gesture events
         freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
