@@ -71,6 +71,7 @@ public sealed interface FloorFilterState {
     public var selectedFacilityId: String?
     public var selectedLevelId: String?
 
+    public val onSiteChanged: StateFlow<FloorSite?>
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
 
@@ -94,6 +95,9 @@ private class FloorFilterStateImpl(
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
     override val floorManager: StateFlow<FloorManager?> = _floorManager.asStateFlow()
+
+    private val _onSiteChanged: MutableStateFlow<FloorSite?> = MutableStateFlow(null)
+    override val onSiteChanged: StateFlow<FloorSite?> = _onSiteChanged.asStateFlow()
 
     private val _onFacilityChanged: MutableStateFlow<FloorFacility?> = MutableStateFlow(null)
     override val onFacilityChanged: StateFlow<FloorFacility?> = _onFacilityChanged.asStateFlow()
@@ -154,6 +158,7 @@ private class FloorFilterStateImpl(
         set(value) {
             _selectedSiteId = value
             selectedFacilityId = null
+            _onSiteChanged.value = getSelectedSite()
             getSelectedSite()?.let {
                 onSelectionChangedListener(
                     FloorFilterSelection(

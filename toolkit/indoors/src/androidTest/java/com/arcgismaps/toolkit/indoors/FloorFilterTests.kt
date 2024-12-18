@@ -20,6 +20,7 @@
 package com.arcgismaps.toolkit.indoors
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -117,24 +118,35 @@ class FloorFilterTests {
         // verify if the facility has 12 floor levels
         assert(floorLevelButtons.fetchSemanticsNodes().size == 12)
 
-        // verify the floor level selector is not collapsed
-        val floorListCloseButton = composeTestRule.onAllNodesWithContentDescription(
-            label = "Close"
+        // verify that the collapse button is being displayed
+        val floorListCollapseButton = composeTestRule.onAllNodesWithContentDescription(
+            label = "Collapse"
         )[0]
 
         // get semantic node of the 8th floor level select button
         val eighthFloorLevelButton = floorLevelButtons[7]
+
+        // get semantic node of the 1st floor level select button
+        val firstFloorLevelButton = floorLevelButtons[0]
+
+        // verify if the 8th floor level select button is being displayed
+        eighthFloorLevelButton.assertIsDisplayed()
+
+        // verify if the 1st floor level select button is being displayed
+        firstFloorLevelButton.assertIsDisplayed()
 
         // select the 8th floor of the facility
         eighthFloorLevelButton.performClick()
         composeTestRule.waitForIdle()
 
         // collapse the floor level list
-        floorListCloseButton.performClick()
+        floorListCollapseButton.performClick()
         composeTestRule.waitForIdle()
 
         // verify the floor level selector is now collapsed
-        floorListCloseButton.assertDoesNotExist()
+        floorListCollapseButton.assertExists()
+        eighthFloorLevelButton.assertIsNotDisplayed()
+        firstFloorLevelButton.assertIsDisplayed()
     }
 }
 
