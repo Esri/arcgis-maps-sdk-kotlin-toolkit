@@ -191,9 +191,6 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        // displays only the selected floor when enabled
-        var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
-
         // boolean toggle to display the site facility selector dialog
         var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -208,10 +205,9 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         val selectedFacility =
             floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
 
+        // displays only the selected floor when enabled
         // Reset isFloorsCollapsed to false whenever a new site or facility is selected
-        LaunchedEffect(selectedSite, selectedFacility) {
-            isFloorsCollapsed = false
-        }
+        var isFloorsCollapsed by rememberSaveable(selectedSite, selectedFacility) { mutableStateOf(false) }
 
         // get the selected level ID
         val selectedLevelID =
