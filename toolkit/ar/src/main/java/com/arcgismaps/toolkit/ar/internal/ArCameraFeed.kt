@@ -89,7 +89,7 @@ internal fun ArCameraFeed(
     AndroidView(factory = { surfaceViewWrapper.glSurfaceView }, modifier = Modifier
         .fillMaxSize()
         .pointerInteropFilter {
-            cameraFeedRenderer.onClick(it)
+            cameraFeedRenderer.onClick(it.x, it.y)
             true
         })
 }

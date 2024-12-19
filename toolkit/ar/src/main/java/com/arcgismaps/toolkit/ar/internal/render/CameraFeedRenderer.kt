@@ -114,7 +114,7 @@ internal class CameraFeedRenderer(
             .setDepthWrite(false)
     }
 
-    private var lastTap: MotionEvent? = null
+    private var lastTapCoordinates: Pair<Float, Float>? = null
 
 
     override fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -223,9 +223,9 @@ internal class CameraFeedRenderer(
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
-        val tap = lastTap ?: return
+        val tap = lastTapCoordinates ?: return
         if (hasHandledTap) return
-        val hitResults = frame.hitTest(tap)
+        val hitResults = frame.hitTest(tap.first, tap.second)
         val hit = hitResults.lastOrNull {
             Log.e("AR", "Hit Test: Q: ${it.hitPose.qx()}, ${it.hitPose.qy()}, ${it.hitPose.qz()}, ${it.hitPose.qw()} T: ${it.hitPose.tx()}, ${it.hitPose.ty()}, ${it.hitPose.tz()}")
             it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(it.hitPose))
@@ -234,12 +234,12 @@ internal class CameraFeedRenderer(
             hasHandledTap = true
         }
         onTap(hit)
-        lastTap = null
+        lastTapCoordinates = null
     }
     var hasHandledTap = false
 
-    fun onClick(it: MotionEvent) {
-        lastTap = it
+    fun onClick(x: Float, y: Float) {
+        lastTapCoordinates = Pair(x, y)
     }
 
     /**
