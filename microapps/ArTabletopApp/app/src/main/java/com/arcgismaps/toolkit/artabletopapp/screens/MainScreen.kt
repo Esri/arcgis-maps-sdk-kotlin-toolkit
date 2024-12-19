@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,25 +39,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.geometry.Envelope
-import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
-import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
-import com.arcgismaps.mapping.view.Graphic
-import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,7 +69,7 @@ fun MainScreen() {
         }
     }
     val arcGISSceneAnchor = remember {
-        Point(-122.68350326165559, 45.53257485106716, 10.0)
+        Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
     }
 
     // Tracks the currently selected building
