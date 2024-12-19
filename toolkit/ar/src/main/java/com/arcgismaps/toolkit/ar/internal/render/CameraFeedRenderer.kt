@@ -222,7 +222,9 @@ internal class CameraFeedRenderer(
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         lastTapCoordinates?.let { tap ->
-            val hit = frame.hitTest(tap.x, tap.y).lastOrNull {
+            val hit = frame.hitTest(tap.x, tap.y).firstOrNull {
+                // sometimes ARCore will consider a hit if the hit point is just barely outside the
+                // polygon. For safety we check that the hit is within the polygon and within the extents
                 it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
                     it.hitPose
                 ))
