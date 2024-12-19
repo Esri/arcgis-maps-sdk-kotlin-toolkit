@@ -401,14 +401,11 @@ private fun MutableState<TableTopSceneViewStatus>.update(
  * @since 200.6.0
  */
 private val Pose.transformationMatrix: TransformationMatrix
-    get() {
-        return TransformationMatrix.createWithQuaternionAndTranslation(
-            qx().toDouble(),
-            qy().toDouble(),
-            qz().toDouble(),
-            qw().toDouble(),
-            tx().toDouble(),
-            ty().toDouble(),
-            tz().toDouble()
-        )
-    }
+    get() = TransformationMatrix.createWithQuaternionAndTranslation(
+        qx().toDouble(),
+        qy().toDouble(),
+        qz().toDouble(),
+        qw().toDouble(),
+        tx().toDouble(),
+        ty().toDouble(),
+        tz().toDouble())
