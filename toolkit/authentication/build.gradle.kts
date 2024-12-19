@@ -21,6 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
 android {
@@ -75,6 +76,19 @@ android {
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+}
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.authentication.ComposableSingletons\$ServerTrustAuthenticatorKt",
+        "com.arcgismaps.toolkit.authentication.ComposableSingletons\$UsernamePasswordAuthenticatorKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {

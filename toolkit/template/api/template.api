@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/template/TemplateInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/template/TemplateKt {
+	public static final fun Template (Lcom/arcgismaps/toolkit/template/TemplateInterface;Landroidx/compose/runtime/Composer;I)V
+}
+

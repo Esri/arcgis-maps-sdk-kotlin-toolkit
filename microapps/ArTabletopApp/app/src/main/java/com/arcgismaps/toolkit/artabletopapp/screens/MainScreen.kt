@@ -23,39 +23,43 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
-import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
+    val arcGISSceneLayer = remember {
+        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+    }
     val arcGISScene = remember {
         ArcGISScene().apply {
-            operationalLayers.add(
-                ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
-            )
+            operationalLayers.add(arcGISSceneLayer)
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
@@ -64,12 +68,17 @@ fun MainScreen() {
             }
         }
     }
-    val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
-    var tappedLocation by remember { mutableStateOf<Point?>(null) }
-    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val arcGISSceneAnchor = remember {
         Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
     }
+
+    // Tracks the currently selected building
+    var identifiedBuilding by remember { mutableStateOf<IdentifiedBuilding?>(null) }
+
+    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
+    val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
+    val coroutineScope = rememberCoroutineScope()
+
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
@@ -81,62 +90,70 @@ fun MainScreen() {
             onInitializationStatusChanged = {
                 initializationStatus = it
             },
-            onSingleTapConfirmed = {
-                val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
-                location?.let { point ->
-                    tappedLocation = point
+            onSingleTapConfirmed = { tap ->
+                arcGISSceneLayer.clearSelection()
+                coroutineScope.launch {
+                    identifiedBuilding = arcGISSceneLayer.identifyBuilding(
+                        tap.screenCoordinate,
+                        tableTopSceneViewProxy
+                    )
+                    identifiedBuilding?.let { identifiedBuilding ->
+                        arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
+                    }
                 }
             }
         ) {
-            tappedLocation?.let {
-                Callout(location = it, modifier = Modifier.wrapContentSize()) {
-                    Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
+            identifiedBuilding?.let {
+                Callout(it.location) {
+                    Text("Building ID: ${it.feature.attributes["OBJECTID"]}")
                 }
             }
         }
-        when (val status = initializationStatus) {
-            is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
-            is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
-            is TableTopSceneViewStatus.Initialized -> {
-                val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                when (sceneLoadStatus) {
-                    is LoadStatus.NotLoaded -> {
-                        // Tell the user to tap the screen if the scene has not started loading
-                        TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
-                    }
+    }
 
-                    is LoadStatus.Loading -> {
-                        // The scene may take a while to load, so show a progress indicator
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    is LoadStatus.FailedToLoad -> {
-                        TextWithScrim(
-                            text = stringResource(
-                                R.string.failed_to_load_scene,
-                                sceneLoadStatus.error
-                            )
-                        )
-                    }
-
-                    LoadStatus.Loaded -> {} // Do nothing
+    // Show an overlay with instructions or progress indicator based on the initialization status
+    when (val status = initializationStatus) {
+        is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
+        is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
+        is TableTopSceneViewStatus.Initialized -> {
+            val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+            when (sceneLoadStatus) {
+                is LoadStatus.NotLoaded -> {
+                    // Tell the user to tap the screen if the scene has not started loading
+                    TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
                 }
-            }
 
-            is TableTopSceneViewStatus.FailedToInitialize -> {
-                TextWithScrim(
-                    text = stringResource(
-                        R.string.failed_to_initialize_overlay,
-                        status.error.message ?: status.error
+                is LoadStatus.Loading -> {
+                    // The scene may take a while to load, so show a progress indicator
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is LoadStatus.FailedToLoad -> {
+                    TextWithScrim(
+                        text = stringResource(
+                            R.string.failed_to_load_scene,
+                            sceneLoadStatus.error
+                        )
                     )
-                )
+                }
+
+                LoadStatus.Loaded -> {} // Do nothing
             }
+        }
+
+        is TableTopSceneViewStatus.FailedToInitialize -> {
+            TextWithScrim(
+                text = stringResource(
+                    R.string.failed_to_initialize_overlay,
+                    status.error.message ?: status.error
+                )
+            )
         }
     }
 }
@@ -158,3 +175,30 @@ fun TextWithScrim(text: String) {
         Text(text = text)
     }
 }
+
+/**
+ * Identifies the building at the given [screenCoordinate] and returns the identified building.
+ * If no feature is identified, or if no location can be found for the given [screenCoordinate],
+ * this function returns `null`.
+ *
+ * @since 200.6.0
+ */
+private suspend fun ArcGISSceneLayer.identifyBuilding(
+    screenCoordinate: ScreenCoordinate,
+    proxy: TableTopSceneViewProxy
+): IdentifiedBuilding? {
+    val identifyLayerResult = proxy.identify(this, screenCoordinate, 50.dp).getOrElse {
+        return null
+    }
+    val identifiedFeature =
+        identifyLayerResult.geoElements.firstOrNull() as? ArcGISFeature ?: return null
+    val identifiedPoint = proxy.screenToLocation(screenCoordinate).getOrNull() ?: return null
+    return IdentifiedBuilding(identifiedFeature, identifiedPoint)
+}
+
+/**
+ * Represents a building feature along with the location in the scene where it was identified.
+ *
+ * @since 200.6.0
+ */
+private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: Point)

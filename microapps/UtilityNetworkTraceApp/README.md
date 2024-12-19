@@ -1,7 +1,12 @@
 # UtilityNetworkTraceApp
 
 This micro app showcases the use of the UtilityNetworks Trace toolkit component. It uses a webmap that comprises of the Utility Network data of naperville utilities.
+The webmap is secured and requires username/password to access the data. Please add the username and password in the `local.properties` file as shown below.
 
+```properties
+traceToolUser="viewer01"
+traceToolPassword="I68VGU^nMurF"
+```
 
 ![image](screenshots/trace.png)
 
