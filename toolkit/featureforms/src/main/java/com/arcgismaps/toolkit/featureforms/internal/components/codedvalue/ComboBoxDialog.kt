@@ -68,6 +68,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,7 +79,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.closeIconSize
-import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.dialogMaxHeightFraction
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.DIALOG_MAX_HEIGHT_RATIO
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.dialogMaxWidth
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.dialogShape
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.headerPadding
@@ -87,8 +88,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboB
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.searchInputFieldPadding
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.searchInputFieldPlaceholderTextStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.searchInputFieldShape
-import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.searchInputFieldSupportingTextStyle
-import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.supportingTextPadding
 import com.arcgismaps.toolkit.featureforms.internal.utils.computeWindowSizeClasses
 import com.arcgismaps.toolkit.featureforms.internal.utils.conditional
 
@@ -96,12 +95,11 @@ internal object ComboBoxDialogDefaults {
     val closeIconSize = 48.dp
     val dialogShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     val dialogMaxWidth = 600.dp
-    val dialogMaxHeightFraction = 0.8f
+    const val DIALOG_MAX_HEIGHT_RATIO = 0.8f
     val headerPadding = PaddingValues(start = 24.dp, top = 12.dp, bottom = 16.dp, end = 12.dp)
     val searchBarIconOffsetX = 5.dp
     val searchInputFieldPadding = PaddingValues(start = 16.dp, bottom = 8.dp, end = 16.dp)
     val searchInputFieldShape = RoundedCornerShape(28.dp)
-    val supportingTextPadding = PaddingValues(vertical = 5.dp)
 
     val headerTextStyle
         @Composable
@@ -123,7 +121,6 @@ internal fun ComboBoxDialog(
     initialValue: Any?,
     values: Map<Any?, String>,
     label: String,
-    description: String,
     isRequired: Boolean,
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
@@ -177,7 +174,7 @@ internal fun ComboBoxDialog(
                     },
                     ifFalse = {
                         width(dialogMaxWidth)
-                            .heightIn(max = (configuration.screenHeightDp * dialogMaxHeightFraction).dp)
+                            .heightIn(max = (configuration.screenHeightDp * DIALOG_MAX_HEIGHT_RATIO).dp)
                             .wrapContentHeight()
                     }
                 ),
@@ -197,14 +194,11 @@ internal fun ComboBoxDialog(
                 SearchInputField(
                     searchText = searchText,
                     onValueChange = { searchText = it },
-                    label = label,
-                    description = description,
                     keyboardType = keyboardType,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(searchInputFieldPadding)
                 )
-                HorizontalDivider(modifier = Modifier.fillMaxWidth())
                 LazyColumn(modifier = Modifier
                     .fillMaxWidth()
                     .semantics {
@@ -255,13 +249,15 @@ internal fun ComboBoxDialog(
 private fun Header(label: String, onDismissRequest: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = headerTextStyle,
-            modifier = Modifier
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         IconButton(
             onClick = onDismissRequest,
@@ -287,8 +283,6 @@ private fun Header(label: String, onDismissRequest: () -> Unit, modifier: Modifi
 private fun SearchInputField(
     searchText: String,
     onValueChange: (String) -> Unit,
-    label: String,
-    description: String,
     keyboardType: KeyboardType,
     modifier: Modifier = Modifier
 ) {
@@ -298,7 +292,7 @@ private fun SearchInputField(
         modifier = modifier,
         placeholder = {
             Text(
-                text = stringResource(R.string.search, label),
+                text = stringResource(R.string.search),
                 style = searchInputFieldPlaceholderTextStyle
             )
         },
@@ -320,16 +314,6 @@ private fun SearchInputField(
             }
         },
         singleLine = true,
-        supportingText = {
-            if (description.isNotEmpty()) {
-                Text(
-                    text = description,
-                    modifier = Modifier
-                        .padding(supportingTextPadding),
-                    style = searchInputFieldSupportingTextStyle
-                )
-            }
-        },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,
             keyboardType = keyboardType
@@ -406,7 +390,6 @@ private fun ComboBoxDialogPreview() {
             "Hemlock" to "Hemlock"
         ),
         label = "Types",
-        description = "Select the tree species",
         isRequired = false,
         noValueOption = FormInputNoValueOption.Show,
         noValueLabel = "No Value",
