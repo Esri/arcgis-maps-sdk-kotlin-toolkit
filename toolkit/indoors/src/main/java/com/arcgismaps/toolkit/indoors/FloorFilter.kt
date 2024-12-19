@@ -37,6 +37,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -189,9 +191,6 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
-        // displays only the selected floor when enabled
-        var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
-
         // boolean toggle to display the site facility selector dialog
         var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -199,9 +198,16 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         // display sites selector by default when set to false, and sites selector when set to true.
         var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
+        // get the current selected site
+        val selectedSite = floorFilterState.onSiteChanged.collectAsStateWithLifecycle().value
+
         // get the current selected facility
         val selectedFacility =
             floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+
+        // displays only the selected floor when enabled
+        // Reset isFloorsCollapsed to false whenever a new site or facility is selected
+        var isFloorsCollapsed by rememberSaveable(selectedSite, selectedFacility) { mutableStateOf(false) }
 
         // get the selected level ID
         val selectedLevelID =
@@ -229,13 +235,15 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         if (uiProperties.closeButtonPosition == ButtonPosition.Top) {
             // check if close button is set to visible and not collapsed
             if (uiProperties.closeButtonVisibility == View.VISIBLE &&
-                !isFloorsCollapsed &&
                 selectedFacility.levels.isNotEmpty()
             ) {
                 FloorListCloseButton(
                     modifier,
                     uiProperties.buttonSize,
-                    onClick = { isFloorsCollapsed = true })
+                    uiProperties.closeButtonPosition,
+                    isFloorsCollapsed,
+                    selectedFacility.levels.size == 1,
+                    onClick = { isFloorsCollapsed = !isFloorsCollapsed })
             }
         } else {
             if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
@@ -291,10 +299,16 @@ internal fun FloorFilterContent(floorFilterState: FloorFilterState, uiProperties
         // display close button if set to bottom, if not display facilities button
         if (uiProperties.closeButtonPosition == ButtonPosition.Bottom) {
             // check if close button is set to visible and not collapsed
-            if (uiProperties.closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
-                FloorListCloseButton(modifier, uiProperties.buttonSize, onClick = {
-                    isFloorsCollapsed = true
-                })
+            if (uiProperties.closeButtonVisibility == View.VISIBLE) {
+                FloorListCloseButton(
+                    modifier,
+                    uiProperties.buttonSize,
+                    uiProperties.closeButtonPosition,
+                    isFloorsCollapsed,
+                    selectedFacility.levels.size == 1,
+                    onClick = {
+                        isFloorsCollapsed = !isFloorsCollapsed
+                    })
             }
         } else {
             if (uiProperties.siteFacilityButtonVisibility == View.VISIBLE) {
@@ -407,7 +421,8 @@ internal fun SiteFacilityButton(
 }
 
 /**
- * Button to collapse the list of floor levels and only display the selected floor level.
+ * Button to collapse/expand the list of floor levels and only display the selected floor level
+ * when collapsed.
  *
  * @since 200.2.0
  */
@@ -415,17 +430,34 @@ internal fun SiteFacilityButton(
 internal fun FloorListCloseButton(
     modifier: Modifier,
     buttonSize: Size,
+    closeButtonPosition: ButtonPosition,
+    isFloorListCollapsed: Boolean,
+    isDisabled: Boolean,
     onClick: (Unit) -> Unit
 ) {
+    val iconImage = if (closeButtonPosition == ButtonPosition.Top) {
+        if (isFloorListCollapsed) {
+            Icons.Outlined.ExpandLess
+        } else {
+            Icons.Outlined.ExpandMore
+        }
+    } else {
+        if (isFloorListCollapsed) {
+            Icons.Outlined.ExpandMore
+        } else {
+            Icons.Outlined.ExpandLess
+        }
+    }
     Box(
         modifier
             .fillMaxWidth()
             .height(buttonSize.height.dp)
-            .clickable { onClick(Unit) }) {
+            .clickable(enabled = !isDisabled) { onClick(Unit) }) {
         Icon(
             modifier = modifier.align(Center),
-            painter = painterResource(id = R.drawable.ic_x_24),
-            contentDescription = stringResource(R.string.close)
+            imageVector = iconImage,
+            contentDescription = stringResource(R.string.collapse),
+            tint = if (isDisabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38F) else MaterialTheme.colorScheme.primary
         )
     }
 }
