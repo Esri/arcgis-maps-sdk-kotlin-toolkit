@@ -19,14 +19,13 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.view.MotionEvent
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
-import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import java.nio.ByteBuffer
@@ -113,7 +112,7 @@ internal class CameraFeedRenderer(
             .setDepthWrite(false)
     }
 
-    private var lastTap: MotionEvent? = null
+    private var lastTapCoordinates: Offset? = null
 
 
     override fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -222,14 +221,21 @@ internal class CameraFeedRenderer(
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
-        val tap = lastTap ?: return
-        val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
-        onTap(hit)
-        lastTap = null
+        lastTapCoordinates?.let { tap ->
+            val hit = frame.hitTest(tap.x, tap.y).firstOrNull {
+                // sometimes ARCore will consider a hit if the hit point is just barely outside the
+                // polygon. For safety we check that the hit is within the polygon and within the extents
+                it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
+                    it.hitPose
+                ))
+            }
+            onTap(hit)
+            lastTapCoordinates = null
+        }
     }
 
-    fun onClick(it: MotionEvent) {
-        lastTap = it
+    fun onClick(offset: Offset) {
+        lastTapCoordinates = offset
     }
 
     /**
