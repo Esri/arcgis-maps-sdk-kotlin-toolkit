@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.ar.core.Coordinates2d
@@ -111,7 +112,7 @@ internal class CameraFeedRenderer(
             .setDepthWrite(false)
     }
 
-    private var lastTapCoordinates: Pair<Float, Float>? = null
+    private var lastTapCoordinates: Offset? = null
 
 
     override fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -220,18 +221,19 @@ internal class CameraFeedRenderer(
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
-        val tap = lastTapCoordinates ?: return
-        val hit = frame.hitTest(tap.first, tap.second).lastOrNull {
-            it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
-                it.hitPose
-            ))
+        lastTapCoordinates?.let { tap ->
+            val hit = frame.hitTest(tap.x, tap.y).lastOrNull {
+                it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
+                    it.hitPose
+                ))
+            }
+            onTap(hit)
+            lastTapCoordinates = null
         }
-        onTap(hit)
-        lastTapCoordinates = null
     }
 
-    fun onClick(x: Float, y: Float) {
-        lastTapCoordinates = Pair(x, y)
+    fun onClick(offset: Offset) {
+        lastTapCoordinates = offset
     }
 
     /**

@@ -20,12 +20,14 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -88,13 +90,10 @@ internal fun ArCameraFeed(
 
     AndroidView(factory = { surfaceViewWrapper.glSurfaceView }, modifier = Modifier
         .fillMaxSize()
-        .pointerInteropFilter {
-            // When we grab the x and y coordinates from here, it adjusts the coordinates
-            // for the size of the view. If we try to grab the x and y coordinates from the
-            // MotionEvent in the CameraFeedRenderer, the coordinates aren't adjusted and the
-            // scene renders  with an offset depending on the layout of the screen.
-            cameraFeedRenderer.onClick(it.x, it.y)
-            true
+        .pointerInput(Unit) {
+            detectTapGestures { offset ->
+                cameraFeedRenderer.onClick(offset)
+            }
         })
 }
 
