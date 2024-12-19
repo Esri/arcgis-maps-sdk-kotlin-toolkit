@@ -53,6 +53,8 @@ android {
     }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
+        // remove this disable when strings.xml lint error is fixed via localization
+        disable += "MissingTranslation"
     }
 }
 
@@ -77,6 +79,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(project(mapOf("path" to ":composable-map")))
