@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.ar
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -41,15 +40,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
-import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -58,7 +54,6 @@ import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
-import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
@@ -239,17 +234,16 @@ public fun TableTopSceneView(
                     arSessionWrapper.onDestroy(lifecycleOwner)
                 }
             }
-            var identityMatrix by remember { mutableStateOf(TransformationMatrix.createIdentityMatrix()) }
+            val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
             val session = arSessionWrapper.session.collectAsStateWithLifecycle()
             session.value?.let { arSession ->
                 ArCameraFeed(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.extractTranslation().transformationMatrix
+                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
-                            Log.e("AR", "Camera Position after adding: Q: ${cameraPosition.quaternionX}, ${cameraPosition.quaternionY}, ${cameraPosition.quaternionZ}, ${cameraPosition.quaternionW} T: ${cameraPosition.translationX}, ${cameraPosition.translationY}, ${cameraPosition.translationZ}")
                             cameraController.transformationMatrix = cameraPosition
                             val imageIntrinsics = frame.camera.imageIntrinsics
                             tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
@@ -267,34 +261,16 @@ public fun TableTopSceneView(
                                     else -> DeviceOrientation.Portrait
                                 }
                             )
-                            Log.e("AR", "Image Intrinsics: ${imageIntrinsics.focalLength[0]}, ${imageIntrinsics.focalLength[1]}, ${imageIntrinsics.principalPoint[0]}, ${imageIntrinsics.principalPoint[1]}, ${imageIntrinsics.imageDimensions[0]}, ${imageIntrinsics.imageDimensions[1]}, ${displayRotation}")
                             tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
                     },
                     onTapWithHitResult = { hit ->
                         hit?.let { hitResult ->
                             if (arCoreAnchor == null) {
-                                identityMatrix = TransformationMatrix.createIdentityMatrix()
-                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation()).also {
-                                    val rotatedPose = it.pose.rotateVector(floatArrayOf(0f, 0f, 0f))
-                                    Log.e("ArCoreAnchor", "Rotated Pose: (${rotatedPose[0]},${rotatedPose[1]},${rotatedPose[2]})")
-                                }
+                                // use `extractTranslation` to ignore any rotation
+                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation())
                                 // stop rendering planes
                                 visualizePlanes = false
-                                val anchorPos = identityMatrix - arCoreAnchor!!.pose.transformationMatrix
-                                Log.e("AR", "Initial Anchor Position: Q: ${anchorPos.quaternionX}, ${anchorPos.quaternionY}, ${anchorPos.quaternionZ}, ${anchorPos.quaternionW} T: ${anchorPos.translationX}, ${anchorPos.translationY}, ${anchorPos.translationZ}")
-                                val location = cameraController.originCamera.value.transformationMatrix + arCoreAnchor!!.pose.transformationMatrix
-                                val pt = Camera(location).location
-                                graphicsOverlays.first().graphics.add(Graphic(
-                                    pt,
-                                    SimpleMarkerSceneSymbol(
-                                        SimpleMarkerSceneSymbolStyle.Cylinder,
-                                        com.arcgismaps.Color.cyan,
-                                        1000.0,
-                                        5.0,
-                                        5.0
-                                    )
-                                ))
                             }
                         }
                     },

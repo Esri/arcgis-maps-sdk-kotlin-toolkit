@@ -19,15 +19,12 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
-import android.view.MotionEvent
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
-import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import java.nio.ByteBuffer
@@ -224,19 +221,14 @@ internal class CameraFeedRenderer(
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         val tap = lastTapCoordinates ?: return
-        if (hasHandledTap) return
-        val hitResults = frame.hitTest(tap.first, tap.second)
-        val hit = hitResults.lastOrNull {
-            Log.e("AR", "Hit Test: Q: ${it.hitPose.qx()}, ${it.hitPose.qy()}, ${it.hitPose.qz()}, ${it.hitPose.qw()} T: ${it.hitPose.tx()}, ${it.hitPose.ty()}, ${it.hitPose.tz()}")
-            it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(it.hitPose))
-        }
-        if (hit != null) {
-            hasHandledTap = true
+        val hit = frame.hitTest(tap.first, tap.second).lastOrNull {
+            it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
+                it.hitPose
+            ))
         }
         onTap(hit)
         lastTapCoordinates = null
     }
-    var hasHandledTap = false
 
     fun onClick(x: Float, y: Float) {
         lastTapCoordinates = Pair(x, y)
