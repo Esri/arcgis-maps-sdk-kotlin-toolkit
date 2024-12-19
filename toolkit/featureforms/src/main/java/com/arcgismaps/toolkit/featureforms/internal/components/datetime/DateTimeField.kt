@@ -34,6 +34,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
@@ -124,7 +125,8 @@ private fun DateTimeFieldPreview() {
                 visible = MutableStateFlow(true),
                 minEpochMillis = null,
                 maxEpochMillis = null,
-                shouldShowTime = true
+                shouldShowTime = true,
+                fieldType = FieldType.Date
             ),
             hasValueExpression = false,
             scope = scope,

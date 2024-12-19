@@ -68,11 +68,15 @@ internal fun BarcodeTextField(
     val isError = value.error !is ValidationErrorState.NoError
     // only show character count if there is a min or max length for this field
     val showCharacterCount = state.minLength > 0 || state.maxLength > 0
-    // if any errors are present, show the error as the supporting text
-    val supportingText = if (!isError) {
-        state.description
-    } else {
-        value.error.getString()
+    val isFocused by state.isFocused.collectAsState()
+    // show the supporting text based on the current state
+    val supportingText = when {
+        // show the error message if there is an error
+        isError -> value.error.getString()
+        // show the helper text if the description is empty and the field is focused
+        state.description.isEmpty() && isFocused -> state.helperText.getString()
+        // show the description if it is not empty
+        else -> state.description
     }
     val dialogRequester = LocalDialogRequester.current
     val stateId = remember(key1 = state) {
@@ -141,6 +145,7 @@ private fun BarcodeTextFieldPreview() {
                 visible = MutableStateFlow(true),
                 validationErrors = MutableStateFlow(emptyList()),
                 fieldType = FieldType.Text,
+                domain = null,
                 minLength = 0,
                 maxLength = 0
             ),
