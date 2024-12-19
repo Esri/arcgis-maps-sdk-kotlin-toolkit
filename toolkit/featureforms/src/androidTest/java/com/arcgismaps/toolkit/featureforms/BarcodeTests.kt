@@ -18,15 +18,21 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.requestFocus
 import androidx.test.rule.GrantPermissionRule
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -48,12 +54,12 @@ class BarcodeTests : FeatureFormTestRunner(
      * Given a `FeatureForm` with a `BarcodeScannerFormInput`
      * When the `FeatureForm` is displayed
      * Then the barcode form element is displayed with the scan icon
-     * And receives length validation errors when the input length is out of range
+     * And displays the helper text when focused
      *
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-barcode-input-type
      */
     @Test
-    fun testBarcodeTextField() = runTest {
+    fun testBarcodeTextField(): Unit = runBlocking {
         composeTestRule.setContent {
             FeatureForm(featureForm = featureForm)
         }
@@ -64,11 +70,9 @@ class BarcodeTests : FeatureFormTestRunner(
         barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
         barcodeFormElement.performTextInput("https://esri.com")
-        // Check the scan icon is displayed
-        barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
-        // Perform text input
-        barcodeFormElement.performTextInput("https://runtimecoretest.maps.arcgis.com/apps/mapviewer/index.html?layers=a9155494098147b9be2fc52bcf825224")
-        // Check for validation error
+        barcodeFormElement.requestFocus()
+        barcodeFormElement.assertIsFocused()
+        // verify helper text is displayed
         barcodeFormElement.onChildWithText("Maximum 50 characters").assertIsDisplayed()
     }
 

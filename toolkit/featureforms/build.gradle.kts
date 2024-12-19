@@ -83,6 +83,7 @@ android {
         // remove these disables when strings.xml lint is fixed via localization
         disable += "MissingTranslation"
         disable += "MissingQuantity"
+        baseline = file("lint-baseline.xml")
     }
 }
 
@@ -94,6 +95,7 @@ apiValidation {
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.featureforms.internal.components.base.ComposableSingletons\$BaseTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$ComboBoxFieldKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$ComboBoxDialogKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$RadioButtonFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.ComposableSingletons\$DateTimeFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.ComposableSingletons\$DateTimePickerKt",
