@@ -66,21 +66,19 @@ fun MainScreen() {
     val arcGISSceneLayer = remember {
         ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
     }
-    val sr = arcGISSceneLayer.spatialReference
-    val arcGISSceneAnchor = remember {
-        Point(-122.68350326165559, 45.53257485106716, 10.0, sr)
-    }
     val arcGISScene = remember {
         ArcGISScene().apply {
-//            operationalLayers.add(arcGISSceneLayer)
+            operationalLayers.add(arcGISSceneLayer)
             baseSurface = Surface().apply {
                 elevationSources.add(
                     ElevationSource.fromTerrain3dService()
                 )
-//                opacity = 0f
+                opacity = 0f
             }
-            initialViewpoint = Viewpoint(arcGISSceneAnchor, 1000.0)
         }
+    }
+    val arcGISSceneAnchor = remember {
+        Point(-122.68350326165559, 45.53257485106716, 10.0)
     }
 
     // Tracks the currently selected building
@@ -89,24 +87,14 @@ fun MainScreen() {
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     val coroutineScope = rememberCoroutineScope()
-    val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
-    LaunchedEffect(Unit) {
-        arcGISScene.loadStatus.filter { it.isTerminal }.collect {
-            graphicsOverlays.first().graphics.addAll(listOf(
-                Graphic(
-                    arcGISSceneAnchor,
-                    SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbolStyle.Sphere, com.arcgismaps.Color.red, height = 10.0, width = 10.0, depth = 10.0)
-                )
-            ))
-        }
-    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
             arcGISSceneAnchor = arcGISSceneAnchor,
-            translationFactor = 2000.0,
+            translationFactor = 400.0,
             modifier = Modifier.fillMaxSize(),
-            clippingDistance = 750.0,
+            clippingDistance = 400.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             onInitializationStatusChanged = {
                 initializationStatus = it
@@ -122,15 +110,7 @@ fun MainScreen() {
                         arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
                     }
                 }
-
-                graphicsOverlays.first().graphics.add(
-                    Graphic(
-                        tableTopSceneViewProxy.screenToBaseSurface(tap.screenCoordinate) ?: return@TableTopSceneView,
-                        SimpleMarkerSceneSymbol(SimpleMarkerSceneSymbolStyle.Cube, com.arcgismaps.Color.green, 10.0, 10.0, 10.0)
-                    )
-                )
-            },
-            graphicsOverlays = graphicsOverlays
+            }
         ) {
             identifiedBuilding?.let {
                 Callout(it.location) {
@@ -231,13 +211,3 @@ private suspend fun ArcGISSceneLayer.identifyBuilding(
  * @since 200.6.0
  */
 private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: Point)
-
-val ArcGISScene.center: Point
-    get() {
-        var envelope = Envelope(0.0, 0.0, 0.0, 0.0, spatialReference = this.spatialReference)
-        operationalLayers.forEach { layer ->
-            envelope =
-                layer.fullExtent?.let { it -> GeometryEngine.union(envelope, it) }?.extent ?: envelope
-        }
-        return envelope.center
-    }
