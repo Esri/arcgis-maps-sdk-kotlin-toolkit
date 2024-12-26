@@ -20,6 +20,5 @@
     <string name="username_label">사용자 이름</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">비밀번호</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">로그인</string>
+
 </resources>
