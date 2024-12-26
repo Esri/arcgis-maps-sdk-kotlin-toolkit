@@ -26,5 +26,5 @@
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Jelszó</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="signin">Bejelentkezés</string>
+    <string name="sign_in">Bejelentkezés</string>
 </resources>

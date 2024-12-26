@@ -241,7 +241,7 @@ private fun UsernamePasswordAuthenticatorImpl(
                 enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
                 onClick = { submitUsernamePassword() }
             ) {
-                Text(stringResource(id = R.string.signin))
+                Text(stringResource(id = R.string.sign_in))
             }
         }
     }

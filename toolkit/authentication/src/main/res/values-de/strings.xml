@@ -26,5 +26,5 @@
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Kennwort</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="signin">Anmeldung</string>
+    <string name="sign_in">Anmeldung</string>
 </resources>
