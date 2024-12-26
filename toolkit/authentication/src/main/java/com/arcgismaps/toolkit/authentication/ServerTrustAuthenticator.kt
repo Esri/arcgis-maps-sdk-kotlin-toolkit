@@ -140,9 +140,9 @@ private fun ServerTrustAuthenticatorImpl(
                 val endIdx = startIdx + hostname.length
                 append(string)
                 addStyle(
-                    SpanStyle(
-                        fontWeight = FontWeight.Bold
-                    ), startIdx, endIdx
+                    style = SpanStyle(fontWeight = FontWeight.Bold),
+                    start = startIdx,
+                    end = endIdx
                 )
             },
             style = MaterialTheme.typography.bodyLarge,
