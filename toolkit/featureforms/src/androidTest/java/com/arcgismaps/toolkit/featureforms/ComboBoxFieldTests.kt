@@ -41,10 +41,9 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
     objectId = 2
 ) {
     private val descriptionSemanticLabel = "supporting text"
-    private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
-    private val comboBoxDialogDoneButtonSemanticLabel = "combo box done selection"
+    private val comboBoxDialogDoneButtonSemanticLabel = "combo box dialog close button"
     private val noValueRowSemanticLabel = "no value row"
     private var errorTextColor: Color? = null
     private lateinit var context: Context
@@ -68,9 +67,9 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
 
     /**
      * Test case 3.1:
-     * Given a ComboBoxField with a pre-existing value, description and a no value label
-     * When the pre-existing value is cleared
-     * Then the ComboBoxField shows the noValueLabel
+     * Given a ComboBoxField with a pre-existing value and a description
+     * When the ComboBoxField is observed
+     * Then the ComboBoxField shows the pre-existing value and description
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
      */
     @Test
@@ -93,19 +92,6 @@ class ComboBoxFieldTests : FeatureFormTestRunner(
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
         comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
-        // find the clear text node within its children
-        val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
-        // validate the clear icon is visible
-        clearButton.assertIsDisplayed()
-        // clear the value
-        clearButton.performClick()
-        // assert "no value" placeholder is visible
-        // assertTextEquals matches the Text(the label) and Editable Text (the placeholder here
-        // due to the use of the PlaceHolderTransformation)
-        comboBoxField.assertTextEquals(
-            formElement.label,
-            input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
-        )
     }
 
     /**
