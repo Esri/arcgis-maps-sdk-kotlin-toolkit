@@ -118,24 +118,24 @@ class UsernamePasswordTests {
         }
         advanceUntilIdle()
         // verify the login button is disabled when the fields are empty
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the username field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the password field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextClearance()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
             .performTextInput("testPassword")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify it is enabled when both are filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsEnabled()
     }
 
@@ -390,6 +390,6 @@ fun <T : TestRule, A : ComponentActivity> AndroidComposeTestRule<T, A>.enterUser
     onNodeWithText(activity.getString(R.string.password_label))
         .performTextInput("testpassword")
     // Click the sign in button
-    onNodeWithText(activity.getString(R.string.login))
+    onNodeWithText(activity.getString(R.string.sign_in))
         .performClick()
 }

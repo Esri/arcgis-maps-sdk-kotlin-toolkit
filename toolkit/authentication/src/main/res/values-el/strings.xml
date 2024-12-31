@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Το παρεχόμενο πιστοποιητικό από το %1$s δεν έχει υπογραφεί από αξιόπιστη αρχή.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">Ακύρωση</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Κίνδυνος: Επιτρέψτε τη σύνδεση</string>
-    <string name="username_password_login_message">Συνδεθείτε στο %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Όνομα χρήστη</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Κωδικός πρόσβασης</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Σύνδεση</string>
+
 </resources>
