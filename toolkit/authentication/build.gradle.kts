@@ -82,6 +82,7 @@ android {
     }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
+        disable += "MissingTranslation"
     }
 }
 

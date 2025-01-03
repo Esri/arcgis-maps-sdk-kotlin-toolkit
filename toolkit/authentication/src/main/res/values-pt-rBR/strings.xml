@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">O certificado fornecido por %1$s não está assinado por uma autoridade confiável.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">Cancelar</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Perigoso: Permitir conexão</string>
-    <string name="username_password_login_message">Efetue o login no %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nome de Usuário</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Senha</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Conectar</string>
+
 </resources>
