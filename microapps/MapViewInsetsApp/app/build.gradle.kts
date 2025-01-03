@@ -70,20 +70,11 @@ android {
         }
     }
 
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
     }
-}
-
-// context receivers are not experimental anymore, but AS thinks they are.
-//https://youtrack.jetbrains.com/issue/KTIJ-21063
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {

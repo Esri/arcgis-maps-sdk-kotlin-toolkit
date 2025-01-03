@@ -47,32 +47,34 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
     }
-    packagingOptions {
-        exclude("META-INF/LICENSE-notice.md")
-        exclude("META-INF/LICENSE.md")
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE-notice.md",
+                "META-INF/LICENSE.md"
+            )
+        }
     }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
     }
+
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }

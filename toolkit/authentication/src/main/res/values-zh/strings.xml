@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s 提供的证书未经受信任的机构签名。</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">取消</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">危险：允许连接</string>
-    <string name="username_password_login_message">请登录到 %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">用户名</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">密码</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">登录</string>
+
 </resources>

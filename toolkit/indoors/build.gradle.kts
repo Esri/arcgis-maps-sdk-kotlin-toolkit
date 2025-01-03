@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
 android {
@@ -28,7 +29,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
     }
@@ -37,7 +37,9 @@ android {
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
@@ -45,6 +47,7 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
+    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
@@ -52,8 +55,23 @@ android {
     }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
+        // remove this disable when strings.xml lint error is fixed via localization
+        disable += "MissingTranslation"
     }
 }
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.indoors.ComposableSingletons\$SiteAndFacilitySelectorKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
+}
+
 
 dependencies {
     api(arcgis.mapsSdk)
@@ -63,6 +81,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(project(mapOf("path" to ":composable-map")))
