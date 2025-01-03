@@ -30,8 +30,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -60,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -141,6 +147,7 @@ private fun UsernamePasswordAuthenticatorImpl(
 ) {
     var usernameFieldText by rememberSaveable { mutableStateOf("") }
     var passwordFieldText by rememberSaveable { mutableStateOf("") }
+    var passwordVisibility by remember { mutableStateOf(false) }
 
     fun submitUsernamePassword() {
         if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
@@ -151,7 +158,7 @@ private fun UsernamePasswordAuthenticatorImpl(
 
     val keyboardActions = remember {
         KeyboardActions(
-            onSend = { submitUsernamePassword() }
+            onSend = { submitUsernamePassword() },
         )
     }
     val focusManager = LocalFocusManager.current
@@ -222,7 +229,20 @@ private fun UsernamePasswordAuthenticatorImpl(
                 keyboardActions = keyboardActions,
                 label = { Text(text = stringResource(id = R.string.password_label)) },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                trailingIcon = {
+                    if (passwordFieldText.isNotEmpty()) {
+                        IconButton(onClick = {
+                            passwordVisibility = !passwordVisibility
+                        }) {
+                            if (passwordVisibility) {
+                                Icon(Icons.Default.Visibility, contentDescription = "Hide password")
+                            } else {
+                                Icon(Icons.Default.VisibilityOff, contentDescription = "Show password")
+                            }
+                        }
+                    }
+                },
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
