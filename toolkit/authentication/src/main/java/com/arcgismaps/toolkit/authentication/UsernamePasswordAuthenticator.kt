@@ -51,12 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -156,13 +150,7 @@ private fun UsernamePasswordAuthenticatorImpl(
         }
     }
 
-    val keyboardActions = remember {
-        KeyboardActions(
-            onSend = { submitUsernamePassword() },
-        )
-    }
     val focusManager = LocalFocusManager.current
-
     Column(
         modifier = modifier
             .padding(24.dp),
@@ -204,13 +192,17 @@ private fun UsernamePasswordAuthenticatorImpl(
 
             OutlinedTextField(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                    .fillMaxWidth(),
                 value = usernameFieldText,
                 onValueChange = { it: String -> usernameFieldText = it },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
                 ),
                 label = { Text(text = stringResource(id = R.string.username_label)) },
                 singleLine = true
@@ -218,27 +210,28 @@ private fun UsernamePasswordAuthenticatorImpl(
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                    .fillMaxWidth(),
                 value = passwordFieldText,
                 onValueChange = { it: String -> passwordFieldText = it },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Send
                 ),
-                keyboardActions = keyboardActions,
+                keyboardActions = KeyboardActions(
+                    onSend = {
+                        submitUsernamePassword()
+                    }
+                ),
                 label = { Text(text = stringResource(id = R.string.password_label)) },
                 singleLine = true,
                 trailingIcon = {
-                    if (passwordFieldText.isNotEmpty()) {
-                        IconButton(onClick = {
-                            passwordVisibility = !passwordVisibility
-                        }) {
-                            if (passwordVisibility) {
-                                Icon(Icons.Default.Visibility, contentDescription = "Hide password")
-                            } else {
-                                Icon(Icons.Default.VisibilityOff, contentDescription = "Show password")
-                            }
+                    IconButton(onClick = {
+                        passwordVisibility = !passwordVisibility
+                    }) {
+                        if (passwordVisibility) {
+                            Icon(Icons.Default.Visibility, contentDescription = "Hide password")
+                        } else {
+                            Icon(Icons.Default.VisibilityOff, contentDescription = "Show password")
                         }
                     }
                 },
@@ -266,25 +259,6 @@ private fun UsernamePasswordAuthenticatorImpl(
         }
     }
 }
-
-private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: () -> Unit) =
-    onPreviewKeyEvent {
-        if (it.type == KeyEventType.KeyDown) {
-            when (it.key.keyCode) {
-                Key.Tab.keyCode -> {
-                    focusManager.moveFocus(FocusDirection.Down); true
-                }
-
-                Key.Enter.keyCode -> {
-                    onEnter()
-                    true
-                }
-
-                else -> false
-            }
-        } else false
-    }
-
 
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 @Composable
