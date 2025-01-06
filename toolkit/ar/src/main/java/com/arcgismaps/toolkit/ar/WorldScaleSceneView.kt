@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
@@ -26,7 +25,6 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
@@ -65,6 +63,7 @@ public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     locationDataSource: LocationDataSource,
     modifier: Modifier = Modifier,
+    elevationCalibration: Double = 0.0,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -182,20 +181,7 @@ public fun WorldScaleSceneView(
                             0.0
                         )
                     )
-//                    initialMatrix = cameraController.transformationMatrix
                     hasSetOriginCamera = true
-                } else {
-//                    val oldOrigin = cameraController.originCamera
-//                    cameraController.setOriginCamera(
-//                        Camera(
-//                            location.position.x,
-//                            location.position.y,
-//                            if (location.position.hasZ) location.position.z!! else 1.0,
-//                            oldOrigin.value.heading,
-//                            oldOrigin.value.pitch,
-//                            oldOrigin.value.roll
-//                        )
-//                    )
                 }
             }
         }
@@ -212,11 +198,13 @@ public fun WorldScaleSceneView(
                             )
                         )
                         initialHeading = heading
-//                        initialMatrix = cameraController.transformationMatrix
                     }
                 }
             }
         }
+    }
+    LaunchedEffect(elevationCalibration) {
+        cameraController.setOriginCamera(cameraController.originCamera.value.elevate(elevationCalibration))
     }
     DisposableEffect(locationDataSource) {
         coroutineScope.launch {
@@ -245,8 +233,7 @@ public fun WorldScaleSceneView(
                 ArCameraFeed(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
-                        val cameraPosition = initialMatrix +
-                            frame.camera.displayOrientedPose.transformationMatrix
+                        val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
                         cameraController.transformationMatrix = cameraPosition
                         worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                             frame.camera,
