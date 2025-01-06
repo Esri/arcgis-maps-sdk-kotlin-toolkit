@@ -71,7 +71,12 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
+import com.arcgismaps.toolkit.ar.internal.transformationMatrix
+import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
@@ -255,21 +260,9 @@ public fun TableTopSceneView(
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
                             cameraController.transformationMatrix = cameraPosition
-                            val imageIntrinsics = frame.camera.imageIntrinsics
                             tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                                imageIntrinsics.focalLength[0],
-                                imageIntrinsics.focalLength[1],
-                                imageIntrinsics.principalPoint[0],
-                                imageIntrinsics.principalPoint[1],
-                                imageIntrinsics.imageDimensions[0].toFloat(),
-                                imageIntrinsics.imageDimensions[1].toFloat(),
-                                deviceOrientation = when (displayRotation) {
-                                    0 -> DeviceOrientation.Portrait
-                                    90 -> DeviceOrientation.LandscapeRight
-                                    180 -> DeviceOrientation.ReversePortrait
-                                    270 -> DeviceOrientation.LandscapeLeft
-                                    else -> DeviceOrientation.Portrait
-                                }
+                                frame.camera,
+                                displayRotation
                             )
                             tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
@@ -344,80 +337,3 @@ public fun TableTopSceneView(
         }
     }
 }
-
-/**
- * Checks if the camera permission is granted and requests it if required.
- *
- * @since 200.6.0
- */
-@Composable
-private fun rememberCameraPermission(
-    requestCameraPermissionAutomatically: Boolean,
-    onNotGranted: () -> Unit
-): MutableState<Boolean> {
-    val cameraPermission = Manifest.permission.CAMERA
-    val context = LocalContext.current
-    val isGrantedState = remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                cameraPermission
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    if (!isGrantedState.value) {
-        if (requestCameraPermissionAutomatically) {
-            val requestPermissionLauncher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-                    isGrantedState.value = granted
-                    if (!granted) {
-                        onNotGranted()
-                    }
-                }
-            SideEffect {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        } else {
-            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
-            // after the composition completes, for example, invoking the onInitializationStatusChanged
-            // callback
-            SideEffect {
-                onNotGranted()
-            }
-        }
-    }
-    return isGrantedState
-}
-
-private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
-    suspendCancellableCoroutine { continuation ->
-        ArCoreApk.getInstance().checkAvailabilityAsync(context) {
-            continuation.resume(it)
-        }
-    }
-
-private fun MutableState<TableTopSceneViewStatus>.update(
-    newStatus: TableTopSceneViewStatus,
-    callback: ((TableTopSceneViewStatus) -> Unit)?
-) {
-    this.value = newStatus
-    callback?.invoke(newStatus)
-}
-
-/**
- * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
- *
- * @since 200.6.0
- */
-private val Pose.transformationMatrix: TransformationMatrix
-    get() {
-        return TransformationMatrix.createWithQuaternionAndTranslation(
-            rotationQuaternion[0].toDouble(),
-            rotationQuaternion[1].toDouble(),
-            rotationQuaternion[2].toDouble(),
-            rotationQuaternion[3].toDouble(),
-            translation[0].toDouble(),
-            translation[1].toDouble(),
-            translation[2].toDouble()
-        )
-    }
