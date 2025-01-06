@@ -18,32 +18,38 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
+import android.location.Criteria
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.rememberLocationDisplay
 
 @Composable
 fun MainScreen() {
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
-                )
-            }
+    val arcGISScene = ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+        initialViewpoint = Viewpoint(
+            latitude = 39.8,
+            longitude = -98.6,
+            scale = 10e7
         )
     }
-    MapView(
+    WorldScaleSceneView(
+        arcGISScene = arcGISScene,
+        locationDataSource = SystemLocationDataSource(),
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap
+        onInitializationStatusChanged = {
+            Log.d("MainScreen", "Initialization status changed: $it")
+        }
     )
 }

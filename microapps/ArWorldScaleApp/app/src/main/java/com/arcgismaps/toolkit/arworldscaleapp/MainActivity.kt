@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp
 
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -51,6 +52,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.applicationContext = applicationContext
+        Log.e("Location",
+            (getSystemService(LOCATION_SERVICE) as LocationManager).getProviders(false).toString()
+        )
         setContent {
             MicroAppTheme {
                 if (isGooglePlayServicesArInstalled.collectAsStateWithLifecycle().value) {
@@ -93,7 +98,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ArWorldScaleApp() {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("ArTabletopApp") }) }
+        topBar = { TopAppBar(title = { Text("ArWorldScaleApp") }) }
     ) {
         Box(Modifier.padding(it)) {
             MainScreen()
