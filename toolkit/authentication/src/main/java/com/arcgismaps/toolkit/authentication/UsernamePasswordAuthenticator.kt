@@ -151,6 +151,7 @@ private fun UsernamePasswordAuthenticatorImpl(
     }
 
     val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
             .padding(24.dp),

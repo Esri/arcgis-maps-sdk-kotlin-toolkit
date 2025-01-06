@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -29,7 +30,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.base.handleCharConstraints
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -42,7 +45,8 @@ internal class BarcodeFieldProperties(
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     validationErrors: StateFlow<List<ValidationErrorState>>,
-    val fieldType: FieldType,
+    fieldType: FieldType,
+    domain: Domain?,
     val minLength: Int,
     val maxLength: Int,
 ) : FieldProperties<String>(
@@ -53,7 +57,9 @@ internal class BarcodeFieldProperties(
     validationErrors,
     required,
     editable,
-    visible
+    visible,
+    fieldType,
+    domain
 )
 
 internal class BarcodeTextFieldState(
@@ -73,11 +79,6 @@ internal class BarcodeTextFieldState(
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
 ) {
-    /**
-     * The [FieldType] of the field.
-     */
-    val fieldType = properties.fieldType
-
     /**
      * The minimum length of the field.
      */
@@ -101,6 +102,16 @@ internal class BarcodeTextFieldState(
             FieldType.Text -> input
             else -> null
         } ?: input
+    }
+
+    override fun calculateHelperText(): ValidationErrorState {
+        // If field type is text, handle character constraints
+        return if (fieldType == FieldType.Text) {
+            handleCharConstraints(minLength, maxLength, hasValueExpression)
+        } else {
+            // Otherwise, call the super class method which handles numeric constraints
+            super.calculateHelperText()
+        }
     }
 
     companion object {
@@ -129,6 +140,7 @@ internal class BarcodeTextFieldState(
                         visible = field.isVisible,
                         validationErrors = field.mapValidationErrors(scope),
                         fieldType = field.fieldType,
+                        domain = field.domain,
                         minLength = input.minLength.toInt(),
                         maxLength = input.maxLength.toInt()
                     ),
@@ -166,6 +178,7 @@ internal fun rememberBarcodeTextFieldState(
             visible = field.isVisible,
             validationErrors = field.mapValidationErrors(scope),
             fieldType = field.fieldType,
+            domain = field.domain,
             minLength = (field.input as BarcodeScannerFormInput).minLength.toInt(),
             maxLength = (field.input as BarcodeScannerFormInput).maxLength.toInt()
         ),

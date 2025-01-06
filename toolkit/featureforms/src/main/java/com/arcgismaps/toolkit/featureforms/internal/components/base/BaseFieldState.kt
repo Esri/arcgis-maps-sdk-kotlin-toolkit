@@ -20,9 +20,19 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.arcgismaps.data.Domain
+import com.arcgismaps.data.FieldType
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
+import com.arcgismaps.toolkit.featureforms.internal.utils.asDoubleTuple
+import com.arcgismaps.toolkit.featureforms.internal.utils.asLongTuple
+import com.arcgismaps.toolkit.featureforms.internal.utils.isFloatingPoint
+import com.arcgismaps.toolkit.featureforms.internal.utils.isIntegerType
+import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +49,9 @@ internal open class FieldProperties<T>(
     val validationErrors: StateFlow<List<ValidationErrorState>>,
     val required: StateFlow<Boolean>,
     val editable: StateFlow<Boolean>,
-    val visible: StateFlow<Boolean>
+    val visible: StateFlow<Boolean>,
+    val fieldType: FieldType,
+    val domain: Domain?
 )
 
 /**
@@ -132,6 +144,27 @@ internal abstract class BaseFieldState<T>(
      * A flag to indicate if the field ever gained focus.
      */
     protected var wasFocused = false
+
+    /**
+     * The [FieldType] of the field.
+     */
+    val fieldType = properties.fieldType
+
+    /**
+     * The domain for this field, if any.
+     */
+    val domain = properties.domain
+
+    /**
+     * Text that indicates instructions or constraints for the field. This is derived from the
+     * properties of field and represented as a [ValidationErrorState]. See [calculateHelperText]
+     * on how to provide custom helper text.
+     *
+     * Use [ValidationErrorState.getString] to get the actual text from within a composition.
+     */
+    val helperText: ValidationErrorState by lazy {
+        calculateHelperText()
+    }
 
     init {
         scope.launch {
@@ -241,6 +274,34 @@ internal abstract class BaseFieldState<T>(
      * @param input The value to convert
      */
     abstract fun typeConverter(input: T): Any?
+
+    /**
+     * This method is called when [helperText] is accessed to provide the helper text for the field.
+     * The default implementation only handles a [RangeDomain] with numeric fields. Override this
+     * method to provide custom helper text.
+     */
+    open fun calculateHelperText(): ValidationErrorState {
+        return when {
+            fieldType.isNumeric && domain is RangeDomain -> {
+                val (min: Number?, max: Number?) = when {
+                    fieldType.isIntegerType -> {
+                        val tuple = domain.asLongTuple
+                        Pair(tuple.min, tuple.max)
+                    }
+
+                    fieldType.isFloatingPoint -> {
+                        val tuple = domain.asDoubleTuple
+                        Pair(tuple.min, tuple.max)
+                    }
+
+                    else -> Pair(null, null)
+                }
+                handleNumericConstraints(min, max, hasValueExpression)
+            }
+
+            else -> ValidationErrorState.NoError
+        }
+    }
 }
 
 /**
