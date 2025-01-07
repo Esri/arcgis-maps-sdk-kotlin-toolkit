@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/scalebar/ScalebarInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/ScalebarKt {
+	public static final fun Scalebar (Lcom/arcgismaps/toolkit/scalebar/ScalebarInterface;Landroidx/compose/runtime/Composer;I)V
+}
+
