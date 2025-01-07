@@ -11,7 +11,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
-* * **[Scalebar](toolkit/scalebar)** - Displays a scalebar on a MapView.
+* * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
 * **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
