@@ -47,20 +47,12 @@ fun MainScreen() {
             scale = 10e7
         )
     }
-    var elevationCalibration by remember { mutableStateOf(0.0) }
-    Column {
-
-        WorldScaleSceneView(
-            arcGISScene = arcGISScene,
-            locationDataSource = SystemLocationDataSource(),
-            modifier = Modifier.fillMaxSize(),
-            elevationCalibration = elevationCalibration,
-            onInitializationStatusChanged = {
-                Log.d("MainScreen", "Initialization status changed: $it")
-            }
-        )
-        Slider(elevationCalibration.toFloat(), onValueChange = {
-            elevationCalibration = it.toDouble()
-        }, valueRange = -500f..500f)
-    }
+    WorldScaleSceneView(
+        arcGISScene = arcGISScene,
+        locationDataSource = SystemLocationDataSource(),
+        modifier = Modifier.fillMaxSize(),
+        onInitializationStatusChanged = {
+            Log.d("MainScreen", "Initialization status changed: $it")
+        }
+    )
 }

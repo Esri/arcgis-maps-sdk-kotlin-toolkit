@@ -63,7 +63,6 @@ public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     locationDataSource: LocationDataSource,
     modifier: Modifier = Modifier,
-    elevationCalibration: Double = 0.0,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -203,9 +202,6 @@ public fun WorldScaleSceneView(
             }
         }
     }
-    LaunchedEffect(elevationCalibration) {
-        cameraController.setOriginCamera(cameraController.originCamera.value.elevate(elevationCalibration))
-    }
     DisposableEffect(locationDataSource) {
         coroutineScope.launch {
             locationDataSource.start()
@@ -297,5 +293,4 @@ public fun WorldScaleSceneView(
             )
         }
     }
-
 }
