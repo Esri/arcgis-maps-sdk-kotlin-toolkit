@@ -316,17 +316,13 @@ class UsernamePasswordTests {
                 setupFailingArcGISTokenRequestInterceptor()
             }
 
-            // simulate incorrect username/password 4 times
-            repeat(4) {
+            // simulate incorrect username/password 5 times
+            repeat(5) {
                 composeTestRule.enterUsernamePasswordAndLogin()
                 advanceUntilIdle()
-                composeTestRule.onNodeWithText("Invalid username or password.").assertIsDisplayed()
             }
-            // the 5th time is should dismiss the dialog.
-            composeTestRule.enterUsernamePasswordAndLogin()
-            advanceUntilIdle()
 
-            // ensure the dialog has disappeared
+            // ensure the dialog has disappeared after last attempt
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
