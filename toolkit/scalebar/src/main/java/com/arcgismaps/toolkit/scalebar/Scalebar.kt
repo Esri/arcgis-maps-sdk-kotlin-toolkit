@@ -68,8 +68,8 @@ internal fun ScalebarPreview() {
     Scalebar(
         maxWidth = 200.0,
         spatialReference = null,
-        unitsPerDip = null,
-        viewpoint = null
+        unitsPerDip = 1.0,
+        viewpoint = Viewpoint(0.0, 0.0, 0.0),
     )
 }
 
