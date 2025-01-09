@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,7 @@ public fun Scalebar(viewModel: ScalebarInterface) {
  */
 @Composable
 internal fun LineScalebar(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.testTag("LineScalebar"),
     scaleValue: String,
     width: Float = 300f,
     lineColor: Color = Color.Black,
