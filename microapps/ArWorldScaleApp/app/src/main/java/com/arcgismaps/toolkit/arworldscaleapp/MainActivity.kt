@@ -53,9 +53,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         ArcGISEnvironment.applicationContext = applicationContext
-        Log.e("Location",
-            (getSystemService(LOCATION_SERVICE) as LocationManager).getProviders(false).toString()
-        )
         setContent {
             MicroAppTheme {
                 if (isGooglePlayServicesArInstalled.collectAsStateWithLifecycle().value) {

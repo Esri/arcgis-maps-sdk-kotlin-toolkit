@@ -40,7 +40,7 @@ internal fun<T> MutableState<T>.update(
 /**
  * Checks if the camera permission is granted and requests it if required.
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 @Composable
 internal fun rememberCameraPermission(
@@ -103,7 +103,7 @@ internal fun SceneViewProxy.setFieldOfViewFromLensIntrinsics(arCoreCamera: Camer
 /**
  * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 internal val Pose.transformationMatrix: TransformationMatrix
     get() {

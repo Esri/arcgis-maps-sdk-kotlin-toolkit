@@ -26,7 +26,7 @@ import androidx.compose.runtime.remember
 /**
  * Represents the initialization status of a [WorldScaleSceneView].
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 public sealed class WorldScaleSceneViewStatus private constructor() {
 
@@ -35,7 +35,7 @@ public sealed class WorldScaleSceneViewStatus private constructor() {
      * During this stage, the [WorldScaleSceneView] will ensure that the device supports AR and that the necessary
      * permissions are granted.
      *
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public data object Initializing : WorldScaleSceneViewStatus()
 
@@ -43,7 +43,7 @@ public sealed class WorldScaleSceneViewStatus private constructor() {
      * The [WorldScaleSceneView] is initialized successfully. The [WorldScaleSceneView] is ready to
      * be used and the scene will be rendered.
      *
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public data object Initialized : WorldScaleSceneViewStatus()
 
@@ -51,7 +51,7 @@ public sealed class WorldScaleSceneViewStatus private constructor() {
      * The [WorldScaleSceneView] failed to initialize. The [error] property contains the error that caused the failure.
      *
      * @param error The error that caused the failure.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public data class FailedToInitialize internal constructor(val error: Throwable) : WorldScaleSceneViewStatus()
 }
@@ -60,7 +60,7 @@ public sealed class WorldScaleSceneViewStatus private constructor() {
  * Remembers a [MutableState] of [WorldScaleSceneViewStatus] that can be used to track the initialization status of a [WorldScaleSceneView].
  * The initial value of the [MutableState] is [WorldScaleSceneViewStatus.Initializing].
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 @Composable
 public fun rememberWorldScaleSceneViewStatus(): MutableState<WorldScaleSceneViewStatus> = remember {

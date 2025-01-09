@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 /**
  * The receiver class of the [WorldScaleSceneView] content lambda.
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 public class WorldScaleSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
     /**
@@ -53,7 +53,7 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
      *        This is useful if you are showing the callout for elements with symbology that does rotate with the [WorldScaleSceneView]
      * @param colorScheme the styling options for the Callout's color properties
      * @param shapes the styling options for the Callout's container shape
-     * @since 200.6.0
+     * @since 200.7.0
      */
 
     @Composable
@@ -85,7 +85,7 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
      * @param colorScheme the styling options for the Callout's shape and color properties
      * @param shapes the styling options for the Callout's container shape
      * @param content the content of the Callout
-     * @since 200.6.0
+     * @since 200.7.0
      */
     @Composable
     public fun Callout(
