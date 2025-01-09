@@ -1,5 +1,5 @@
 public final class com/arcgismaps/toolkit/scalebar/ScalebarKt {
-	public static final fun Scalebar (DLcom/arcgismaps/geometry/SpatialReference;Ljava/lang/Double;Lcom/arcgismaps/mapping/Viewpoint;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/scalebar/UIProperties;Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun Scalebar-EvF7kEw (DDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/arcgismaps/toolkit/scalebar/ScalebarStyle : java/lang/Enum {
@@ -21,44 +21,50 @@ public final class com/arcgismaps/toolkit/scalebar/ScalebarUnits : java/lang/Enu
 	public static fun values ()[Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;
 }
 
-public final class com/arcgismaps/toolkit/scalebar/UIProperties {
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarColors {
 	public static final field $stable I
-	public synthetic fun <init> (DDDJJJJDJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (DDDJJJJDJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()D
-	public final fun component10-0d7_KjU ()J
-	public final fun component2 ()D
-	public final fun component3 ()D
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
-	public final fun component7-0d7_KjU ()J
-	public final fun component8 ()D
-	public final fun component9-0d7_KjU ()J
-	public final fun copy-ZWOP6lw (DDDJJJJDJJ)Lcom/arcgismaps/toolkit/scalebar/UIProperties;
-	public static synthetic fun copy-ZWOP6lw$default (Lcom/arcgismaps/toolkit/scalebar/UIProperties;DDDJJJJDJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/UIProperties;
+	public final fun copy-tNS2XkQ (JJJJJJ)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
+	public static synthetic fun copy-tNS2XkQ$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;JJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAlternateFillColor-0d7_KjU ()J
-	public final fun getAutoHideDelay ()D
-	public final fun getBarCornerRadius ()D
 	public final fun getFillColor-0d7_KjU ()J
 	public final fun getLineColor-0d7_KjU ()J
-	public final fun getMinScale ()D
 	public final fun getShadowColor-0d7_KjU ()J
-	public final fun getShadowRadius ()D
 	public final fun getTextColor-0d7_KjU ()J
 	public final fun getTextShadowColor-0d7_KjU ()J
 	public fun hashCode ()I
 	public final fun setAlternateFillColor-8_81llA (J)V
-	public final fun setAutoHideDelay (D)V
-	public final fun setBarCornerRadius (D)V
 	public final fun setFillColor-8_81llA (J)V
 	public final fun setLineColor-8_81llA (J)V
-	public final fun setMinScale (D)V
 	public final fun setShadowColor-8_81llA (J)V
-	public final fun setShadowRadius (D)V
 	public final fun setTextColor-8_81llA (J)V
 	public final fun setTextShadowColor-8_81llA (J)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults;
+	public final fun colors-5tl4gsc (JJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
+	public final fun shapes-ixp7dh8 (FFLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarShapes {
+	public static final field $stable I
+	public final fun component1-D9Ej5fM ()F
+	public final fun component2-D9Ej5fM ()F
+	public final fun copy-YgX7TsA (FF)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public static synthetic fun copy-YgX7TsA$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;FFILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBarCornerRadius-D9Ej5fM ()F
+	public final fun getShadowCornerRadius-D9Ej5fM ()F
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
