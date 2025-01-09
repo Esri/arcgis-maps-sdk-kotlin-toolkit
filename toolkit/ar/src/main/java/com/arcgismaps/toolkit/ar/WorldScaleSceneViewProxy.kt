@@ -33,7 +33,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 
 /**
- * Used to perform operations on a [eSceneView].
+ * Used to perform operations on a [WorldScaleSceneView].
  *
  * There should be a one-to-one relationship between a WorldScaleSceneViewProxy and a [WorldScaleSceneView]. This
  * relationship is established by passing an instance of WorldScaleSceneViewProxy to the [WorldScaleSceneView] function.
@@ -41,7 +41,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
  * Operations performed when the associated composable WorldScaleSceneView is not in the composition will fail gracefully,
  * i.e. won't throw exceptions but won't return a successful result.
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 @Stable
 public class WorldScaleSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
@@ -56,7 +56,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
      * A null value represents that it is currently undetermined.
      *
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public val isWrapAroundEnabled: Boolean?
         get() = sceneViewProxy.isWrapAroundEnabled
@@ -65,7 +65,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * Exports an image snapshot of the current WorldScaleSceneView.
      *
      * @return A [Result] containing a [BitmapDrawable], or failure
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun exportImage(): Result<BitmapDrawable> = sceneViewProxy.exportImage()
 
@@ -92,7 +92,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @param returnPopupsOnly whether the graphics property of the result is populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun identify(
         graphicsOverlay: GraphicsOverlay,
@@ -132,7 +132,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
      * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapping.view.Graphic]s
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
@@ -169,7 +169,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @param maximumResults maximum size of the result set of GeoElements (element type dependent on target layer) to
      * return per layer or sublayer. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyLayerResult], or failure
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun identify(
         layer: Layer,
@@ -208,7 +208,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @return A [Result] containing a [List] of [IdentifyLayerResult], containing one entry for each layer in the
      * view that supports identify, or failure. Each entry contains a [Layer] and a [List] of elements of the type
      * contained by the layer (e.g. [com.arcgismaps.data.Feature] for an [com.arcgismaps.mapping.layers.FeatureLayer])
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,
@@ -224,7 +224,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @param layer the layer to retrieve the view state from
      * @return the [LayerViewState] of the provided layer, or null if this proxy's WorldScaleSceneView is not
      * part of the composition
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? =
         sceneViewProxy.getLayerViewState(layer)
@@ -242,7 +242,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      *
      * @param point a location defined within the spatial reference of the scene view
      * @return A location to screen result object. If an error occurs, null is returned.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public fun locationToScreen(point: Point): LocationToScreenResult? =
         sceneViewProxy.locationToScreen(point)
@@ -259,7 +259,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      *
      * @param screenCoordinate a pixel coordinate relative to the upper-left corner of the screen.
      * @return A [Result] containing a [Point] or an exception.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
         sceneViewProxy.screenToLocation(screenCoordinate)
@@ -274,7 +274,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
         sceneViewProxy.screenToBaseSurface(screenCoordinate)
@@ -287,7 +287,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      *
      * A null value represents that it is currently undetermined.
      *
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public val fieldOfView: Double?
         get() = sceneViewProxy.fieldOfView
@@ -300,7 +300,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      *
      * The default value is 1.0.
      * A null value represents that it is currently undetermined.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     public val fieldOfViewDistortionRatio: Double?
         get() = sceneViewProxy.fieldOfViewDistortionRatio

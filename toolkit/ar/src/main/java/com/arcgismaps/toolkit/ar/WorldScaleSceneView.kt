@@ -154,8 +154,6 @@ public fun WorldScaleSceneView(
 
     val coroutineScope = rememberCoroutineScope()
 
-    var initialMatrix by remember { mutableStateOf(TransformationMatrix.createIdentityMatrix()) }
-
     LaunchedEffect(locationDataSource) {
         launch {
             locationDataSource.status.collect {
@@ -262,7 +260,7 @@ public fun WorldScaleSceneView(
             }
         }
         if (initializationStatus.value == WorldScaleSceneViewStatus.Initialized) {
-            // Disable interaction, which is not supported in TableTop scenarios
+            // Disable interaction, which is not supported in WorldScale scenarios
             val interactionOptions = remember {
                 SceneViewInteractionOptions().apply {
                     this.isEnabled = false

@@ -42,7 +42,7 @@ fun MainScreen() {
         locationDataSource = SystemLocationDataSource(),
         modifier = Modifier.fillMaxSize(),
         onInitializationStatusChanged = {
-            Log.d("MainScreen", "Initialization status changed: $it")
+            Log.d("ArWorldScaleApp", "Initialization status changed: $it")
         }
     )
 }
