@@ -43,9 +43,9 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 public fun Scalebar(
     maxWidth: Double, //  maximum screen width allotted to the scalebar
+    unitsPerDip: Double,
+    viewpoint: Viewpoint,
     spatialReference: SpatialReference?,
-    unitsPerDip: Double?,
-    viewpoint: Viewpoint?,
     modifier: Modifier = Modifier,
     autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
     minScale: Double = 0.0, // minimum scale to show the scalebar
