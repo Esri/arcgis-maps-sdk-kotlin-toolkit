@@ -39,6 +39,12 @@ import com.google.ar.core.Pose
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+/**
+ * Checks the availability of ARCore on the device.
+ *
+ * @see ArCoreApk.Availability
+ * @since 200.7.0
+ */
 internal suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
     suspendCancellableCoroutine { continuation ->
         ArCoreApk.getInstance().checkAvailabilityAsync(context) {
@@ -46,6 +52,11 @@ internal suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availa
         }
     }
 
+/**
+ * Updates the value of a [MutableState] and invokes the [callback].
+ *
+ * @since 200.7.0
+ */
 internal fun <T> MutableState<T>.update(
     newValue: T,
     callback: ((T) -> Unit)?
@@ -98,6 +109,11 @@ internal fun rememberCameraPermission(
     return isGrantedState
 }
 
+/**
+ * Sets the field of view of the [SceneViewProxy] based on the lens intrinsics from an ARCore [Camera].
+ *
+ * @since 200.7.0
+ */
 internal fun SceneViewProxy.setFieldOfViewFromLensIntrinsics(
     arCoreCamera: Camera,
     displayRotation: Int
@@ -111,10 +127,10 @@ internal fun SceneViewProxy.setFieldOfViewFromLensIntrinsics(
         imageIntrinsics.imageDimensions[0].toFloat(),
         imageIntrinsics.imageDimensions[1].toFloat(),
         deviceOrientation = when (displayRotation) {
-            0 -> DeviceOrientation.Portrait
-            90 -> DeviceOrientation.LandscapeRight
-            180 -> DeviceOrientation.ReversePortrait
-            270 -> DeviceOrientation.LandscapeLeft
+            0 -> DeviceOrientation.LandscapeLeft
+            90 -> DeviceOrientation.Portrait
+            180 -> DeviceOrientation.LandscapeRight
+            270 -> DeviceOrientation.ReversePortrait
             else -> DeviceOrientation.Portrait
         }
     )
