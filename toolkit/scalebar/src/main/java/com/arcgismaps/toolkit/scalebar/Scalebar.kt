@@ -18,13 +18,18 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.compose.ui.unit.dp
 
 @Composable
 public fun Scalebar(viewModel: ScalebarInterface) {
@@ -32,12 +37,85 @@ public fun Scalebar(viewModel: ScalebarInterface) {
     Text(text = text.value)
 }
 
-@Preview
+/**
+ * Displays a single label with endpoint lines.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param scaleValue The scale value to display.
+ * @param width The width of the scale bar.
+ * @param lineColor The color of the scale bar lines.
+ * @param shadowColor The color of the scale bar shadows.
+ * @param textColor The color of the scale bar text.
+ * @param textShadowColor The color of the scale bar text shadow.
+ * @since 200.7.0
+ */
 @Composable
-internal fun ScalebarPreview() {
-    val viewModel = object: ScalebarInterface {
-        private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Scalebar Preview")
-        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
+internal fun LineScalebar(
+    modifier: Modifier = Modifier,
+    scaleValue: String,
+    width: Float = 300f,
+    lineColor: Color = Color.Black,
+    shadowColor: Color = Color.Gray,
+    textColor: Color = Color.Black,
+    textShadowColor: Color = Color.White
+) {
+    val textMeasurer = rememberTextMeasurer()
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .padding(8.dp)
+    ) {
+        // left line
+        drawVerticalLine(
+            x = pixelAlignment,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = lineColor,
+            shadowColor = shadowColor,
+            strokeWidth = lineWidth.toPx(),
+        )
+
+        // bottom line
+        drawHorizontalLine(
+            y = scalebarHeight,
+            left = 0f,
+            right = width,
+            color = lineColor,
+            shadowColor = shadowColor,
+            strokeWidth = lineWidth.toPx()
+        )
+
+        // right line
+        drawVerticalLine(
+            x = width - pixelAlignment,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = lineColor,
+            shadowColor = shadowColor,
+            strokeWidth = lineWidth.toPx()
+        )
+        // text label
+        drawText(
+            text = scaleValue,
+            textMeasurer = textMeasurer,
+            barEnd = width,
+            scalebarHeight = scalebarHeight,
+            color = textColor,
+            shadowColor = textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
     }
-    Scalebar(viewModel)
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun LineScaleBarPreview() {
+    LineScalebar(
+        scaleValue = "100 km",
+        lineColor = Color.Green,
+        shadowColor = Color.Blue,
+        textColor = Color.Red,
+        textShadowColor = Color.Black
+    )
 }
