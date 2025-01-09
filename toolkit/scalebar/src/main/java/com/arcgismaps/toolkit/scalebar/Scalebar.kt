@@ -18,19 +18,14 @@
 
 package com.arcgismaps.toolkit.scalebar
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-
-private const val scalebarHeight = 20f // Height of the scalebar in pixels
+import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.Viewpoint
 
 /**
  * A composable UI component to display a Scalebar.
@@ -45,10 +40,12 @@ private const val scalebarHeight = 20f // Height of the scalebar in pixels
 public fun Scalebar(
     maxWidth: Double, //  maximum screen width allotted to the scalebar
     spatialReference: SpatialReference?,
-    unitsPerDips: Double?,
+    unitsPerDip: Double?,
     viewpoint: Viewpoint?,
     modifier: Modifier = Modifier,
-    uiProperties: UIProperties = UIProperties(),
+    autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
+    minScale: Double = 0.0, // minimum scale to show the scalebar
+    useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
     // TODO: determining the default ScalebarUnit is not tested
     units: ScalebarUnits = if (isMetric()) {
@@ -56,8 +53,20 @@ public fun Scalebar(
     } else {
         ScalebarUnits.IMPERIAL
     },
-    useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve
+    colorScheme: ScalebarColors = ScalebarDefaults.colors(),
+    shapes: ScalebarShapes = ScalebarDefaults.shapes()
 ) {
+}
+
+@Preview
+@Composable
+internal fun ScalebarPreview() {
+    Scalebar(
+        maxWidth = 200.0,
+        spatialReference = null,
+        unitsPerDip = null,
+        viewpoint = null
+    )
 }
 
 /**
@@ -138,67 +147,4 @@ internal fun LineScaleBarPreview() {
         textColor = Color.Black,
         textShadowColor = Color.White
     )
-}
-
-/**
- * A Scalebar style.
- *
- * @since 200.7.0
- */
-public enum class ScalebarStyle {
-    /**
-     * Displays a single unit with segmented bars of alternating fill color.
-     *
-     * @since 200.7.0
-     */
-    AlternatingBar,
-
-    /**
-     * Displays a single unit.
-     *
-     * @since 200.7.0
-     */
-    Bar,
-
-    /**
-     * Displays both metric and imperial units. The primary unit is displayed on top.
-     *
-     * @since 200.7.0
-     */
-    DualUnitLine,
-
-    /**
-     * Displays a single unit with a single bar.
-     *
-     * @since 200.7.0
-     */
-    GraduatedLine,
-
-    /**
-     * Displays a single unit with endpoint tick marks.
-     *
-     * @since 200.7.0
-     */
-    Line
-}
-
-/**
- * A Scalebar unit.
- *
- * @since 200.7.0
- */
-public enum class ScalebarUnits {
-    /**
-     * Imperial units (feet, miles, etc)
-     *
-     * @since 200.7.0
-     */
-    IMPERIAL,
-
-    /**
-     * Metric units (meters, etc)
-     *
-     * @since 200.7.0
-     */
-    METRIC
 }
