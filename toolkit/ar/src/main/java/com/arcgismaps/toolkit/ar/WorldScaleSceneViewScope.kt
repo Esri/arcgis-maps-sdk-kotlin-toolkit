@@ -65,7 +65,15 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
-    ): Unit = sceneViewScope.Callout(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
+    ): Unit = sceneViewScope.Callout(
+        location,
+        modifier,
+        offset,
+        rotateOffsetWithGeoView,
+        colorScheme,
+        shapes,
+        content
+    )
 
     /**
      * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the WorldScaleSceneView. The Callout is a composable
@@ -95,5 +103,6 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
-    ): Unit = sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+    ): Unit =
+        sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
 }

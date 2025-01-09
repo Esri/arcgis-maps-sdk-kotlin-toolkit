@@ -53,7 +53,8 @@ public sealed class WorldScaleSceneViewStatus private constructor() {
      * @param error The error that caused the failure.
      * @since 200.7.0
      */
-    public data class FailedToInitialize internal constructor(val error: Throwable) : WorldScaleSceneViewStatus()
+    public data class FailedToInitialize internal constructor(val error: Throwable) :
+        WorldScaleSceneViewStatus()
 }
 
 /**

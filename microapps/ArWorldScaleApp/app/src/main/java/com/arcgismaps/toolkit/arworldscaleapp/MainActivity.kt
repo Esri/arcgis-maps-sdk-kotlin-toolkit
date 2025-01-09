@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp
 
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity

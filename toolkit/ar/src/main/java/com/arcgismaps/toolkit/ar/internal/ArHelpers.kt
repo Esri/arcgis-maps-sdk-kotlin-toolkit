@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
-import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Camera
@@ -47,7 +46,7 @@ internal suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availa
         }
     }
 
-internal fun<T> MutableState<T>.update(
+internal fun <T> MutableState<T>.update(
     newValue: T,
     callback: ((T) -> Unit)?
 ) {
@@ -99,7 +98,10 @@ internal fun rememberCameraPermission(
     return isGrantedState
 }
 
-internal fun SceneViewProxy.setFieldOfViewFromLensIntrinsics(arCoreCamera: Camera, displayRotation: Int) {
+internal fun SceneViewProxy.setFieldOfViewFromLensIntrinsics(
+    arCoreCamera: Camera,
+    displayRotation: Int
+) {
     val imageIntrinsics = arCoreCamera.imageIntrinsics
     setFieldOfViewFromLensIntrinsics(
         imageIntrinsics.focalLength[0],
