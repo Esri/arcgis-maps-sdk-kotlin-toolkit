@@ -1,3 +1,20 @@
+/*
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package com.arcgismaps.toolkit.scalebar.theme
 
 import androidx.compose.runtime.Composable
@@ -5,12 +22,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 
 /**
  * Shape styling properties for the Scalebar.
  *
  * @param shadowCornerRadius The corner radius of the shadow on the Scalebar.
- * @param barCornerRadius The corner radius of the scalebar of type bar and alternating bar.
+ * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
  *
  * @since 200.7.0
  */
@@ -23,8 +41,8 @@ public data class ScalebarShapes internal constructor(
 /**
  * Color styling properties for the Scalebar.
  *
- * @param fillColor The fill color used for bar and alternating bar Scalebar.
- * @param alternateFillColor The second color used for for bar and alternating bar Scalebar.
+ * @param fillColor The fill color used for [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar] Scalebar.
+ * @param alternateFillColor The second color used for for [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar] Scalebar.
  * @param lineColor The color used for the Scalebar's line color.
  * @param shadowColor The color used for the Scalebar's shadow color.
  * @param textColor The color used for the Scalebar's text labels.
@@ -52,8 +70,8 @@ public object ScalebarDefaults {
     /**
      * Creates an instance of [ScalebarColors] with default values.
      *
-     * @param fillColor The fill color used for bar and alternating bar Scalebar.
-     * @param alternateFillColor The second color used for for bar and alternating bar Scalebar.
+     * @param fillColor The fill color used for [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar] Scalebar.
+     * @param alternateFillColor The second color used for for [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar] Scalebar.
      * @param lineColor The color used for the Scalebar's line color.
      * @param shadowColor The color used for the Scalebar's shadow color.
      * @param textColor The color used for the Scalebar's text labels.
@@ -84,7 +102,7 @@ public object ScalebarDefaults {
      * Creates an instance of [ScalebarShapes] with default values.
      *
      * @param shadowCornerRadius The corner radius of the shadow on the Scalebar.
-     * @param barCornerRadius The corner radius of the scalebar of type bar and alternating bar.
+     * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
      *
      * @since 200.7.0
      */
