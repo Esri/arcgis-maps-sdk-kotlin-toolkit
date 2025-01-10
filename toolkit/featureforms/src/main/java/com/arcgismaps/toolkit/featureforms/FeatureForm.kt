@@ -216,7 +216,7 @@ public fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
@@ -395,9 +395,12 @@ private fun FeatureFormBody(
             item {
                 UtilityNetworkAssociationsElement(
                     state = unState,
+                    onUtilityElementClick = {
+
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 20.dp)
                 )
             }
         }

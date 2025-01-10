@@ -16,30 +16,27 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.DatasetLinked
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowUp
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -49,13 +46,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityElement
@@ -66,6 +64,7 @@ import kotlin.random.Random
 @Composable
 internal fun UtilityNetworkAssociationsElement(
     state: UtilityNetworkAssociationsElementState,
+    onUtilityElementClick : (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selected by remember(state) {
@@ -118,8 +117,9 @@ internal fun UtilityNetworkAssociationsElement(
                     )
                     HorizontalDivider()
                     AssociationContent(
-                        target,
-                        emptyMap(),
+                        type = target,
+                        associations = emptyMap(),
+                        onUtilityElementClick = onUtilityElementClick,
                         modifier = Modifier
                             .requiredHeightIn(min = containerHeight, max = containerHeight * 3)
                             .padding(16.dp)
@@ -242,6 +242,7 @@ private fun Associations(
 private fun AssociationContent(
     type: UNAssociationType,
     associations: Map<UtilityNetworkSource, List<UtilityElement>>,
+    onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val map = buildMap {
@@ -261,20 +262,71 @@ private fun AssociationContent(
     ) {
         map.keys.forEach {
             item {
-                Row {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = map[it]?.count().toString(),
-                    )
+                var expanded by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                expanded = !expanded
+                            }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = map[it]?.count().toString(),
+                        )
+                    }
+                    if (expanded) {
+                        NetworkSourceContent(
+                            elements = map[it] ?: emptyList(),
+                            onUtilityElementClick = onUtilityElementClick,
+                            //modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
                 }
             }
         }
     }
 
+}
+
+@Composable
+private fun NetworkSourceContent(
+    elements: List<String>,
+    onUtilityElementClick: (UtilityElement) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // show the list of utility elements
+    Column(
+        modifier = modifier.clip(RoundedCornerShape(8.dp))
+    ) {
+        elements.forEachIndexed { index, name ->
+            Column {
+                ListItem(
+                    headlineContent = {
+                        Text(text = name)
+                    },
+                    modifier = Modifier.clickable {  }
+                )
+                if (index < elements.size - 1) {
+                    HorizontalDivider()
+                }
+            }
+        }
+    }
 }
 
 @Preview(showSystemUi = true)
@@ -286,7 +338,7 @@ private fun UtilityNetworkAssociationsElementPreview() {
         description = "This is a description",
         isVisible = MutableStateFlow(true)
     )
-    UtilityNetworkAssociationsElement(state = state)
+    UtilityNetworkAssociationsElement(state = state, {})
 }
 
 @Preview(showBackground = true)
@@ -317,6 +369,7 @@ private fun AssociationContentPreview() {
     AssociationContent(
         UNAssociationType(UtilityAssociationType.Containment, "Fuse Box", "This content"),
         emptyMap(),
+        {},
         modifier = Modifier.fillMaxWidth()
     )
 }
