@@ -1,0 +1,44 @@
+/*
+ * Copyright 2025 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
+
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.utilitynetworks.UtilityAssociationType
+import kotlinx.coroutines.flow.StateFlow
+
+internal class UtilityNetworkAssociationsElementState(
+    id : Int,
+    label: String,
+    description: String,
+    isVisible: StateFlow<Boolean>,
+) : FormElementState(
+    id = id,
+    label = label,
+    description = description,
+    isVisible = isVisible
+) {
+    val types : List<UNAssociationType> = listOf(
+        UNAssociationType(UtilityAssociationType.Containment, "Fuse Box", "This content"),
+        UNAssociationType(UtilityAssociationType.Attachment, "Attachment Point", "This content"),
+    )
+}
+
+internal class UNAssociationType(
+    val type: UtilityAssociationType,
+    val title : String,
+    val description: String
+)
