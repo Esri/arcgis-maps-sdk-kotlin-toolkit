@@ -219,9 +219,6 @@ public fun WorldScaleSceneView(
         }
     }
     DisposableEffect(locationDataSource) {
-        if (ArcGISEnvironment.applicationContext == null) {
-            ArcGISEnvironment.applicationContext = context.applicationContext
-        }
         coroutineScope.launch {
             locationDataSource.start()
         }
