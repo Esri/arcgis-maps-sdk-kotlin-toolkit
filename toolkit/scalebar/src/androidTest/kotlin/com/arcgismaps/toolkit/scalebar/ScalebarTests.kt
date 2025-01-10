@@ -38,7 +38,7 @@ import org.junit.Test
  * @since 200.6.0
  */
 class ScalebarTests {
-    val lineScalebarTag = "LineScalebar"
+    private val lineScalebarTag = "LineScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
