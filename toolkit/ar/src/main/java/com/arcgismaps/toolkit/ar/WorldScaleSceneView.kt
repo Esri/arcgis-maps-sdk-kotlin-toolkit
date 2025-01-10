@@ -226,6 +226,7 @@ public fun WorldScaleSceneView(
             locationDataSource.start()
         }
         onDispose {
+            // TODO: Determine if this scope could be cancelled before onDispose is called
             coroutineScope.launch {
                 locationDataSource.stop()
             }
