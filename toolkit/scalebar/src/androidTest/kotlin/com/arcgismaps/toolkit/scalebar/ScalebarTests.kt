@@ -17,12 +17,17 @@
 package com.arcgismaps.toolkit.scalebar
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,6 +38,7 @@ import org.junit.Test
  * @since 200.6.0
  */
 class ScalebarTests {
+    val lineScalebarTag = "LineScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -44,12 +50,15 @@ class ScalebarTests {
     fun testScaleLabelIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
-            LineScalebar(
-                scaleValue = "1000 km"
-            )
-        }
+                LineScalebar(
+                    scaleValue = "1000 km",
+                    maxWidth = 300f,
+                    colorScheme = ScalebarDefaults.colors(),
+                    shapes = ScalebarDefaults.shapes()
 
-        composeTestRule.onNodeWithTag("LineScalebar").assertIsDisplayed()
+                )
+            }
+        composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 
 
@@ -60,14 +69,21 @@ class ScalebarTests {
     @Test
     fun testScaleBarIsDisplayed() {
         composeTestRule.setContent {
-            LineScalebar(
-                scaleValue = "1000 km",
-                lineColor = Color.Red
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                LineScalebar(
+                    scaleValue = "1000 km",
+                    maxWidth = 300f,
+                    colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+                    shapes = ScalebarDefaults.shapes()
+                )
+            }
         }
 
         val lineScalebarNodeInteraction = composeTestRule
-            .onNodeWithTag("LineScalebar")
+            .onNodeWithTag(lineScalebarTag).assertIsDisplayed()
 
         val scalebarBitmap = lineScalebarNodeInteraction.captureToImage().asAndroidBitmap()
         // test if the scalebar contains red color
