@@ -32,6 +32,8 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+private const val scalebarHeight = 20f // Height of the scalebar in pixels
+
 @Composable
 public fun Scalebar(viewModel: ScalebarInterface) {
     val text = viewModel.someProperty.collectAsState()
@@ -56,9 +58,9 @@ internal fun LineScalebar(
     scaleValue: String,
     width: Float = 300f,
     lineColor: Color = Color.Black,
-    shadowColor: Color = Color.Gray,
+    shadowColor: Color = Color.Unspecified,
     textColor: Color = Color.Black,
-    textShadowColor: Color = Color.White
+    textShadowColor: Color = Color.Unspecified
 ) {
     val textMeasurer = rememberTextMeasurer()
     Canvas(
@@ -69,12 +71,11 @@ internal fun LineScalebar(
     ) {
         // left line
         drawVerticalLine(
-            x = pixelAlignment,
+            x = 0f,
             top = 0f,
             bottom = scalebarHeight,
             color = lineColor,
-            shadowColor = shadowColor,
-            strokeWidth = lineWidth.toPx(),
+            shadowColor = shadowColor
         )
 
         // bottom line
@@ -84,17 +85,15 @@ internal fun LineScalebar(
             right = width,
             color = lineColor,
             shadowColor = shadowColor,
-            strokeWidth = lineWidth.toPx()
         )
 
         // right line
         drawVerticalLine(
-            x = width - pixelAlignment,
+            x = width,
             top = 0f,
             bottom = scalebarHeight,
             color = lineColor,
             shadowColor = shadowColor,
-            strokeWidth = lineWidth.toPx()
         )
         // text label
         drawText(
@@ -113,10 +112,10 @@ internal fun LineScalebar(
 @Composable
 internal fun LineScaleBarPreview() {
     LineScalebar(
-        scaleValue = "100 km",
-        lineColor = Color.Green,
-        shadowColor = Color.Blue,
-        textColor = Color.Red,
-        textShadowColor = Color.Black
+        scaleValue = "1,000 km",
+        lineColor = Color.White,
+        shadowColor = Color.Gray,
+        textColor = Color.Black,
+        textShadowColor = Color.White
     )
 }

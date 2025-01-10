@@ -23,13 +23,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-internal const val scalebarHeight = 20f // Height of the scalebar in pixels
-internal const val pixelAlignment = 2.5f // used to align the line edges
-internal val lineWidth = 2.dp
-internal val textSize = 14.sp
+private const val pixelAlignment = 2.5f // Aligns the line edges
+private const val lineWidth = 5f
+private const val shadowOffset = 3f
+private val textSize = 14.sp
 
 internal enum class TextAlignment {
     LEFT,
@@ -42,22 +41,20 @@ internal fun DrawScope.drawVerticalLine(
     top: Float,
     bottom: Float,
     color: Color,
-    strokeWidth: Float,
-    shadowColor: Color = Color.Gray,
+    shadowColor: Color,
 ) {
-    val shadowOffset = 2f
     // shadow
     drawLine(
         color = shadowColor,
         start = Offset(x + shadowOffset, top),
         end = Offset(x + shadowOffset, bottom),
-        strokeWidth = strokeWidth,
+        strokeWidth = lineWidth,
     )
     drawLine(
         color = color,
         start = Offset(x, top),
         end = Offset(x, bottom),
-        strokeWidth = strokeWidth,
+        strokeWidth = lineWidth,
     )
 }
 
@@ -66,22 +63,20 @@ internal fun DrawScope.drawHorizontalLine(
     left: Float,
     right: Float,
     color: Color,
-    strokeWidth: Float,
-    shadowColor: Color = Color.Gray,
+    shadowColor: Color,
 ) {
-    val shadowOffset = 2f
     // draw shadow
     drawLine(
         color = shadowColor,
-        start = Offset(left + shadowOffset, y + shadowOffset),
-        end = Offset(right + shadowOffset, y + shadowOffset),
-        strokeWidth = strokeWidth,
+        start = Offset((left - pixelAlignment) + shadowOffset, y + shadowOffset),
+        end = Offset((right + pixelAlignment) + shadowOffset, y + shadowOffset),
+        strokeWidth = lineWidth,
     )
     drawLine(
         color = color,
-        start = Offset(left, y),
-        end = Offset(right, y),
-        strokeWidth = strokeWidth,
+        start = Offset(left - pixelAlignment, y),
+        end = Offset(right + pixelAlignment, y),
+        strokeWidth = lineWidth,
     )
 }
 
@@ -100,9 +95,9 @@ internal fun DrawScope.drawText(
         style = TextStyle(fontSize = textSize)
     )
     val xPos = when (alignment) {
-        TextAlignment.LEFT -> barStart - 4.5f
+        TextAlignment.LEFT -> barStart - (measuredText.size.width / 2)
         TextAlignment.CENTER -> (barEnd - measuredText.size.width) / 2
-        TextAlignment.RIGHT -> barEnd - pixelAlignment - (measuredText.size.width / 2)
+        TextAlignment.RIGHT -> barEnd - (measuredText.size.width / 2)
     }
     val yPos = scalebarHeight + 5f
     drawText(
