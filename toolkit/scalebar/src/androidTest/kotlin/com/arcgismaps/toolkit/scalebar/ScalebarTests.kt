@@ -35,7 +35,7 @@ import org.junit.Test
 /**
  * Tests for Scalebar.
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
@@ -44,7 +44,7 @@ class ScalebarTests {
 
     /**
      * Test the scalebar is displayed.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     @Test
     fun testScaleLabelIsDisplayed() {
@@ -64,7 +64,7 @@ class ScalebarTests {
 
     /**
      * Test the scalebar is displayed.
-     * @since 200.6.0
+     * @since 200.7.0
      */
     @Test
     fun testScaleBarIsDisplayed() {
