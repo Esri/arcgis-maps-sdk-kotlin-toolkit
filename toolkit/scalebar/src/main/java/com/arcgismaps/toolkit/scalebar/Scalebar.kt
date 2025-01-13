@@ -53,7 +53,6 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-
 /**
  * A composable UI component to display a Scalebar.
  * A Scalebar displays the representation of an accurate linear measurement on the map.
@@ -85,7 +84,7 @@ public fun Scalebar(
 ) {
 }
 
-//@Preview
+@Preview
 @Composable
 internal fun ScalebarPreview() {
     Scalebar(
@@ -180,9 +179,8 @@ internal fun LineScaleBarPreview() {
     }
 }
 
-
 @Composable
-internal fun isMetric(): Boolean {
+private fun isMetric(): Boolean {
     // TODO implement the actual logic to determine the default ScalebarUnit
     // this is a placeholder implementation
     val context = LocalContext.current

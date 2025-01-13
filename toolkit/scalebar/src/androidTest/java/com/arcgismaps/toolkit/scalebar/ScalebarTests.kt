@@ -31,7 +31,6 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
 
-
 /**
  * Tests for Scalebar.
  *
@@ -64,7 +63,6 @@ class ScalebarTests {
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 
-
     /**
      * Given a scalebar with the line color set to red
      * When it is displayed
@@ -96,7 +94,6 @@ class ScalebarTests {
         assert(scalebarBitmap.containsColor(Color.Red.hashCode()))
     }
 }
-
 
 private fun Bitmap.containsColor(color: Int): Boolean {
     for (x in 0 until width) {
