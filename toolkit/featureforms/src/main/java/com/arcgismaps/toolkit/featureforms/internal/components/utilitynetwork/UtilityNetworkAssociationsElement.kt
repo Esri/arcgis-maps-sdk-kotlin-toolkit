@@ -46,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -55,21 +56,20 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityElement
-import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 @Composable
 internal fun UtilityNetworkAssociationsElement(
     state: UtilityNetworkAssociationsElementState,
-    onUtilityElementClick : (UtilityElement) -> Unit,
+    onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selected by remember(state) {
-        mutableStateOf<UNAssociationType?>(null)
-    }
+    val associations by state.associations
+    val selected by state.selectedAssociation
     var containerHeight = remember(state) {
         0.dp
     }
@@ -94,8 +94,8 @@ internal fun UtilityNetworkAssociationsElement(
                         Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
                     )
                     Associations(
-                        state.types,
-                        { selected = it },
+                        associations.keys.toList(),
+                        { state.selectAssociation(it) },
                         Modifier
                             .padding(top = 16.dp)
                             .onGloballyPositioned {
@@ -108,9 +108,9 @@ internal fun UtilityNetworkAssociationsElement(
                     )
                 } else {
                     ContentHeader(
-                        target.title,
+                        target.toString(),
                         state.label,
-                        onBackPressed = { selected = null },
+                        onBackPressed = { state.selectAssociation(null) },
                         modifier = Modifier
                             .padding(16.dp)
                             .fillMaxWidth()
@@ -118,7 +118,7 @@ internal fun UtilityNetworkAssociationsElement(
                     HorizontalDivider()
                     AssociationContent(
                         type = target,
-                        associations = emptyMap(),
+                        associations = associations[target] ?: emptyList(),
                         onUtilityElementClick = onUtilityElementClick,
                         modifier = Modifier
                             .requiredHeightIn(min = containerHeight, max = containerHeight * 3)
@@ -200,8 +200,8 @@ private fun ContentHeader(
 
 @Composable
 private fun Associations(
-    types: List<UNAssociationType>,
-    onClick: (UNAssociationType) -> Unit,
+    types: List<UtilityAssociationType>,
+    onClick: (UtilityAssociationType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -210,7 +210,7 @@ private fun Associations(
         types.forEachIndexed { i, type ->
             ListItem(
                 headlineContent = {
-                    Text(text = type.title)
+                    Text(text = type.toString())
                 },
                 modifier = Modifier.clickable {
                     onClick(type)
@@ -240,23 +240,15 @@ private fun Associations(
 
 @Composable
 private fun AssociationContent(
-    type: UNAssociationType,
-    associations: Map<UtilityNetworkSource, List<UtilityElement>>,
+    type: UtilityAssociationType,
+    associations: List<UtilityAssociation>,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val map = buildMap {
-        put(
-            "Telco Device",
-            listOf(
-                "Line1", "Line2", "Line3", "Line4", "Line5", "Line6"
-            )
-        )
-        put(
-            "Structure Junction",
-            listOf("structure01", "structure02", "structure03")
-        )
-    }
+    val map = associations
+        .asSequence()
+        .map { it.toElement }
+        .groupBy { it.networkSource }
     LazyColumn(
         modifier = modifier
     ) {
@@ -281,7 +273,7 @@ private fun AssociationContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = it,
+                            text = it.name,
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.weight(1f))
@@ -305,7 +297,7 @@ private fun AssociationContent(
 
 @Composable
 private fun NetworkSourceContent(
-    elements: List<String>,
+    elements: List<UtilityElement>,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -313,13 +305,15 @@ private fun NetworkSourceContent(
     Column(
         modifier = modifier.clip(RoundedCornerShape(8.dp))
     ) {
-        elements.forEachIndexed { index, name ->
+        elements.forEachIndexed { index, element ->
             Column {
                 ListItem(
                     headlineContent = {
-                        Text(text = name)
+                        Text(text = element.objectId.toString())
                     },
-                    modifier = Modifier.clickable {  }
+                    modifier = Modifier.clickable {
+                        onUtilityElementClick(element)
+                    }
                 )
                 if (index < elements.size - 1) {
                     HorizontalDivider()
@@ -336,7 +330,10 @@ private fun UtilityNetworkAssociationsElementPreview() {
         id = 0,
         label = "Associations",
         description = "This is a description",
-        isVisible = MutableStateFlow(true)
+        isVisible = MutableStateFlow(true),
+        utilityNetwork = null,
+        utilityElement = null,
+        scope = rememberCoroutineScope()
     )
     UtilityNetworkAssociationsElement(state = state, {})
 }
@@ -351,25 +348,4 @@ private fun HeaderPreview() {
 @Composable
 private fun ContentHeaderPreview() {
     ContentHeader("Fuse Box", "Feature", {}, Modifier.fillMaxWidth())
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AssociationsPreview() {
-    val types: List<UNAssociationType> = listOf(
-        UNAssociationType(UtilityAssociationType.Containment, "Fuse Box", "This content"),
-        UNAssociationType(UtilityAssociationType.Attachment, "Attachment Point", "This content"),
-    )
-    Associations(types, {})
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AssociationContentPreview() {
-    AssociationContent(
-        UNAssociationType(UtilityAssociationType.Containment, "Fuse Box", "This content"),
-        emptyMap(),
-        {},
-        modifier = Modifier.fillMaxWidth()
-    )
 }

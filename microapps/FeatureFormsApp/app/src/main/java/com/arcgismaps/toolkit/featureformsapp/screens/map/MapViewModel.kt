@@ -49,6 +49,7 @@ import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.utilitynetworks.UtilityElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -190,6 +191,7 @@ class MapViewModel @Inject constructor(
         scope.launch {
             // load the map and set the UI state to not editing
             map.load()
+            map.utilityNetworks.firstOrNull()?.load()
             _uiState.value = UIState.NotEditing
         }
     }
@@ -433,6 +435,14 @@ class MapViewModel @Inject constructor(
             _uiState.value = UIState.Editing(featureForm)
         }.onFailure {
             Log.e("MapViewModel", "Failed to add feature", it)
+        }
+    }
+
+    suspend fun selectUtilityElement(utilityElement: UtilityElement) {
+        val utilityNetwork = map.utilityNetworks.firstOrNull() ?: return
+        utilityNetwork.getFeaturesForElements(listOf(utilityElement)).onSuccess {
+            val feature = it.firstOrNull() ?: return@onSuccess
+            selectFeature(feature)
         }
     }
 

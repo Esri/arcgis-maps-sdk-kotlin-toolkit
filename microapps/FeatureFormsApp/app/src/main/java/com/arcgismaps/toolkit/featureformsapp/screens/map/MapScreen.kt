@@ -127,6 +127,8 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottom
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
@@ -245,7 +247,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     featureForm = rememberedForm,
                     errorVisibility = errorVisibility,
-                    modifier = Modifier.padding(padding)
+                    modifier = Modifier.padding(padding),
+                    onUtilityElementClicked = {
+                        scope.launch {
+                            mapViewModel.selectUtilityElement(it)
+                        }
+                    },
+                    utilityNetwork = mapViewModel.map.utilityNetworks.firstOrNull()
                 )
             }
             AnimatedVisibility(
@@ -437,6 +445,8 @@ fun FeatureFormSheet(
     featureForm: FeatureForm,
     errorVisibility: ValidationErrorVisibility,
     modifier: Modifier = Modifier,
+    onUtilityElementClicked : (UtilityElement) -> Unit,
+    utilityNetwork: UtilityNetwork?
 ) {
     val windowSize = getWindowSize(LocalContext.current)
     val bottomSheetState = rememberStandardBottomSheetState(
@@ -463,7 +473,9 @@ fun FeatureFormSheet(
             FeatureForm(
                 featureForm = featureForm,
                 modifier = Modifier.fillMaxSize(),
-                validationErrorVisibility = errorVisibility
+                validationErrorVisibility = errorVisibility,
+                onUtilityElementClicked = onUtilityElementClicked,
+                utilityNetwork = utilityNetwork
             )
         }
     }

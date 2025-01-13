@@ -90,9 +90,10 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
+import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -213,8 +214,10 @@ public fun FeatureForm(
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
+    utilityNetwork: UtilityNetwork? = null,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
+    onUtilityElementClicked: (UtilityElement) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
@@ -226,7 +229,9 @@ public fun FeatureForm(
             stateData = stateData,
             modifier = modifier,
             validationErrorVisibility = validationErrorVisibility,
-            onBarcodeButtonClick = onBarcodeButtonClick
+            onBarcodeButtonClick = onBarcodeButtonClick,
+            onUtilityElementClicked = onUtilityElementClicked,
+            utilityNetwork = utilityNetwork
         )
     }
 }
@@ -245,8 +250,10 @@ internal data class StateData(@Stable val featureForm: FeatureForm)
 private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
+    utilityNetwork: UtilityNetwork?,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+    onUtilityElementClicked: (UtilityElement) -> Unit,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val featureForm = stateData.featureForm
     // hold the list of form elements in a mutable state to make them observable
@@ -267,7 +274,9 @@ private fun FeatureForm(
             // expressions evaluated, load attachments
             formElements.value = featureForm.elements
         },
-        onBarcodeButtonClick = onBarcodeButtonClick
+        onBarcodeButtonClick = onBarcodeButtonClick,
+        onUtilityElementClicked = onUtilityElementClicked,
+        utilityNetwork = utilityNetwork
     )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -305,17 +314,26 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
+    utilityNetwork: UtilityNetwork?,
     onExpressionsEvaluated: () -> Unit,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+    onUtilityElementClicked : (UtilityElement) -> Unit
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val unState = UtilityNetworkAssociationsElementState(
-        id = form.hashCode(),
-        label = "Associations",
-        description = "This is a description",
-        isVisible = MutableStateFlow(true)
-    )
+    val unState = utilityNetwork?.let {
+        val utilityElement = utilityNetwork.createElementOrNull(form.feature)
+        UtilityNetworkAssociationsElementState(
+            id = form.hashCode(),
+            label = "Associations",
+            description = "This is a description",
+            isVisible = MutableStateFlow(true),
+            utilityNetwork = it,
+            utilityElement = utilityElement,
+            scope = scope
+        )
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -393,15 +411,15 @@ private fun FeatureFormBody(
                 }
             }
             item {
-                UtilityNetworkAssociationsElement(
-                    state = unState,
-                    onUtilityElementClick = {
-
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 20.dp)
-                )
+                if (unState != null) {
+                    UtilityNetworkAssociationsElement(
+                        state = unState,
+                        onUtilityElementClick = onUtilityElementClicked,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 20.dp)
+                    )
+                }
             }
         }
     }

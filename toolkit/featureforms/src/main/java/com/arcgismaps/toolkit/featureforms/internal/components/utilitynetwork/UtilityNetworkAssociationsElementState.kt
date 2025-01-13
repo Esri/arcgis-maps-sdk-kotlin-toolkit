@@ -16,29 +16,50 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
+import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityNetwork
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 internal class UtilityNetworkAssociationsElementState(
     id : Int,
     label: String,
     description: String,
     isVisible: StateFlow<Boolean>,
+    utilityNetwork: UtilityNetwork?,
+    utilityElement: UtilityElement?,
+    scope: CoroutineScope
 ) : FormElementState(
     id = id,
     label = label,
     description = description,
     isVisible = isVisible
 ) {
-    val types : List<UNAssociationType> = listOf(
-        UNAssociationType(UtilityAssociationType.Containment, "Fuse Box", "This content"),
-        UNAssociationType(UtilityAssociationType.Attachment, "Attachment Point", "This content"),
+    var associations : MutableState<Map<UtilityAssociationType, List<UtilityAssociation>>> = mutableStateOf(
+        emptyMap()
     )
-}
+        private set
 
-internal class UNAssociationType(
-    val type: UtilityAssociationType,
-    val title : String,
-    val description: String
-)
+    var selectedAssociation : MutableState<UtilityAssociationType?> = mutableStateOf(null)
+        private set
+
+    init {
+        scope.launch {
+            if (utilityElement != null) {
+                utilityNetwork?.getAssociations(utilityElement)?.onSuccess { res ->
+                    associations.value = res.groupBy { it.associationType }
+                }
+            }
+        }
+    }
+
+    fun selectAssociation(associationType: UtilityAssociationType?) {
+        selectedAssociation.value = associationType
+    }
+}
