@@ -19,12 +19,34 @@
 package com.arcgismaps.toolkit.scalebar
 
 import android.content.Context
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
+import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
+import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
+import com.arcgismaps.toolkit.scalebar.internal.drawText
+import com.arcgismaps.toolkit.scalebar.internal.drawVerticalLine
+import com.arcgismaps.toolkit.scalebar.internal.pixelAlignment
+import com.arcgismaps.toolkit.scalebar.internal.scalebarHeight
+import com.arcgismaps.toolkit.scalebar.internal.shadowOffset
+import com.arcgismaps.toolkit.scalebar.internal.textOffset
+import com.arcgismaps.toolkit.scalebar.internal.textSize
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
@@ -71,6 +93,90 @@ internal fun ScalebarPreview() {
         unitsPerDip = 1.0,
         viewpoint = Viewpoint(0.0, 0.0, 0.0),
     )
+}
+
+/**
+ * Displays a scalebar with single label and endpoint lines.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param scaleValue The scale value to display.
+ * @param maxWidth The width of the scale bar.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun LineScalebar(
+    modifier: Modifier = Modifier.testTag("LineScalebar"),
+    scaleValue: String,
+    maxWidth: Float,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { textSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // left line
+        drawVerticalLine(
+            x = 0f,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // bottom line
+        drawHorizontalLine(
+            y = scalebarHeight,
+            left = 0f,
+            right = maxWidth,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // right line
+        drawVerticalLine(
+            x = maxWidth,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+        // text label
+        drawText(
+            text = scaleValue,
+            textMeasurer = textMeasurer,
+            barEnd = maxWidth,
+            scalebarHeight = scalebarHeight,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun LineScaleBarPreview() {
+    Box(modifier = Modifier.fillMaxSize().padding(4.dp), contentAlignment = Alignment.BottomStart) {
+        LineScalebar(
+            modifier = Modifier,
+            scaleValue = "1,000 km",
+            maxWidth = 300f,
+            colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+            shapes = ScalebarDefaults.shapes()
+        )
+    }
 }
 
 @Composable
