@@ -43,7 +43,10 @@ class ScalebarTests {
     val composeTestRule = createComposeRule()
 
     /**
-     * Test the scalebar is displayed.
+     * Given a scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
      * @since 200.7.0
      */
     @Test
@@ -63,7 +66,10 @@ class ScalebarTests {
 
 
     /**
-     * Test the scalebar is displayed.
+     * Given a scalebar with the line color set to red
+     * When it is displayed
+     * Then it should be visible with the red color
+     *
      * @since 200.7.0
      */
     @Test
