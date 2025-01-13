@@ -83,7 +83,7 @@ internal fun DrawScope.drawVerticalLine(
 
 /**
  * Draws a horizontal line on the canvas with a shadow.
- * The line wil be of color [color] and the shadow will be of color [shadowColor].
+ * The line will be of color [color] and the shadow will be of color [shadowColor].
  *
  * @since 200.7.0
  */
