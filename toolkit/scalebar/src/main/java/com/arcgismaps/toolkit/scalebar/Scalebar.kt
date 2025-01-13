@@ -18,18 +18,35 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import android.content.Context
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
+import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
+import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
+import com.arcgismaps.toolkit.scalebar.internal.drawText
+import com.arcgismaps.toolkit.scalebar.internal.drawVerticalLine
+import com.arcgismaps.toolkit.scalebar.internal.pixelAlignment
+import com.arcgismaps.toolkit.scalebar.internal.scalebarHeight
+import com.arcgismaps.toolkit.scalebar.internal.shadowOffset
+import com.arcgismaps.toolkit.scalebar.internal.textOffset
+import com.arcgismaps.toolkit.scalebar.internal.textSize
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
@@ -87,6 +104,7 @@ internal fun ScalebarPreview() {
  * @param maxWidth The width of the scale bar.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
+ *
  * @since 200.7.0
  */
 @Composable
@@ -97,15 +115,55 @@ internal fun LineScalebar(
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes
 ) {
-    LineScalebarImpl(
-        modifier = modifier,
-        scaleValue = scaleValue,
-        width = maxWidth,
-        lineColor = colorScheme.lineColor,
-        shadowColor = colorScheme.shadowColor,
-        textColor = colorScheme.textColor,
-        textShadowColor = colorScheme.textShadowColor
-    )
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { textSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // left line
+        drawVerticalLine(
+            x = 0f,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // bottom line
+        drawHorizontalLine(
+            y = scalebarHeight,
+            left = 0f,
+            right = maxWidth,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // right line
+        drawVerticalLine(
+            x = maxWidth,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+        // text label
+        drawText(
+            text = scaleValue,
+            textMeasurer = textMeasurer,
+            barEnd = maxWidth,
+            scalebarHeight = scalebarHeight,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
@@ -120,4 +178,14 @@ internal fun LineScaleBarPreview() {
             shapes = ScalebarDefaults.shapes()
         )
     }
+}
+
+
+@Composable
+internal fun isMetric(): Boolean {
+    // TODO implement the actual logic to determine the default ScalebarUnit
+    // this is a placeholder implementation
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    return sharedPreferences.getBoolean("isMetric", true)
 }

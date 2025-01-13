@@ -37,4 +37,3 @@ public enum class ScalebarUnits {
      */
     METRIC
 }
-
