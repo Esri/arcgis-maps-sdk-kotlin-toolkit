@@ -62,9 +62,11 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.rememberPreferGeospatialTrackingMode
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -78,7 +80,7 @@ import java.time.Instant
 @Composable
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
-    locationDataSource: LocationDataSource,
+    trackingMode: WorldScaleTrackingMode = rememberPreferGeospatialTrackingMode(),
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
@@ -146,88 +148,14 @@ public fun WorldScaleSceneView(
         }
     }
 
-    var hasSetOriginCamera by remember { mutableStateOf(false) }
-    var initialHeading: Double? by remember { mutableStateOf(null) }
-
     val cameraController = remember { TransformationMatrixCameraController() }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(locationDataSource) {
-        launch {
-            locationDataSource.status.collect {
-                when (it) {
-                    LocationDataSourceStatus.FailedToStart -> {
-                        initializationStatus.update(
-                            WorldScaleSceneViewStatus.FailedToInitialize(
-                                IllegalStateException(
-                                    context.getString(
-                                        R.string.location_data_source_failed_to_start,
-                                        locationDataSource.error.value?.message
-                                    )
-                                )
-                            ),
-                            onInitializationStatusChanged
-                        )
-                    }
-
-                    LocationDataSourceStatus.Started -> {
-                        initializationStatus.update(
-                            WorldScaleSceneViewStatus.Initialized,
-                            onInitializationStatusChanged
-                        )
-                    }
-
-                    else -> {}
-                }
-            }
+    trackingMode.TrackLocation(
+        cameraController,
+        onUpdateInitializationStatus = {
+            initializationStatus.update(it, onInitializationStatusChanged)
         }
-        launch {
-            locationDataSource.locationChanged.collect { location ->
-                if (!hasSetOriginCamera) {
-                    cameraController.setOriginCamera(
-                        Camera(
-                            location.position.y,
-                            location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 1.0,
-                            0.0,
-                            90.0,
-                            0.0
-                        )
-                    )
-                    hasSetOriginCamera = true
-                }
-            }
-        }
-        launch {
-            locationDataSource.headingChanged.take(1).collect { heading ->
-                if (!heading.isNaN()) {
-                    if (initialHeading == null) {
-                        cameraController.setOriginCamera(
-                            Camera(
-                                cameraController.originCamera.value.location,
-                                heading,
-                                cameraController.originCamera.value.pitch,
-                                cameraController.originCamera.value.roll
-                            )
-                        )
-                        initialHeading = heading
-                    }
-                }
-            }
-        }
-    }
-    DisposableEffect(locationDataSource) {
-        coroutineScope.launch {
-            locationDataSource.start()
-        }
-        onDispose {
-            // TODO: Determine if this scope could be cancelled before onDispose is called
-            coroutineScope.launch {
-                locationDataSource.stop()
-            }
-        }
-    }
+    )
 
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
@@ -307,6 +235,99 @@ public fun WorldScaleSceneView(
                     content?.invoke(WorldScaleSceneViewScope(this))
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun WorldScaleTrackingMode.TrackLocation(cameraController: TransformationMatrixCameraController, onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit) {
+    when (this) {
+        is WorldScaleTrackingMode.World -> TrackLocationWithLocationDataSource(locationDataSource, cameraController, onUpdateInitializationStatus)
+        is WorldScaleTrackingMode.Geospatial -> TODO()
+        // TODO: Once Geospatial is available, this will need logic to determine which mode to use
+        is WorldScaleTrackingMode.PreferGeospatial -> TrackLocationWithLocationDataSource(locationDataSource, cameraController, onUpdateInitializationStatus)
+    }
+}
+
+@Composable
+private fun TrackLocationWithLocationDataSource(
+    locationDataSource: LocationDataSource,
+    cameraController: TransformationMatrixCameraController,
+    onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit
+) {
+    val context = LocalContext.current
+    var hasSetOriginCamera by remember { mutableStateOf(false) }
+    var initialHeading: Double? by remember { mutableStateOf(null) }
+    LaunchedEffect(locationDataSource) {
+        launch {
+            locationDataSource.status.collect {
+                when (it) {
+                    LocationDataSourceStatus.FailedToStart -> {
+                        onUpdateInitializationStatus(
+                            WorldScaleSceneViewStatus.FailedToInitialize(
+                                IllegalStateException(
+                                    context.getString(
+                                        R.string.location_data_source_failed_to_start,
+                                        locationDataSource.error.value?.message
+                                    )
+                                )
+                            )
+                        )
+                    }
+
+                    LocationDataSourceStatus.Started -> {
+                        onUpdateInitializationStatus(
+                            WorldScaleSceneViewStatus.Initialized
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+        launch {
+            locationDataSource.locationChanged.collect { location ->
+                if (!hasSetOriginCamera) {
+                    cameraController.setOriginCamera(
+                        Camera(
+                            location.position.y,
+                            location.position.x,
+                            if (location.position.hasZ) location.position.z!! else 1.0,
+                            0.0,
+                            90.0,
+                            0.0
+                        )
+                    )
+                    hasSetOriginCamera = true
+                }
+            }
+        }
+        launch {
+            locationDataSource.headingChanged.take(1).collect { heading ->
+                if (!heading.isNaN()) {
+                    if (initialHeading == null) {
+                        cameraController.setOriginCamera(
+                            Camera(
+                                cameraController.originCamera.value.location,
+                                heading,
+                                cameraController.originCamera.value.pitch,
+                                cameraController.originCamera.value.roll
+                            )
+                        )
+                        initialHeading = heading
+                    }
+                }
+            }
+        }
+    }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(locationDataSource) {
+        val wrapper = LocationDataSourceWrapper(locationDataSource)
+        lifecycleOwner.lifecycle.addObserver(wrapper)
+        wrapper.startLocationDataSource()
+        onDispose {
+            wrapper.onDestroy(lifecycleOwner)
+            lifecycleOwner.lifecycle.removeObserver(wrapper)
         }
     }
 }

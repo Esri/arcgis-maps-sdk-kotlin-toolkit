@@ -39,7 +39,6 @@ fun MainScreen() {
     }
     WorldScaleSceneView(
         arcGISScene = arcGISScene,
-        locationDataSource = SystemLocationDataSource(),
         modifier = Modifier.fillMaxSize(),
         onInitializationStatusChanged = {
             Log.d("ArWorldScaleApp", "Initialization status changed: $it")
