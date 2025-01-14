@@ -17,6 +17,9 @@
  */
 package com.arcgismaps.toolkit.scalebar.internal
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.GeodeticCurveType
@@ -26,63 +29,82 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.Scalebar
 import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 import com.arcgismaps.toolkit.scalebar.ScalebarUnits
+import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
-internal class ScalebarViewModel : ViewModel() {
+internal const val lineWidth = 2.0f
+
+internal class ScalebarViewModel(
+    private val minScale: Double,
+    private val style: ScalebarStyle,
+    private val units: ScalebarUnits,
+    private val labelTypography: LabelTypography,
+    private val useGeodeticCalculations: Boolean
+) : ViewModel() {
+
+    private val labelPaddingX: Float = 4.0f
 
     private var lineMapLength: Double = 0.0
 
+    private val geodeticCurveType: GeodeticCurveType = GeodeticCurveType.Geodesic
+
+    private var _isScaleBarUpdated: MutableState<Boolean> = mutableStateOf(false)
+    val isScaleBarUpdated: State<Boolean> = _isScaleBarUpdated
+
+    private var _displayLength: Double = (0.0)
+    val displayLength: Double = _displayLength
+
+    private var _displayUnit: LinearUnit? = null
+    val displayUnit: LinearUnit? = _displayUnit
+
+    private var _labels: MutableList<ScalebarLabel> = mutableListOf()
+    val labels: List<ScalebarLabel> = _labels
 
     /**
-     *
+     * Updates the labels for the Scalebar.
      *
      * @since 200.7.0
      */
-    fun updateLabels(displayLength: Double, displayUnit: LinearUnit?, style: ScalebarStyle) {
-        val lineDisplayLength = displayLength
-
+    fun updateLabels() {
+        val localLabels = mutableListOf<ScalebarLabel>()
         val minSegmentTestString: String = if (lineMapLength >= 100) {
             lineMapLength.toInt().toString()
         } else {
             "9.9"
         }
+        // TODO: Do we need to calculate this using UnitsPerDip?
+        val minSegmentWidth = (minSegmentTestString.length * labelTypography.labelStyle.fontSize.value * 1.5) +
+                (labelPaddingX * 2)
 
-        val minSegmentWidth = (minSegmentTestString.length * Scalebar.font.uiFont.size * 1.5) +
-                (Scalebar.labelXPad * 2)
+        val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
 
-        val suggestedNumSegments = (lineDisplayLength / minSegmentWidth).toInt()
-
-        val maxNumSegments = min(suggestedNumSegments, 4)
+        // Cap segments at 4
+        val maxNumSegments = minOf(suggestedNumSegments, 4)
 
         val numSegments = ScalebarUnits.numSegments(
             lineMapLength,
             maxNumSegments
         )
 
-        val segmentScreenLength = lineDisplayLength / numSegments
+        val segmentScreenLength = displayLength / numSegments
         var currSegmentX = 0.0
-        val labels = mutableListOf<ScalebarLabel>()
 
-        labels.add(
+        localLabels.add(
             ScalebarLabel(
                 index = -1,
-                xOffset = 0.0,
-                text = "0"
+                xOffset = 0.0 ,
+                yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+                text = "0" // TODO: localized this ?
             )
         )
 
         for (index in 0 until numSegments) {
             currSegmentX += segmentScreenLength
-            val segmentMapLength = (segmentScreenLength * (index + 1) / lineDisplayLength) * lineMapLength
+            val segmentMapLength = (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
 
             val segmentText: String = if (index == numSegments - 1 && displayUnit != null) {
-                val measurement = Measurement(
-                    value = segmentMapLength,
-                    linearUnit = displayUnit
-                )
-                measurement.formatted(MeasurementFormatter.Style.SCALE_MEASUREMENT)
+                "$segmentMapLength $displayUnit"
             } else {
                 segmentMapLength.toString()
             }
@@ -90,18 +112,20 @@ internal class ScalebarViewModel : ViewModel() {
             val label = ScalebarLabel(
                 index = index,
                 xOffset = currSegmentX,
+                yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
                 text = segmentText
             )
-            labels.add(label)
+            localLabels.add(label)
         }
 
-        if (style == ScalebarStyle.BAR || style == ScalebarStyle.LINE) {
-            labels.lastOrNull()?.let {
-                this.labels = listOf(it)
+        if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
+            localLabels.lastOrNull()?.let {
+                _labels = mutableListOf(it)
             }
         } else {
-            this.labels = labels
+            _labels = localLabels
         }
+        _isScaleBarUpdated.value = true
     }
 
     /**
@@ -113,10 +137,7 @@ internal class ScalebarViewModel : ViewModel() {
         spatialReference: SpatialReference?,
         unitsPerDip: Double?,
         viewpoint: Viewpoint?,
-        minScale: Double,
-        units: ScalebarUnits,
-        availableLineDisplayLength: Double,
-        useGeodeticCalculations: Boolean
+        maxLength: Double,
     ) {
         if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
             return
@@ -127,12 +148,10 @@ internal class ScalebarViewModel : ViewModel() {
         }
 
         val mapCenter = viewpoint.targetGeometry.extent.center
-        // TODO: determine the maximum length of the line that can be displayed add implementation
-        val maxLength = availableLineDisplayLength
 
-        val lineMapLength: Double
-        val displayUnit: LinearUnit
-        val displayLength: Double
+        val localDisplayLength: Double
+        val localDisplayUnit: LinearUnit
+        val localLineMapLength: Double
 
         if (useGeodeticCalculations || spatialReference.unit is AngularUnit) {
             val maxLengthPlanar = unitsPerDip * maxLength
@@ -154,16 +173,16 @@ internal class ScalebarViewModel : ViewModel() {
             val maxLengthGeodetic = GeometryEngine.lengthGeodetic(
                 polyline,
                 baseUnits,
-                GeodeticCurveType.Geodesic
+                geodeticCurveType
             )
             val roundNumberDistance = units.closestDistanceWithoutGoingOver(
                 maxLengthGeodetic,
                 baseUnits
             )
             val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
-            displayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
-            displayUnit = units.linearUnitsForDistance(roundNumberDistance)
-            lineMapLength = baseUnits.convertTo(displayUnit, roundNumberDistance)
+            localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
+            localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
+            localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
         } else {
             val srUnit = spatialReference.unit as? LinearUnit ?: return
             val baseUnits = units.baseLinearUnit
@@ -175,36 +194,27 @@ internal class ScalebarViewModel : ViewModel() {
                 lenAvail,
                 baseUnits
             )
-            displayLength = baseUnits.convertTo(
+            localDisplayLength = baseUnits.convertTo(
                 srUnit,
                 closestLen
             ) / unitsPerDip
-            displayUnit = units.linearUnitsForDistance(closestLen)
-            lineMapLength = baseUnits.convertTo(
-                displayUnit,
+            localDisplayUnit = units.linearUnitsForDistance(closestLen)
+            localLineMapLength = baseUnits.convertTo(
+                localDisplayUnit,
                 closestLen
             )
         }
 
-        if (!displayLength.isFinite() || displayLength.isNaN()) {
+        if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
             return
         }
 
-        // TODO: update the scalebar with the new values
-//    this.displayLength = displayLength
-//    this.displayUnit = displayUnit
-//    this.lineMapLength = lineMapLength
+        // update the scalebar with the new values
+        _displayLength = localDisplayLength
+        _displayUnit = localDisplayUnit
+        lineMapLength = localLineMapLength
 
-        // TODO: handle the case when the initial scale was calculated
-//    initialScaleWasCalculated = true
-        // TODO: update the labels
-//    updateLabels()
-
+        // update the labels
+        updateLabels()
     }
-
-    // TODO: implement the actual logic to determine the maximum length of the line that can be displayed
-    private fun availableLineDisplayLength(): Double {
-        return 0.0
-    }
-
 }

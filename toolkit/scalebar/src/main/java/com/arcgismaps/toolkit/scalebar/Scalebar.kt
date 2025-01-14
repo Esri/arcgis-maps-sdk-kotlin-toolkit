@@ -22,9 +22,12 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.lineWidth
+import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
@@ -58,7 +61,8 @@ public fun Scalebar(
         ScalebarUnits.IMPERIAL
     },
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
-    shapes: ScalebarShapes = ScalebarDefaults.shapes()
+    shapes: ScalebarShapes = ScalebarDefaults.shapes(),
+    labelTypography: LabelTypography = ScalebarDefaults.typography(),
 ) {
 }
 
@@ -80,4 +84,33 @@ private fun isMetric(): Boolean {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     return sharedPreferences.getBoolean("isMetric", true)
+}
+
+/**
+ * Returns the display length of the scalebar line.
+ *
+ * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
+ * @since 200.7.0
+ */
+@Composable
+private fun availableLineDisplayLength(
+    maxWidth: Double,
+    labelTypography: LabelTypography,
+    unitsPerDip: Double?, // Do we need to use this to calculate maxUnitDisplayWidth?
+    style: ScalebarStyle
+): Double {
+    return when (style) {
+        ScalebarStyle.AlternatingBar,
+        ScalebarStyle.DualUnitLine,
+        ScalebarStyle.GraduatedLine -> {
+            // " km" will render wider than " mi"
+            val textMeasurer = rememberTextMeasurer()
+            val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
+            maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
+        }
+        ScalebarStyle.Bar,
+        ScalebarStyle.Line -> {
+            maxWidth - lineWidth
+        }
+    }
 }

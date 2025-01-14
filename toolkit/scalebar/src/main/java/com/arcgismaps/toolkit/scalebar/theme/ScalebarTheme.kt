@@ -17,9 +17,11 @@
  */
 package com.arcgismaps.toolkit.scalebar.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.scalebar.ScalebarStyle
@@ -58,6 +60,18 @@ public data class ScalebarColors internal constructor(
     public var shadowColor: Color,
     public var textColor: Color,
     public var textShadowColor: Color
+)
+
+/**
+ * Typography styling properties for the Scalebar.
+ *
+ * @param labelStyle The text style used for the Scalebar's text labels.
+ *
+ * @since 200.7.0
+ */
+@Immutable
+public data class LabelTypography internal constructor(
+    public val labelStyle: TextStyle
 )
 
 /**
@@ -114,6 +128,22 @@ public object ScalebarDefaults {
         return ScalebarShapes(
             shadowCornerRadius = shadowCornerRadius,
             barCornerRadius = barCornerRadius
+        )
+    }
+
+    /**
+     * Creates an instance of [LabelTypography] with default values.
+     *
+     * @param labelStyle The text style used for the Scalebar's text labels.
+     *
+     * @since 200.7.0
+     */
+    @Composable
+    public fun typography(
+        labelStyle: TextStyle = MaterialTheme.typography.labelSmall
+    ): LabelTypography {
+        return LabelTypography(
+            labelStyle = labelStyle
         )
     }
 }

@@ -53,7 +53,7 @@ public enum class ScalebarUnits {
 
         private fun multiplier(distance: Double): Double {
             val residual = distance / magnitude(distance)
-            return roundNumberMultipliers.filter { it <= residual }.lastOrNull() ?: 0.0
+            return roundNumberMultipliers.lastOrNull { it <= residual } ?: 0.0
         }
 
         private fun segmentOptions(multiplier: Double): List<Int> {
@@ -82,7 +82,7 @@ public enum class ScalebarUnits {
         fun numSegments(distance: Double, maxNumSegments: Int): Int {
             val multiplier = multiplier(distance)
             val options = segmentOptions(multiplier)
-            return options.filter { it <= maxNumSegments }.lastOrNull() ?: 1
+            return options.lastOrNull { it <= maxNumSegments } ?: 1
         }
     }
 
