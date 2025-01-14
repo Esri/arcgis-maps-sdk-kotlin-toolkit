@@ -28,7 +28,8 @@ public sealed class WorldScaleTrackingMode {
      *
      * @since 200.7.0
      */
-    public data object Geospatial: WorldScaleTrackingMode()
+    // TODO: defining this as class instead of object to keep open for enhancements
+    public class Geospatial(): WorldScaleTrackingMode()
 
     /**
      * The [WorldScaleSceneView] will attempt to track the device's position and orientation using

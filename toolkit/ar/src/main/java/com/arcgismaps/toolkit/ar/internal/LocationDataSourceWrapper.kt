@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class LocationDataSourceWrapper(internal val locationDataSource: LocationDataSource) : DefaultLifecycleObserver {
+internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSource, val onStartResult: (Result<Unit>) -> Unit) : DefaultLifecycleObserver {
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -24,7 +24,8 @@ internal class LocationDataSourceWrapper(internal val locationDataSource: Locati
 
     fun startLocationDataSource() {
         scope.launch {
-            locationDataSource.start()
+            val result = locationDataSource.start()
+            onStartResult(result)
         }
     }
 }

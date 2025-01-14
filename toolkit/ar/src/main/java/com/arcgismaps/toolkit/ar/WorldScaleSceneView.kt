@@ -322,7 +322,14 @@ private fun TrackLocationWithLocationDataSource(
     }
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(locationDataSource) {
-        val wrapper = LocationDataSourceWrapper(locationDataSource)
+        val wrapper = LocationDataSourceWrapper(locationDataSource, onStartResult = {
+            // TODO: decide how to set initialized
+            it.onSuccess {
+                onUpdateInitializationStatus(WorldScaleSceneViewStatus.Initialized)
+            }.onFailure {
+                onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
+            }
+        })
         lifecycleOwner.lifecycle.addObserver(wrapper)
         wrapper.startLocationDataSource()
         onDispose {
