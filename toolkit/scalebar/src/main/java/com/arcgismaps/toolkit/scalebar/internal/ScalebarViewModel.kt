@@ -44,6 +44,7 @@ internal class ScalebarViewModel(
     private val labelPaddingX: Float = 4.0f
 
     private var lineMapLength: Double = 0.0
+    private var displayUnit: LinearUnit? = null
 
     private val geodeticCurveType: GeodeticCurveType = GeodeticCurveType.Geodesic
 
@@ -52,9 +53,6 @@ internal class ScalebarViewModel(
 
     private var _displayLength: Double = (0.0)
     val displayLength: Double = _displayLength
-
-    private var _displayUnit: LinearUnit? = null
-    val displayUnit: LinearUnit? = _displayUnit
 
     private var _labels: MutableList<ScalebarLabel> = mutableListOf()
     val labels: List<ScalebarLabel> = _labels
@@ -209,7 +207,7 @@ internal class ScalebarViewModel(
 
         // update the scalebar with the new values
         _displayLength = localDisplayLength
-        _displayUnit = localDisplayUnit
+        displayUnit = localDisplayUnit
         lineMapLength = localLineMapLength
 
         // update the labels
