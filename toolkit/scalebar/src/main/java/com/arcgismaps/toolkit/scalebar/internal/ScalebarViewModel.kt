@@ -33,8 +33,6 @@ import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 import com.arcgismaps.toolkit.scalebar.ScalebarUnits
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
-internal const val lineWidth = 2.0f
-
 internal class ScalebarViewModel(
     private val minScale: Double,
     private val style: ScalebarStyle,
