@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -317,11 +318,18 @@ private fun FeatureFormBody(
     utilityNetwork: UtilityNetwork?,
     onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityElementClicked : (UtilityElement) -> Unit
+    onUtilityElementClicked: (UtilityElement) -> Unit
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberSaveable(
+        inputs = arrayOf(form),
+        saver = LazyListState.Saver)
+    {
+        LazyListState()
+    }
+    // create a state for the utility network associations element if the utility network is
+    // provided
     val unState = utilityNetwork?.let {
         val utilityElement = utilityNetwork.createElementOrNull(form.feature)
         UtilityNetworkAssociationsElementState(
