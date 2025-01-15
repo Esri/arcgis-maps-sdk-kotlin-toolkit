@@ -69,6 +69,7 @@ class ScalebarViewModelTests {
     }
 
     /**
+     * Executes a test for the ScalebarViewModel with the given parameters.
      *
      * @since 200.7.0
      */
