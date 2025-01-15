@@ -85,7 +85,7 @@ public fun Scalebar(
     LineScalebar(
         modifier = modifier,
         scaleValue = "1,000 km",
-        maxWidth = 300f,
+        maxWidth = maxWidth.toFloat(),
         colorScheme = colorScheme,
         shapes = shapes
     )

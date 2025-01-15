@@ -76,7 +76,7 @@ fun MainScreen(modifier: Modifier) {
                 .align(Alignment.BottomStart)
         ) {
             Scalebar(
-                maxWidth = 200.0,
+                maxWidth = 300.0,
                 unitsPerDip = unitsPerDip,
                 viewpoint = viewpoint,
                 spatialReference = spatialReference
