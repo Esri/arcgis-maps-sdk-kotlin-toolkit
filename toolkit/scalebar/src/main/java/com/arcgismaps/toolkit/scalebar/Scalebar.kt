@@ -192,7 +192,8 @@ private fun isMetric(): Boolean {
 }
 
 /**
- * Returns the display length of the scalebar line.
+ * Returns the display length of the Scalebar line.
+ * // TODO: The computed length from this function needs to be passed to the updateScalebar function in the ScalebarViewModel.
  *
  * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
  * @since 200.7.0
@@ -201,7 +202,6 @@ private fun isMetric(): Boolean {
 private fun availableLineDisplayLength(
     maxWidth: Double,
     labelTypography: LabelTypography,
-    unitsPerDip: Double?, // Do we need to use this to calculate maxUnitDisplayWidth?
     style: ScalebarStyle
 ): Double {
     return when (style) {

@@ -97,7 +97,6 @@ class ScalebarViewModelTests {
         )
 
         val viewModel = ScalebarViewModel(
-            maxWidth,
             0.0,
             style,
             units,
@@ -105,7 +104,9 @@ class ScalebarViewModelTests {
             useGeodeticCalculations
         )
 
-        viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerDip)
+        val availableLineDisplayLength = maxWidth - 2 // this is the value being passed after the available line display length is calculated
+                                                      // in swift, it is calculated as maxWidth - lineWidth
+        viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength)
 
         assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
         assertThat(viewModel.labels.size).isEqualTo(labels.size)

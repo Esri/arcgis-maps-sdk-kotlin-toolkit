@@ -34,7 +34,6 @@ import com.arcgismaps.toolkit.scalebar.ScalebarUnits
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
 internal class ScalebarViewModel(
-    private val maxLength: Double,
     private val minScale: Double,
     private val style: ScalebarStyle,
     private val units: ScalebarUnits,
@@ -136,7 +135,8 @@ internal class ScalebarViewModel(
     fun updateScaleBar(
         spatialReference: SpatialReference?,
         viewpoint: Viewpoint?,
-        unitsPerDip: Double?
+        unitsPerDip: Double?,
+        maxLength: Double
     ) {
         if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
             return
