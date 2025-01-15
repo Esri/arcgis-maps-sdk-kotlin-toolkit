@@ -53,9 +53,7 @@ fun ScalebarApp() {
     Scaffold(
         topBar = { TopAppBar(title = { Text("ScalebarApp") }) }
     ) {
-        Box(Modifier.padding(it)) {
-            MainScreen()
-        }
+        MainScreen(Modifier.padding(it))
     }
 
 }

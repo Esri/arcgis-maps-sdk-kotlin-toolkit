@@ -18,19 +18,31 @@
 
 package com.arcgismaps.toolkit.scalebarapp.screens
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.scalebar.Scalebar
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier) {
     val arcGISMap by remember {
         mutableStateOf(
             ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
@@ -42,8 +54,33 @@ fun MainScreen() {
             }
         )
     }
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap
-    )
+    var viewpoint: Viewpoint? by remember { mutableStateOf(null) }
+    var unitsPerDip by remember { mutableDoubleStateOf(Double.NaN) }
+    var spatialReference: SpatialReference? by remember { mutableStateOf(null) }
+    // show composable MapView with a Scalebar
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = arcGISMap,
+            onSpatialReferenceChanged = { spatialReference = it },
+            onUnitsPerDipChanged = { unitsPerDip = it },
+            onViewpointChangedForCenterAndScale = { viewpoint = it }
+        )
+        Row(
+            modifier = Modifier
+                .height(IntrinsicSize.Max)
+                .fillMaxWidth()
+                .padding(25.dp)
+                .align(Alignment.BottomStart)
+        ) {
+            Scalebar(
+                maxWidth = 300.0,
+                unitsPerDip = unitsPerDip,
+                viewpoint = viewpoint,
+                spatialReference = spatialReference
+            )
+        }
+    }
 }

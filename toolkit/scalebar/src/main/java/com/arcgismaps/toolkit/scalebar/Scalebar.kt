@@ -66,7 +66,7 @@ import kotlin.time.Duration.Companion.seconds
 public fun Scalebar(
     maxWidth: Double, //  maximum screen width allotted to the scalebar
     unitsPerDip: Double,
-    viewpoint: Viewpoint,
+    viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
     autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
@@ -82,6 +82,13 @@ public fun Scalebar(
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes()
 ) {
+    LineScalebar(
+        modifier = modifier,
+        scaleValue = "1,000 km",
+        maxWidth = maxWidth.toFloat(),
+        colorScheme = colorScheme,
+        shapes = shapes
+    )
 }
 
 @Preview
