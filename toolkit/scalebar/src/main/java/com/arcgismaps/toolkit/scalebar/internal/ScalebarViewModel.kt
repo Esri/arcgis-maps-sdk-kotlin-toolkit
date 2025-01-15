@@ -229,6 +229,6 @@ private fun LinearUnit.getAbbreviation(): String {
         LinearUnit.kilometers -> "km"
         LinearUnit.feet -> "ft"
         LinearUnit.miles -> "mi"
-        else -> "unknown"
+        else -> ""
     }
 }
