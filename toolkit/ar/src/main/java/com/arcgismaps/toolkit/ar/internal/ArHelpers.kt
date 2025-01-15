@@ -34,7 +34,6 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
-import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Camera
@@ -156,9 +155,3 @@ internal val Pose.transformationMatrix: TransformationMatrix
             translation[2].toDouble()
         )
     }
-
-@Composable
-internal fun rememberPreferGeospatialTrackingMode() : WorldScaleTrackingMode.PreferGeospatial {
-    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
-    return remember { WorldScaleTrackingMode.PreferGeospatial() }
-}

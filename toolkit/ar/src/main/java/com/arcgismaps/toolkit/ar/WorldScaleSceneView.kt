@@ -26,16 +26,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
@@ -66,7 +67,6 @@ import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
-import com.arcgismaps.toolkit.ar.internal.rememberPreferGeospatialTrackingMode
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -80,7 +80,6 @@ import java.time.Instant
 @Composable
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
-    trackingMode: WorldScaleTrackingMode = rememberPreferGeospatialTrackingMode(),
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
@@ -150,7 +149,10 @@ public fun WorldScaleSceneView(
 
     val cameraController = remember { TransformationMatrixCameraController() }
 
-    trackingMode.TrackLocation(
+    val locationDataSource = rememberSystemLocationDataSource()
+
+    TrackLocationWithLocationDataSource(
+        locationDataSource,
         cameraController,
         onUpdateInitializationStatus = {
             initializationStatus.update(it, onInitializationStatusChanged)
@@ -236,16 +238,6 @@ public fun WorldScaleSceneView(
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun WorldScaleTrackingMode.TrackLocation(cameraController: TransformationMatrixCameraController, onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit) {
-    when (this) {
-        is WorldScaleTrackingMode.World -> TrackLocationWithLocationDataSource(locationDataSource, cameraController, onUpdateInitializationStatus)
-        is WorldScaleTrackingMode.Geospatial -> TODO()
-        // TODO: Once Geospatial is available, this will need logic to determine which mode to use
-        is WorldScaleTrackingMode.PreferGeospatial -> TrackLocationWithLocationDataSource(locationDataSource, cameraController, onUpdateInitializationStatus)
     }
 }
 
@@ -337,4 +329,10 @@ private fun TrackLocationWithLocationDataSource(
             lifecycleOwner.lifecycle.removeObserver(wrapper)
         }
     }
+}
+
+@Composable
+private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
+    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
+    return remember { SystemLocationDataSource() }
 }
