@@ -23,8 +23,8 @@ class ScalebarViewModelTests {
     private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 11.sp))
 
     /**
-     * Given a scalebar view model
-     * When the scalebar of line style is updated
+     * Given a Scalebar view model
+     * When the Scalebar of line style is updated
      * Then the display length and labels should be correct
      *
      * @since 200.7.0
@@ -38,7 +38,7 @@ class ScalebarViewModelTests {
             maxWidth = 175.0,
             units = ScalebarUnits.METRIC,
             scale = 10000000.0,
-            unitsPerPoint = 2645.833333330476,
+            unitsPerDip = 2645.833333330476,
             labelTypography = defaultLabelTypography,
             displayLength = 171,
             labels = listOf("375 km")
@@ -46,25 +46,25 @@ class ScalebarViewModelTests {
     }
 
     /**
-     * Given a scalebar view model
-     * When the scalebar of line style is updated
+     * Given a Scalebar view model
+     * When the Scalebar of Bar style is updated
      * Then the display length and labels should be correct
      *
      * @since 200.7.0
      */
     @Test
-    fun testGraduatedLineStyle() = runTest {
+    fun testBarStyle() = runTest {
         testScalebarViewModel(
             x = esriRedlands.x,
             y = esriRedlands.y,
-            style = ScalebarStyle.Line,
+            style = ScalebarStyle.Bar,
             maxWidth = 175.0,
             units = ScalebarUnits.METRIC,
             scale = 10000000.0,
-            unitsPerPoint = 2645.833333330476,
+            unitsPerDip = 2645.833333330476,
             labelTypography = defaultLabelTypography,
-            displayLength = 137,
-            labels = listOf("0", "100", "200", "300 km")
+            displayLength = 171,
+            labels = listOf("375 km")
         )
     }
 
@@ -80,7 +80,7 @@ class ScalebarViewModelTests {
         maxWidth: Double,
         units: ScalebarUnits,
         scale: Double,
-        unitsPerPoint: Double,
+        unitsPerDip: Double,
         labelTypography: LabelTypography,
         useGeodeticCalculations: Boolean = true,
         displayLength: Int,
@@ -104,7 +104,7 @@ class ScalebarViewModelTests {
             useGeodeticCalculations
         )
 
-        viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerPoint)
+        viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerDip)
 
         assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
         assertThat(viewModel.labels.size).isEqualTo(labels.size)
