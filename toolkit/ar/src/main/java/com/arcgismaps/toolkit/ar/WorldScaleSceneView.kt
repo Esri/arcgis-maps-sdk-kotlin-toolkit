@@ -150,17 +150,37 @@ public fun WorldScaleSceneView(
     val cameraController = remember { TransformationMatrixCameraController() }
 
     val locationDataSource = rememberSystemLocationDataSource()
+    var isLocationDataSourceStarted by remember { mutableStateOf(false) }
 
     TrackLocationWithLocationDataSource(
         locationDataSource,
         cameraController,
-        onUpdateInitializationStatus = {
-            initializationStatus.update(it, onInitializationStatusChanged)
+        onLocationDataSourceStatus = {
+            when (it) {
+                LocationDataSourceStatus.FailedToStart -> {
+                    initializationStatus.update(
+                        WorldScaleSceneViewStatus.FailedToInitialize(
+                            IllegalStateException(
+                                context.getString(
+                                    R.string.location_data_source_failed_to_start,
+                                    locationDataSource.error.value?.message
+                                )
+                            )
+                        ),
+                        onInitializationStatusChanged
+                    )
+                }
+
+                LocationDataSourceStatus.Started -> {
+                    isLocationDataSourceStarted = true
+                }
+                else -> {}
+            }
         }
     )
 
     Box(modifier = modifier) {
-        if (cameraPermissionGranted && arCoreInstalled) {
+        if (cameraPermissionGranted && isLocationDataSourceStarted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {
@@ -187,6 +207,8 @@ public fun WorldScaleSceneView(
                     onFirstPlaneDetected = { },
                     visualizePlanes = false
                 )
+                // Once the session is created, we can say we're initialized
+                initializationStatus.update(WorldScaleSceneViewStatus.Initialized, onInitializationStatusChanged)
             }
         }
         if (initializationStatus.value == WorldScaleSceneViewStatus.Initialized) {
@@ -245,36 +267,14 @@ public fun WorldScaleSceneView(
 private fun TrackLocationWithLocationDataSource(
     locationDataSource: LocationDataSource,
     cameraController: TransformationMatrixCameraController,
-    onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit
+    onLocationDataSourceStatus: ((LocationDataSourceStatus)) -> Unit
 ) {
-    val context = LocalContext.current
     var hasSetOriginCamera by remember { mutableStateOf(false) }
     var initialHeading: Double? by remember { mutableStateOf(null) }
     LaunchedEffect(locationDataSource) {
         launch {
             locationDataSource.status.collect {
-                when (it) {
-                    LocationDataSourceStatus.FailedToStart -> {
-                        onUpdateInitializationStatus(
-                            WorldScaleSceneViewStatus.FailedToInitialize(
-                                IllegalStateException(
-                                    context.getString(
-                                        R.string.location_data_source_failed_to_start,
-                                        locationDataSource.error.value?.message
-                                    )
-                                )
-                            )
-                        )
-                    }
-
-                    LocationDataSourceStatus.Started -> {
-                        onUpdateInitializationStatus(
-                            WorldScaleSceneViewStatus.Initialized
-                        )
-                    }
-
-                    else -> {}
-                }
+                onLocationDataSourceStatus(it)
             }
         }
         launch {
@@ -314,14 +314,7 @@ private fun TrackLocationWithLocationDataSource(
     }
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(locationDataSource) {
-        val wrapper = LocationDataSourceWrapper(locationDataSource, onStartResult = {
-            // TODO: decide how to set initialized
-            it.onSuccess {
-                onUpdateInitializationStatus(WorldScaleSceneViewStatus.Initialized)
-            }.onFailure {
-                onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
-            }
-        })
+        val wrapper = LocationDataSourceWrapper(locationDataSource)
         lifecycleOwner.lifecycle.addObserver(wrapper)
         wrapper.startLocationDataSource()
         onDispose {
