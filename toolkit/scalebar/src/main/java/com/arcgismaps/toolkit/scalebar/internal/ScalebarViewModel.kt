@@ -34,6 +34,7 @@ import com.arcgismaps.toolkit.scalebar.ScalebarUnits
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
 internal class ScalebarViewModel(
+    private val maxLength: Double,
     private val minScale: Double,
     private val style: ScalebarStyle,
     private val units: ScalebarUnits,
@@ -51,18 +52,20 @@ internal class ScalebarViewModel(
     private var _isScaleBarUpdated: MutableState<Boolean> = mutableStateOf(false)
     val isScaleBarUpdated: State<Boolean> = _isScaleBarUpdated
 
-    private var _displayLength: Double = (0.0)
-    val displayLength: Double = _displayLength
+    private var _displayLength: Double = 0.0
+    val displayLength: Double
+        get() = _displayLength
 
     private var _labels: MutableList<ScalebarLabel> = mutableListOf()
-    val labels: List<ScalebarLabel> = _labels
+    val labels: List<ScalebarLabel>
+        get() = _labels
 
     /**
      * Updates the labels for the Scalebar.
      *
      * @since 200.7.0
      */
-    fun updateLabels() {
+    private fun updateLabels() {
         val localLabels = mutableListOf<ScalebarLabel>()
         val minSegmentTestString: String = if (lineMapLength >= 100) {
             lineMapLength.toInt().toString()
@@ -100,7 +103,8 @@ internal class ScalebarViewModel(
             val segmentMapLength = (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
 
             val segmentText: String = if (index == numSegments - 1 && displayUnit != null) {
-                "$segmentMapLength $displayUnit"
+                val displayUnitAbbr = displayUnit?.getAbbreviation()
+                "${segmentMapLength.toInt()} $displayUnitAbbr"
             } else {
                 segmentMapLength.toString()
             }
@@ -131,9 +135,8 @@ internal class ScalebarViewModel(
      */
     fun updateScaleBar(
         spatialReference: SpatialReference?,
-        unitsPerDip: Double?,
         viewpoint: Viewpoint?,
-        maxLength: Double,
+        unitsPerDip: Double?
     ) {
         if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
             return
@@ -212,5 +215,20 @@ internal class ScalebarViewModel(
 
         // update the labels
         updateLabels()
+    }
+}
+
+/**
+ * Gets the abbreviation for the LinearUnit.
+ *
+ * @since 200.7.0
+ */
+private fun LinearUnit.getAbbreviation(): String {
+    return when (this) {
+        LinearUnit.meters -> "m"
+        LinearUnit.kilometers -> "km"
+        LinearUnit.feet -> "ft"
+        LinearUnit.miles -> "mi"
+        else -> "unknown"
     }
 }
