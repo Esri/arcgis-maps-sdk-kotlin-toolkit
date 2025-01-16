@@ -80,7 +80,7 @@ internal class ScalebarViewModel(
         // Cap segments at 4
         val maxNumSegments = minOf(suggestedNumSegments, 4)
 
-        val numSegments = ScalebarUnits.numSegments(
+        val numSegments = ScalebarUtils.numSegments(
             lineMapLength,
             maxNumSegments
         )

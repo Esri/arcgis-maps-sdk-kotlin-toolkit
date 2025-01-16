@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.arcgismaps.toolkit.scalebar
 
 import androidx.compose.ui.text.TextStyle
@@ -104,8 +120,9 @@ class ScalebarViewModelTests {
             useGeodeticCalculations
         )
 
-        val availableLineDisplayLength = maxWidth - 2 // this is the value being passed after the available line display length is calculated
-                                                      // in swift, it is calculated as maxWidth - lineWidth
+        val lineWidth = 2.0f // this is the value being passed after the available line display length is calculated
+                             // in swift, it is calculated as maxWidth - lineWidth
+        val availableLineDisplayLength = maxWidth - lineWidth
         viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength)
 
         assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
