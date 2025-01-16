@@ -49,32 +49,32 @@ internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
  */
 internal enum class TextAlignment {
     /**
-     * Aligns the text to the left of the given point.
+     * Left align the text relative to a point.
      * @since 200.7.0
      */
     LEFT,
 
     /**
-     * Aligns the text centered of the given point.
+     * Center align the text relative to a point.
      * @since 200.7.0
      */
     CENTER,
 
     /**
-     * Aligns the text to the right of the given point.
+     * Right aligns the text relative to a point.
      * @since 200.7.0
      */
     RIGHT,
 }
 
 /**
- * Draws a vertical line on the canvas with a shadow.
- * The line will be of color [color] and the shadow will be of color [shadowColor].
+ * Draws a vertical line on the canvas at the [xPos] of color [color] with a shadow of color [shadowColor].
+ * The line height will be determined by [top] and [bottom] positions.
  *
  * @since 200.7.0
  */
 internal fun DrawScope.drawVerticalLine(
-    x: Float,
+    xPos: Float,
     top: Float,
     bottom: Float,
     color: Color,
@@ -83,26 +83,26 @@ internal fun DrawScope.drawVerticalLine(
     // draw shadow
     drawLine(
         color = shadowColor,
-        start = Offset(x + shadowOffset, top),
-        end = Offset(x + shadowOffset, bottom),
+        start = Offset(xPos + shadowOffset, top),
+        end = Offset(xPos + shadowOffset, bottom),
         strokeWidth = lineWidth,
     )
     drawLine(
         color = color,
-        start = Offset(x, top),
-        end = Offset(x, bottom),
+        start = Offset(xPos, top),
+        end = Offset(xPos, bottom),
         strokeWidth = lineWidth,
     )
 }
 
 /**
- * Draws a horizontal line on the canvas with a shadow.
- * The line will be of color [color] and the shadow will be of color [shadowColor].
+ * Draws a horizontal line on the canvas at the [yPos] with a color [color] and a shadow of color [shadowColor].
+ * The line width will be determined by [left] and [right] positions.
  *
  * @since 200.7.0
  */
 internal fun DrawScope.drawHorizontalLine(
-    y: Float,
+    yPos: Float,
     left: Float,
     right: Float,
     color: Color,
@@ -111,14 +111,14 @@ internal fun DrawScope.drawHorizontalLine(
     // draw shadow
     drawLine(
         color = shadowColor,
-        start = Offset((left - pixelAlignment) + shadowOffset, y + shadowOffset),
-        end = Offset((right + pixelAlignment) + shadowOffset, y + shadowOffset),
+        start = Offset((left - pixelAlignment) + shadowOffset, yPos + shadowOffset),
+        end = Offset((right + pixelAlignment) + shadowOffset, yPos + shadowOffset),
         strokeWidth = lineWidth,
     )
     drawLine(
         color = color,
-        start = Offset(left - pixelAlignment, y),
-        end = Offset(right + pixelAlignment, y),
+        start = Offset(left - pixelAlignment, yPos),
+        end = Offset(right + pixelAlignment, yPos),
         strokeWidth = lineWidth,
     )
 }
@@ -129,10 +129,10 @@ internal fun DrawScope.drawHorizontalLine(
  *
  * @param text The text to be drawn.
  * @param textMeasurer The [TextMeasurer] to measure the text.
- * @param offset The location where the text should be drawn.
+ * @param xPos The location where the text should be drawn.
  * @param color The color of the text.
- * @param shadowColor The color of the shadow.
- * @param alignment The alignment of the text.
+ * @param shadowColor The color of the text shadow.
+ * @param alignment The alignment of text relative to [xPos].
  * @since 200.7.0
  */
 internal fun DrawScope.drawText(
@@ -150,7 +150,7 @@ internal fun DrawScope.drawText(
     val alignedXPos = when (alignment) {
         TextAlignment.LEFT -> xPos - measuredText.size.width + pixelAlignment
         TextAlignment.CENTER -> xPos - (measuredText.size.width / 2)
-        TextAlignment.RIGHT -> xPos + pixelAlignment
+        TextAlignment.RIGHT -> xPos - pixelAlignment
     }
     val yPos = scalebarHeight + textOffset
     drawText(
@@ -161,8 +161,15 @@ internal fun DrawScope.drawText(
     )
 }
 
+/**
+ * Draws the tick marks on the canvas of height [tickHeight] with a color [color] and shadow of color [shadowColor].
+ *
+ * The text of the tick marks will be drawn with a color [textColor] and shadow of color [textShadowColor]. The tickmark
+ * position will be determined by [ScalebarLabel.xOffset].
+ */
 internal fun DrawScope.drawTickMarks(
-    tickMarks: List<TickMark>,
+    tickMarks: List<ScalebarLabel>,
+    tickHeight: Float = 10f,
     color: Color,
     shadowColor: Color,
     textMeasurer: TextMeasurer,
@@ -170,24 +177,23 @@ internal fun DrawScope.drawTickMarks(
     textShadowColor: Color
 ) {
 
-    for (i in 1 until tickMarks.size - 1) {
+    for (i in 0 until tickMarks.size - 1) {
         drawVerticalLine(
-            x = tickMarks[i].label.xOffset.toFloat(),
-            top = scalebarHeight - tickMarks[i].tickHeight,
+            xPos = tickMarks[i].xOffset.toFloat(),
+            top = if (i == 0) 0f else scalebarHeight - tickHeight,
             bottom = scalebarHeight,
             color = color,
             shadowColor = shadowColor
         )
         drawText(
-            text = tickMarks[i].label.text,
+            text = tickMarks[i].text,
             textMeasurer = textMeasurer,
-            xPos = tickMarks[i].label.xOffset.toFloat(),
+            xPos = tickMarks[i].xOffset.toFloat(),
             color = textColor,
             shadowColor = textShadowColor,
-            alignment = TextAlignment.CENTER
+            alignment = if (i == 0) TextAlignment.RIGHT else TextAlignment.CENTER
         )
     }
 }
 
-internal data class TickMark(val label: ScalebarLabel, val tickHeight: Float = 10f)
 
