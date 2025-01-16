@@ -191,16 +191,3 @@ internal fun DrawScope.drawTickMarks(
 
 internal data class TickMark(val label: ScalebarLabel, val tickHeight: Float = 10f)
 
-
-/**
- * Represents a Scalebar label.
- *
- * @since 200.7.0
- */
-internal data class ScalebarLabel(
-    val index: Int,
-    val xOffset: Double,
-    val yOffset: Double,
-    val text: String
-)
-
