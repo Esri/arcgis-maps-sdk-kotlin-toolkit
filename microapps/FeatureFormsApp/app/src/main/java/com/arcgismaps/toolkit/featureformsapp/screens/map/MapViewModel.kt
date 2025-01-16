@@ -240,9 +240,10 @@ class MapViewModel @Inject constructor(
     fun selectNewFeature() {
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             prevState.oldState.featureForm.discardEdits()
-            val layer = prevState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
-            layer.clearSelection()
-            layer.selectFeature(prevState.newFeature)
+            val prevLayer = prevState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
+            prevLayer.clearSelection()
+            val newLayer = prevState.newFeature.featureTable?.layer as FeatureLayer
+            newLayer.selectFeature(prevState.newFeature)
             _uiState.value = UIState.Editing(
                 featureForm = FeatureForm(prevState.newFeature)
             )

@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -33,8 +31,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.DatasetLinked
-import androidx.compose.material.icons.filled.KeyboardDoubleArrowUp
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
@@ -45,15 +43,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.utilitynetworks.UtilityAssociation
@@ -65,73 +60,70 @@ import kotlin.random.Random
 @Composable
 internal fun UtilityNetworkAssociationsElement(
     state: UtilityNetworkAssociationsElementState,
-    onUtilityElementClick: (UtilityElement) -> Unit,
+    onAssociationTypeClick: () -> Unit,
+    //onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val associations by state.associations
-    val selected by state.selectedAssociation
-    var containerHeight = remember(state) {
-        0.dp
-    }
-    val density = LocalDensity.current
     Card(
         modifier = modifier.fillMaxWidth(),
     ) {
-        AnimatedContent(
-            targetState = selected,
-            label = "association-content",
-            modifier = Modifier.wrapContentSize()
-        ) { target ->
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top
-            ) {
-                if (target == null) {
-                    Header(
-                        state.label,
-                        state.description,
-                        Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                    )
-                    Associations(
-                        associations.keys.toList(),
-                        { state.selectAssociation(it) },
-                        Modifier
-                            .padding(top = 16.dp)
-                            .onGloballyPositioned {
-                                with(density) {
-                                    if (containerHeight == 0.dp) {
-                                        containerHeight = it.size.height.toDp()
-                                    }
-                                }
-                            }
-                    )
-                } else {
-                    ContentHeader(
-                        target.toString(),
-                        state.label,
-                        onBackPressed = { state.selectAssociation(null) },
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    )
-                    HorizontalDivider()
-                    AssociationContent(
-                        type = target,
-                        associations = associations[target] ?: emptyList(),
-                        onUtilityElementClick = onUtilityElementClick,
-                        modifier = Modifier
-                            .requiredHeightIn(min = containerHeight, max = containerHeight * 3)
-                            .padding(16.dp)
-                    )
-                }
-            }
+        Column(
+            modifier = Modifier.wrapContentSize(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Top
+        ) {
+            ElementHeader(
+                state.label,
+                state.description,
+                Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            )
+            AssociationTypes(
+                associations.keys.toList(),
+                {
+                    state.selectedAssociationType = it
+                    onAssociationTypeClick()
+                },
+                Modifier.padding(top = 16.dp)
+            )
         }
     }
 }
 
 @Composable
-private fun Header(
+internal fun UtilityNetworkAssociationType(
+    state: UtilityNetworkAssociationsElementState,
+    onBackPressed: () -> Unit,
+    onUtilityElementClick: (UtilityElement) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (state.selectedAssociationType == null) {
+        // return to the previous screen if no association type is selected
+        onBackPressed()
+        return
+    }
+    val associations by state.associations
+    Column(modifier = modifier) {
+        AssociationTypeHeader(
+            state.selectedAssociationType!!.name,
+            state.label,
+            onBackPressed = onBackPressed,
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        )
+        HorizontalDivider()
+        Associations(
+            associations = associations[state.selectedAssociationType] ?: emptyList(),
+            displayCount = state.displayCount,
+            onUtilityElementClick = onUtilityElementClick,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun ElementHeader(
     label: String,
     description: String,
     modifier: Modifier = Modifier
@@ -162,7 +154,7 @@ private fun Header(
 }
 
 @Composable
-private fun ContentHeader(
+private fun AssociationTypeHeader(
     label: String,
     source: String,
     onBackPressed: () -> Unit,
@@ -173,7 +165,7 @@ private fun ContentHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            imageVector = Icons.Filled.KeyboardDoubleArrowUp,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = null,
             modifier = Modifier
                 .padding(4.dp)
@@ -199,7 +191,7 @@ private fun ContentHeader(
 }
 
 @Composable
-private fun Associations(
+private fun AssociationTypes(
     types: List<UtilityAssociationType>,
     onClick: (UtilityAssociationType) -> Unit,
     modifier: Modifier = Modifier
@@ -210,7 +202,7 @@ private fun Associations(
         types.forEachIndexed { i, type ->
             ListItem(
                 headlineContent = {
-                    Text(text = type.toString())
+                    Text(text = type.name)
                 },
                 modifier = Modifier.clickable {
                     onClick(type)
@@ -239,9 +231,9 @@ private fun Associations(
 }
 
 @Composable
-private fun AssociationContent(
-    type: UtilityAssociationType,
+private fun Associations(
     associations: List<UtilityAssociation>,
+    displayCount: Int,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -284,8 +276,8 @@ private fun AssociationContent(
                     if (expanded) {
                         NetworkSourceContent(
                             elements = map[it] ?: emptyList(),
+                            displayCount = displayCount,
                             onUtilityElementClick = onUtilityElementClick,
-                            //modifier = Modifier.padding(horizontal = 8.dp)
                         )
                     }
                 }
@@ -298,6 +290,7 @@ private fun AssociationContent(
 @Composable
 private fun NetworkSourceContent(
     elements: List<UtilityElement>,
+    displayCount: Int,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -323,7 +316,15 @@ private fun NetworkSourceContent(
     }
 }
 
-@Preview(showSystemUi = true)
+private val UtilityAssociationType.name : String
+    get() {
+        val input = this.toString()
+        val regex = Regex("UtilityAssociationType\\$(\\w+)@")
+        val matchResult = regex.find(input)
+        return matchResult?.groupValues?.get(1) ?: input
+    }
+
+@Preview(showBackground = true)
 @Composable
 private fun UtilityNetworkAssociationsElementPreview() {
     val state = UtilityNetworkAssociationsElementState(
@@ -340,12 +341,12 @@ private fun UtilityNetworkAssociationsElementPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun HeaderPreview() {
-    Header("Associations", "This is a description", Modifier.fillMaxWidth())
+private fun ElementHeaderPreview() {
+    ElementHeader("Associations", "This is a description", Modifier.fillMaxWidth())
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentHeaderPreview() {
-    ContentHeader("Fuse Box", "Feature", {}, Modifier.fillMaxWidth())
+private fun AssociationTypeHeaderPreview() {
+    AssociationTypeHeader("Fuse Box", "Feature", {}, Modifier.fillMaxWidth())
 }

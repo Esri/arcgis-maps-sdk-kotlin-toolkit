@@ -19,7 +19,12 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +33,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +56,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -84,6 +93,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationType
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -95,6 +105,7 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.Serializable
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -276,7 +287,7 @@ private fun FeatureForm(
             formElements.value = featureForm.elements
         },
         onBarcodeButtonClick = onBarcodeButtonClick,
-        onUtilityElementClicked = onUtilityElementClicked,
+        onUtilityElementClick = onUtilityElementClicked,
         utilityNetwork = utilityNetwork
     )
     FeatureFormDialog(states)
@@ -318,16 +329,15 @@ private fun FeatureFormBody(
     utilityNetwork: UtilityNetwork?,
     onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityElementClicked: (UtilityElement) -> Unit
+    onUtilityElementClick: (UtilityElement) -> Unit
 ) {
+    Log.e("TAG", "FeatureFormBody: recomp ${form.feature.attributes["objectid"]}", )
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val lazyListState = rememberSaveable(
-        inputs = arrayOf(form),
-        saver = LazyListState.Saver)
-    {
+    val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
         LazyListState()
     }
+    val navController = rememberNavController()
     // create a state for the utility network associations element if the utility network is
     // provided
     val unState = utilityNetwork?.let {
@@ -346,88 +356,132 @@ private fun FeatureFormBody(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // title
-        FeatureFormTitle(
-            featureForm = form,
-            modifier = Modifier.padding(horizontal = 15.dp)
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
-        )
-        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-            initialEvaluation
-        }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        // form content
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics { contentDescription = "lazy column" },
-            state = lazyListState
-        ) {
-            states.forEach { entry ->
-                item {
-                    when (entry.formElement) {
-                        is FieldFormElement -> {
-                            FieldElement(
-                                state = entry.getState<BaseFieldState<*>>(),
-                                // set the onClick callback for the field element only if provided
-                                onClick = handleFieldFormElementTapAction(
-                                    fieldFormElement = entry.formElement as FieldFormElement,
-                                    barcodeTapAction = onBarcodeButtonClick
-                                ),
-                            )
-                        }
+        NavHost(navController, startDestination = NavRoute.Form) {
+            composable<NavRoute.Form>(
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() }
+            ) {
+                Log.e("TAG", "NavHost: recomp ${form.feature.attributes["objectid"]}", )
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // title
+                    FeatureFormTitle(
+                        featureForm = form,
+                        modifier = Modifier.padding(horizontal = 15.dp)
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(15.dp)
+                    )
+                    InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
+                        initialEvaluation
+                    }
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+                    // form content
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics { contentDescription = "lazy column" },
+                        state = lazyListState
+                    ) {
+                        states.forEach { entry ->
+                            item {
+                                when (entry.formElement) {
+                                    is FieldFormElement -> {
+                                        FieldElement(
+                                            state = entry.getState<BaseFieldState<*>>(),
+                                            // set the onClick callback for the field element only if provided
+                                            onClick = handleFieldFormElementTapAction(
+                                                fieldFormElement = entry.formElement as FieldFormElement,
+                                                barcodeTapAction = onBarcodeButtonClick
+                                            ),
+                                        )
+                                    }
 
-                        is GroupFormElement -> {
-                            GroupElement(
-                                state = entry.getState(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                // set the onClick callback for the group element only if provided
-                                onFormElementClick = handleFormElementTapAction(
-                                    barcodeTapAction = onBarcodeButtonClick
+                                    is GroupFormElement -> {
+                                        GroupElement(
+                                            state = entry.getState(),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 15.dp, vertical = 10.dp),
+                                            // set the onClick callback for the group element only if provided
+                                            onFormElementClick = handleFormElementTapAction(
+                                                barcodeTapAction = onBarcodeButtonClick
+                                            )
+                                        )
+                                    }
+
+                                    is TextFormElement -> {
+                                        TextFormElement(
+                                            state = entry.getState(),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                                        )
+                                    }
+
+                                    is AttachmentsFormElement -> {
+                                        AttachmentFormElement(
+                                            state = entry.getState(),
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                                        )
+                                    }
+
+                                    else -> {
+                                        // other form elements are not created
+                                    }
+                                }
+                            }
+                        }
+                        item {
+                            if (unState != null) {
+                                UtilityNetworkAssociationsElement(
+                                    state = unState,
+                                    onAssociationTypeClick = {
+                                        // navigate to the associations screen
+                                        if (unState.selectedAssociationType != null) {
+                                            navController.navigate(NavRoute.UNAssociations(unState.id))
+                                        }
+                                    },
+                                    //onUtilityElementClick = onUtilityElementClicked,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 15.dp,
+                                            end = 15.dp,
+                                            top = 10.dp,
+                                            bottom = 20.dp
+                                        )
                                 )
-                            )
-                        }
-
-                        is AttachmentsFormElement -> {
-                            AttachmentFormElement(
-                                state = entry.getState(),
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp)
-                            )
-                        }
-
-                        is TextFormElement -> {
-                            TextFormElement(
-                                state = entry.getState(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp)
-                            )
-                        }
-
-                        else -> {
-                            // other form elements are not created
+                            }
                         }
                     }
                 }
             }
-            item {
-                if (unState != null) {
-                    UtilityNetworkAssociationsElement(
-                        state = unState,
-                        onUtilityElementClick = onUtilityElementClicked,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 20.dp)
-                    )
-                }
+
+            composable<NavRoute.UNAssociations>(
+                enterTransition = { slideInHorizontally { h -> h } },
+                exitTransition = { slideOutHorizontally { h -> h } }
+            ) { backStackEntry ->
+                val stateId = backStackEntry.toRoute<NavRoute.UNAssociations>()
+                UtilityNetworkAssociationType(
+                    state = unState!!,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                    onUtilityElementClick = {
+                        onUtilityElementClick(it)
+                    }
+                )
+            }
+
+            composable(NavRoute.UNAssociationElements.route) {
+
             }
         }
     }
@@ -438,6 +492,18 @@ private fun FeatureFormBody(
         initialEvaluation = true
         onExpressionsEvaluated()
     }
+}
+
+@Serializable
+private sealed class NavRoute(val route: String) {
+    @Serializable
+    data object Form : NavRoute("form")
+
+    @Serializable
+    data class UNAssociations(val stateId: Int) : NavRoute("unassociations")
+
+    @Serializable
+    data object UNAssociationElements : NavRoute("elements")
 }
 
 /**

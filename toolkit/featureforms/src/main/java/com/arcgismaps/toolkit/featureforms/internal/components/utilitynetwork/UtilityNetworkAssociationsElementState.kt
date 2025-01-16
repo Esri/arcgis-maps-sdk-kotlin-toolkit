@@ -48,8 +48,7 @@ internal class UtilityNetworkAssociationsElementState(
     )
         private set
 
-    var selectedAssociation : MutableState<UtilityAssociationType?> = mutableStateOf(null)
-        private set
+    var selectedAssociationType : UtilityAssociationType? = null
 
     init {
         scope.launch {
@@ -59,9 +58,5 @@ internal class UtilityNetworkAssociationsElementState(
                 }
             }
         }
-    }
-
-    fun selectAssociation(associationType: UtilityAssociationType?) {
-        selectedAssociation.value = associationType
     }
 }

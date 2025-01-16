@@ -248,7 +248,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     featureForm = rememberedForm,
                     errorVisibility = errorVisibility,
                     modifier = Modifier.padding(padding),
-                    onUtilityElementClicked = {
+                    onUtilityElementClick = {
                         scope.launch {
                             mapViewModel.selectUtilityElement(it)
                         }
@@ -445,7 +445,7 @@ fun FeatureFormSheet(
     featureForm: FeatureForm,
     errorVisibility: ValidationErrorVisibility,
     modifier: Modifier = Modifier,
-    onUtilityElementClicked : (UtilityElement) -> Unit,
+    onUtilityElementClick : (UtilityElement) -> Unit,
     utilityNetwork: UtilityNetwork?
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -474,7 +474,7 @@ fun FeatureFormSheet(
                 featureForm = featureForm,
                 modifier = Modifier.fillMaxSize(),
                 validationErrorVisibility = errorVisibility,
-                onUtilityElementClicked = onUtilityElementClicked,
+                onUtilityElementClicked = onUtilityElementClick,
                 utilityNetwork = utilityNetwork
             )
         }

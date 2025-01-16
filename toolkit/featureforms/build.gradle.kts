@@ -23,6 +23,7 @@ plugins {
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
@@ -130,6 +131,8 @@ dependencies {
     implementation(libs.androidx.material.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.androidx.navigation.compose)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
