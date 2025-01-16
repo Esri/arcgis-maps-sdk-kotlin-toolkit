@@ -41,8 +41,6 @@ internal class UtilityNetworkAssociationsElementState(
     description = description,
     isVisible = isVisible
 ) {
-    val displayCount : Int = 3
-
     var associations : MutableState<Map<UtilityAssociationType, List<UtilityAssociation>>> = mutableStateOf(
         emptyMap()
     )

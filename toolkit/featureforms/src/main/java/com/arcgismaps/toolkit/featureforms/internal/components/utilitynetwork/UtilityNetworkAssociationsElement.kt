@@ -115,7 +115,6 @@ internal fun UtilityNetworkAssociationType(
         HorizontalDivider()
         Associations(
             associations = associations[state.selectedAssociationType] ?: emptyList(),
-            displayCount = state.displayCount,
             onUtilityElementClick = onUtilityElementClick,
             modifier = Modifier.padding(16.dp)
         )
@@ -233,7 +232,6 @@ private fun AssociationTypes(
 @Composable
 private fun Associations(
     associations: List<UtilityAssociation>,
-    displayCount: Int,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -276,7 +274,6 @@ private fun Associations(
                     if (expanded) {
                         NetworkSourceContent(
                             elements = map[it] ?: emptyList(),
-                            displayCount = displayCount,
                             onUtilityElementClick = onUtilityElementClick,
                         )
                     }
@@ -290,7 +287,6 @@ private fun Associations(
 @Composable
 private fun NetworkSourceContent(
     elements: List<UtilityElement>,
-    displayCount: Int,
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
