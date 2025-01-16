@@ -159,8 +159,7 @@ internal fun LineScalebar(
         drawText(
             text = scaleValue,
             textMeasurer = textMeasurer,
-            barEnd = maxWidth,
-            scalebarHeight = scalebarHeight,
+            xPos = maxWidth / 2.0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
@@ -173,7 +172,8 @@ internal fun GraduatedLineScalebar(
     modifier: Modifier,
     maxWidth: Float,
     colorScheme: ScalebarColors,
-    shapes: ScalebarShapes
+    shapes: ScalebarShapes,
+    tickMarks: List<TickMark>
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -213,23 +213,16 @@ internal fun GraduatedLineScalebar(
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
-
-        val divisionMarks = listOf(
-            TickMark(label = ScalebarLabel(0, 0.0, 0.0, "0")),
-            TickMark(label = ScalebarLabel(1, maxWidth/2.0, 0.0, "50")),
-            TickMark(label = ScalebarLabel(1, maxWidth.toDouble(), 0.0, "100  km"))
-        )
         drawText(
-            text = divisionMarks.first().label.text,
+            text = tickMarks.first().label.text,
+            xPos = tickMarks.first().label.xOffset.toFloat(),
             textMeasurer = textMeasurer,
-            barEnd = divisionMarks.first().label.xOffset.toFloat(),
-            scalebarHeight = scalebarHeight,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
-            alignment = TextAlignment.RIGHT
+            alignment = TextAlignment.CENTER
         )
         drawTickMarks(
-            tickMarks = divisionMarks,
+            tickMarks = tickMarks,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,
@@ -238,10 +231,17 @@ internal fun GraduatedLineScalebar(
         )
 
         drawText(
-            text = divisionMarks.last().label.text,
+            text = tickMarks.last().label.text,
             textMeasurer = textMeasurer,
-            barEnd = divisionMarks.last().label.xOffset.toFloat(),
-            scalebarHeight = scalebarHeight,
+            xPos = tickMarks.last().label.xOffset.toFloat(),
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.LEFT
+        )
+        drawText(
+            text = " km",
+            textMeasurer = textMeasurer,
+            xPos = tickMarks.last().label.xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.RIGHT
@@ -252,9 +252,11 @@ internal fun GraduatedLineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
         LineScalebar(
             modifier = Modifier,
             scaleValue = "1,000 km",
@@ -268,15 +270,23 @@ internal fun LineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedScaleBarPreview() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    val maxWidth = 300f
+    val tickMarks = listOf(
+        TickMark(label = ScalebarLabel(0, 0.0, 0.0, "0")),
+        TickMark(label = ScalebarLabel(1, maxWidth / 2.0, 0.0, "50")),
+        TickMark(label = ScalebarLabel(1, maxWidth.toDouble(), 0.0, "100"))
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
         GraduatedLineScalebar(
             modifier = Modifier,
-//            scaleValue = "1,000 km",
-            maxWidth = 300f,
-            colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-            shapes = ScalebarDefaults.shapes()
+            maxWidth = maxWidth,
+            colorScheme = ScalebarDefaults.colors(),
+            shapes = ScalebarDefaults.shapes(),
+            tickMarks = tickMarks
         )
     }
 }

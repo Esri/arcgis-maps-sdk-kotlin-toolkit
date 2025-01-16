@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.scalebar.internal
 
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -44,14 +43,28 @@ internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
 }
 
 /**
- * Used to align the text relative to the scalebar.
+ * Used to align the text relative to a point in the scalebar.
  *
  * @since 200.7.0
  */
 internal enum class TextAlignment {
+    /**
+     * Aligns the text to the left of the given point.
+     * @since 200.7.0
+     */
     LEFT,
+
+    /**
+     * Aligns the text centered of the given point.
+     * @since 200.7.0
+     */
     CENTER,
-    RIGHT
+
+    /**
+     * Aligns the text to the right of the given point.
+     * @since 200.7.0
+     */
+    RIGHT,
 }
 
 /**
@@ -114,14 +127,18 @@ internal fun DrawScope.drawHorizontalLine(
  * Draws the text on the canvas with a shadow.
  * This method adds blank space of size [textOffset] between the scaleBar and the text.
  *
+ * @param text The text to be drawn.
+ * @param textMeasurer The [TextMeasurer] to measure the text.
+ * @param offset The location where the text should be drawn.
+ * @param color The color of the text.
+ * @param shadowColor The color of the shadow.
+ * @param alignment The alignment of the text.
  * @since 200.7.0
  */
 internal fun DrawScope.drawText(
     text: String,
     textMeasurer: TextMeasurer,
-    barStart: Float = 0f,
-    barEnd: Float,
-    scalebarHeight: Float,
+    xPos: Float,
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
     alignment: TextAlignment = TextAlignment.CENTER
@@ -130,16 +147,16 @@ internal fun DrawScope.drawText(
         text = text,
         style = TextStyle(fontSize = textSize)
     )
-    val xPos = when (alignment) {
-        TextAlignment.LEFT -> barStart - (measuredText.size.width / 2)
-        TextAlignment.CENTER -> (barEnd - measuredText.size.width) / 2
-        TextAlignment.RIGHT -> barEnd - (measuredText.size.width / 2)
+    val alignedXPos = when (alignment) {
+        TextAlignment.LEFT -> xPos - measuredText.size.width + pixelAlignment
+        TextAlignment.CENTER -> xPos - (measuredText.size.width / 2)
+        TextAlignment.RIGHT -> xPos + pixelAlignment
     }
     val yPos = scalebarHeight + textOffset
     drawText(
         measuredText,
         color = color,
-        topLeft = Offset(xPos, yPos),
+        topLeft = Offset(alignedXPos, yPos),
         shadow = Shadow(color = shadowColor, offset = Offset(1f, 1f))
     )
 }
@@ -153,7 +170,7 @@ internal fun DrawScope.drawTickMarks(
     textShadowColor: Color
 ) {
 
-    for (i in 1 until tickMarks.size-1) {
+    for (i in 1 until tickMarks.size - 1) {
         drawVerticalLine(
             x = tickMarks[i].label.xOffset.toFloat(),
             top = scalebarHeight - tickMarks[i].tickHeight,
@@ -164,11 +181,10 @@ internal fun DrawScope.drawTickMarks(
         drawText(
             text = tickMarks[i].label.text,
             textMeasurer = textMeasurer,
-            barEnd = tickMarks[i].label.xOffset.toFloat(),
-            scalebarHeight = scalebarHeight,
+            xPos = tickMarks[i].label.xOffset.toFloat(),
             color = textColor,
             shadowColor = textShadowColor,
-            alignment = TextAlignment.RIGHT
+            alignment = TextAlignment.CENTER
         )
     }
 }
