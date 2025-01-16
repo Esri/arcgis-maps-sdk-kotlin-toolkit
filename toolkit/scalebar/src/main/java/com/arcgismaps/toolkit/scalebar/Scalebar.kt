@@ -41,7 +41,6 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
-import com.arcgismaps.toolkit.scalebar.internal.TickMark
 import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
 import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
 import com.arcgismaps.toolkit.scalebar.internal.drawText
@@ -141,7 +140,7 @@ internal fun LineScalebar(
     ) {
         // left line
         drawVerticalLine(
-            x = 0f,
+            xPos = 0f,
             top = 0f,
             bottom = scalebarHeight,
             color = colorScheme.lineColor,
@@ -150,7 +149,7 @@ internal fun LineScalebar(
 
         // bottom line
         drawHorizontalLine(
-            y = scalebarHeight,
+            yPos = scalebarHeight,
             left = 0f,
             right = maxWidth,
             color = colorScheme.lineColor,
@@ -159,7 +158,7 @@ internal fun LineScalebar(
 
         // right line
         drawVerticalLine(
-            x = maxWidth,
+            xPos = maxWidth,
             top = 0f,
             bottom = scalebarHeight,
             color = colorScheme.lineColor,
@@ -183,7 +182,7 @@ internal fun GraduatedLineScalebar(
     maxWidth: Float,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
-    tickMarks: List<TickMark>
+    tickMarks: List<ScalebarLabel>
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -197,40 +196,7 @@ internal fun GraduatedLineScalebar(
             .width(calculateSizeInDp(density, totalWidth))
             .height(calculateSizeInDp(density, totalHeight))
     ) {
-        // left line
-        drawVerticalLine(
-            x = 0f,
-            top = 0f,
-            bottom = scalebarHeight,
-            color = colorScheme.lineColor,
-            shadowColor = colorScheme.shadowColor
-        )
-
-        // bottom line
-        drawHorizontalLine(
-            y = scalebarHeight,
-            left = 0f,
-            right = maxWidth,
-            color = colorScheme.lineColor,
-            shadowColor = colorScheme.shadowColor
-        )
-
-        // right line
-        drawVerticalLine(
-            x = maxWidth,
-            top = 0f,
-            bottom = scalebarHeight,
-            color = colorScheme.lineColor,
-            shadowColor = colorScheme.shadowColor
-        )
-        drawText(
-            text = tickMarks.first().label.text,
-            xPos = tickMarks.first().label.xOffset.toFloat(),
-            textMeasurer = textMeasurer,
-            color = colorScheme.textColor,
-            shadowColor = colorScheme.textShadowColor,
-            alignment = TextAlignment.CENTER
-        )
+        // draw tick marks
         drawTickMarks(
             tickMarks = tickMarks,
             color = colorScheme.lineColor,
@@ -240,10 +206,29 @@ internal fun GraduatedLineScalebar(
             textShadowColor = colorScheme.textShadowColor
         )
 
+        // bottom line
+        drawHorizontalLine(
+            yPos = scalebarHeight,
+            left = 0f,
+            right = maxWidth,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // right line
+        drawVerticalLine(
+            xPos = maxWidth,
+            top = 0f,
+            bottom = scalebarHeight,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // draw last label
         drawText(
-            text = tickMarks.last().label.text,
+            text = tickMarks.last().text,
             textMeasurer = textMeasurer,
-            xPos = tickMarks.last().label.xOffset.toFloat(),
+            xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.LEFT
@@ -251,7 +236,7 @@ internal fun GraduatedLineScalebar(
         drawText(
             text = " km",
             textMeasurer = textMeasurer,
-            xPos = tickMarks.last().label.xOffset.toFloat(),
+            xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.RIGHT
@@ -280,11 +265,13 @@ internal fun LineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedScaleBarPreview() {
-    val maxWidth = 300f
+    val maxWidth = 500f
     val tickMarks = listOf(
-        TickMark(label = ScalebarLabel(0, 0.0, 0.0, "0")),
-        TickMark(label = ScalebarLabel(1, maxWidth / 2.0, 0.0, "50")),
-        TickMark(label = ScalebarLabel(1, maxWidth.toDouble(), 0.0, "100"))
+        ScalebarLabel(0, 0.0, 0.0, "0"),
+        ScalebarLabel(1, (maxWidth / 4.0), 0.0, "25"),
+        ScalebarLabel(2, maxWidth / 2.0, 0.0, "50"),
+        ScalebarLabel(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+        ScalebarLabel(4, maxWidth.toDouble(), 0.0, "100")
     )
     Box(
         modifier = Modifier
