@@ -37,7 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.lineWidth
+import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
 import com.arcgismaps.toolkit.scalebar.internal.TickMark
 import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
@@ -69,7 +70,7 @@ import kotlin.time.Duration.Companion.seconds
 public fun Scalebar(
     maxWidth: Double, //  maximum screen width allotted to the scalebar
     unitsPerDip: Double,
-    viewpoint: Viewpoint,
+    viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
     autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
@@ -83,8 +84,16 @@ public fun Scalebar(
         ScalebarUnits.IMPERIAL
     },
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
-    shapes: ScalebarShapes = ScalebarDefaults.shapes()
+    shapes: ScalebarShapes = ScalebarDefaults.shapes(),
+    labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
+    LineScalebar(
+        modifier = modifier,
+        scaleValue = "1,000 km",
+        maxWidth = maxWidth.toFloat(),
+        colorScheme = colorScheme,
+        shapes = shapes
+    )
 }
 
 @Preview
@@ -298,4 +307,33 @@ private fun isMetric(): Boolean {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     return sharedPreferences.getBoolean("isMetric", true)
+}
+
+/**
+ * Returns the display length of the Scalebar line.
+ * // TODO: The computed length from this function needs to be passed to the updateScalebar function in the ScalebarViewModel.
+ *
+ * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
+ * @since 200.7.0
+ */
+@Composable
+private fun availableLineDisplayLength(
+    maxWidth: Double,
+    labelTypography: LabelTypography,
+    style: ScalebarStyle
+): Double {
+    return when (style) {
+        ScalebarStyle.AlternatingBar,
+        ScalebarStyle.DualUnitLine,
+        ScalebarStyle.GraduatedLine -> {
+            // " km" will render wider than " mi"
+            val textMeasurer = rememberTextMeasurer()
+            val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
+            maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
+        }
+        ScalebarStyle.Bar,
+        ScalebarStyle.Line -> {
+            maxWidth - lineWidth
+        }
+    }
 }
