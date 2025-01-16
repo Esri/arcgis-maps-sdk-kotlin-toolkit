@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.scalebar.internal
 
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -142,3 +143,48 @@ internal fun DrawScope.drawText(
         shadow = Shadow(color = shadowColor, offset = Offset(1f, 1f))
     )
 }
+
+internal fun DrawScope.drawTickMarks(
+    tickMarks: List<TickMark>,
+    color: Color,
+    shadowColor: Color,
+    textMeasurer: TextMeasurer,
+    textColor: Color,
+    textShadowColor: Color
+) {
+
+    for (i in 1 until tickMarks.size-1) {
+        drawVerticalLine(
+            x = tickMarks[i].label.xOffset.toFloat(),
+            top = scalebarHeight - tickMarks[i].tickHeight,
+            bottom = scalebarHeight,
+            color = color,
+            shadowColor = shadowColor
+        )
+        drawText(
+            text = tickMarks[i].label.text,
+            textMeasurer = textMeasurer,
+            barEnd = tickMarks[i].label.xOffset.toFloat(),
+            scalebarHeight = scalebarHeight,
+            color = textColor,
+            shadowColor = textShadowColor,
+            alignment = TextAlignment.RIGHT
+        )
+    }
+}
+
+internal data class TickMark(val label: ScalebarLabel, val tickHeight: Float = 10f)
+
+
+/**
+ * Represents a Scalebar label.
+ *
+ * @since 200.7.0
+ */
+internal data class ScalebarLabel(
+    val index: Int,
+    val xOffset: Double,
+    val yOffset: Double,
+    val text: String
+)
+
