@@ -17,6 +17,12 @@
  */
 package com.arcgismaps.toolkit.scalebar
 
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
+
 /**
  * A Scalebar unit.
  *
@@ -35,5 +41,70 @@ public enum class ScalebarUnits {
      *
      * @since 200.7.0
      */
-    METRIC
+    METRIC;
+
+    /**
+     * Determines an appropriate base linear unit for this scalebar unit.
+     *
+     * [ScalebarUnits.IMPERIAL] will return [LinearUnit.feet] as feet is the smallest linear
+     *  unit that will be displayed.
+     * [ScalebarUnits.METRIC] will return [LinearUnit.meters] as meter is the smallest linear
+     *  unit that will be displayed.
+     *
+     * @return [LinearUnit.feet] for `IMPERIAL` and [LinearUnit.meters] for `METRIC`.
+     *
+     * @since 200.7.0
+     */
+    internal val baseLinearUnit: LinearUnit
+        get() = if (this == IMPERIAL) LinearUnit.feet else LinearUnit.meters
+
+    /**
+     * Calculates a round number suitable for display.
+     *
+     *  @param distance The distance to calculate the round number for.
+     *  @param units The units to calculate the round number for.
+     *  @return The round number for a given distance and units.
+     *
+     *  @since 200.7.0
+     */
+    internal fun closestDistanceWithoutGoingOver(distance: Double, units: LinearUnit): Double {
+        val magnitude = ScalebarUtils.magnitude(distance)
+        val multiplier = ScalebarUtils.multiplier(distance)
+        val roundNumber = multiplier * magnitude
+
+        // Because feet and miles are not relationally multiples of 10 with
+        // each other, we have to convert to miles if we are dealing in feet.
+        if (units == LinearUnit.feet) {
+            val displayUnits = linearUnitsForDistance(roundNumber)
+            if (units != displayUnits) {
+                val displayDistance = closestDistanceWithoutGoingOver(
+                    units.convertTo(displayUnits, distance),
+                    displayUnits
+                )
+                return displayUnits.convertTo(units, displayDistance)
+            }
+        }
+
+        return roundNumber
+    }
+
+    /**
+     * Returns a suitable display unit for the given distance.
+     *
+     * [ScalebarUnits.IMPERIAL] will return [LinearUnit.miles] if the given distance is greater
+     *  than or equal to 1/2 mile, and [LinearUnit.feet] otherwise.
+     * [ScalebarUnits.METRIC] will return [LinearUnit.kilometers] if the given distance is
+     *  greater than or equal to 1 kilometer, and [LinearUnit.meters] otherwise.
+     *
+     * @param distance The distance to calculate the linear units for.
+     * @return The linear units for a given distance.
+     *
+     * @since 200.7.0
+     */
+    internal fun linearUnitsForDistance(distance: Double): LinearUnit {
+        return when (this) {
+            IMPERIAL -> if (distance >= 2640) LinearUnit.miles else LinearUnit.feet
+            METRIC -> if (distance >= 1000) LinearUnit.kilometers else LinearUnit.meters
+        }
+    }
 }

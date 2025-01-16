@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
 
 internal const val pixelAlignment = 2.5f // Aligns the horizontal line edges
-private const val lineWidth = 5f
+internal const val lineWidth = 5f
 internal const val shadowOffset = 3f
 internal const val scalebarHeight = 20f // Height of the scalebar in pixels
 internal val textSize = 14.sp
