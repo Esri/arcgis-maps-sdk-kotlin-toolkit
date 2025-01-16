@@ -53,7 +53,7 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    scaleValue = "1000 km",
+                    label = "1000 km",
                     maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(),
                     shapes = ScalebarDefaults.shapes()
@@ -78,7 +78,7 @@ class ScalebarTests {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
-                    scaleValue = "1000 km",
+                    label = "1000 km",
                     maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     shapes = ScalebarDefaults.shapes()

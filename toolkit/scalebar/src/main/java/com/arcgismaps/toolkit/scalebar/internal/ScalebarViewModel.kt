@@ -21,6 +21,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
@@ -215,6 +216,21 @@ internal class ScalebarViewModel(
 
         // update the labels
         updateLabels()
+    }
+}
+
+internal class ScalebarViewModelFactory(
+    private val minScale: Double,
+    private val style: ScalebarStyle,
+    private val units: ScalebarUnits,
+    private val labelTypography: LabelTypography,
+    private val useGeodeticCalculations: Boolean
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ScalebarViewModel::class.java)) {
+            return ScalebarViewModel(minScale, style, units, labelTypography, useGeodeticCalculations) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 

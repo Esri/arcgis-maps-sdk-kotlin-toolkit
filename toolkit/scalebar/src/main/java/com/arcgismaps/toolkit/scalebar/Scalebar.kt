@@ -26,6 +26,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
@@ -35,8 +40,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
@@ -76,22 +85,80 @@ public fun Scalebar(
     useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
     // TODO: determining the default ScalebarUnit is not tested
-    units: ScalebarUnits = if (isMetric()) {
-        ScalebarUnits.METRIC
-    } else {
-        ScalebarUnits.IMPERIAL
-    },
+    units: ScalebarUnits = ScalebarUnits.IMPERIAL,
+//        if (isMetric()) {
+//        ScalebarUnits.METRIC
+//    } else {
+//        ScalebarUnits.IMPERIAL
+//    },
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    LineScalebar(
-        modifier = modifier,
-        scaleValue = "1,000 km",
-        maxWidth = maxWidth.toFloat(),
-        colorScheme = colorScheme,
-        shapes = shapes
+    val scalebarViewModel: ScalebarViewModel = viewModel(
+        factory = ScalebarViewModelFactory(
+            minScale,
+            style,
+            units,
+            labelTypography,
+            useGeodeticCalculations
+        )
     )
+
+    key(unitsPerDip, viewpoint, spatialReference) {
+        val availableLineDisplayLength =
+            availableLineDisplayLength(maxWidth, labelTypography, style)
+        scalebarViewModel.updateScaleBar(
+            spatialReference,
+            viewpoint,
+            unitsPerDip,
+            availableLineDisplayLength
+        )
+    }
+
+    val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
+    if (isScaleBarUpdated) {
+        ShowScalebar(
+            scalebarViewModel.displayLength,
+            scalebarViewModel.labels,
+            style,
+            colorScheme,
+            shapes,
+            modifier
+        )
+    }
+
+//    LineScalebar(
+//        modifier = modifier,
+//        label = "1,000 km",
+//        maxWidth = maxWidth.toFloat(),
+//        colorScheme = colorScheme,
+//        shapes = shapes
+//    )
+}
+
+@Composable
+private fun ShowScalebar(
+    maxWidth: Double,
+    labels: List<ScalebarLabel>,
+    scalebarStyle: ScalebarStyle,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes,
+    modifier: Modifier = Modifier
+) {
+    when (scalebarStyle) {
+        ScalebarStyle.AlternatingBar -> TODO()
+        ScalebarStyle.Bar -> TODO()
+        ScalebarStyle.DualUnitLine -> TODO()
+        ScalebarStyle.GraduatedLine -> TODO()
+        ScalebarStyle.Line -> LineScalebar(
+            modifier = modifier,
+            label = labels[0].text,
+            maxWidth = maxWidth.toFloat(),
+            colorScheme = colorScheme,
+            shapes = shapes
+        )
+    }
 }
 
 @Preview
@@ -109,7 +176,7 @@ internal fun ScalebarPreview() {
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param scaleValue The scale value to display.
+ * @param label The scale value to display.
  * @param maxWidth The width of the scale bar.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
@@ -119,7 +186,7 @@ internal fun ScalebarPreview() {
 @Composable
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
-    scaleValue: String,
+    label: String,
     maxWidth: Float,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes
@@ -129,11 +196,14 @@ internal fun LineScalebar(
     val textSizeInPx = with(density) { textSize.toPx() }
 
     val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+//    val totalWidth = maxWidth + shadowOffset + pixelAlignment
 
     Canvas(
         modifier = modifier
-            .width(calculateSizeInDp(density, totalWidth))
+//            .width(calculateSizeInDp(density, totalWidth))
+//            .width(calculateSizeInDp(density, maxWidth))
+//            .height(calculateSizeInDp(density, totalHeight))
+            .width(maxWidth.dp)
             .height(calculateSizeInDp(density, totalHeight))
     ) {
         // left line
@@ -164,7 +234,7 @@ internal fun LineScalebar(
         )
         // text label
         drawText(
-            text = scaleValue,
+            text = label,
             textMeasurer = textMeasurer,
             barEnd = maxWidth,
             scalebarHeight = scalebarHeight,
@@ -178,10 +248,12 @@ internal fun LineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    Box(modifier = Modifier.fillMaxSize().padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
         LineScalebar(
             modifier = Modifier,
-            scaleValue = "1,000 km",
+            label = "1,000 km",
             maxWidth = 300f,
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
             shapes = ScalebarDefaults.shapes()
@@ -211,6 +283,7 @@ private fun availableLineDisplayLength(
     labelTypography: LabelTypography,
     style: ScalebarStyle
 ): Double {
+    val density = LocalDensity.current
     return when (style) {
         ScalebarStyle.AlternatingBar,
         ScalebarStyle.DualUnitLine,
