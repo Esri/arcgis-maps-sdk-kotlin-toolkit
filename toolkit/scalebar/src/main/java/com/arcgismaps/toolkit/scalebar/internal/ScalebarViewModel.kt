@@ -42,9 +42,6 @@ internal class ScalebarViewModel(
     private val useGeodeticCalculations: Boolean
 ) : ViewModel() {
 
-    private val labelPaddingX: Float = 4.0f
-
-    private var lineMapLength: Double = 0.0
     private var displayUnit: LinearUnit? = null
 
     private val geodeticCurveType: GeodeticCurveType = GeodeticCurveType.Geodesic
@@ -52,9 +49,16 @@ internal class ScalebarViewModel(
     private var _isScaleBarUpdated: MutableState<Boolean> = mutableStateOf(false)
     val isScaleBarUpdated: State<Boolean> = _isScaleBarUpdated
 
+    private var _isUpdateLabels: MutableState<Boolean> = mutableStateOf(false)
+    val isUpdateLabels: State<Boolean> = _isUpdateLabels
+
     private var _displayLength: Double = 0.0
     val displayLength: Double
         get() = _displayLength
+
+    private var _lineMapLength: Double = 0.0
+    val lineMapLength: Double
+        get() = _lineMapLength
 
     private var _labels: MutableList<ScalebarLabel> = mutableListOf()
     val labels: List<ScalebarLabel>
@@ -65,16 +69,8 @@ internal class ScalebarViewModel(
      *
      * @since 200.7.0
      */
-    private fun updateLabels() {
+    internal fun updateLabels(minSegmentWidth: Double) {
         val localLabels = mutableListOf<ScalebarLabel>()
-        val minSegmentTestString: String = if (lineMapLength >= 100) {
-            lineMapLength.toInt().toString()
-        } else {
-            "9.9"
-        }
-        // TODO: Do we need to calculate this using UnitsPerDip?
-        val minSegmentWidth = (minSegmentTestString.length * labelTypography.labelStyle.fontSize.value * 1.5) +
-                (labelPaddingX * 2)
 
         val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
 
@@ -94,7 +90,7 @@ internal class ScalebarViewModel(
                 index = -1,
                 xOffset = 0.0 ,
                 yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-                text = "0" // TODO: localized this ?
+                text = "0"
             )
         )
 
@@ -106,7 +102,7 @@ internal class ScalebarViewModel(
                 val displayUnitAbbr = displayUnit?.getAbbreviation()
                 "${segmentMapLength.toInt()} $displayUnitAbbr"
             } else {
-                segmentMapLength.toString()
+                segmentMapLength.toInt().toString()
             }
 
             val label = ScalebarLabel(
@@ -133,11 +129,11 @@ internal class ScalebarViewModel(
      *
      * @since 200.7.0
      */
-    fun updateScaleBar(
+    internal fun updateScaleBar(
         spatialReference: SpatialReference?,
         viewpoint: Viewpoint?,
         unitsPerDip: Double?,
-        maxLength: Double
+        maxLength: Double,
     ) {
         if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
             return
@@ -212,10 +208,10 @@ internal class ScalebarViewModel(
         // update the scalebar with the new values
         _displayLength = localDisplayLength
         displayUnit = localDisplayUnit
-        lineMapLength = localLineMapLength
+        _lineMapLength = localLineMapLength
 
         // update the labels
-        updateLabels()
+        _isUpdateLabels.value = true
     }
 }
 
