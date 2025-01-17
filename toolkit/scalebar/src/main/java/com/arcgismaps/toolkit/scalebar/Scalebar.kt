@@ -176,13 +176,23 @@ internal fun LineScalebar(
     }
 }
 
+/**
+ * Displays a graduated scalebar with multiple labels and tick marks.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param maxWidth The width of the scale bar.
+ * @param tickMarks The list of tick marks to display.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ * @since 200.7.0
+ */
 @Composable
 internal fun GraduatedLineScalebar(
     modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
     maxWidth: Float,
+    tickMarks: List<ScalebarLabel>,
     colorScheme: ScalebarColors,
-    shapes: ScalebarShapes,
-    tickMarks: List<ScalebarLabel>
+    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
