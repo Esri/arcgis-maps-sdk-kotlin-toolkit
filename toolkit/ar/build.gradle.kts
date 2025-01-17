@@ -69,8 +69,19 @@ android {
         }
     }
 
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    @Suppress("UnstableApiUsage")
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
+        disable += "MissingTranslation"
     }
 }
 
