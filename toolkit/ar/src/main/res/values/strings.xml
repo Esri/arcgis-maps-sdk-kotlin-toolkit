@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="camera_permission_not_granted">Camera permission not granted</string>
-    <string name="arcore_not_installed_message">ARCore must be installed to use this component. ARCore availability: %1$s</string>
-    <string name="location_data_source_failed_to_start">Location Data Source failed to start: %1$s</string>
+    <string name="arcore_not_installed_message">ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s</string>
 </resources>
