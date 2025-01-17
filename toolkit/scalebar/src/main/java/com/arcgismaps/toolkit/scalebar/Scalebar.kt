@@ -29,9 +29,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -244,7 +248,56 @@ internal fun GraduatedLineScalebar(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+/**
+ * Displays bar scalebar with a single label.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param maxWidth The width of the scale bar.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ */
+@Composable
+internal fun BarScalebar(
+    modifier: Modifier = Modifier.testTag("BarScalebar"),
+    scaleValue: String,
+    maxWidth: Float,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { textSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        drawRect(
+            color = colorScheme.fillColor,
+            topLeft = Offset(0f, 0f),
+            size = Size(maxWidth, scalebarHeight)
+        )
+        drawRect(
+            color = colorScheme.lineColor,
+            topLeft = Offset(0f, 0f),
+            size = Size(maxWidth, scalebarHeight),
+            style = Stroke(width = lineWidth)
+        )
+        drawText(
+            text = scaleValue,
+            textMeasurer = textMeasurer,
+            xPos = maxWidth / 2.0f,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
+    }
+}
+//@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
     Box(
@@ -262,7 +315,7 @@ internal fun LineScaleBarPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+//@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedScaleBarPreview() {
     val maxWidth = 500f
@@ -284,6 +337,24 @@ internal fun GraduatedScaleBarPreview() {
             colorScheme = ScalebarDefaults.colors(),
             shapes = ScalebarDefaults.shapes(),
             tickMarks = tickMarks
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun BarScaleBarPreview() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
+        BarScalebar(
+            modifier = Modifier,
+            scaleValue = "1000 km",
+            maxWidth = 300f,
+            colorScheme = ScalebarDefaults.colors(),
+            shapes = ScalebarDefaults.shapes()
         )
     }
 }

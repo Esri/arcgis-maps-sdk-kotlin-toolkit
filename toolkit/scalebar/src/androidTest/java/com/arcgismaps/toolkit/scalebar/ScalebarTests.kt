@@ -40,6 +40,7 @@ import org.junit.Test
 class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
+    private val barScalebarTag = "BarScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -91,7 +92,29 @@ class ScalebarTests {
                     tickMarks = tickMarks
                 )
         }
+
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a bar scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testBarScalebarIsDisplayed() {
+        val maxWidth = 300f
+        composeTestRule.setContent {
+            BarScalebar(
+                maxWidth = maxWidth,
+                scaleValue = "1000 km",
+                colorScheme = ScalebarDefaults.colors(),
+                shapes = ScalebarDefaults.shapes(),
+            )
+        }
+        composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
     }
 
     /**
