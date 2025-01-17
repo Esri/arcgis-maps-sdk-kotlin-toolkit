@@ -301,7 +301,7 @@ private fun availableLineDisplayLength(
  * @since 200.7.0
  */
 @Composable
-private fun minSegmentWidth(
+internal fun minSegmentWidth(
     lineMapLength: Double,
     labelTypography: LabelTypography
 ): Double {
