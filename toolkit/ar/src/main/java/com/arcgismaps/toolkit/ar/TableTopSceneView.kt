@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,8 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +47,6 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
@@ -71,9 +67,9 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.PermissionState
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -81,10 +77,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Pose
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
-import kotlin.coroutines.resume
 
 /**
  * A scene view that provides an augmented reality table top experience.
@@ -185,16 +178,47 @@ public fun TableTopSceneView(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
-        // onNotGranted
-        initializationStatus.update(
-            TableTopSceneViewStatus.FailedToInitialize(
-                IllegalStateException(
-                    context.getString(R.string.camera_permission_not_granted)
+
+    val launcher =
+        rememberLauncherForActivityResult<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>(ActivityResultContracts.RequestMultiplePermissions()) { grantedState: Map<String, Boolean> ->
+            if (!grantedState.values.all { it }) {
+                initializationStatus.update(
+                    TableTopSceneViewStatus.FailedToInitialize(
+                        IllegalStateException(
+                            context.getString(
+                                R.string.camera_permission_not_granted,
+                            )
+                        )
+                    ),
+                    onInitializationStatusChanged
                 )
-            ),
-            onInitializationStatusChanged
-        )
+            }
+        }
+    val permissionState =
+        remember { PermissionState(context, listOf(Manifest.permission.CAMERA).toTypedArray<String>(), launcher) }
+    if (!requestCameraPermissionAutomatically) {
+        // If we are not requesting the camera permission automatically, we should check if it's granted
+        // and fail early if not
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            initializationStatus.update(
+                TableTopSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.camera_permission_not_granted))
+                ),
+                onInitializationStatusChanged
+            )
+        }
+    } else {
+        var hasLaunchedRequest by remember { mutableStateOf(false) }
+        LaunchedEffect(hasLaunchedRequest) {
+            if (!hasLaunchedRequest) {
+                permissionState.launchRequest()
+                hasLaunchedRequest = true
+            }
+        }
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
@@ -224,7 +248,7 @@ public fun TableTopSceneView(
     var visualizePlanes by remember { mutableStateOf(true) }
 
     Box(modifier = modifier) {
-        if (cameraPermissionGranted && arCoreInstalled) {
+        if (permissionState.allPermissionsGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {

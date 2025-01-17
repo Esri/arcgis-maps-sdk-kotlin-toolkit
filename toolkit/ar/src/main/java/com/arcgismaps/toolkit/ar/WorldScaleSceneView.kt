@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.ar
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -69,7 +71,6 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberPermissionState
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -126,13 +127,27 @@ public fun WorldScaleSceneView(
 
     var hasLaunchedRequest by remember { mutableStateOf(false) }
     val permissions = mutableListOf<String>()
+    var allPermissionsGranted by remember {
+        val allPermissionsGranted = permissions.map {
+            ContextCompat.checkSelfPermission(
+                context,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }.all { it }
+        mutableStateOf(
+            allPermissionsGranted
+        )
+    }
     if (requestCameraPermissionAutomatically) {
         permissions.add(Manifest.permission.CAMERA)
-    }
-    else {
+    } else {
         // If we are not requesting the camera permission automatically, we should check if it's granted
         // and fail early if not
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.camera_permission_not_granted))
@@ -147,8 +162,15 @@ public fun WorldScaleSceneView(
     } else {
         // If we are not requesting the location permissions automatically, we should check if it's granted
         // and fail early if not
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.location_permission_not_granted))
@@ -157,27 +179,34 @@ public fun WorldScaleSceneView(
             )
         }
     }
-    val permissionState = rememberPermissionState(context, permissions) { grantedResults ->
-        // This callback will only be relevant to the permissions that were added to the request.
-        // If the user has set [requestCameraPermissionAutomatically] to false, for example,
-        // and the camera permission is not granted, this will not be included in the message.
-        val permissionsNotGranted = grantedResults.filter { !it.value }.keys.joinToString(", ")
-        initializationStatus.update(
-            WorldScaleSceneViewStatus.FailedToInitialize(
-                IllegalStateException(
-                    context.getString(
-                        R.string.permissions_not_granted_message,
-                        permissionsNotGranted
-                    )
+    val launcher =
+        rememberLauncherForActivityResult<kotlin.Array<kotlin.String>, kotlin.collections.Map<kotlin.String, @kotlin.jvm.JvmSuppressWildcards kotlin.Boolean>>(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { grantedState: Map<String, Boolean> ->
+            allPermissionsGranted = grantedState.all { it.value }
+            // This callback will only be relevant to the permissions that were added to the request.
+            // If the user has set [requestCameraPermissionAutomatically] to false, for example,
+            // and the camera permission is not granted, this will not be included in the message.
+            if (grantedState.any { !it.value }) {
+                val permissionsNotGranted =
+                    grantedState.filter { !it.value }.keys.joinToString(", ")
+                initializationStatus.update(
+                    WorldScaleSceneViewStatus.FailedToInitialize(
+                        IllegalStateException(
+                            context.getString(
+                                R.string.permissions_not_granted_message,
+                                permissionsNotGranted
+                            )
+                        )
+                    ),
+                    onInitializationStatusChanged
                 )
-            ),
-            onInitializationStatusChanged
-        )
-    }
+            }
+        }
 
     LaunchedEffect(hasLaunchedRequest) {
         if (!hasLaunchedRequest) {
-            permissionState.launchRequest()
+            launcher.launch(permissions.toTypedArray())
             hasLaunchedRequest = true
         }
     }
@@ -201,7 +230,7 @@ public fun WorldScaleSceneView(
     val cameraController = remember { TransformationMatrixCameraController() }
 
     var isLocationDataSourceStarted by remember { mutableStateOf(false) }
-    if (permissionState.allPermissionsGranted) {
+    if (allPermissionsGranted) {
         val locationDataSource = rememberSystemLocationDataSource()
         TrackLocationWithLocationDataSource(
             locationDataSource,
@@ -233,7 +262,7 @@ public fun WorldScaleSceneView(
     }
 
     Box(modifier = modifier) {
-        if (permissionState.allPermissionsGranted && isLocationDataSourceStarted && arCoreInstalled) {
+        if (allPermissionsGranted && isLocationDataSourceStarted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {

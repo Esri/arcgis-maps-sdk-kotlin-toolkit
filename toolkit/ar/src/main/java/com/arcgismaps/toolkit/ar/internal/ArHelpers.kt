@@ -71,54 +71,6 @@ internal fun <T> MutableState<T>.update(
 }
 
 /**
- * Checks if the camera permission is granted and requests it if required.
- *
- * @since 200.7.0
- */
-@Composable
-internal fun rememberCameraPermission(
-    requestCameraPermissionAutomatically: Boolean,
-    onNotGranted: () -> Unit
-): MutableState<Boolean> {
-    val cameraPermission = Manifest.permission.CAMERA
-    val context = LocalContext.current
-    val isGrantedState = rememberSaveable {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                cameraPermission
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    // We need to track whether we've already requested, otherwise, when the permission is denied,
-    // the permission request dialog will be shown again on the next composition
-    var hasRequested by remember { mutableStateOf(false) }
-    if (!isGrantedState.value && !hasRequested) {
-        if (requestCameraPermissionAutomatically) {
-            val requestPermissionLauncher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-                    isGrantedState.value = granted
-                    if (!granted) {
-                        onNotGranted()
-                    }
-                }
-            SideEffect {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                hasRequested = true
-            }
-        } else {
-            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
-            // after the composition completes, for example, invoking the onInitializationStatusChanged
-            // callback
-            SideEffect {
-                onNotGranted()
-            }
-        }
-    }
-    return isGrantedState
-}
-
-/**
  * Sets the field of view of the [SceneViewProxy] based on the lens intrinsics from an ARCore [Camera].
  *
  * @since 200.7.0
