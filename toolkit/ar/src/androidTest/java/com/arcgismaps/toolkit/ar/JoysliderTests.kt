@@ -69,13 +69,13 @@ class JoysliderTests {
         joyslider.performTouchInput {
             up(0)
         }
-        val pointerUpHeading = value
+        val pointerUpValue = value
 
         joyslider.performTouchInput {
             advanceEventTime(250)
         }
 
-        assert(value == pointerUpHeading)
+        assert(value == pointerUpValue)
     }
 
     /**
