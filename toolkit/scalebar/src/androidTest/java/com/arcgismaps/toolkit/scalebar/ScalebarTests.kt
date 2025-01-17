@@ -27,6 +27,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +39,7 @@ import org.junit.Test
  */
 class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
+    private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -49,7 +51,7 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testScaleLabelIsDisplayed() {
+    fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
@@ -61,6 +63,35 @@ class ScalebarTests {
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testGraduatedLineScalebarIsDisplayed() {
+        val maxWidth = 500f
+        val tickMarks = listOf(
+            ScalebarLabel(0, 0.0, 0.0, "0"),
+            ScalebarLabel(1, (maxWidth / 4.0), 0.0, "25"),
+            ScalebarLabel(2, maxWidth / 2.0, 0.0, "50"),
+            ScalebarLabel(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+            ScalebarLabel(4, maxWidth.toDouble(), 0.0, "100")
+        )
+        // Test the scalebar
+        composeTestRule.setContent {
+                GraduatedLineScalebar(
+                    maxWidth = maxWidth,
+                    colorScheme = ScalebarDefaults.colors(),
+                    shapes = ScalebarDefaults.shapes(),
+                    tickMarks = tickMarks
+                )
+        }
+        composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
     }
 
     /**

@@ -178,7 +178,7 @@ internal fun LineScalebar(
 
 @Composable
 internal fun GraduatedLineScalebar(
-    modifier: Modifier,
+    modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
     maxWidth: Float,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
