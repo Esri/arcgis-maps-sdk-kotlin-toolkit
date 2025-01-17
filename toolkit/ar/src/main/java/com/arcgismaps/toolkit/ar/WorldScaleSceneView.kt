@@ -18,11 +18,17 @@
 
 package com.arcgismaps.toolkit.ar
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
@@ -64,6 +71,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
+import com.arcgismaps.toolkit.ar.internal.PermissionState
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
@@ -83,6 +91,7 @@ public fun WorldScaleSceneView(
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
+    requestLocationPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
@@ -119,16 +128,27 @@ public fun WorldScaleSceneView(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
-        // onNotGranted
-        initializationStatus.update(
-            WorldScaleSceneViewStatus.FailedToInitialize(
-                IllegalStateException(
-                    context.getString(R.string.camera_permission_not_granted)
-                )
-            ),
-            onInitializationStatusChanged
-        )
+    val permissionState = remember { PermissionState(context, Manifest.permission.CAMERA, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION) }
+    val isPermissionsGranted by permissionState.isGrantedState.collectAsStateWithLifecycle()
+    val hasLaunchedRequest by permissionState.hasLaunchedRequest.collectAsStateWithLifecycle()
+    if (!isPermissionsGranted && !hasLaunchedRequest) {
+        permissionState.LaunchRequest()
+    }
+    LaunchedEffect(hasLaunchedRequest, isPermissionsGranted) {
+        if (hasLaunchedRequest && !isPermissionsGranted) {
+            val permissionsGranted = permissionState.getPermissionsGranted()
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(
+                        context.getString(
+                            R.string.permissions_not_granted_message,
+                            permissionsGranted.filter { !it.value }.keys.joinToString(", ")
+                        )
+                    )
+                ),
+                onInitializationStatusChanged
+            )
+        }
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
@@ -149,38 +169,40 @@ public fun WorldScaleSceneView(
 
     val cameraController = remember { TransformationMatrixCameraController() }
 
-    val locationDataSource = rememberSystemLocationDataSource()
     var isLocationDataSourceStarted by remember { mutableStateOf(false) }
-
-    TrackLocationWithLocationDataSource(
-        locationDataSource,
-        cameraController,
-        onLocationDataSourceStatus = {
-            when (it) {
-                LocationDataSourceStatus.FailedToStart -> {
-                    initializationStatus.update(
-                        WorldScaleSceneViewStatus.FailedToInitialize(
-                            IllegalStateException(
-                                context.getString(
-                                    R.string.location_data_source_failed_to_start,
-                                    locationDataSource.error.value?.message
-                                )
+        if (isPermissionsGranted) {
+            val locationDataSource = rememberSystemLocationDataSource()
+            TrackLocationWithLocationDataSource(
+                locationDataSource,
+                cameraController,
+                onLocationDataSourceStatus = {
+                    when (it) {
+                        LocationDataSourceStatus.FailedToStart -> {
+                            initializationStatus.update(
+                                WorldScaleSceneViewStatus.FailedToInitialize(
+                                    IllegalStateException(
+                                        context.getString(
+                                            R.string.location_data_source_failed_to_start,
+                                            locationDataSource.error.value?.message
+                                        )
+                                    )
+                                ),
+                                onInitializationStatusChanged
                             )
-                        ),
-                        onInitializationStatusChanged
-                    )
-                }
+                        }
 
-                LocationDataSourceStatus.Started -> {
-                    isLocationDataSourceStarted = true
+                        LocationDataSourceStatus.Started -> {
+                            isLocationDataSourceStarted = true
+                        }
+
+                        else -> {}
+                    }
                 }
-                else -> {}
-            }
-        }
-    )
+            )
+    }
 
     Box(modifier = modifier) {
-        if (cameraPermissionGranted && isLocationDataSourceStarted && arCoreInstalled) {
+        if (isPermissionsGranted && isLocationDataSourceStarted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {
@@ -208,7 +230,10 @@ public fun WorldScaleSceneView(
                     visualizePlanes = false
                 )
                 // Once the session is created, we can say we're initialized
-                initializationStatus.update(WorldScaleSceneViewStatus.Initialized, onInitializationStatusChanged)
+                initializationStatus.update(
+                    WorldScaleSceneViewStatus.Initialized,
+                    onInitializationStatusChanged
+                )
             }
         }
         if (initializationStatus.value == WorldScaleSceneViewStatus.Initialized) {
@@ -328,4 +353,61 @@ private fun TrackLocationWithLocationDataSource(
 private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     return remember { SystemLocationDataSource() }
+}
+
+/**
+ * Checks if the location permission is granted and requests it if required.
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun rememberLocationPermission(
+    requestLocationPermissionAutomatically: Boolean,
+    onNotGranted: () -> Unit
+): MutableState<Boolean> {
+    val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
+    val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+    val context = LocalContext.current
+    // We need to track whether we've already requested, otherwise, when the permission is denied,
+    // the permission request dialog will be shown again on the next composition
+    var hasRequested by remember { mutableStateOf(false) }
+    val isGrantedState = remember {
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            coarseLocationPermission
+        ) == PackageManager.PERMISSION_GRANTED
+        val fineLocationPermissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            fineLocationPermission
+        ) == PackageManager.PERMISSION_GRANTED
+        mutableStateOf(coarseLocationGranted && fineLocationPermissionGranted)
+    }
+    if (!isGrantedState.value && !hasRequested) {
+        if (requestLocationPermissionAutomatically) {
+            val requestPermissionLauncher =
+                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+                    isGrantedState.value = granted.all { it.value }
+                    if (!isGrantedState.value) {
+                        onNotGranted()
+                    }
+                }
+            SideEffect {
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                )
+                hasRequested = true
+            }
+        } else {
+            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
+            // after the composition completes, for example, invoking the onInitializationStatusChanged
+            // callback
+            SideEffect {
+                onNotGranted()
+            }
+        }
+    }
+    return isGrantedState
 }

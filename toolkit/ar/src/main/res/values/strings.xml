@@ -3,4 +3,6 @@
     <string name="camera_permission_not_granted">Camera permission not granted</string>
     <string name="arcore_not_installed_message">ARCore must be installed to use this component. ARCore availability: %1$s</string>
     <string name="location_data_source_failed_to_start">Location Data Source failed to start: %1$s</string>
+    <string name="location_permission_not_granted">Location permission not granted</string>
+    <string name="permissions_not_granted_message">"The following permissions are required, but not granted: %1$s"</string>
 </resources>

@@ -26,8 +26,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.ArcGISEnvironment
@@ -79,7 +82,7 @@ internal fun rememberCameraPermission(
 ): MutableState<Boolean> {
     val cameraPermission = Manifest.permission.CAMERA
     val context = LocalContext.current
-    val isGrantedState = remember {
+    val isGrantedState = rememberSaveable {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
                 context,
@@ -87,7 +90,10 @@ internal fun rememberCameraPermission(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
-    if (!isGrantedState.value) {
+    // We need to track whether we've already requested, otherwise, when the permission is denied,
+    // the permission request dialog will be shown again on the next composition
+    var hasRequested by remember { mutableStateOf(false) }
+    if (!isGrantedState.value && !hasRequested) {
         if (requestCameraPermissionAutomatically) {
             val requestPermissionLauncher =
                 rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
@@ -98,6 +104,7 @@ internal fun rememberCameraPermission(
                 }
             SideEffect {
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                hasRequested = true
             }
         } else {
             // We should use a SideEffect here to ensure that code executed in onNotGranted is run
