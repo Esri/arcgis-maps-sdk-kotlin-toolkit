@@ -125,8 +125,9 @@ public fun Scalebar(
 
     val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
     if (isScaleBarUpdated) {
+        val density = LocalDensity.current
         ShowScalebar(
-            scalebarViewModel.displayLength,
+            scalebarViewModel.displayLength * density.density,
             scalebarViewModel.labels,
             style,
             colorScheme,
