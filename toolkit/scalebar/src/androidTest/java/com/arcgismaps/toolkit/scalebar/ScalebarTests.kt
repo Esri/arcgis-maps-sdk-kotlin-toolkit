@@ -66,7 +66,7 @@ class ScalebarTests {
     }
 
     /**
-     * Given a scalebar
+     * Given a graduated line scalebar
      * When it is displayed
      * Then it should be visible
      *
