@@ -32,6 +32,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 import com.arcgismaps.toolkit.scalebar.ScalebarUnits
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
 internal class ScalebarViewModel(
@@ -70,8 +71,6 @@ internal class ScalebarViewModel(
      * @since 200.7.0
      */
     internal fun updateLabels(minSegmentWidth: Double) {
-        val localLabels = mutableListOf<ScalebarLabel>()
-
         val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
 
         // Cap segments at 4
@@ -84,6 +83,7 @@ internal class ScalebarViewModel(
 
         val segmentScreenLength = displayLength / numSegments
         var currSegmentX = 0.0
+        val localLabels = mutableListOf<ScalebarLabel>()
 
         localLabels.add(
             ScalebarLabel(
@@ -96,13 +96,13 @@ internal class ScalebarViewModel(
 
         for (index in 0 until numSegments) {
             currSegmentX += segmentScreenLength
-            val segmentMapLength = (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
+            val segmentMapLength: Double = (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
 
             val segmentText: String = if (index == numSegments - 1 && displayUnit != null) {
                 val displayUnitAbbr = displayUnit?.getAbbreviation()
-                "${segmentMapLength.toInt()} $displayUnitAbbr"
+                "${segmentMapLength.format()} $displayUnitAbbr"
             } else {
-                segmentMapLength.toInt().toString()
+                segmentMapLength.format()
             }
 
             val label = ScalebarLabel(
