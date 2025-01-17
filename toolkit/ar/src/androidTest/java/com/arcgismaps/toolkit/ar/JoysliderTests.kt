@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.ar
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,10 +20,10 @@ class JoysliderTests {
      * Then the value should increase in proportion with the time held
      */
     @Test
-    fun joysliderDragHold() = runTest {
+    fun joysliderFullDragHold() = runTest {
         var value = 0F
         composeTestRule.setContent {
-            Joyslider(onValueChange = {value += it})
+            Joyslider(onValueChange = { value += it })
         }
 
         val joysliderTestTag = "Slider"
@@ -42,6 +43,36 @@ class JoysliderTests {
 
     /**
      * Given a [Joyslider] configured to accumulate a value
+     * When it is dragged midway to the right and held
+     * Then the value should increase in proportion with the time held, but by less than
+     * if it were dragged all the way to the right
+     */
+    @Test
+    fun joysliderPartialDragHold() = runTest {
+        var value = 0F
+        composeTestRule.setContent {
+            Joyslider(onValueChange = { value += it })
+        }
+
+        val joysliderTestTag = "Slider"
+        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
+        joyslider.assertIsDisplayed()
+        assert(value == 0F)
+
+        joyslider.performTouchInput {
+            val centerRightMid = Offset((centerRight.x + center.x) / 2, centerY)
+            down(center)
+            moveTo(centerRightMid)
+            advanceEventTime(250)
+            up(0)
+        }
+
+        // give some leeway for fp inexactness
+        assert((1.95..2.05).contains(value))
+    }
+
+    /**
+     * Given a [Joyslider] configured to accumulate a value
      * When it is dragged to the right and held, before being released
      * Then the value should increase in proportion with the time held. After it is let go,
      * the value should not change any further.
@@ -50,7 +81,7 @@ class JoysliderTests {
     fun joysliderDragHoldLetGo() = runTest {
         var value = 0F
         composeTestRule.setContent {
-            Joyslider(onValueChange = {value += it})
+            Joyslider(onValueChange = { value += it })
         }
 
         val joysliderTestTag = "Slider"
@@ -87,7 +118,7 @@ class JoysliderTests {
     fun joysliderOneWayThenOther() = runTest {
         var value = 0F
         composeTestRule.setContent {
-            Joyslider(onValueChange = {value += it})
+            Joyslider(onValueChange = { value += it })
         }
 
         val joysliderTestTag = "Slider"
@@ -109,7 +140,6 @@ class JoysliderTests {
             up(0)
         }
 
-        assert(value==0F)
+        assert(value == 0F)
     }
-
 }
