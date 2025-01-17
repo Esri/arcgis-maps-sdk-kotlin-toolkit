@@ -71,10 +71,9 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
-import com.arcgismaps.toolkit.ar.internal.PermissionState
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.rememberPermissionState
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -128,26 +127,34 @@ public fun WorldScaleSceneView(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val permissionState = remember { PermissionState(context, Manifest.permission.CAMERA, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION) }
-    val isPermissionsGranted by permissionState.isGrantedState.collectAsStateWithLifecycle()
-    val hasLaunchedRequest by permissionState.hasLaunchedRequest.collectAsStateWithLifecycle()
-    if (!isPermissionsGranted && !hasLaunchedRequest) {
-        permissionState.LaunchRequest()
-    }
-    LaunchedEffect(hasLaunchedRequest, isPermissionsGranted) {
-        if (hasLaunchedRequest && !isPermissionsGranted) {
-            val permissionsGranted = permissionState.getPermissionsGranted()
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(
-                        context.getString(
-                            R.string.permissions_not_granted_message,
-                            permissionsGranted.filter { !it.value }.keys.joinToString(", ")
-                        )
+
+    var hasLaunchedRequest by remember { mutableStateOf(false) }
+
+    val permissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    val permissionState = rememberPermissionState(context, permissions) { grantedResults ->
+        val permissionsNotGranted = grantedResults.filter { !it.value }.keys.joinToString(", ")
+        initializationStatus.update(
+            WorldScaleSceneViewStatus.FailedToInitialize(
+                IllegalStateException(
+                    context.getString(
+                        R.string.permissions_not_granted_message,
+                        permissionsNotGranted
                     )
-                ),
-                onInitializationStatusChanged
-            )
+                )
+            ),
+            onInitializationStatusChanged
+        )
+    }
+
+    LaunchedEffect(hasLaunchedRequest) {
+        if (!hasLaunchedRequest) {
+            permissionState.launchRequest()
+            hasLaunchedRequest = true
         }
     }
 
@@ -170,39 +177,39 @@ public fun WorldScaleSceneView(
     val cameraController = remember { TransformationMatrixCameraController() }
 
     var isLocationDataSourceStarted by remember { mutableStateOf(false) }
-        if (isPermissionsGranted) {
-            val locationDataSource = rememberSystemLocationDataSource()
-            TrackLocationWithLocationDataSource(
-                locationDataSource,
-                cameraController,
-                onLocationDataSourceStatus = {
-                    when (it) {
-                        LocationDataSourceStatus.FailedToStart -> {
-                            initializationStatus.update(
-                                WorldScaleSceneViewStatus.FailedToInitialize(
-                                    IllegalStateException(
-                                        context.getString(
-                                            R.string.location_data_source_failed_to_start,
-                                            locationDataSource.error.value?.message
-                                        )
+    if (permissionState.allPermissionsGranted) {
+        val locationDataSource = rememberSystemLocationDataSource()
+        TrackLocationWithLocationDataSource(
+            locationDataSource,
+            cameraController,
+            onLocationDataSourceStatus = {
+                when (it) {
+                    LocationDataSourceStatus.FailedToStart -> {
+                        initializationStatus.update(
+                            WorldScaleSceneViewStatus.FailedToInitialize(
+                                IllegalStateException(
+                                    context.getString(
+                                        R.string.location_data_source_failed_to_start,
+                                        locationDataSource.error.value?.message
                                     )
-                                ),
-                                onInitializationStatusChanged
-                            )
-                        }
-
-                        LocationDataSourceStatus.Started -> {
-                            isLocationDataSourceStarted = true
-                        }
-
-                        else -> {}
+                                )
+                            ),
+                            onInitializationStatusChanged
+                        )
                     }
+
+                    LocationDataSourceStatus.Started -> {
+                        isLocationDataSourceStarted = true
+                    }
+
+                    else -> {}
                 }
-            )
+            }
+        )
     }
 
     Box(modifier = modifier) {
-        if (isPermissionsGranted && isLocationDataSourceStarted && arCoreInstalled) {
+        if (permissionState.allPermissionsGranted && isLocationDataSourceStarted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {
