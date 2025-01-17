@@ -262,6 +262,7 @@ internal fun BarScalebar(
     scaleValue: String,
     maxWidth: Float,
     colorScheme: ScalebarColors,
+    topLeftPoint : Offset = Offset(0f, 0f),
     shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -278,12 +279,12 @@ internal fun BarScalebar(
     ) {
         drawRect(
             color = colorScheme.fillColor,
-            topLeft = Offset(0f, 0f),
+            topLeft = topLeftPoint,
             size = Size(maxWidth, scalebarHeight)
         )
         drawRect(
             color = colorScheme.lineColor,
-            topLeft = Offset(0f, 0f),
+            topLeft = topLeftPoint,
             size = Size(maxWidth, scalebarHeight),
             style = Stroke(width = lineWidth)
         )
@@ -297,7 +298,7 @@ internal fun BarScalebar(
         )
     }
 }
-//@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
     Box(
@@ -315,7 +316,7 @@ internal fun LineScaleBarPreview() {
     }
 }
 
-//@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedScaleBarPreview() {
     val maxWidth = 500f
