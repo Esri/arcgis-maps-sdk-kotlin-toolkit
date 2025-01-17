@@ -20,15 +20,11 @@ package com.arcgismaps.toolkit.ar
 
 import android.Manifest
 import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -129,14 +125,42 @@ public fun WorldScaleSceneView(
     val context = LocalContext.current
 
     var hasLaunchedRequest by remember { mutableStateOf(false) }
-
-    val permissions = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
-
+    val permissions = mutableListOf<String>()
+    if (requestCameraPermissionAutomatically) {
+        permissions.add(Manifest.permission.CAMERA)
+    }
+    else {
+        // If we are not requesting the camera permission automatically, we should check if it's granted
+        // and fail early if not
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.camera_permission_not_granted))
+                ),
+                onInitializationStatusChanged
+            )
+        }
+    }
+    if (requestLocationPermissionAutomatically) {
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    } else {
+        // If we are not requesting the location permissions automatically, we should check if it's granted
+        // and fail early if not
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.location_permission_not_granted))
+                ),
+                onInitializationStatusChanged
+            )
+        }
+    }
     val permissionState = rememberPermissionState(context, permissions) { grantedResults ->
+        // This callback will only be relevant to the permissions that were added to the request.
+        // If the user has set [requestCameraPermissionAutomatically] to false, for example,
+        // and the camera permission is not granted, this will not be included in the message.
         val permissionsNotGranted = grantedResults.filter { !it.value }.keys.joinToString(", ")
         initializationStatus.update(
             WorldScaleSceneViewStatus.FailedToInitialize(
@@ -360,61 +384,4 @@ private fun TrackLocationWithLocationDataSource(
 private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     return remember { SystemLocationDataSource() }
-}
-
-/**
- * Checks if the location permission is granted and requests it if required.
- *
- * @since 200.7.0
- */
-@Composable
-internal fun rememberLocationPermission(
-    requestLocationPermissionAutomatically: Boolean,
-    onNotGranted: () -> Unit
-): MutableState<Boolean> {
-    val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
-    val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-    val context = LocalContext.current
-    // We need to track whether we've already requested, otherwise, when the permission is denied,
-    // the permission request dialog will be shown again on the next composition
-    var hasRequested by remember { mutableStateOf(false) }
-    val isGrantedState = remember {
-        val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            coarseLocationPermission
-        ) == PackageManager.PERMISSION_GRANTED
-        val fineLocationPermissionGranted = ContextCompat.checkSelfPermission(
-            context,
-            fineLocationPermission
-        ) == PackageManager.PERMISSION_GRANTED
-        mutableStateOf(coarseLocationGranted && fineLocationPermissionGranted)
-    }
-    if (!isGrantedState.value && !hasRequested) {
-        if (requestLocationPermissionAutomatically) {
-            val requestPermissionLauncher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) { granted ->
-                    isGrantedState.value = granted.all { it.value }
-                    if (!isGrantedState.value) {
-                        onNotGranted()
-                    }
-                }
-            SideEffect {
-                requestPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                )
-                hasRequested = true
-            }
-        } else {
-            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
-            // after the composition completes, for example, invoking the onInitializationStatusChanged
-            // callback
-            SideEffect {
-                onNotGranted()
-            }
-        }
-    }
-    return isGrantedState
 }

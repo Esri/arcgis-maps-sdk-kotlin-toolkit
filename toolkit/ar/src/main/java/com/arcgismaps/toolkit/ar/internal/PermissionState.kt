@@ -82,12 +82,12 @@ internal class PermissionState constructor(
 @Composable
 internal fun rememberPermissionState(
     context: Context,
-    permissions: Array<String>,
+    permissions: List<String>,
     onPermissionResult: (Map<String, Boolean>) -> Unit
 ): PermissionState {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grantedState: Map<String, Boolean> ->
             onPermissionResult(grantedState)
         }
-    return remember { PermissionState(context, permissions, launcher) }
+    return remember { PermissionState(context, permissions.toTypedArray(), launcher) }
 }
