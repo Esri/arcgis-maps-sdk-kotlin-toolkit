@@ -75,7 +75,6 @@ class ScalebarTests {
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
                     label = "1000 km",
