@@ -104,8 +104,10 @@ public fun Scalebar(
     )
 
     key(unitsPerDip, viewpoint, spatialReference) {
+        // Measure the available line display length
         val availableLineDisplayLength =
             measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+        // compute the scalebar properties
         scalebarViewModel.computeScalebarProperties(
             spatialReference,
             viewpoint,
@@ -115,12 +117,17 @@ public fun Scalebar(
     }
 
     val isUpdateLabels by scalebarViewModel.isUpdateLabels
+    // invoked after the scalebar properties are computed
     if (isUpdateLabels) {
+        // Measure the minimum segment width required to display the labels without overlapping
         val minSegmentWidth = measureMinSegmentWidth(scalebarViewModel.lineMapLength, labelTypography)
+        // update the label text and offsets
         scalebarViewModel.updateLabels(minSegmentWidth)
     }
 
     val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
+    // invoked after the scalebar properties displayLength, displayUnit are computed
+    // and the labels are updated
     if (isScaleBarUpdated) {
         val density = LocalDensity.current
         ShowScalebar(
