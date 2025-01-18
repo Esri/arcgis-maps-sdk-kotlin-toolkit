@@ -125,11 +125,12 @@ internal class ScalebarViewModel(
     }
 
     /**
-     * Updates the Scalebar with the new values.
+     * Computes the Scalebar properties namely DisplayLength, DisplayUnit and LineMapLength
+     * with the new values of the given parameters.
      *
      * @since 200.7.0
      */
-    internal fun updateScaleBar(
+    internal fun computeScalebarProperties(
         spatialReference: SpatialReference?,
         viewpoint: Viewpoint?,
         unitsPerDip: Double?,

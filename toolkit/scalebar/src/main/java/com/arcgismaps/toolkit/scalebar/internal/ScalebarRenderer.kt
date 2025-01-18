@@ -44,6 +44,13 @@ internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
 }
 
 /**
+ * Calculates the size in pixels based on the density of the device.
+ *
+ * @since 200.7.0
+ */
+internal fun calculateSizeInPixels(density: Density, value: Double) = value * density.density
+
+/**
  * Used to align the text relative to the scalebar.
  *
  * @since 200.7.0

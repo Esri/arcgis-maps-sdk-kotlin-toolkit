@@ -45,6 +45,7 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
 import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
+import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInPixels
 import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
 import com.arcgismaps.toolkit.scalebar.internal.drawText
 import com.arcgismaps.toolkit.scalebar.internal.drawVerticalLine
@@ -104,8 +105,8 @@ public fun Scalebar(
 
     key(unitsPerDip, viewpoint, spatialReference) {
         val availableLineDisplayLength =
-            availableLineDisplayLength(maxWidth, labelTypography, style)
-        scalebarViewModel.updateScaleBar(
+            measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+        scalebarViewModel.computeScalebarProperties(
             spatialReference,
             viewpoint,
             unitsPerDip,
@@ -115,16 +116,15 @@ public fun Scalebar(
 
     val isUpdateLabels by scalebarViewModel.isUpdateLabels
     if (isUpdateLabels) {
-        scalebarViewModel.updateLabels(
-            minSegmentWidth(scalebarViewModel.lineMapLength, labelTypography)
-        )
+        val minSegmentWidth = measureMinSegmentWidth(scalebarViewModel.lineMapLength, labelTypography)
+        scalebarViewModel.updateLabels(minSegmentWidth)
     }
 
     val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
     if (isScaleBarUpdated) {
         val density = LocalDensity.current
         ShowScalebar(
-            scalebarViewModel.displayLength * density.density,
+            calculateSizeInPixels(density, scalebarViewModel.displayLength),
             scalebarViewModel.labels,
             style,
             colorScheme,
@@ -271,7 +271,7 @@ private fun isMetric(): Boolean {
  * @since 200.7.0
  */
 @Composable
-private fun availableLineDisplayLength(
+private fun measureAvailableLineDisplayLength(
     maxWidth: Double,
     labelTypography: LabelTypography,
     style: ScalebarStyle
@@ -299,7 +299,7 @@ private fun availableLineDisplayLength(
  * @since 200.7.0
  */
 @Composable
-internal fun minSegmentWidth(
+internal fun measureMinSegmentWidth(
     lineMapLength: Double,
     labelTypography: LabelTypography
 ): Double {

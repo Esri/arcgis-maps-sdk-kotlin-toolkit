@@ -139,7 +139,7 @@ class ScalebarViewModelTests {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                viewModel.updateScaleBar(
+                viewModel.computeScalebarProperties(
                     spatialReference,
                     viewpoint,
                     unitsPerDip,
@@ -147,7 +147,7 @@ class ScalebarViewModelTests {
                 )
                 val isUpdateLabels by viewModel.isUpdateLabels
                 if (isUpdateLabels) {
-                    viewModel.updateLabels(minSegmentWidth(viewModel.lineMapLength, ScalebarDefaults.typography()))
+                    viewModel.updateLabels(measureMinSegmentWidth(viewModel.lineMapLength, ScalebarDefaults.typography()))
                 }
 
                 assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
