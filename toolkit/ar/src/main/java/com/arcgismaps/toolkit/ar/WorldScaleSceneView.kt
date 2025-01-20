@@ -288,7 +288,7 @@ private fun requestPermissionsOrFail(
     requestLocationPermissionAutomatically: Boolean,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
-) : MutableState<Boolean> {
+): MutableState<Boolean> {
     var hasLaunchedRequest by remember { mutableStateOf(false) }
     val hasCompletedRequest = remember { mutableStateOf(false) }
     val permissionsToRequest = mutableListOf<String>()

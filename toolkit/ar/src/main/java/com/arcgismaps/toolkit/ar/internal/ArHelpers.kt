@@ -26,15 +26,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
@@ -68,6 +63,50 @@ internal fun <T> MutableState<T>.update(
 ) {
     this.value = newValue
     callback?.invoke(newValue)
+}
+
+/**
+ * Checks if the camera permission is granted and requests it if required.
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun rememberCameraPermission(
+    requestCameraPermissionAutomatically: Boolean,
+    onNotGranted: () -> Unit
+): MutableState<Boolean> {
+    val cameraPermission = Manifest.permission.CAMERA
+    val context = LocalContext.current
+    val isGrantedState = remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                cameraPermission
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    if (!isGrantedState.value) {
+        if (requestCameraPermissionAutomatically) {
+            val requestPermissionLauncher =
+                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+                    isGrantedState.value = granted
+                    if (!granted) {
+                        onNotGranted()
+                    }
+                }
+            SideEffect {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        } else {
+            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
+            // after the composition completes, for example, invoking the onInitializationStatusChanged
+            // callback
+            SideEffect {
+                onNotGranted()
+            }
+        }
+    }
+    return isGrantedState
 }
 
 /**

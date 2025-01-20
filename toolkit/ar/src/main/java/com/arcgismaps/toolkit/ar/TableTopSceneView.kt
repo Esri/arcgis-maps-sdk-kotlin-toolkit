@@ -18,10 +18,6 @@
 
 package com.arcgismaps.toolkit.ar
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -35,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -67,9 +62,9 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.PermissionState
 import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
@@ -178,47 +173,16 @@ public fun TableTopSceneView(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-
-    val launcher =
-        rememberLauncherForActivityResult<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>(ActivityResultContracts.RequestMultiplePermissions()) { grantedState: Map<String, Boolean> ->
-            if (!grantedState.values.all { it }) {
-                initializationStatus.update(
-                    TableTopSceneViewStatus.FailedToInitialize(
-                        IllegalStateException(
-                            context.getString(
-                                R.string.camera_permission_not_granted,
-                            )
-                        )
-                    ),
-                    onInitializationStatusChanged
+    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
+        // onNotGranted
+        initializationStatus.update(
+            TableTopSceneViewStatus.FailedToInitialize(
+                IllegalStateException(
+                    context.getString(R.string.camera_permission_not_granted)
                 )
-            }
-        }
-    val permissionState =
-        remember { PermissionState(context, listOf(Manifest.permission.CAMERA).toTypedArray<String>(), launcher) }
-    if (!requestCameraPermissionAutomatically) {
-        // If we are not requesting the camera permission automatically, we should check if it's granted
-        // and fail early if not
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            initializationStatus.update(
-                TableTopSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.camera_permission_not_granted))
-                ),
-                onInitializationStatusChanged
-            )
-        }
-    } else {
-        var hasLaunchedRequest by remember { mutableStateOf(false) }
-        LaunchedEffect(hasLaunchedRequest) {
-            if (!hasLaunchedRequest) {
-                permissionState.launchRequest()
-                hasLaunchedRequest = true
-            }
-        }
+            ),
+            onInitializationStatusChanged
+        )
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
@@ -248,7 +212,7 @@ public fun TableTopSceneView(
     var visualizePlanes by remember { mutableStateOf(true) }
 
     Box(modifier = modifier) {
-        if (permissionState.allPermissionsGranted && arCoreInstalled) {
+        if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             DisposableEffect(Unit) {
