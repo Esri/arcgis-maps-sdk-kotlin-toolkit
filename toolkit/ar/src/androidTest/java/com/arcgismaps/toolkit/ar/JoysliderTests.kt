@@ -1,11 +1,30 @@
+/*
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.ar
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import com.arcgismaps.toolkit.ar.internal.Joyslider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +46,7 @@ class JoysliderTests {
         }
 
         val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
@@ -45,7 +64,7 @@ class JoysliderTests {
      * Given a [Joyslider] configured to accumulate a value
      * When it is dragged midway to the right and held
      * Then the value should increase in proportion with the time held, but by less than
-     * if it were dragged all the way to the right
+     * if dragged all the way to the right for the same period of time
      */
     @Test
     fun joysliderPartialDragHold() = runTest {
@@ -55,9 +74,21 @@ class JoysliderTests {
         }
 
         val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
+
+        // perform a full drag for comparison
+        joyslider.performTouchInput {
+            down(center)
+            moveTo(centerRight)
+            advanceEventTime(250)
+            up(0)
+        }
+
+        // store the result, then reset value
+        val fullDragValue = value
+        value = 0F
 
         joyslider.performTouchInput {
             val centerRightMid = Offset((centerRight.x + center.x) / 2, centerY)
@@ -67,8 +98,8 @@ class JoysliderTests {
             up(0)
         }
 
-        // give some leeway for fp inexactness
-        assert((1.95..2.05).contains(value))
+        // partial drag should result in a value ~half a full drag
+        assert((0.48..0.52).contains(value/fullDragValue))
     }
 
     /**
@@ -85,7 +116,7 @@ class JoysliderTests {
         }
 
         val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
@@ -96,16 +127,13 @@ class JoysliderTests {
         }
 
         assert(value >= 4F)
+        val pointerUpValue = value
 
         joyslider.performTouchInput {
             up(0)
         }
-        val pointerUpValue = value
 
-        joyslider.performTouchInput {
-            advanceEventTime(250)
-        }
-
+        delay(75)
         assert(value == pointerUpValue)
     }
 
@@ -122,7 +150,7 @@ class JoysliderTests {
         }
 
         val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
