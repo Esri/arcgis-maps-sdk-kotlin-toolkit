@@ -306,7 +306,7 @@ private fun measureAvailableLineDisplayLength(
  * @since 200.7.0
  */
 @Composable
-private fun measureMinSegmentWidth(
+internal fun measureMinSegmentWidth(
     lineMapLength: Double,
     labelTypography: LabelTypography
 ): Double {
