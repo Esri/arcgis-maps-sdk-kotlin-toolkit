@@ -16,30 +16,133 @@
 
 package com.arcgismaps.toolkit.scalebar.internal
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 
-internal const val pixelAlignment = 2.5f // Aligns the horizontal line edges
+private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
 internal const val lineWidth = 5f
-internal const val shadowOffset = 3f
-internal const val scalebarHeight = 20f // Height of the scalebar in pixels
-internal val textSize = 14.sp
-internal const val textOffset = 5f
+private const val shadowOffset = 3f
+private const val scalebarHeight = 20f // Height of the scalebar in pixels
+private val textSize = 14.sp
+private const val textOffset = 5f
 internal const val labelXPadding = 4f // padding between scalebar labels.
+
+/**
+ * Displays a scalebar with single label and endpoint lines.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param label The scale value to display.
+ * @param maxWidth The width of the scalebar in pixels.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun LineScalebar(
+    modifier: Modifier = Modifier.testTag("LineScalebar"),
+    label: String,
+    maxWidth: Float,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { textSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // left line
+        drawVerticalLineAndShadow(
+            x = 0f,
+            top = 0f,
+            bottom = scalebarHeight,
+            lineColor = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // bottom line
+        drawHorizontalLineAndShadow(
+            y = scalebarHeight,
+            left = 0f,
+            right = maxWidth,
+            lineColor = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // right line
+        drawVerticalLineAndShadow(
+            x = maxWidth,
+            top = 0f,
+            bottom = scalebarHeight,
+            lineColor = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+        // text label
+        drawText(
+            text = label,
+            textMeasurer = textMeasurer,
+            barEnd = maxWidth,
+            scalebarHeight = scalebarHeight,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun LineScaleBarPreview() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
+        LineScalebar(
+            modifier = Modifier,
+            label = "1,000 km",
+            maxWidth = 300f,
+            colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+            shapes = ScalebarDefaults.shapes()
+        )
+    }
+}
 
 /**
  * Calculates the size in dp based on the density of the device.
  *
  * @since 200.7.0
  */
-internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
+private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
     value.toDp()
 }
 
@@ -48,7 +151,7 @@ internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
  *
  * @since 200.7.0
  */
-internal enum class TextAlignment {
+private enum class TextAlignment {
     LEFT,
     CENTER,
     RIGHT
@@ -56,15 +159,15 @@ internal enum class TextAlignment {
 
 /**
  * Draws a vertical line on the canvas with a shadow.
- * The line will be of color [color] and the shadow will be of color [shadowColor].
+ * The line will be of color [lineColor] and the shadow will be of color [shadowColor].
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawVerticalLine(
+private fun DrawScope.drawVerticalLineAndShadow(
     x: Float,
     top: Float,
     bottom: Float,
-    color: Color,
+    lineColor: Color,
     shadowColor: Color,
 ) {
     // draw shadow
@@ -75,7 +178,7 @@ internal fun DrawScope.drawVerticalLine(
         strokeWidth = lineWidth,
     )
     drawLine(
-        color = color,
+        color = lineColor,
         start = Offset(x, top),
         end = Offset(x, bottom),
         strokeWidth = lineWidth,
@@ -84,15 +187,15 @@ internal fun DrawScope.drawVerticalLine(
 
 /**
  * Draws a horizontal line on the canvas with a shadow.
- * The line will be of color [color] and the shadow will be of color [shadowColor].
+ * The line will be of color [lineColor] and the shadow will be of color [shadowColor].
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawHorizontalLine(
+private fun DrawScope.drawHorizontalLineAndShadow(
     y: Float,
     left: Float,
     right: Float,
-    color: Color,
+    lineColor: Color,
     shadowColor: Color,
 ) {
     // draw shadow
@@ -103,7 +206,7 @@ internal fun DrawScope.drawHorizontalLine(
         strokeWidth = lineWidth,
     )
     drawLine(
-        color = color,
+        color = lineColor,
         start = Offset(left - pixelAlignment, y),
         end = Offset(right + pixelAlignment, y),
         strokeWidth = lineWidth,
@@ -116,7 +219,7 @@ internal fun DrawScope.drawHorizontalLine(
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawText(
+private fun DrawScope.drawText(
     text: String,
     textMeasurer: TextMeasurer,
     barStart: Float = 0f,
