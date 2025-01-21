@@ -21,7 +21,9 @@ package com.arcgismaps.toolkit.scalebar
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -32,6 +34,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
