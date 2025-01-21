@@ -32,6 +32,7 @@ internal const val shadowOffset = 3f
 internal const val scalebarHeight = 20f // Height of the scalebar in pixels
 internal val textSize = 14.sp
 internal const val textOffset = 5f
+internal const val labelXPadding = 4f // padding between scalebar labels.
 
 /**
  * Calculates the size in dp based on the density of the device.

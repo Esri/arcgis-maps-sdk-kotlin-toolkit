@@ -26,29 +26,37 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.internal.lineWidth
-import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
 import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
 import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
 import com.arcgismaps.toolkit.scalebar.internal.drawText
 import com.arcgismaps.toolkit.scalebar.internal.drawVerticalLine
+import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
+import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.internal.pixelAlignment
 import com.arcgismaps.toolkit.scalebar.internal.scalebarHeight
 import com.arcgismaps.toolkit.scalebar.internal.shadowOffset
 import com.arcgismaps.toolkit.scalebar.internal.textOffset
 import com.arcgismaps.toolkit.scalebar.internal.textSize
+import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
@@ -85,13 +93,76 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    LineScalebar(
-        modifier = modifier,
-        scaleValue = "1,000 km",
-        maxWidth = maxWidth.toFloat(),
-        colorScheme = colorScheme,
-        shapes = shapes
+    val scalebarViewModel: ScalebarViewModel = viewModel(
+        factory = ScalebarViewModelFactory(
+            minScale,
+            style,
+            units,
+            labelTypography,
+            useGeodeticCalculations
+        )
     )
+
+    key(unitsPerDip, viewpoint, spatialReference) {
+        // Measure the available line display length
+        val availableLineDisplayLength =
+            measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+        // compute the scalebar properties
+        scalebarViewModel.computeScalebarProperties(
+            spatialReference,
+            viewpoint,
+            unitsPerDip,
+            availableLineDisplayLength
+        )
+    }
+
+    val isUpdateLabels by scalebarViewModel.isUpdateLabels
+    // invoked after the scalebar properties are computed
+    if (isUpdateLabels) {
+        // Measure the minimum segment width required to display the labels without overlapping
+        val minSegmentWidth = measureMinSegmentWidth(scalebarViewModel.lineMapLength, labelTypography)
+        // update the label text and offsets
+        scalebarViewModel.updateLabels(minSegmentWidth)
+    }
+
+    val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
+    // invoked after the scalebar properties displayLength, displayUnit are computed
+    // and the labels are updated
+    if (isScaleBarUpdated) {
+        val density = LocalDensity.current
+        ShowScalebar(
+            scalebarViewModel.displayLength.toPx(density),
+            scalebarViewModel.labels,
+            style,
+            colorScheme,
+            shapes,
+            modifier
+        )
+    }
+}
+
+@Composable
+private fun ShowScalebar(
+    maxWidth: Double,
+    labels: List<ScalebarLabel>,
+    scalebarStyle: ScalebarStyle,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes,
+    modifier: Modifier = Modifier
+) {
+    when (scalebarStyle) {
+        ScalebarStyle.AlternatingBar -> TODO()
+        ScalebarStyle.Bar -> TODO()
+        ScalebarStyle.DualUnitLine -> TODO()
+        ScalebarStyle.GraduatedLine -> TODO()
+        ScalebarStyle.Line -> LineScalebar(
+            modifier = modifier,
+            label = labels[0].text,
+            maxWidth = maxWidth.toFloat(),
+            colorScheme = colorScheme,
+            shapes = shapes
+        )
+    }
 }
 
 @Preview
@@ -109,8 +180,8 @@ internal fun ScalebarPreview() {
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param scaleValue The scale value to display.
- * @param maxWidth The width of the scale bar.
+ * @param label The scale value to display.
+ * @param maxWidth The width of the scalebar in pixels.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
  *
@@ -119,7 +190,7 @@ internal fun ScalebarPreview() {
 @Composable
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
-    scaleValue: String,
+    label: String,
     maxWidth: Float,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes
@@ -164,7 +235,7 @@ internal fun LineScalebar(
         )
         // text label
         drawText(
-            text = scaleValue,
+            text = label,
             textMeasurer = textMeasurer,
             barEnd = maxWidth,
             scalebarHeight = scalebarHeight,
@@ -178,10 +249,12 @@ internal fun LineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    Box(modifier = Modifier.fillMaxSize().padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
         LineScalebar(
             modifier = Modifier,
-            scaleValue = "1,000 km",
+            label = "1,000 km",
             maxWidth = 300f,
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
             shapes = ScalebarDefaults.shapes()
@@ -199,14 +272,13 @@ private fun isMetric(): Boolean {
 }
 
 /**
- * Returns the display length of the Scalebar line.
- * // TODO: The computed length from this function needs to be passed to the updateScalebar function in the ScalebarViewModel.
+ * Returns the display length in pixels of the Scalebar line.
  *
  * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
  * @since 200.7.0
  */
 @Composable
-private fun availableLineDisplayLength(
+private fun measureAvailableLineDisplayLength(
     maxWidth: Double,
     labelTypography: LabelTypography,
     style: ScalebarStyle
@@ -225,4 +297,32 @@ private fun availableLineDisplayLength(
             maxWidth - lineWidth
         }
     }
+}
+
+/**
+ * Returns the minimum segment width in pixels required to display the labels without overlapping.
+ *
+ * @return minimum segment width
+ * @since 200.7.0
+ */
+@Composable
+internal fun measureMinSegmentWidth(
+    lineMapLength: Double,
+    labelTypography: LabelTypography
+): Double {
+    // The constraining factor is the space required to draw the labels. Create a testString containing the longest
+    // label, which is usually the one for 'distance' because the other labels will be smaller numbers.
+    // But if 'distance' is small some of the other labels may use decimals, so allow for each label needing at least
+    // 3 characters
+    val minSegmentTestString: String = if (lineMapLength >= 100) {
+        lineMapLength.toInt().toString()
+    } else {
+        "9.9"
+    }
+    // Calculate the bounds of the testString to determine its length
+    val textMeasurer = rememberTextMeasurer()
+    val maxUnitDisplayWidth = textMeasurer.measure(minSegmentTestString, labelTypography.labelStyle).size.width
+    // Calculate the minimum segment length to ensure the labels don't overlap; multiply the testString length by 1.5
+    // to allow for the right-most label being right-justified whereas the other labels are center-justified
+    return (maxUnitDisplayWidth * 1.5) + (labelXPadding * 2)
 }
