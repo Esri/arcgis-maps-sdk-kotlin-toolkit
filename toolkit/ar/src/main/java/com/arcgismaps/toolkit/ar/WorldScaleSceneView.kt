@@ -85,9 +85,7 @@ import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Session
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
@@ -406,19 +404,9 @@ private fun TrackLocationWithLocationDataSource(
         launch {
             locationDataSource.locationChanged
                 .filter { location ->
-                    // filter out old locations
-                    Instant.now()
-                        .toEpochMilli() - location.timestamp.toEpochMilli() < 10.0.seconds.inWholeMilliseconds
-                }
-                .filter { location ->
-                    // filter out locations with no accuracy
-                    location.horizontalAccuracy > 0.0 || location.verticalAccuracy > 0.0
-                }
-                .filter { location ->
                     !hasSetOriginCamera || shouldUpdateCamera(
                         location,
-                        cameraController.originCamera.value,
-                        2.0
+                        cameraController.originCamera.value
                     )
                 }
                 .collect { location ->
@@ -437,7 +425,8 @@ private fun TrackLocationWithLocationDataSource(
                     }
 
                     // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix = TransformationMatrix.createIdentityMatrix()
+                    cameraController.transformationMatrix =
+                        TransformationMatrix.createIdentityMatrix()
                 }
         }
     }
@@ -453,23 +442,30 @@ private fun TrackLocationWithLocationDataSource(
     }
 }
 
-@Composable
-private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
-    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
-    return remember { SystemLocationDataSource() }
-}
-
 /**
- * Returns true if the distance between [location] and [currentCamera] is greater than [distanceThreshold],
- * otherwise false.
+ * Returns false if the location timestamp is older than 10 seconds,
+ * if the horizontal or vertical accuracy is negative,
+ * or if the distance between the location and the current camera is less than 2 meters.
+ * Otherwise, returns true.
  *
  * @since 200.7.0
  */
-private fun shouldUpdateCamera(
+internal fun shouldUpdateCamera(
     location: Location,
     currentCamera: Camera,
-    distanceThreshold: Double
 ): Boolean {
+    // filter out old locations
+    if (Instant.now()
+            .toEpochMilli() - location.timestamp.toEpochMilli() > 10.0.seconds.inWholeMilliseconds
+    ) return false
+
+    // filter out locations with no accuracy
+    if (location.horizontalAccuracy < 0.0
+        || location.verticalAccuracy < 0.0
+        || location.horizontalAccuracy.isNaN()
+        || location.verticalAccuracy.isNaN()
+    ) return false
+
     val distance = GeometryEngine.distanceGeodeticOrNull(
         currentCamera.location,
         location.position,
@@ -477,5 +473,11 @@ private fun shouldUpdateCamera(
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
-    return distance > distanceThreshold
+    return distance > 2.0
+}
+
+@Composable
+private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
+    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
+    return remember { SystemLocationDataSource() }
 }
