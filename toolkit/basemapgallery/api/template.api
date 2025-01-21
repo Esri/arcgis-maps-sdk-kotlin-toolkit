@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/basemapgallery/BasemapGalleryInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/basemapgallery/BasemapGalleryKt {
+	public static final fun BasemapGallery (Lcom/arcgismaps/toolkit/basemapgallery/BasemapGalleryInterface;Landroidx/compose/runtime/Composer;I)V
+}
+
