@@ -55,7 +55,7 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun Joyslider(
     onValueChange: (Float) -> Unit,
-    contentDescription: String = "Slider",
+    contentDescription: String,
     modifier: Modifier = Modifier
 ) {
     var userInteracting by remember { mutableStateOf(false) }
