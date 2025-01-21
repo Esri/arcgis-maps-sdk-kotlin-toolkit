@@ -17,6 +17,7 @@
  */
 package com.arcgismaps.toolkit.scalebar.internal
 
+import androidx.compose.ui.unit.Density
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -129,4 +130,11 @@ internal object ScalebarUtils {
             else -> "%.2f".format(this) // Display two decimal places
         }
     }
+
+    /**
+     * Calculates the size in pixels based on the density of the device.
+     *
+     * @since 200.7.0
+     */
+    fun Double.toPx(density: Density): Double = this * density.density
 }

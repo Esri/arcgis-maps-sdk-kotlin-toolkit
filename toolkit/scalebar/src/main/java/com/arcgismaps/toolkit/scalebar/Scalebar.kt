@@ -41,11 +41,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
 import com.arcgismaps.toolkit.scalebar.internal.TextAlignment
 import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInDp
-import com.arcgismaps.toolkit.scalebar.internal.calculateSizeInPixels
 import com.arcgismaps.toolkit.scalebar.internal.drawHorizontalLine
 import com.arcgismaps.toolkit.scalebar.internal.drawText
 import com.arcgismaps.toolkit.scalebar.internal.drawVerticalLine
@@ -131,7 +131,7 @@ public fun Scalebar(
     if (isScaleBarUpdated) {
         val density = LocalDensity.current
         ShowScalebar(
-            calculateSizeInPixels(density, scalebarViewModel.displayLength),
+            scalebarViewModel.displayLength.toPx(density),
             scalebarViewModel.labels,
             style,
             colorScheme,
@@ -181,7 +181,7 @@ internal fun ScalebarPreview() {
  *
  * @param modifier The modifier to apply to the layout.
  * @param label The scale value to display.
- * @param maxWidth The width of the scale bar.
+ * @param maxWidth The width of the scalebar in pixels.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
  *
@@ -272,7 +272,7 @@ private fun isMetric(): Boolean {
 }
 
 /**
- * Returns the display length of the Scalebar line.
+ * Returns the display length in pixels of the Scalebar line.
  *
  * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
  * @since 200.7.0
@@ -300,7 +300,7 @@ private fun measureAvailableLineDisplayLength(
 }
 
 /**
- * Returns the minimum segment width required to display the labels without overlapping.
+ * Returns the minimum segment width in pixels required to display the labels without overlapping.
  *
  * @return minimum segment width
  * @since 200.7.0
