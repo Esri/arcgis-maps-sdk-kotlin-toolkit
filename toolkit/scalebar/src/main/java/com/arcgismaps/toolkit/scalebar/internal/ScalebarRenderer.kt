@@ -142,7 +142,7 @@ internal fun LineScaleBarPreview() {
  *
  * @since 200.7.0
  */
-internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
+private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
     value.toDp()
 }
 
@@ -151,7 +151,7 @@ internal fun calculateSizeInDp(density: Density, value: Float) = with(density) {
  *
  * @since 200.7.0
  */
-internal enum class TextAlignment {
+private enum class TextAlignment {
     LEFT,
     CENTER,
     RIGHT
@@ -163,7 +163,7 @@ internal enum class TextAlignment {
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawVerticalLineAndShadow(
+private fun DrawScope.drawVerticalLineAndShadow(
     x: Float,
     top: Float,
     bottom: Float,
@@ -191,7 +191,7 @@ internal fun DrawScope.drawVerticalLineAndShadow(
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawHorizontalLineAndShadow(
+private fun DrawScope.drawHorizontalLineAndShadow(
     y: Float,
     left: Float,
     right: Float,
@@ -219,7 +219,7 @@ internal fun DrawScope.drawHorizontalLineAndShadow(
  *
  * @since 200.7.0
  */
-internal fun DrawScope.drawText(
+private fun DrawScope.drawText(
     text: String,
     textMeasurer: TextMeasurer,
     barStart: Float = 0f,
