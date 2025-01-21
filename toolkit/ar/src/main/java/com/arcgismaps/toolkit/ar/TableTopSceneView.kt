@@ -71,12 +71,7 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
-import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
-import com.arcgismaps.toolkit.ar.internal.transformationMatrix
-import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
@@ -246,23 +241,25 @@ public fun TableTopSceneView(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.translation.let {
-                                TransformationMatrix.createWithQuaternionAndTranslation(
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    it[0].toDouble(),
-                                    it[1].toDouble(),
-                                    it[2].toDouble()
-                                )
-                            }
+                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
                             cameraController.transformationMatrix = cameraPosition
+                            val imageIntrinsics = frame.camera.imageIntrinsics
                             tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                                frame.camera,
-                                displayRotation
+                                imageIntrinsics.focalLength[0],
+                                imageIntrinsics.focalLength[1],
+                                imageIntrinsics.principalPoint[0],
+                                imageIntrinsics.principalPoint[1],
+                                imageIntrinsics.imageDimensions[0].toFloat(),
+                                imageIntrinsics.imageDimensions[1].toFloat(),
+                                deviceOrientation = when (displayRotation) {
+                                    0 -> DeviceOrientation.LandscapeLeft
+                                    90 -> DeviceOrientation.Portrait
+                                    180 -> DeviceOrientation.LandscapeRight
+                                    270 -> DeviceOrientation.ReversePortrait
+                                    else -> DeviceOrientation.Portrait
+                                }
                             )
                             tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
@@ -270,7 +267,8 @@ public fun TableTopSceneView(
                     onTapWithHitResult = { hit ->
                         hit?.let { hitResult ->
                             if (arCoreAnchor == null) {
-                                arCoreAnchor = hitResult.createAnchor()
+                                // use `extractTranslation` to ignore any rotation
+                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation())
                                 // stop rendering planes
                                 visualizePlanes = false
                             }
@@ -337,3 +335,77 @@ public fun TableTopSceneView(
         }
     }
 }
+
+/**
+ * Checks if the camera permission is granted and requests it if required.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun rememberCameraPermission(
+    requestCameraPermissionAutomatically: Boolean,
+    onNotGranted: () -> Unit
+): MutableState<Boolean> {
+    val cameraPermission = Manifest.permission.CAMERA
+    val context = LocalContext.current
+    val isGrantedState = remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                cameraPermission
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    if (!isGrantedState.value) {
+        if (requestCameraPermissionAutomatically) {
+            val requestPermissionLauncher =
+                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+                    isGrantedState.value = granted
+                    if (!granted) {
+                        onNotGranted()
+                    }
+                }
+            SideEffect {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        } else {
+            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
+            // after the composition completes, for example, invoking the onInitializationStatusChanged
+            // callback
+            SideEffect {
+                onNotGranted()
+            }
+        }
+    }
+    return isGrantedState
+}
+
+private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
+    suspendCancellableCoroutine { continuation ->
+        ArCoreApk.getInstance().checkAvailabilityAsync(context) {
+            continuation.resume(it)
+        }
+    }
+
+private fun MutableState<TableTopSceneViewStatus>.update(
+    newStatus: TableTopSceneViewStatus,
+    callback: ((TableTopSceneViewStatus) -> Unit)?
+) {
+    this.value = newStatus
+    callback?.invoke(newStatus)
+}
+
+/**
+ * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
+ *
+ * @since 200.6.0
+ */
+private val Pose.transformationMatrix: TransformationMatrix
+    get() = TransformationMatrix.createWithQuaternionAndTranslation(
+        qx().toDouble(),
+        qy().toDouble(),
+        qz().toDouble(),
+        qw().toDouble(),
+        tx().toDouble(),
+        ty().toDouble(),
+        tz().toDouble())
