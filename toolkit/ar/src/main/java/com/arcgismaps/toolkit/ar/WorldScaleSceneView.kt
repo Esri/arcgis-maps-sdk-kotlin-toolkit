@@ -41,7 +41,11 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
 import com.arcgismaps.location.SystemLocationDataSource
@@ -66,6 +70,7 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -80,9 +85,12 @@ import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Session
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 public fun WorldScaleSceneView(
@@ -396,8 +404,24 @@ private fun TrackLocationWithLocationDataSource(
             }
         }
         launch {
-            locationDataSource.locationChanged.collect { location ->
-                if (!hasSetOriginCamera) {
+            locationDataSource.locationChanged
+                .filter { location ->
+                    // filter out old locations
+                    Instant.now()
+                        .toEpochMilli() - location.timestamp.toEpochMilli() < 10.0.seconds.inWholeMilliseconds
+                }
+                .filter { location ->
+                    // filter out locations with no accuracy
+                    location.horizontalAccuracy > 0.0 || location.verticalAccuracy > 0.0
+                }
+                .filter { location ->
+                    !hasSetOriginCamera || shouldUpdateCamera(
+                        location,
+                        cameraController.originCamera.value,
+                        2.0
+                    )
+                }
+                .collect { location ->
                     cameraController.setOriginCamera(
                         Camera(
                             location.position.y,
@@ -408,26 +432,13 @@ private fun TrackLocationWithLocationDataSource(
                             0.0
                         )
                     )
-                    hasSetOriginCamera = true
-                }
-            }
-        }
-        launch {
-            locationDataSource.headingChanged.take(1).collect { heading ->
-                if (!heading.isNaN()) {
-                    if (initialHeading == null) {
-                        cameraController.setOriginCamera(
-                            Camera(
-                                cameraController.originCamera.value.location,
-                                heading,
-                                cameraController.originCamera.value.pitch,
-                                cameraController.originCamera.value.roll
-                            )
-                        )
-                        initialHeading = heading
+                    if (!hasSetOriginCamera) {
+                        hasSetOriginCamera = true
                     }
+
+                    // We have to do this or the error gets bigger and bigger.
+                    cameraController.transformationMatrix = TransformationMatrix.createIdentityMatrix()
                 }
-            }
         }
     }
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -446,4 +457,25 @@ private fun TrackLocationWithLocationDataSource(
 private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     return remember { SystemLocationDataSource() }
+}
+
+/**
+ * Returns true if the distance between [location] and [currentCamera] is greater than [distanceThreshold],
+ * otherwise false.
+ *
+ * @since 200.7.0
+ */
+private fun shouldUpdateCamera(
+    location: Location,
+    currentCamera: Camera,
+    distanceThreshold: Double
+): Boolean {
+    val distance = GeometryEngine.distanceGeodeticOrNull(
+        currentCamera.location,
+        location.position,
+        distanceUnit = LinearUnit.meters,
+        azimuthUnit = null,
+        curveType = GeodeticCurveType.Geodesic
+    )?.distance ?: return false
+    return distance > distanceThreshold
 }
