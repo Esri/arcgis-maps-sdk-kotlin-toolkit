@@ -130,38 +130,19 @@ public fun Scalebar(
     // and the labels are updated
     if (isScaleBarUpdated) {
         val density = LocalDensity.current
-        ShowScalebar(
-            scalebarViewModel.displayLength.toPx(density),
-            scalebarViewModel.labels,
-            style,
-            colorScheme,
-            shapes,
-            modifier
-        )
-    }
-}
-
-@Composable
-private fun ShowScalebar(
-    maxWidth: Double,
-    labels: List<ScalebarLabel>,
-    scalebarStyle: ScalebarStyle,
-    colorScheme: ScalebarColors,
-    shapes: ScalebarShapes,
-    modifier: Modifier = Modifier
-) {
-    when (scalebarStyle) {
-        ScalebarStyle.AlternatingBar -> TODO()
-        ScalebarStyle.Bar -> TODO()
-        ScalebarStyle.DualUnitLine -> TODO()
-        ScalebarStyle.GraduatedLine -> TODO()
-        ScalebarStyle.Line -> LineScalebar(
-            modifier = modifier,
-            label = labels[0].text,
-            maxWidth = maxWidth.toFloat(),
-            colorScheme = colorScheme,
-            shapes = shapes
-        )
+        when (style) {
+            ScalebarStyle.AlternatingBar -> TODO()
+            ScalebarStyle.Bar -> TODO()
+            ScalebarStyle.DualUnitLine -> TODO()
+            ScalebarStyle.GraduatedLine -> TODO()
+            ScalebarStyle.Line -> LineScalebar(
+                modifier = modifier,
+                label = scalebarViewModel.labels[0].text,
+                maxWidth = scalebarViewModel.displayLength.toPx(density).toFloat(),
+                colorScheme = colorScheme,
+                shapes = shapes
+            )
+        }
     }
 }
 
