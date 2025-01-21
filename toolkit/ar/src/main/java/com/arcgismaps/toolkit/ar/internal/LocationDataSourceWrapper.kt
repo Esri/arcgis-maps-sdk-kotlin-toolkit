@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.ar.internal
 
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -7,8 +25,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSource) :
-    DefaultLifecycleObserver {
+/**
+ * Wrapper class to manage the lifecycle of a [LocationDataSource].
+ * The [LocationDataSource] will be started when the lifecycle owner is resumed and stopped when the lifecycle owner is paused or destroyed.
+ *
+ * @since 200.7.0
+ */
+internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSource) : DefaultLifecycleObserver {
+    // This ensures that we can stop the location data source on a scope that won't be cancelled when the composition is destroyed
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun onDestroy(owner: LifecycleOwner) {
