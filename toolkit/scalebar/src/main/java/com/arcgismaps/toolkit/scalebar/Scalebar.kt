@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
@@ -93,6 +96,7 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
+    var scalebarProperties: ScalebarProperties? by rememberSaveable  { mutableStateOf(null) }
     val scalebarViewModel: ScalebarViewModel = viewModel(
         factory = ScalebarViewModelFactory(
             minScale,
@@ -103,41 +107,30 @@ public fun Scalebar(
         )
     )
 
-    key(unitsPerDip, viewpoint, spatialReference) {
-        // Measure the available line display length
-        val availableLineDisplayLength =
-            measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
-        // compute the scalebar properties
-        scalebarViewModel.computeScalebarProperties(
-            spatialReference,
-            viewpoint,
-            unitsPerDip,
-            availableLineDisplayLength
-        )
-    }
-
-    val isUpdateLabels by scalebarViewModel.isUpdateLabels
-    // invoked after the scalebar properties are computed
-    if (isUpdateLabels) {
+    val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+    scalebarProperties = scalebarViewModel.computeScalebarProperties(
+        spatialReference,
+        viewpoint,
+        unitsPerDip,
+        availableLineDisplayLength
+    )
+    if (scalebarProperties != null) {
+        val localScalebarProperties = scalebarProperties!!
         // Measure the minimum segment width required to display the labels without overlapping
-        val minSegmentWidth = measureMinSegmentWidth(scalebarViewModel.lineMapLength, labelTypography)
-        // update the label text and offsets
-        scalebarViewModel.updateLabels(minSegmentWidth)
-    }
+        val minSegmentWidth = measureMinSegmentWidth(localScalebarProperties.displayLength, labelTypography)
+        val scalebarLabels = scalebarViewModel.updateLabels(minSegmentWidth)
 
-    val isScaleBarUpdated by scalebarViewModel.isScaleBarUpdated
-    // invoked after the scalebar properties displayLength, displayUnit are computed
-    // and the labels are updated
-    if (isScaleBarUpdated) {
         val density = LocalDensity.current
-        ShowScalebar(
-            scalebarViewModel.displayLength.toPx(density),
-            scalebarViewModel.labels,
-            style,
-            colorScheme,
-            shapes,
-            modifier
-        )
+        if (scalebarLabels.isNotEmpty()) {
+            ShowScalebar(
+                localScalebarProperties.displayLength.toPx(density),
+                scalebarLabels,
+                style,
+                colorScheme,
+                shapes,
+                modifier
+            )
+        }
     }
 }
 
@@ -249,9 +242,11 @@ internal fun LineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
         LineScalebar(
             modifier = Modifier,
             label = "1,000 km",
@@ -292,6 +287,7 @@ private fun measureAvailableLineDisplayLength(
             val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
             maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
         }
+
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
             maxWidth - lineWidth

@@ -17,9 +17,6 @@
  */
 package com.arcgismaps.toolkit.scalebar.internal
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.geometry.AngularUnit
@@ -43,52 +40,37 @@ internal class ScalebarViewModel(
     private val useGeodeticCalculations: Boolean
 ) : ViewModel() {
 
-    private var displayUnit: LinearUnit? = null
-
+    private var _scalebarProperties: ScalebarProperties = ScalebarProperties(
+        displayLength = 0.0,
+        displayUnit = LinearUnit.meters,
+        lineMapLength = 0.0
+    )
     private val geodeticCurveType: GeodeticCurveType = GeodeticCurveType.Geodesic
-
-    private var _isScaleBarUpdated: MutableState<Boolean> = mutableStateOf(false)
-    val isScaleBarUpdated: State<Boolean> = _isScaleBarUpdated
-
-    private var _isUpdateLabels: MutableState<Boolean> = mutableStateOf(false)
-    val isUpdateLabels: State<Boolean> = _isUpdateLabels
-
-    private var _displayLength: Double = 0.0
-    val displayLength: Double
-        get() = _displayLength
-
-    private var _lineMapLength: Double = 0.0
-    val lineMapLength: Double
-        get() = _lineMapLength
-
-    private var _labels: MutableList<ScalebarLabel> = mutableListOf()
-    val labels: List<ScalebarLabel>
-        get() = _labels
 
     /**
      * Updates the labels for the Scalebar.
      *
      * @since 200.7.0
      */
-    internal fun updateLabels(minSegmentWidth: Double) {
-        val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
+    internal fun updateLabels(minSegmentWidth: Double): List<ScalebarLabel> {
+        val suggestedNumSegments = (_scalebarProperties.displayLength / minSegmentWidth).toInt()
 
         // Cap segments at 4
         val maxNumSegments = minOf(suggestedNumSegments, 4)
 
         val numSegments = ScalebarUtils.numSegments(
-            lineMapLength,
+            _scalebarProperties.lineMapLength,
             maxNumSegments
         )
 
-        val segmentScreenLength = displayLength / numSegments
+        val segmentScreenLength = _scalebarProperties.displayLength / numSegments
         var currSegmentX = 0.0
         val localLabels = mutableListOf<ScalebarLabel>()
 
         localLabels.add(
             ScalebarLabel(
                 index = -1,
-                xOffset = 0.0 ,
+                xOffset = 0.0,
                 yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
                 text = "0"
             )
@@ -96,14 +78,16 @@ internal class ScalebarViewModel(
 
         for (index in 0 until numSegments) {
             currSegmentX += segmentScreenLength
-            val segmentMapLength: Double = (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
+            val segmentMapLength: Double =
+                (segmentScreenLength * (index + 1) / _scalebarProperties.displayLength) * _scalebarProperties.lineMapLength
 
-            val segmentText: String = if (index == numSegments - 1 && displayUnit != null) {
-                val displayUnitAbbr = displayUnit?.getAbbreviation()
-                "${segmentMapLength.format()} $displayUnitAbbr"
-            } else {
-                segmentMapLength.format()
-            }
+            val segmentText: String =
+                if (index == numSegments - 1 /*&& _scalebarProperties.value.displayUnit != null*/) {
+                    val displayUnitAbbr = _scalebarProperties.displayUnit.getAbbreviation()
+                    "${segmentMapLength.format()} $displayUnitAbbr"
+                } else {
+                    segmentMapLength.format()
+                }
 
             val label = ScalebarLabel(
                 index = index,
@@ -114,14 +98,15 @@ internal class ScalebarViewModel(
             localLabels.add(label)
         }
 
-        if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
-            localLabels.lastOrNull()?.let {
-                _labels = mutableListOf(it)
+        return if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
+            if (localLabels.isNotEmpty()) {
+                mutableListOf(localLabels.last())
+            } else {
+                mutableListOf()
             }
         } else {
-            _labels = localLabels
+            localLabels
         }
-        _isScaleBarUpdated.value = true
     }
 
     /**
@@ -135,13 +120,13 @@ internal class ScalebarViewModel(
         viewpoint: Viewpoint?,
         unitsPerDip: Double?,
         maxLength: Double,
-    ) {
+    ): ScalebarProperties? {
         if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
-            return
+            return null
         }
 
         if (minScale > 0 && viewpoint.targetScale >= minScale || unitsPerDip.isNaN()) {
-            return
+            return null
         }
 
         val mapCenter = viewpoint.targetGeometry.extent.center
@@ -181,7 +166,7 @@ internal class ScalebarViewModel(
             localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
             localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
         } else {
-            val srUnit = spatialReference.unit as? LinearUnit ?: return
+            val srUnit = spatialReference.unit as? LinearUnit ?: return null
             val baseUnits = units.baseLinearUnit
             val lenAvail = srUnit.convertTo(
                 baseUnits,
@@ -203,18 +188,22 @@ internal class ScalebarViewModel(
         }
 
         if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
-            return
+            return null
         }
-
-        // update the scalebar with the new values
-        _displayLength = localDisplayLength
-        displayUnit = localDisplayUnit
-        _lineMapLength = localLineMapLength
-
-        // update the labels
-        _isUpdateLabels.value = true
+        _scalebarProperties = ScalebarProperties(
+            displayLength = localDisplayLength,
+            displayUnit = localDisplayUnit,
+            lineMapLength = localLineMapLength
+        )
+        return _scalebarProperties
     }
 }
+
+internal data class ScalebarProperties(
+    val displayLength: Double,
+    val displayUnit: LinearUnit,
+    val lineMapLength: Double
+)
 
 internal class ScalebarViewModelFactory(
     private val minScale: Double,
