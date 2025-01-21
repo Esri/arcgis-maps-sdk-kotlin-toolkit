@@ -21,7 +21,7 @@ package com.arcgismaps.toolkit.ar
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performTouchInput
 import com.arcgismaps.toolkit.ar.internal.Joyslider
 import kotlinx.coroutines.delay
@@ -41,12 +41,16 @@ class JoysliderTests {
     @Test
     fun joysliderFullDragHold() = runTest {
         var value = 0F
+        val joysliderTestTag = "TestSlider"
+
         composeTestRule.setContent {
-            Joyslider(onValueChange = { value += it })
+            Joyslider(
+                onValueChange = { value += it },
+                contentDescription = joysliderTestTag
+            )
         }
 
-        val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
@@ -69,12 +73,16 @@ class JoysliderTests {
     @Test
     fun joysliderPartialDragHold() = runTest {
         var value = 0F
+        val joysliderTestTag = "TestSlider"
+
         composeTestRule.setContent {
-            Joyslider(onValueChange = { value += it })
+            Joyslider(
+                onValueChange = { value += it },
+                contentDescription = joysliderTestTag
+            )
         }
 
-        val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
@@ -111,12 +119,16 @@ class JoysliderTests {
     @Test
     fun joysliderDragHoldLetGo() = runTest {
         var value = 0F
+        val joysliderTestTag = "TestSlider"
+
         composeTestRule.setContent {
-            Joyslider(onValueChange = { value += it })
+            Joyslider(
+                onValueChange = { value += it },
+                contentDescription = joysliderTestTag
+            )
         }
 
-        val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 
@@ -127,11 +139,12 @@ class JoysliderTests {
         }
 
         assert(value >= 4F)
-        val pointerUpValue = value
 
         joyslider.performTouchInput {
             up(0)
         }
+
+        val pointerUpValue = value
 
         delay(75)
         assert(value == pointerUpValue)
@@ -145,12 +158,16 @@ class JoysliderTests {
     @Test
     fun joysliderOneWayThenOther() = runTest {
         var value = 0F
+        val joysliderTestTag = "TestSlider"
+
         composeTestRule.setContent {
-            Joyslider(onValueChange = { value += it })
+            Joyslider(
+                onValueChange = { value += it },
+                contentDescription = joysliderTestTag
+            )
         }
 
-        val joysliderTestTag = "Slider"
-        val joyslider = composeTestRule.onNodeWithTag(joysliderTestTag)
+        val joyslider = composeTestRule.onNodeWithContentDescription(joysliderTestTag)
         joyslider.assertIsDisplayed()
         assert(value == 0F)
 

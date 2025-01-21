@@ -39,8 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun Joyslider(
     onValueChange: (Float) -> Unit,
+    contentDescription: String = "Slider",
     modifier: Modifier = Modifier
 ) {
     var userInteracting by remember { mutableStateOf(false) }
@@ -75,7 +76,7 @@ internal fun Joyslider(
     }
 
     Slider(
-        modifier = modifier.semantics { testTag = "Slider" },
+        modifier = modifier.semantics { this.contentDescription = contentDescription },
         value = bounceValue,
         valueRange = -1F..1F,
         onValueChange = { newValue ->
