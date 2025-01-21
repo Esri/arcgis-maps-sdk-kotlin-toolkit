@@ -387,6 +387,11 @@ private fun Context.checkPermissionsGranted(): Boolean = listOf(
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 }.all { it }
 
+/**
+ * Starts the [locationDataSource] and periodically updates the [cameraController] with new locations
+ *
+ * @since 200.7.0
+ */
 @Composable
 private fun TrackLocationWithLocationDataSource(
     locationDataSource: LocationDataSource,
@@ -394,7 +399,6 @@ private fun TrackLocationWithLocationDataSource(
     onLocationDataSourceStatus: ((LocationDataSourceStatus)) -> Unit
 ) {
     var hasSetOriginCamera by remember { mutableStateOf(false) }
-    var initialHeading: Double? by remember { mutableStateOf(null) }
     LaunchedEffect(locationDataSource) {
         launch {
             locationDataSource.status.collect {
