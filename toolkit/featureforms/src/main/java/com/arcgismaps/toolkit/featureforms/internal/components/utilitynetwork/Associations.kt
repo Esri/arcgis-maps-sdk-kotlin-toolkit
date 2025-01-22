@@ -23,17 +23,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -146,29 +150,42 @@ private fun Layers(
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     val layers = group.getLayers()
     // show the list of layers
-    LazyColumn (
-        modifier = modifier
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(15.dp)
     ) {
-        layers.forEachIndexed { index, layer ->
-            val count = group.elements[layer]?.size ?: 0
-            item {
+        LazyColumn {
+            itemsIndexed(layers) { index, layer ->
+                val count = group.elements[layer]?.size ?: 0
                 ListItem(
                     headlineContent = {
-                        Text(text = layer)
+                        Text(text = layer, modifier = Modifier.padding(start = 16.dp))
                     },
                     trailingContent = {
                         Text(
-                            text = "$count"
+                            text = "$count",
+                            modifier = Modifier.padding(end = 16.dp)
                         )
+                    },
+                    overlineContent = {
                     },
                     modifier = Modifier.clickable {
                         onClick(layer)
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
                 )
-                if (index < layers.size - 1) {
-                    HorizontalDivider()
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                ) {
+                    if (index < layers.size - 1) {
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    }
                 }
             }
         }
@@ -186,10 +203,23 @@ internal fun Associations(
     onUtilityElementClick: (UtilityElement) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier) {
-        items(associations) { association ->
-            val target = association.getTargetElement(source)
-            AssociationItem(target, onUtilityElementClick)
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(15.dp)
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            itemsIndexed(associations) { index, association ->
+                val target = association.getTargetElement(source)
+                AssociationItem(target, onUtilityElementClick)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                ) {
+                    if (index < associations.size - 1) {
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -202,10 +232,13 @@ private fun AssociationItem(
 ) {
     ListItem(
         headlineContent = {
-            Text(element.objectId.toString())
+            Text(element.objectId.toString(), modifier = Modifier.padding(start = 16.dp))
         },
         modifier = modifier.clickable {
             onClick(element)
-        }
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+        )
     )
 }
