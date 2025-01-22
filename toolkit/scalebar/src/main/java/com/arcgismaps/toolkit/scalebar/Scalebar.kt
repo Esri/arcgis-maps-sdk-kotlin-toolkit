@@ -87,12 +87,12 @@ public fun Scalebar(
         derivedStateOf {
             computeScalebarProperties(
                 minScale = minScale,
+                maxLength = availableLineDisplayLength,
                 useGeodeticCalculations = useGeodeticCalculations,
-                units = units,
-                spatialReference,
-                viewpoint,
-                unitsPerDip,
-                availableLineDisplayLength
+                spatialReference = spatialReference,
+                viewpoint = viewpoint,
+                unitsPerDip = unitsPerDip,
+                scalebarUnits = units,
             )
         }
     }
