@@ -28,11 +28,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.geometry.AngularUnit
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarState
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
@@ -73,21 +80,15 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    val scalebarState = remember(minScale, style, units, labelTypography, useGeodeticCalculations) {
-        ScalebarState(
-            minScale,
-            style,
-            units,
-            labelTypography,
-            useGeodeticCalculations
-        )
-    }
 
     val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
 
     val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
         derivedStateOf {
-            scalebarState.computeScalebarProperties(
+            computeScalebarProperties(
+                minScale = minScale,
+                useGeodeticCalculations = useGeodeticCalculations,
+                units = units,
                 spatialReference,
                 viewpoint,
                 unitsPerDip,
@@ -98,7 +99,14 @@ public fun Scalebar(
 
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties?.displayLength ?: 0.0, labelTypography)
-    val scalebarLabels = scalebarState.updateLabels(scalebarProperties, minSegmentWidth)
+    val scalebarLabels = updateLabels(
+        minSegmentWidth,
+        scalebarProperties?.displayLength ?: 0.0,
+        scalebarProperties?.lineMapLength ?: 0.0,
+        scalebarProperties?.displayUnit,
+        style,
+        labelTypography
+    )
 
     if (scalebarLabels.isNotEmpty()) {
         val density = LocalDensity.current
@@ -213,3 +221,186 @@ internal fun measureMinSegmentWidth(
     // to allow for the right-most label being right-justified whereas the other labels are center-justified
     return (maxUnitDisplayWidth * 1.5) + (labelXPadding * 2)
 }
+
+/**
+ * Computes the Scalebar properties namely DisplayLength, DisplayUnit and LineMapLength
+ * with the new values of the given parameters.
+ *
+ * @since 200.7.0
+ */
+internal fun computeScalebarProperties(
+    minScale: Double,
+    useGeodeticCalculations: Boolean,
+    units: ScalebarUnits,
+    spatialReference: SpatialReference?,
+    viewpoint: Viewpoint?,
+    unitsPerDip: Double?,
+    maxLength: Double,
+): ScalebarProperties? {
+    if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
+        return null
+    }
+
+    if (minScale > 0 && viewpoint.targetScale >= minScale || unitsPerDip.isNaN()) {
+        return null
+    }
+
+    val mapCenter = viewpoint.targetGeometry.extent.center
+
+    val localDisplayLength: Double
+    val localDisplayUnit: LinearUnit
+    val localLineMapLength: Double
+
+    if (useGeodeticCalculations || spatialReference.unit is AngularUnit) {
+        val maxLengthPlanar = unitsPerDip * maxLength
+        val p1 = Point(
+            x = mapCenter.x - (maxLengthPlanar * 0.5),
+            y = mapCenter.y,
+            spatialReference = spatialReference
+        )
+        val p2 = Point(
+            x = mapCenter.x + (maxLengthPlanar * 0.5),
+            y = mapCenter.y,
+            spatialReference = spatialReference
+        )
+        val polyline = Polyline(
+            points = listOf(p1, p2),
+            spatialReference = spatialReference
+        )
+        val baseUnits = units.baseLinearUnit
+        val maxLengthGeodetic = GeometryEngine.lengthGeodetic(
+            polyline,
+            baseUnits,
+            GeodeticCurveType.Geodesic
+        )
+        val roundNumberDistance = units.closestDistanceWithoutGoingOver(
+            maxLengthGeodetic,
+            baseUnits
+        )
+        val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
+        localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
+        localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
+        localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
+    } else {
+        val srUnit = spatialReference.unit as? LinearUnit ?: return null
+        val baseUnits = units.baseLinearUnit
+        val lenAvail = srUnit.convertTo(
+            baseUnits,
+            unitsPerDip * maxLength
+        )
+        val closestLen = units.closestDistanceWithoutGoingOver(
+            lenAvail,
+            baseUnits
+        )
+        localDisplayLength = baseUnits.convertTo(
+            srUnit,
+            closestLen
+        ) / unitsPerDip
+        localDisplayUnit = units.linearUnitsForDistance(closestLen)
+        localLineMapLength = baseUnits.convertTo(
+            localDisplayUnit,
+            closestLen
+        )
+    }
+
+    if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
+        return null
+    }
+    return ScalebarProperties(
+        displayLength = localDisplayLength,
+        displayUnit = localDisplayUnit,
+        lineMapLength = localLineMapLength
+    )
+}
+
+/**
+ * Updates the labels for the Scalebar.
+ *
+ * @since 200.7.0
+ */
+internal fun updateLabels(
+    minSegmentWidth: Double,
+    displayLength: Double,
+    lineMapLength: Double,
+    displayUnit: LinearUnit?,
+    style: ScalebarStyle,
+    labelTypography: LabelTypography,
+): List<ScalebarLabel> {
+    val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
+
+    // Cap segments at 4
+    val maxNumSegments = minOf(suggestedNumSegments, 4)
+
+    val numSegments = ScalebarUtils.numSegments(
+        lineMapLength,
+        maxNumSegments
+    )
+
+    val segmentScreenLength = displayLength / numSegments
+    var currSegmentX = 0.0
+    val localLabels = mutableListOf<ScalebarLabel>()
+
+    localLabels.add(
+        ScalebarLabel(
+            index = -1,
+            xOffset = 0.0,
+            yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+            text = "0"
+        )
+    )
+
+    for (index in 0 until numSegments) {
+        currSegmentX += segmentScreenLength
+        val segmentMapLength: Double =
+            (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
+
+        val segmentText: String =
+            if (index == numSegments - 1 && displayUnit != null) {
+                val displayUnitAbbr = displayUnit.getAbbreviation()
+                "${segmentMapLength.format()} $displayUnitAbbr"
+            } else {
+                segmentMapLength.format()
+            }
+
+        val label = ScalebarLabel(
+            index = index,
+            xOffset = currSegmentX,
+            yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+            text = segmentText
+        )
+        localLabels.add(label)
+    }
+
+    return if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
+        if (localLabels.isNotEmpty()) {
+            mutableListOf(localLabels.last())
+        } else {
+            mutableListOf()
+        }
+    } else {
+        localLabels
+    }
+}
+
+internal data class ScalebarProperties(
+    val displayLength: Double,
+    val displayUnit: LinearUnit,
+    val lineMapLength: Double
+)
+
+/**
+ * Gets the abbreviation for the LinearUnit.
+ *
+ * @since 200.7.0
+ */
+private fun LinearUnit.getAbbreviation(): String {
+    return when (this) {
+        LinearUnit.meters -> "m"
+        LinearUnit.kilometers -> "km"
+        LinearUnit.feet -> "ft"
+        LinearUnit.miles -> "mi"
+        else -> ""
+    }
+}
+
+
