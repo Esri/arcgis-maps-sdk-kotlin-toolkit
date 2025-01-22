@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.scalebar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -27,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
@@ -37,7 +36,7 @@ import org.junit.Test
 import kotlin.math.roundToInt
 
 /**
- * Tests for ScalebarViewModel.
+ * Tests for Scalebar drawing calculations.
  *
  * @since 200.7.0
  */
@@ -49,7 +48,7 @@ class ScalebarViewModelTests {
     private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 11.sp))
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of line style is updated
      * Then the display length and labels should be correct
      *
@@ -57,7 +56,7 @@ class ScalebarViewModelTests {
      */
     @Test
     fun testLineStyle() = runTest {
-        testScalebarViewModel(
+        testScalebarCalculations(
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Line,
@@ -72,7 +71,7 @@ class ScalebarViewModelTests {
     }
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of Bar style is updated
      * Then the display length and labels should be correct
      *
@@ -80,7 +79,7 @@ class ScalebarViewModelTests {
      */
     @Test
     fun testBarStyle() = runTest {
-        testScalebarViewModel(
+        testScalebarCalculations(
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Bar,
@@ -95,11 +94,11 @@ class ScalebarViewModelTests {
     }
 
     /**
-     * Executes a test for the ScalebarViewModel with the given parameters.
+     * Executes a test for the Scalebar calculations with the given parameters.
      *
      * @since 200.7.0
      */
-    private fun testScalebarViewModel(
+    private fun testScalebarCalculations(
         x: Double,
         y: Double,
         spatialReference: SpatialReference = SpatialReference.webMercator(),
@@ -122,14 +121,6 @@ class ScalebarViewModelTests {
             scale = scale
         )
 
-        val viewModel = ScalebarViewModel(
-            0.0,
-            style,
-            units,
-            labelTypography,
-            useGeodeticCalculations
-        )
-
         val lineWidth = 2.0f // this is the value being passed after the available line display length is calculated
                              // in swift, it is calculated as maxWidth - lineWidth
         val availableLineDisplayLength = maxWidth - lineWidth
@@ -139,21 +130,34 @@ class ScalebarViewModelTests {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                viewModel.computeScalebarProperties(
+                val scalebarProperties = computeScalebarProperties(
+                    0.0,
+                    useGeodeticCalculations,
+                    units,
                     spatialReference,
                     viewpoint,
                     unitsPerDip,
                     availableLineDisplayLength
                 )
-                val isUpdateLabels by viewModel.isUpdateLabels
-                if (isUpdateLabels) {
-                    viewModel.updateLabels(measureMinSegmentWidth(viewModel.lineMapLength, ScalebarDefaults.typography()))
+
+                var calculatedDisplayLength = 0.0
+                var computedLabels = emptyList<ScalebarLabel>()
+
+                scalebarProperties?.let { properties ->
+                    updateLabels(measureMinSegmentWidth(properties.lineMapLength, ScalebarDefaults.typography()),
+                        properties.displayLength,
+                        properties.lineMapLength,
+                        properties.displayUnit,
+                        style,
+                        labelTypography,
+                        { calculatedDisplayLength = it },
+                        { computedLabels = it })
                 }
 
-                assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
-                assertThat(viewModel.labels.size).isEqualTo(labels.size)
-                for (i in labels.indices) {
-                    assertThat(viewModel.labels[i].text).isEqualTo(labels[i])
+                assertThat(calculatedDisplayLength.roundToInt()).isEqualTo(displayLength)
+                assertThat(computedLabels.size).isEqualTo(labels.size)
+                for (i in computedLabels.indices) {
+                    assertThat(computedLabels[i].text).isEqualTo(labels[i])
                 }
             }
         }

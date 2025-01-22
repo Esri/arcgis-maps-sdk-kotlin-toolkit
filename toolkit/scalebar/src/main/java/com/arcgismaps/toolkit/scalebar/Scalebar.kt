@@ -20,11 +20,15 @@ package com.arcgismaps.toolkit.scalebar
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -86,16 +90,14 @@ public fun Scalebar(
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
 
-    val displayLength = rememberSaveable  { mutableDoubleStateOf(0.0) }
-    var labels: List<ScalebarLabel> = rememberSaveable { mutableListOf() }
-
     // Measure the available line display length
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
-
+//    vararg inputs: Any?,
+//    saver: Saver<T, out Any> = autoSaver(),
+//    key: String? = null,
     val scalebarProperties = rememberSaveable(unitsPerDip, viewpoint, spatialReference) {
         mutableStateOf(
-            // compute the scalebar properties
             computeScalebarProperties(
                 minScale,
                 useGeodeticCalculations,
@@ -107,6 +109,9 @@ public fun Scalebar(
             )
         )
     }
+
+    val displayLength = rememberSaveable  { mutableDoubleStateOf(0.0) }
+    var labels: List<ScalebarLabel> = rememberSaveable { mutableListOf() }
 
     // update the label text and offsets
     scalebarProperties.value?.let { properties ->
@@ -321,23 +326,33 @@ internal fun updateLabels (
         localLabels.add(label)
     }
 
+    // update the display length
     updateDisplayLength(displayLength)
+
     if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
         localLabels.lastOrNull()?.let {
             updateLabels(mutableListOf(it))
-//            _labels = mutableListOf(it)
         }
     } else {
-//        _labels = localLabels
         updateLabels(localLabels)
     }
-//    _isScaleBarUpdated.value = true
 }
 
-public data class ScalebarProperties(
+internal data class ScalebarProperties(
     val displayLength: Double,
     val displayUnit: LinearUnit,
     val lineMapLength: Double
+)
+
+internal val ScalebarPropertiesSaver: Saver<ScalebarProperties, *> = listSaver(
+    save = { listOf(it.displayLength, it.displayUnit, it.lineMapLength) },
+    restore = {
+        ScalebarProperties(
+            displayLength = it[0] as Double,
+            displayUnit = it[1] as LinearUnit,
+            lineMapLength = it[2] as Double
+        )
+    }
 )
 
 /**
