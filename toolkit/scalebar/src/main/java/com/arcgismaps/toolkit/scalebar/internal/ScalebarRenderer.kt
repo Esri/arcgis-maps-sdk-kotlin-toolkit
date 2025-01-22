@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
-import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 
 private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
 internal const val lineWidth = 5f
@@ -58,7 +57,6 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
  * @param label The scale value to display.
  * @param maxWidth The width of the scalebar in pixels.
  * @param colorScheme The color scheme to use.
- * @param shapes The shape properties to use.
  *
  * @since 200.7.0
  */
@@ -68,7 +66,6 @@ internal fun LineScalebar(
     label: String,
     maxWidth: Float,
     colorScheme: ScalebarColors,
-    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -112,7 +109,7 @@ internal fun LineScalebar(
         drawText(
             text = label,
             textMeasurer = textMeasurer,
-            xPos = maxWidth,
+            xPos = maxWidth / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
@@ -127,7 +124,6 @@ internal fun LineScalebar(
  * @param maxWidth The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
- * @param shapes The shape properties to use.
  * @since 200.7.0
  */
 @Composable
@@ -136,7 +132,6 @@ internal fun GraduatedLineScalebar(
     maxWidth: Float,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
-    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -151,7 +146,7 @@ internal fun GraduatedLineScalebar(
             .height(calculateSizeInDp(density, totalHeight))
     ) {
         // draw tick marks
-        drawTickMarks(
+        drawTickMarksWithLabels(
             tickMarks = tickMarks,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
@@ -180,20 +175,12 @@ internal fun GraduatedLineScalebar(
 
         // draw last label
         drawText(
-            text = tickMarks.last().text,
+            text = tickMarks.last().label,
             textMeasurer = textMeasurer,
             xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
-            alignment = TextAlignment.LEFT
-        )
-        drawText(
-            text = " km",
-            textMeasurer = textMeasurer,
-            xPos = tickMarks.last().xOffset.toFloat(),
-            color = colorScheme.textColor,
-            shadowColor = colorScheme.textShadowColor,
-            alignment = TextAlignment.RIGHT
+            alignment = TextAlignment.CENTER
         )
     }
 }
@@ -211,21 +198,20 @@ internal fun LineScaleBarPreview() {
             label = "1,000 km",
             maxWidth = 300f,
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-            shapes = ScalebarDefaults.shapes()
         )
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
-internal fun GraduatedScaleBarPreview() {
+internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 500f
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
         ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
         ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
         ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
+        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100 km")
     )
     Box(
         modifier = Modifier
@@ -236,7 +222,6 @@ internal fun GraduatedScaleBarPreview() {
             modifier = Modifier,
             maxWidth = maxWidth,
             colorScheme = ScalebarDefaults.colors(),
-            shapes = ScalebarDefaults.shapes(),
             tickMarks = tickMarks
         )
     }
@@ -252,7 +237,7 @@ private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
 }
 
 /**
- * Used to align the text relative to a point in the scalebar.
+ * Used to align the text relative to an anchor point in the scalebar.
  *
  * @since 200.7.0
  */
@@ -277,7 +262,7 @@ private enum class TextAlignment {
 }
 
 /**
- * Draws a vertical line on the canvas at the [xPos] of color [color] with a shadow of color [shadowColor].
+ * Draws a vertical line of [color] on the canvas at the [xPos] with a shadow of color [shadowColor].
  * The line height will be determined by [top] and [bottom] positions.
  *
  * @since 200.7.0
@@ -304,7 +289,7 @@ private fun DrawScope.drawVerticalLineAndShadow(
         )
     }
 /**
- * Draws a horizontal line on the canvas at the [yPos] with a color [color] and a shadow of color [shadowColor].
+ * Draws a horizontal line of [color] on the canvas at the [yPos] with a shadow of [shadowColor].
  * The line width will be determined by [left] and [right] positions.
  *
  * @since 200.7.0
@@ -370,14 +355,13 @@ private fun DrawScope.drawText(
 }
 
 /**
- * Draws the tick marks on the canvas of height [tickHeight] with a color [color] and shadow of color [shadowColor].
+ * Draws the tick marks on the canvas of [tickHeight] with a [color] with a shadow of [shadowColor].
  *
- * The text of the tick marks will be drawn with a color [textColor] and shadow of color [textShadowColor]. The tickmark
+ * The label of the tick marks will be drawn with a [textColor] and shadow of [textShadowColor]. The tickmark
  * position will be determined by [ScalebarDivision.xOffset].
  */
-private fun DrawScope.drawTickMarks(
+private fun DrawScope.drawTickMarksWithLabels(
     tickMarks: List<ScalebarDivision>,
-    tickHeight: Float = 10f,
     color: Color,
     shadowColor: Color,
     textMeasurer: TextMeasurer,
@@ -388,13 +372,13 @@ private fun DrawScope.drawTickMarks(
     for (i in 0 until tickMarks.size - 1) {
         drawVerticalLineAndShadow(
             xPos = tickMarks[i].xOffset.toFloat(),
-            top = if (i == 0) 0f else scalebarHeight - tickHeight,
+            top = 0f,
             bottom = scalebarHeight,
             lineColor = color,
             shadowColor = shadowColor
         )
         drawText(
-            text = tickMarks[i].text,
+            text = tickMarks[i].label,
             textMeasurer = textMeasurer,
             xPos = tickMarks[i].xOffset.toFloat(),
             color = textColor,
@@ -403,5 +387,3 @@ private fun DrawScope.drawTickMarks(
         )
     }
 }
-
-

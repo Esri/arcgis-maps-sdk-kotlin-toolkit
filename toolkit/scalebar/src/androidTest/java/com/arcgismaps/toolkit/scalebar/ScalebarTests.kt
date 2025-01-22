@@ -26,6 +26,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
@@ -58,7 +59,6 @@ class ScalebarTests {
                     label = "1000 km",
                     maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(),
-                    shapes = ScalebarDefaults.shapes()
 
                 )
             }
@@ -87,7 +87,6 @@ class ScalebarTests {
                 GraduatedLineScalebar(
                     maxWidth = maxWidth,
                     colorScheme = ScalebarDefaults.colors(),
-                    shapes = ScalebarDefaults.shapes(),
                     tickMarks = tickMarks
                 )
         }
@@ -111,7 +110,6 @@ class ScalebarTests {
                     label = "1000 km",
                     maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-                    shapes = ScalebarDefaults.shapes()
                 )
             }
         }

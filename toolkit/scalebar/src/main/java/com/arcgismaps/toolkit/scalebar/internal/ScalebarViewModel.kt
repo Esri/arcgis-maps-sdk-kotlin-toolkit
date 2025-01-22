@@ -89,8 +89,8 @@ internal class ScalebarViewModel(
             ScalebarDivision(
                 index = -1,
                 xOffset = 0.0 ,
-                yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-                text = "0"
+                labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+                label = "0"
             )
         )
 
@@ -108,8 +108,8 @@ internal class ScalebarViewModel(
             val label = ScalebarDivision(
                 index = index,
                 xOffset = currSegmentX,
-                yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-                text = segmentText
+                labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+                label = segmentText
             )
             localLabels.add(label)
         }
