@@ -138,8 +138,8 @@ private fun ShowScalebar(
         ScalebarStyle.GraduatedLine -> TODO()
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            label = labels[0].label,
             maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
             colorScheme = colorScheme,
         )
     }
