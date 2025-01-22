@@ -166,8 +166,8 @@ public fun WorldScaleSceneView(
         TrackLocationWithLocationDataSource(
             locationDataSource,
             cameraController,
-            onLocationDataSourceStatus = {
-                when (it) {
+            onLocationDataSourceStatus = { status ->
+                when (status) {
                     LocationDataSourceStatus.FailedToStart -> {
                         initializationStatus.update(
                             WorldScaleSceneViewStatus.FailedToInitialize(
@@ -434,7 +434,7 @@ private fun TrackLocationWithLocationDataSource(
                 }
         }
     }
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(locationDataSource) {
         val wrapper = LocationDataSourceWrapper(locationDataSource)
         lifecycleOwner.lifecycle.addObserver(wrapper)

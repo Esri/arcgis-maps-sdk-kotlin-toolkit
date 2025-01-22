@@ -28,7 +28,7 @@ import java.time.Instant
 /**
  * Tests for the location filtering logic of the [WorldScaleSceneView]
  */
-class LocationFilteringTests() {
+class LocationFilteringTests {
 
     /**
      * Given a location and a current camera,
