@@ -19,12 +19,12 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
+import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,16 +47,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -93,7 +99,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationType
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationLayers
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -106,6 +112,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -331,13 +338,20 @@ private fun FeatureFormBody(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityElementClick: (UtilityElement) -> Unit
 ) {
-    Log.e("TAG", "FeatureFormBody: recomp ${form.feature.attributes["objectid"]}", )
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
         LazyListState()
     }
-    val navController = rememberNavController()
+    val navController = rememberNavController(
+        // set the navigator to the nav controller, this is required so that every time the
+        // navigator (and form) changes, the nav controller is reset
+        form
+    )
+    var currentRoute = rememberSaveable(form, saver = NavRouteSaver) {
+        NavRoute.Form
+    }
+    Log.e("TAG", "FeatureFormBody: ${navController.currentBackStackEntry}", )
     // create a state for the utility network associations element if the utility network is
     // provided
     val unState = utilityNetwork?.let {
@@ -356,12 +370,11 @@ private fun FeatureFormBody(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NavHost(navController, startDestination = NavRoute.Form) {
+        NavHost(navController, startDestination = currentRoute) {
             composable<NavRoute.Form>(
                 enterTransition = { fadeIn() },
                 exitTransition = { fadeOut() }
             ) {
-                Log.e("TAG", "NavHost: recomp ${form.feature.attributes["objectid"]}", )
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -444,11 +457,13 @@ private fun FeatureFormBody(
                                     state = unState,
                                     onAssociationTypeClick = {
                                         // navigate to the associations screen
-                                        if (unState.selectedAssociationType != null) {
-                                            navController.navigate(NavRoute.UNAssociations(unState.id))
-                                        }
+                                        navController.navigate(
+                                            NavRoute.UNAssociations(
+                                                unState.id,
+                                                it
+                                            )
+                                        )
                                     },
-                                    //onUtilityElementClick = onUtilityElementClicked,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(
@@ -465,23 +480,26 @@ private fun FeatureFormBody(
             }
 
             composable<NavRoute.UNAssociations>(
-                enterTransition = { slideInHorizontally { h -> h } },
-                exitTransition = { slideOutHorizontally { h -> h } }
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() }
             ) { backStackEntry ->
-                val stateId = backStackEntry.toRoute<NavRoute.UNAssociations>()
-                UtilityNetworkAssociationType(
-                    state = unState!!,
+                val data = backStackEntry.toRoute<NavRoute.UNAssociations>()
+                currentRoute = data
+                val group = unState!!.groups.value.getOrNull(data.selectedGroupIndex) ?: run {
+                    // guard against out of bounds index
+                    navController.navigate(NavRoute.Form) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                    return@composable
+                }
+                UtilityNetworkAssociationLayers(
+                    group = group,
+                    source = unState.utilityElement!!,
                     onBackPressed = {
                         navController.popBackStack()
                     },
-                    onUtilityElementClick = {
-                        onUtilityElementClick(it)
-                    }
+                    onUtilityElementClick = onUtilityElementClick
                 )
-            }
-
-            composable(NavRoute.UNAssociationElements.route) {
-
             }
         }
     }
@@ -495,15 +513,27 @@ private fun FeatureFormBody(
 }
 
 @Serializable
-private sealed class NavRoute(val route: String) {
+private sealed class NavRoute {
     @Serializable
-    data object Form : NavRoute("form")
+    data object Form : NavRoute()
 
     @Serializable
-    data class UNAssociations(val stateId: Int) : NavRoute("unassociations")
+    data class UNAssociations(
+        val stateId: Int,
+        val selectedGroupIndex: Int
+    ) : NavRoute()
+}
 
-    @Serializable
-    data object UNAssociationElements : NavRoute("elements")
+private val NavRouteSaver: Saver<NavRoute, Bundle> = object : Saver<NavRoute, Bundle> {
+    override fun SaverScope.save(value: NavRoute): Bundle {
+        return Bundle().apply {
+            putString("navRoute", Json.encodeToString(NavRoute.serializer(), value))
+        }
+    }
+
+    override fun restore(value: Bundle): NavRoute? {
+        return value.getString("navRoute")?.let { Json.decodeFromString(it) }
+    }
 }
 
 /**
@@ -710,5 +740,25 @@ internal fun rememberFieldState(
         else -> {
             null
         }
+    }
+}
+
+@Composable
+internal fun rememberNavController(vararg inputs : Any) : NavHostController {
+    val context = LocalContext.current
+    rememberNavController()
+    return rememberSaveable(inputs = inputs, saver = Saver(
+        save = { it.saveState() },
+        restore = { createNavController(context).apply { restoreState(it) } }
+    )) {
+        createNavController(context)
+    }
+}
+
+private fun createNavController(context: Context): NavHostController {
+    Log.e("TAG", "createNavController: creating nav", )
+    return NavHostController(context).apply {
+        navigatorProvider.addNavigator(ComposeNavigator())
+        navigatorProvider.addNavigator(DialogNavigator())
     }
 }

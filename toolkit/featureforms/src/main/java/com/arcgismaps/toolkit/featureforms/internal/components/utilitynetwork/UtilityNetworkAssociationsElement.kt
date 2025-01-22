@@ -54,17 +54,17 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.random.Random
 
 @Composable
 internal fun UtilityNetworkAssociationsElement(
     state: UtilityNetworkAssociationsElementState,
-    onAssociationTypeClick: () -> Unit,
-    //onUtilityElementClick: (UtilityElement) -> Unit,
+    onAssociationTypeClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val associations by state.associations
+    val groups by state.groups
     Card(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -79,45 +79,13 @@ internal fun UtilityNetworkAssociationsElement(
                 Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
             )
             AssociationTypes(
-                associations.keys.toList(),
-                {
-                    state.selectedAssociationType = it
-                    onAssociationTypeClick()
+                groups = groups,
+                onClick = {
+                    onAssociationTypeClick(it)
                 },
-                Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
         }
-    }
-}
-
-@Composable
-internal fun UtilityNetworkAssociationType(
-    state: UtilityNetworkAssociationsElementState,
-    onBackPressed: () -> Unit,
-    onUtilityElementClick: (UtilityElement) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (state.selectedAssociationType == null) {
-        // return to the previous screen if no association type is selected
-        onBackPressed()
-        return
-    }
-    val associations by state.associations
-    Column(modifier = modifier) {
-        AssociationTypeHeader(
-            state.selectedAssociationType!!.name,
-            state.label,
-            onBackPressed = onBackPressed,
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        )
-        HorizontalDivider()
-        Associations(
-            associations = associations[state.selectedAssociationType] ?: emptyList(),
-            onUtilityElementClick = onUtilityElementClick,
-            modifier = Modifier.padding(16.dp)
-        )
     }
 }
 
@@ -153,58 +121,21 @@ private fun ElementHeader(
 }
 
 @Composable
-private fun AssociationTypeHeader(
-    label: String,
-    source: String,
-    onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Image(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(4.dp)
-                .size(32.dp)
-                .clickable {
-                    onBackPressed()
-                }
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = source,
-                style = MaterialTheme.typography.labelMedium,
-            )
-        }
-    }
-}
-
-@Composable
 private fun AssociationTypes(
-    types: List<UtilityAssociationType>,
-    onClick: (UtilityAssociationType) -> Unit,
+    groups: List<UtilityAssociationGroup>,
+    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
     ) {
-        types.forEachIndexed { i, type ->
+        groups.forEachIndexed { i, group ->
             ListItem(
                 headlineContent = {
-                    Text(text = type.name)
+                    Text(text = group.type.name)
                 },
                 modifier = Modifier.clickable {
-                    onClick(type)
+                    onClick(i)
                 },
                 trailingContent = {
                     Row(
@@ -212,7 +143,7 @@ private fun AssociationTypes(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = Random(System.currentTimeMillis()).nextInt(0, 100).toString()
+                            text = group.count.toString(),
                         )
                         Image(
                             imageVector = Icons.AutoMirrored.Default.ArrowRight,
@@ -222,103 +153,12 @@ private fun AssociationTypes(
                     }
                 }
             )
-            if (i < types.size - 1) {
+            if (i < groups.size - 1) {
                 HorizontalDivider()
             }
         }
     }
 }
-
-@Composable
-private fun Associations(
-    associations: List<UtilityAssociation>,
-    onUtilityElementClick: (UtilityElement) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val map = associations
-        .asSequence()
-        .map { it.toElement }
-        .groupBy { it.networkSource }
-    LazyColumn(
-        modifier = modifier
-    ) {
-        map.keys.forEach {
-            item {
-                var expanded by rememberSaveable {
-                    mutableStateOf(false)
-                }
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                expanded = !expanded
-                            }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                            contentDescription = null,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = it.name,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = map[it]?.count().toString(),
-                        )
-                    }
-                    if (expanded) {
-                        NetworkSourceContent(
-                            elements = map[it] ?: emptyList(),
-                            onUtilityElementClick = onUtilityElementClick,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-@Composable
-private fun NetworkSourceContent(
-    elements: List<UtilityElement>,
-    onUtilityElementClick: (UtilityElement) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // show the list of utility elements
-    Column(
-        modifier = modifier.clip(RoundedCornerShape(8.dp))
-    ) {
-        elements.forEachIndexed { index, element ->
-            Column {
-                ListItem(
-                    headlineContent = {
-                        Text(text = element.objectId.toString())
-                    },
-                    modifier = Modifier.clickable {
-                        onUtilityElementClick(element)
-                    }
-                )
-                if (index < elements.size - 1) {
-                    HorizontalDivider()
-                }
-            }
-        }
-    }
-}
-
-private val UtilityAssociationType.name : String
-    get() {
-        val input = this.toString()
-        val regex = Regex("UtilityAssociationType\\$(\\w+)@")
-        val matchResult = regex.find(input)
-        return matchResult?.groupValues?.get(1) ?: input
-    }
 
 @Preview(showBackground = true)
 @Composable
@@ -339,10 +179,4 @@ private fun UtilityNetworkAssociationsElementPreview() {
 @Composable
 private fun ElementHeaderPreview() {
     ElementHeader("Associations", "This is a description", Modifier.fillMaxWidth())
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AssociationTypeHeaderPreview() {
-    AssociationTypeHeader("Fuse Box", "Feature", {}, Modifier.fillMaxWidth())
 }
