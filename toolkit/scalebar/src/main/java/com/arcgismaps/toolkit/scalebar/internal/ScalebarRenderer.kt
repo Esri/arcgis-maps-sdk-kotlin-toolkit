@@ -119,6 +119,7 @@ internal fun LineScalebar(
         )
     }
 }
+
 /**
  * Displays a graduated scalebar with multiple labels and tick marks.
  *
@@ -255,7 +256,7 @@ private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
  *
  * @since 200.7.0
  */
-internal enum class TextAlignment {
+private enum class TextAlignment {
     /**
      * Left align the text relative to a point.
      * @since 200.7.0
@@ -374,7 +375,7 @@ private fun DrawScope.drawText(
  * The text of the tick marks will be drawn with a color [textColor] and shadow of color [textShadowColor]. The tickmark
  * position will be determined by [ScalebarDivision.xOffset].
  */
-internal fun DrawScope.drawTickMarks(
+private fun DrawScope.drawTickMarks(
     tickMarks: List<ScalebarDivision>,
     tickHeight: Float = 10f,
     color: Color,
