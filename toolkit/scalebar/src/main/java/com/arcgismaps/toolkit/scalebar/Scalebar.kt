@@ -99,7 +99,7 @@ public fun Scalebar(
 
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties?.displayLength ?: 0.0, labelTypography)
-    val scalebarLabels = updateLabels(
+    val scalebarLabels = computeScalebarLabels(
         minSegmentWidth,
         scalebarProperties?.displayLength ?: 0.0,
         scalebarProperties?.lineMapLength ?: 0.0,
@@ -231,7 +231,7 @@ internal fun measureMinSegmentWidth(
 internal fun computeScalebarProperties(
     minScale: Double,
     useGeodeticCalculations: Boolean,
-    units: ScalebarUnits,
+    scalebarUnits: ScalebarUnits,
     spatialReference: SpatialReference?,
     viewpoint: Viewpoint?,
     unitsPerDip: Double?,
@@ -267,28 +267,28 @@ internal fun computeScalebarProperties(
             points = listOf(p1, p2),
             spatialReference = spatialReference
         )
-        val baseUnits = units.baseLinearUnit
+        val baseUnits = scalebarUnits.baseLinearUnit
         val maxLengthGeodetic = GeometryEngine.lengthGeodetic(
             polyline,
             baseUnits,
             GeodeticCurveType.Geodesic
         )
-        val roundNumberDistance = units.closestDistanceWithoutGoingOver(
+        val roundNumberDistance = scalebarUnits.closestDistanceWithoutGoingOver(
             maxLengthGeodetic,
             baseUnits
         )
         val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
         localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
-        localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
+        localDisplayUnit = scalebarUnits.linearUnitsForDistance(roundNumberDistance)
         localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
     } else {
         val srUnit = spatialReference.unit as? LinearUnit ?: return null
-        val baseUnits = units.baseLinearUnit
+        val baseUnits = scalebarUnits.baseLinearUnit
         val lenAvail = srUnit.convertTo(
             baseUnits,
             unitsPerDip * maxLength
         )
-        val closestLen = units.closestDistanceWithoutGoingOver(
+        val closestLen = scalebarUnits.closestDistanceWithoutGoingOver(
             lenAvail,
             baseUnits
         )
@@ -296,7 +296,7 @@ internal fun computeScalebarProperties(
             srUnit,
             closestLen
         ) / unitsPerDip
-        localDisplayUnit = units.linearUnitsForDistance(closestLen)
+        localDisplayUnit = scalebarUnits.linearUnitsForDistance(closestLen)
         localLineMapLength = baseUnits.convertTo(
             localDisplayUnit,
             closestLen
@@ -318,7 +318,7 @@ internal fun computeScalebarProperties(
  *
  * @since 200.7.0
  */
-internal fun updateLabels(
+internal fun computeScalebarLabels(
     minSegmentWidth: Double,
     displayLength: Double,
     lineMapLength: Double,

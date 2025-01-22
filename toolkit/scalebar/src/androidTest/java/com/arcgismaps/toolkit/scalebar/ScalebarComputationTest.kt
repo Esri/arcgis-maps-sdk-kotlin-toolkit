@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.scalebar/*
+/*
  * Copyright 2025 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@ package com.arcgismaps.toolkit.scalebar/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.arcgismaps.toolkit.scalebar
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.text.TextStyle
@@ -106,10 +108,11 @@ class ScalebarCalculationsTest {
                 ),
                 scale = scale
             )
+
             val scalebarProperties = computeScalebarProperties(
                 minScale = 0.0,
                 useGeodeticCalculations = useGeodeticCalculations,
-                units = units,
+                scalebarUnits = units,
                 spatialReference = spatialReference,
                 viewpoint = viewpoint,
                 unitsPerDip = unitsPerDip,
@@ -119,7 +122,7 @@ class ScalebarCalculationsTest {
                 lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
                 labelTypography = labelTypography,
             )
-            val scalebarLabels = updateLabels(
+            val scalebarLabels = computeScalebarLabels(
                 minSegmentWidth = minSegmentWidth,
                 displayLength = scalebarProperties?.displayLength ?: 0.0,
                 lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
