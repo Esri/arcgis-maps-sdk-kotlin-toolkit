@@ -85,7 +85,7 @@ public fun Scalebar(
 
     val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
         derivedStateOf {
-            computeScalebarProperties(
+            calculateScalebarProperties(
                 minScale = minScale,
                 maxLength = availableLineDisplayLength,
                 useGeodeticCalculations = useGeodeticCalculations,
@@ -99,7 +99,7 @@ public fun Scalebar(
 
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties?.displayLength ?: 0.0, labelTypography)
-    val scalebarLabels = computeScalebarLabels(
+    val scalebarLabels = generateScalebarLabels(
         minSegmentWidth,
         scalebarProperties?.displayLength ?: 0.0,
         scalebarProperties?.lineMapLength ?: 0.0,
@@ -228,7 +228,7 @@ internal fun measureMinSegmentWidth(
  *
  * @since 200.7.0
  */
-internal fun computeScalebarProperties(
+internal fun calculateScalebarProperties(
     minScale: Double,
     useGeodeticCalculations: Boolean,
     scalebarUnits: ScalebarUnits,
@@ -318,7 +318,7 @@ internal fun computeScalebarProperties(
  *
  * @since 200.7.0
  */
-internal fun computeScalebarLabels(
+internal fun generateScalebarLabels(
     minSegmentWidth: Double,
     displayLength: Double,
     lineMapLength: Double,

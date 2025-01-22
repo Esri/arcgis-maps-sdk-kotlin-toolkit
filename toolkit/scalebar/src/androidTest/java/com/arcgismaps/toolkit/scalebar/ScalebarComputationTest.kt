@@ -109,7 +109,7 @@ class ScalebarCalculationsTest {
                 scale = scale
             )
 
-            val scalebarProperties = computeScalebarProperties(
+            val scalebarProperties = calculateScalebarProperties(
                 minScale = 0.0,
                 useGeodeticCalculations = useGeodeticCalculations,
                 scalebarUnits = units,
@@ -122,7 +122,7 @@ class ScalebarCalculationsTest {
                 lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
                 labelTypography = labelTypography,
             )
-            val scalebarLabels = computeScalebarLabels(
+            val scalebarLabels = generateScalebarLabels(
                 minSegmentWidth = minSegmentWidth,
                 displayLength = scalebarProperties?.displayLength ?: 0.0,
                 lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
