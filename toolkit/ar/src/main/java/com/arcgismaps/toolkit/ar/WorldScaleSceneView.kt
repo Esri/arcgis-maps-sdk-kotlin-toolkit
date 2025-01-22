@@ -134,7 +134,7 @@ public fun WorldScaleSceneView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    val hasCompletedPermissionRequest by requestPermissionsOrFail(
+    val hasCompletedPermissionRequest = requestPermissionsOrFail(
         context,
         requestCameraPermissionAutomatically,
         requestLocationPermissionAutomatically,
@@ -294,9 +294,9 @@ private fun requestPermissionsOrFail(
     requestLocationPermissionAutomatically: Boolean,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
-): MutableState<Boolean> {
+): Boolean {
     var hasLaunchedRequest by remember { mutableStateOf(false) }
-    val hasCompletedRequest = remember { mutableStateOf(false) }
+    var hasCompletedRequest by remember { mutableStateOf(false) }
     val permissionsToRequest = mutableListOf<String>()
     if (requestCameraPermissionAutomatically) {
         permissionsToRequest.add(Manifest.permission.CAMERA)
@@ -361,7 +361,7 @@ private fun requestPermissionsOrFail(
                     onInitializationStatusChanged
                 )
             }
-            hasCompletedRequest.value = true
+            hasCompletedRequest = true
         }
 
     if (!hasLaunchedRequest) {
