@@ -17,6 +17,7 @@
  */
 package com.arcgismaps.toolkit.scalebar.internal
 
+import androidx.compose.ui.unit.Density
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -113,4 +114,27 @@ internal object ScalebarUtils {
         val options = segmentOptions(multiplier)
         return options.lastOrNull { it <= maxNumSegments } ?: 1
     }
+
+    /**
+     * Formats a double to a string.
+     * If the double has no decimal part, it will be displayed as an int.
+     * If the second digit after the decimal is zero, it will be displayed with one decimal place.
+     * Otherwise, it will be displayed with two decimal places.
+     *
+     * @since 200.7.0
+     */
+    fun Double.format(): String {
+        return when {
+            this % 1.0 == 0.0 -> this.toInt().toString() // Display as int if no decimal part
+            (this * 10) % 1.0 == 0.0 -> "%.1f".format(this) // Display one decimal place if last digit is zero
+            else -> "%.2f".format(this) // Display two decimal places
+        }
+    }
+
+    /**
+     * Calculates the size in pixels based on the density of the device.
+     *
+     * @since 200.7.0
+     */
+    fun Double.toPx(density: Density): Double = this * density.density
 }

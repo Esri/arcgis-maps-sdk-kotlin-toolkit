@@ -40,6 +40,8 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.scalebar.Scalebar
+import com.arcgismaps.toolkit.scalebar.ScalebarStyle
+import com.arcgismaps.toolkit.scalebar.ScalebarUnits
 
 @Composable
 fun MainScreen(modifier: Modifier) {
@@ -76,10 +78,12 @@ fun MainScreen(modifier: Modifier) {
                 .align(Alignment.BottomStart)
         ) {
             Scalebar(
-                maxWidth = 300.0,
+                maxWidth = 175.0,
                 unitsPerDip = unitsPerDip,
                 viewpoint = viewpoint,
-                spatialReference = spatialReference
+                spatialReference = spatialReference,
+                style = ScalebarStyle.Line,
+                units = ScalebarUnits.IMPERIAL
             )
         }
     }
