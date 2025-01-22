@@ -27,7 +27,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
@@ -76,11 +76,11 @@ class ScalebarTests {
     fun testGraduatedLineScalebarIsDisplayed() {
         val maxWidth = 500f
         val tickMarks = listOf(
-            ScalebarLabel(0, 0.0, 0.0, "0"),
-            ScalebarLabel(1, (maxWidth / 4.0), 0.0, "25"),
-            ScalebarLabel(2, maxWidth / 2.0, 0.0, "50"),
-            ScalebarLabel(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-            ScalebarLabel(4, maxWidth.toDouble(), 0.0, "100")
+            ScalebarDivision(0, 0.0, 0.0, "0"),
+            ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
+            ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
+            ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+            ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
         )
         // Test the scalebar
         composeTestRule.setContent {

@@ -133,7 +133,7 @@ internal fun LineScalebar(
 internal fun GraduatedLineScalebar(
     modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
     maxWidth: Float,
-    tickMarks: List<ScalebarLabel>,
+    tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes
 ) {
@@ -220,11 +220,11 @@ internal fun LineScaleBarPreview() {
 internal fun GraduatedScaleBarPreview() {
     val maxWidth = 500f
     val tickMarks = listOf(
-        ScalebarLabel(0, 0.0, 0.0, "0"),
-        ScalebarLabel(1, (maxWidth / 4.0), 0.0, "25"),
-        ScalebarLabel(2, maxWidth / 2.0, 0.0, "50"),
-        ScalebarLabel(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-        ScalebarLabel(4, maxWidth.toDouble(), 0.0, "100")
+        ScalebarDivision(0, 0.0, 0.0, "0"),
+        ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
+        ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
+        ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
     )
     Box(
         modifier = Modifier
@@ -372,10 +372,10 @@ private fun DrawScope.drawText(
  * Draws the tick marks on the canvas of height [tickHeight] with a color [color] and shadow of color [shadowColor].
  *
  * The text of the tick marks will be drawn with a color [textColor] and shadow of color [textShadowColor]. The tickmark
- * position will be determined by [ScalebarLabel.xOffset].
+ * position will be determined by [ScalebarDivision.xOffset].
  */
 internal fun DrawScope.drawTickMarks(
-    tickMarks: List<ScalebarLabel>,
+    tickMarks: List<ScalebarDivision>,
     tickHeight: Float = 10f,
     color: Color,
     shadowColor: Color,

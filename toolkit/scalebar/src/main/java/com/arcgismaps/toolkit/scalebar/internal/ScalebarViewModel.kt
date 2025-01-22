@@ -61,8 +61,8 @@ internal class ScalebarViewModel(
     val lineMapLength: Double
         get() = _lineMapLength
 
-    private var _labels: MutableList<ScalebarLabel> = mutableListOf()
-    val labels: List<ScalebarLabel>
+    private var _labels: MutableList<ScalebarDivision> = mutableListOf()
+    val labels: List<ScalebarDivision>
         get() = _labels
 
     /**
@@ -83,10 +83,10 @@ internal class ScalebarViewModel(
 
         val segmentScreenLength = displayLength / numSegments
         var currSegmentX = 0.0
-        val localLabels = mutableListOf<ScalebarLabel>()
+        val localLabels = mutableListOf<ScalebarDivision>()
 
         localLabels.add(
-            ScalebarLabel(
+            ScalebarDivision(
                 index = -1,
                 xOffset = 0.0 ,
                 yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
@@ -105,7 +105,7 @@ internal class ScalebarViewModel(
                 segmentMapLength.format()
             }
 
-            val label = ScalebarLabel(
+            val label = ScalebarDivision(
                 index = index,
                 xOffset = currSegmentX,
                 yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
