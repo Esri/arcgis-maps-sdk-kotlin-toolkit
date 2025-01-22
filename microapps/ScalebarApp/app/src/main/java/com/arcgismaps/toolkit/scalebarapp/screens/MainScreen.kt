@@ -49,9 +49,9 @@ fun MainScreen(modifier: Modifier) {
         mutableStateOf(
             ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
                 initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
+                    latitude = 33.751765,
+                    longitude = -117.935518,
+                    scale = 44016.65596653387
                 )
             }
         )

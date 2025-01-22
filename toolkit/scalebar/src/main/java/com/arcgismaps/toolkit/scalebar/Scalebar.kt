@@ -20,24 +20,20 @@ package com.arcgismaps.toolkit.scalebar
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarState
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -77,41 +73,43 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    var scalebarProperties: ScalebarProperties? by rememberSaveable  { mutableStateOf(null) }
-    val scalebarViewModel: ScalebarViewModel = viewModel(
-        factory = ScalebarViewModelFactory(
+    val scalebarState = remember(minScale, style, units, labelTypography, useGeodeticCalculations) {
+        ScalebarState(
             minScale,
             style,
             units,
             labelTypography,
             useGeodeticCalculations
         )
-    )
+    }
 
     val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
-    scalebarProperties = scalebarViewModel.computeScalebarProperties(
-        spatialReference,
-        viewpoint,
-        unitsPerDip,
-        availableLineDisplayLength
-    )
-    if (scalebarProperties != null) {
-        val localScalebarProperties = scalebarProperties!!
-        // Measure the minimum segment width required to display the labels without overlapping
-        val minSegmentWidth = measureMinSegmentWidth(localScalebarProperties.displayLength, labelTypography)
-        val scalebarLabels = scalebarViewModel.updateLabels(minSegmentWidth)
 
-        val density = LocalDensity.current
-        if (scalebarLabels.isNotEmpty()) {
-            ShowScalebar(
-                localScalebarProperties.displayLength.toPx(density),
-                scalebarLabels,
-                style,
-                colorScheme,
-                shapes,
-                modifier
+    val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
+        derivedStateOf {
+            scalebarState.computeScalebarProperties(
+                spatialReference,
+                viewpoint,
+                unitsPerDip,
+                availableLineDisplayLength
             )
         }
+    }
+
+    // Measure the minimum segment width required to display the labels without overlapping
+    val minSegmentWidth = measureMinSegmentWidth(scalebarProperties?.displayLength ?: 0.0, labelTypography)
+    val scalebarLabels = scalebarState.updateLabels(scalebarProperties, minSegmentWidth)
+
+    if (scalebarLabels.isNotEmpty()) {
+        val density = LocalDensity.current
+        ShowScalebar(
+            scalebarProperties?.displayLength?.toPx(density) ?: 0.0,
+            scalebarLabels,
+            style,
+            colorScheme,
+            shapes,
+            modifier
+        )
     }
 }
 
@@ -180,6 +178,7 @@ private fun measureAvailableLineDisplayLength(
             val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
             maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
         }
+
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
             maxWidth - lineWidth

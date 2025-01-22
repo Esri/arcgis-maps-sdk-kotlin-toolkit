@@ -17,8 +17,6 @@
  */
 package com.arcgismaps.toolkit.scalebar.internal
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
@@ -32,19 +30,14 @@ import com.arcgismaps.toolkit.scalebar.ScalebarUnits
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
-internal class ScalebarViewModel(
+
+internal class ScalebarState(
     private val minScale: Double,
     private val style: ScalebarStyle,
     private val units: ScalebarUnits,
     private val labelTypography: LabelTypography,
     private val useGeodeticCalculations: Boolean
-) : ViewModel() {
-
-    private var _scalebarProperties: ScalebarProperties = ScalebarProperties(
-        displayLength = 0.0,
-        displayUnit = LinearUnit.meters,
-        lineMapLength = 0.0
-    )
+) {
     private val geodeticCurveType: GeodeticCurveType = GeodeticCurveType.Geodesic
 
     /**
@@ -52,18 +45,21 @@ internal class ScalebarViewModel(
      *
      * @since 200.7.0
      */
-    internal fun updateLabels(minSegmentWidth: Double): List<ScalebarLabel> {
-        val suggestedNumSegments = (_scalebarProperties.displayLength / minSegmentWidth).toInt()
+    internal fun updateLabels(scalebarProperties: ScalebarProperties?, minSegmentWidth: Double): List<ScalebarLabel> {
+        if (scalebarProperties == null) {
+            return emptyList()
+        }
+        val suggestedNumSegments = (scalebarProperties.displayLength / minSegmentWidth).toInt()
 
         // Cap segments at 4
         val maxNumSegments = minOf(suggestedNumSegments, 4)
 
         val numSegments = ScalebarUtils.numSegments(
-            _scalebarProperties.lineMapLength,
+            scalebarProperties.lineMapLength,
             maxNumSegments
         )
 
-        val segmentScreenLength = _scalebarProperties.displayLength / numSegments
+        val segmentScreenLength = scalebarProperties.displayLength / numSegments
         var currSegmentX = 0.0
         val localLabels = mutableListOf<ScalebarLabel>()
 
@@ -79,11 +75,11 @@ internal class ScalebarViewModel(
         for (index in 0 until numSegments) {
             currSegmentX += segmentScreenLength
             val segmentMapLength: Double =
-                (segmentScreenLength * (index + 1) / _scalebarProperties.displayLength) * _scalebarProperties.lineMapLength
+                (segmentScreenLength * (index + 1) / scalebarProperties.displayLength) * scalebarProperties.lineMapLength
 
             val segmentText: String =
                 if (index == numSegments - 1 /*&& _scalebarProperties.value.displayUnit != null*/) {
-                    val displayUnitAbbr = _scalebarProperties.displayUnit.getAbbreviation()
+                    val displayUnitAbbr = scalebarProperties.displayUnit.getAbbreviation()
                     "${segmentMapLength.format()} $displayUnitAbbr"
                 } else {
                     segmentMapLength.format()
@@ -190,35 +186,19 @@ internal class ScalebarViewModel(
         if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
             return null
         }
-        _scalebarProperties = ScalebarProperties(
+        return ScalebarProperties(
             displayLength = localDisplayLength,
             displayUnit = localDisplayUnit,
             lineMapLength = localLineMapLength
         )
-        return _scalebarProperties
     }
-}
 
+}
 internal data class ScalebarProperties(
     val displayLength: Double,
     val displayUnit: LinearUnit,
     val lineMapLength: Double
 )
-
-internal class ScalebarViewModelFactory(
-    private val minScale: Double,
-    private val style: ScalebarStyle,
-    private val units: ScalebarUnits,
-    private val labelTypography: LabelTypography,
-    private val useGeodeticCalculations: Boolean
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ScalebarViewModel::class.java)) {
-            return ScalebarViewModel(minScale, style, units, labelTypography, useGeodeticCalculations) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
 
 /**
  * Gets the abbreviation for the LinearUnit.
