@@ -54,8 +54,8 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar in pixels.
  * @param label The scale value to display.
+ * @param maxWidth The width of the scalebar in pixels.
  * @param colorScheme The color scheme to use.
  *
  * @since 200.7.0
@@ -63,8 +63,8 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
 @Composable
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
-    maxWidth: Float,
     label: String,
+    maxWidth: Float,
     colorScheme: ScalebarColors,
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -195,8 +195,8 @@ internal fun LineScaleBarPreview() {
     ) {
         LineScalebar(
             modifier = Modifier,
-            maxWidth = 300f,
             label = "1,000 km",
+            maxWidth = 300f,
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
         )
     }

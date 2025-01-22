@@ -56,8 +56,8 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    maxWidth = 300f,
                     label = "1000 km",
+                    maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(),
 
                 )
@@ -107,8 +107,8 @@ class ScalebarTests {
                 modifier = Modifier.fillMaxSize(),
             ) {
                 LineScalebar(
-                    maxWidth = 300f,
                     label = "1000 km",
+                    maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                 )
             }
