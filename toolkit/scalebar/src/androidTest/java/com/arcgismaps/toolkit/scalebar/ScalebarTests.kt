@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.scalebar
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -75,6 +76,7 @@ class ScalebarTests {
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
                     label = "1000 km",
