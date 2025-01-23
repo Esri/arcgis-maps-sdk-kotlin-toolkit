@@ -397,7 +397,8 @@ private fun LocationTracker(
     cameraController: TransformationMatrixCameraController,
     onLocationDataSourceStatus: ((LocationDataSourceStatus)) -> Unit
 ) {
-    var hasSetOriginCamera by remember { mutableStateOf(false) }
+    // We should reset the origin camera if the LDS or camera controller changes
+    var hasSetOriginCamera = remember(locationDataSource, cameraController) { false }
     LaunchedEffect(locationDataSource) {
         launch {
             locationDataSource.status.collect {
@@ -423,13 +424,11 @@ private fun LocationTracker(
                             0.0
                         )
                     )
+                    // We have to do this or the error gets bigger and bigger.
+                    cameraController.transformationMatrix = TransformationMatrix.createIdentityMatrix()
                     if (!hasSetOriginCamera) {
                         hasSetOriginCamera = true
                     }
-
-                    // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix =
-                        TransformationMatrix.createIdentityMatrix()
                 }
         }
     }
