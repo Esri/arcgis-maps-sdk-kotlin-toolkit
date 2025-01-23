@@ -323,7 +323,7 @@ internal fun generateScalebarLabels(
     displayUnit: LinearUnit?,
     style: ScalebarStyle,
     labelTypography: LabelTypography,
-): List<ScalebarLabel> {
+): List<ScalebarDivision> {
     val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
 
     // Cap segments at 4
@@ -336,14 +336,14 @@ internal fun generateScalebarLabels(
 
     val segmentScreenLength = displayLength / numSegments
     var currSegmentX = 0.0
-    val localLabels = mutableListOf<ScalebarLabel>()
+    val localLabels = mutableListOf<ScalebarDivision>()
 
     localLabels.add(
-        ScalebarLabel(
+        ScalebarDivision(
             index = -1,
             xOffset = 0.0,
-            yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-            text = "0"
+            labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+            label = "0"
         )
     )
 
@@ -360,11 +360,11 @@ internal fun generateScalebarLabels(
                 segmentMapLength.format()
             }
 
-        val label = ScalebarLabel(
+        val label = ScalebarDivision(
             index = index,
             xOffset = currSegmentX,
-            yOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-            text = segmentText
+            labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+            label = segmentText
         )
         localLabels.add(label)
     }

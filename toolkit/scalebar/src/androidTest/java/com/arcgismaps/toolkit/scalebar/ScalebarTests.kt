@@ -102,7 +102,7 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testLineScaleBarColorChange() {
+    fun testLineScalebarColorChange() {
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),

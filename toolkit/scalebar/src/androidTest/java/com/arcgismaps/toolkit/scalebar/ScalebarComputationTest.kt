@@ -134,7 +134,7 @@ class ScalebarCalculationsTest {
             assertThat(scalebarProperties?.displayLength).isWithin(.5).of(expectedDisplayLength)
             assertThat(scalebarLabels.size).isEqualTo(expectedLabels.size)
             for (i in expectedLabels.indices) {
-                assertThat(scalebarLabels[i].text).isEqualTo(expectedLabels[i])
+                assertThat(scalebarLabels[i].label).isEqualTo(expectedLabels[i])
             }
         }
     }
