@@ -32,13 +32,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 
@@ -46,7 +45,6 @@ private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
 internal const val lineWidth = 5f
 private const val shadowOffset = 3f
 private const val scalebarHeight = 20f // Height of the scalebar in pixels
-private val textSize = 14.sp
 private const val textOffset = 5f
 internal const val labelXPadding = 4f // padding between scalebar labels.
 
@@ -66,10 +64,11 @@ internal fun LineScalebar(
     maxWidth: Float,
     label: String,
     colorScheme: ScalebarColors,
+    labelTypography: LabelTypography
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInPx = with(density) { textSize.toPx() }
+    val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toPx() }
 
     val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
@@ -109,6 +108,7 @@ internal fun LineScalebar(
         drawText(
             text = label,
             textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
             xPos = maxWidth / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
@@ -132,10 +132,11 @@ internal fun GraduatedLineScalebar(
     maxWidth: Float,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
+    labelTypography: LabelTypography
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInPx = with(density) { textSize.toPx() }
+    val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toPx() }
 
     val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
@@ -151,6 +152,7 @@ internal fun GraduatedLineScalebar(
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
             textColor = colorScheme.textColor,
             textShadowColor = colorScheme.textShadowColor
         )
@@ -177,6 +179,7 @@ internal fun GraduatedLineScalebar(
         drawText(
             text = tickMarks.last().label,
             textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
             xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
@@ -198,6 +201,7 @@ internal fun LineScaleBarPreview() {
             maxWidth = 300f,
             label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+            labelTypography = ScalebarDefaults.typography()
         )
     }
 }
@@ -222,7 +226,8 @@ internal fun GraduatedLineScaleBarPreview() {
             modifier = Modifier,
             maxWidth = maxWidth,
             colorScheme = ScalebarDefaults.colors(),
-            tickMarks = tickMarks
+            tickMarks = tickMarks,
+            labelTypography = ScalebarDefaults.typography()
         )
     }
 }
@@ -322,6 +327,7 @@ private fun DrawScope.drawHorizontalLineAndShadow(
  *
  * @param text The text to be drawn.
  * @param textMeasurer The [TextMeasurer] to measure the text.
+ * @param labelTypography The typography to use for the text.
  * @param xPos The location where the text should be drawn.
  * @param color The color of the text.
  * @param shadowColor The color of the text shadow.
@@ -331,6 +337,7 @@ private fun DrawScope.drawHorizontalLineAndShadow(
 private fun DrawScope.drawText(
     text: String,
     textMeasurer: TextMeasurer,
+    labelTypography: LabelTypography,
     xPos: Float,
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
@@ -338,7 +345,7 @@ private fun DrawScope.drawText(
 ) {
     val measuredText = textMeasurer.measure(
         text = text,
-        style = TextStyle(fontSize = textSize)
+        style = labelTypography.labelStyle
     )
     val alignedXPos = when (alignment) {
         TextAlignment.LEFT -> xPos - measuredText.size.width + pixelAlignment
@@ -365,6 +372,7 @@ private fun DrawScope.drawTickMarksWithLabels(
     color: Color,
     shadowColor: Color,
     textMeasurer: TextMeasurer,
+    labelTypography: LabelTypography,
     textColor: Color,
     textShadowColor: Color
 ) {
@@ -380,6 +388,7 @@ private fun DrawScope.drawTickMarksWithLabels(
         drawText(
             text = tickMarks[i].label,
             textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
             xPos = tickMarks[i].xOffset.toFloat(),
             color = textColor,
             shadowColor = textShadowColor,

@@ -117,6 +117,7 @@ public fun Scalebar(
             style,
             colorScheme,
             shapes,
+            labelTypography,
             modifier
         )
     }
@@ -129,6 +130,7 @@ private fun ShowScalebar(
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
+    labelTypography: LabelTypography,
     modifier: Modifier = Modifier
 ) {
     when (scalebarStyle) {
@@ -141,6 +143,7 @@ private fun ShowScalebar(
             maxWidth = maxWidth.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
+            labelTypography = labelTypography
         )
     }
 }
