@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -132,7 +133,7 @@ public fun WorldScaleSceneView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    val allPermissionsGranted = rememberPermissionsGranted(
+    val allPermissionsGranted by rememberPermissionsGranted(
         context,
         requestCameraPermissionAutomatically,
         requestLocationPermissionAutomatically,
@@ -292,8 +293,8 @@ private fun rememberPermissionsGranted(
     requestLocationPermissionAutomatically: Boolean,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
-): Boolean {
-    var allPermissionsGranted by remember { mutableStateOf(false) }
+): State<Boolean> {
+    val allPermissionsGranted = remember { mutableStateOf(false) }
     val permissionsToRequest = mutableListOf<String>()
     if (requestCameraPermissionAutomatically) {
         permissionsToRequest.add(Manifest.permission.CAMERA)
@@ -359,7 +360,7 @@ private fun rememberPermissionsGranted(
                 )
             }
             else {
-                allPermissionsGranted = true
+                allPermissionsGranted.value = true
             }
         }
 
