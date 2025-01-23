@@ -418,9 +418,9 @@ private fun LocationTracker(
     }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(locationDataSource) {
+        // This will start the LocationDataSource
         val wrapper = LocationDataSourceWrapper(locationDataSource)
         lifecycleOwner.lifecycle.addObserver(wrapper)
-        wrapper.startLocationDataSource()
         onDispose {
             wrapper.onDestroy(lifecycleOwner)
             lifecycleOwner.lifecycle.removeObserver(wrapper)

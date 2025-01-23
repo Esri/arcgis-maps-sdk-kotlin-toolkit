@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.location.LocationDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -38,16 +39,20 @@ internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSou
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            scope.cancel()
         }
+        super.onDestroy(owner)
     }
 
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
         }
+        super.onPause(owner)
     }
 
-    fun startLocationDataSource() {
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
         scope.launch {
             locationDataSource.start()
         }
