@@ -60,7 +60,7 @@ class ScalebarTests {
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
-
+                    labelTypography = ScalebarDefaults.typography()
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
@@ -88,7 +88,8 @@ class ScalebarTests {
                 GraduatedLineScalebar(
                     maxWidth = maxWidth,
                     colorScheme = ScalebarDefaults.colors(),
-                    tickMarks = tickMarks
+                    tickMarks = tickMarks,
+                    labelTypography = ScalebarDefaults.typography()
                 )
         }
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
@@ -112,6 +113,7 @@ class ScalebarTests {
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+                    labelTypography = ScalebarDefaults.typography()
                 )
             }
         }
