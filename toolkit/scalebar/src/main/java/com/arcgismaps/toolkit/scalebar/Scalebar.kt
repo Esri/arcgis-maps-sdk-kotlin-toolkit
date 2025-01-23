@@ -37,7 +37,7 @@ import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
@@ -124,7 +124,7 @@ public fun Scalebar(
 @Composable
 private fun Scalebar(
     maxWidth: Double,
-    labels: List<ScalebarLabel>,
+    labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -137,10 +137,9 @@ private fun Scalebar(
         ScalebarStyle.GraduatedLine -> TODO()
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            label = labels[0].text,
             maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
             colorScheme = colorScheme,
-            shapes = shapes
         )
     }
 }
@@ -186,7 +185,6 @@ private fun measureAvailableDisplayLength(
             val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
             maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
         }
-
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
             maxWidth - lineWidth
