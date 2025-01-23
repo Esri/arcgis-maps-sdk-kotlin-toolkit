@@ -242,7 +242,7 @@ private fun AssociationItem(
         },
         supportingContent = {
             Text(
-                text = element.assetType.name,
+                text = element.assetGroup.name,
                 modifier = Modifier.padding(start = 16.dp),
                 style = MaterialTheme.typography.labelSmall
             )

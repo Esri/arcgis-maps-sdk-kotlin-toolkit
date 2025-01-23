@@ -21,12 +21,11 @@ package com.arcgismaps.toolkit.featureforms
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -69,6 +68,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -83,6 +83,8 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.featureforms.TextFormElement
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.rememberBarcodeTextFieldState
@@ -269,6 +271,7 @@ public fun FeatureForm(
                         validationErrorVisibility = validationErrorVisibility,
                         onBarcodeButtonClick = onBarcodeButtonClick,
                         onUtilityElementClicked = { element ->
+                            stateData.featureForm.clearSelection()
                             scope.launch {
                                 if (utilityNetwork != null) {
                                     utilityNetwork.getFeaturesForElements(listOf(element))
@@ -286,9 +289,7 @@ public fun FeatureForm(
                                                     // to prevent a circular navigation
                                                     popUpTo(newRoute) {
                                                         inclusive = true
-                                                        saveState = true
                                                     }
-                                                    restoreState = true
                                                 }
                                             }
                                         }
@@ -297,6 +298,12 @@ public fun FeatureForm(
                         },
                         utilityNetwork = utilityNetwork
                     )
+                }
+                // only enable back navigation if there is a previous route
+                BackHandler(navController.previousBackStackEntry != null) {
+                    if (navController.popBackStack()) {
+                        form.clearSelection()
+                    }
                 }
             }
         }
@@ -330,6 +337,7 @@ private fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val featureForm = stateData.featureForm
+    featureForm.selectFeature()
     // hold the list of form elements in a mutable state to make them observable
     val formElements = remember(featureForm) {
         mutableStateOf(featureForm.elements)
@@ -406,7 +414,6 @@ private fun FeatureFormBody(
     var currentRoute = rememberSaveable(form, saver = NavRouteSaver) {
         NavRoute.Form
     }
-    Log.e("TAG", "FeatureFormBody: ${navController.currentBackStackEntry}")
     // create a state for the utility network associations element if the utility network is
     // provided
     val unState = utilityNetwork?.let {
@@ -819,7 +826,6 @@ internal fun rememberNavController(vararg inputs: Any): NavHostController {
 }
 
 private fun createNavController(context: Context): NavHostController {
-    Log.e("TAG", "createNavController: creating nav")
     return NavHostController(context).apply {
         navigatorProvider.addNavigator(ComposeNavigator())
         navigatorProvider.addNavigator(DialogNavigator())
@@ -828,3 +834,23 @@ private fun createNavController(context: Context): NavHostController {
 
 private val FeatureForm.id: String
     get() = feature.attributes["objectid"].toString()
+
+private fun FeatureForm.selectFeature() {
+    val table = feature.featureTable as? ArcGISFeatureTable ?: return
+    val layer = when(table.layer) {
+        is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
+        is FeatureLayer -> table.layer as FeatureLayer
+        else -> return
+    }
+    layer.selectFeature(feature)
+}
+
+private fun FeatureForm.clearSelection() {
+    val table = feature.featureTable as? ArcGISFeatureTable ?: return
+    val layer = when(table.layer) {
+        is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
+        is FeatureLayer -> table.layer as FeatureLayer
+        else -> return
+    }
+    layer.unselectFeature(feature)
+}

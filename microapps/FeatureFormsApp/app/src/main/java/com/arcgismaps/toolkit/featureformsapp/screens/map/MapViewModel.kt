@@ -338,7 +338,7 @@ class MapViewModel @Inject constructor(
                 val layer = feature.featureTable!!.layer as FeatureLayer
                 val featureForm = FeatureForm(feature)
                 // select the feature
-                layer.selectFeature(feature)
+                //layer.selectFeature(feature)
                 // set the UI to an editing state with the FeatureForm
                 _uiState.value = UIState.Editing(featureForm)
                 scope.launch {
@@ -432,7 +432,7 @@ class MapViewModel @Inject constructor(
                     proxy.setViewpointScale(scale)
                 }
             }
-            layer.selectFeature(feature)
+            //layer.selectFeature(feature)
             _uiState.value = UIState.Editing(featureForm)
         }.onFailure {
             Log.e("MapViewModel", "Failed to add feature", it)
@@ -443,7 +443,7 @@ class MapViewModel @Inject constructor(
         val utilityNetwork = map.utilityNetworks.firstOrNull() ?: return
         utilityNetwork.getFeaturesForElements(listOf(utilityElement)).onSuccess {
             val feature = it.firstOrNull() ?: return@onSuccess
-            selectFeature(feature)
+            //selectFeature(feature)
         }
     }
 

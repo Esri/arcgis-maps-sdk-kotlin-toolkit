@@ -251,7 +251,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     modifier = Modifier.padding(padding),
                     onUtilityElementClick = {
                         scope.launch {
-                            mapViewModel.selectUtilityElement(it)
+                            //mapViewModel.selectUtilityElement(it)
                         }
                     },
                     utilityNetwork = mapViewModel.map.utilityNetworks.firstOrNull()
