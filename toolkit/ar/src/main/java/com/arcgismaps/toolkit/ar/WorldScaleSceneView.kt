@@ -162,16 +162,9 @@ public fun WorldScaleSceneView(
     )
 
     Box(modifier = modifier) {
-        val lifecycleOwner = LocalLifecycleOwner.current
         val arSessionWrapper =
             rememberArSessionWrapper(applicationContext = context.applicationContext)
-        DisposableEffect(Unit) {
-            lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                arSessionWrapper.onDestroy(lifecycleOwner)
-            }
-        }
+
         val session = arSessionWrapper.session.collectAsStateWithLifecycle()
         session.value?.let { arSession ->
             ArCameraFeed(

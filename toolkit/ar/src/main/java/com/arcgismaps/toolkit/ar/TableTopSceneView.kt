@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -215,17 +216,11 @@ public fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            DisposableEffect(Unit) {
-                // We call this from inside DisposableEffect so that we invoke the callback in a side effect
+            SideEffect {
                 initializationStatus.update(
                     TableTopSceneViewStatus.DetectingPlanes,
                     onInitializationStatusChanged
                 )
-                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                    arSessionWrapper.onDestroy(lifecycleOwner)
-                }
             }
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
             val session = arSessionWrapper.session.collectAsStateWithLifecycle()

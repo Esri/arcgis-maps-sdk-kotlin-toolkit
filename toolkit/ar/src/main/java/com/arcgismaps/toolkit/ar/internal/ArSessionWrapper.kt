@@ -19,9 +19,11 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,6 +74,15 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember {
-    ArSessionWrapper(applicationContext)
+internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val arSessionWrapper = remember { ArSessionWrapper(applicationContext) }
+    DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+            arSessionWrapper.onDestroy(lifecycleOwner)
+        }
+    }
+    return arSessionWrapper
 }
