@@ -372,11 +372,8 @@ internal fun generateScalebarLabels(
     }
 
     return if (style == ScalebarStyle.Bar || style == ScalebarStyle.Line) {
-        if (localLabels.isNotEmpty()) {
-            mutableListOf(localLabels.last())
-        } else {
-            mutableListOf()
-        }
+        // return a list with the last label or an empty list if there are no labels
+        localLabels.takeLast(1)
     } else {
         localLabels
     }
