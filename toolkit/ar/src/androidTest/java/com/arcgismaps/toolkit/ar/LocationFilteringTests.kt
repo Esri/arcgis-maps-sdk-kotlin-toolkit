@@ -22,6 +22,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
 import com.arcgismaps.mapping.view.Camera
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.Instant
 
@@ -47,17 +48,29 @@ class LocationFilteringTests {
 
         val cameraAtNullIsland = Camera(nullIsland, 0.0, 0.0, 0.0)
 
-        val recentLocationAtNullIsland = Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(50))
-        val oldLocationAtNullIsland = Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
-        val recentLocationFarFarAway = Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(50))
-        val oldLocationFarFarAway = Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
-        val recentLocationWithNoAccuracy = Location.create(nullIsland, Double.NaN, Double.NaN, 0.0, 0.0, false, Instant.now().minusMillis(50))
+        val recentLocationAtNullIsland =
+            Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(50))
+        val oldLocationAtNullIsland =
+            Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
+        val recentLocationFarFarAway =
+            Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(50))
+        val oldLocationFarFarAway =
+            Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
+        val recentLocationWithNoAccuracy = Location.create(
+            nullIsland,
+            Double.NaN,
+            Double.NaN,
+            0.0,
+            0.0,
+            false,
+            Instant.now().minusMillis(50)
+        )
 
-        assert(!shouldUpdateCamera(recentLocationAtNullIsland, cameraAtNullIsland))
-        assert(!shouldUpdateCamera(oldLocationAtNullIsland, cameraAtNullIsland))
-        assert(!shouldUpdateCamera(oldLocationFarFarAway, cameraAtNullIsland))
-        assert(!shouldUpdateCamera(recentLocationWithNoAccuracy, cameraAtNullIsland))
+        assertThat(shouldUpdateCamera(recentLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateCamera(oldLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateCamera(oldLocationFarFarAway, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateCamera(recentLocationWithNoAccuracy, cameraAtNullIsland)).isFalse()
 
-        assert(shouldUpdateCamera(recentLocationFarFarAway, cameraAtNullIsland))
+        assertThat(shouldUpdateCamera(recentLocationFarFarAway, cameraAtNullIsland)).isTrue()
     }
 }
