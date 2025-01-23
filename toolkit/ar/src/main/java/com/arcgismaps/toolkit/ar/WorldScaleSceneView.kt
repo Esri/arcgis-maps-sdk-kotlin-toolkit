@@ -163,7 +163,7 @@ public fun WorldScaleSceneView(
     var isLocationDataSourceStarted by remember { mutableStateOf(false) }
     if (hasCompletedPermissionRequest && context.checkPermissionsGranted()) {
         val locationDataSource = rememberSystemLocationDataSource()
-        TrackLocationWithLocationDataSource(
+        LocationTracker(
             locationDataSource,
             cameraController,
             onLocationDataSourceStatus = { status ->
@@ -393,7 +393,7 @@ private fun Context.checkPermissionsGranted(): Boolean = listOf(
  * @since 200.7.0
  */
 @Composable
-private fun TrackLocationWithLocationDataSource(
+private fun LocationTracker(
     locationDataSource: LocationDataSource,
     cameraController: TransformationMatrixCameraController,
     onLocationDataSourceStatus: ((LocationDataSourceStatus)) -> Unit
