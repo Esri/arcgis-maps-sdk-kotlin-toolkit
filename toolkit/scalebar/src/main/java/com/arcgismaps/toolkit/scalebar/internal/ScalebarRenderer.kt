@@ -202,7 +202,7 @@ internal fun LineScaleBarPreview() {
     ) {
         LineScalebar(
             modifier = Modifier,
-            maxWidth = 300f,
+            maxWidth = 500f / LocalDensity.current.density,
             label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
             labelTypography = ScalebarDefaults.typography()
@@ -214,12 +214,13 @@ internal fun LineScaleBarPreview() {
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 500f
+    val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100 km")
+        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
+        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
+        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
+        ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "100 km")
     )
     Box(
         modifier = Modifier
