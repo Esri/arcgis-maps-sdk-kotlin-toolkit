@@ -61,7 +61,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 public fun Scalebar(
-    maxWidth: Double, //  maximum screen width allotted to the scalebar
+    maxDisplayWidth: Double, //  maximum screen width allotted to the scalebar
     unitsPerDip: Double,
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
@@ -81,13 +81,13 @@ public fun Scalebar(
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
 
-    val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+    val availableDisplayLength = measureAvailableDisplayLength(maxDisplayWidth, labelTypography, style)
 
-    val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
+    val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableDisplayLength) {
         derivedStateOf {
             calculateScalebarProperties(
                 minScale = minScale,
-                maxLength = availableLineDisplayLength,
+                maxDisplayLength = availableDisplayLength,
                 useGeodeticCalculations = useGeodeticCalculations,
                 spatialReference = spatialReference,
                 viewpoint = viewpoint,
@@ -102,7 +102,7 @@ public fun Scalebar(
     val scalebarLabels = generateScalebarLabels(
         minSegmentWidth,
         scalebarProperties?.displayLength ?: 0.0,
-        scalebarProperties?.lineMapLength ?: 0.0,
+        scalebarProperties?.lineLength ?: 0.0,
         scalebarProperties?.displayUnit,
         style,
         labelTypography
@@ -149,7 +149,7 @@ private fun Scalebar(
 @Composable
 internal fun ScalebarPreview() {
     Scalebar(
-        maxWidth = 200.0,
+        maxDisplayWidth = 200.0,
         spatialReference = null,
         unitsPerDip = 1.0,
         viewpoint = Viewpoint(0.0, 0.0, 0.0),
@@ -172,7 +172,7 @@ private fun isMetric(): Boolean {
  * @since 200.7.0
  */
 @Composable
-private fun measureAvailableLineDisplayLength(
+private fun measureAvailableDisplayLength(
     maxWidth: Double,
     labelTypography: LabelTypography,
     style: ScalebarStyle
@@ -202,15 +202,15 @@ private fun measureAvailableLineDisplayLength(
  */
 @Composable
 internal fun measureMinSegmentWidth(
-    lineMapLength: Double,
+    scalebarLineLength: Double,
     labelTypography: LabelTypography
 ): Double {
     // The constraining factor is the space required to draw the labels. Create a testString containing the longest
     // label, which is usually the one for 'distance' because the other labels will be smaller numbers.
     // But if 'distance' is small some of the other labels may use decimals, so allow for each label needing at least
     // 3 characters
-    val minSegmentTestString: String = if (lineMapLength >= 100) {
-        lineMapLength.toInt().toString()
+    val minSegmentTestString: String = if (scalebarLineLength >= 100) {
+        scalebarLineLength.toInt().toString()
     } else {
         "9.9"
     }
@@ -230,12 +230,12 @@ internal fun measureMinSegmentWidth(
  */
 internal fun calculateScalebarProperties(
     minScale: Double,
+    maxDisplayLength: Double,
     useGeodeticCalculations: Boolean,
     scalebarUnits: ScalebarUnits,
     spatialReference: SpatialReference?,
     viewpoint: Viewpoint?,
     unitsPerDip: Double?,
-    maxLength: Double,
 ): ScalebarProperties? {
     if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
         return null
@@ -249,10 +249,10 @@ internal fun calculateScalebarProperties(
 
     val localDisplayLength: Double
     val localDisplayUnit: LinearUnit
-    val localLineMapLength: Double
+    val localScalebarLineLength: Double
 
     if (useGeodeticCalculations || spatialReference.unit is AngularUnit) {
-        val maxLengthPlanar = unitsPerDip * maxLength
+        val maxLengthPlanar = unitsPerDip * maxDisplayLength
         val p1 = Point(
             x = mapCenter.x - (maxLengthPlanar * 0.5),
             y = mapCenter.y,
@@ -280,26 +280,26 @@ internal fun calculateScalebarProperties(
         val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
         localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
         localDisplayUnit = scalebarUnits.linearUnitsForDistance(roundNumberDistance)
-        localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
+        localScalebarLineLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
     } else {
         val srUnit = spatialReference.unit as? LinearUnit ?: return null
         val baseUnits = scalebarUnits.baseLinearUnit
         val lenAvail = srUnit.convertTo(
             baseUnits,
-            unitsPerDip * maxLength
+            unitsPerDip * maxDisplayLength
         )
-        val closestLen = scalebarUnits.closestDistanceWithoutGoingOver(
+        val closestLength = scalebarUnits.closestDistanceWithoutGoingOver(
             lenAvail,
             baseUnits
         )
         localDisplayLength = baseUnits.convertTo(
             srUnit,
-            closestLen
+            closestLength
         ) / unitsPerDip
-        localDisplayUnit = scalebarUnits.linearUnitsForDistance(closestLen)
-        localLineMapLength = baseUnits.convertTo(
+        localDisplayUnit = scalebarUnits.linearUnitsForDistance(closestLength)
+        localScalebarLineLength = baseUnits.convertTo(
             localDisplayUnit,
-            closestLen
+            closestLength
         )
     }
 
@@ -309,7 +309,7 @@ internal fun calculateScalebarProperties(
     return ScalebarProperties(
         displayLength = localDisplayLength,
         displayUnit = localDisplayUnit,
-        lineMapLength = localLineMapLength
+        lineLength = localScalebarLineLength
     )
 }
 
@@ -321,7 +321,7 @@ internal fun calculateScalebarProperties(
 internal fun generateScalebarLabels(
     minSegmentWidth: Double,
     displayLength: Double,
-    lineMapLength: Double,
+    scalebarLineLength: Double,
     displayUnit: LinearUnit?,
     style: ScalebarStyle,
     labelTypography: LabelTypography,
@@ -332,7 +332,7 @@ internal fun generateScalebarLabels(
     val maxNumSegments = minOf(suggestedNumSegments, 4)
 
     val numSegments = ScalebarUtils.numSegments(
-        lineMapLength,
+        scalebarLineLength,
         maxNumSegments
     )
 
@@ -352,7 +352,7 @@ internal fun generateScalebarLabels(
     for (index in 0 until numSegments) {
         currSegmentX += segmentScreenLength
         val segmentMapLength: Double =
-            (segmentScreenLength * (index + 1) / displayLength) * lineMapLength
+            (segmentScreenLength * (index + 1) / displayLength) * scalebarLineLength
 
         val segmentText: String =
             if (index == numSegments - 1 && displayUnit != null) {
@@ -382,7 +382,7 @@ internal fun generateScalebarLabels(
 internal data class ScalebarProperties(
     val displayLength: Double,
     val displayUnit: LinearUnit,
-    val lineMapLength: Double
+    val lineLength: Double
 )
 
 /**

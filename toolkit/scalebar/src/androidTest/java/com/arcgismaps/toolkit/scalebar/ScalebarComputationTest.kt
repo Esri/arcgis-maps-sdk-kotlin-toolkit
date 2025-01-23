@@ -116,16 +116,16 @@ class ScalebarCalculationsTest {
                 spatialReference = spatialReference,
                 viewpoint = viewpoint,
                 unitsPerDip = unitsPerDip,
-                maxLength = maxWidth,
+                maxDisplayLength = maxWidth,
             )
             val minSegmentWidth = measureMinSegmentWidth(
-                lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
+                scalebarLineLength = scalebarProperties?.lineLength ?: 0.0,
                 labelTypography = labelTypography,
             )
             val scalebarLabels = generateScalebarLabels(
                 minSegmentWidth = minSegmentWidth,
                 displayLength = scalebarProperties?.displayLength ?: 0.0,
-                lineMapLength = scalebarProperties?.lineMapLength ?: 0.0,
+                scalebarLineLength = scalebarProperties?.lineLength ?: 0.0,
                 displayUnit = scalebarProperties?.displayUnit,
                 style = style,
                 labelTypography = labelTypography,
