@@ -110,7 +110,7 @@ public fun Scalebar(
 
     if (scalebarLabels.isNotEmpty()) {
         val density = LocalDensity.current
-        ShowScalebar(
+        Scalebar(
             scalebarProperties?.displayLength?.toPx(density) ?: 0.0,
             scalebarLabels,
             style,
@@ -122,7 +122,7 @@ public fun Scalebar(
 }
 
 @Composable
-private fun ShowScalebar(
+private fun Scalebar(
     maxWidth: Double,
     labels: List<ScalebarLabel>,
     scalebarStyle: ScalebarStyle,
