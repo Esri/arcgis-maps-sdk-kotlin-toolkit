@@ -374,8 +374,8 @@ private fun LocationTracker(
         val wrapper = LocationDataSourceWrapper(locationDataSource)
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
-            wrapper.onDestroy(lifecycleOwner)
             lifecycleOwner.lifecycle.removeObserver(wrapper)
+            wrapper.onDestroy(lifecycleOwner)
         }
     }
 }
