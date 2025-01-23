@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -133,7 +132,7 @@ public fun WorldScaleSceneView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    val hasCompletedPermissionRequest = requestPermissionsOrFail(
+    val allPermissionsGranted = rememberPermissionsGranted(
         context,
         requestCameraPermissionAutomatically,
         requestLocationPermissionAutomatically,
@@ -160,7 +159,7 @@ public fun WorldScaleSceneView(
     val cameraController = remember { TransformationMatrixCameraController() }
 
     var isLocationDataSourceStarted by remember { mutableStateOf(false) }
-    if (hasCompletedPermissionRequest && context.checkPermissionsGranted()) {
+    if (allPermissionsGranted) {
         val locationDataSource = rememberSystemLocationDataSource()
         LocationTracker(
             locationDataSource,
@@ -283,19 +282,18 @@ public fun WorldScaleSceneView(
  * If [requestCameraPermissionAutomatically] or [requestLocationPermissionAutomatically] are set to false,
  * the permissions will not be requested automatically and the initialization will fail if the permissions are not granted.
  *
- * @return A [MutableState] that will be true when the permissions have been requested and the result has been received.
+ * @return A [MutableState] that will be true when all permissions are granted.
  * @since 200.7.0
  */
 @Composable
-private fun requestPermissionsOrFail(
+private fun rememberPermissionsGranted(
     context: Context,
     requestCameraPermissionAutomatically: Boolean,
     requestLocationPermissionAutomatically: Boolean,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
 ): Boolean {
-    var hasLaunchedRequest by remember { mutableStateOf(false) }
-    var hasCompletedRequest by remember { mutableStateOf(false) }
+    var allPermissionsGranted by remember { mutableStateOf(false) }
     val permissionsToRequest = mutableListOf<String>()
     if (requestCameraPermissionAutomatically) {
         permissionsToRequest.add(Manifest.permission.CAMERA)
@@ -360,31 +358,17 @@ private fun requestPermissionsOrFail(
                     onInitializationStatusChanged
                 )
             }
-            hasCompletedRequest = true
+            else {
+                allPermissionsGranted = true
+            }
         }
 
-    if (!hasLaunchedRequest) {
-        SideEffect {
-            hasLaunchedRequest = true
-            launcher.launch(permissionsToRequest.toTypedArray())
-        }
+    LaunchedEffect(Unit) {
+        launcher.launch(permissionsToRequest.toTypedArray())
     }
 
-    return hasCompletedRequest
+    return allPermissionsGranted
 }
-
-/**
- * Returns true if camera and location permissions are granted, otherwise false if either is not granted.
- *
- * @since 200.7.0
- */
-private fun Context.checkPermissionsGranted(): Boolean = listOf(
-    Manifest.permission.CAMERA,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
-    Manifest.permission.ACCESS_FINE_LOCATION
-).map { permission ->
-    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-}.all { it }
 
 /**
  * Starts the [locationDataSource] and periodically updates the [cameraController] with new locations
