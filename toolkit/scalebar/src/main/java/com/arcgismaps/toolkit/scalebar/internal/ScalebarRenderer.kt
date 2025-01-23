@@ -46,7 +46,7 @@ internal val lineWidth = 2.dp
 private const val shadowOffset = 3f
 private const val scalebarHeight = 20f // Height of the scalebar in pixels
 private const val textOffset = 5f
-internal val labelXPadding = 4.dp // padding between scalebar labels.
+internal val labelXPadding = 4.0 // padding between scalebar labels.
 
 /**
  * Displays a scalebar with single label and endpoint lines.

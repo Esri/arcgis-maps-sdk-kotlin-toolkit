@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.scalebar.internal
 
 import androidx.compose.ui.unit.Density
+import kotlin.math.absoluteValue
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -125,7 +126,7 @@ internal object ScalebarUtils {
      */
     fun Double.format(): String {
         return when {
-            this % 1.0 == 0.0 -> this.toInt().toString() // Display as int if no decimal part
+            (this - this.toInt()).absoluteValue < 1e-12 -> this.toInt().toString() // Display as int if very close to an integer
             (this * 10) % 1.0 == 0.0 -> "%.1f".format(this) // Display one decimal place if last digit is zero
             else -> "%.2f".format(this) // Display two decimal places
         }

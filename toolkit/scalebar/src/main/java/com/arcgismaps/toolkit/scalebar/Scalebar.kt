@@ -173,8 +173,6 @@ private fun isMetric(): Boolean {
     return sharedPreferences.getBoolean("isMetric", true)
 }
 
-internal val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 9.sp))
-
 /**
  * Returns the display length in pixels of the Scalebar line.
  *
@@ -187,19 +185,18 @@ internal fun measureAvailableLineDisplayLength(
     labelTypography: LabelTypography,
     style: ScalebarStyle
 ): Double {
-    val lineWidthInPx = with(LocalDensity.current) { lineWidth.toPx() }
     return when (style) {
         ScalebarStyle.AlternatingBar,
         ScalebarStyle.DualUnitLine,
         ScalebarStyle.GraduatedLine -> {
             // " km" will render wider than " mi"
             val textMeasurer = rememberTextMeasurer()
-            val maxUnitDisplayWidth = textMeasurer.measure(" km", defaultLabelTypography.labelStyle).size.width / LocalDensity.current.density
-            maxWidth - (lineWidthInPx / 2.0f) - maxUnitDisplayWidth
+            val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width / LocalDensity.current.density
+            maxWidth - (lineWidth.value / 2.0f) - maxUnitDisplayWidth
         }
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
-            maxWidth - lineWidthInPx
+            maxWidth - lineWidth.value
         }
     }
 }
@@ -215,7 +212,6 @@ internal fun measureMinSegmentWidth(
     lineMapLength: Double,
     labelTypography: LabelTypography
 ): Double {
-    val labelXPaddingInPx = with(LocalDensity.current) { labelXPadding.toPx() }
     // The constraining factor is the space required to draw the labels. Create a testString containing the longest
     // label, which is usually the one for 'distance' because the other labels will be smaller numbers.
     // But if 'distance' is small some of the other labels may use decimals, so allow for each label needing at least
@@ -227,8 +223,8 @@ internal fun measureMinSegmentWidth(
     }
     // Calculate the bounds of the testString to determine its length
     val textMeasurer = rememberTextMeasurer()
-    val maxUnitDisplayWidth = textMeasurer.measure(minSegmentTestString, defaultLabelTypography.labelStyle).size.width / LocalDensity.current.density
+    val maxUnitDisplayWidth = textMeasurer.measure(minSegmentTestString, labelTypography.labelStyle).size.width / LocalDensity.current.density
     // Calculate the minimum segment length to ensure the labels don't overlap; multiply the testString length by 1.5
     // to allow for the right-most label being right-justified whereas the other labels are center-justified
-    return (maxUnitDisplayWidth * 1.5) + (labelXPaddingInPx * 2)
+    return (maxUnitDisplayWidth * 1.5) + (labelXPadding * 2)
 }
