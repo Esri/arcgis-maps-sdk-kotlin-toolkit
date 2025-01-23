@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -325,6 +326,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         )
     }
+    BackHandler {
+        if (uiState is UIState.Editing) {
+            showDiscardEditsDialog = true
+        } else {
+            onBackPressed()
+        }
+    }
 }
 
 @Composable
@@ -470,11 +478,11 @@ fun FeatureFormSheet(
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
         ) {
             // set bottom sheet content to the FeatureForm
-            FeatureForm(
+             FeatureForm(
                 featureForm = featureForm,
                 modifier = Modifier.fillMaxSize(),
                 validationErrorVisibility = errorVisibility,
-                onUtilityElementClicked = onUtilityElementClick,
+                onUtilityElementClick = { true},
                 utilityNetwork = utilityNetwork
             )
         }

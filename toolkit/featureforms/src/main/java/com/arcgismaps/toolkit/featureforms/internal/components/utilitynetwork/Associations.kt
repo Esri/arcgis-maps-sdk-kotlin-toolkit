@@ -207,10 +207,13 @@ internal fun Associations(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        LazyColumn {
             itemsIndexed(associations) { index, association ->
                 val target = association.getTargetElement(source)
-                AssociationItem(target, onUtilityElementClick)
+                AssociationItem(
+                    target,
+                    onUtilityElementClick
+                )
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -232,7 +235,17 @@ private fun AssociationItem(
 ) {
     ListItem(
         headlineContent = {
-            Text(element.objectId.toString(), modifier = Modifier.padding(start = 16.dp))
+            Text(
+                text = "Object ID ${element.objectId}",
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        },
+        supportingContent = {
+            Text(
+                text = element.assetType.name,
+                modifier = Modifier.padding(start = 16.dp),
+                style = MaterialTheme.typography.labelSmall
+            )
         },
         modifier = modifier.clickable {
             onClick(element)

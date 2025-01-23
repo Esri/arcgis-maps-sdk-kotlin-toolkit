@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -61,12 +62,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.Navigator
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil.request.Disposable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -111,6 +114,7 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -174,6 +178,8 @@ public fun FeatureForm(
     )
 }
 
+private val store = mutableMapOf<String, FeatureForm>()
+
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
@@ -236,22 +242,61 @@ public fun FeatureForm(
     utilityNetwork: UtilityNetwork? = null,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onUtilityElementClicked: (UtilityElement) -> Unit = {},
+    onUtilityElementClick: ((UtilityElement) -> Boolean)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
-    val stateData = remember(featureForm) {
-        StateData(featureForm)
+    var isGraphReady by rememberSaveable(featureForm) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val navController = rememberNavController()
+    val homeRoute = NavigationRoute.Form(featureForm.id)
+    if (isGraphReady) {
+        NavHost(navController, startDestination = homeRoute) {
+            composable<NavigationRoute.Form> {
+                val routeData = it.toRoute<NavigationRoute.Form>()
+                val form = store[routeData.formId] ?: return@composable
+                val stateData = StateData(form)
+                FeatureFormTheme(colorScheme, typography) {
+                    FeatureForm(
+                        stateData = stateData,
+                        modifier = modifier,
+                        validationErrorVisibility = validationErrorVisibility,
+                        onBarcodeButtonClick = onBarcodeButtonClick,
+                        onUtilityElementClicked = { element ->
+                            // invoke the callback if provided, else navigate to the element
+                            val res = onUtilityElementClick?.invoke(element) ?: true
+                            // if the callback returns false, do not navigate
+                            if (res) {
+                                scope.launch {
+                                    if (utilityNetwork != null) {
+                                        utilityNetwork.getFeaturesForElements(listOf(element))
+                                            .onSuccess { results ->
+                                                val feature =
+                                                    results.firstOrNull() ?: return@onSuccess
+                                                val newForm = FeatureForm(feature)
+                                                store[newForm.id] = newForm
+                                                val newRoute = NavigationRoute.Form(newForm.id)
+                                                navController.navigate(newRoute) {
+                                                    // to prevent a circular navigation
+                                                    popUpTo(newRoute) { inclusive = true }
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                        },
+                        utilityNetwork = utilityNetwork
+                    )
+                }
+            }
+        }
     }
-    FeatureFormTheme(colorScheme, typography) {
-        FeatureForm(
-            stateData = stateData,
-            modifier = modifier,
-            validationErrorVisibility = validationErrorVisibility,
-            onBarcodeButtonClick = onBarcodeButtonClick,
-            onUtilityElementClicked = onUtilityElementClicked,
-            utilityNetwork = utilityNetwork
-        )
+    LaunchedEffect(featureForm) {
+        if (!isGraphReady) {
+            store.clear()
+            store[featureForm.id] = featureForm
+            isGraphReady = true
+        }
     }
 }
 
@@ -322,7 +367,7 @@ private fun FeatureForm(
 private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
     val title by featureForm.title.collectAsState()
     Text(
-        text = title,
+        text = title + " ${featureForm.id}",
         style = MaterialTheme.typography.titleMedium,
         modifier = modifier
     )
@@ -351,7 +396,7 @@ private fun FeatureFormBody(
     var currentRoute = rememberSaveable(form, saver = NavRouteSaver) {
         NavRoute.Form
     }
-    Log.e("TAG", "FeatureFormBody: ${navController.currentBackStackEntry}", )
+    Log.e("TAG", "FeatureFormBody: ${navController.currentBackStackEntry}")
     // create a state for the utility network associations element if the utility network is
     // provided
     val unState = utilityNetwork?.let {
@@ -522,6 +567,12 @@ private sealed class NavRoute {
         val stateId: Int,
         val selectedGroupIndex: Int
     ) : NavRoute()
+}
+
+@Serializable
+private sealed class NavigationRoute {
+    @Serializable
+    data class Form(val formId: String) : NavigationRoute()
 }
 
 private val NavRouteSaver: Saver<NavRoute, Bundle> = object : Saver<NavRoute, Bundle> {
@@ -744,7 +795,7 @@ internal fun rememberFieldState(
 }
 
 @Composable
-internal fun rememberNavController(vararg inputs : Any) : NavHostController {
+internal fun rememberNavController(vararg inputs: Any): NavHostController {
     val context = LocalContext.current
     rememberNavController()
     return rememberSaveable(inputs = inputs, saver = Saver(
@@ -756,9 +807,12 @@ internal fun rememberNavController(vararg inputs : Any) : NavHostController {
 }
 
 private fun createNavController(context: Context): NavHostController {
-    Log.e("TAG", "createNavController: creating nav", )
+    Log.e("TAG", "createNavController: creating nav")
     return NavHostController(context).apply {
         navigatorProvider.addNavigator(ComposeNavigator())
         navigatorProvider.addNavigator(DialogNavigator())
     }
 }
+
+private val FeatureForm.id: String
+    get() = feature.attributes["objectid"].toString()
