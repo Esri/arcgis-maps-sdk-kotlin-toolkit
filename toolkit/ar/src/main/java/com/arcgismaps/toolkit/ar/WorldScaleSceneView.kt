@@ -88,7 +88,6 @@ import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.Instant
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 public fun WorldScaleSceneView(
@@ -418,7 +417,7 @@ private fun LocationTracker(
                         Camera(
                             location.position.y,
                             location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 1.0,
+                            if (location.position.hasZ) location.position.z!! else 0.0,
                             0.0,
                             90.0,
                             0.0
@@ -460,7 +459,7 @@ internal fun shouldUpdateCamera(
 ): Boolean {
     // filter out old locations
     if (Instant.now()
-            .toEpochMilli() - location.timestamp.toEpochMilli() > 10.0.seconds.inWholeMilliseconds
+            .toEpochMilli() - location.timestamp.toEpochMilli() > WorldScaleParameters.LOCATION_AGE_THRESHOLD_MS
     ) return false
 
     // filter out locations with no accuracy
@@ -477,11 +476,21 @@ internal fun shouldUpdateCamera(
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
-    return distance > 2.0
+    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
 }
 
 @Composable
 private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     return remember { SystemLocationDataSource() }
+}
+
+/**
+ * Provides constants for the [WorldScaleSceneView].
+ *
+ * @since 200.7.0
+ */
+private data object WorldScaleParameters {
+    const val LOCATION_DISTANCE_THRESHOLD_METERS = 2.0
+    const val LOCATION_AGE_THRESHOLD_MS = 10000.0
 }
