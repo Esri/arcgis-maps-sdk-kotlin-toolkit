@@ -37,6 +37,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
@@ -146,9 +147,12 @@ internal fun GraduatedLineScalebar(
             .width(calculateSizeInDp(density, totalWidth))
             .height(calculateSizeInDp(density, totalHeight))
     ) {
+        val tickMarksWithOffsetInScreenSizes = tickMarks.map { tickMark ->
+            tickMark.copy(xOffset = tickMark.xOffset.toPx(density))
+        }
         // draw tick marks
         drawTickMarksWithLabels(
-            tickMarks = tickMarks,
+            tickMarks = tickMarksWithOffsetInScreenSizes,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,
@@ -180,7 +184,7 @@ internal fun GraduatedLineScalebar(
             text = tickMarks.last().label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = tickMarks.last().xOffset.toFloat(),
+            xPos = tickMarks.last().xOffset.toPx(density).toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
