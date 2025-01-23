@@ -25,6 +25,9 @@ import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -247,7 +250,14 @@ public fun FeatureForm(
     val navController = rememberNavController()
     val homeRoute = NavigationRoute.Form(featureForm.id)
     if (isGraphReady) {
-        NavHost(navController, startDestination = homeRoute) {
+        NavHost(
+            navController,
+            startDestination = homeRoute,
+            enterTransition = { slideInHorizontally { h -> h } },
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() },
+            popExitTransition = { slideOutHorizontally { h -> h } }
+        ) {
             composable<NavigationRoute.Form> {
                 val routeData = it.toRoute<NavigationRoute.Form>()
                 val form = store[routeData.formId] ?: return@composable
@@ -274,7 +284,11 @@ public fun FeatureForm(
                                                 val newRoute = NavigationRoute.Form(newForm.id)
                                                 navController.navigate(newRoute) {
                                                     // to prevent a circular navigation
-                                                    popUpTo(newRoute) { inclusive = true }
+                                                    popUpTo(newRoute) {
+                                                        inclusive = true
+                                                        saveState = true
+                                                    }
+                                                    restoreState = true
                                                 }
                                             }
                                         }
@@ -411,11 +425,13 @@ private fun FeatureFormBody(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NavHost(navController, startDestination = currentRoute) {
-            composable<NavRoute.Form>(
-                enterTransition = { fadeIn() },
-                exitTransition = { fadeOut() }
-            ) {
+        NavHost(
+            navController,
+            startDestination = currentRoute,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() },
+        ) {
+            composable<NavRoute.Form> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
