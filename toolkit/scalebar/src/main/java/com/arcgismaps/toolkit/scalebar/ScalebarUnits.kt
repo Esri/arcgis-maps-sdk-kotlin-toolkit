@@ -19,9 +19,6 @@ package com.arcgismaps.toolkit.scalebar
 
 import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
 
 /**
  * A Scalebar unit.
