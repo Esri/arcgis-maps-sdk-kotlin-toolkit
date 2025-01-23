@@ -119,7 +119,7 @@ internal fun LineScalebar(
 }
 
 /**
- * Displays a graduated scalebar with multiple labels and tick marks.
+ * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
