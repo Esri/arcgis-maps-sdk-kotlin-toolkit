@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModelFactory
@@ -125,7 +125,7 @@ public fun Scalebar(
 @Composable
 private fun ShowScalebar(
     maxWidth: Double,
-    labels: List<ScalebarLabel>,
+    labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -138,10 +138,9 @@ private fun ShowScalebar(
         ScalebarStyle.GraduatedLine -> TODO()
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            label = labels[0].text,
             maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
             colorScheme = colorScheme,
-            shapes = shapes
         )
     }
 }

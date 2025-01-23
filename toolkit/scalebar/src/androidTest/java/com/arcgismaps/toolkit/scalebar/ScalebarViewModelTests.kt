@@ -153,7 +153,7 @@ class ScalebarViewModelTests {
                 assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
                 assertThat(viewModel.labels.size).isEqualTo(labels.size)
                 for (i in labels.indices) {
-                    assertThat(viewModel.labels[i].text).isEqualTo(labels[i])
+                    assertThat(viewModel.labels[i].label).isEqualTo(labels[i])
                 }
             }
         }

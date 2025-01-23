@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.scalebar
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -26,7 +27,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +41,7 @@ import org.junit.Test
  */
 class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
+    private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -49,18 +53,45 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testScaleLabelIsDisplayed() {
+    fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    label = "1000 km",
                     maxWidth = 300f,
+                    label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
-                    shapes = ScalebarDefaults.shapes()
 
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a graduated line scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testGraduatedLineScalebarIsDisplayed() {
+        val maxWidth = 500f
+        val tickMarks = listOf(
+            ScalebarDivision(0, 0.0, 0.0, "0"),
+            ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
+            ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
+            ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+            ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
+        )
+        // Test the scalebar
+        composeTestRule.setContent {
+                GraduatedLineScalebar(
+                    maxWidth = maxWidth,
+                    colorScheme = ScalebarDefaults.colors(),
+                    tickMarks = tickMarks
+                )
+        }
+        composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
     }
 
     /**
@@ -71,16 +102,16 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testScaleBarIsDisplayed() {
+    fun testLineScaleBarColorChange() {
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
-                    label = "1000 km",
                     maxWidth = 300f,
+                    label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-                    shapes = ScalebarDefaults.shapes()
                 )
             }
         }

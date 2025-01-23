@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
-import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 
 private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
 internal const val lineWidth = 5f
@@ -55,20 +54,18 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param label The scale value to display.
  * @param maxWidth The width of the scalebar in pixels.
+ * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
- * @param shapes The shape properties to use.
  *
  * @since 200.7.0
  */
 @Composable
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
-    label: String,
     maxWidth: Float,
+    label: String,
     colorScheme: ScalebarColors,
-    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -84,7 +81,7 @@ internal fun LineScalebar(
     ) {
         // left line
         drawVerticalLineAndShadow(
-            x = 0f,
+            xPos = 0f,
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -93,7 +90,7 @@ internal fun LineScalebar(
 
         // bottom line
         drawHorizontalLineAndShadow(
-            y = scalebarHeight,
+            yPos = scalebarHeight,
             left = 0f,
             right = maxWidth,
             lineColor = colorScheme.lineColor,
@@ -102,7 +99,7 @@ internal fun LineScalebar(
 
         // right line
         drawVerticalLineAndShadow(
-            x = maxWidth,
+            xPos = maxWidth,
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -112,8 +109,75 @@ internal fun LineScalebar(
         drawText(
             text = label,
             textMeasurer = textMeasurer,
-            barEnd = maxWidth,
-            scalebarHeight = scalebarHeight,
+            xPos = maxWidth / 2,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            alignment = TextAlignment.CENTER
+        )
+    }
+}
+
+/**
+ * Displays a graduated scalebar with multiple labels and tick marks.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param maxWidth The width of the scale bar.
+ * @param tickMarks The list of tick marks to display.
+ * @param colorScheme The color scheme to use.
+ * @since 200.7.0
+ */
+@Composable
+internal fun GraduatedLineScalebar(
+    modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
+    maxWidth: Float,
+    tickMarks: List<ScalebarDivision>,
+    colorScheme: ScalebarColors,
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { textSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // draw tick marks
+        drawTickMarksWithLabels(
+            tickMarks = tickMarks,
+            color = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor,
+            textMeasurer = textMeasurer,
+            textColor = colorScheme.textColor,
+            textShadowColor = colorScheme.textShadowColor
+        )
+
+        // bottom line
+        drawHorizontalLineAndShadow(
+            yPos = scalebarHeight,
+            left = 0f,
+            right = maxWidth,
+            lineColor = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // right line
+        drawVerticalLineAndShadow(
+            xPos = maxWidth,
+            top = 0f,
+            bottom = scalebarHeight,
+            lineColor = colorScheme.lineColor,
+            shadowColor = colorScheme.shadowColor
+        )
+
+        // draw last label
+        drawText(
+            text = tickMarks.last().label,
+            textMeasurer = textMeasurer,
+            xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
@@ -124,15 +188,41 @@ internal fun LineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(4.dp), contentAlignment = Alignment.BottomStart) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
         LineScalebar(
             modifier = Modifier,
-            label = "1,000 km",
             maxWidth = 300f,
+            label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-            shapes = ScalebarDefaults.shapes()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun GraduatedLineScaleBarPreview() {
+    val maxWidth = 500f
+    val tickMarks = listOf(
+        ScalebarDivision(0, 0.0, 0.0, "0"),
+        ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
+        ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
+        ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100 km")
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
+        GraduatedLineScalebar(
+            modifier = Modifier,
+            maxWidth = maxWidth,
+            colorScheme = ScalebarDefaults.colors(),
+            tickMarks = tickMarks
         )
     }
 }
@@ -147,52 +237,65 @@ private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
 }
 
 /**
- * Used to align the text relative to the scalebar.
+ * Used to align the text relative to an anchor point in the scalebar.
  *
  * @since 200.7.0
  */
 private enum class TextAlignment {
+    /**
+     * Left align the text relative to a point.
+     * @since 200.7.0
+     */
     LEFT,
+
+    /**
+     * Center align the text relative to a point.
+     * @since 200.7.0
+     */
     CENTER,
-    RIGHT
+
+    /**
+     * Right aligns the text relative to a point.
+     * @since 200.7.0
+     */
+    RIGHT,
 }
 
 /**
- * Draws a vertical line on the canvas with a shadow.
- * The line will be of color [lineColor] and the shadow will be of color [shadowColor].
+ * Draws a vertical line of [color] on the canvas at the [xPos] with a shadow of color [shadowColor].
+ * The line height will be determined by [top] and [bottom] positions.
  *
  * @since 200.7.0
  */
 private fun DrawScope.drawVerticalLineAndShadow(
-    x: Float,
+    xPos: Float,
     top: Float,
     bottom: Float,
     lineColor: Color,
     shadowColor: Color,
 ) {
-    // draw shadow
-    drawLine(
-        color = shadowColor,
-        start = Offset(x + shadowOffset, top),
-        end = Offset(x + shadowOffset, bottom),
-        strokeWidth = lineWidth,
-    )
-    drawLine(
-        color = lineColor,
-        start = Offset(x, top),
-        end = Offset(x, bottom),
-        strokeWidth = lineWidth,
-    )
-}
-
+        // draw shadow
+        drawLine(
+            color = shadowColor,
+            start = Offset(xPos + shadowOffset, top),
+            end = Offset(xPos + shadowOffset, bottom),
+            strokeWidth = lineWidth,
+        )
+        drawLine(
+            color = lineColor,
+            start = Offset(xPos, top),
+            end = Offset(xPos, bottom),
+            strokeWidth = lineWidth,
+        )
+    }
 /**
- * Draws a horizontal line on the canvas with a shadow.
- * The line will be of color [lineColor] and the shadow will be of color [shadowColor].
+ * Draws a horizontal line of [color] on the canvas at the [yPos] with a shadow of [shadowColor].
+ * The line width will be determined by [left] and [right] positions.
  *
  * @since 200.7.0
  */
 private fun DrawScope.drawHorizontalLineAndShadow(
-    y: Float,
+    yPos: Float,
     left: Float,
     right: Float,
     lineColor: Color,
@@ -201,14 +304,14 @@ private fun DrawScope.drawHorizontalLineAndShadow(
     // draw shadow
     drawLine(
         color = shadowColor,
-        start = Offset((left - pixelAlignment) + shadowOffset, y + shadowOffset),
-        end = Offset((right + pixelAlignment) + shadowOffset, y + shadowOffset),
+        start = Offset((left - pixelAlignment) + shadowOffset, yPos + shadowOffset),
+        end = Offset((right + pixelAlignment) + shadowOffset, yPos + shadowOffset),
         strokeWidth = lineWidth,
     )
     drawLine(
         color = lineColor,
-        start = Offset(left - pixelAlignment, y),
-        end = Offset(right + pixelAlignment, y),
+        start = Offset(left - pixelAlignment, yPos),
+        end = Offset(right + pixelAlignment, yPos),
         strokeWidth = lineWidth,
     )
 }
@@ -217,14 +320,18 @@ private fun DrawScope.drawHorizontalLineAndShadow(
  * Draws the text on the canvas with a shadow.
  * This method adds blank space of size [textOffset] between the scaleBar and the text.
  *
+ * @param text The text to be drawn.
+ * @param textMeasurer The [TextMeasurer] to measure the text.
+ * @param xPos The location where the text should be drawn.
+ * @param color The color of the text.
+ * @param shadowColor The color of the text shadow.
+ * @param alignment The alignment of text relative to [xPos].
  * @since 200.7.0
  */
 private fun DrawScope.drawText(
     text: String,
     textMeasurer: TextMeasurer,
-    barStart: Float = 0f,
-    barEnd: Float,
-    scalebarHeight: Float,
+    xPos: Float,
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
     alignment: TextAlignment = TextAlignment.CENTER
@@ -233,16 +340,50 @@ private fun DrawScope.drawText(
         text = text,
         style = TextStyle(fontSize = textSize)
     )
-    val xPos = when (alignment) {
-        TextAlignment.LEFT -> barStart - (measuredText.size.width / 2)
-        TextAlignment.CENTER -> (barEnd - measuredText.size.width) / 2
-        TextAlignment.RIGHT -> barEnd - (measuredText.size.width / 2)
+    val alignedXPos = when (alignment) {
+        TextAlignment.LEFT -> xPos - measuredText.size.width + pixelAlignment
+        TextAlignment.CENTER -> xPos - (measuredText.size.width / 2)
+        TextAlignment.RIGHT -> xPos - pixelAlignment
     }
     val yPos = scalebarHeight + textOffset
     drawText(
         measuredText,
         color = color,
-        topLeft = Offset(xPos, yPos),
+        topLeft = Offset(alignedXPos, yPos),
         shadow = Shadow(color = shadowColor, offset = Offset(1f, 1f))
     )
+}
+
+/**
+ * Draws the tick marks on the canvas of [tickHeight] with a [color] with a shadow of [shadowColor].
+ *
+ * The label of the tick marks will be drawn with a [textColor] and shadow of [textShadowColor]. The tickmark
+ * position will be determined by [ScalebarDivision.xOffset].
+ */
+private fun DrawScope.drawTickMarksWithLabels(
+    tickMarks: List<ScalebarDivision>,
+    color: Color,
+    shadowColor: Color,
+    textMeasurer: TextMeasurer,
+    textColor: Color,
+    textShadowColor: Color
+) {
+
+    for (i in 0 until tickMarks.size - 1) {
+        drawVerticalLineAndShadow(
+            xPos = tickMarks[i].xOffset.toFloat(),
+            top = 0f,
+            bottom = scalebarHeight,
+            lineColor = color,
+            shadowColor = shadowColor
+        )
+        drawText(
+            text = tickMarks[i].label,
+            textMeasurer = textMeasurer,
+            xPos = tickMarks[i].xOffset.toFloat(),
+            color = textColor,
+            shadowColor = textShadowColor,
+            alignment = if (i == 0) TextAlignment.RIGHT else TextAlignment.CENTER
+        )
+    }
 }
