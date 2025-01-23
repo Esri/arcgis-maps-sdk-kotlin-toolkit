@@ -46,7 +46,7 @@ class ScalebarViewModelTests {
     val composeTestRule = createComposeRule()
 
     private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
-    private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 11.sp))
+    private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 9.sp))
 
     /**
      * Given a Scalebar view model
@@ -95,6 +95,29 @@ class ScalebarViewModelTests {
     }
 
     /**
+     * Given a Scalebar view model
+     * When the Scalebar of Bar style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testGraduatedLineStyle() = runTest {
+        testScalebarViewModel(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.GraduatedLine,
+            maxWidth = 175.0,
+            units = ScalebarUnits.METRIC,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            labelTypography = defaultLabelTypography,
+            displayLength = 137,
+            labels = listOf("0", "100", "200", "300 km")
+        )
+    }
+
+    /**
      * Executes a test for the ScalebarViewModel with the given parameters.
      *
      * @since 200.7.0
@@ -132,13 +155,15 @@ class ScalebarViewModelTests {
 
         val lineWidth = 2.0f // this is the value being passed after the available line display length is calculated
                              // in swift, it is calculated as maxWidth - lineWidth
-        val availableLineDisplayLength = maxWidth - lineWidth
+//        val availableLineDisplayLength = maxWidth - lineWidth
 
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
+                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+
                 viewModel.computeScalebarProperties(
                     spatialReference,
                     viewpoint,

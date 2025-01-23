@@ -42,11 +42,11 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 
 private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
-internal const val lineWidth = 5f
+internal val lineWidth = 2.dp
 private const val shadowOffset = 3f
 private const val scalebarHeight = 20f // Height of the scalebar in pixels
 private const val textOffset = 5f
-internal const val labelXPadding = 4f // padding between scalebar labels.
+internal val labelXPadding = 4.dp // padding between scalebar labels.
 
 /**
  * Displays a scalebar with single label and endpoint lines.
@@ -284,13 +284,13 @@ private fun DrawScope.drawVerticalLineAndShadow(
             color = shadowColor,
             start = Offset(xPos + shadowOffset, top),
             end = Offset(xPos + shadowOffset, bottom),
-            strokeWidth = lineWidth,
+            strokeWidth = lineWidth.toPx(),
         )
         drawLine(
             color = lineColor,
             start = Offset(xPos, top),
             end = Offset(xPos, bottom),
-            strokeWidth = lineWidth,
+            strokeWidth = lineWidth.toPx(),
         )
     }
 /**
@@ -311,13 +311,13 @@ private fun DrawScope.drawHorizontalLineAndShadow(
         color = shadowColor,
         start = Offset((left - pixelAlignment) + shadowOffset, yPos + shadowOffset),
         end = Offset((right + pixelAlignment) + shadowOffset, yPos + shadowOffset),
-        strokeWidth = lineWidth,
+        strokeWidth = lineWidth.toPx(),
     )
     drawLine(
         color = lineColor,
         start = Offset(left - pixelAlignment, yPos),
         end = Offset(right + pixelAlignment, yPos),
-        strokeWidth = lineWidth,
+        strokeWidth = lineWidth.toPx(),
     )
 }
 
