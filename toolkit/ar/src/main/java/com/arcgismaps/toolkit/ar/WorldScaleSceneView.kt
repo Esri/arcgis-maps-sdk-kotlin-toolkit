@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.ar
 
+import android.Manifest
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -273,8 +274,7 @@ public fun WorldScaleSceneView(
 
 /**
  * Checks the permissions required for the [WorldScaleSceneView] to function and requests them if necessary.
- * If [requestCameraPermissionAutomatically] or [requestLocationPermissionAutomatically] are set to false,
- * the permissions will not be requested automatically and the initialization will fail if the permissions are not granted.
+ * If the permissions are not granted, this function will update the [initializationStatus] to [WorldScaleSceneViewStatus.FailedToInitialize].
  *
  * @return A [MutableState] that will be true when all permissions are granted.
  * @since 200.7.0
@@ -286,14 +286,15 @@ private fun rememberPermissionsGranted(
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
 ): State<Boolean> {
     val allPermissionsGranted = remember { mutableStateOf(false) }
-    val permissionsToRequest = mutableListOf<String>()
+    val permissionsToRequest = listOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.CAMERA
+    )
     val launcher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { grantedState: Map<String, Boolean> ->
-            // This callback will only be relevant to the permissions that were added to the request.
-            // If the user has set [requestCameraPermissionAutomatically] to false, for example,
-            // and the camera permission is not granted, this will not be included in the message.
             if (grantedState.any { !it.value }) {
                 val permissionsNotGranted =
                     grantedState.filter { !it.value }.keys.joinToString(", ")
