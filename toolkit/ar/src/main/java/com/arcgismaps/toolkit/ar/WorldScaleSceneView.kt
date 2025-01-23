@@ -18,9 +18,7 @@
 
 package com.arcgismaps.toolkit.ar
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -37,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ArcGISEnvironment
@@ -94,8 +91,6 @@ public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
-    requestCameraPermissionAutomatically: Boolean = true,
-    requestLocationPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
@@ -135,8 +130,6 @@ public fun WorldScaleSceneView(
 
     val allPermissionsGranted by rememberPermissionsGranted(
         context,
-        requestCameraPermissionAutomatically,
-        requestLocationPermissionAutomatically,
         initializationStatus,
         onInitializationStatusChanged,
     )
@@ -289,56 +282,13 @@ public fun WorldScaleSceneView(
 @Composable
 private fun rememberPermissionsGranted(
     context: Context,
-    requestCameraPermissionAutomatically: Boolean,
-    requestLocationPermissionAutomatically: Boolean,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
 ): State<Boolean> {
     val allPermissionsGranted = remember { mutableStateOf(false) }
     val permissionsToRequest = mutableListOf<String>()
-    if (requestCameraPermissionAutomatically) {
-        permissionsToRequest.add(Manifest.permission.CAMERA)
-    } else {
-        // If we are not requesting the camera permission automatically, we should check if it's granted
-        // and fail early if not
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.camera_permission_not_granted))
-                ),
-                onInitializationStatusChanged
-            )
-        }
-    }
-    if (requestLocationPermissionAutomatically) {
-        permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-    } else {
-        // If we are not requesting the location permissions automatically, we should check if it's granted
-        // and fail early if not
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.location_permission_not_granted))
-                ),
-                onInitializationStatusChanged
-            )
-        }
-    }
     val launcher =
-        rememberLauncherForActivityResult<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>(
+        rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { grantedState: Map<String, Boolean> ->
             // This callback will only be relevant to the permissions that were added to the request.
@@ -358,8 +308,7 @@ private fun rememberPermissionsGranted(
                     ),
                     onInitializationStatusChanged
                 )
-            }
-            else {
+            } else {
                 allPermissionsGranted.value = true
             }
         }
@@ -410,7 +359,8 @@ private fun LocationTracker(
                         )
                     )
                     // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix = TransformationMatrix.createIdentityMatrix()
+                    cameraController.transformationMatrix =
+                        TransformationMatrix.createIdentityMatrix()
                     if (!hasSetOriginCamera) {
                         hasSetOriginCamera = true
                     }
