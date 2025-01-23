@@ -29,6 +29,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -125,18 +126,10 @@ public fun WorldScaleSceneView(
     content: (@Composable WorldScaleSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
-
-    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    val allPermissionsGranted by rememberPermissionsGranted(
-        context,
-        initializationStatus,
-        onInitializationStatusChanged,
-    )
-
+    // Check if ARCore is installed
     var arCoreInstalled by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
@@ -150,125 +143,104 @@ public fun WorldScaleSceneView(
             arCoreInstalled = true
         }
     }
+    // If ARCore is not installed, we can't display anything
+    if (!arCoreInstalled) return
+
+    val allPermissionsGranted by rememberPermissionsGranted(
+        context,
+        initializationStatus,
+        onInitializationStatusChanged,
+    )
+    // If we don't have permission for camera or location, we can't display anything
+    if (!allPermissionsGranted) return
 
     val cameraController = remember { TransformationMatrixCameraController() }
-
-    var isLocationDataSourceStarted by remember { mutableStateOf(false) }
-    if (allPermissionsGranted) {
-        val locationDataSource = rememberSystemLocationDataSource()
-        LocationTracker(
-            locationDataSource,
-            cameraController,
-            onLocationDataSourceStatus = { status ->
-                when (status) {
-                    LocationDataSourceStatus.FailedToStart -> {
-                        initializationStatus.update(
-                            WorldScaleSceneViewStatus.FailedToInitialize(
-                                IllegalStateException(
-                                    context.getString(
-                                        R.string.location_data_source_failed_to_start,
-                                        locationDataSource.error.value?.message
-                                    )
-                                )
-                            ),
-                            onInitializationStatusChanged
-                        )
-                    }
-
-                    LocationDataSourceStatus.Started -> {
-                        isLocationDataSourceStarted = true
-                    }
-
-                    else -> {}
-                }
-            }
-        )
-    }
+    val locationDataSource = rememberSystemLocationDataSource()
+    LocationTracker(
+        locationDataSource,
+        cameraController
+    )
 
     Box(modifier = modifier) {
-        if (isLocationDataSourceStarted && arCoreInstalled) {
-            val arSessionWrapper =
-                rememberArSessionWrapper(applicationContext = context.applicationContext)
-            DisposableEffect(Unit) {
-                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                    arSessionWrapper.onDestroy(lifecycleOwner)
-                }
-            }
-            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-            session.value?.let { arSession ->
-                ArCameraFeed(
-                    session = arSession,
-                    onFrame = { frame, displayRotation ->
-                        val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
-                        cameraController.transformationMatrix = cameraPosition
-                        worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                            frame.camera,
-                            displayRotation
-                        )
-                        worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
-                    },
-                    onTapWithHitResult = { },
-                    onFirstPlaneDetected = { },
-                    visualizePlanes = false
-                )
-                // Once the session is created, we can say we're initialized
-                initializationStatus.update(
-                    WorldScaleSceneViewStatus.Initialized,
-                    onInitializationStatusChanged
-                )
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val arSessionWrapper =
+            rememberArSessionWrapper(applicationContext = context.applicationContext)
+        DisposableEffect(Unit) {
+            lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+                arSessionWrapper.onDestroy(lifecycleOwner)
             }
         }
-        if (initializationStatus.value == WorldScaleSceneViewStatus.Initialized) {
-            // Disable interaction, which is not supported in WorldScale scenarios
-            val interactionOptions = remember {
-                SceneViewInteractionOptions().apply {
-                    this.isEnabled = false
-                }
-            }
-            SceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier.fillMaxSize(),
-                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-                graphicsOverlays = graphicsOverlays,
-                sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
-                sceneViewInteractionOptions = interactionOptions,
-                viewLabelProperties = viewLabelProperties,
-                selectionProperties = selectionProperties,
-                isAttributionBarVisible = isAttributionBarVisible,
-                onAttributionTextChanged = onAttributionTextChanged,
-                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                cameraController = cameraController,
-                analysisOverlays = analysisOverlays,
-                imageOverlays = imageOverlays,
-                atmosphereEffect = AtmosphereEffect.None,
-                timeExtent = timeExtent,
-                onTimeExtentChanged = onTimeExtentChanged,
-                spaceEffect = SpaceEffect.Transparent,
-                sunTime = sunTime,
-                sunLighting = sunLighting,
-                ambientLightColor = ambientLightColor,
-                onNavigationChanged = onNavigationChanged,
-                onSpatialReferenceChanged = onSpatialReferenceChanged,
-                onLayerViewStateChanged = onLayerViewStateChanged,
-                onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-                onRotate = onRotate,
-                onScale = onScale,
-                onUp = onUp,
-                onDown = onDown,
-                onSingleTapConfirmed = onSingleTapConfirmed,
-                onDoubleTap = onDoubleTap,
-                onLongPress = onLongPress,
-                onTwoPointerTap = onTwoPointerTap,
-                onPan = onPan,
-                content = {
-                    content?.invoke(WorldScaleSceneViewScope(this))
-                }
+        val session = arSessionWrapper.session.collectAsStateWithLifecycle()
+        session.value?.let { arSession ->
+            ArCameraFeed(
+                session = arSession,
+                onFrame = { frame, displayRotation ->
+                    val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
+                    cameraController.transformationMatrix = cameraPosition
+                    worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                        frame.camera,
+                        displayRotation
+                    )
+                    worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
+                },
+                onTapWithHitResult = { },
+                onFirstPlaneDetected = { },
+                visualizePlanes = false
+            )
+            // Once the session is created, we can say we're initialized
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.Initialized,
+                onInitializationStatusChanged
             )
         }
+        SceneView(
+            arcGISScene = arcGISScene,
+            modifier = Modifier.fillMaxSize(),
+            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+            graphicsOverlays = graphicsOverlays,
+            sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
+            sceneViewInteractionOptions = remember {
+                // Disable interaction, which is not supported in WorldScale scenarios
+                SceneViewInteractionOptions().apply {
+                    isEnabled = false
+                }
+            },
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            cameraController = cameraController,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            atmosphereEffect = AtmosphereEffect.None,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            spaceEffect = SpaceEffect.Transparent,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = onSpatialReferenceChanged,
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+            onPan = onPan,
+            content = {
+                content?.invoke(WorldScaleSceneViewScope(this))
+            }
+        )
     }
 }
 
@@ -329,17 +301,11 @@ private fun rememberPermissionsGranted(
 @Composable
 private fun LocationTracker(
     locationDataSource: LocationDataSource,
-    cameraController: TransformationMatrixCameraController,
-    onLocationDataSourceStatus: ((LocationDataSourceStatus)) -> Unit
+    cameraController: TransformationMatrixCameraController
 ) {
     // We should reset the origin camera if the LDS or camera controller changes
     var hasSetOriginCamera = remember(locationDataSource, cameraController) { false }
     LaunchedEffect(locationDataSource) {
-        launch {
-            locationDataSource.status.collect {
-                onLocationDataSourceStatus(it)
-            }
-        }
         launch {
             locationDataSource.locationChanged
                 .filter { location ->
