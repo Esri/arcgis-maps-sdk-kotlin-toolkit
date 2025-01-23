@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,6 @@ internal fun UtilityNetworkAssociationsElement(
     modifier: Modifier = Modifier
 ) {
     val groups by state.groups
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -109,35 +109,37 @@ private fun AssociationTypes(
     Surface(
         modifier = modifier
     ) {
-        groups.forEachIndexed { i, group ->
-            ListItem(
-                headlineContent = {
-                    Text(text = group.type.name)
-                },
-                modifier = Modifier.clickable {
-                    onClick(i)
-                },
-                trailingContent = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = group.count.toString(),
-                        )
-                        Image(
-                            imageVector = Icons.AutoMirrored.Default.ArrowRight,
-                            contentDescription = null,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+        Column {
+            groups.forEachIndexed { i, group ->
+                ListItem(
+                    headlineContent = {
+                        Text(text = group.type.name)
+                    },
+                    modifier = Modifier.clickable {
+                        onClick(i)
+                    },
+                    trailingContent = {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = group.count.toString(),
+                            )
+                            Image(
+                                imageVector = Icons.AutoMirrored.Default.ArrowRight,
+                                contentDescription = null,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
                 )
-            )
-            if (i < groups.size - 1) {
-                HorizontalDivider()
+                if (i < groups.size - 1) {
+                    HorizontalDivider()
+                }
             }
         }
     }

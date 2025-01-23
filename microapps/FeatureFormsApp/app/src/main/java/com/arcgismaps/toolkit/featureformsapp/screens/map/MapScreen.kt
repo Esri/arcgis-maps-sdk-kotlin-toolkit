@@ -482,7 +482,7 @@ fun FeatureFormSheet(
                 featureForm = featureForm,
                 modifier = Modifier.fillMaxSize(),
                 validationErrorVisibility = errorVisibility,
-                onUtilityElementClick = { true},
+                onUtilityFeatureEdit = { true },
                 utilityNetwork = utilityNetwork
             )
         }

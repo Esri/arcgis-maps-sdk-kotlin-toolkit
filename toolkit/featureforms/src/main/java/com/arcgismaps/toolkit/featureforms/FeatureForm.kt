@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -60,16 +59,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.Navigator
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import coil.request.Disposable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -242,7 +238,7 @@ public fun FeatureForm(
     utilityNetwork: UtilityNetwork? = null,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onUtilityElementClick: ((UtilityElement) -> Boolean)? = null,
+    onUtilityFeatureEdit: ((FeatureForm) -> Boolean)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
@@ -263,17 +259,17 @@ public fun FeatureForm(
                         validationErrorVisibility = validationErrorVisibility,
                         onBarcodeButtonClick = onBarcodeButtonClick,
                         onUtilityElementClicked = { element ->
-                            // invoke the callback if provided, else navigate to the element
-                            val res = onUtilityElementClick?.invoke(element) ?: true
-                            // if the callback returns false, do not navigate
-                            if (res) {
-                                scope.launch {
-                                    if (utilityNetwork != null) {
-                                        utilityNetwork.getFeaturesForElements(listOf(element))
-                                            .onSuccess { results ->
-                                                val feature =
-                                                    results.firstOrNull() ?: return@onSuccess
-                                                val newForm = FeatureForm(feature)
+                            scope.launch {
+                                if (utilityNetwork != null) {
+                                    utilityNetwork.getFeaturesForElements(listOf(element))
+                                        .onSuccess { results ->
+                                            val feature =
+                                                results.firstOrNull() ?: return@onSuccess
+                                            val newForm = FeatureForm(feature)
+                                            // invoke the callback if provided, else navigate to the element
+                                            val res = onUtilityFeatureEdit?.invoke(newForm) ?: true
+                                            // if the callback returns false, do not navigate
+                                            if (res) {
                                                 store[newForm.id] = newForm
                                                 val newRoute = NavigationRoute.Form(newForm.id)
                                                 navController.navigate(newRoute) {
@@ -281,7 +277,7 @@ public fun FeatureForm(
                                                     popUpTo(newRoute) { inclusive = true }
                                                 }
                                             }
-                                    }
+                                        }
                                 }
                             }
                         },
