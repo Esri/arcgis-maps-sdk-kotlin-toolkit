@@ -196,7 +196,7 @@ internal fun GraduatedLineScalebar(
 }
 
 /**
- * Displays a dual unit line scalebar with scale lenght and measurements in primary and
+ * Displays a dual unit line scalebar with scale length and measurements in primary and
  * alternate unit.
  *
  * @param modifier The modifier to apply to the layout.
@@ -234,7 +234,7 @@ internal fun DualUnitLineScalebar(
         drawVerticalLineAndShadow(
             xPos = 0f,
             top = 0f,
-            bottom = (scalebarHeight * 2) + (lineWidth.toPx()/2),
+            bottom = (scalebarHeight * 2) + (lineWidth.toPx()),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -263,7 +263,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = endScalebarDivision.xOffset.toPx(density).toFloat(),
-            yPos = -(2 * scalebarHeight) - textOffset,
+            yPos = -(2 * scalebarHeight),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
@@ -284,7 +284,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = alternateScalebarDivision.xOffset.toPx(density).toFloat(),
-            yPos = scalebarHeight + 2 * (lineWidth.toPx()) + textOffset,
+            yPos = scalebarHeight + (2 * (lineWidth.toPx())) + textOffset,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             alignment = TextAlignment.CENTER
@@ -315,13 +315,9 @@ internal fun LineScaleBarPreview() {
 internal fun DualUnitLineScalebarPreview() {
     val maxWidth = 500f
     val density = LocalDensity.current.density
-    val tickMarks = listOf(
-        ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "100 km")
-    )
+    val endScalebarDivision = ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "3000 m")
+    val alternateScalebarDivision = ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "3500 Km")
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -330,8 +326,8 @@ internal fun DualUnitLineScalebarPreview() {
         DualUnitLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
-            endScalebarDivision = tickMarks[4],
-            alternateScalebarDivision = tickMarks[4],
+            endScalebarDivision = endScalebarDivision,
+            alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = ScalebarDefaults.colors(),
             labelTypography = ScalebarDefaults.typography()
         )
