@@ -140,7 +140,7 @@ public object ScalebarDefaults {
      */
     @Composable
     public fun typography(
-        labelStyle: TextStyle = MaterialTheme.typography.labelSmall
+        labelStyle: TextStyle = MaterialTheme.typography.titleSmall
     ): LabelTypography {
         return LabelTypography(
             labelStyle = labelStyle
