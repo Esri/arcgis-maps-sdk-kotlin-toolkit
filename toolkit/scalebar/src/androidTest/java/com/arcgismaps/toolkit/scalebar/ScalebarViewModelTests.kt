@@ -111,6 +111,28 @@ class ScalebarViewModelTests {
     }
 
     /**
+     * Given a Scalebar view model
+     * When the Scalebar of Dual unit style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testDualUnitLineStyle() = runTest {
+        testScalebarViewModel(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.DualUnitLine,
+            maxWidth = 175.0,
+            units = ScalebarUnits.METRIC,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 137,
+            labels = listOf("0", "100", "200", "300 km")
+        )
+    }
+
+    /**
      * Executes a test for the ScalebarViewModel with the given parameters.
      *
      * @since 200.7.0

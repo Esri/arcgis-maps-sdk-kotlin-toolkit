@@ -65,6 +65,29 @@ internal class ScalebarViewModel(
     val labels: List<ScalebarDivision>
         get() = _labels
 
+    internal val alternateUnit: ScalebarDivision
+        get() {
+            val displayUnit = displayUnit ?: return ScalebarDivision(-1, 0.0, 0.0, "")
+            val altUnit = if (units == ScalebarUnits.IMPERIAL) ScalebarUnits.METRIC else ScalebarUnits.IMPERIAL
+            val altMapBaseLength = displayUnit.convertTo(altUnit.baseLinearUnit, lineMapLength)
+            val altClosestBaseLength = altUnit.closestDistanceWithoutGoingOver(altMapBaseLength, altUnit.baseLinearUnit)
+            val altDisplayUnits = altUnit.linearUnitsForDistance(altClosestBaseLength)
+            val altMapLength = altUnit.baseLinearUnit.convertTo(altDisplayUnits, altClosestBaseLength)
+            val displayFactor = lineMapLength / displayLength
+            val convertedDisplayFactor = displayUnit.convertTo(altDisplayUnits, displayFactor)
+            val altScreenLength = altMapLength / convertedDisplayFactor
+
+            val altUnitAbbr = altDisplayUnits.getAbbreviation()
+            val label = "${altMapLength.format()} $altUnitAbbr"
+
+            return ScalebarDivision(
+                index = -2,
+                xOffset = altScreenLength,
+                labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+                label = label
+            )
+        }
+
     /**
      * Updates the labels for the Scalebar.
      *

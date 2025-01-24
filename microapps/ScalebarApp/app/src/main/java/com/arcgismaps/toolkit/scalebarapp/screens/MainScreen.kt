@@ -74,7 +74,7 @@ fun MainScreen(modifier: Modifier) {
             modifier = Modifier
                 .height(IntrinsicSize.Max)
                 .fillMaxWidth()
-                .padding(25.dp)
+                .padding(30.dp)
                 .align(Alignment.BottomStart)
         ) {
             Scalebar(
@@ -82,7 +82,7 @@ fun MainScreen(modifier: Modifier) {
                 unitsPerDip = unitsPerDip,
                 viewpoint = viewpoint,
                 spatialReference = spatialReference,
-                style = ScalebarStyle.GraduatedLine,
+                style = ScalebarStyle.DualUnitLine,
                 units = ScalebarUnits.IMPERIAL
             )
         }

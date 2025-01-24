@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -120,6 +121,7 @@ public fun Scalebar(
         ShowScalebar(
             scalebarViewModel.displayLength.toPx(density),
             scalebarViewModel.labels,
+            scalebarViewModel.alternateUnit,
             style,
             colorScheme,
             shapes,
@@ -133,6 +135,7 @@ public fun Scalebar(
 private fun ShowScalebar(
     maxWidth: Double,
     labels: List<ScalebarDivision>,
+    alternateUnit: ScalebarDivision,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -142,7 +145,14 @@ private fun ShowScalebar(
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> TODO()
         ScalebarStyle.Bar -> TODO()
-        ScalebarStyle.DualUnitLine -> TODO()
+        ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            endScalebarDivision = labels.last(),
+            alternateScalebarDivision = alternateUnit,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography
+        )
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
