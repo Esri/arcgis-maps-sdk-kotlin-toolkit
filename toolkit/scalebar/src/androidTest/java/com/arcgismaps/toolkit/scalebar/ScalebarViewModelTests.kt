@@ -112,7 +112,7 @@ class ScalebarViewModelTests {
 
     /**
      * Given a Scalebar view model
-     * When the Scalebar of Dual unit style is updated
+     * When the Scalebar of Dual unit line style is updated
      * Then the display length and labels should be correct
      *
      * @since 200.7.0
