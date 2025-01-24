@@ -338,13 +338,13 @@ internal fun DualUnitLineScalebarPreview() {
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 500f
-    val density = LocalDensity.current
+    val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / (4.0 * density.density)), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / (2.0 * density.density), 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / (4.0 * density.density))* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble() / density.density, 0.0, "100 km")
+        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
+        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
+        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
+        ScalebarDivision(4, maxWidth.toDouble() / density, 0.0, "100 km")
     )
     Box(
         modifier = Modifier
