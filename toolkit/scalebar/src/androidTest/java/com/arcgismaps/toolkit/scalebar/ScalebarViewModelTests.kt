@@ -16,6 +16,12 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.geometry.Point
@@ -23,8 +29,10 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import kotlin.math.roundToInt
 
@@ -34,6 +42,8 @@ import kotlin.math.roundToInt
  * @since 200.7.0
  */
 class ScalebarViewModelTests {
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
     private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
     private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 11.sp))
@@ -123,12 +133,29 @@ class ScalebarViewModelTests {
         val lineWidth = 2.0f // this is the value being passed after the available line display length is calculated
                              // in swift, it is calculated as maxWidth - lineWidth
         val availableLineDisplayLength = maxWidth - lineWidth
-        viewModel.updateScaleBar(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength)
 
-        assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
-        assertThat(viewModel.labels.size).isEqualTo(labels.size)
-        for (i in labels.indices) {
-            assertThat(viewModel.labels[i].text).isEqualTo(labels[i])
+        composeTestRule.setContent {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                viewModel.computeScalebarProperties(
+                    spatialReference,
+                    viewpoint,
+                    unitsPerDip,
+                    availableLineDisplayLength
+                )
+                val isUpdateLabels by viewModel.isUpdateLabels
+                if (isUpdateLabels) {
+                    viewModel.updateLabels(measureMinSegmentWidth(viewModel.lineMapLength, ScalebarDefaults.typography()))
+                }
+
+                assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
+                assertThat(viewModel.labels.size).isEqualTo(labels.size)
+                for (i in labels.indices) {
+                    assertThat(viewModel.labels[i].label).isEqualTo(labels[i])
+                }
+            }
         }
     }
 }

@@ -27,7 +27,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarLabel
+import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
+import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
@@ -52,22 +54,21 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testLineScalebarIsDisplayed() {
+    fun testScaleLabelIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    scaleValue = "1000 km",
                     maxWidth = 300f,
+                    label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
-                    shapes = ScalebarDefaults.shapes()
-
+                    labelTypography = ScalebarDefaults.typography()
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 
     /**
-     * Given a scalebar
+     * Given a graduated line scalebar
      * When it is displayed
      * Then it should be visible
      *
@@ -77,46 +78,23 @@ class ScalebarTests {
     fun testGraduatedLineScalebarIsDisplayed() {
         val maxWidth = 500f
         val tickMarks = listOf(
-            ScalebarLabel(0, 0.0, 0.0, "0"),
-            ScalebarLabel(1, (maxWidth / 4.0), 0.0, "25"),
-            ScalebarLabel(2, maxWidth / 2.0, 0.0, "50"),
-            ScalebarLabel(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-            ScalebarLabel(4, maxWidth.toDouble(), 0.0, "100")
+            ScalebarDivision(0, 0.0, 0.0, "0"),
+            ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
+            ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
+            ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
+            ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
                 GraduatedLineScalebar(
                     maxWidth = maxWidth,
                     colorScheme = ScalebarDefaults.colors(),
-                    shapes = ScalebarDefaults.shapes(),
-                    tickMarks = tickMarks
+                    tickMarks = tickMarks,
+                    labelTypography = ScalebarDefaults.typography()
                 )
         }
-
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
     }
-
-    /**
-     * Given a bar scalebar
-     * When it is displayed
-     * Then it should be visible
-     *
-     * @since 200.7.0
-     */
-    @Test
-    fun testBarScalebarIsDisplayed() {
-        val maxWidth = 300f
-        composeTestRule.setContent {
-            BarScalebar(
-                maxWidth = maxWidth,
-                scaleValue = "1000 km",
-                colorScheme = ScalebarDefaults.colors(),
-                shapes = ScalebarDefaults.shapes(),
-            )
-        }
-        composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
-    }
-
     /**
      * Given a scalebar with the line color set to red
      * When it is displayed
@@ -136,6 +114,28 @@ class ScalebarTests {
                     maxWidth = 300f,
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     shapes = ScalebarDefaults.shapes()
+                )
+            }
+        }
+    /**
+     * Given a scalebar with the line color set to red
+     * When it is displayed
+     * Then it should be visible with the red color
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testScaleBarIsDisplayed() {
+        composeTestRule.setContent {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                LineScalebar(
+                    maxWidth = 300f,
+                    label = "1000 km",
+                    colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+                    labelTypography = ScalebarDefaults.typography()
                 )
             }
         }
