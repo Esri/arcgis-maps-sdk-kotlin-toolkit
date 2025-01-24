@@ -147,12 +147,12 @@ internal fun GraduatedLineScalebar(
             .width(calculateSizeInDp(density, totalWidth))
             .height(calculateSizeInDp(density, totalHeight))
     ) {
-        val tickMarksWithOffsetInScreenSizes = tickMarks.map { tickMark ->
+        val tickMarksWithDensityOffsets = tickMarks.map { tickMark ->
             tickMark.copy(xOffset = tickMark.xOffset.toPx(density))
         }
         // draw tick marks
         drawTickMarksWithLabels(
-            tickMarks = tickMarksWithOffsetInScreenSizes,
+            tickMarks = tickMarksWithDensityOffsets,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,

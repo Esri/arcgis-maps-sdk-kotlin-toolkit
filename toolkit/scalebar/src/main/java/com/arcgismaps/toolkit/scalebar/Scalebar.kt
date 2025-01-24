@@ -198,7 +198,12 @@ internal fun measureAvailableLineDisplayLength(
         ScalebarStyle.GraduatedLine -> {
             // " km" will render wider than " mi"
             val textMeasurer = rememberTextMeasurer()
-            val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width / LocalDensity.current.density
+            val maxUnitDisplayWidth = with(LocalDensity.current) {
+                textMeasurer.measure(
+                    " km",
+                    labelTypography.labelStyle
+                ).size.width.toDp().value
+            }
             maxWidth - (lineWidth.value / 2.0f) - maxUnitDisplayWidth
         }
         ScalebarStyle.Bar,
@@ -230,7 +235,12 @@ internal fun measureMinSegmentWidth(
     }
     // Calculate the bounds of the testString to determine its length
     val textMeasurer = rememberTextMeasurer()
-    val maxUnitDisplayWidth = textMeasurer.measure(minSegmentTestString, labelTypography.labelStyle).size.width / LocalDensity.current.density
+    val maxUnitDisplayWidth = with(LocalDensity.current) {
+        textMeasurer.measure(
+            minSegmentTestString,
+            labelTypography.labelStyle
+        ).size.width.toDp().value
+    }
     // Calculate the minimum segment length to ensure the labels don't overlap; multiply the testString length by 1.5
     // to allow for the right-most label being right-justified whereas the other labels are center-justified
     return (maxUnitDisplayWidth * 1.5) + (labelXPadding * 2)
