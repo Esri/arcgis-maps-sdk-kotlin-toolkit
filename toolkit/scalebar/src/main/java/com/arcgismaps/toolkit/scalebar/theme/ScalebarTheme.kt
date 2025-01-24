@@ -22,14 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 
 /**
  * Shape styling properties for the Scalebar.
  *
- * @param textShadowBlurRadius The text shadow blur radius.
+ * @param textShadowBlurRadius The text shadow blur radius, a value of 0.0 will result in no blur.
  * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
  * A value of 0.0 will result in a square corner.
  *
