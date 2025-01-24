@@ -126,33 +126,17 @@ public fun WorldScaleSceneView(
     content: (@Composable WorldScaleSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
-    val context = LocalContext.current
 
-    // Check if ARCore is installed
-    var arCoreInstalled by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
-                onInitializationStatusChanged
-            )
-        } else {
-            arCoreInstalled = true
-        }
-    }
+    val arCoreInstalled by rememberArCoreInstalled(initializationStatus, onInitializationStatusChanged)
     // If ARCore is not installed, we can't display anything
-    if (!arCoreInstalled) return
+    if (!arCoreInstalled) return@WorldScaleSceneView
 
     val allPermissionsGranted by rememberPermissionsGranted(
-        context,
         initializationStatus,
         onInitializationStatusChanged,
     )
     // If we don't have permission for camera or location, we can't display anything
-    if (!allPermissionsGranted) return
+    if (!allPermissionsGranted) return@WorldScaleSceneView
 
     val cameraController = remember { TransformationMatrixCameraController() }
     val locationDataSource = rememberSystemLocationDataSource()
@@ -163,7 +147,7 @@ public fun WorldScaleSceneView(
 
     Box(modifier = modifier) {
         val arSessionWrapper =
-            rememberArSessionWrapper(applicationContext = context.applicationContext)
+            rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
 
         val session = arSessionWrapper.session.collectAsStateWithLifecycle()
         session.value?.let { arSession ->
@@ -237,6 +221,29 @@ public fun WorldScaleSceneView(
     }
 }
 
+@Composable
+private fun rememberArCoreInstalled(
+    initializationStatus: MutableState<WorldScaleSceneViewStatus>,
+    onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
+): State<Boolean> {
+    val context = LocalContext.current
+    val arCoreInstalled = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val arCoreAvailability = checkArCoreAvailability(context)
+        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
+                ),
+                onInitializationStatusChanged
+            )
+        } else {
+            arCoreInstalled.value = true
+        }
+    }
+    return arCoreInstalled
+}
+
 /**
  * Checks the permissions required for the [WorldScaleSceneView] to function and requests them if necessary.
  * If the permissions are not granted, this function will update the [initializationStatus] to [WorldScaleSceneViewStatus.FailedToInitialize].
@@ -246,10 +253,10 @@ public fun WorldScaleSceneView(
  */
 @Composable
 private fun rememberPermissionsGranted(
-    context: Context,
     initializationStatus: MutableState<WorldScaleSceneViewStatus>,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
 ): State<Boolean> {
+    val context = LocalContext.current
     val allPermissionsGranted = remember { mutableStateOf(false) }
     val permissionsToRequest = listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
