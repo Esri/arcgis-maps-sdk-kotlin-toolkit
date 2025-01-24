@@ -118,16 +118,16 @@ internal object ScalebarUtils {
     /**
      * Formats a double to a string.
      * If the double has no decimal part or the first two decimal places are 0, then it will be displayed as an int.
-     * If the second digit after the decimal is zero, it will be displayed with one decimal place.
-     * Otherwise, it will be displayed with two decimal places.
+     * If the second decimal place is zero, it will display the number with one decimal place.
+     * Otherwise, it will truncate the number and be displayed with two decimal places.
      *
      * @since 200.7.0
      */
     fun Double.format(): String {
         return when {
             this % 1.0 == 0.0 || (this * 100).toInt() % 100 == 0 -> this.toInt().toString()
-            (this * 10) % 1.0 == 0.0 -> "%.1f".format(this) // Display one decimal place if last digit is zero
-            else -> "%.2f".format(this) // Display two decimal places
+            (this * 10).toInt() % 10 == 0 -> "%.1f".format(this)
+            else -> "%.2f".format(this)
         }
     }
 
