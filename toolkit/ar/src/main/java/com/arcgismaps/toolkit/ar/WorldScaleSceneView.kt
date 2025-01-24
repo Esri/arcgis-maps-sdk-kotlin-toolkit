@@ -146,11 +146,8 @@ public fun WorldScaleSceneView(
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
     val cameraController = remember { TransformationMatrixCameraController() }
-    val locationDataSource = rememberSystemLocationDataSource()
-    LocationTracker(
-        locationDataSource,
-        cameraController
-    )
+
+    LocationTracker(cameraController)
 
     Box(modifier = modifier) {
         val arSessionWrapper =
@@ -235,12 +232,12 @@ public fun WorldScaleSceneView(
  */
 @Composable
 private fun LocationTracker(
-    locationDataSource: LocationDataSource,
     cameraController: TransformationMatrixCameraController
 ) {
+    val locationDataSource = rememberSystemLocationDataSource()
     // We should reset the origin camera if the LDS or camera controller changes
-    var hasSetOriginCamera = remember(locationDataSource, cameraController) { false }
-    LaunchedEffect(locationDataSource) {
+    var hasSetOriginCamera = remember(cameraController) { false }
+    LaunchedEffect(Unit) {
         launch {
             locationDataSource.locationChanged
                 .filter { location ->
@@ -270,7 +267,7 @@ private fun LocationTracker(
         }
     }
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(locationDataSource) {
+    DisposableEffect(Unit) {
         // This will start the LocationDataSource
         val wrapper = LocationDataSourceWrapper(locationDataSource)
         lifecycleOwner.lifecycle.addObserver(wrapper)
