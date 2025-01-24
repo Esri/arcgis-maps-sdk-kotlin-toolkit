@@ -24,14 +24,17 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
+import com.arcgismaps.toolkit.ar.R
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Camera
@@ -153,3 +156,68 @@ internal val Pose.transformationMatrix: TransformationMatrix
             translation[2].toDouble()
         )
     }
+
+/**
+ * Checks if ARCore is supported and installed and returns a [State] indicating if it is.
+ * If ARCore is not supported or installed, [onFailed] will be called with an [IllegalStateException].
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun rememberArCoreInstalled(
+    onFailed: (IllegalStateException) -> Unit
+): State<Boolean> {
+    val context = LocalContext.current
+    val arCoreInstalled = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val arCoreAvailability = checkArCoreAvailability(context)
+        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+            onFailed(IllegalStateException(context.getString(R.string.arcore_not_installed_message)))
+        } else {
+            arCoreInstalled.value = true
+        }
+    }
+    return arCoreInstalled
+}
+
+/**
+ * Requests the [permissionsToRequest] and returns a [State] indicating if all permissions are granted.
+ * If any permissions are not granted, [onFailed] will be called with an [IllegalStateException] specifying
+ * the permissions that were not granted.
+ *
+ * @return A [State] that will be true when all permissions are granted.
+ * @since 200.7.0
+ */
+@Composable
+internal fun rememberPermissionsGranted(
+    permissionsToRequest: List<String>,
+    onFailed: (IllegalStateException) -> Unit
+): State<Boolean> {
+    val context = LocalContext.current
+    val allPermissionsGranted = remember { mutableStateOf(false) }
+    val launcher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { grantedState: Map<String, Boolean> ->
+            if (grantedState.any { !it.value }) {
+                val permissionsNotGranted =
+                    grantedState.filter { !it.value }.keys.joinToString(", ")
+                onFailed(
+                    IllegalStateException(
+                        context.getString(
+                            R.string.permissions_not_granted_message,
+                            permissionsNotGranted
+                        )
+                    )
+                )
+            } else {
+                allPermissionsGranted.value = true
+            }
+        }
+
+    LaunchedEffect(Unit) {
+        launcher.launch(permissionsToRequest.toTypedArray())
+    }
+
+    return allPermissionsGranted
+}

@@ -19,21 +19,13 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
-import android.content.Context
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +38,6 @@ import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
-import com.arcgismaps.location.LocationDataSourceStatus
 import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -76,14 +67,14 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
-import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
+import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -127,13 +118,29 @@ public fun WorldScaleSceneView(
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
 
-    val arCoreInstalled by rememberArCoreInstalled(initializationStatus, onInitializationStatusChanged)
+    val arCoreInstalled by rememberArCoreInstalled(
+        onFailed = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
     // If ARCore is not installed, we can't display anything
     if (!arCoreInstalled) return@WorldScaleSceneView
 
     val allPermissionsGranted by rememberPermissionsGranted(
-        initializationStatus,
-        onInitializationStatusChanged,
+        permissionsToRequest = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CAMERA
+        ),
+        onFailed = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
     )
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
@@ -219,78 +226,6 @@ public fun WorldScaleSceneView(
             }
         )
     }
-}
-
-@Composable
-private fun rememberArCoreInstalled(
-    initializationStatus: MutableState<WorldScaleSceneViewStatus>,
-    onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
-): State<Boolean> {
-    val context = LocalContext.current
-    val arCoreInstalled = remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
-                onInitializationStatusChanged
-            )
-        } else {
-            arCoreInstalled.value = true
-        }
-    }
-    return arCoreInstalled
-}
-
-/**
- * Checks the permissions required for the [WorldScaleSceneView] to function and requests them if necessary.
- * If the permissions are not granted, this function will update the [initializationStatus] to [WorldScaleSceneViewStatus.FailedToInitialize].
- *
- * @return A [MutableState] that will be true when all permissions are granted.
- * @since 200.7.0
- */
-@Composable
-private fun rememberPermissionsGranted(
-    initializationStatus: MutableState<WorldScaleSceneViewStatus>,
-    onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)?
-): State<Boolean> {
-    val context = LocalContext.current
-    val allPermissionsGranted = remember { mutableStateOf(false) }
-    val permissionsToRequest = listOf(
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.CAMERA
-    )
-    val launcher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { grantedState: Map<String, Boolean> ->
-            if (grantedState.any { !it.value }) {
-                val permissionsNotGranted =
-                    grantedState.filter { !it.value }.keys.joinToString(", ")
-                initializationStatus.update(
-                    WorldScaleSceneViewStatus.FailedToInitialize(
-                        IllegalStateException(
-                            context.getString(
-                                R.string.permissions_not_granted_message,
-                                permissionsNotGranted
-                            )
-                        )
-                    ),
-                    onInitializationStatusChanged
-                )
-            } else {
-                allPermissionsGranted.value = true
-            }
-        }
-
-    LaunchedEffect(Unit) {
-        launcher.launch(permissionsToRequest.toTypedArray())
-    }
-
-    return allPermissionsGranted
 }
 
 /**
