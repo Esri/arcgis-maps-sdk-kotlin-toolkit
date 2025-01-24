@@ -19,17 +19,23 @@
 package com.arcgismaps.toolkit.scalebar
 
 import android.content.Context
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
@@ -137,7 +143,13 @@ private fun ShowScalebar(
         ScalebarStyle.AlternatingBar -> TODO()
         ScalebarStyle.Bar -> TODO()
         ScalebarStyle.DualUnitLine -> TODO()
-        ScalebarStyle.GraduatedLine -> TODO()
+        ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            tickMarks = labels,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography
+        )
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
@@ -175,7 +187,7 @@ private fun isMetric(): Boolean {
  * @since 200.7.0
  */
 @Composable
-private fun measureAvailableLineDisplayLength(
+internal fun measureAvailableLineDisplayLength(
     maxWidth: Double,
     labelTypography: LabelTypography,
     style: ScalebarStyle
@@ -186,12 +198,17 @@ private fun measureAvailableLineDisplayLength(
         ScalebarStyle.GraduatedLine -> {
             // " km" will render wider than " mi"
             val textMeasurer = rememberTextMeasurer()
-            val maxUnitDisplayWidth = textMeasurer.measure(" km", labelTypography.labelStyle).size.width
-            maxWidth - (lineWidth / 2.0f) - maxUnitDisplayWidth
+            val maxUnitDisplayWidth = with(LocalDensity.current) {
+                textMeasurer.measure(
+                    " km",
+                    labelTypography.labelStyle
+                ).size.width.toDp().value
+            }
+            maxWidth - (lineWidth.value / 2.0f) - maxUnitDisplayWidth
         }
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
-            maxWidth - lineWidth
+            maxWidth - lineWidth.value
         }
     }
 }
@@ -218,7 +235,12 @@ internal fun measureMinSegmentWidth(
     }
     // Calculate the bounds of the testString to determine its length
     val textMeasurer = rememberTextMeasurer()
-    val maxUnitDisplayWidth = textMeasurer.measure(minSegmentTestString, labelTypography.labelStyle).size.width
+    val maxUnitDisplayWidth = with(LocalDensity.current) {
+        textMeasurer.measure(
+            minSegmentTestString,
+            labelTypography.labelStyle
+        ).size.width.toDp().value
+    }
     // Calculate the minimum segment length to ensure the labels don't overlap; multiply the testString length by 1.5
     // to allow for the right-most label being right-justified whereas the other labels are center-justified
     return (maxUnitDisplayWidth * 1.5) + (labelXPadding * 2)

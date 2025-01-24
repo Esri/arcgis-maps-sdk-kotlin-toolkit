@@ -45,7 +45,7 @@ public enum class ScalebarStyle {
     DualUnitLine,
 
     /**
-     * Displays a single unit with a single bar.
+     * Displays a single unit with tick marks.
      *
      * @since 200.7.0
      */

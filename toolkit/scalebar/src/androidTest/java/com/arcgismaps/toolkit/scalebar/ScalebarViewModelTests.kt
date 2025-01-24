@@ -22,13 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarViewModel
-import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -46,7 +43,6 @@ class ScalebarViewModelTests {
     val composeTestRule = createComposeRule()
 
     private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
-    private val defaultLabelTypography = LabelTypography(labelStyle = TextStyle(fontSize = 11.sp))
 
     /**
      * Given a Scalebar view model
@@ -65,7 +61,6 @@ class ScalebarViewModelTests {
             units = ScalebarUnits.METRIC,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
-            labelTypography = defaultLabelTypography,
             displayLength = 171,
             labels = listOf("375 km")
         )
@@ -88,9 +83,30 @@ class ScalebarViewModelTests {
             units = ScalebarUnits.METRIC,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
-            labelTypography = defaultLabelTypography,
             displayLength = 171,
             labels = listOf("375 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar view model
+     * When the Scalebar of GraduatedLine style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testGraduatedLineStyle() = runTest {
+        testScalebarViewModel(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.GraduatedLine,
+            maxWidth = 175.0,
+            units = ScalebarUnits.METRIC,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 137,
+            labels = listOf("0", "100", "200", "300 km")
         )
     }
 
@@ -108,7 +124,6 @@ class ScalebarViewModelTests {
         units: ScalebarUnits,
         scale: Double,
         unitsPerDip: Double,
-        labelTypography: LabelTypography,
         useGeodeticCalculations: Boolean = true,
         displayLength: Int,
         labels: List<String>,
@@ -122,23 +137,23 @@ class ScalebarViewModelTests {
             scale = scale
         )
 
-        val viewModel = ScalebarViewModel(
-            0.0,
-            style,
-            units,
-            labelTypography,
-            useGeodeticCalculations
-        )
-
-        val lineWidth = 2.0f // this is the value being passed after the available line display length is calculated
-                             // in swift, it is calculated as maxWidth - lineWidth
-        val availableLineDisplayLength = maxWidth - lineWidth
-
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
+                val defaultLabelTypography = ScalebarDefaults.typography()
+
+                val viewModel = ScalebarViewModel(
+                    0.0,
+                    style,
+                    units,
+                    defaultLabelTypography,
+                    useGeodeticCalculations
+                )
+
+                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, defaultLabelTypography, style)
+
                 viewModel.computeScalebarProperties(
                     spatialReference,
                     viewpoint,
@@ -147,7 +162,7 @@ class ScalebarViewModelTests {
                 )
                 val isUpdateLabels by viewModel.isUpdateLabels
                 if (isUpdateLabels) {
-                    viewModel.updateLabels(measureMinSegmentWidth(viewModel.lineMapLength, ScalebarDefaults.typography()))
+                    viewModel.updateLabels(measureMinSegmentWidth(viewModel.lineMapLength, defaultLabelTypography))
                 }
 
                 assertThat(viewModel.displayLength.roundToInt()).isEqualTo(displayLength)
