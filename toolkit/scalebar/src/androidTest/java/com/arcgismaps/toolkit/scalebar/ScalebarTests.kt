@@ -99,6 +99,13 @@ class ScalebarTests {
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
     }
 
+    /**
+     * Given a bar scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testBarScaleBarIsDisplayed(){
         // Test the scalebar

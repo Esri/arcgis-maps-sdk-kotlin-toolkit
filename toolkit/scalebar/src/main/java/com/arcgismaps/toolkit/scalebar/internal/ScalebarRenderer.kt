@@ -59,7 +59,8 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
  * @param maxWidth The width of the scalebar in pixels.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
- *
+ * @param labelTypography The typography to use for the label.
+ * @param shapes The shape properties to use.
  * @since 200.7.0
  */
 @Composable
@@ -128,8 +129,11 @@ internal fun LineScalebar(
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
+ * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
+ * @param labelTypography The typography to use for the label.
+ * @since 200.7.0
  */
 @Composable
 internal fun BarScalebar(
@@ -199,6 +203,8 @@ internal fun BarScalebar(
  * @param maxWidth The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
+ * @param labelTypography The typography to use for the label.
+ * @param shapes The shape properties to use.
  * @since 200.7.0
  */
 @Composable
