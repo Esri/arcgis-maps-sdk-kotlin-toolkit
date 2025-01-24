@@ -8,7 +8,7 @@ import androidx.compose.ui.text.TextStyle
 public object WorldScaleCalibrationViewDefaults {
 
     @Composable
-    internal fun colorScheme(
+    public fun colorScheme(
         backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
         containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
         closeButtonContainerColor: Color = MaterialTheme.colorScheme.secondary,
@@ -31,7 +31,7 @@ public object WorldScaleCalibrationViewDefaults {
     }
 
     @Composable
-    internal fun typography(
+    public fun typography(
         titleTextStyle: TextStyle = MaterialTheme.typography.titleLarge.copy(
             color = MaterialTheme.colorScheme.secondary
         ),

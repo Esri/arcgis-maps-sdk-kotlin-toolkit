@@ -18,12 +18,46 @@
 
 package com.arcgismaps.toolkit.ar
 
+import android.icu.text.DecimalFormat
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.toolkit.ar.internal.DefaultThemeTokens
+import com.arcgismaps.toolkit.ar.internal.Joyslider
+import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewColorScheme
+import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
+import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewTypography
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -35,6 +69,25 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
  * @since 200.7.0
  */
 public class WorldScaleSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
+
+    @Composable
+    public fun CalibrationView(
+        onDismiss: () -> Unit,
+        modifier: Modifier = Modifier,
+        colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
+        typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography()
+    ) {
+        CalibrationViewInternal(
+            onDismiss = onDismiss,
+            modifier = modifier,
+            colorScheme = colorScheme,
+            typography = typography,
+            onHeadingChange = {},
+            onElevationChange = {}
+        )
+    }
+
+
     /**
      * Displays a Callout at the specified geographical location on the WorldScaleSceneView. The Callout is a composable
      * that can be used to display additional information about a location on the scene. The additional information is
@@ -105,4 +158,204 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
         content: @Composable BoxScope.() -> Unit
     ): Unit =
         sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+
+    @Composable
+    private fun CalibrationViewInternal(
+        onDismiss: () -> Unit,
+        modifier: Modifier = Modifier,
+        colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
+        typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
+        onHeadingChange: (Float) -> Unit,
+        onElevationChange: (Float) -> Unit
+    ) {
+        CompositionLocalProvider(
+            LocalColorScheme provides colorScheme,
+            LocalTypography provides typography
+        ) {
+            Card(
+                modifier = modifier,
+                colors = CardDefaults.cardColors(
+                    containerColor = LocalColorScheme.current.backgroundColor,
+                )
+            ) {
+                Column(
+                    //modifier = Modifier.background(color = Color.Transparent).padding(5.dp).clip(RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp)).background(color = Color.Red)
+                    modifier = Modifier.padding(5.dp),
+                ) {
+                    // title and close button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = "Calibration",
+                            style = LocalTypography.current.titleTextStyle
+                        )
+                        FilledIconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.size(24.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = LocalColorScheme.current.buttonContainerColor,
+                                contentColor = LocalColorScheme.current.buttonContentColor
+                            )
+                        ) {
+                            Icon(
+                                Icons.Filled.Close,
+                                tint = LocalColorScheme.current.buttonContentColor,
+                                contentDescription = "Close Calibration"
+                            )
+                        }
+                    }
+                    // heading
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = LocalColorScheme.current.containerColor,
+                        )
+                    ) {
+                        var heading by remember { mutableFloatStateOf(0F) }
+                        JoySliderBar(
+                            "Heading",
+                            "${DecimalFormat("#.#").format(heading)}º",
+                            minusContentDescritption = "Decrease Heading",
+                            plusContentDescritption = "Increase Heading",
+                            onMinusClick = { onHeadingChange(-1F) },
+                            onPlusClick = { onHeadingChange(+1F) }
+                        )
+                        Joyslider(
+                            onValueChange = { onHeadingChange(it) },
+                            contentDescription = "Heading slider",
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(5.dp))
+
+                    // elevation
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = LocalColorScheme.current.containerColor,
+                        )
+                    ) {
+                        var elevation by remember { mutableFloatStateOf(0F) }
+                        JoySliderBar(
+                            "Elevation",
+                            "${DecimalFormat("#.##").format(elevation)}m",
+                            minusContentDescritption = "Decrease Elevation",
+                            plusContentDescritption = "Increase Elevation",
+                            onMinusClick = { onElevationChange(-1F) },
+                            onPlusClick = { onElevationChange(+1F) }
+                        )
+                        Joyslider(
+                            onValueChange = { onElevationChange(0.1F * it) },
+                            contentDescription = "Elevation slider"
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.colorScheme }
+internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.typography }
+
+
+@Composable
+internal fun JoySliderBar(
+    title: String,
+    value: String,
+    minusContentDescritption: String,
+    plusContentDescritption: String,
+    onMinusClick: () -> Unit,
+    onPlusClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = title,
+                style = LocalTypography.current.subtitleTextStyle
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+                text = value,
+                style = LocalTypography.current.bodyTextStyle
+            )
+        }
+        PlusMinusButton(
+            minusContentDescritption = minusContentDescritption,
+            plusContentDescritption = plusContentDescritption,
+            onMinusClick = onMinusClick,
+            onPlusClick = onPlusClick
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun PlusMinusButton(
+    minusContentDescritption: String,
+    plusContentDescritption: String,
+    onMinusClick: () -> Unit,
+    onPlusClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SingleChoiceSegmentedButtonRow(
+        modifier = modifier
+    ) {
+        SegmentedButton(
+            shape = SegmentedButtonDefaults.itemShape(
+                index = 0,
+                count = 2
+            ),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = LocalColorScheme.current.buttonContainerColor,
+                activeContentColor = LocalColorScheme.current.buttonContentColor,
+                inactiveContainerColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveContentColor = LocalColorScheme.current.buttonContentColor,
+                activeBorderColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveBorderColor = LocalColorScheme.current.buttonContainerColor,
+            ),
+            onClick = onMinusClick,
+            selected = false,
+            label = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_action_reduce_heading),
+                    tint = LocalColorScheme.current.buttonContentColor,
+                    contentDescription = minusContentDescritption
+                )
+            }
+        )
+        SegmentedButton(
+            shape = SegmentedButtonDefaults.itemShape(
+                index = 1,
+                count = 2
+            ),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = LocalColorScheme.current.buttonContainerColor,
+                activeContentColor = LocalColorScheme.current.buttonContentColor,
+                inactiveContainerColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveContentColor = LocalColorScheme.current.buttonContentColor,
+                activeBorderColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveBorderColor = LocalColorScheme.current.buttonContainerColor,
+            ),
+            onClick = onPlusClick,
+            selected = false,
+            label = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_action_add_heading),
+                    tint = LocalColorScheme.current.buttonContentColor,
+                    contentDescription = plusContentDescritption
+                )
+            }
+        )
+    }
 }
