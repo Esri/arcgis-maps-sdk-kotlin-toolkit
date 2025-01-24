@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.scalebar.internal
 
 import androidx.compose.ui.unit.Density
-import kotlin.math.absoluteValue
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
