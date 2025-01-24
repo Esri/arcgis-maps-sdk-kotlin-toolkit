@@ -29,15 +29,16 @@ import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 /**
  * Shape styling properties for the Scalebar.
  *
- * @param shadowCornerRadius The corner radius of the shadow on the Scalebar.
+ * @param textShadowBlurRadius The text shadow blur radius.
  * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
+ * A value of 0.0 will result in a square corner.
  *
  * @since 200.7.0
  */
 @Immutable
 public data class ScalebarShapes internal constructor(
-    public val shadowCornerRadius: Dp,
-    public val barCornerRadius: Dp,
+    public val textShadowBlurRadius: Double,
+    public val barCornerRadius: Double,
 )
 
 /**
@@ -114,19 +115,20 @@ public object ScalebarDefaults {
 
     /**
      * Creates an instance of [ScalebarShapes] with default values.
-     *
-     * @param shadowCornerRadius The corner radius of the shadow on the Scalebar.
+     * [textShadowBlurRadius] is set to 0.0, meaning no shadow blur will be applied. [barCornerRadius] is set to 0.0,
+     * resulting in a square corner.
+     * @param textShadowBlurRadius The corner radius of the shadow on the Scalebar.
      * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
      *
      * @since 200.7.0
      */
     @Composable
     public fun shapes(
-        shadowCornerRadius: Dp = 10.dp,
-        barCornerRadius: Dp = 10.dp,
+        textShadowBlurRadius: Double = 0.0,
+        barCornerRadius: Double = 0.0
     ): ScalebarShapes {
         return ScalebarShapes(
-            shadowCornerRadius = shadowCornerRadius,
+            textShadowBlurRadius = textShadowBlurRadius,
             barCornerRadius = barCornerRadius
         )
     }

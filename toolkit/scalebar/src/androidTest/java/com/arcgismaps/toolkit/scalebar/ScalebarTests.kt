@@ -27,6 +27,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -54,14 +55,15 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testScaleLabelIsDisplayed() {
+    fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
@@ -90,33 +92,28 @@ class ScalebarTests {
                     maxWidth = maxWidth,
                     colorScheme = ScalebarDefaults.colors(),
                     tickMarks = tickMarks,
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
         }
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
     }
-    /**
-     * Given a scalebar with the line color set to red
-     * When it is displayed
-     * Then it should be visible with the red color
-     *
-     * @since 200.7.0
-     */
+
     @Test
-    fun testScaleBarIsDisplayed() {
+    fun testBarScaleBarIsDisplayed(){
+        // Test the scalebar
         composeTestRule.setContent {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                LineScalebar(
-                    scaleValue = "1000 km",
-                    maxWidth = 300f,
-                    colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-                    shapes = ScalebarDefaults.shapes()
-                )
-            }
+            BarScalebar(
+                maxWidth = 300f,
+                label = "1000 km",
+                colorScheme = ScalebarDefaults.colors(),
+                shapes = ScalebarDefaults.shapes(),
+                labelTypography = ScalebarDefaults.typography(),
+            )
         }
+        composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
+    }
+
     /**
      * Given a scalebar with the line color set to red
      * When it is displayed
@@ -125,7 +122,7 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testScaleBarIsDisplayed() {
+    fun testLineScaleBarColorChange() {
         composeTestRule.setContent {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -135,7 +132,8 @@ class ScalebarTests {
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
             }
         }

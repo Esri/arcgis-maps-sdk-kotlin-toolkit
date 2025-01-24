@@ -25,10 +25,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextMeasurer
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
+import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 
 private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
 internal const val lineWidth = 5f
@@ -64,7 +68,8 @@ internal fun LineScalebar(
     maxWidth: Float,
     label: String,
     colorScheme: ScalebarColors,
-    labelTypography: LabelTypography
+    labelTypography: LabelTypography,
+    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -112,6 +117,76 @@ internal fun LineScalebar(
             xPos = maxWidth / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
+            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
+            alignment = TextAlignment.CENTER
+        )
+    }
+}
+
+/**
+ * Displays bar scalebar with a single label.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param maxWidth The width of the scale bar.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ */
+@Composable
+internal fun BarScalebar(
+    modifier: Modifier = Modifier.testTag("BarScalebar"),
+    maxWidth: Float,
+    label: String,
+    colorScheme: ScalebarColors,
+    topLeftPoint : Offset = Offset(0f, 0f),
+    shapes: ScalebarShapes,
+    labelTypography: LabelTypography
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // draws the rectangle's shadow
+        drawRoundRect(
+            color = colorScheme.shadowColor,
+            topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
+            size = Size(maxWidth, scalebarHeight),
+            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            style = Stroke(width = lineWidth)
+        )
+        
+        // Draws the rectangle's fill color
+        drawRoundRect(
+            color = colorScheme.fillColor,
+            topLeft = topLeftPoint,
+            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            size = Size(maxWidth, scalebarHeight),
+
+        )
+        // draws the rectangle's border
+        drawRoundRect(
+            color = colorScheme.lineColor,
+            topLeft = topLeftPoint,
+            size = Size(maxWidth, scalebarHeight),
+            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            style = Stroke(width = lineWidth)
+        )
+
+        drawText(
+            text = label,
+            textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
+            xPos = maxWidth / 2.0f,
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
             alignment = TextAlignment.CENTER
         )
     }
@@ -132,7 +207,8 @@ internal fun GraduatedLineScalebar(
     maxWidth: Float,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
-    labelTypography: LabelTypography
+    labelTypography: LabelTypography,
+    shapes: ScalebarShapes
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -154,7 +230,8 @@ internal fun GraduatedLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             textColor = colorScheme.textColor,
-            textShadowColor = colorScheme.textShadowColor
+            textShadowColor = colorScheme.textShadowColor,
+            textShadowBlurRadius = shapes.textShadowBlurRadius.toFloat()
         )
 
         // bottom line
@@ -183,6 +260,7 @@ internal fun GraduatedLineScalebar(
             xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
+            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
             alignment = TextAlignment.CENTER
         )
     }
@@ -200,7 +278,27 @@ internal fun LineScaleBarPreview() {
             modifier = Modifier,
             maxWidth = 300f,
             label = "1,000 km",
-            colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
+            colorScheme = ScalebarDefaults.colors(),
+            labelTypography = ScalebarDefaults.typography(),
+            shapes = ScalebarDefaults.shapes()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun BarScaleBarPreview() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
+        BarScalebar(
+            modifier = Modifier,
+            maxWidth = 300f,
+            label = "1000 km",
+            colorScheme = ScalebarDefaults.colors(shadowColor = Color.Red, textShadowColor = Color.Red),
+            shapes = ScalebarDefaults.shapes(barCornerRadius = 4.0, textShadowBlurRadius = 2.0),
             labelTypography = ScalebarDefaults.typography()
         )
     }
@@ -227,7 +325,8 @@ internal fun GraduatedLineScaleBarPreview() {
             maxWidth = maxWidth,
             colorScheme = ScalebarDefaults.colors(),
             tickMarks = tickMarks,
-            labelTypography = ScalebarDefaults.typography()
+            labelTypography = ScalebarDefaults.typography(),
+            shapes = ScalebarDefaults.shapes()
         )
     }
 }
@@ -341,6 +440,7 @@ private fun DrawScope.drawText(
     xPos: Float,
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
+    shadowBlurRadius: Float,
     alignment: TextAlignment = TextAlignment.CENTER
 ) {
     val measuredText = textMeasurer.measure(
@@ -357,7 +457,11 @@ private fun DrawScope.drawText(
         measuredText,
         color = color,
         topLeft = Offset(alignedXPos, yPos),
-        shadow = Shadow(color = shadowColor, offset = Offset(1f, 1f))
+        shadow = Shadow(
+            color = shadowColor,
+            offset = Offset(1f, 1f),
+            blurRadius = shadowBlurRadius
+        )
     )
 }
 
@@ -374,7 +478,8 @@ private fun DrawScope.drawTickMarksWithLabels(
     textMeasurer: TextMeasurer,
     labelTypography: LabelTypography,
     textColor: Color,
-    textShadowColor: Color
+    textShadowColor: Color,
+    textShadowBlurRadius: Float
 ) {
 
     for (i in 0 until tickMarks.size - 1) {
@@ -392,6 +497,7 @@ private fun DrawScope.drawTickMarksWithLabels(
             xPos = tickMarks[i].xOffset.toFloat(),
             color = textColor,
             shadowColor = textShadowColor,
+            shadowBlurRadius = textShadowBlurRadius,
             alignment = if (i == 0) TextAlignment.RIGHT else TextAlignment.CENTER
         )
     }
