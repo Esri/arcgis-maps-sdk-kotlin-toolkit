@@ -118,7 +118,7 @@ internal fun LineScalebar(
             xPos = maxWidth / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
-            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
+            shadowBlurRadius = shapes.textShadowBlurRadius,
             alignment = TextAlignment.CENTER
         )
     }
@@ -162,7 +162,7 @@ internal fun BarScalebar(
             color = colorScheme.shadowColor,
             topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
             size = Size(maxWidth, scalebarHeight),
-            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth)
         )
         
@@ -170,7 +170,7 @@ internal fun BarScalebar(
         drawRoundRect(
             color = colorScheme.fillColor,
             topLeft = topLeftPoint,
-            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            cornerRadius = CornerRadius(shapes.barCornerRadius),
             size = Size(maxWidth, scalebarHeight),
 
         )
@@ -179,7 +179,7 @@ internal fun BarScalebar(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
             size = Size(maxWidth, scalebarHeight),
-            cornerRadius = CornerRadius(shapes.barCornerRadius.toFloat()),
+            cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth)
         )
 
@@ -190,7 +190,7 @@ internal fun BarScalebar(
             xPos = maxWidth / 2.0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
-            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
+            shadowBlurRadius = shapes.textShadowBlurRadius,
             alignment = TextAlignment.CENTER
         )
     }
@@ -237,7 +237,7 @@ internal fun GraduatedLineScalebar(
             labelTypography = labelTypography,
             textColor = colorScheme.textColor,
             textShadowColor = colorScheme.textShadowColor,
-            textShadowBlurRadius = shapes.textShadowBlurRadius.toFloat()
+            textShadowBlurRadius = shapes.textShadowBlurRadius
         )
 
         // bottom line
@@ -266,7 +266,7 @@ internal fun GraduatedLineScalebar(
             xPos = tickMarks.last().xOffset.toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
-            shadowBlurRadius = shapes.textShadowBlurRadius.toFloat(),
+            shadowBlurRadius = shapes.textShadowBlurRadius,
             alignment = TextAlignment.CENTER
         )
     }
@@ -304,7 +304,7 @@ internal fun BarScaleBarPreview() {
             maxWidth = 300f,
             label = "1000 km",
             colorScheme = ScalebarDefaults.colors(shadowColor = Color.Red, textShadowColor = Color.Red),
-            shapes = ScalebarDefaults.shapes(barCornerRadius = 4.0, textShadowBlurRadius = 2.0),
+            shapes = ScalebarDefaults.shapes(barCornerRadius = 4f, textShadowBlurRadius = 2f),
             labelTypography = ScalebarDefaults.typography()
         )
     }

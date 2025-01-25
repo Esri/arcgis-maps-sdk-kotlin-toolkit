@@ -27,16 +27,16 @@ import com.arcgismaps.toolkit.scalebar.ScalebarStyle
 /**
  * Shape styling properties for the Scalebar.
  *
- * @param textShadowBlurRadius The text shadow blur radius, a value of 0.0 will result in no blur.
+ * @param textShadowBlurRadius The text shadow blur radius, a value of 0f will result in no blur.
  * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
- * A value of 0.0 will result in a square corner.
+ * A value of 0f will result in a square corner.
  *
  * @since 200.7.0
  */
 @Immutable
 public data class ScalebarShapes internal constructor(
-    public val textShadowBlurRadius: Double,
-    public val barCornerRadius: Double,
+    public val textShadowBlurRadius: Float,
+    public val barCornerRadius: Float,
 )
 
 /**
@@ -94,8 +94,8 @@ public object ScalebarDefaults {
      */
     @Composable
     public fun colors(
-        fillColor: Color = Color.Black,
-        alternateFillColor: Color = Color.Gray,
+        fillColor: Color = Color.Gray,
+        alternateFillColor: Color = Color.Black,
         lineColor: Color = Color.White,
         shadowColor: Color = Color.Black.copy(alpha = 0.65f),
         textColor: Color = Color.Black,
@@ -113,17 +113,17 @@ public object ScalebarDefaults {
 
     /**
      * Creates an instance of [ScalebarShapes] with default values.
-     * [textShadowBlurRadius] is set to 0.0, meaning no shadow blur will be applied. [barCornerRadius] is set to 0.0,
+     * [textShadowBlurRadius] is set to 0f, meaning no shadow blur will be applied. [barCornerRadius] is set to 0f,
      * resulting in a square corner.
-     * @param textShadowBlurRadius The corner radius of the shadow on the Scalebar.
+     * @param textShadowBlurRadius The blur radius on the shadow of all text.
      * @param barCornerRadius The corner radius of the Scalebar of style [ScalebarStyle.Bar] and [ScalebarStyle.AlternatingBar].
      *
      * @since 200.7.0
      */
     @Composable
     public fun shapes(
-        textShadowBlurRadius: Double = 0.0,
-        barCornerRadius: Double = 0.0
+        textShadowBlurRadius: Float = 0f,
+        barCornerRadius: Float = 0f
     ): ScalebarShapes {
         return ScalebarShapes(
             textShadowBlurRadius = textShadowBlurRadius,
