@@ -210,7 +210,26 @@ public fun WorldScaleSceneView(
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
             content = {
-                content?.invoke(WorldScaleSceneViewScope(this))
+                content?.invoke(
+                    WorldScaleSceneViewScope(
+                        sceneViewScope = this,
+                        onHeadingChange = {
+                            cameraController.setOriginCamera(
+                                cameraController.originCamera.value.rotateAround(
+                                    cameraController.originCamera.value.location,
+                                    deltaPitch = 0.0,
+                                    deltaRoll = 0.0,
+                                    deltaHeading = -it
+                                )
+                            )
+                        },
+                        onElevationChange = {
+                            cameraController.setOriginCamera(
+                                cameraController.originCamera.value.elevate(it)
+                            )
+                        }
+                    )
+                )
             }
         )
     }

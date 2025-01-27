@@ -43,7 +43,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,22 +67,30 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
  *
  * @since 200.7.0
  */
-public class WorldScaleSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
+public class WorldScaleSceneViewScope internal constructor(
+    private val sceneViewScope: SceneViewScope,
+    private val onHeadingChange: (Double) -> Unit,
+    private val onElevationChange: (Double) -> Unit
+) {
+
+    private var heading by  mutableFloatStateOf(0F)
+    private var elevation by mutableFloatStateOf(0F)
+
 
     @Composable
     public fun CalibrationView(
         onDismiss: () -> Unit,
         modifier: Modifier = Modifier,
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
-        typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography()
+        typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
     ) {
         CalibrationViewInternal(
             onDismiss = onDismiss,
             modifier = modifier,
             colorScheme = colorScheme,
             typography = typography,
-            onHeadingChange = {},
-            onElevationChange = {}
+            onHeadingChange = onHeadingChange,
+            onElevationChange = onElevationChange
         )
     }
 
@@ -165,8 +172,8 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
         modifier: Modifier = Modifier,
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
         typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
-        onHeadingChange: (Float) -> Unit,
-        onElevationChange: (Float) -> Unit
+        onHeadingChange: (Double) -> Unit,
+        onElevationChange: (Double) -> Unit
     ) {
         CompositionLocalProvider(
             LocalColorScheme provides colorScheme,
@@ -213,17 +220,25 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
                             containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
-                        var heading by remember { mutableFloatStateOf(0F) }
                         JoySliderBar(
                             "Heading",
                             "${DecimalFormat("#.#").format(heading)}º",
                             minusContentDescritption = "Decrease Heading",
                             plusContentDescritption = "Increase Heading",
-                            onMinusClick = { onHeadingChange(-1F) },
-                            onPlusClick = { onHeadingChange(+1F) }
+                            onMinusClick = {
+                                onHeadingChange(-1.0)
+                                heading -= 1
+                            },
+                            onPlusClick = {
+                                onHeadingChange(1.0)
+                                heading += 1
+                            }
                         )
                         Joyslider(
-                            onValueChange = { onHeadingChange(it) },
+                            onValueChange = {
+                                onHeadingChange(it.toDouble())
+                                heading += it
+                            },
                             contentDescription = "Heading slider",
                         )
                     }
@@ -236,17 +251,25 @@ public class WorldScaleSceneViewScope internal constructor(private val sceneView
                             containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
-                        var elevation by remember { mutableFloatStateOf(0F) }
                         JoySliderBar(
                             "Elevation",
                             "${DecimalFormat("#.##").format(elevation)}m",
                             minusContentDescritption = "Decrease Elevation",
                             plusContentDescritption = "Increase Elevation",
-                            onMinusClick = { onElevationChange(-1F) },
-                            onPlusClick = { onElevationChange(+1F) }
+                            onMinusClick = {
+                                onElevationChange(-1.0)
+                                elevation -= 1
+                            },
+                            onPlusClick = {
+                                onElevationChange(1.0)
+                                elevation += 1
+                            }
                         )
                         Joyslider(
-                            onValueChange = { onElevationChange(0.1F * it) },
+                            onValueChange = {
+                                onElevationChange(it.toDouble())
+                                elevation += it
+                            },
                             contentDescription = "Elevation slider"
                         )
                     }
