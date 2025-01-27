@@ -34,7 +34,7 @@ import org.junit.Test
 import kotlin.math.roundToInt
 
 /**
- * Tests for ScalebarViewModel.
+ * Tests for Scalebar computations.
  *
  * @since 200.7.0
  */
@@ -45,7 +45,7 @@ class ScalebarComputationsTest {
     private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of line style is updated
      * Then the display length and labels should be correct
      *
@@ -67,7 +67,7 @@ class ScalebarComputationsTest {
     }
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of Bar style is updated
      * Then the display length and labels should be correct
      *
@@ -89,7 +89,7 @@ class ScalebarComputationsTest {
     }
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of GraduatedLine style is updated
      * Then the display length and labels should be correct
      *
@@ -111,7 +111,7 @@ class ScalebarComputationsTest {
     }
 
     /**
-     * Executes a test for the ScalebarViewModel with the given parameters.
+     * Executes a test for the Scalebar with the given parameters.
      *
      * @since 200.7.0
      */

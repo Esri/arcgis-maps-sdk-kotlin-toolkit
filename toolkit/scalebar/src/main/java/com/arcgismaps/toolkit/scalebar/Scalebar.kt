@@ -180,7 +180,7 @@ private fun isMetric(): Boolean {
 /**
  * Returns the display length in pixels of the Scalebar line.
  *
- * @return maxLength to be passed to updateScalebar fun in ScalebarViewModel
+ * @return maxWidth the maximum width of the Scalebar taking into account the text units
  * @since 200.7.0
  */
 @Composable
