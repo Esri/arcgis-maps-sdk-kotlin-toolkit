@@ -35,7 +35,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
+import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
@@ -140,22 +142,38 @@ private fun ShowScalebar(
     modifier: Modifier = Modifier
 ) {
     when (scalebarStyle) {
-        ScalebarStyle.AlternatingBar -> TODO()
-        ScalebarStyle.Bar -> TODO()
+        ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            scalebarDivisions = labels,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
+        ScalebarStyle.Bar -> BarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.DualUnitLine -> TODO()
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
             tickMarks = labels,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
     }
 }

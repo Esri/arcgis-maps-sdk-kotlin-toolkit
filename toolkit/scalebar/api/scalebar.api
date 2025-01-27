@@ -63,19 +63,19 @@ public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults;
 	public final fun colors-5tl4gsc (JJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
-	public final fun shapes-ixp7dh8 (FFLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public final fun shapes (DDLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
 	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;
 }
 
 public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarShapes {
 	public static final field $stable I
-	public final fun component1-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
-	public final fun copy-YgX7TsA (FF)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
-	public static synthetic fun copy-YgX7TsA$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;FFILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun copy (DD)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;DDILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBarCornerRadius-D9Ej5fM ()F
-	public final fun getShadowCornerRadius-D9Ej5fM ()F
+	public final fun getBarCornerRadius ()D
+	public final fun getTextShadowBlurRadius ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
