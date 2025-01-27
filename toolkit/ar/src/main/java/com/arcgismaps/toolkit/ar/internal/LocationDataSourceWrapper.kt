@@ -71,7 +71,7 @@ internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSou
 
 
 @Composable
-private fun rememberSystemLocationDataSource(): LocationDataSourceWrapper {
+internal fun rememberSystemLocationDataSource(): LocationDataSourceWrapper {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
     val wrapper = remember { LocationDataSourceWrapper(SystemLocationDataSource()) }
