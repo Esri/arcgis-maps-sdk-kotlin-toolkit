@@ -97,48 +97,46 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Column {
-        var currentSelectedColor by remember { mutableStateOf(selectedColor) }
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                TraceConfigurations(
-                    configurations,
-                    selectedConfig,
-                ) { newConfig ->
-                    onConfigSelected(newConfig)
-                }
-            }
-            item {
-                StartingPoints(
-                    startingPoints,
-                    onAddStartingPointButtonClicked,
-                    onStartingPointRemoved,
-                    onStartingPointSelected,
-                )
-            }
-            item {
-                AdvancedOptions(
-                    onNameChange = onNameChange,
-                    onColorChanged = {
-                        currentSelectedColor = it
-                        onColorChanged(it)
-                    },
-                    defaultTraceName = defaultTraceName,
-                    selectedColor = currentSelectedColor,
-                    zoomToResult = zoomToResult,
-                    onZoomRequested = onZoomRequested
-                )
+    var currentSelectedColor by remember { mutableStateOf(selectedColor) }
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            TraceConfigurations(
+                configurations,
+                selectedConfig,
+            ) { newConfig ->
+                onConfigSelected(newConfig)
             }
         }
-        TraceButton(
-            enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
-            onClicked = onTraceButtonClicked
-        )
+        item {
+            StartingPoints(
+                startingPoints,
+                onAddStartingPointButtonClicked,
+                onStartingPointRemoved,
+                onStartingPointSelected,
+            )
+        }
+        item {
+            AdvancedOptions(
+                onNameChange = onNameChange,
+                onColorChanged = {
+                    currentSelectedColor = it
+                    onColorChanged(it)
+                },
+                defaultTraceName = defaultTraceName,
+                selectedColor = currentSelectedColor,
+                zoomToResult = zoomToResult,
+                onZoomRequested = onZoomRequested
+            )
+        }
+        item {
+            TraceButton(
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+                onClicked = onTraceButtonClicked
+            )
+        }
     }
 }
 
@@ -150,7 +148,8 @@ private fun TraceConfigurations(
 ) {
     TraceConfigurations(
         configs = configs.map { it.name },
-        selectedConfigName = selectedConfig?.name ?: LocalContext.current.getString(R.string.no_configuration_selected)
+        selectedConfigName = selectedConfig?.name
+            ?: LocalContext.current.getString(R.string.no_configuration_selected)
     ) { index ->
         onTraceSelected(configs[index])
     }
@@ -163,7 +162,13 @@ private fun TraceConfigurations(
     onTraceSelected: (Int) -> Unit
 ) {
     val expandableCardState = rememberExpandableCardState(false)
-    var selectedConfigIndex by remember(selectedConfigName) { mutableIntStateOf(configs.indexOf(selectedConfigName)) }
+    var selectedConfigIndex by remember(selectedConfigName) {
+        mutableIntStateOf(
+            configs.indexOf(
+                selectedConfigName
+            )
+        )
+    }
     ExpandableCardWithLabel(
         expandableCardState = expandableCardState,
         labelText = stringResource(id = R.string.trace_configuration),
@@ -255,18 +260,10 @@ private fun StartingPoints(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .padding(bottom = 20.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         AddStartingPointButton {
             showAddStartingPointScreen()
         }
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-                .fillMaxWidth()
-        )
         ExpandableCard(
             title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
             padding = PaddingValues()

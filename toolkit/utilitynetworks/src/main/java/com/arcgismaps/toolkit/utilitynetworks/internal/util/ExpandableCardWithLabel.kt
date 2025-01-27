@@ -40,11 +40,7 @@ internal fun ExpandableCardWithLabel(
     expandableCardState: ExpandableCardState = rememberExpandableCardState(false),
     content: @Composable () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             labelText,
             color = MaterialTheme.colorScheme.tertiary,

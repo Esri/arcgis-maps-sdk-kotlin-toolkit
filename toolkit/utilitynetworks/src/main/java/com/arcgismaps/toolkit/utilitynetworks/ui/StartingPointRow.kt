@@ -27,7 +27,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -56,11 +55,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.anchoredDraggable
-import com.arcgismaps.toolkit.utilitynetworks.R
-import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -94,7 +93,7 @@ internal fun StartingPointRow(
 ) {
     val density = LocalDensity.current
     var deleteActive by rememberSaveable { mutableStateOf(false) }
-    val confirmValueChange: (DragAnchors) -> Boolean  = { _ -> true }
+    val confirmValueChange: (DragAnchors) -> Boolean = { _ -> true }
     val positionalThreshold: (Float) -> Float = { distance: Float -> distance * 0.9f }
     val velocityThreshold: () -> Float = { with(density) { 10000.dp.toPx() } }
     val spec: () -> AnimationSpec<Float> = {
@@ -135,23 +134,22 @@ internal fun StartingPointRow(
         horizontalArrangement = Arrangement.Center
     ) {
         val metrics = LocalDensity.current
-        var bitmap: ImageBitmap? by remember { mutableStateOf(null)}
+        var bitmap: ImageBitmap? by remember { mutableStateOf(null) }
         LaunchedEffect(data) {
             bitmap = data.getDrawable(metrics.density).bitmap.asImageBitmap()
         }
         bitmap?.let {
-                Image(
-                    bitmap = it,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .width(50.dp)
-                        .padding(15.dp),
-                    contentDescription = stringResource(id = R.string.feature_icon),
-                )
+            Image(
+                bitmap = it,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(50.dp)
+                    .padding(15.dp),
+                contentDescription = stringResource(id = R.string.feature_icon),
+            )
         }
         Box(
             modifier = modifier
-                .fillMaxSize()
                 .align(Alignment.CenterVertically)
                 .clickable {
                     if (!deleteActive) {
@@ -179,7 +177,7 @@ internal fun StartingPointRow(
             ReadOnlyTextField(
                 text = data.name,
                 modifier = Modifier
-                    .padding(start = 5.dp, end = 25.dp )
+                    .padding(start = 5.dp, end = 25.dp)
                     .height(65.dp)
             )
 
