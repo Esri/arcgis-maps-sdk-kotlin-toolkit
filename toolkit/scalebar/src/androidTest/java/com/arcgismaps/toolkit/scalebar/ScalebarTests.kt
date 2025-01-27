@@ -27,6 +27,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -42,6 +43,7 @@ import org.junit.Test
 class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
+    private val barScalebarTag = "BarScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -60,7 +62,8 @@ class ScalebarTests {
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
             }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
@@ -89,10 +92,33 @@ class ScalebarTests {
                     maxWidth = maxWidth,
                     colorScheme = ScalebarDefaults.colors(),
                     tickMarks = tickMarks,
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
         }
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a bar scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testBarScaleBarIsDisplayed(){
+        // Test the scalebar
+        composeTestRule.setContent {
+            BarScalebar(
+                maxWidth = 300f,
+                label = "1000 km",
+                colorScheme = ScalebarDefaults.colors(),
+                shapes = ScalebarDefaults.shapes(),
+                labelTypography = ScalebarDefaults.typography(),
+            )
+        }
+        composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
     }
 
     /**
@@ -113,7 +139,8 @@ class ScalebarTests {
                     maxWidth = 300f,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
-                    labelTypography = ScalebarDefaults.typography()
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
                 )
             }
         }
