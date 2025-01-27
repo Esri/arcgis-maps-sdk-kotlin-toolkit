@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.ar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -172,7 +170,6 @@ public fun TableTopSceneView(
 ) {
     val initializationStatus = rememberTableTopSceneViewStatus()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
