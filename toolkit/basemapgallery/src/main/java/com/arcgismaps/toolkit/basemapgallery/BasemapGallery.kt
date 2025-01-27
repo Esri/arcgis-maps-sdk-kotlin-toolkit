@@ -18,10 +18,21 @@
 
 package com.arcgismaps.toolkit.basemapgallery
 
+import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.mapping.Basemap
+import androidx.compose.ui.unit.dp
 
 @Composable
 public fun BasemapGallery() {
@@ -29,13 +40,38 @@ public fun BasemapGallery() {
 }
 
 @Composable
-public fun BasemapGallery(basemaps: List<Basemap>) {
-    Text(text = "Hello ${basemaps.size}")
+public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifier: Modifier = Modifier, onItemClick: (BasemapGalleryItem) -> Unit) {
+    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(128.dp)) {
+        basemapGalleryItems.forEach { basemapGalleryItem ->
+            item {
+                Column(modifier = Modifier
+                    .padding(8.dp)
+                    .clickable { onItemClick(basemapGalleryItem) }) {
+                    Image(
+                        basemapGalleryItem.thumbnail,
+                        contentDescription = basemapGalleryItem.title
+                    )
+                    Text(text = basemapGalleryItem.title)
+                }
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
 internal fun BasemapGalleryPreview() {
-    val basemaps = listOf(Basemap())
-    BasemapGallery(basemaps)
+    val items = mutableListOf<BasemapGalleryItem>()
+    val colors = IntArray(100 * 100)
+    for (i in 0 ..< 100 * 100) {
+        colors[i] = 0xFF0000FF.toInt()
+    }
+    val bitmap = Bitmap.createBitmap(colors, 100, 100, Bitmap.Config.ARGB_8888).asImageBitmap()
+    val thumbnail = BitmapPainter(bitmap)
+    for (i in 0..100) {
+        items.add(BasemapGalleryItem("Item $i", null, thumbnail))
+    }
+    BasemapGallery(items, onItemClick = {
+        Log.d("BaseMapGallery", "Item clicked: ${it.title}")
+    })
 }

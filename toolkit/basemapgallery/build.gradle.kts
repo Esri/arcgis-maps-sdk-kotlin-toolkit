@@ -22,6 +22,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
     namespace = "com.arcgismaps.toolkit.basemapgallery"
