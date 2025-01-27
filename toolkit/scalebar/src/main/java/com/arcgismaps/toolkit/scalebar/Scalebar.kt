@@ -19,23 +19,19 @@
 package com.arcgismaps.toolkit.scalebar
 
 import android.content.Context
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
+import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
@@ -141,7 +137,14 @@ private fun ShowScalebar(
 ) {
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> TODO()
-        ScalebarStyle.Bar -> TODO()
+        ScalebarStyle.Bar -> BarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.DualUnitLine -> TODO()
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
@@ -155,7 +158,8 @@ private fun ShowScalebar(
             maxWidth = maxWidth.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
     }
 }
