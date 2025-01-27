@@ -83,7 +83,6 @@ fun MainScreen(modifier: Modifier) {
                 viewpoint = viewpoint,
                 spatialReference = spatialReference,
                 style = ScalebarStyle.GraduatedLine,
-                units = ScalebarUnits.IMPERIAL
             )
         }
     }

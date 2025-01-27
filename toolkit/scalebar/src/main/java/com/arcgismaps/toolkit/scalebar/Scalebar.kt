@@ -18,20 +18,15 @@
 
 package com.arcgismaps.toolkit.scalebar
 
-import android.content.Context
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -70,12 +65,7 @@ public fun Scalebar(
     minScale: Double = 0.0, // minimum scale to show the scalebar
     useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
-    // TODO: determining the default ScalebarUnit is not tested
-    units: ScalebarUnits = if (isMetric()) {
-        ScalebarUnits.METRIC
-    } else {
-        ScalebarUnits.IMPERIAL
-    },
+    units: ScalebarUnits = rememberDefaultScalebarUnits(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
@@ -172,12 +162,13 @@ internal fun ScalebarPreview() {
 }
 
 @Composable
-private fun isMetric(): Boolean {
-    // TODO implement the actual logic to determine the default ScalebarUnit
-    // this is a placeholder implementation
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    return sharedPreferences.getBoolean("isMetric", true)
+private fun rememberDefaultScalebarUnits(): ScalebarUnits {
+    val locale = Locale.current
+    val scalebarUnits =  when (locale.platformLocale.country) {
+        "US", "LR", "MM" -> ScalebarUnits.IMPERIAL// United States, Liberia, Myanmar
+        else -> ScalebarUnits.METRIC
+    }
+    return rememberSaveable { scalebarUnits }
 }
 
 /**
