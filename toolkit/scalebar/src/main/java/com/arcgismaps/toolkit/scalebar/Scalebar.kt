@@ -219,15 +219,15 @@ internal fun measureAvailableLineDisplayLength(
  */
 @Composable
 internal fun measureMinSegmentWidth(
-    lineMapLength: Double,
+    scalebarLengthInMapUnits: Double,
     labelTypography: LabelTypography
 ): Double {
     // The constraining factor is the space required to draw the labels. Create a testString containing the longest
     // label, which is usually the one for 'distance' because the other labels will be smaller numbers.
     // But if 'distance' is small some of the other labels may use decimals, so allow for each label needing at least
     // 3 characters
-    val minSegmentTestString: String = if (lineMapLength >= 100) {
-        lineMapLength.toInt().toString()
+    val minSegmentTestString: String = if (scalebarLengthInMapUnits >= 100) {
+        scalebarLengthInMapUnits.toInt().toString()
     } else {
         "9.9"
     }
