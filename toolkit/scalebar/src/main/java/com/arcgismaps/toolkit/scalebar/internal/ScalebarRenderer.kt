@@ -164,7 +164,7 @@ internal fun BarScalebar(
             topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
             size = Size(maxWidth, scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
-            style = Stroke(width = lineWidth)
+            style = Stroke(width = lineWidth.toPx())
         )
         
         // Draws the rectangle's fill color
@@ -181,7 +181,7 @@ internal fun BarScalebar(
             topLeft = topLeftPoint,
             size = Size(maxWidth, scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
-            style = Stroke(width = lineWidth)
+            style = Stroke(width = lineWidth.toPx())
         )
 
         drawText(

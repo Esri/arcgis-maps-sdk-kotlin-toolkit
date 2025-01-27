@@ -151,7 +151,8 @@ private fun ShowScalebar(
             maxWidth = maxWidth.toFloat(),
             tickMarks = labels,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
