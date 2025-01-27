@@ -18,9 +18,16 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.location.LocationDataSource
+import com.arcgismaps.location.SystemLocationDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -33,7 +40,8 @@ import kotlinx.coroutines.launch
  *
  * @since 200.7.0
  */
-internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSource) : DefaultLifecycleObserver {
+internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSource) :
+    DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
@@ -59,4 +67,20 @@ internal class LocationDataSourceWrapper(val locationDataSource: LocationDataSou
             locationDataSource.start()
         }
     }
+}
+
+
+@Composable
+private fun rememberSystemLocationDataSource(): LocationDataSourceWrapper {
+    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val wrapper = remember { LocationDataSourceWrapper(SystemLocationDataSource()) }
+    DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(wrapper)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(wrapper)
+            wrapper.onDestroy(lifecycleOwner)
+        }
+    }
+    return wrapper
 }

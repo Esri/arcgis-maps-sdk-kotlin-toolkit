@@ -22,22 +22,18 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
-import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -66,7 +62,6 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.LocationDataSourceWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
@@ -226,7 +221,7 @@ public fun WorldScaleSceneView(
 }
 
 /**
- * Starts the [locationDataSource] and periodically updates the [cameraController] with new locations
+ * Starts the a [SystemLocationDataSource] and periodically updates the [cameraController] with new locations
  *
  * @since 200.7.0
  */
@@ -234,7 +229,7 @@ public fun WorldScaleSceneView(
 private fun LocationTracker(
     cameraController: TransformationMatrixCameraController
 ) {
-    val locationDataSource = rememberSystemLocationDataSource()
+    val locationDataSource = rememberSystemLocationDataSource().locationDataSource
     // We should reset the origin camera if the LDS or camera controller changes
     var hasSetOriginCamera = remember(cameraController) { false }
     LaunchedEffect(Unit) {
@@ -266,16 +261,7 @@ private fun LocationTracker(
                 }
         }
     }
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(Unit) {
-        // This will start the LocationDataSource
-        val wrapper = LocationDataSourceWrapper(locationDataSource)
-        lifecycleOwner.lifecycle.addObserver(wrapper)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(wrapper)
-            wrapper.onDestroy(lifecycleOwner)
-        }
-    }
+
 }
 
 /**
@@ -310,12 +296,6 @@ internal fun shouldUpdateCamera(
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
     return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
-}
-
-@Composable
-private fun rememberSystemLocationDataSource(): SystemLocationDataSource {
-    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
-    return remember { SystemLocationDataSource() }
 }
 
 /**
