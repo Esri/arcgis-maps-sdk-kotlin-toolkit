@@ -231,7 +231,7 @@ private fun LocationTracker(
     cameraController: TransformationMatrixCameraController
 ) {
     val locationDataSource = rememberSystemLocationDataSource().locationDataSource
-    // We should reset the origin camera if the LDS or camera controller changes
+    // We should reset the origin camera if the camera controller changes
     var hasSetOriginCamera = remember(cameraController) { false }
     LaunchedEffect(Unit) {
         launch {
