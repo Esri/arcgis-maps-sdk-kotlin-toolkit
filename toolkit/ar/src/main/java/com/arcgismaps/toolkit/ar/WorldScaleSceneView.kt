@@ -18,24 +18,23 @@
 
 package com.arcgismaps.toolkit.ar
 
+import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.location.LocationDataSource
-import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.Location
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
@@ -57,31 +56,30 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
+import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
+import com.arcgismaps.toolkit.ar.internal.rememberSystemLocationDataSource
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.google.ar.core.ArCoreApk
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.Instant
 
 @Composable
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
-    locationDataSource: LocationDataSource,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
-    requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
@@ -116,197 +114,197 @@ public fun WorldScaleSceneView(
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
-        // onNotGranted
-        initializationStatus.update(
-            WorldScaleSceneViewStatus.FailedToInitialize(
-                IllegalStateException(
-                    context.getString(R.string.camera_permission_not_granted)
-                )
-            ),
-            onInitializationStatusChanged
-        )
-    }
-
-    var arCoreInstalled by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+    val arCoreInstalled by rememberArCoreInstalled(
+        onFailed = {
             initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
                 onInitializationStatusChanged
             )
-        } else {
-            arCoreInstalled = true
         }
-    }
+    )
+    // If ARCore is not installed, we can't display anything
+    if (!arCoreInstalled) return@WorldScaleSceneView
 
-    var hasSetOriginCamera by remember { mutableStateOf(false) }
-    var initialHeading: Double? by remember { mutableStateOf(null) }
+    val allPermissionsGranted by rememberPermissionsGranted(
+        permissionsToRequest = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CAMERA
+        ),
+        onFailed = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
+    // If we don't have permission for camera or location, we can't display anything
+    if (!allPermissionsGranted) return@WorldScaleSceneView
 
     val cameraController = remember { TransformationMatrixCameraController() }
 
-    val coroutineScope = rememberCoroutineScope()
+    LocationTracker(cameraController)
 
-    LaunchedEffect(locationDataSource) {
-        launch {
-            locationDataSource.status.collect {
-                when (it) {
-                    LocationDataSourceStatus.FailedToStart -> {
-                        initializationStatus.update(
-                            WorldScaleSceneViewStatus.FailedToInitialize(
-                                IllegalStateException(
-                                    context.getString(
-                                        R.string.location_data_source_failed_to_start,
-                                        locationDataSource.error.value?.message
-                                    )
-                                )
-                            ),
-                            onInitializationStatusChanged
-                        )
-                    }
+    Box(modifier = modifier) {
+        val arSessionWrapper =
+            rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
 
-                    LocationDataSourceStatus.Started -> {
-                        initializationStatus.update(
-                            WorldScaleSceneViewStatus.Initialized,
-                            onInitializationStatusChanged
-                        )
-                    }
-
-                    else -> {}
-                }
-            }
+        val session = arSessionWrapper.session.collectAsStateWithLifecycle()
+        session.value?.let { arSession ->
+            ArCameraFeed(
+                session = arSession,
+                onFrame = { frame, displayRotation ->
+                    val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
+                    cameraController.transformationMatrix = cameraPosition
+                    worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                        frame.camera,
+                        displayRotation
+                    )
+                    worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
+                },
+                onTapWithHitResult = { },
+                onFirstPlaneDetected = { },
+                visualizePlanes = false
+            )
+            // Once the session is created, we can say we're initialized
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.Initialized,
+                onInitializationStatusChanged
+            )
         }
+        SceneView(
+            arcGISScene = arcGISScene,
+            modifier = Modifier.fillMaxSize(),
+            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+            graphicsOverlays = graphicsOverlays,
+            sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
+            sceneViewInteractionOptions = remember {
+                // Disable interaction, which is not supported in WorldScale scenarios
+                SceneViewInteractionOptions().apply {
+                    isEnabled = false
+                }
+            },
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            cameraController = cameraController,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            atmosphereEffect = AtmosphereEffect.None,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            spaceEffect = SpaceEffect.Transparent,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = onSpatialReferenceChanged,
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+            onPan = onPan,
+            content = {
+                content?.invoke(WorldScaleSceneViewScope(this))
+            }
+        )
+    }
+}
+
+/**
+ * Starts the a [SystemLocationDataSource] and periodically updates the [cameraController] with new locations
+ *
+ * @since 200.7.0
+ */
+@Composable
+private fun LocationTracker(
+    cameraController: TransformationMatrixCameraController
+) {
+    val locationDataSource = rememberSystemLocationDataSource().locationDataSource
+    // We should reset the origin camera if the camera controller changes
+    var hasSetOriginCamera = remember(cameraController) { false }
+    LaunchedEffect(Unit) {
         launch {
-            locationDataSource.locationChanged.collect { location ->
-                if (!hasSetOriginCamera) {
+            locationDataSource.locationChanged
+                .filter { location ->
+                    !hasSetOriginCamera || shouldUpdateCamera(
+                        location,
+                        cameraController.originCamera.value
+                    )
+                }
+                .collect { location ->
                     cameraController.setOriginCamera(
                         Camera(
                             location.position.y,
                             location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 1.0,
+                            if (location.position.hasZ) location.position.z!! else 0.0,
                             0.0,
                             90.0,
                             0.0
                         )
                     )
-                    hasSetOriginCamera = true
-                }
-            }
-        }
-        launch {
-            locationDataSource.headingChanged.take(1).collect { heading ->
-                if (!heading.isNaN()) {
-                    if (initialHeading == null) {
-                        cameraController.setOriginCamera(
-                            Camera(
-                                cameraController.originCamera.value.location,
-                                heading,
-                                cameraController.originCamera.value.pitch,
-                                cameraController.originCamera.value.roll
-                            )
-                        )
-                        initialHeading = heading
+                    // We have to do this or the error gets bigger and bigger.
+                    cameraController.transformationMatrix =
+                        TransformationMatrix.createIdentityMatrix()
+                    if (!hasSetOriginCamera) {
+                        hasSetOriginCamera = true
                     }
                 }
-            }
-        }
-    }
-    DisposableEffect(locationDataSource) {
-        coroutineScope.launch {
-            locationDataSource.start()
-        }
-        onDispose {
-            // TODO: Determine if this scope could be cancelled before onDispose is called
-            coroutineScope.launch {
-                locationDataSource.stop()
-            }
         }
     }
 
-    Box(modifier = modifier) {
-        if (cameraPermissionGranted && arCoreInstalled) {
-            val arSessionWrapper =
-                rememberArSessionWrapper(applicationContext = context.applicationContext)
-            DisposableEffect(Unit) {
-                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                    arSessionWrapper.onDestroy(lifecycleOwner)
-                }
-            }
-            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-            session.value?.let { arSession ->
-                ArCameraFeed(
-                    session = arSession,
-                    onFrame = { frame, displayRotation ->
-                        val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
-                        cameraController.transformationMatrix = cameraPosition
-                        worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                            frame.camera,
-                            displayRotation
-                        )
-                        worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
-                    },
-                    onTapWithHitResult = { },
-                    onFirstPlaneDetected = { },
-                    visualizePlanes = false
-                )
-            }
-        }
-        if (initializationStatus.value == WorldScaleSceneViewStatus.Initialized) {
-            // Disable interaction, which is not supported in WorldScale scenarios
-            val interactionOptions = remember {
-                SceneViewInteractionOptions().apply {
-                    this.isEnabled = false
-                }
-            }
-            SceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier.fillMaxSize(),
-                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-                graphicsOverlays = graphicsOverlays,
-                sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
-                sceneViewInteractionOptions = interactionOptions,
-                viewLabelProperties = viewLabelProperties,
-                selectionProperties = selectionProperties,
-                isAttributionBarVisible = isAttributionBarVisible,
-                onAttributionTextChanged = onAttributionTextChanged,
-                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                cameraController = cameraController,
-                analysisOverlays = analysisOverlays,
-                imageOverlays = imageOverlays,
-                atmosphereEffect = AtmosphereEffect.None,
-                timeExtent = timeExtent,
-                onTimeExtentChanged = onTimeExtentChanged,
-                spaceEffect = SpaceEffect.Transparent,
-                sunTime = sunTime,
-                sunLighting = sunLighting,
-                ambientLightColor = ambientLightColor,
-                onNavigationChanged = onNavigationChanged,
-                onSpatialReferenceChanged = onSpatialReferenceChanged,
-                onLayerViewStateChanged = onLayerViewStateChanged,
-                onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-                onRotate = onRotate,
-                onScale = onScale,
-                onUp = onUp,
-                onDown = onDown,
-                onSingleTapConfirmed = onSingleTapConfirmed,
-                onDoubleTap = onDoubleTap,
-                onLongPress = onLongPress,
-                onTwoPointerTap = onTwoPointerTap,
-                onPan = onPan,
-                content = {
-                    content?.invoke(WorldScaleSceneViewScope(this))
-                }
-            )
-        }
-    }
+}
+
+/**
+ * Returns false if the location timestamp is older than 10 seconds,
+ * if the horizontal or vertical accuracy is negative,
+ * or if the distance between the location and the current camera is less than 2 meters.
+ * Otherwise, returns true.
+ *
+ * @since 200.7.0
+ */
+internal fun shouldUpdateCamera(
+    location: Location,
+    currentCamera: Camera,
+): Boolean {
+    // filter out old locations
+    if (Instant.now()
+            .toEpochMilli() - location.timestamp.toEpochMilli() > WorldScaleParameters.LOCATION_AGE_THRESHOLD_MS
+    ) return false
+
+    // filter out locations with no accuracy
+    if (location.horizontalAccuracy < 0.0
+        || location.verticalAccuracy < 0.0
+        || location.horizontalAccuracy.isNaN()
+        || location.verticalAccuracy.isNaN()
+    ) return false
+
+    val distance = GeometryEngine.distanceGeodeticOrNull(
+        currentCamera.location,
+        location.position,
+        distanceUnit = LinearUnit.meters,
+        azimuthUnit = null,
+        curveType = GeodeticCurveType.Geodesic
+    )?.distance ?: return false
+    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
+}
+
+/**
+ * Provides constants for the [WorldScaleSceneView].
+ *
+ * @since 200.7.0
+ */
+private data object WorldScaleParameters {
+    const val LOCATION_DISTANCE_THRESHOLD_METERS = 2.0
+    const val LOCATION_AGE_THRESHOLD_MS = 10000.0
 }
