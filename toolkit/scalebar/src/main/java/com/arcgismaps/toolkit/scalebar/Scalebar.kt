@@ -21,7 +21,7 @@ package com.arcgismaps.toolkit.scalebar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -131,21 +132,30 @@ private fun ShowScalebar(
 ) {
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> TODO()
-        ScalebarStyle.Bar -> TODO()
+        ScalebarStyle.Bar -> BarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            label = labels[0].label,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.DualUnitLine -> TODO()
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
             tickMarks = labels,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
-            labelTypography = labelTypography
+            labelTypography = labelTypography,
+            shapes = shapes
         )
     }
 }
@@ -168,7 +178,7 @@ private fun rememberDefaultScalebarUnits(): ScalebarUnits {
         "US", "LR", "MM" -> ScalebarUnits.IMPERIAL// United States, Liberia, Myanmar
         else -> ScalebarUnits.METRIC
     }
-    return rememberSaveable { scalebarUnits }
+    return remember { scalebarUnits }
 }
 
 /**
