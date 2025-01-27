@@ -127,6 +127,8 @@ internal fun LineScalebar(
 
 /**
  * Displays bar scalebar with a single label.
+<<<<<<< HEAD
+=======
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
@@ -142,7 +144,6 @@ internal fun BarScalebar(
     maxWidth: Float,
     label: String,
     colorScheme: ScalebarColors,
-    topLeftPoint : Offset = Offset(0f, 0f),
     shapes: ScalebarShapes,
     labelTypography: LabelTypography
 ) {
@@ -152,6 +153,7 @@ internal fun BarScalebar(
 
     val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
+    val topLeftPoint = Offset(0f, 0f)
 
     Canvas(
         modifier = modifier

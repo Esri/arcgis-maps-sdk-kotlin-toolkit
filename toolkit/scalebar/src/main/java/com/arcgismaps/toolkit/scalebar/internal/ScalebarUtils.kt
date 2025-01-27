@@ -125,7 +125,7 @@ internal object ScalebarUtils {
      */
     fun Double.format(): String {
         return when {
-            (this - this.toInt()) < 1e-12 -> this.toInt().toString()
+            (this - this.toInt()) < 1e-6 -> this.toInt().toString()
             (this * 10) % 1.0 == 0.0 -> "%.1f".format(this)
             else -> "%.2f".format(this)
         }
