@@ -40,13 +40,14 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 
 private const val pixelAlignment = 2.5f // Aligns the horizontal line edges
-internal const val lineWidth = 5f
+internal val lineWidth = 2.dp
 private const val shadowOffset = 3f
 private const val scalebarHeight = 20f // Height of the scalebar in pixels
 private const val textOffset = 5f
@@ -197,7 +198,7 @@ internal fun BarScalebar(
 }
 
 /**
- * Displays a graduated scalebar with multiple labels and tick marks.
+ * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
@@ -228,9 +229,12 @@ internal fun GraduatedLineScalebar(
             .width(calculateSizeInDp(density, totalWidth))
             .height(calculateSizeInDp(density, totalHeight))
     ) {
+        val tickMarksWithDensityOffsets = tickMarks.map { tickMark ->
+            tickMark.copy(xOffset = tickMark.xOffset.toPx(density))
+        }
         // draw tick marks
         drawTickMarksWithLabels(
-            tickMarks = tickMarks,
+            tickMarks = tickMarksWithDensityOffsets,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,
@@ -263,7 +267,7 @@ internal fun GraduatedLineScalebar(
             text = tickMarks.last().label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = tickMarks.last().xOffset.toFloat(),
+            xPos = tickMarks.last().xOffset.toPx(density).toFloat(),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -282,7 +286,7 @@ internal fun LineScaleBarPreview() {
     ) {
         LineScalebar(
             modifier = Modifier,
-            maxWidth = 300f,
+            maxWidth = 500f / LocalDensity.current.density,
             label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(),
             labelTypography = ScalebarDefaults.typography(),
@@ -314,12 +318,13 @@ internal fun BarScaleBarPreview() {
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 500f
+    val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100 km")
+        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
+        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
+        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
+        ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "100 km")
     )
     Box(
         modifier = Modifier
@@ -389,13 +394,13 @@ private fun DrawScope.drawVerticalLineAndShadow(
             color = shadowColor,
             start = Offset(xPos + shadowOffset, top),
             end = Offset(xPos + shadowOffset, bottom),
-            strokeWidth = lineWidth,
+            strokeWidth = lineWidth.toPx(),
         )
         drawLine(
             color = lineColor,
             start = Offset(xPos, top),
             end = Offset(xPos, bottom),
-            strokeWidth = lineWidth,
+            strokeWidth = lineWidth.toPx(),
         )
     }
 /**
@@ -416,13 +421,13 @@ private fun DrawScope.drawHorizontalLineAndShadow(
         color = shadowColor,
         start = Offset((left - pixelAlignment) + shadowOffset, yPos + shadowOffset),
         end = Offset((right + pixelAlignment) + shadowOffset, yPos + shadowOffset),
-        strokeWidth = lineWidth,
+        strokeWidth = lineWidth.toPx(),
     )
     drawLine(
         color = lineColor,
         start = Offset(left - pixelAlignment, yPos),
         end = Offset(right + pixelAlignment, yPos),
-        strokeWidth = lineWidth,
+        strokeWidth = lineWidth.toPx(),
     )
 }
 
