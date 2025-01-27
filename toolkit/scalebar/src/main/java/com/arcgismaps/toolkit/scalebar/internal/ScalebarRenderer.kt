@@ -127,8 +127,6 @@ internal fun LineScalebar(
 
 /**
  * Displays bar scalebar with a single label.
-<<<<<<< HEAD
-=======
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
@@ -200,11 +198,11 @@ internal fun BarScalebar(
 }
 
 /**
- * Displays bar scalebar with a single label.
+ * Displays AlternatingBar scalebar with segmented bars of alternating fill color.
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar.
- * @param label The scale value to display.
+ * @param scalebarDivisions The scale value to display.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
  * @param labelTypography The typography to use for the label.
@@ -231,6 +229,7 @@ internal fun AlternatingBarScalebar(
             .width(calculateSizeInDp(density, totalWidth))
             .height(calculateSizeInDp(density, totalHeight))
     ) {
+        // draw the first label
         drawText(
             text = scalebarDivisions[0].label,
             textMeasurer = textMeasurer,
@@ -243,11 +242,11 @@ internal fun AlternatingBarScalebar(
         )
 
         for (index in scalebarDivisions.indices) {
-            val startX =
-                if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density).toFloat()
+            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density).toFloat()
             val endX = scalebarDivisions[index].xOffset.toPx(density).toFloat()
             val width = endX - startX
 
+            // Draws the rectangle's shadow
             drawRoundRect(
                 color = colorScheme.shadowColor,
                 topLeft = Offset(startX + shadowOffset, 0f + shadowOffset),
@@ -264,6 +263,7 @@ internal fun AlternatingBarScalebar(
                 size = Size(width, scalebarHeight),
             )
 
+            // Draws the rectangle's border
             drawRoundRect(
                 color = colorScheme.lineColor,
                 topLeft = Offset(startX, 0f),
@@ -272,6 +272,7 @@ internal fun AlternatingBarScalebar(
                 style = Stroke(width = lineWidth.toPx())
             )
 
+            // draw text label
             drawText(
                 text = scalebarDivisions[index].label,
                 textMeasurer = textMeasurer,
