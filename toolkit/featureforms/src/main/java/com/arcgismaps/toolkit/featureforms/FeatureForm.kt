@@ -22,11 +22,14 @@ import android.Manifest
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -401,18 +405,9 @@ private fun FeatureFormBody(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityElementClick: (UtilityElement) -> Unit
 ) {
-    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
-        LazyListState()
-    }
-    val navController = rememberNavController(
-        // set the navigator to the nav controller, this is required so that every time the
-        // navigator (and form) changes, the nav controller is reset
-        form
-    )
-    var currentRoute = rememberSaveable(form, saver = NavRouteSaver) {
-        NavRoute.Form
+    var contentState by rememberSaveable(form, saver = NavRouteStateSaver) {
+        mutableStateOf(NavRoute.FormView)
     }
     // create a state for the utility network associations element if the utility network is
     // provided
@@ -432,157 +427,57 @@ private fun FeatureFormBody(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NavHost(
-            navController,
-            startDestination = currentRoute,
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() },
-        ) {
-            composable<NavRoute.Form> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // title
-                    FeatureFormTitle(
-                        featureForm = form,
-                        modifier = Modifier.padding(horizontal = 15.dp)
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(15.dp)
-                    )
-                    InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-                        initialEvaluation
-                    }
-                    HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-                    // form content
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .semantics { contentDescription = "lazy column" },
-                        state = lazyListState
-                    ) {
-                        states.forEach { entry ->
-                            item {
-                                when (entry.formElement) {
-                                    is FieldFormElement -> {
-                                        FieldElement(
-                                            state = entry.getState<BaseFieldState<*>>(),
-                                            // set the onClick callback for the field element only if provided
-                                            onClick = handleFieldFormElementTapAction(
-                                                fieldFormElement = entry.formElement as FieldFormElement,
-                                                barcodeTapAction = onBarcodeButtonClick
-                                            ),
-                                        )
-                                    }
-
-                                    is GroupFormElement -> {
-                                        GroupElement(
-                                            state = entry.getState(),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 15.dp, vertical = 10.dp),
-                                            // set the onClick callback for the group element only if provided
-                                            onFormElementClick = handleFormElementTapAction(
-                                                barcodeTapAction = onBarcodeButtonClick
-                                            )
-                                        )
-                                    }
-
-                                    is TextFormElement -> {
-                                        TextFormElement(
-                                            state = entry.getState(),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 15.dp, vertical = 10.dp)
-                                        )
-                                    }
-
-                                    is AttachmentsFormElement -> {
-                                        AttachmentFormElement(
-                                            state = entry.getState(),
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 15.dp, vertical = 10.dp)
-                                        )
-                                    }
-
-                                    else -> {
-                                        // other form elements are not created
-                                    }
-                                }
-                            }
-                        }
-                        item {
-                            if (unState != null) {
-                                UtilityNetworkAssociationsElement(
-                                    state = unState,
-                                    onAssociationTypeClick = {
-                                        // navigate to the associations screen
-                                        navController.navigate(
-                                            NavRoute.UNAssociations(
-                                                unState.id,
-                                                it
-                                            )
-                                        )
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = 15.dp,
-                                            end = 15.dp,
-                                            top = 10.dp,
-                                            bottom = 20.dp
-                                        )
-                                )
-                            }
-                        }
-                    }
-                }
+        AnimatedContent(
+            targetState = contentState, label = "content",
+            transitionSpec = {
+                fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
             }
-
-            composable<NavRoute.UNAssociations>(
-                enterTransition = { fadeIn() },
-                exitTransition = { fadeOut() }
-            ) { backStackEntry ->
-                val data = backStackEntry.toRoute<NavRoute.UNAssociations>()
-                currentRoute = data
-                val group = unState!!.groups.value.getOrNull(data.selectedGroupIndex) ?: run {
-                    // guard against out of bounds index
-                    navController.navigate(NavRoute.Form) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                    return@composable
+        ) { state ->
+            when(state) {
+                is NavRoute.FormView -> {
+                    FormContent(
+                        form = form,
+                        states = states,
+                        unState = unState,
+                        onExpressionsEvaluated = onExpressionsEvaluated,
+                        onBarcodeButtonClick = onBarcodeButtonClick,
+                        onUtilityAssociationTypeClick = { index ->
+                            contentState = NavRoute.UNAssociationsView(
+                                stateId = 0,
+                                selectedGroupIndex = index
+                            )
+                        }
+                    )
                 }
-                UtilityNetworkAssociationLayers(
-                    group = group,
-                    source = unState.utilityElement!!,
-                    onBackPressed = {
-                        navController.popBackStack()
-                    },
-                    onUtilityElementClick = onUtilityElementClick
-                )
+
+                is NavRoute.UNAssociationsView -> {
+                    unState ?: return@AnimatedContent
+                    val group = unState.groups.value.getOrNull(state.selectedGroupIndex) ?: run {
+                        // guard against out of bounds index
+                        contentState = NavRoute.FormView
+                        return@AnimatedContent
+                    }
+                    UtilityNetworkAssociationLayers(
+                        group = group,
+                        source = unState.utilityElement!!,
+                        onBackPressed = {
+                            contentState = NavRoute.FormView
+                        },
+                        onUtilityElementClick = onUtilityElementClick
+                    )
+                }
             }
         }
-    }
-
-    LaunchedEffect(form) {
-        // ensure expressions are evaluated
-        form.evaluateExpressions()
-        initialEvaluation = true
-        onExpressionsEvaluated()
     }
 }
 
 @Serializable
 private sealed class NavRoute {
     @Serializable
-    data object Form : NavRoute()
+    data object FormView : NavRoute()
 
     @Serializable
-    data class UNAssociations(
+    data class UNAssociationsView(
         val stateId: Int,
         val selectedGroupIndex: Int
     ) : NavRoute()
@@ -594,15 +489,133 @@ private sealed class NavigationRoute {
     data class Form(val formId: String) : NavigationRoute()
 }
 
-private val NavRouteSaver: Saver<NavRoute, Bundle> = object : Saver<NavRoute, Bundle> {
-    override fun SaverScope.save(value: NavRoute): Bundle {
+@Composable
+private fun FormContent(
+    form: FeatureForm,
+    states: FormStateCollection,
+    unState : UtilityNetworkAssociationsElementState?,
+    onExpressionsEvaluated: () -> Unit,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+    onUtilityAssociationTypeClick: (Int) -> Unit = {}
+) {
+    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
+    val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
+        LazyListState()
+    }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        //currentRoute = backStackEntry.toRoute<NavRoute.Form>()
+        // title
+        FeatureFormTitle(
+            featureForm = form,
+            modifier = Modifier.padding(horizontal = 15.dp)
+        )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(15.dp)
+        )
+        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
+            initialEvaluation
+        }
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        // form content
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "lazy column" },
+            state = lazyListState
+        ) {
+            states.forEach { entry ->
+                item {
+                    when (entry.formElement) {
+                        is FieldFormElement -> {
+                            FieldElement(
+                                state = entry.getState<BaseFieldState<*>>(),
+                                // set the onClick callback for the field element only if provided
+                                onClick = handleFieldFormElementTapAction(
+                                    fieldFormElement = entry.formElement as FieldFormElement,
+                                    barcodeTapAction = onBarcodeButtonClick
+                                ),
+                            )
+                        }
+
+                        is GroupFormElement -> {
+                            GroupElement(
+                                state = entry.getState(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp),
+                                // set the onClick callback for the group element only if provided
+                                onFormElementClick = handleFormElementTapAction(
+                                    barcodeTapAction = onBarcodeButtonClick
+                                )
+                            )
+                        }
+
+                        is TextFormElement -> {
+                            TextFormElement(
+                                state = entry.getState(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
+
+                        is AttachmentsFormElement -> {
+                            AttachmentFormElement(
+                                state = entry.getState(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
+
+                        else -> {
+                            // other form elements are not created
+                        }
+                    }
+                }
+            }
+            item {
+                if (unState != null) {
+                    UtilityNetworkAssociationsElement(
+                        state = unState,
+                        onAssociationTypeClick = onUtilityAssociationTypeClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = 15.dp,
+                                end = 15.dp,
+                                top = 10.dp,
+                                bottom = 20.dp
+                            )
+                    )
+                }
+            }
+        }
+    }
+    LaunchedEffect(form) {
+        // ensure expressions are evaluated
+        form.evaluateExpressions()
+        initialEvaluation = true
+        onExpressionsEvaluated()
+    }
+}
+
+private val NavRouteStateSaver: Saver<MutableState<NavRoute>, Bundle> = object : Saver<MutableState<NavRoute>, Bundle> {
+    override fun SaverScope.save(value: MutableState<NavRoute>): Bundle? {
         return Bundle().apply {
-            putString("navRoute", Json.encodeToString(NavRoute.serializer(), value))
+            putString("navRoute", Json.encodeToString(NavRoute.serializer(), value.value))
         }
     }
 
-    override fun restore(value: Bundle): NavRoute? {
-        return value.getString("navRoute")?.let { Json.decodeFromString(it) }
+    override fun restore(value: Bundle): MutableState<NavRoute>? {
+        val json = value.getString("navRoute") ?: return null
+        val restoredValue = Json.decodeFromString<NavRoute>(json)
+        return mutableStateOf(restoredValue)
     }
 }
 
