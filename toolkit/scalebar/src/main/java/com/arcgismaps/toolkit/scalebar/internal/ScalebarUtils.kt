@@ -141,7 +141,7 @@ internal object ScalebarUtils {
     fun Double.toPx(density: Density): Double = this * density.density
 
     /**
-     * Determines an appropriate base linear unit for this scalebar unit.
+     * Determines an appropriate base linear unit for this [UnitSystem].
      *
      * [UnitSystem.Imperial] will return [LinearUnit.feet] as feet is the smallest linear
      *  unit that will be displayed.
