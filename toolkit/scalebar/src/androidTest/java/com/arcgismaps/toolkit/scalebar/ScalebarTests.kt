@@ -60,7 +60,7 @@ class ScalebarTests {
         composeTestRule.setContent {
                 LineScalebar(
                     maxWidth = 300f,
-                    displayLength = 290f,
+                    displayLength = 290.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
                     labelTypography = ScalebarDefaults.typography(),
@@ -80,7 +80,7 @@ class ScalebarTests {
     @Test
     fun testGraduatedLineScalebarIsDisplayed() {
         val maxWidth = 510f
-        val displayLength = 500f
+        val displayLength = 500.0
         val tickMarks = listOf(
             ScalebarDivision(0, 0.0, 0.0, "0"),
             ScalebarDivision(1, (displayLength / 4.0), 0.0, "25"),
@@ -115,7 +115,7 @@ class ScalebarTests {
         composeTestRule.setContent {
             BarScalebar(
                 maxWidth = 300f,
-                displayLength = 290f,
+                displayLength = 290.0,
                 label = "1000 km",
                 colorScheme = ScalebarDefaults.colors(),
                 shapes = ScalebarDefaults.shapes(),
@@ -141,7 +141,7 @@ class ScalebarTests {
             ) {
                 LineScalebar(
                     maxWidth = 300f,
-                    displayLength = 290f,
+                    displayLength = 290.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     labelTypography = ScalebarDefaults.typography(),
