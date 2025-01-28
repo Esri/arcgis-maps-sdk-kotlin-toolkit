@@ -36,7 +36,7 @@ import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
-import com.arcgismaps.toolkit.scalebar.internal.generateDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -96,7 +96,7 @@ public fun Scalebar(
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, labelTypography)
     // update the label text and offsets
-    val scalebarDivisions = scalebarProperties.generateDivisions(
+    val scalebarDivisions = scalebarProperties.computeDivisions(
         minSegmentWidth = minSegmentWidth,
         labelTypography = labelTypography,
         scalebarStyle = style

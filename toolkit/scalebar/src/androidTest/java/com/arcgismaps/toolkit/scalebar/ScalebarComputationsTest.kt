@@ -25,7 +25,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
-import com.arcgismaps.toolkit.scalebar.internal.generateDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -155,7 +155,7 @@ class ScalebarComputationsTest {
                     units
                 )
                 val minimumSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
-                val scalebarLabels = scalebarProperties.generateDivisions(
+                val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
                     labelTypography = defaultLabelTypography,
                     scalebarStyle = style

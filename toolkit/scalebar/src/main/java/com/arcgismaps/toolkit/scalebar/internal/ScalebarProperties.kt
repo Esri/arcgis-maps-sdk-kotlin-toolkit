@@ -48,12 +48,16 @@ internal data class ScalebarProperties(
         )
     }
 }
+
 /**
- * Updates the labels for the Scalebar.
+ * Computes the scalebar divisions based on the given parameters.
  *
+ * @param minSegmentWidth The minimum width of a segment.
+ * @param labelTypography The typography for the labels.
+ * @param scalebarStyle The style of the scalebar.
  * @since 200.7.0
  */
-internal fun ScalebarProperties.generateDivisions(
+internal fun ScalebarProperties.computeDivisions(
     minSegmentWidth: Double,
     labelTypography: LabelTypography,
     scalebarStyle: ScalebarStyle
@@ -109,9 +113,15 @@ internal fun ScalebarProperties.generateDivisions(
 }
 
 /**
- * Computes the Scalebar properties namely DisplayLength, DisplayUnit and LineMapLength
- * with the new values of the given parameters.
+ * Computes the [ScalebarProperties] based on the given parameters.
  *
+ * @param minScale The minimum scale for the scalebar to be visible.
+ * @param spatialReference The spatial reference of the map.
+ * @param viewpoint The viewpoint of the map.
+ * @param unitsPerDip The number of units per device independent pixel.
+ * @param maxLength The maximum length of the scalebar.
+ * @param useGeodeticCalculations Whether to use geodetic calculations.
+ * @param units The units for the scalebar.
  * @since 200.7.0
  */
 internal fun computeScalebarProperties(
