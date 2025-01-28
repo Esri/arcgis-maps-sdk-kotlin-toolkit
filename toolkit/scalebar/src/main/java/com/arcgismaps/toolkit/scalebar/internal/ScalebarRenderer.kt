@@ -57,7 +57,8 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar in pixels.
+ * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param displayLength The width of the scalebar in pixels.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
  * @param labelTypography The typography to use for the label.
@@ -68,6 +69,7 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
     maxWidth: Float,
+    displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
     labelTypography: LabelTypography,
@@ -98,14 +100,14 @@ internal fun LineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight,
             left = 0f,
-            right = maxWidth,
+            right = displayLength.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = maxWidth,
+            xPos = displayLength.toPx(density).toFloat(),
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -116,7 +118,7 @@ internal fun LineScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = maxWidth / 2,
+            xPos = displayLength.toPx(density).toFloat() / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -129,7 +131,8 @@ internal fun LineScalebar(
  * Displays bar scalebar with a single label.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar.
+ * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
@@ -140,6 +143,7 @@ internal fun LineScalebar(
 internal fun BarScalebar(
     modifier: Modifier = Modifier.testTag("BarScalebar"),
     maxWidth: Float,
+    displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -162,7 +166,7 @@ internal fun BarScalebar(
         drawRoundRect(
             color = colorScheme.shadowColor,
             topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
-            size = Size(maxWidth, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -172,14 +176,14 @@ internal fun BarScalebar(
             color = colorScheme.fillColor,
             topLeft = topLeftPoint,
             cornerRadius = CornerRadius(shapes.barCornerRadius),
-            size = Size(maxWidth, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
 
         )
         // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
-            size = Size(maxWidth, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -188,7 +192,7 @@ internal fun BarScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = maxWidth / 2.0f,
+            xPos = displayLength.toPx(density).toFloat() / 2.0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -201,7 +205,8 @@ internal fun BarScalebar(
  * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar.
+ * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param displayLength The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
  * @param labelTypography The typography to use for the label.
@@ -212,6 +217,7 @@ internal fun BarScalebar(
 internal fun GraduatedLineScalebar(
     modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
     maxWidth: Float,
+    displayLength: Double,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
     labelTypography: LabelTypography,
@@ -248,14 +254,14 @@ internal fun GraduatedLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight,
             left = 0f,
-            right = maxWidth,
+            right = displayLength.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = maxWidth,
+            xPos = displayLength.toPx(density).toFloat(),
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -279,6 +285,8 @@ internal fun GraduatedLineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
+    val maxWidth = 500f
+    val displayLength = 490.0
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -286,7 +294,8 @@ internal fun LineScaleBarPreview() {
     ) {
         LineScalebar(
             modifier = Modifier,
-            maxWidth = 500f / LocalDensity.current.density,
+            maxWidth = maxWidth / LocalDensity.current.density,
+            displayLength = displayLength / LocalDensity.current.density,
             label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(),
             labelTypography = ScalebarDefaults.typography(),
@@ -298,6 +307,8 @@ internal fun LineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun BarScaleBarPreview() {
+    val maxWidth = 500f
+    val displayLength = 490.0
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -305,7 +316,8 @@ internal fun BarScaleBarPreview() {
     ) {
         BarScalebar(
             modifier = Modifier,
-            maxWidth = 300f,
+            maxWidth = maxWidth / LocalDensity.current.density,
+            displayLength = displayLength / LocalDensity.current.density,
             label = "1000 km",
             colorScheme = ScalebarDefaults.colors(shadowColor = Color.Red, textShadowColor = Color.Red),
             shapes = ScalebarDefaults.shapes(barCornerRadius = 4f, textShadowBlurRadius = 2f),
@@ -317,14 +329,14 @@ internal fun BarScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
-    val maxWidth = 500f
+    val maxWidth = 550f
+    val displayLength = 500.0
     val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "100 km")
+        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
+        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
+        ScalebarDivision(4, displayLength.toDouble()/ density, 0.0, "300 km")
     )
     Box(
         modifier = Modifier
@@ -334,6 +346,7 @@ internal fun GraduatedLineScaleBarPreview() {
         GraduatedLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
+            displayLength = displayLength,
             colorScheme = ScalebarDefaults.colors(),
             tickMarks = tickMarks,
             labelTypography = ScalebarDefaults.typography(),

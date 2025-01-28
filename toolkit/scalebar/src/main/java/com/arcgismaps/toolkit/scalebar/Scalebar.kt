@@ -34,7 +34,6 @@ import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
@@ -105,7 +104,8 @@ public fun Scalebar(
     // and the labels are updated
     val density = LocalDensity.current
     Scalebar(
-        maxWidth = scalebarProperties.displayLength.toPx(density),
+        maxWidth = maxWidth,
+        displayLength = scalebarProperties.displayLength,
         labels = scalebarDivisions,
         scalebarStyle = style,
         colorScheme = colorScheme,
@@ -118,6 +118,7 @@ public fun Scalebar(
 @Composable
 private fun Scalebar(
     maxWidth: Double,
+    displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
@@ -130,6 +131,7 @@ private fun Scalebar(
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -140,6 +142,7 @@ private fun Scalebar(
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -149,6 +152,7 @@ private fun Scalebar(
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
