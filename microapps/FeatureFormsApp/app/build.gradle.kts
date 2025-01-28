@@ -23,6 +23,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
@@ -82,6 +83,8 @@ dependencies {
     implementation(project(":geoview-compose"))
     // sdk
     implementation(arcgis.mapsSdk)
+    // serializer
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     // hilt
     implementation(libs.hilt.android.core)
     implementation(libs.androidx.hilt.navigation.compose)
