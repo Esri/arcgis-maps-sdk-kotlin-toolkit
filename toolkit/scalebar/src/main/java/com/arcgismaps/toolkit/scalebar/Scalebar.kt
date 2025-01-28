@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
@@ -34,8 +35,8 @@ import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
-import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -65,7 +66,7 @@ public fun Scalebar(
     minScale: Double = 0.0, // minimum scale to show the scalebar
     useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
-    units: ScalebarUnits = rememberDefaultScalebarUnits(),
+    units: UnitSystem = rememberDefaultScalebarUnits(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
@@ -163,13 +164,13 @@ internal fun ScalebarPreview() {
 }
 
 @Composable
-private fun rememberDefaultScalebarUnits(): ScalebarUnits {
+private fun rememberDefaultScalebarUnits(): UnitSystem {
     val locale = Locale.current
-    val scalebarUnits =  when (locale.platformLocale.country) {
-        "US", "LR", "MM" -> ScalebarUnits.IMPERIAL// United States, Liberia, Myanmar
-        else -> ScalebarUnits.METRIC
+    val unitSystem = when (locale.platformLocale.country) {
+        "US", "LR", "MM" -> UnitSystem.Imperial// United States, Liberia, Myanmar
+        else -> UnitSystem.Metric
     }
-    return remember { scalebarUnits }
+    return remember(locale) { unitSystem }
 }
 
 /**
