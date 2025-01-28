@@ -65,7 +65,7 @@ public fun Scalebar(
     minScale: Double = 0.0, // minimum scale to show the scalebar
     useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
-    units: UnitSystem = rememberDefaultScalebarUnits(),
+    units: UnitSystem = rememberDefaultUnitSystem(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
@@ -168,7 +168,7 @@ internal fun ScalebarPreview() {
 }
 
 @Composable
-private fun rememberDefaultScalebarUnits(): UnitSystem {
+private fun rememberDefaultUnitSystem(): UnitSystem {
     val locale = Locale.current
     val unitSystem = when (locale.platformLocale.country) {
         "US", "LR", "MM" -> UnitSystem.Imperial// United States, Liberia, Myanmar
