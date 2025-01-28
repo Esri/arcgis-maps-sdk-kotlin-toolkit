@@ -306,7 +306,7 @@ internal fun DualUnitLineScalebar(
     val density = LocalDensity.current
     val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toPx() }
 
-    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalHeight = scalebarHeight + (textSizeInPx * 2) + shadowOffset + (textOffset * 2)
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
 
     Canvas(
@@ -318,26 +318,26 @@ internal fun DualUnitLineScalebar(
         // left end line
         drawVerticalLineAndShadow(
             xPos = 0f,
-            top = 0f,
-            bottom = (scalebarHeight * 2) + (lineWidth.toPx()),
+            top = totalHeight / 2 - scalebarHeight,
+            bottom = totalHeight / 2,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // Scalebar line
         drawHorizontalLineAndShadow(
-            yPos = scalebarHeight,
+            yPos = totalHeight / 2,
             left = 0f,
-            right = maxWidth,
+            right = endScalebarDivision.xOffset.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right end line
         drawVerticalLineAndShadow(
-            xPos = maxWidth,
-            top = 0f,
-            bottom = scalebarHeight,
+            xPos = endScalebarDivision.xOffset.toPx(density).toFloat(),
+            top = totalHeight / 2 - scalebarHeight,
+            bottom = totalHeight / 2,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -348,7 +348,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = endScalebarDivision.xOffset.toPx(density).toFloat(),
-            yPos = -(2 * scalebarHeight),
+            yPos = -10f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -358,8 +358,8 @@ internal fun DualUnitLineScalebar(
         // draw end line for alternate scalebar
         drawVerticalLineAndShadow(
             xPos = alternateScalebarDivision.xOffset.toPx(density).toFloat(),
-            top = (scalebarHeight * 2) + (lineWidth.toPx()/2),
-            bottom = scalebarHeight,
+            top = totalHeight / 2,
+            bottom = (totalHeight / 2) + scalebarHeight,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -370,7 +370,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = alternateScalebarDivision.xOffset.toPx(density).toFloat(),
-            yPos = scalebarHeight + (2 * (lineWidth.toPx())) + textOffset,
+            yPos = scalebarHeight * 3 + textOffset,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
