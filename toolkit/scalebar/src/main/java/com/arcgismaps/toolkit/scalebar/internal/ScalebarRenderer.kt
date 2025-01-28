@@ -69,7 +69,7 @@ internal const val labelXPadding = 4f // padding between scalebar labels.
 internal fun LineScalebar(
     modifier: Modifier = Modifier.testTag("LineScalebar"),
     maxWidth: Float,
-    displayLength: Float,
+    displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
     labelTypography: LabelTypography,
@@ -100,14 +100,14 @@ internal fun LineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight,
             left = 0f,
-            right = displayLength,
+            right = displayLength.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength,
+            xPos = displayLength.toPx(density).toFloat(),
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -118,7 +118,7 @@ internal fun LineScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = displayLength / 2,
+            xPos = displayLength.toPx(density).toFloat() / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -143,7 +143,7 @@ internal fun LineScalebar(
 internal fun BarScalebar(
     modifier: Modifier = Modifier.testTag("BarScalebar"),
     maxWidth: Float,
-    displayLength: Float,
+    displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -166,7 +166,7 @@ internal fun BarScalebar(
         drawRoundRect(
             color = colorScheme.shadowColor,
             topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
-            size = Size(displayLength, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -176,14 +176,14 @@ internal fun BarScalebar(
             color = colorScheme.fillColor,
             topLeft = topLeftPoint,
             cornerRadius = CornerRadius(shapes.barCornerRadius),
-            size = Size(displayLength, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
 
         )
         // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
-            size = Size(displayLength, scalebarHeight),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -192,7 +192,7 @@ internal fun BarScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = displayLength / 2.0f,
+            xPos = displayLength.toPx(density).toFloat() / 2.0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -217,7 +217,7 @@ internal fun BarScalebar(
 internal fun GraduatedLineScalebar(
     modifier: Modifier = Modifier.testTag("GraduatedLineScalebar"),
     maxWidth: Float,
-    displayLength: Float,
+    displayLength: Double,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
     labelTypography: LabelTypography,
@@ -254,14 +254,14 @@ internal fun GraduatedLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight,
             left = 0f,
-            right = displayLength,
+            right = displayLength.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength,
+            xPos = displayLength.toPx(density).toFloat(),
             top = 0f,
             bottom = scalebarHeight,
             lineColor = colorScheme.lineColor,
@@ -286,7 +286,7 @@ internal fun GraduatedLineScalebar(
 @Composable
 internal fun LineScaleBarPreview() {
     val maxWidth = 500f
-    val displayLength = 490f
+    val displayLength = 490.0
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -308,7 +308,7 @@ internal fun LineScaleBarPreview() {
 @Composable
 internal fun BarScaleBarPreview() {
     val maxWidth = 500f
-    val displayLength = 490f
+    val displayLength = 490.0
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -330,7 +330,7 @@ internal fun BarScaleBarPreview() {
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 550f
-    val displayLength = 500f
+    val displayLength = 500.0
     val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
