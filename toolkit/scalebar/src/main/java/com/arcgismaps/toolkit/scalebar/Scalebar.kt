@@ -105,7 +105,8 @@ public fun Scalebar(
     // and the labels are updated
     val density = LocalDensity.current
     Scalebar(
-        maxWidth = scalebarProperties.displayLength.toPx(density),
+        maxWidth = maxWidth,
+        displayLength = scalebarProperties.displayLength.toPx(density),
         labels = scalebarDivisions,
         scalebarStyle = style,
         colorScheme = colorScheme,
@@ -118,6 +119,7 @@ public fun Scalebar(
 @Composable
 private fun Scalebar(
     maxWidth: Double,
+    displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
@@ -130,6 +132,7 @@ private fun Scalebar(
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -140,6 +143,7 @@ private fun Scalebar(
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength.toFloat(),
             tickMarks = labels,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -149,6 +153,7 @@ private fun Scalebar(
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength.toFloat(),
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
