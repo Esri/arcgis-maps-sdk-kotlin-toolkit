@@ -1,5 +1,5 @@
 public final class com/arcgismaps/toolkit/scalebar/ScalebarKt {
-	public static final fun Scalebar-MPUtEvE (DDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/runtime/Composer;III)V
+	public static final fun Scalebar-MPUtEvE (DDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/UnitSystem;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/arcgismaps/toolkit/scalebar/ScalebarStyle : java/lang/Enum {
@@ -11,14 +11,6 @@ public final class com/arcgismaps/toolkit/scalebar/ScalebarStyle : java/lang/Enu
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
 	public static fun values ()[Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
-}
-
-public final class com/arcgismaps/toolkit/scalebar/ScalebarUnits : java/lang/Enum {
-	public static final field IMPERIAL Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;
-	public static final field METRIC Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;
-	public static fun values ()[Lcom/arcgismaps/toolkit/scalebar/ScalebarUnits;
 }
 
 public final class com/arcgismaps/toolkit/scalebar/theme/LabelTypography {
