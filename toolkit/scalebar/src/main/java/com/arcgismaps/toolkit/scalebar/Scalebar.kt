@@ -18,7 +18,13 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -44,6 +51,7 @@ import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
+import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -72,6 +80,14 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
+    val isScalebarVisible = remember { mutableStateOf(true) }
+    LaunchedEffect(viewpoint, autoHideDelay) {
+        if (autoHideDelay > Duration.ZERO) {
+            isScalebarVisible.value = true
+            delay(autoHideDelay)
+            isScalebarVisible.value = false
+        }
+    }
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
 
@@ -100,18 +116,27 @@ public fun Scalebar(
         labelTypography = labelTypography,
         scalebarStyle = style
     )
-    // invoked after the scalebar properties displayLength, displayUnit are computed
-    // and the labels are updated
-    Scalebar(
-        maxWidth = maxWidth,
-        displayLength = scalebarProperties.displayLength,
-        labels = scalebarDivisions,
-        scalebarStyle = style,
-        colorScheme = colorScheme,
-        shapes = shapes,
-        labelTypography = labelTypography,
-        modifier = modifier
-    )
+
+    AnimatedVisibility(
+        visible = isScalebarVisible.value,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Box(
+            modifier = modifier.width(maxWidth.dp)
+        ) {
+            Scalebar(
+                maxWidth = maxWidth,
+                displayLength = scalebarProperties.displayLength,
+                labels = scalebarDivisions,
+                scalebarStyle = style,
+                colorScheme = colorScheme,
+                shapes = shapes,
+                labelTypography = labelTypography,
+                modifier = modifier
+            )
+        }
+    }
 }
 
 @Composable
@@ -138,6 +163,7 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
+
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
