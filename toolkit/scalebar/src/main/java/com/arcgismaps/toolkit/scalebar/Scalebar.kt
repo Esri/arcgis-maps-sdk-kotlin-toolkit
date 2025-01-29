@@ -18,24 +18,23 @@
 
 package com.arcgismaps.toolkit.scalebar
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
+import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
-import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
@@ -67,12 +66,7 @@ public fun Scalebar(
     minScale: Double = 0.0, // minimum scale to show the scalebar
     useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
-    // TODO: determining the default ScalebarUnit is not tested
-    units: ScalebarUnits = if (isMetric()) {
-        ScalebarUnits.METRIC
-    } else {
-        ScalebarUnits.IMPERIAL
-    },
+    units: UnitSystem = rememberDefaultUnitSystem(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
@@ -109,7 +103,8 @@ public fun Scalebar(
     // and the labels are updated
     val density = LocalDensity.current
     Scalebar(
-        maxWidth = scalebarProperties.displayLength.toPx(density),
+        maxWidth = maxWidth,
+        displayLength = scalebarProperties.displayLength,
         labels = scalebarDivisions,
         scalebarStyle = style,
         colorScheme = colorScheme,
@@ -122,6 +117,7 @@ public fun Scalebar(
 @Composable
 private fun Scalebar(
     maxWidth: Double,
+    displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
@@ -137,6 +133,7 @@ private fun Scalebar(
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -147,6 +144,7 @@ private fun Scalebar(
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -156,6 +154,7 @@ private fun Scalebar(
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
@@ -176,12 +175,13 @@ internal fun ScalebarPreview() {
 }
 
 @Composable
-private fun isMetric(): Boolean {
-    // TODO implement the actual logic to determine the default ScalebarUnit
-    // this is a placeholder implementation
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    return sharedPreferences.getBoolean("isMetric", true)
+private fun rememberDefaultUnitSystem(): UnitSystem {
+    val locale = Locale.current
+    val unitSystem = when (locale.platformLocale.country) {
+        "US", "LR", "MM" -> UnitSystem.Imperial// United States, Liberia, Myanmar
+        else -> UnitSystem.Metric
+    }
+    return remember(locale) { unitSystem }
 }
 
 /**

@@ -16,7 +16,7 @@
 
 package com.arcgismaps.toolkit.scalebar.internal
 
-import android.util.Log
+import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
@@ -26,8 +26,10 @@ import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.ScalebarStyle
-import com.arcgismaps.toolkit.scalebar.ScalebarUnits
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.baseLinearUnit
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.closestDistanceWithoutGoingOver
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.linearUnitsForDistance
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
 
@@ -132,7 +134,7 @@ internal fun computeScalebarProperties(
     unitsPerDip: Double?,
     maxLength: Double,
     useGeodeticCalculations: Boolean,
-    units: ScalebarUnits
+    units: UnitSystem
 ): ScalebarProperties {
     if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
         return ScalebarProperties.INVALID
