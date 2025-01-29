@@ -131,7 +131,7 @@ internal fun LineScalebar(
  * Displays bar scalebar with a single label.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
  * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -205,7 +205,7 @@ internal fun BarScalebar(
  * Displays AlternatingBar scalebar with segmented bars of alternating fill color.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
  * @param scalebarDivisions The scale value to display.
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
@@ -295,7 +295,7 @@ internal fun AlternatingBarScalebar(
  * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
  * @param displayLength The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
@@ -426,7 +426,7 @@ internal fun GraduatedLineScaleBarPreview() {
         ScalebarDivision(0, 0.0, 0.0, "0"),
         ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
         ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
-        ScalebarDivision(4, displayLength.toDouble()/ density, 0.0, "300 km")
+        ScalebarDivision(4, displayLength/ density, 0.0, "300 km")
     )
     Box(
         modifier = Modifier
@@ -448,14 +448,14 @@ internal fun GraduatedLineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun AlternatingBarScaleBarPreview() {
-    val maxWidth = 500f
+    val maxWidth = 550f
+    val displayLength = 500.0
     val density = LocalDensity.current.density
     val scalebarDivisions = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (maxWidth / (4.0 * density)), 0.0, "25"),
-        ScalebarDivision(2, maxWidth / (2.0 * density), 0.0, "50"),
-        ScalebarDivision(3, (maxWidth / (4.0 * density))* 3, 0.0, "75"),
-        ScalebarDivision(4, maxWidth.toDouble()/ density, 0.0, "100 km")
+        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
+        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
+        ScalebarDivision(4, displayLength/ density, 0.0, "300 km")
     )
     Box(
         modifier = Modifier

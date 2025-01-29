@@ -125,7 +125,7 @@ class ScalebarComputationsTest {
             y = esriRedlands.y,
             style = ScalebarStyle.AlternatingBar,
             maxWidth = 175.0,
-            units = ScalebarUnits.METRIC,
+            units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
