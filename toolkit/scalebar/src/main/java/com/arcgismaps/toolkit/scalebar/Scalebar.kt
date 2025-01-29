@@ -60,8 +60,21 @@ import kotlin.time.Duration.Companion.seconds
  * A Scalebar displays the representation of an accurate linear measurement on the map.
  * It provides a visual indication through which users can determine the size of features or
  * the distance between features on a map.
- * // TODO: update documentation
  *
+ * @param maxWidth the maximum screen width allotted to the scalebar in dp.
+ * @param unitsPerDip the number of map units per density-independent pixel (dp).
+ * @param viewpoint the current viewpoint of the map.
+ * @param spatialReference the spatial reference of the map.
+ * @param modifier the modifier to apply to this layout.
+ * @param autoHideDelay the duration to wait before hiding the scalebar, set to `Duration.INFINITE` to disable auto-hide.
+ * @param minScale the minimum scale to show the scalebar, default is `0.0` which means the scalebar will always be visible.
+ * @param useGeodeticCalculations `true` to compute scale using a geodesic curve, `false` to compute scale without a geodesic curve,
+ * default is `true`.
+ * @param style the style of the scalebar, default is [ScalebarStyle.AlternatingBar].
+ * @param units the units for the scalebar, default is the default unit system based on the device's locale.
+ * @param colorScheme the color scheme for the scalebar.
+ * @param shapes the shapes for the scalebar.
+ * @param labelTypography the typography for the scalebar labels.
  * @since 200.7.0
  */
 @Composable
@@ -71,9 +84,9 @@ public fun Scalebar(
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
-    autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
-    minScale: Double = 0.0, // minimum scale to show the scalebar
-    useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
+    autoHideDelay: Duration = 1.75.seconds,
+    minScale: Double = 0.0,
+    useGeodeticCalculations: Boolean = true,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
     units: UnitSystem = rememberDefaultUnitSystem(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
@@ -82,7 +95,7 @@ public fun Scalebar(
 ) {
     val isScalebarVisible = remember { mutableStateOf(true) }
     LaunchedEffect(viewpoint, autoHideDelay) {
-        if (autoHideDelay > Duration.ZERO) {
+        if (autoHideDelay > Duration.ZERO && autoHideDelay != Duration.INFINITE) {
             isScalebarVisible.value = true
             delay(autoHideDelay)
             isScalebarVisible.value = false
