@@ -81,7 +81,7 @@ fun MainScreen(modifier: Modifier) {
                 unitsPerDip = unitsPerDip,
                 viewpoint = viewpoint,
                 spatialReference = spatialReference,
-                style = ScalebarStyle.GraduatedLine,
+                style = ScalebarStyle.AlternatingBar,
             )
         }
     }

@@ -112,6 +112,28 @@ class ScalebarComputationsTest {
     }
 
     /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyle() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.0,
+            units = UnitSystem.Metric,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 137,
+            labels = listOf("0", "100", "200", "300 km")
+        )
+    }
+
+    /**
      * Executes a test for the Scalebar with the given parameters.
      *
      * @since 200.7.0

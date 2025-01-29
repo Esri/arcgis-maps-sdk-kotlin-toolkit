@@ -131,7 +131,7 @@ internal fun LineScalebar(
  * Displays bar scalebar with a single label.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
  * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -202,10 +202,99 @@ internal fun BarScalebar(
 }
 
 /**
+ * Displays AlternatingBar scalebar with segmented bars of alternating fill color.
+ *
+ * @param modifier The modifier to apply to the layout.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
+ * @param displayLength The width of the scale bar.
+ * @param scalebarDivisions The scale value to display.
+ * @param colorScheme The color scheme to use.
+ * @param shapes The shape properties to use.
+ * @param labelTypography The typography to use for the label.
+ * @since 200.7.0
+ */
+@Composable
+internal fun AlternatingBarScalebar(
+    modifier: Modifier = Modifier.testTag("AlternatingBarScalebar"),
+    maxWidth: Float,
+    displayLength: Double,
+    scalebarDivisions: List<ScalebarDivision>,
+    colorScheme: ScalebarColors,
+    shapes: ScalebarShapes,
+    labelTypography: LabelTypography
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toPx() }
+
+    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInPx
+    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+    val topLeftPoint = Offset(0f, 0f)
+
+    Canvas(
+        modifier = modifier
+            .width(calculateSizeInDp(density, totalWidth))
+            .height(calculateSizeInDp(density, totalHeight))
+    ) {
+        // draws the rectangle's shadow
+        drawRoundRect(
+            color = colorScheme.shadowColor,
+            topLeft = Offset(topLeftPoint.x + shadowOffset, topLeftPoint.y + shadowOffset),
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
+            cornerRadius = CornerRadius(shapes.barCornerRadius),
+            style = Stroke(width = lineWidth.toPx())
+        )
+        // Draws the alternating fill colors, bars and text labels
+        for (index in scalebarDivisions.indices) {
+            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density).toFloat()
+            val endX = scalebarDivisions[index].xOffset.toPx(density).toFloat()
+            val width = endX - startX
+
+            // Draw the inner fill color
+            drawRoundRect(
+                color = if (index % 2 == 0) colorScheme.fillColor else colorScheme.alternateFillColor,
+                topLeft = Offset(startX + lineWidth.toPx() / 2, 0f),
+                cornerRadius = CornerRadius(shapes.barCornerRadius),
+                size = Size(width - lineWidth.toPx(), scalebarHeight)
+            )
+
+            // Draw the segment line
+            drawLine(
+                color = colorScheme.lineColor,
+                start = Offset(endX, 0f),
+                end = Offset(endX, scalebarHeight),
+                strokeWidth = lineWidth.toPx(),
+            )
+
+            // draw text label
+            drawText(
+                text = scalebarDivisions[index].label,
+                textMeasurer = textMeasurer,
+                labelTypography = labelTypography,
+                xPos = scalebarDivisions[index].xOffset.toPx(density).toFloat(),
+                color = colorScheme.textColor,
+                shadowColor = colorScheme.textShadowColor,
+                shadowBlurRadius = shapes.textShadowBlurRadius,
+                alignment = TextAlignment.CENTER
+            )
+        }
+
+        // draw the rectangle's border
+        drawRoundRect(
+            color = colorScheme.lineColor,
+            topLeft = topLeftPoint,
+            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight),
+            cornerRadius = CornerRadius(shapes.barCornerRadius),
+            style = Stroke(width = lineWidth.toPx())
+        )
+    }
+}
+
+/**
  * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in pixels.
  * @param displayLength The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
@@ -334,9 +423,9 @@ internal fun GraduatedLineScaleBarPreview() {
     val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
-        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
-        ScalebarDivision(4, displayLength.toDouble()/ density, 0.0, "300 km")
+        ScalebarDivision(1, 0.33 * (displayLength / density), 0.0, "100"),
+        ScalebarDivision(2, 0.66 * (displayLength / density), 0.0, "200"),
+        ScalebarDivision(4, displayLength / density, 0.0, "300 km")
     )
     Box(
         modifier = Modifier
@@ -346,9 +435,38 @@ internal fun GraduatedLineScaleBarPreview() {
         GraduatedLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
-            displayLength = displayLength,
+            displayLength = displayLength / density,
             colorScheme = ScalebarDefaults.colors(),
             tickMarks = tickMarks,
+            labelTypography = ScalebarDefaults.typography(),
+            shapes = ScalebarDefaults.shapes()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff91d2ff)
+@Composable
+internal fun AlternatingBarScaleBarPreview() {
+    val maxWidth = 550f
+    val displayLength = 500.0
+    val density = LocalDensity.current.density
+    val scalebarDivisions = listOf(
+        ScalebarDivision(0, 0.0, 0.0, "0"),
+        ScalebarDivision(1, 0.33 * (displayLength / density), 0.0, "100"),
+        ScalebarDivision(2, 0.66 * (displayLength / density), 0.0, "200"),
+        ScalebarDivision(4, displayLength / density, 0.0, "300 km")
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp), contentAlignment = Alignment.BottomStart
+    ) {
+        AlternatingBarScalebar(
+            modifier = Modifier,
+            maxWidth = maxWidth,
+            displayLength = displayLength / density,
+            colorScheme = ScalebarDefaults.colors(),
+            scalebarDivisions = scalebarDivisions,
             labelTypography = ScalebarDefaults.typography(),
             shapes = ScalebarDefaults.shapes()
         )
