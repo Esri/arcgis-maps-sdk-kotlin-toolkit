@@ -214,6 +214,38 @@ internal fun computeScalebarProperties(
 }
 
 /**
+ * Computes the alternate unit scalebar division based on the given parameters for the dual unit line style.
+ *
+ * @param unit The unit system of the scalebar
+ * @param labelTypography The typography for the labels.
+ *
+ * @since 200.7.0
+ */
+internal fun ScalebarProperties.computeAlternateUnitScalebarDivision(
+    unit: UnitSystem,
+    labelTypography: LabelTypography
+): ScalebarDivision {
+    val altUnit = if (unit == UnitSystem.Imperial) UnitSystem.Metric else UnitSystem.Imperial
+    val altMapBaseLength = mapUnitsToDisplay.convertTo(altUnit.baseLinearUnit, scalebarLengthInMapUnits)
+    val altClosestBaseLength = altUnit.closestDistanceWithoutGoingOver(altMapBaseLength, altUnit.baseLinearUnit)
+    val altDisplayUnits = altUnit.linearUnitsForDistance(altClosestBaseLength)
+    val altMapLength = altUnit.baseLinearUnit.convertTo(altDisplayUnits, altClosestBaseLength)
+    val displayFactor = scalebarLengthInMapUnits / displayLength
+    val convertedDisplayFactor = mapUnitsToDisplay.convertTo(altDisplayUnits, displayFactor)
+    val altDisplayLength = altMapLength / convertedDisplayFactor
+
+    val altUnitAbbr = altDisplayUnits.getAbbreviation()
+    val label = "${altMapLength.format()} $altUnitAbbr"
+
+    return ScalebarDivision(
+        index = -2,
+        xOffset = altDisplayLength,
+        labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
+        label = label
+    )
+}
+
+/**
  * Gets the abbreviation for the LinearUnit.
  *
  * @since 200.7.0

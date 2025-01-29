@@ -35,6 +35,7 @@ import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
+import com.arcgismaps.toolkit.scalebar.internal.computeAlternateUnitScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
@@ -96,12 +97,20 @@ public fun Scalebar(
         labelTypography = labelTypography,
         scalebarStyle = style
     )
+    // alternate scalebar division for dual unit line style
+    val alternateScalebarDivision: ScalebarDivision = if (style == ScalebarStyle.DualUnitLine) {
+        scalebarProperties.computeAlternateUnitScalebarDivision(units, labelTypography)
+    } else {
+        ScalebarDivision(-1, 0.0, 0.0, "")
+    }
+
     // invoked after the scalebar properties displayLength, displayUnit are computed
     // and the labels are updated
     Scalebar(
         maxWidth = maxWidth,
         displayLength = scalebarProperties.displayLength,
         labels = scalebarDivisions,
+        alternateScalebarDivision = alternateScalebarDivision,
         scalebarStyle = style,
         colorScheme = colorScheme,
         shapes = shapes,
@@ -115,6 +124,7 @@ private fun Scalebar(
     maxWidth: Double,
     displayLength: Double,
     labels: List<ScalebarDivision>,
+    alternateScalebarDivision: ScalebarDivision,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -136,7 +146,7 @@ private fun Scalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
             endScalebarDivision = labels.last(),
-            alternateScalebarDivision = alternateUnit,
+            alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
             shapes = shapes

@@ -73,7 +73,7 @@ fun MainScreen(modifier: Modifier) {
             modifier = Modifier
                 .height(IntrinsicSize.Max)
                 .fillMaxWidth()
-                .padding(30.dp)
+                .padding(25.dp)
                 .align(Alignment.BottomStart)
         ) {
             Scalebar(
