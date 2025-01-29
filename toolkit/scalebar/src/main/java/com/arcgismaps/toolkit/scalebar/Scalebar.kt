@@ -88,7 +88,7 @@ public fun Scalebar(
         )
     }
     // prevent displaying the scalebar if the properties are invalid
-    if (scalebarProperties == ScalebarProperties.INVALID) {
+    if (scalebarProperties == ScalebarProperties.NOT_INITIALIZED) {
         return
     }
     // Measure the minimum segment width required to display the labels without overlapping

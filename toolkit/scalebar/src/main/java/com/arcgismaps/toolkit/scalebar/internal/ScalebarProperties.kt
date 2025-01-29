@@ -21,6 +21,7 @@ import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.LinearUnitId
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
@@ -44,7 +45,7 @@ internal data class ScalebarProperties(
     val scalebarLengthInMapUnits: Double
 ) {
     companion object {
-        val INVALID = ScalebarProperties(
+        val NOT_INITIALIZED = ScalebarProperties(
             displayLength = 0.0,
             mapUnitsToDisplay = LinearUnit.meters,
             scalebarLengthInMapUnits = 0.0
@@ -92,8 +93,8 @@ internal fun ScalebarProperties.computeDivisions(
         currSegmentX += segmentScreenLength
         val segmentMapLength: Double = (segmentScreenLength * (index + 1) / displayLength) * scalebarLengthInMapUnits
 
-        val segmentText: String = if (index == numSegments - 1 && mapUnitsToDisplay != null) {
-            val displayUnitAbbr = mapUnitsToDisplay?.getAbbreviation()
+        val segmentText: String = if (index == numSegments - 1) {
+            val displayUnitAbbr = mapUnitsToDisplay.getAbbreviation()
             "${segmentMapLength.format()} $displayUnitAbbr"
         } else {
             segmentMapLength.format()
@@ -137,11 +138,11 @@ internal fun computeScalebarProperties(
     units: UnitSystem
 ): ScalebarProperties {
     if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
-        return ScalebarProperties.INVALID
+        return ScalebarProperties.NOT_INITIALIZED
     }
 
     if (minScale > 0 && viewpoint.targetScale >= minScale || unitsPerDip.isNaN()) {
-        return ScalebarProperties.INVALID
+        return ScalebarProperties.NOT_INITIALIZED
     }
 
     val mapCenter = viewpoint.targetGeometry.extent.center
@@ -153,7 +154,7 @@ internal fun computeScalebarProperties(
     }
 
     if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
-        return ScalebarProperties.INVALID
+        return ScalebarProperties.NOT_INITIALIZED
     }
 
     return ScalebarProperties(
