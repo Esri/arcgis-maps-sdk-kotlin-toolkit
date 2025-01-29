@@ -27,6 +27,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
@@ -44,6 +45,7 @@ class ScalebarTests {
     private val lineScalebarTag = "LineScalebar"
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     private val barScalebarTag = "BarScalebar"
+    private val alternatingBarScalebarTag = "AlternatingBarScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -123,6 +125,37 @@ class ScalebarTests {
             )
         }
         composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a AlternatingBar scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlteratingBarScaleBarIsDisplayed(){
+        // Test the scalebar
+        val maxWidth = 550f
+        val displayLength = 500.0
+        val scalebarDivisions = listOf(
+            ScalebarDivision(0, 0.0, 0.0, "0"),
+            ScalebarDivision(1, (displayLength / 3.0), 0.0, "100"),
+            ScalebarDivision(2, 2.0 * displayLength / 3.0, 0.0, "200"),
+            ScalebarDivision(4, displayLength, 0.0, "300 km")
+        )
+        // Test the scalebar
+        composeTestRule.setContent {
+            AlternatingBarScalebar(
+                maxWidth = maxWidth,
+                scalebarDivisions = scalebarDivisions,
+                colorScheme = ScalebarDefaults.colors(),
+                shapes = ScalebarDefaults.shapes(),
+                labelTypography = ScalebarDefaults.typography(),
+            )
+        }
+        composeTestRule.onNodeWithTag(alternatingBarScalebarTag).assertIsDisplayed()
     }
 
     /**
