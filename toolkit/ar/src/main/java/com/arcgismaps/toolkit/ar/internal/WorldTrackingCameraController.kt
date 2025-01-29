@@ -43,8 +43,6 @@ import com.google.ar.core.Frame
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
@@ -70,6 +68,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
 
     private val locationDataSource = SystemLocationDataSource()
     val cameraController = TransformationMatrixCameraController()
+
     // TODO: make this a mutable state
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
