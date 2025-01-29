@@ -35,6 +35,7 @@ import androidx.core.content.ContextCompat
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.toolkit.ar.R
+import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Camera
@@ -220,4 +221,14 @@ internal fun rememberPermissionsGranted(
     }
 
     return allPermissionsGranted
+}
+
+/**
+ * Provides constants for the [WorldScaleSceneView].
+ *
+ * @since 200.7.0
+ */
+internal data object WorldScaleParameters {
+    const val LOCATION_DISTANCE_THRESHOLD_METERS = 2.0
+    const val LOCATION_AGE_THRESHOLD_MS = 10000.0
 }

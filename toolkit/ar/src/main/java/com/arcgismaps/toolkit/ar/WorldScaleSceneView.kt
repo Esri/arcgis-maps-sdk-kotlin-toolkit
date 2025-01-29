@@ -22,19 +22,13 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.geometry.GeodeticCurveType
-import com.arcgismaps.geometry.GeometryEngine
-import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.location.Location
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
@@ -56,23 +50,18 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
-import com.arcgismaps.mapping.view.TransformationMatrix
-import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberWorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
-import com.arcgismaps.toolkit.ar.internal.rememberSystemLocationDataSource
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
-import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 @Composable
@@ -141,9 +130,14 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
-    val cameraController = remember { TransformationMatrixCameraController() }
-
-    LocationTracker(cameraController)
+    val locationTracker = rememberWorldTrackingCameraController(
+        onLocationDataSourceFailedToStart = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
 
     Box(modifier = modifier) {
         val arSessionWrapper =
@@ -154,8 +148,7 @@ public fun WorldScaleSceneView(
             ArCameraFeed(
                 session = arSession,
                 onFrame = { frame, displayRotation ->
-                    val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
-                    cameraController.transformationMatrix = cameraPosition
+                    locationTracker.updateCamera(frame)
                     worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                         frame.camera,
                         displayRotation
@@ -172,6 +165,8 @@ public fun WorldScaleSceneView(
                 onInitializationStatusChanged
             )
         }
+        // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
+        if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -190,7 +185,7 @@ public fun WorldScaleSceneView(
             isAttributionBarVisible = isAttributionBarVisible,
             onAttributionTextChanged = onAttributionTextChanged,
             onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = cameraController,
+            cameraController = locationTracker.cameraController,
             analysisOverlays = analysisOverlays,
             imageOverlays = imageOverlays,
             atmosphereEffect = AtmosphereEffect.None,
@@ -219,92 +214,4 @@ public fun WorldScaleSceneView(
             }
         )
     }
-}
-
-/**
- * Starts the a [SystemLocationDataSource] and periodically updates the [cameraController] with new locations
- *
- * @since 200.7.0
- */
-@Composable
-private fun LocationTracker(
-    cameraController: TransformationMatrixCameraController
-) {
-    val locationDataSource = rememberSystemLocationDataSource().locationDataSource
-    // We should reset the origin camera if the LDS or camera controller changes
-    var hasSetOriginCamera = remember(cameraController) { false }
-    LaunchedEffect(Unit) {
-        launch {
-            locationDataSource.locationChanged
-                .filter { location ->
-                    !hasSetOriginCamera || shouldUpdateCamera(
-                        location,
-                        cameraController.originCamera.value
-                    )
-                }
-                .collect { location ->
-                    cameraController.setOriginCamera(
-                        Camera(
-                            location.position.y,
-                            location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 0.0,
-                            0.0,
-                            90.0,
-                            0.0
-                        )
-                    )
-                    // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix =
-                        TransformationMatrix.createIdentityMatrix()
-                    if (!hasSetOriginCamera) {
-                        hasSetOriginCamera = true
-                    }
-                }
-        }
-    }
-
-}
-
-/**
- * Returns false if the location timestamp is older than 10 seconds,
- * if the horizontal or vertical accuracy is negative,
- * or if the distance between the location and the current camera is less than 2 meters.
- * Otherwise, returns true.
- *
- * @since 200.7.0
- */
-internal fun shouldUpdateCamera(
-    location: Location,
-    currentCamera: Camera,
-): Boolean {
-    // filter out old locations
-    if (Instant.now()
-            .toEpochMilli() - location.timestamp.toEpochMilli() > WorldScaleParameters.LOCATION_AGE_THRESHOLD_MS
-    ) return false
-
-    // filter out locations with no accuracy
-    if (location.horizontalAccuracy < 0.0
-        || location.verticalAccuracy < 0.0
-        || location.horizontalAccuracy.isNaN()
-        || location.verticalAccuracy.isNaN()
-    ) return false
-
-    val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentCamera.location,
-        location.position,
-        distanceUnit = LinearUnit.meters,
-        azimuthUnit = null,
-        curveType = GeodeticCurveType.Geodesic
-    )?.distance ?: return false
-    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
-}
-
-/**
- * Provides constants for the [WorldScaleSceneView].
- *
- * @since 200.7.0
- */
-private data object WorldScaleParameters {
-    const val LOCATION_DISTANCE_THRESHOLD_METERS = 2.0
-    const val LOCATION_AGE_THRESHOLD_MS = 10000.0
 }
