@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.basemapgallery
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -28,9 +27,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -63,14 +62,10 @@ public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifie
 @Composable
 internal fun BasemapGalleryPreview() {
     val items = mutableListOf<BasemapGalleryItem>()
-    val colors = IntArray(100 * 100)
-    for (i in 0 ..< 100 * 100) {
-        colors[i] = 0xFF0000FF.toInt()
-    }
-    val bitmap = Bitmap.createBitmap(colors, 100, 100, Bitmap.Config.ARGB_8888).asImageBitmap()
-    val thumbnail = BitmapPainter(bitmap)
     for (i in 0..100) {
-        //items.add(BasemapGalleryItem("Item $i", null, { thumbnail } ))
+        items.add(BasemapGalleryItem(title = "Item $i", tag = null, loadableImage = null, placeholderProvider = {
+            val painter = painterResource(R.drawable.basemap)
+            remember { painter }} ))
     }
     BasemapGallery(items, onItemClick = {
         Log.d("BaseMapGallery", "Item clicked: ${it.title}")
