@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
@@ -100,7 +101,6 @@ public fun Scalebar(
     )
     // invoked after the scalebar properties displayLength, displayUnit are computed
     // and the labels are updated
-    val density = LocalDensity.current
     Scalebar(
         maxWidth = maxWidth,
         displayLength = scalebarProperties.displayLength,
@@ -128,7 +128,15 @@ private fun Scalebar(
         return
     }
     when (scalebarStyle) {
-        ScalebarStyle.AlternatingBar -> TODO()
+        ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
+            scalebarDivisions = labels,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
