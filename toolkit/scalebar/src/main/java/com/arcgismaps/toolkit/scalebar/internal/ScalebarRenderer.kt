@@ -333,10 +333,10 @@ internal fun GraduatedLineScaleBarPreview() {
     val displayLength = 500.0
     val density = LocalDensity.current.density
     val tickMarks = listOf(
-        ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
-        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
-        ScalebarDivision(4, displayLength.toDouble()/ density, 0.0, "300 km")
+        ScalebarDivision(0.0,  "0"),
+        ScalebarDivision((displayLength / (3.0 * density)),  "100"),
+        ScalebarDivision(2.0 * displayLength / (3.0 * density), "200"),
+        ScalebarDivision(displayLength.toDouble()/ density,  "300 km")
     )
     Box(
         modifier = Modifier

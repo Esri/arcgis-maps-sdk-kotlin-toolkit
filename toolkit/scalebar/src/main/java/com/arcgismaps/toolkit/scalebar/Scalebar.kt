@@ -96,7 +96,6 @@ public fun Scalebar(
     // update the label text and offsets
     val scalebarDivisions = scalebarProperties.computeDivisions(
         minSegmentWidth = minSegmentWidth,
-        labelTypography = labelTypography,
         scalebarStyle = style
     )
     // invoked after the scalebar properties displayLength, displayUnit are computed

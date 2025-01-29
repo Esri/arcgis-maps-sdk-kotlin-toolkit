@@ -11,8 +11,6 @@ package com.arcgismaps.toolkit.scalebar.internal
  * @since 200.7.0
  */
 internal data class ScalebarDivision(
-    val index: Int,
     val xOffset: Double,
-    val labelYOffset: Double,
     val label: String
 )
