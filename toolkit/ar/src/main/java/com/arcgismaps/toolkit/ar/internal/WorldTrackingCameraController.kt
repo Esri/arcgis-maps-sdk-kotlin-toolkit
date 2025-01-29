@@ -51,9 +51,14 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 
 /**
- * Wrapper class to manage the lifecycle of a [LocationDataSource].
- * The [LocationDataSource] will be started when the lifecycle owner is resumed and stopped when the
- * lifecycle owner is paused or destroyed.
+ * Wraps a [TransformationMatrixCameraController] and uses the position of the device to update the camera.
+ * If the camera position deviates significantly from the device's position, the camera is updated.
+ *
+ * This class should not be constructed directly. Instead, use the [rememberWorldTrackingCameraController] factory function.
+ *
+ * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
+ * @see updateCamera to calibrate the camera using heading and elevation offsets.
+ * @see rememberWorldTrackingCameraController
  *
  * @since 200.7.0
  */
@@ -69,14 +74,39 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
+    /**
+     * Sets the current position of the camera using the orientation of the [Frame.getCamera].
+     *
+     * @since 200.7.0
+     */
     internal fun updateCamera(frame: Frame): Unit {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
         cameraController.transformationMatrix = cameraPosition
     }
 
+    /**
+     * Modifies the origin position of the camera by the given heading and elevation offsets.
+     *
+     * @since 200.7.0
+     */
     internal fun updateCamera(headingOffset: Double, elevationOffset: Double): Unit = TODO()
 
-    internal fun updateCamera(location: Location): Unit = TODO()
+    /**
+     * Sets the origin position of the camera to the given location.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCamera(location: Location): Unit =
+        cameraController.setOriginCamera(
+            Camera(
+                location.position.y,
+                location.position.x,
+                if (location.position.hasZ) location.position.z!! else 0.0,
+                0.0,
+                90.0,
+                0.0
+            )
+        )
 
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
@@ -117,16 +147,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     )
                 }
                 .collect { location ->
-                    cameraController.setOriginCamera(
-                        Camera(
-                            location.position.y,
-                            location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 0.0,
-                            0.0,
-                            90.0,
-                            0.0
-                        )
-                    )
+                    updateCamera(location)
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
@@ -138,7 +159,13 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     }
 }
 
-
+/**
+ * Returns a [WorldTrackingCameraController] that is tied to the lifecycle of the current [LifecycleOwner].
+ *
+ * @see WorldTrackingCameraController
+ * @param onLocationDataSourceFailedToStart Callback that is called when the [LocationDataSource] fails to start.
+ * @since 200.7.0
+ */
 @Composable
 internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
@@ -162,7 +189,7 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
  *
  * @since 200.7.0
  */
-internal fun shouldUpdateCamera(
+private fun shouldUpdateCamera(
     location: Location,
     currentCamera: Camera,
 ): Boolean {
