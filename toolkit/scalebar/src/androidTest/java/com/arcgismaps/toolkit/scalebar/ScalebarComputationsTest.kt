@@ -112,7 +112,7 @@ class ScalebarComputationsTest {
     }
 
     /**
-     * Given a Scalebar view model
+     * Given a Scalebar
      * When the Scalebar of AlternatingBar style is updated
      * Then the display length and labels should be correct
      *

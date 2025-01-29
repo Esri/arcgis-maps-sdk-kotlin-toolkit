@@ -125,6 +125,7 @@ private fun Scalebar(
         ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
             scalebarDivisions = labels,
             colorScheme = colorScheme,
             labelTypography = labelTypography,
