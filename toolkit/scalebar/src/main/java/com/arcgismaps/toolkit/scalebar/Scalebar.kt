@@ -34,8 +34,9 @@ import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
-import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
+import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -70,7 +71,6 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
 
@@ -86,6 +86,10 @@ public fun Scalebar(
                 units = units,
             )
         )
+    }
+    // prevent displaying the scalebar if the properties are invalid
+    if (scalebarProperties == ScalebarProperties.NOT_INITIALIZED) {
+        return
     }
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, labelTypography)
@@ -121,6 +125,9 @@ private fun Scalebar(
     labelTypography: LabelTypography,
     modifier: Modifier = Modifier
 ) {
+    if (labels.isEmpty()) {
+        return
+    }
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> TODO()
         ScalebarStyle.Bar -> BarScalebar(

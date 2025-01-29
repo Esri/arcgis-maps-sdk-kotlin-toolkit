@@ -44,7 +44,7 @@ internal data class ScalebarProperties(
     val scalebarLengthInMapUnits: Double
 ) {
     companion object {
-        val DEFAULT = ScalebarProperties(
+        val NOT_INITIALIZED = ScalebarProperties(
             displayLength = 0.0,
             mapUnitsToDisplay = LinearUnit.meters,
             scalebarLengthInMapUnits = 0.0
@@ -92,8 +92,8 @@ internal fun ScalebarProperties.computeDivisions(
         currSegmentX += segmentScreenLength
         val segmentMapLength: Double = (segmentScreenLength * (index + 1) / displayLength) * scalebarLengthInMapUnits
 
-        val segmentText: String = if (index == numSegments - 1 && mapUnitsToDisplay != null) {
-            val displayUnitAbbr = mapUnitsToDisplay?.getAbbreviation()
+        val segmentText: String = if (index == numSegments - 1) {
+            val displayUnitAbbr = mapUnitsToDisplay.getAbbreviation()
             "${segmentMapLength.format()} $displayUnitAbbr"
         } else {
             segmentMapLength.format()
@@ -137,80 +137,107 @@ internal fun computeScalebarProperties(
     units: UnitSystem
 ): ScalebarProperties {
     if (spatialReference == null || unitsPerDip == null || viewpoint == null) {
-        return ScalebarProperties.DEFAULT
+        return ScalebarProperties.NOT_INITIALIZED
     }
 
     if (minScale > 0 && viewpoint.targetScale >= minScale || unitsPerDip.isNaN()) {
-        return ScalebarProperties.DEFAULT
+        return ScalebarProperties.NOT_INITIALIZED
     }
 
     val mapCenter = viewpoint.targetGeometry.extent.center
 
-    val localDisplayLength: Double
-    val localDisplayUnit: LinearUnit
-    val localLineMapLength: Double
-
-    if (useGeodeticCalculations || spatialReference.unit is AngularUnit) {
-        val maxLengthPlanar = unitsPerDip * maxLength
-        val p1 = Point(
-            x = mapCenter.x - (maxLengthPlanar * 0.5),
-            y = mapCenter.y,
-            spatialReference = spatialReference
-        )
-        val p2 = Point(
-            x = mapCenter.x + (maxLengthPlanar * 0.5),
-            y = mapCenter.y,
-            spatialReference = spatialReference
-        )
-        val polyline = Polyline(
-            points = listOf(p1, p2),
-            spatialReference = spatialReference
-        )
-        val baseUnits = units.baseLinearUnit
-        val maxLengthGeodetic = GeometryEngine.lengthGeodetic(
-            polyline,
-            baseUnits,
-            GeodeticCurveType.Geodesic
-        )
-        val roundNumberDistance = units.closestDistanceWithoutGoingOver(
-            maxLengthGeodetic,
-            baseUnits
-        )
-        val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
-        localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
-        localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
-        localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
+    val (localDisplayLength, localDisplayUnit, localLineMapLength) = if (useGeodeticCalculations || spatialReference.unit is AngularUnit) {
+        calculateGeodeticProperties(mapCenter, spatialReference, unitsPerDip, maxLength, units)
     } else {
-        val srUnit = spatialReference.unit as? LinearUnit ?: return ScalebarProperties.DEFAULT
-        val baseUnits = units.baseLinearUnit
-        val lenAvail = srUnit.convertTo(
-            baseUnits,
-            unitsPerDip * maxLength
-        )
-        val closestLen = units.closestDistanceWithoutGoingOver(
-            lenAvail,
-            baseUnits
-        )
-        localDisplayLength = baseUnits.convertTo(
-            srUnit,
-            closestLen
-        ) / unitsPerDip
-        localDisplayUnit = units.linearUnitsForDistance(closestLen)
-        localLineMapLength = baseUnits.convertTo(
-            localDisplayUnit,
-            closestLen
-        )
+        calculatePlanarProperties(spatialReference, unitsPerDip, maxLength, units)
     }
 
     if (!localDisplayLength.isFinite() || localDisplayLength.isNaN()) {
-        return ScalebarProperties.DEFAULT
+        return ScalebarProperties.NOT_INITIALIZED
     }
-    // update the scalebar with the new values
+
     return ScalebarProperties(
         displayLength = localDisplayLength,
         mapUnitsToDisplay = localDisplayUnit,
         scalebarLengthInMapUnits = localLineMapLength
     )
+}
+
+/**
+ * Computes the scalebar properties when geodetic calculations are used.
+ *
+ * @since 200.7.0
+ */
+private fun calculateGeodeticProperties(
+    mapCenter: Point,
+    spatialReference: SpatialReference,
+    unitsPerDip: Double,
+    maxLength: Double,
+    units: UnitSystem
+): Triple<Double, LinearUnit, Double> {
+    val maxLengthPlanar = unitsPerDip * maxLength
+    val polyline = Polyline(
+        points = listOf(
+            Point(
+                x = mapCenter.x - (maxLengthPlanar * 0.5),
+                y = mapCenter.y,
+                spatialReference = spatialReference
+            ), Point(
+                x = mapCenter.x + (maxLengthPlanar * 0.5),
+                y = mapCenter.y,
+                spatialReference = spatialReference
+            )
+        ),
+        spatialReference = spatialReference
+    )
+    val baseUnits = units.baseLinearUnit
+    val maxLengthGeodetic = GeometryEngine.lengthGeodetic(
+        polyline,
+        baseUnits,
+        GeodeticCurveType.Geodesic
+    )
+    val roundNumberDistance = units.closestDistanceWithoutGoingOver(
+        maxLengthGeodetic,
+        baseUnits
+    )
+    val planarToGeodeticFactor = maxLengthPlanar / maxLengthGeodetic
+    val localDisplayLength = (roundNumberDistance * planarToGeodeticFactor) / unitsPerDip
+    val localDisplayUnit = units.linearUnitsForDistance(roundNumberDistance)
+    val localLineMapLength = baseUnits.convertTo(localDisplayUnit, roundNumberDistance)
+    return Triple(localDisplayLength, localDisplayUnit, localLineMapLength)
+}
+
+/**
+ * Computes the scalebar properties when planar calculations are used.
+ *
+ * @since 200.7.0
+ */
+private fun calculatePlanarProperties(
+    spatialReference: SpatialReference,
+    unitsPerDip: Double,
+    maxLength: Double,
+    units: UnitSystem
+): Triple<Double, LinearUnit, Double> {
+    val srUnit = spatialReference.unit as? LinearUnit ?: return Triple(0.0, LinearUnit.meters, 0.0)
+    val baseUnits = units.baseLinearUnit
+    val lenAvail = srUnit.convertTo(
+        baseUnits,
+        unitsPerDip * maxLength
+    )
+    val closestLen = units.closestDistanceWithoutGoingOver(
+        lenAvail,
+        baseUnits
+    )
+    val localDisplayLength = baseUnits.convertTo(
+        srUnit,
+        closestLen
+    ) / unitsPerDip
+    val localDisplayUnit = units.linearUnitsForDistance(closestLen)
+    val localLineMapLength = baseUnits.convertTo(
+        localDisplayUnit,
+        closestLen
+    )
+    return Triple(localDisplayLength, localDisplayUnit, localLineMapLength)
 }
 
 /**
