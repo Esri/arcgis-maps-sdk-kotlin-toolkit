@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -58,7 +59,7 @@ class ScalebarComputationsTest {
             y = esriRedlands.y,
             style = ScalebarStyle.Line,
             maxWidth = 175.0,
-            units = ScalebarUnits.METRIC,
+            units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
@@ -80,7 +81,7 @@ class ScalebarComputationsTest {
             y = esriRedlands.y,
             style = ScalebarStyle.Bar,
             maxWidth = 175.0,
-            units = ScalebarUnits.METRIC,
+            units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
@@ -102,7 +103,7 @@ class ScalebarComputationsTest {
             y = esriRedlands.y,
             style = ScalebarStyle.GraduatedLine,
             maxWidth = 175.0,
-            units = ScalebarUnits.METRIC,
+            units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
@@ -143,7 +144,7 @@ class ScalebarComputationsTest {
         spatialReference: SpatialReference = SpatialReference.webMercator(),
         style: ScalebarStyle,
         maxWidth: Double,
-        units: ScalebarUnits,
+        units: UnitSystem,
         scale: Double,
         unitsPerDip: Double,
         useGeodeticCalculations: Boolean = true,
