@@ -173,7 +173,7 @@ private fun calculateGeodeticProperties(
     spatialReference: SpatialReference,
     unitsPerDip: Double,
     maxLength: Double,
-    units: ScalebarUnits
+    units: UnitSystem
 ): Triple<Double, LinearUnit, Double> {
     val maxLengthPlanar = unitsPerDip * maxLength
     val polyline = Polyline(
@@ -216,7 +216,7 @@ private fun calculatePlanarProperties(
     spatialReference: SpatialReference,
     unitsPerDip: Double,
     maxLength: Double,
-    units: ScalebarUnits
+    units: UnitSystem
 ): Triple<Double, LinearUnit, Double> {
     val srUnit = spatialReference.unit as? LinearUnit ?: return Triple(0.0, LinearUnit.meters, 0.0)
     val baseUnits = units.baseLinearUnit
