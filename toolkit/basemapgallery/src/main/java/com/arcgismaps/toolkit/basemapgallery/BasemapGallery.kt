@@ -48,7 +48,8 @@ public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifie
                     .padding(8.dp)
                     .clickable { onItemClick(basemapGalleryItem) }) {
                     Image(
-                        basemapGalleryItem.thumbnail,
+                        //basemapGalleryItem.thumbnail,
+                        basemapGalleryItem.painterProvider().value,
                         contentDescription = basemapGalleryItem.title
                     )
                     Text(text = basemapGalleryItem.title)
@@ -69,7 +70,7 @@ internal fun BasemapGalleryPreview() {
     val bitmap = Bitmap.createBitmap(colors, 100, 100, Bitmap.Config.ARGB_8888).asImageBitmap()
     val thumbnail = BitmapPainter(bitmap)
     for (i in 0..100) {
-        items.add(BasemapGalleryItem("Item $i", null, thumbnail))
+        //items.add(BasemapGalleryItem("Item $i", null, { thumbnail } ))
     }
     BasemapGallery(items, onItemClick = {
         Log.d("BaseMapGallery", "Item clicked: ${it.title}")

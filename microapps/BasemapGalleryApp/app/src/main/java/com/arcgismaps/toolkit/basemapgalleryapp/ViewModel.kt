@@ -19,26 +19,18 @@
 package com.arcgismaps.toolkit.basemapgalleryapp
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
-import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
-
-//    private val _items: MutableList<BasemapGalleryItem> = mutableListOf()
-//
-//    val items: List<BasemapGalleryItem>
-//        get() = _items
 
     var items = mutableStateListOf<BasemapGalleryItem>()
         private set
@@ -48,37 +40,36 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
+            // set up a placeholder bitmap
+//            val colors = IntArray(100 * 100)
+//            for (i in 0..<100 * 100) {
+//                colors[i] = 0xFF0000FF.toInt()
+//            }
+//            val bitmap = Bitmap.createBitmap(colors, 100, 100, Bitmap.Config.ARGB_8888)
+//                .asImageBitmap()
+//            val placeholder = BitmapPainter(bitmap)
+
+//            // get basemaps from a portal
 //            val portal = Portal("https://www.arcgis.com")
 //            portal.load().getOrThrow()
-//            val result = portal.fetchBasemaps().getOrThrow()
+//            val basemaps = portal.fetchBasemaps().getOrThrow()
 //
-//            result.forEach {
-//                Log.d("BasemapGallery", "${it.item?.itemId}")
-//
-//                val item = it.item
-//
-//                item?.thumbnail?.load()?.getOrThrow()
-//
-//                val image = item?.thumbnail?.image?.bitmap?.asImageBitmap()
-//                val painter = BitmapPainter(image!!)
-//                val title = item.title
-//
-//                val galleryItem = BasemapGalleryItem(title, thumbnail = painter, tag = item)
-//                items.add(galleryItem)
+//            basemaps.forEach { basemap ->
+//                basemap.item?.let {item ->
+//                    val galleryItem = BasemapGalleryItem(title = item.title,
+//                        loadableImage = item.thumbnail, placeholderProvider = { painterResource(R.drawable.coin) }, tag = item)
+//                    items.add(galleryItem)
+//                }
 //            }
 
+            // get basemaps from a basemap style service
             val service = BasemapStylesService()
-
             service.load().getOrThrow()
 
-            service.info?.stylesInfo?.forEach {
-                it.thumbnail?.load()?.getOrThrow()
-
-                val image = it.thumbnail?.image?.bitmap?.asImageBitmap()
-                val painter = BitmapPainter(image!!)
-                val title = it.styleName
-
-                val galleryItem = BasemapGalleryItem(title, thumbnail = painter, tag = it)
+            service.info?.stylesInfo?.forEach {basemapStyleInfo ->
+                val galleryItem = BasemapGalleryItem(title = basemapStyleInfo.styleName,
+                    tag = basemapStyleInfo, loadableImage = basemapStyleInfo.thumbnail,
+                    placeholderProvider = { painterResource(R.drawable.basemap) })
                 items.add(galleryItem)
             }
         }
