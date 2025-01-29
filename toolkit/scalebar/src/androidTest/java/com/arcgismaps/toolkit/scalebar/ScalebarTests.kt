@@ -60,6 +60,7 @@ class ScalebarTests {
         composeTestRule.setContent {
                 LineScalebar(
                     maxWidth = 300f,
+                    displayLength = 290.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
                     labelTypography = ScalebarDefaults.typography(),
@@ -78,18 +79,20 @@ class ScalebarTests {
      */
     @Test
     fun testGraduatedLineScalebarIsDisplayed() {
-        val maxWidth = 500f
+        val maxWidth = 510f
+        val displayLength = 500.0
         val tickMarks = listOf(
             ScalebarDivision(0, 0.0, 0.0, "0"),
-            ScalebarDivision(1, (maxWidth / 4.0), 0.0, "25"),
-            ScalebarDivision(2, maxWidth / 2.0, 0.0, "50"),
-            ScalebarDivision(3, (maxWidth / 4.0)* 3, 0.0, "75"),
-            ScalebarDivision(4, maxWidth.toDouble(), 0.0, "100")
+            ScalebarDivision(1, (displayLength / 4.0), 0.0, "25"),
+            ScalebarDivision(2, displayLength / 2.0, 0.0, "50"),
+            ScalebarDivision(3, (displayLength / 4.0)* 3, 0.0, "75"),
+            ScalebarDivision(4, displayLength.toDouble(), 0.0, "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
                 GraduatedLineScalebar(
                     maxWidth = maxWidth,
+                    displayLength = displayLength,
                     colorScheme = ScalebarDefaults.colors(),
                     tickMarks = tickMarks,
                     labelTypography = ScalebarDefaults.typography(),
@@ -112,6 +115,7 @@ class ScalebarTests {
         composeTestRule.setContent {
             BarScalebar(
                 maxWidth = 300f,
+                displayLength = 290.0,
                 label = "1000 km",
                 colorScheme = ScalebarDefaults.colors(),
                 shapes = ScalebarDefaults.shapes(),
@@ -137,6 +141,7 @@ class ScalebarTests {
             ) {
                 LineScalebar(
                     maxWidth = 300f,
+                    displayLength = 290.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     labelTypography = ScalebarDefaults.typography(),
