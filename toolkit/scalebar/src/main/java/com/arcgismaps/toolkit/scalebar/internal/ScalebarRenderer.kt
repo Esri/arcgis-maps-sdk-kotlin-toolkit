@@ -423,8 +423,8 @@ internal fun GraduatedLineScaleBarPreview() {
     val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
-        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
+        ScalebarDivision(1, 0.33 * (displayLength / density), 0.0, "100"),
+        ScalebarDivision(2, 0.66 * (displayLength / density), 0.0, "200"),
         ScalebarDivision(4, displayLength / density, 0.0, "300 km")
     )
     Box(
@@ -452,8 +452,8 @@ internal fun AlternatingBarScaleBarPreview() {
     val density = LocalDensity.current.density
     val scalebarDivisions = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
-        ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
+        ScalebarDivision(1, 0.33 * (displayLength / density), 0.0, "100"),
+        ScalebarDivision(2, 0.66 * (displayLength / density), 0.0, "200"),
         ScalebarDivision(4, displayLength / density, 0.0, "300 km")
     )
     Box(
