@@ -22,6 +22,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.toolkit.ar.internal.shouldUpdateCamera
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.Instant

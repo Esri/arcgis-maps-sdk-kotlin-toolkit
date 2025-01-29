@@ -189,7 +189,7 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
  *
  * @since 200.7.0
  */
-private fun shouldUpdateCamera(
+internal fun shouldUpdateCamera(
     location: Location,
     currentCamera: Camera,
 ): Boolean {
