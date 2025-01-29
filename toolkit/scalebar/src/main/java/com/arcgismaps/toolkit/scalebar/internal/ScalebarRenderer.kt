@@ -425,7 +425,7 @@ internal fun GraduatedLineScaleBarPreview() {
         ScalebarDivision(0, 0.0, 0.0, "0"),
         ScalebarDivision(1, (displayLength / (3.0 * density)), 0.0, "100"),
         ScalebarDivision(2, 2.0 * displayLength / (3.0 * density), 0.0, "200"),
-        ScalebarDivision(4, (displayLength / density), 0.0, "300 km")
+        ScalebarDivision(4, displayLength / density, 0.0, "300 km")
     )
     Box(
         modifier = Modifier
