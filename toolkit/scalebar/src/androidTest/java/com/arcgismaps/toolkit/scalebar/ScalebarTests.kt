@@ -140,10 +140,10 @@ class ScalebarTests {
         val maxWidth = 550f
         val displayLength = 500.0
         val scalebarDivisions = listOf(
-            ScalebarDivision(0, 0.0, 0.0, "0"),
-            ScalebarDivision(1, (displayLength / 3.0), 0.0, "100"),
-            ScalebarDivision(2, 2.0 * displayLength / 3.0, 0.0, "200"),
-            ScalebarDivision(3, displayLength, 0.0, "300 km")
+            ScalebarDivision(0.0, "0"),
+            ScalebarDivision((displayLength / 3.0), "100"),
+            ScalebarDivision(2.0 * displayLength / 3.0, "200"),
+            ScalebarDivision(displayLength, "300 km")
         )
         // Test the scalebar
         composeTestRule.setContent {
