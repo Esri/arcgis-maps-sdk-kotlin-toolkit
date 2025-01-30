@@ -18,16 +18,26 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
@@ -44,6 +54,7 @@ import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
+import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -52,8 +63,20 @@ import kotlin.time.Duration.Companion.seconds
  * A Scalebar displays the representation of an accurate linear measurement on the map.
  * It provides a visual indication through which users can determine the size of features or
  * the distance between features on a map.
- * // TODO: update documentation
  *
+ * @param maxWidth the maximum screen width allotted to the scalebar in dp.
+ * @param unitsPerDip the number of map units per density-independent pixel (dp).
+ * @param viewpoint the current viewpoint of the map.
+ * @param spatialReference the spatial reference of the map.
+ * @param modifier the modifier to apply to this layout.
+ * @param autoHideDelay the duration to wait before hiding the scalebar, set to `Duration.INFINITE` to disable auto-hide.
+ * @param minScale the minimum scale to show the scalebar, default is `0.0` which means the scalebar will always be visible.
+ * @param useGeodeticCalculations `true` to compute scale using a geodesic curve, `false`otherwise, default is `true`.
+ * @param style the style of the scalebar, default is [ScalebarStyle.AlternatingBar].
+ * @param units the units for the scalebar, default is the default unit system based on the device's locale.
+ * @param colorScheme the color scheme for the scalebar.
+ * @param shapes the shapes for the scalebar.
+ * @param labelTypography the typography for the scalebar labels.
  * @since 200.7.0
  */
 @Composable
@@ -63,15 +86,23 @@ public fun Scalebar(
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
-    autoHideDelay: Duration = 1.75.seconds, // wait time before the scalebar hides itself, -1 means never hide
-    minScale: Double = 0.0, // minimum scale to show the scalebar
-    useGeodeticCalculations: Boolean = true, // `false` to compute scale without a geodesic curve,
+    autoHideDelay: Duration = 1.75.seconds,
+    minScale: Double = 0.0,
+    useGeodeticCalculations: Boolean = true,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
     units: UnitSystem = rememberDefaultUnitSystem(),
     colorScheme: ScalebarColors = ScalebarDefaults.colors(),
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
+    val isScalebarVisible = remember { mutableStateOf(true) }
+    LaunchedEffect(viewpoint, autoHideDelay) {
+        if (autoHideDelay > Duration.ZERO && autoHideDelay != Duration.INFINITE) {
+            isScalebarVisible.value = true
+            delay(autoHideDelay)
+            isScalebarVisible.value = false
+        }
+    }
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
 
@@ -100,18 +131,24 @@ public fun Scalebar(
         labelTypography = labelTypography,
         scalebarStyle = style
     )
-    // invoked after the scalebar properties displayLength, displayUnit are computed
-    // and the labels are updated
-    Scalebar(
-        maxWidth = maxWidth,
-        displayLength = scalebarProperties.displayLength,
-        labels = scalebarDivisions,
-        scalebarStyle = style,
-        colorScheme = colorScheme,
-        shapes = shapes,
-        labelTypography = labelTypography,
-        modifier = modifier
-    )
+
+    AnimatedVisibility(
+        modifier = Modifier.width(maxWidth.dp),
+        visible = isScalebarVisible.value,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Scalebar(
+            maxWidth = maxWidth,
+            displayLength = scalebarProperties.displayLength,
+            labels = scalebarDivisions,
+            scalebarStyle = style,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            labelTypography = labelTypography,
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
@@ -123,7 +160,7 @@ private fun Scalebar(
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
     labelTypography: LabelTypography,
-    modifier: Modifier = Modifier
+    modifier: Modifier /*= Modifier.testTag("Scalebar")*/
 ) {
     if (labels.isEmpty()) {
         return
@@ -138,6 +175,7 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
+
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
@@ -174,12 +212,25 @@ private fun Scalebar(
 @Preview
 @Composable
 internal fun ScalebarPreview() {
-    Scalebar(
-        maxWidth = 200.0,
-        spatialReference = null,
-        unitsPerDip = 1.0,
-        viewpoint = Viewpoint(0.0, 0.0, 0.0),
+    // Test the scalebar
+    val viewPoint = Viewpoint(
+        Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator()),
+        10000000.0
     )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Scalebar(
+            maxWidth = 175.0,
+            unitsPerDip = 2645.833333330476,
+            viewpoint = viewPoint,
+            units = UnitSystem.Metric,
+            spatialReference = SpatialReference.webMercator(),
+            style = ScalebarStyle.Line,
+            autoHideDelay = Duration.INFINITE
+        )
+    }
 }
 
 @Composable
