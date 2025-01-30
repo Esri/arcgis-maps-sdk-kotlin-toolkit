@@ -94,11 +94,11 @@ class ScalebarTests {
         val maxWidth = 510f
         val displayLength = 500.0
         val tickMarks = listOf(
-            ScalebarDivision(0, 0.0, 0.0, "0"),
-            ScalebarDivision(1, (displayLength / 4.0), 0.0, "25"),
-            ScalebarDivision(2, displayLength / 2.0, 0.0, "50"),
-            ScalebarDivision(3, (displayLength / 4.0) * 3, 0.0, "75"),
-            ScalebarDivision(4, displayLength.toDouble(), 0.0, "100")
+            ScalebarDivision(0.0, "0"),
+            ScalebarDivision((displayLength / 4.0), "25"),
+            ScalebarDivision(displayLength / 2.0, "50"),
+            ScalebarDivision((displayLength / 4.0) * 3, "75"),
+            ScalebarDivision(displayLength.toDouble(), "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
@@ -181,10 +181,10 @@ class ScalebarTests {
         val maxWidth = 550f
         val displayLength = 500.0
         val scalebarDivisions = listOf(
-            ScalebarDivision(0, 0.0, 0.0, "0"),
-            ScalebarDivision(1, (displayLength / 3.0), 0.0, "100"),
-            ScalebarDivision(2, 2.0 * displayLength / 3.0, 0.0, "200"),
-            ScalebarDivision(3, displayLength, 0.0, "300 km")
+            ScalebarDivision(0.0, "0"),
+            ScalebarDivision((displayLength / 3.0), "100"),
+            ScalebarDivision(2.0 * displayLength / 3.0, "200"),
+            ScalebarDivision(displayLength, "300 km")
         )
         // Test the scalebar
         composeTestRule.setContent {
