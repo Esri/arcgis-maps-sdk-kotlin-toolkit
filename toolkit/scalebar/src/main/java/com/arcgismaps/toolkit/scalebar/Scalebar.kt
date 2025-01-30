@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -46,6 +47,7 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import androidx.compose.ui.unit.dp
 
 /**
  * A composable UI component to display a Scalebar.
@@ -58,7 +60,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 public fun Scalebar(
-    maxWidth: Double, //  maximum screen width allotted to the scalebar
+    maxWidth: Dp, //  maximum screen width allotted to the scalebar
     unitsPerDip: Double,
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
@@ -73,7 +75,7 @@ public fun Scalebar(
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
     val availableLineDisplayLength =
-        measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+        measureAvailableLineDisplayLength(maxWidth.value.toDouble(), labelTypography, style)
 
     val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
         mutableStateOf(
@@ -116,7 +118,7 @@ public fun Scalebar(
 
 @Composable
 private fun Scalebar(
-    maxWidth: Double,
+    maxWidth: Dp,
     displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
@@ -131,7 +133,7 @@ private fun Scalebar(
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             scalebarDivisions = labels,
             colorScheme = colorScheme,
@@ -140,7 +142,7 @@ private fun Scalebar(
         )
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -151,7 +153,7 @@ private fun Scalebar(
         ScalebarStyle.DualUnitLine -> TODO()
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
@@ -161,7 +163,7 @@ private fun Scalebar(
 
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -175,7 +177,7 @@ private fun Scalebar(
 @Composable
 internal fun ScalebarPreview() {
     Scalebar(
-        maxWidth = 200.0,
+        maxWidth = 200.dp,
         spatialReference = null,
         unitsPerDip = 1.0,
         viewpoint = Viewpoint(0.0, 0.0, 0.0),
