@@ -27,6 +27,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
@@ -61,8 +62,8 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    maxWidth = 300f,
-                    displayLength = 290.0,
+                    maxWidth = 175.dp,
+                    displayLength = 160.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
                     labelTypography = ScalebarDefaults.typography(),
@@ -81,8 +82,8 @@ class ScalebarTests {
      */
     @Test
     fun testGraduatedLineScalebarIsDisplayed() {
-        val maxWidth = 510f
-        val displayLength = 500.0
+        val maxWidth = 175.dp
+        val displayLength = 139.3
         val tickMarks = listOf(
             ScalebarDivision(0, 0.0, 0.0, "0"),
             ScalebarDivision(1, (displayLength / 4.0), 0.0, "25"),
@@ -116,8 +117,8 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             BarScalebar(
-                maxWidth = 300f,
-                displayLength = 290.0,
+                maxWidth = 175.dp,
+                displayLength = 160.0,
                 label = "1000 km",
                 colorScheme = ScalebarDefaults.colors(),
                 shapes = ScalebarDefaults.shapes(),
@@ -137,8 +138,8 @@ class ScalebarTests {
     @Test
     fun testAlternatingBarScaleBarIsDisplayed(){
         // Test the scalebar
-        val maxWidth = 550f
-        val displayLength = 500.0
+        val maxWidth = 175.dp
+        val displayLength = 139.3
         val scalebarDivisions = listOf(
             ScalebarDivision(0, 0.0, 0.0, "0"),
             ScalebarDivision(1, (displayLength / 3.0), 0.0, "100"),
@@ -174,8 +175,8 @@ class ScalebarTests {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
-                    maxWidth = 300f,
-                    displayLength = 290.0,
+                    maxWidth = 175.dp,
+                    displayLength = 160.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     labelTypography = ScalebarDefaults.typography(),

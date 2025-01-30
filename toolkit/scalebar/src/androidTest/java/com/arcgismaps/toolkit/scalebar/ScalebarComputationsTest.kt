@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -58,7 +60,7 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Line,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
@@ -80,7 +82,7 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Bar,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
@@ -102,7 +104,7 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.GraduatedLine,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
@@ -124,7 +126,7 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.AlternatingBar,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
@@ -143,7 +145,7 @@ class ScalebarComputationsTest {
         y: Double,
         spatialReference: SpatialReference = SpatialReference.webMercator(),
         style: ScalebarStyle,
-        maxWidth: Double,
+        maxWidth: Dp,
         units: UnitSystem,
         scale: Double,
         unitsPerDip: Double,
@@ -167,7 +169,7 @@ class ScalebarComputationsTest {
             ) {
                 val defaultLabelTypography = ScalebarDefaults.typography()
 
-                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, defaultLabelTypography, style)
+                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth.value.toDouble(), defaultLabelTypography, style)
                 val scalebarProperties = computeScalebarProperties(
                     0.0,
                     spatialReference,
