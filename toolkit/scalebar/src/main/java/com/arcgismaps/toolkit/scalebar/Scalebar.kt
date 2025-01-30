@@ -71,8 +71,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param modifier the modifier to apply to this layout.
  * @param autoHideDelay the duration to wait before hiding the scalebar, set to `Duration.INFINITE` to disable auto-hide.
  * @param minScale the minimum scale to show the scalebar, default is `0.0` which means the scalebar will always be visible.
- * @param useGeodeticCalculations `true` to compute scale using a geodesic curve, `false` to compute scale without a geodesic curve,
- * default is `true`.
+ * @param useGeodeticCalculations `true` to compute scale using a geodesic curve, `false`otherwise, default is `true`.
  * @param style the style of the scalebar, default is [ScalebarStyle.AlternatingBar].
  * @param units the units for the scalebar, default is the default unit system based on the device's locale.
  * @param colorScheme the color scheme for the scalebar.
