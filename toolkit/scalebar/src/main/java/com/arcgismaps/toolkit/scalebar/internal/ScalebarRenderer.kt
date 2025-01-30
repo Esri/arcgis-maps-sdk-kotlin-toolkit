@@ -136,8 +136,9 @@ internal fun LineScalebar(
  * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
- * @param labelTypography The typography to use for the label.
  * @param shapes The shape properties to use.
+ * @param labelTypography The typography to use for the label.
+ *
  * @since 200.7.0
  */
 @Composable
@@ -147,8 +148,8 @@ internal fun BarScalebar(
     displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
-    labelTypography: LabelTypography,
-    shapes: ScalebarShapes
+    shapes: ScalebarShapes,
+    labelTypography: LabelTypography
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -212,6 +213,7 @@ internal fun BarScalebar(
  * @param colorScheme The color scheme to use.
  * @param shapes The shape properties to use.
  * @param labelTypography The typography to use for the label.
+ *
  * @since 200.7.0
  */
 @Composable
@@ -301,7 +303,7 @@ internal fun AlternatingBarScalebar(
  * @param colorScheme The color scheme to use.
  * @param labelTypography The typography to use for the label.
  * @param shapes The shape properties to use.
- *
+ * 
  * @since 200.7.0
  */
 @Composable
