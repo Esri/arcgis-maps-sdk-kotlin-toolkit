@@ -28,6 +28,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -37,8 +38,8 @@ import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
-import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -47,7 +48,6 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import androidx.compose.ui.unit.dp
 
 /**
  * A composable UI component to display a Scalebar.
