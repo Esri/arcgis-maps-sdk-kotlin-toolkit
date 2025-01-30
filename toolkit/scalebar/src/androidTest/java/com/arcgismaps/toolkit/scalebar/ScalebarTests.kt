@@ -19,14 +19,20 @@ package com.arcgismaps.toolkit.scalebar
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
@@ -35,6 +41,7 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Tests for Scalebar.
@@ -46,6 +53,9 @@ class ScalebarTests {
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     private val barScalebarTag = "BarScalebar"
     private val alternatingBarScalebarTag = "AlternatingBarScalebar"
+    private val scalebarTag = "Scalebar"
+    private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
+
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -60,15 +70,15 @@ class ScalebarTests {
     fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
-                LineScalebar(
-                    maxWidth = 300f,
-                    displayLength = 290.0,
-                    label = "1000 km",
-                    colorScheme = ScalebarDefaults.colors(),
-                    labelTypography = ScalebarDefaults.typography(),
-                    shapes = ScalebarDefaults.shapes()
-                )
-            }
+            LineScalebar(
+                maxWidth = 300f,
+                displayLength = 290.0,
+                label = "1000 km",
+                colorScheme = ScalebarDefaults.colors(),
+                labelTypography = ScalebarDefaults.typography(),
+                shapes = ScalebarDefaults.shapes()
+            )
+        }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 
@@ -87,21 +97,52 @@ class ScalebarTests {
             ScalebarDivision(0.0, "0"),
             ScalebarDivision((displayLength / 4.0), "25"),
             ScalebarDivision(displayLength / 2.0, "50"),
-            ScalebarDivision((displayLength / 4.0)* 3, "75"),
+            ScalebarDivision((displayLength / 4.0) * 3, "75"),
             ScalebarDivision(displayLength.toDouble(), "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
-                GraduatedLineScalebar(
-                    maxWidth = maxWidth,
-                    displayLength = displayLength,
-                    colorScheme = ScalebarDefaults.colors(),
-                    tickMarks = tickMarks,
-                    labelTypography = ScalebarDefaults.typography(),
-                    shapes = ScalebarDefaults.shapes()
-                )
+            GraduatedLineScalebar(
+                maxWidth = maxWidth,
+                displayLength = displayLength,
+                colorScheme = ScalebarDefaults.colors(),
+                tickMarks = tickMarks,
+                labelTypography = ScalebarDefaults.typography(),
+                shapes = ScalebarDefaults.shapes()
+            )
         }
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a scalebar with a given minScale value
+     * When the initial viewpoint is at the same minScale
+     * Then the scalebar should not be drawn
+     * When the viewpoint is changed to a lower scale
+     * Then the scalebar should be shown
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testScalebarMinScale() {
+        val minScale = 3125000.0
+        val viewPoint = mutableStateOf(Viewpoint(esriRedlands, minScale))
+        composeTestRule.setContent {
+            Scalebar(
+                minScale = minScale,
+                modifier = Modifier.testTag(scalebarTag),
+                maxWidth = 175.0,
+                unitsPerDip = 2645.833333330476,
+                viewpoint = viewPoint.value,
+                spatialReference = SpatialReference.webMercator(),
+                style = ScalebarStyle.Line,
+            )
+        }
+        composeTestRule.onNodeWithTag(scalebarTag).assertIsNotDisplayed()
+        composeTestRule.runOnUiThread {
+            viewPoint.value = Viewpoint(esriRedlands, minScale - 1000)
+        }
+        composeTestRule.onNodeWithTag(scalebarTag).assertIsDisplayed()
     }
 
     /**
@@ -112,7 +153,7 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testBarScaleBarIsDisplayed(){
+    fun testBarScaleBarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
             BarScalebar(
@@ -135,7 +176,7 @@ class ScalebarTests {
      * @since 200.7.0
      */
     @Test
-    fun testAlternatingBarScaleBarIsDisplayed(){
+    fun testAlternatingBarScaleBarIsDisplayed() {
         // Test the scalebar
         val maxWidth = 550f
         val displayLength = 500.0
@@ -157,6 +198,37 @@ class ScalebarTests {
             )
         }
         composeTestRule.onNodeWithTag(alternatingBarScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a scalebar with an auto-hide delay of 1 second
+     * When it is displayed on the screen
+     * And a one second timer is reached
+     * Then the scalebar should not be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testScalebarAnimation() {
+        // Test the scalebar
+        val viewPoint = Viewpoint(
+            Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator()),
+            10000000.0
+        )
+        composeTestRule.setContent {
+            Scalebar(
+                modifier = Modifier.testTag(scalebarTag),
+                maxWidth = 175.0,
+                unitsPerDip = 2645.833333330476,
+                viewpoint = viewPoint,
+                spatialReference = SpatialReference.webMercator(),
+                style = ScalebarStyle.Line,
+                autoHideDelay = 1.seconds
+            )
+        }
+        composeTestRule.onNodeWithTag(scalebarTag).assertIsDisplayed()
+        composeTestRule.mainClock.advanceTimeBy(1000)
+        composeTestRule.onNodeWithTag(scalebarTag).assertDoesNotExist()
     }
 
     /**
