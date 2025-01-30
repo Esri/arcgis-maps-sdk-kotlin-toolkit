@@ -19,12 +19,14 @@ package com.arcgismaps.toolkit.scalebar
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -52,6 +54,7 @@ class ScalebarTests {
     private val barScalebarTag = "BarScalebar"
     private val alternatingBarScalebarTag = "AlternatingBarScalebar"
     private val scalebarTag = "Scalebar"
+    private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -109,6 +112,37 @@ class ScalebarTests {
             )
         }
         composeTestRule.onNodeWithTag(graduatedLineScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a scalebar with a given minScale value
+     * When the initial viewpoint is at the same minScale
+     * Then the scalebar should not be drawn
+     * When the viewpoint is changed to a lower scale
+     * Then the scalebar should be shown
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testScalebarMinScale() {
+        val minScale = 3125000.0
+        val viewPoint = mutableStateOf(Viewpoint(esriRedlands, minScale))
+        composeTestRule.setContent {
+            Scalebar(
+                minScale = minScale,
+                modifier = Modifier.testTag(scalebarTag),
+                maxWidth = 175.0,
+                unitsPerDip = 2645.833333330476,
+                viewpoint = viewPoint.value,
+                spatialReference = SpatialReference.webMercator(),
+                style = ScalebarStyle.Line,
+            )
+        }
+        composeTestRule.onNodeWithTag(scalebarTag).assertIsNotDisplayed()
+        composeTestRule.runOnUiThread {
+            viewPoint.value = Viewpoint(esriRedlands, minScale - 1000)
+        }
+        composeTestRule.onNodeWithTag(scalebarTag).assertIsDisplayed()
     }
 
     /**
