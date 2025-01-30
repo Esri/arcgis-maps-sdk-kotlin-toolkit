@@ -66,7 +66,7 @@ internal fun ScalebarProperties.computeDivisions(
 ): List<ScalebarDivision> {
     return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
         listOf(
-            generateLastLabel(
+            genratePrimaryDivision(
                 displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
                 scalebarLengthInMapUnits = scalebarLengthInMapUnits,
                 xOffset = displayLength
@@ -106,7 +106,7 @@ internal fun ScalebarProperties.computeDivisions(
         }
 
         localLabels.add(
-            generateLastLabel(
+            genratePrimaryDivision(
                 displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
                 scalebarLengthInMapUnits = scalebarLengthInMapUnits,
                 xOffset = displayLength
@@ -122,7 +122,7 @@ internal fun ScalebarProperties.computeDivisions(
  *
  * @since 200.7.0
  */
-private fun generateLastLabel(
+private fun genratePrimaryDivision(
     displayUnitAbbreviation: String,
     scalebarLengthInMapUnits: Double,
     xOffset: Double,
