@@ -548,7 +548,7 @@ internal fun DualUnitLineScalebarPreview() {
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 550f
-    val displayLength = 175.0
+    val displayLength = 500.0
     val density = LocalDensity.current.density
     val tickMarks = listOf(
         ScalebarDivision(0, 0.0, 0.0, "0"),
