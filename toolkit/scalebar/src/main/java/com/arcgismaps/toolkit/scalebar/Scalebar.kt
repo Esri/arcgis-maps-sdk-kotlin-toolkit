@@ -22,12 +22,14 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
@@ -131,24 +134,21 @@ public fun Scalebar(
     )
 
     AnimatedVisibility(
+        modifier = Modifier.width(maxWidth.dp),
         visible = isScalebarVisible.value,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Box(
-            modifier = modifier.width(maxWidth.dp)
-        ) {
-            Scalebar(
-                maxWidth = maxWidth,
-                displayLength = scalebarProperties.displayLength,
-                labels = scalebarDivisions,
-                scalebarStyle = style,
-                colorScheme = colorScheme,
-                shapes = shapes,
-                labelTypography = labelTypography,
-                modifier = modifier
-            )
-        }
+        Scalebar(
+            maxWidth = maxWidth,
+            displayLength = scalebarProperties.displayLength,
+            labels = scalebarDivisions,
+            scalebarStyle = style,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            labelTypography = labelTypography,
+            modifier = modifier
+        )
     }
 }
 
@@ -161,7 +161,7 @@ private fun Scalebar(
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
     labelTypography: LabelTypography,
-    modifier: Modifier = Modifier
+    modifier: Modifier /*= Modifier.testTag("Scalebar")*/
 ) {
     if (labels.isEmpty()) {
         return
@@ -213,12 +213,25 @@ private fun Scalebar(
 @Preview
 @Composable
 internal fun ScalebarPreview() {
-    Scalebar(
-        maxWidth = 200.0,
-        spatialReference = null,
-        unitsPerDip = 1.0,
-        viewpoint = Viewpoint(0.0, 0.0, 0.0),
+    // Test the scalebar
+    val viewPoint = Viewpoint(
+        Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator()),
+        10000000.0
     )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Scalebar(
+            maxWidth = 175.0,
+            unitsPerDip = 2645.833333330476,
+            viewpoint = viewPoint,
+            units = UnitSystem.Metric,
+            spatialReference = SpatialReference.webMercator(),
+            style = ScalebarStyle.Line,
+            autoHideDelay = Duration.INFINITE
+        )
+    }
 }
 
 @Composable
