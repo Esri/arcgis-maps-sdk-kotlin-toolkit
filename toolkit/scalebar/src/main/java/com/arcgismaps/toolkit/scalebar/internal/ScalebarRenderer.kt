@@ -473,15 +473,6 @@ internal fun AlternatingBarScaleBarPreview() {
 }
 
 /**
- * Calculates the size in dp based on the density of the device.
- *
- * @since 200.7.0
- */
-private fun calculateSizeInDp(density: Density, value: Float) = with(density) {
-    value.toDp()
-}
-
-/**
  * Used to align the text relative to an anchor point in the scalebar.
  *
  * @since 200.7.0
