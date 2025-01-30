@@ -32,7 +32,6 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.linearUnitsForDistance
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
-
 /**
  * A data class to hold the properties of the Scalebar.
  *
