@@ -30,11 +30,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
+import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeAlternateUnitScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
@@ -72,7 +74,6 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
 
@@ -88,6 +89,10 @@ public fun Scalebar(
                 units = units,
             )
         )
+    }
+    // prevent displaying the scalebar if the properties are invalid
+    if (scalebarProperties == ScalebarProperties.NOT_INITIALIZED) {
+        return
     }
     // Measure the minimum segment width required to display the labels without overlapping
     val minSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, labelTypography)
@@ -131,8 +136,19 @@ private fun Scalebar(
     labelTypography: LabelTypography,
     modifier: Modifier = Modifier
 ) {
+    if (labels.isEmpty()) {
+        return
+    }
     when (scalebarStyle) {
-        ScalebarStyle.AlternatingBar -> TODO()
+        ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth.toFloat(),
+            displayLength = displayLength,
+            scalebarDivisions = labels,
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
