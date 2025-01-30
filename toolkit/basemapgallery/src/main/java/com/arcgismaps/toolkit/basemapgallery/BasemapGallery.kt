@@ -27,15 +27,35 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-public fun BasemapGallery() {
-    Text(text = "Hello BasemapGallery")
+internal fun item(basemapGalleryItem: BasemapGalleryItem) {
+    val placeholder = painterResource(R.drawable.basemap)
+    val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
+    LaunchedEffect(thumbnail) {
+        basemapGalleryItem.thumbnailProvider(basemapGalleryItem)?.let {bitmap ->
+            bitmap.asImageBitmap().let {imageBitmap ->
+                thumbnail.value = BitmapPainter(imageBitmap)
+            }
+        }
+        thumbnail
+    }
+    Image(
+        painter = thumbnail.value,
+        contentDescription = basemapGalleryItem.title
+    )
+    Text(text = basemapGalleryItem.title)
 }
 
 @Composable
@@ -46,12 +66,7 @@ public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifie
                 Column(modifier = Modifier
                     .padding(8.dp)
                     .clickable { onItemClick(basemapGalleryItem) }) {
-                    Image(
-                        //basemapGalleryItem.thumbnail,
-                        basemapGalleryItem.painterProvider().value,
-                        contentDescription = basemapGalleryItem.title
-                    )
-                    Text(text = basemapGalleryItem.title)
+                    item(basemapGalleryItem)
                 }
             }
         }
@@ -63,9 +78,7 @@ public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifie
 internal fun BasemapGalleryPreview() {
     val items = mutableListOf<BasemapGalleryItem>()
     for (i in 0..100) {
-        items.add(BasemapGalleryItem(title = "Item $i", tag = null, loadableImage = null, placeholderProvider = {
-            val painter = painterResource(R.drawable.basemap)
-            remember { painter }} ))
+        items.add(BasemapGalleryItem(title = "Item $i"))
     }
     BasemapGallery(items, onItemClick = {
         Log.d("BaseMapGallery", "Item clicked: ${it.title}")

@@ -18,52 +18,20 @@
 
 package com.arcgismaps.toolkit.basemapgallery
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
+import android.graphics.Bitmap
 import com.arcgismaps.mapping.BasemapStyleInfo
 import com.arcgismaps.mapping.Item
 import com.arcgismaps.portal.LoadableImage
 
-public class BasemapGalleryItem private constructor(public val title: String,
-                                public val tag: Any? = null,
-                                internal val painterProvider: @Composable () -> MutableState<Painter>
+public class BasemapGalleryItem(
+    public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend BasemapGalleryItem.() -> Bitmap? = { null }
 ) {
-    public constructor(title: String,
-                       tag: Any?,
-                       loadableImage: LoadableImage?,
-                       placeholderProvider: @Composable () -> Painter) : this(title, tag, painterProvider = {
-        val placeholder = placeholderProvider()
-        val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
-
-        LaunchedEffect(thumbnail) {
-            loadableImage?.let { image ->
-                image.load().onSuccess {
-                    image.image?.bitmap?.asImageBitmap()?.let {
-                        thumbnail.value = BitmapPainter(it)
-                    }
-                }
-            }
-        }
-
-        thumbnail
+    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(title, tag, thumbnailProvider = {
+        var bitmap: Bitmap? = null
+        thumbnail?.load()?.onFailure { bitmap = null }?.onSuccess { bitmap = thumbnail.image?.bitmap }
+        bitmap
     })
 
-    public constructor(basemapStyleInfo: BasemapStyleInfo, placeholderProvider: @Composable () -> Painter) : this(
-        basemapStyleInfo.styleName, tag = basemapStyleInfo, loadableImage = basemapStyleInfo.thumbnail, placeholderProvider = placeholderProvider)
-
-    public constructor(item: Item, placeholderProvider: @Composable () -> Painter) : this(
-        item.title, tag = item, loadableImage = item.thumbnail, placeholderProvider = placeholderProvider)
-
-//    public constructor(title: String,
-//                       tag: Any?,
-//                       thumbnailProvider: @Composable () -> Painter): this(title, tag, painterProvider = {
-//        val provider = thumbnailProvider()
-//        remember { mutableStateOf(provider) }
-//    })
+    public constructor(basemapStyleInfo: BasemapStyleInfo) : this(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
+    public constructor(item: Item) : this(item.title, item, item.thumbnail)
 }

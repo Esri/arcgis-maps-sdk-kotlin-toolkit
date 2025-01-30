@@ -34,7 +34,6 @@ import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.basemapgalleryapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
-import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
