@@ -303,7 +303,7 @@ internal fun AlternatingBarScalebar(
  * @param colorScheme The color scheme to use.
  * @param labelTypography The typography to use for the label.
  * @param shapes The shape properties to use.
- * 
+ *
  * @since 200.7.0
  */
 @Composable
@@ -526,8 +526,8 @@ internal fun DualUnitLineScalebarPreview() {
     val maxWidth = 500f
     val displayLength = 440.0
     val density = LocalDensity.current.density
-    val endScalebarDivision = ScalebarDivision(4, displayLength / density, 0.0, "3000 m")
-    val alternateScalebarDivision = ScalebarDivision(3, 0.75 * (displayLength / density), 0.0, "3500 Km")
+    val endScalebarDivision = ScalebarDivision(0, displayLength / density, 0.0, "3000 m")
+    val alternateScalebarDivision = ScalebarDivision(1, 0.75 * (displayLength / density), 0.0, "3500 Km")
 
     Box(
         modifier = Modifier

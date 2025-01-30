@@ -23,12 +23,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
+import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -46,6 +48,7 @@ class ScalebarTests {
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     private val barScalebarTag = "BarScalebar"
     private val alternatingBarScalebarTag = "AlternatingBarScalebar"
+    private val dualUnitLineScalebarTag = "DualUnitLineScalebar"
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -88,7 +91,7 @@ class ScalebarTests {
             ScalebarDivision(1, (displayLength / 4.0), 0.0, "25"),
             ScalebarDivision(2, displayLength / 2.0, 0.0, "50"),
             ScalebarDivision(3, (displayLength / 4.0)* 3, 0.0, "75"),
-            ScalebarDivision(4, displayLength.toDouble(), 0.0, "100")
+            ScalebarDivision(4, displayLength, 0.0, "100")
         )
         // Test the scalebar
         composeTestRule.setContent {
@@ -125,6 +128,33 @@ class ScalebarTests {
             )
         }
         composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a dual unit line scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testDualUnitLineScalebarIsDisplayed() {
+        val maxWidth = 300f
+        val displayLength = 290.0
+        val endScalebarDivision = ScalebarDivision(0, displayLength, 0.0, "3000 m")
+        val alternateScalebarDivision = ScalebarDivision(1, 0.75 * (displayLength), 0.0, "3500 Km")
+        // Test the scalebar
+        composeTestRule.setContent {
+            DualUnitLineScalebar(
+                maxWidth = maxWidth,
+                endScalebarDivision = endScalebarDivision,
+                alternateScalebarDivision = alternateScalebarDivision,
+                colorScheme = ScalebarDefaults.colors(),
+                labelTypography = ScalebarDefaults.typography(),
+                shapes = ScalebarDefaults.shapes()
+            )
+        }
+        composeTestRule.onNodeWithTag(dualUnitLineScalebarTag).assertIsDisplayed()
     }
 
     /**

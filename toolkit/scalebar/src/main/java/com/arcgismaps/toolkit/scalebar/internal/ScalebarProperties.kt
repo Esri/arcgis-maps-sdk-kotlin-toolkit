@@ -181,13 +181,13 @@ internal fun ScalebarProperties.computeAlternateUnitScalebarDivision(
     val altClosestBaseLength =
         altUnit.closestDistanceWithoutGoingOver(altMapBaseLength, altUnit.baseLinearUnit)
     val altDisplayUnits = altUnit.linearUnitsForDistance(altClosestBaseLength)
-    val altMapLength = altUnit.baseLinearUnit.convertTo(altDisplayUnits, altClosestBaseLength)
+    val altLengthInMapUnits = altUnit.baseLinearUnit.convertTo(altDisplayUnits, altClosestBaseLength)
     val displayFactor = scalebarLengthInMapUnits / displayLength
     val convertedDisplayFactor = mapUnitsToDisplay.convertTo(altDisplayUnits, displayFactor)
-    val altDisplayLength = altMapLength / convertedDisplayFactor
+    val altDisplayLength = altLengthInMapUnits / convertedDisplayFactor
 
     val altUnitAbbr = altDisplayUnits.getAbbreviation()
-    val label = "${altMapLength.format()} $altUnitAbbr"
+    val label = "${altLengthInMapUnits.format()} $altUnitAbbr"
 
     return ScalebarDivision(
         index = -2,
