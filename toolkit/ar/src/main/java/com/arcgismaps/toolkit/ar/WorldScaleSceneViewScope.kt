@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.ar
 
 import android.icu.text.DecimalFormat
-import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -194,7 +192,9 @@ public class WorldScaleSceneViewScope internal constructor(
      * @param colorScheme Color scheme applied to the calibration view
      * @param typography Typography style applied to text in the calibration view
      * @param onHeadingChange Lambda invoked when the user adjusts heading offset
+     * @param onHeadingReset Lambda invoked when the user resets heading offset
      * @param onElevationChange Lambda invoked when the user adjusts elevation offset
+     * @param onElevationReset Lambda invoked when the user resets elevation offset
      *
      * @since 200.7.0
      */
@@ -261,6 +261,7 @@ public class WorldScaleSceneViewScope internal constructor(
                             "${value}º",
                             minusContentDescription = "Decrease Heading",
                             plusContentDescription = "Increase Heading",
+                            resetContentDescription = "Reset Heading",
                             onMinusClick = {
                                 onHeadingChange(-1.0)
                                 heading -= 1
@@ -298,6 +299,7 @@ public class WorldScaleSceneViewScope internal constructor(
                             "${value}m",
                             minusContentDescription = "Decrease Elevation",
                             plusContentDescription = "Increase Elevation",
+                            resetContentDescription = "Reset Elevation",
                             onMinusClick = {
                                 onElevationChange(-1.0)
                                 elevation -= 1
@@ -328,20 +330,17 @@ public class WorldScaleSceneViewScope internal constructor(
 internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.colorScheme }
 internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.typography }
 
-public fun something(input: String) : () -> Int {
-    return {0}
-
-}
-
 /**
  * UI element containing a [Joyslider] and plus/minus buttons for adjusting a value.
  *
  * @param title Name of the quantity being adjusted
  * @param value Quantity being adjusted, for display
  * @param minusContentDescription Content description for the minus button
+ * @param resetContentDescription Content description for the reset button
  * @param plusContentDescription Content description for the plus button
  * @param onMinusClick Lambda invoked when the user presses the minus button
  * @param onPlusClick Lambda invoked when the user presses the plus button
+ * @param onResetClick Lambda invoked when the user presses the reset button
  * @param modifier Modifier to be applied to the Joyslider bar
  *
  * @since 200.7.0
@@ -352,6 +351,7 @@ internal fun JoysliderBar(
     value: String,
     minusContentDescription: String,
     plusContentDescription: String,
+    resetContentDescription: String,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
     onResetClick: () -> Unit,
@@ -380,6 +380,7 @@ internal fun JoysliderBar(
         PlusMinusResetButton(
             minusContentDescription = minusContentDescription,
             plusContentDescription = plusContentDescription,
+            resetContentDescription = resetContentDescription,
             onMinusClick = onMinusClick,
             onPlusClick = onPlusClick,
             onResetClick = onResetClick
@@ -392,8 +393,10 @@ internal fun JoysliderBar(
  *
  * @param minusContentDescription Content description for the minus button
  * @param plusContentDescription Content description for the plus button
+ * @param resetContentDescription Content description for the reset button
  * @param onMinusClick Lambda invoked when user presses the minus button
  * @param onPlusClick Lambda invoked when user presses the plus button
+ * @param onResetClick Lambda invoked when user presses the reset button
  * @param modifier Modifier to apply to the button
  *
  * @since 200.7.0
@@ -402,6 +405,7 @@ internal fun JoysliderBar(
 internal fun PlusMinusResetButton(
     minusContentDescription: String,
     plusContentDescription: String,
+    resetContentDescription: String,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
     onResetClick: () -> Unit,
@@ -451,10 +455,9 @@ internal fun PlusMinusResetButton(
             selected = false,
             label = {
                 Icon(
-                    // TODO redo all this
                     imageVector = Icons.Default.Refresh,
                     tint = LocalColorScheme.current.buttonContentColor,
-                    contentDescription = "idk"
+                    contentDescription = resetContentDescription
                 )
             }
         )

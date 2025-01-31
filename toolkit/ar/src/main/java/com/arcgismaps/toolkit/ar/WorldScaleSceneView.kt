@@ -19,14 +19,11 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -142,8 +139,8 @@ public fun WorldScaleSceneView(
         }
     )
 
-    var totalHeadingOffset = remember { 0F }
-    var totalElevationOffset = remember { 0F }
+    var totalHeadingOffset = remember { 0.0 }
+    var totalElevationOffset = remember { 0.0 }
 
     Box(modifier = modifier) {
         val arSessionWrapper =
@@ -220,41 +217,38 @@ public fun WorldScaleSceneView(
                     WorldScaleSceneViewScope(
                         sceneViewScope = this,
                         onHeadingChange = {
-                            cameraController.setOriginCamera(
-                                cameraController.originCamera.value.rotateAround(
-                                    cameraController.originCamera.value.location,
+                            locationTracker.cameraController.setOriginCamera(
+                                locationTracker.cameraController.originCamera.value.rotateAround(
+                                    locationTracker.cameraController.originCamera.value.location,
                                     deltaPitch = 0.0,
                                     deltaRoll = 0.0,
                                     deltaHeading = -it
                                 )
                             )
-                            // TODO minimise the back-and-forth with float and double
-                            totalHeadingOffset += it.toFloat()
+                            totalHeadingOffset += it
                         },
                         onElevationChange = {
-                            cameraController.setOriginCamera(
-                                cameraController.originCamera.value.elevate(it)
+                            locationTracker.cameraController.setOriginCamera(
+                                locationTracker.cameraController.originCamera.value.elevate(it)
                             )
-                            totalElevationOffset += it.toFloat()
-                            Log.i("ElevationOffset", totalElevationOffset.toString())
+                            totalElevationOffset += it
                         },
                         onHeadingReset = {
-                            cameraController.setOriginCamera(
-                                cameraController.originCamera.value.rotateAround(
-                                    cameraController.originCamera.value.location,
+                            locationTracker.cameraController.setOriginCamera(
+                                locationTracker.cameraController.originCamera.value.rotateAround(
+                                    locationTracker.cameraController.originCamera.value.location,
                                     deltaPitch = 0.0,
                                     deltaRoll = 0.0,
-                                    deltaHeading = totalHeadingOffset.toDouble()
+                                    deltaHeading = totalHeadingOffset
                                 )
                             )
-                            totalHeadingOffset = 0F
+                            totalHeadingOffset = 0.0
                                          },
                         onElevationReset = {
-                            Log.i("ElevationOffsetReset", totalElevationOffset.toString())
-                            cameraController.setOriginCamera(
-                                cameraController.originCamera.value.elevate(-totalElevationOffset.toDouble())
+                            locationTracker.cameraController.setOriginCamera(
+                                locationTracker.cameraController.originCamera.value.elevate(-totalElevationOffset)
                             )
-                            totalElevationOffset = 0F
+                            totalElevationOffset = 0.0
                         }
                     )
                 )
