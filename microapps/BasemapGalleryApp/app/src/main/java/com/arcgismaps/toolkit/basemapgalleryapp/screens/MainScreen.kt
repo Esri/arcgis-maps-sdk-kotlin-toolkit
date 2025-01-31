@@ -47,8 +47,7 @@ fun MainScreen() {
             when (val tag = it.tag) {
                 is BasemapStyleInfo -> {
                     Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
-                    val basemap = Basemap(tag.style)
-                    viewModel.arcGISMap.setBasemap(basemap)
+                    viewModel.arcGISMap.setBasemap(Basemap(tag.style))
                 }
                 is Item -> {
                     Log.d("BasemapGallery", "Item clicked: ${tag.itemId}")

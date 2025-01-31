@@ -20,18 +20,16 @@ package com.arcgismaps.toolkit.basemapgallery
 
 import android.graphics.Bitmap
 import com.arcgismaps.mapping.BasemapStyleInfo
-import com.arcgismaps.mapping.Item
 import com.arcgismaps.portal.LoadableImage
 
 public class BasemapGalleryItem(
     public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
-    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(title, tag, thumbnailProvider = {
+    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?): this(title, tag, thumbnailProvider = {
         var bitmap: Bitmap? = null
         thumbnail?.load()?.onFailure { bitmap = null }?.onSuccess { bitmap = thumbnail.image?.bitmap }
         bitmap
     })
 
-    public constructor(basemapStyleInfo: BasemapStyleInfo) : this(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
-    public constructor(item: Item) : this(item.title, item, item.thumbnail)
+    public constructor(basemapStyleInfo: BasemapStyleInfo): this(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
 }
