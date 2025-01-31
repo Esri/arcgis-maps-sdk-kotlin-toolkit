@@ -128,7 +128,7 @@ class ScalebarComputationsTest {
             scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
-            labels = listOf("0", "100", "200", "300 km")
+            labels = listOf("300 km", "175 mi")
         )
     }
 
@@ -201,7 +201,8 @@ class ScalebarComputationsTest {
                 val minimumSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
                 val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
-                    scalebarStyle = style
+                    scalebarStyle = style,
+                    units
                 )
                 assertThat(scalebarProperties.displayLength.roundToInt()).isEqualTo(displayLength)
                 assertThat(scalebarLabels.size).isEqualTo(labels.size)

@@ -130,17 +130,10 @@ public fun Scalebar(
     // update the label text and offsets
     val scalebarDivisions = scalebarProperties.computeDivisions(
         minSegmentWidth = minSegmentWidth,
-        scalebarStyle = style
+        scalebarStyle = style,
+        units = units
     )
-    // alternate scalebar division for dual unit line style
-    val alternateScalebarDivision: ScalebarDivision = if (style == ScalebarStyle.DualUnitLine) {
-        scalebarProperties.computeAlternateUnitScalebarDivision(units)
-    } else {
-        ScalebarDivision(0.0, "")
-    }
 
-    // invoked after the scalebar properties displayLength, displayUnit are computed
-    // and the labels are updated
     AnimatedVisibility(
         modifier = Modifier.width(maxWidth.dp),
         visible = isScalebarVisible.value,
@@ -151,7 +144,6 @@ public fun Scalebar(
             maxWidth = maxWidth,
             displayLength = scalebarProperties.displayLength,
             labels = scalebarDivisions,
-            alternateScalebarDivision = alternateScalebarDivision,
             scalebarStyle = style,
             colorScheme = colorScheme,
             shapes = shapes,
@@ -166,7 +158,6 @@ private fun Scalebar(
     maxWidth: Double,
     displayLength: Double,
     labels: List<ScalebarDivision>,
-    alternateScalebarDivision: ScalebarDivision,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
@@ -186,7 +177,6 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
-
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
@@ -199,8 +189,8 @@ private fun Scalebar(
         ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),
-            endScalebarDivision = labels.last(),
-            alternateScalebarDivision = alternateScalebarDivision,
+            primaryScalebarDivision = labels.first(),
+            alternateScalebarDivision = labels.last(),
             colorScheme = colorScheme,
             labelTypography = labelTypography,
             shapes = shapes
@@ -214,7 +204,6 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
-
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth.toFloat(),

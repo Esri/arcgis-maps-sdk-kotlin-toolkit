@@ -62,7 +62,8 @@ private const val MAX_NUM_OF_SEGMENTS = 4
  */
 internal fun ScalebarProperties.computeDivisions(
     minSegmentWidth: Double,
-    scalebarStyle: ScalebarStyle
+    scalebarStyle: ScalebarStyle,
+    units: UnitSystem
 ): List<ScalebarDivision> {
     return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
         listOf(
@@ -83,7 +84,7 @@ internal fun ScalebarProperties.computeDivisions(
 
         val segmentScreenLength = displayLength / numSegments
         var currSegmentX = 0.0
-        val localLabels = mutableListOf<ScalebarDivision>()
+        var localLabels = mutableListOf<ScalebarDivision>()
 
         // Add the first label at 0
         localLabels.add(
@@ -112,6 +113,9 @@ internal fun ScalebarProperties.computeDivisions(
                 xOffset = displayLength
             )
         )
+        if (scalebarStyle == ScalebarStyle.DualUnitLine) {
+            localLabels = mutableListOf(localLabels.last(), computeAlternateUnitScalebarDivision(units))
+        }
 
         localLabels
     }

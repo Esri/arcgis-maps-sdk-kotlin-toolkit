@@ -381,7 +381,7 @@ internal fun GraduatedLineScalebar(
  *
  * @param modifier The modifier to apply to the layout.
  * @param maxWidth The width of the scale bar container displaying line and text in pixels.
- * @param endScalebarDivision The end segment for the primary unit.
+ * @param primaryScalebarDivision The end segment for the primary unit.
  * @param alternateScalebarDivision The end segment for the alternate unit.
  * @param colorScheme The color scheme to use.
  * @param labelTypography The typography to use for the labels.
@@ -393,7 +393,7 @@ internal fun GraduatedLineScalebar(
 internal fun DualUnitLineScalebar(
     modifier: Modifier = Modifier.testTag("DualUnitLineScalebar"),
     maxWidth: Float,
-    endScalebarDivision: ScalebarDivision,
+    primaryScalebarDivision: ScalebarDivision,
     alternateScalebarDivision: ScalebarDivision,
     colorScheme: ScalebarColors,
     labelTypography: LabelTypography,
@@ -425,14 +425,14 @@ internal fun DualUnitLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = totalHeight / 2,
             left = lineWidth.toPx(),
-            right = endScalebarDivision.xOffset.toPx(density).toFloat(),
+            right = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right end line
         drawVerticalLineAndShadow(
-            xPos = endScalebarDivision.xOffset.toPx(density).toFloat(),
+            xPos = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
             top = totalHeight / 2 - scalebarHeight,
             bottom = totalHeight / 2,
             lineColor = colorScheme.lineColor,
@@ -441,10 +441,10 @@ internal fun DualUnitLineScalebar(
 
         // draw last label
         drawText(
-            text = endScalebarDivision.label,
+            text = primaryScalebarDivision.label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = endScalebarDivision.xOffset.toPx(density).toFloat(),
+            xPos = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
             yPos = 0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
@@ -537,7 +537,7 @@ internal fun DualUnitLineScalebarPreview() {
         DualUnitLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
-            endScalebarDivision = endScalebarDivision,
+            primaryScalebarDivision = endScalebarDivision,
             alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = ScalebarDefaults.colors(),
             labelTypography = ScalebarDefaults.typography(),

@@ -181,13 +181,13 @@ class ScalebarTests {
     fun testDualUnitLineScalebarIsDisplayed() {
         val maxWidth = 300f
         val displayLength = 290.0
-        val endScalebarDivision = ScalebarDivision(displayLength, "3000 m")
+        val endScalebarDivision = ScalebarDivision(displayLength, "3000 mi")
         val alternateScalebarDivision = ScalebarDivision(0.75 * (displayLength),"3500 Km")
         // Test the scalebar
         composeTestRule.setContent {
             DualUnitLineScalebar(
                 maxWidth = maxWidth,
-                endScalebarDivision = endScalebarDivision,
+                primaryScalebarDivision = endScalebarDivision,
                 alternateScalebarDivision = alternateScalebarDivision,
                 colorScheme = ScalebarDefaults.colors(),
                 labelTypography = ScalebarDefaults.typography(),
