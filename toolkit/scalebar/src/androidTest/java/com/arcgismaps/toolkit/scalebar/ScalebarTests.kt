@@ -132,7 +132,7 @@ class ScalebarTests {
             Scalebar(
                 minScale = minScale,
                 modifier = Modifier.testTag(scalebarTag),
-                maxWidth = 175.0,
+                maxWidth = 175.dp,
                 unitsPerDip = 2645.833333330476,
                 viewpoint = viewPoint.value,
                 spatialReference = SpatialReference.webMercator(),

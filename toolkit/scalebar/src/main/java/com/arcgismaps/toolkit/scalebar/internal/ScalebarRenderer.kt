@@ -100,14 +100,14 @@ internal fun LineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight.toPx(),
             left = 0f,
-            right = displayLength.toPx(density).toFloat(),
+            right = displayLength.toPx(density),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength.toPx(density).toFloat(),
+            xPos = displayLength.toPx(density),
             top = 0f,
             bottom = scalebarHeight.toPx(),
             lineColor = colorScheme.lineColor,
@@ -118,7 +118,7 @@ internal fun LineScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = displayLength.toPx(density).toFloat() / 2,
+            xPos = displayLength.toPx(density) / 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -166,7 +166,7 @@ internal fun BarScalebar(
         drawRoundRect(
             color = colorScheme.shadowColor,
             topLeft = Offset(topLeftPoint.x + shadowOffset.toPx(), topLeftPoint.y + shadowOffset.toPx()),
-            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight.toPx()),
+            size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -176,14 +176,14 @@ internal fun BarScalebar(
             color = colorScheme.fillColor,
             topLeft = topLeftPoint,
             cornerRadius = CornerRadius(shapes.barCornerRadius),
-            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight.toPx()),
+            size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
 
         )
         // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
-            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight.toPx()),
+            size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -192,7 +192,7 @@ internal fun BarScalebar(
             text = label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = displayLength.toPx(density).toFloat() / 2.0f,
+            xPos = displayLength.toPx(density) / 2.0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -240,14 +240,14 @@ internal fun AlternatingBarScalebar(
         drawRoundRect(
             color = colorScheme.shadowColor,
             topLeft = Offset(topLeftPoint.x + shadowOffset.toPx(), topLeftPoint.y + shadowOffset.toPx()),
-            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight.toPx()),
+            size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
         // Draws the alternating fill colors, bars and text labels
         for (index in scalebarDivisions.indices) {
-            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density).toFloat()
-            val endX = scalebarDivisions[index].xOffset.toPx(density).toFloat()
+            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density)
+            val endX = scalebarDivisions[index].xOffset.toPx(density)
             val width = endX - startX
 
             // Draw the inner fill color
@@ -271,7 +271,7 @@ internal fun AlternatingBarScalebar(
                 text = scalebarDivisions[index].label,
                 textMeasurer = textMeasurer,
                 labelTypography = labelTypography,
-                xPos = scalebarDivisions[index].xOffset.toPx(density).toFloat(),
+                xPos = scalebarDivisions[index].xOffset.toPx(density),
                 color = colorScheme.textColor,
                 shadowColor = colorScheme.textShadowColor,
                 shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -283,7 +283,7 @@ internal fun AlternatingBarScalebar(
         drawRoundRect(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
-            size = Size(displayLength.toPx(density).toFloat(), scalebarHeight.toPx()),
+            size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
@@ -325,7 +325,7 @@ internal fun GraduatedLineScalebar(
             .height(totalHeight)
     ) {
         val tickMarksWithPixelOffsets = tickMarks.map { tickMark ->
-            tickMark.copy(xOffset = tickMark.xOffset.toPx(density))
+            tickMark.copy(xOffset = tickMark.xOffset.toPx(density).toDouble())
         }
         // draw tick marks
         drawTickMarksWithLabels(
@@ -343,14 +343,14 @@ internal fun GraduatedLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight.toPx(),
             left = 0f,
-            right = displayLength.toPx(density).toFloat(),
+            right = displayLength.toPx(density),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength.toPx(density).toFloat(),
+            xPos = displayLength.toPx(density),
             top = 0f,
             bottom = scalebarHeight.toPx(),
             lineColor = colorScheme.lineColor,
@@ -362,7 +362,7 @@ internal fun GraduatedLineScalebar(
             text = tickMarks.last().label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = tickMarks.last().xOffset.toPx(density).toFloat(),
+            xPos = tickMarks.last().xOffset.toPx(density),
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,

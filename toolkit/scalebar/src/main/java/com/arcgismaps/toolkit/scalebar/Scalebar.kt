@@ -244,7 +244,7 @@ private fun rememberDefaultUnitSystem(): UnitSystem {
 }
 
 /**
- * Returns the display length in pixels of the Scalebar line.
+ * Returns the display length in device independent pixels of the Scalebar line.
  *
  * @return maxWidth the maximum width of the Scalebar taking into account the text units
  * @since 200.7.0
