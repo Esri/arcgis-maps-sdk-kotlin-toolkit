@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar
 
 import android.icu.text.DecimalFormat
+import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,9 +29,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -47,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +59,7 @@ import com.arcgismaps.toolkit.ar.internal.Joyslider
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewColorScheme
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewTypography
+import com.arcgismaps.toolkit.ar.internal.theme.WorldScaleCalibrationViewTheme
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -70,13 +73,25 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 public class WorldScaleSceneViewScope internal constructor(
     private val sceneViewScope: SceneViewScope,
     private val onHeadingChange: (Double) -> Unit,
-    private val onElevationChange: (Double) -> Unit
+    private val onElevationChange: (Double) -> Unit,
+    private val onHeadingReset: () -> Unit,
+    private val onElevationReset: () -> Unit
 ) {
 
     private var heading by  mutableFloatStateOf(0F)
     private var elevation by mutableFloatStateOf(0F)
 
-
+    /**
+     * Displays a calibration view used to adjust the heading/altitude of the scene displayed
+     * in the [WorldScaleSceneView].
+     *
+     * @param onDismiss Action to take when the calibration view is dismissed by the user
+     * @param modifier Modifier to be applied to the composable calibration view
+     * @param colorScheme Color scheme applied to the calibration view
+     * @param typography Typography style applied to text in the calibration view
+     *
+     * @since 200.7.0
+     */
     @Composable
     public fun CalibrationView(
         onDismiss: () -> Unit,
@@ -84,14 +99,18 @@ public class WorldScaleSceneViewScope internal constructor(
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
         typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
     ) {
-        CalibrationViewInternal(
-            onDismiss = onDismiss,
-            modifier = modifier,
-            colorScheme = colorScheme,
-            typography = typography,
-            onHeadingChange = onHeadingChange,
-            onElevationChange = onElevationChange
-        )
+        WorldScaleCalibrationViewTheme {
+            CalibrationViewInternal(
+                onDismiss = onDismiss,
+                modifier = modifier,
+                colorScheme = colorScheme,
+                typography = typography,
+                onHeadingChange = onHeadingChange,
+                onElevationChange = onElevationChange,
+                onHeadingReset = onHeadingReset,
+                onElevationReset = onElevationReset
+            )
+        }
     }
 
 
@@ -166,14 +185,29 @@ public class WorldScaleSceneViewScope internal constructor(
     ): Unit =
         sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
 
+    /**
+     *
+     * Internal implementation for the calibration view
+     *
+     * @param onDismiss Action to take when the calibration view is dismissed by the user
+     * @param modifier Modifier to be applied to the composable calibration view
+     * @param colorScheme Color scheme applied to the calibration view
+     * @param typography Typography style applied to text in the calibration view
+     * @param onHeadingChange Lambda invoked when the user adjusts heading offset
+     * @param onElevationChange Lambda invoked when the user adjusts elevation offset
+     *
+     * @since 200.7.0
+     */
     @Composable
-    private fun CalibrationViewInternal(
+    internal fun CalibrationViewInternal(
         onDismiss: () -> Unit,
         modifier: Modifier = Modifier,
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
         typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
         onHeadingChange: (Double) -> Unit,
-        onElevationChange: (Double) -> Unit
+        onElevationChange: (Double) -> Unit,
+        onHeadingReset: () -> Unit,
+        onElevationReset: () -> Unit
     ) {
         CompositionLocalProvider(
             LocalColorScheme provides colorScheme,
@@ -186,7 +220,6 @@ public class WorldScaleSceneViewScope internal constructor(
                 )
             ) {
                 Column(
-                    //modifier = Modifier.background(color = Color.Transparent).padding(5.dp).clip(RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp)).background(color = Color.Red)
                     modifier = Modifier.padding(5.dp),
                 ) {
                     // title and close button
@@ -220,11 +253,14 @@ public class WorldScaleSceneViewScope internal constructor(
                             containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
-                        JoySliderBar(
+                        var value = DecimalFormat("#.#").format(heading)
+                        if (heading > 0) {value = "+$value"}
+
+                        JoysliderBar(
                             "Heading",
-                            "${DecimalFormat("#.#").format(heading)}º",
-                            minusContentDescritption = "Decrease Heading",
-                            plusContentDescritption = "Increase Heading",
+                            "${value}º",
+                            minusContentDescription = "Decrease Heading",
+                            plusContentDescription = "Increase Heading",
                             onMinusClick = {
                                 onHeadingChange(-1.0)
                                 heading -= 1
@@ -232,6 +268,10 @@ public class WorldScaleSceneViewScope internal constructor(
                             onPlusClick = {
                                 onHeadingChange(1.0)
                                 heading += 1
+                            },
+                            onResetClick = {
+                                onHeadingReset()
+                                heading = 0F
                             }
                         )
                         Joyslider(
@@ -251,11 +291,13 @@ public class WorldScaleSceneViewScope internal constructor(
                             containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
-                        JoySliderBar(
+                        var value = DecimalFormat("#.##").format(elevation)
+                        if (elevation > 0) {value = "+$value"}
+                        JoysliderBar(
                             "Elevation",
-                            "${DecimalFormat("#.##").format(elevation)}m",
-                            minusContentDescritption = "Decrease Elevation",
-                            plusContentDescritption = "Increase Elevation",
+                            "${value}m",
+                            minusContentDescription = "Decrease Elevation",
+                            plusContentDescription = "Increase Elevation",
                             onMinusClick = {
                                 onElevationChange(-1.0)
                                 elevation -= 1
@@ -263,6 +305,10 @@ public class WorldScaleSceneViewScope internal constructor(
                             onPlusClick = {
                                 onElevationChange(1.0)
                                 elevation += 1
+                            },
+                            onResetClick = {
+                                onElevationReset()
+                                elevation = 0F
                             }
                         )
                         Joyslider(
@@ -282,15 +328,33 @@ public class WorldScaleSceneViewScope internal constructor(
 internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.colorScheme }
 internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.typography }
 
+public fun something(input: String) : () -> Int {
+    return {0}
 
+}
+
+/**
+ * UI element containing a [Joyslider] and plus/minus buttons for adjusting a value.
+ *
+ * @param title Name of the quantity being adjusted
+ * @param value Quantity being adjusted, for display
+ * @param minusContentDescription Content description for the minus button
+ * @param plusContentDescription Content description for the plus button
+ * @param onMinusClick Lambda invoked when the user presses the minus button
+ * @param onPlusClick Lambda invoked when the user presses the plus button
+ * @param modifier Modifier to be applied to the Joyslider bar
+ *
+ * @since 200.7.0
+ */
 @Composable
-internal fun JoySliderBar(
+internal fun JoysliderBar(
     title: String,
     value: String,
-    minusContentDescritption: String,
-    plusContentDescritption: String,
+    minusContentDescription: String,
+    plusContentDescription: String,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
+    onResetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -313,22 +377,34 @@ internal fun JoySliderBar(
                 style = LocalTypography.current.bodyTextStyle
             )
         }
-        PlusMinusButton(
-            minusContentDescritption = minusContentDescritption,
-            plusContentDescritption = plusContentDescritption,
+        PlusMinusResetButton(
+            minusContentDescription = minusContentDescription,
+            plusContentDescription = plusContentDescription,
             onMinusClick = onMinusClick,
-            onPlusClick = onPlusClick
+            onPlusClick = onPlusClick,
+            onResetClick = onResetClick
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Segmented button used for incrementing/decrementing a value.
+ *
+ * @param minusContentDescription Content description for the minus button
+ * @param plusContentDescription Content description for the plus button
+ * @param onMinusClick Lambda invoked when user presses the minus button
+ * @param onPlusClick Lambda invoked when user presses the plus button
+ * @param modifier Modifier to apply to the button
+ *
+ * @since 200.7.0
+ */
 @Composable
-internal fun PlusMinusButton(
-    minusContentDescritption: String,
-    plusContentDescritption: String,
+internal fun PlusMinusResetButton(
+    minusContentDescription: String,
+    plusContentDescription: String,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
+    onResetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SingleChoiceSegmentedButtonRow(
@@ -337,7 +413,7 @@ internal fun PlusMinusButton(
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(
                 index = 0,
-                count = 2
+                count = 3
             ),
             colors = SegmentedButtonDefaults.colors(
                 activeContainerColor = LocalColorScheme.current.buttonContainerColor,
@@ -353,14 +429,39 @@ internal fun PlusMinusButton(
                 Icon(
                     painter = painterResource(R.drawable.ic_action_reduce_heading),
                     tint = LocalColorScheme.current.buttonContentColor,
-                    contentDescription = minusContentDescritption
+                    contentDescription = minusContentDescription
+                )
+            }
+        )
+
+        SegmentedButton(
+            shape = SegmentedButtonDefaults.itemShape(
+                index = 1,
+                count = 3
+            ),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = LocalColorScheme.current.buttonContainerColor,
+                activeContentColor = LocalColorScheme.current.buttonContentColor,
+                inactiveContainerColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveContentColor = LocalColorScheme.current.buttonContentColor,
+                activeBorderColor = LocalColorScheme.current.buttonContainerColor,
+                inactiveBorderColor = LocalColorScheme.current.buttonContainerColor,
+            ),
+            onClick = onResetClick,
+            selected = false,
+            label = {
+                Icon(
+                    // TODO redo all this
+                    imageVector = Icons.Default.Refresh,
+                    tint = LocalColorScheme.current.buttonContentColor,
+                    contentDescription = "idk"
                 )
             }
         )
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(
-                index = 1,
-                count = 2
+                index = 2,
+                count = 3
             ),
             colors = SegmentedButtonDefaults.colors(
                 activeContainerColor = LocalColorScheme.current.buttonContainerColor,
@@ -376,7 +477,7 @@ internal fun PlusMinusButton(
                 Icon(
                     painter = painterResource(R.drawable.ic_action_add_heading),
                     tint = LocalColorScheme.current.buttonContentColor,
-                    contentDescription = plusContentDescritption
+                    contentDescription = plusContentDescription
                 )
             }
         )
