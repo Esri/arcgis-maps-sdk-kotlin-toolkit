@@ -29,7 +29,6 @@ import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -134,6 +133,14 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with Imperial units
+     * Then the display length and labels should be correct
+     * And the labels should be in miles
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleImperial() = runTest {
         testScalebar(
@@ -149,6 +156,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with Geodetic calculations disabled
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleDisableGeodetic() = runTest {
         testScalebar(
@@ -161,10 +175,17 @@ class ScalebarComputationsTest {
             unitsPerDip = 2645.833333330476,
             useGeodeticCalculations = false,
             displayLength = 142,
-            labels = listOf("0", "200", "400 km")
+            labels = listOf("0", "125", "250", "375 km")
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 100 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleWidth_100() = runTest {
         testScalebar(
@@ -176,10 +197,17 @@ class ScalebarComputationsTest {
             scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 68,
-            labels = listOf("0", "175 km")
+            labels = listOf("0", "150 km")
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 300 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleWidth_300() = runTest {
         testScalebar(
@@ -195,6 +223,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 500 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleWidth_500() = runTest {
         testScalebar(
@@ -210,7 +245,13 @@ class ScalebarComputationsTest {
         )
     }
 
-
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a view centered near the Arctic Ocean
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleArcticOcean() = runTest {
         testScalebar(
@@ -226,6 +267,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a view centered near the Antarctica
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleNearAntarctica() = runTest {
         testScalebar(
@@ -237,10 +285,17 @@ class ScalebarComputationsTest {
             scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 136,
-            labels = listOf("0", "30", "60", "90 km")
+            labels = listOf("0", "40", "80 km")
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 100
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_100() = runTest {
         testScalebar(
@@ -256,6 +311,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 1000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_1000() = runTest {
         testScalebar(
@@ -271,6 +333,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 10000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_10000() = runTest {
         testScalebar(
@@ -286,6 +355,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 100000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_100000() = runTest {
         testScalebar(
@@ -301,6 +377,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 1000000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_1000000() = runTest {
         testScalebar(
@@ -316,6 +399,13 @@ class ScalebarComputationsTest {
         )
     }
 
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 80,000,000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
     @Test
     fun testAlternatingBarStyleScale_80000000() = runTest {
         testScalebar(
@@ -365,26 +455,25 @@ class ScalebarComputationsTest {
             ) {
                 val defaultLabelTypography = ScalebarDefaults.typography()
 
-                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth, defaultLabelTypography, style)
+                val availableLineDisplayLength =
+                    measureAvailableLineDisplayLength(maxWidth, defaultLabelTypography, style)
                 val scalebarProperties = computeScalebarProperties(
-                    0.0,
+                    minScale = 0.0,
                     spatialReference,
                     viewpoint,
                     unitsPerDip,
-                    availableLineDisplayLength,
+                    maxLength = availableLineDisplayLength,
                     useGeodeticCalculations,
                     units
                 )
-                val minimumSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
+                val minimumSegmentWidth =
+                    measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
                 val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
                     scalebarStyle = style
                 )
                 assertThat(scalebarProperties.displayLength.roundToInt()).isEqualTo(displayLength)
-                assertThat(scalebarLabels.size).isEqualTo(labels.size)
-                for (i in labels.indices) {
-                    assertThat(scalebarLabels[i].label).isEqualTo(labels[i])
-                }
+                assertThat(scalebarLabels.map { it.label }).containsExactlyElementsIn(labels).inOrder()
             }
         }
     }
