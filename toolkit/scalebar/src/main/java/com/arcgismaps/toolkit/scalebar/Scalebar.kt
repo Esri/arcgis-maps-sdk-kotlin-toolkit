@@ -82,7 +82,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 public fun Scalebar(
-    maxWidth: Dp, //  maximum screen width allotted to the scalebar
+    maxWidth: Dp,
     unitsPerDip: Double,
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,

@@ -38,7 +38,6 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
@@ -276,7 +275,7 @@ internal fun AlternatingBarScalebar(
                 color = colorScheme.textColor,
                 shadowColor = colorScheme.textShadowColor,
                 shadowBlurRadius = shapes.textShadowBlurRadius,
-                alignment = TextAlignment.CENTER
+                alignment = if (index == 0) TextAlignment.RIGHT else TextAlignment.CENTER
             )
         }
 
@@ -325,12 +324,12 @@ internal fun GraduatedLineScalebar(
             .width(totalWidth)
             .height(totalHeight)
     ) {
-        val tickMarksWithDensityOffsets = tickMarks.map { tickMark ->
+        val tickMarksWithPixelOffsets = tickMarks.map { tickMark ->
             tickMark.copy(xOffset = tickMark.xOffset.toPx(density))
         }
         // draw tick marks
         drawTickMarksWithLabels(
-            tickMarks = tickMarksWithDensityOffsets,
+            tickMarks = tickMarksWithPixelOffsets,
             color = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor,
             textMeasurer = textMeasurer,
