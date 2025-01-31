@@ -44,8 +44,8 @@ internal fun item(basemapGalleryItem: BasemapGalleryItem) {
     val placeholder = painterResource(R.drawable.basemap)
     val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
     LaunchedEffect(thumbnail) {
-        basemapGalleryItem.thumbnailProvider(basemapGalleryItem)?.let {bitmap ->
-            bitmap.asImageBitmap().let {imageBitmap ->
+        basemapGalleryItem.thumbnailProvider()?.let { bitmap ->
+            bitmap.asImageBitmap().let { imageBitmap ->
                 thumbnail.value = BitmapPainter(imageBitmap)
             }
         }

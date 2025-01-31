@@ -24,7 +24,7 @@ import com.arcgismaps.mapping.Item
 import com.arcgismaps.portal.LoadableImage
 
 public class BasemapGalleryItem(
-    public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend BasemapGalleryItem.() -> Bitmap? = { null }
+    public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
     internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(title, tag, thumbnailProvider = {
         var bitmap: Bitmap? = null
