@@ -69,7 +69,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     private val locationDataSource = SystemLocationDataSource()
     val cameraController = TransformationMatrixCameraController()
 
-    // TODO: make this a mutable state
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
