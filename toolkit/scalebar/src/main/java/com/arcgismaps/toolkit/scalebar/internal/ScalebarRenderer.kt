@@ -421,10 +421,10 @@ internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 175.dp
     val displayLength = 139.3
     val tickMarks = listOf(
-        ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, 0.33 * displayLength, 0.0, "100"),
-        ScalebarDivision(2, 0.66 * displayLength, 0.0, "200"),
-        ScalebarDivision(4, displayLength, 0.0, "300 km")
+        ScalebarDivision(0.0,  "0"),
+        ScalebarDivision( 0.33 * displayLength, "100"),
+        ScalebarDivision(0.66 * displayLength, "200"),
+        ScalebarDivision(displayLength,  "300 km")
     )
     Box(
         modifier = Modifier
@@ -449,10 +449,10 @@ internal fun AlternatingBarScaleBarPreview() {
     val maxWidth = 175.dp
     val displayLength = 139.3
     val scalebarDivisions = listOf(
-        ScalebarDivision(0, 0.0, 0.0, "0"),
-        ScalebarDivision(1, 0.33 * displayLength, 0.0, "100"),
-        ScalebarDivision(2, 0.66 * displayLength, 0.0, "200"),
-        ScalebarDivision(4, displayLength, 0.0, "300 km")
+        ScalebarDivision(0.0, "0"),
+        ScalebarDivision(0.33 * displayLength,"100"),
+        ScalebarDivision(0.66 * displayLength, "200"),
+        ScalebarDivision(displayLength,"300 km")
     )
     Box(
         modifier = Modifier

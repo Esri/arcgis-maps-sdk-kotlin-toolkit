@@ -30,7 +30,6 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.baseLinearUnit
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.closestDistanceWithoutGoingOver
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.linearUnitsForDistance
-import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 
 /**
  * A data class to hold the properties of the Scalebar.
@@ -51,67 +50,88 @@ internal data class ScalebarProperties(
     }
 }
 
+private const val MAX_NUM_OF_SEGMENTS = 4
+
 /**
  * Computes the scalebar divisions based on the given parameters.
  *
  * @param minSegmentWidth The minimum width of a segment.
- * @param labelTypography The typography for the labels.
  * @param scalebarStyle The style of the scalebar.
  * @since 200.7.0
  */
 internal fun ScalebarProperties.computeDivisions(
     minSegmentWidth: Double,
-    labelTypography: LabelTypography,
     scalebarStyle: ScalebarStyle
 ): List<ScalebarDivision> {
-    val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
-
-    // Cap segments at 4
-    val maxNumSegments = minOf(suggestedNumSegments, 4)
-
-    val numSegments = ScalebarUtils.numSegments(
-        scalebarLengthInMapUnits,
-        maxNumSegments
-    )
-
-    val segmentScreenLength = displayLength / numSegments
-    var currSegmentX = 0.0
-    val localLabels = mutableListOf<ScalebarDivision>()
-
-    localLabels.add(
-        ScalebarDivision(
-            index = -1,
-            xOffset = 0.0 ,
-            labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-            label = "0"
+    return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
+        listOf(
+            createPrimaryDivision(
+                displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
+                scalebarLengthInMapUnits = scalebarLengthInMapUnits,
+                xOffset = displayLength
+            )
         )
-    )
+    } else {
+        val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
+        val maxNumSegments = minOf(suggestedNumSegments, MAX_NUM_OF_SEGMENTS)
 
-    for (index in 0 until numSegments) {
-        currSegmentX += segmentScreenLength
-        val segmentMapLength: Double = (segmentScreenLength * (index + 1) / displayLength) * scalebarLengthInMapUnits
+        val numSegments = ScalebarUtils.numSegments(
+            scalebarLengthInMapUnits,
+            maxNumSegments
+        )
 
-        val segmentText: String = if (index == numSegments - 1) {
-            val displayUnitAbbr = mapUnitsToDisplay.getAbbreviation()
-            "${segmentMapLength.format()} $displayUnitAbbr"
-        } else {
-            segmentMapLength.format()
+        val segmentScreenLength = displayLength / numSegments
+        var currSegmentX = 0.0
+        val localLabels = mutableListOf<ScalebarDivision>()
+
+        // Add the first label at 0
+        localLabels.add(
+            ScalebarDivision(
+                xOffset = 0.0,
+                label = "0"
+            )
+        )
+
+        for (index in 1 until numSegments) {
+            currSegmentX += segmentScreenLength
+            val segmentLengthInMapUnits: Double =
+                (segmentScreenLength * index / displayLength) * scalebarLengthInMapUnits
+
+            val label = ScalebarDivision(
+                xOffset = currSegmentX,
+                label = segmentLengthInMapUnits.format()
+            )
+            localLabels.add(label)
         }
 
-        val label = ScalebarDivision(
-            index = index,
-            xOffset = currSegmentX,
-            labelYOffset = labelTypography.labelStyle.fontSize.value / 2.0,
-            label = segmentText
+        localLabels.add(
+            createPrimaryDivision(
+                displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
+                scalebarLengthInMapUnits = scalebarLengthInMapUnits,
+                xOffset = displayLength
+            )
         )
-        localLabels.add(label)
-    }
 
-    return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
-        localLabels.takeLast(1)
-    } else {
         localLabels
     }
+}
+
+/**
+ * Creates the primary scalebar division.
+ *
+ * It contains the length and [displayUnitAbbreviation].
+ * @since 200.7.0
+ */
+private fun createPrimaryDivision(
+    displayUnitAbbreviation: String,
+    scalebarLengthInMapUnits: Double,
+    xOffset: Double,
+): ScalebarDivision {
+    val label = ScalebarDivision(
+        xOffset = xOffset,
+        label = "${scalebarLengthInMapUnits.format()} $displayUnitAbbreviation"
+    )
+    return label
 }
 
 /**
