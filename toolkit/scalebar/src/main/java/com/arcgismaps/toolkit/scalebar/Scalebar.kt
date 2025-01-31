@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.scalebar
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -266,9 +267,9 @@ internal fun measureAvailableLineDisplayLength(
                     labelTypography.labelStyle
                 ).size.width.toDp().value
             }
+            Log.d("ArcGIS-Main", "measureAvailableLineDisplayLength: $maxUnitDisplayWidth")
             maxWidth - (lineWidth.value / 2.0f) - maxUnitDisplayWidth
         }
-
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
             maxWidth - lineWidth.value
