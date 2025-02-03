@@ -77,7 +77,7 @@ internal fun LineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp= getTextHeightInDp(label, labelTypography, textMeasurer)
+    val textHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
 
     val totalHeight = scalebarHeight + textHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment + (lineWidth/2)
@@ -152,7 +152,7 @@ internal fun BarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp = getTextHeightInDp(label, labelTypography, textMeasurer)
+    val textHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
 
     val totalHeightInDp = scalebarHeight + textHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment
@@ -227,8 +227,8 @@ internal fun AlternatingBarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = getTextHeightInDp(scalebarDivisions.last().label, labelTypography, textMeasurer)
-    val primaryLabelWidthInDp = getTextWidthInDp(scalebarDivisions.last().label, labelTypography, textMeasurer)
+    val textSizeInDp = textMeasurer.getTextHeightInDp(scalebarDivisions.last().label, labelTypography)
+    val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(scalebarDivisions.last().label, labelTypography)
     val totalHeight = scalebarHeight + textSizeInDp
     val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
     val topLeftPoint = Offset(0f + (lineWidth).value, 0f+(lineWidth).value)
@@ -317,8 +317,8 @@ internal fun GraduatedLineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp = getTextHeightInDp(tickMarks.last().label, labelTypography, textMeasurer)
-    val primaryLabelWidthInDp = getTextWidthInDp(tickMarks.last().label, labelTypography, textMeasurer)
+    val textHeightInDp = textMeasurer.getTextHeightInDp(tickMarks.last().label, labelTypography)
+    val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(tickMarks.last().label, labelTypography)
 
     val totalHeight = scalebarHeight +  textHeightInDp
     val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
@@ -382,9 +382,9 @@ internal fun DualUnitLineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val primaryLabelHeightInDp = getTextHeightInDp(primaryScalebarDivision.label, labelTypography, textMeasurer)
-    val primaryLabelWidthInDp = getTextWidthInDp(primaryScalebarDivision.label, labelTypography, textMeasurer)
-    val alternateTextHeightInDp = getTextHeightInDp(alternateScalebarDivision.label, labelTypography, textMeasurer)
+    val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(primaryScalebarDivision.label, labelTypography)
+    val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(primaryScalebarDivision.label, labelTypography)
+    val alternateTextHeightInDp = textMeasurer.getTextHeightInDp(alternateScalebarDivision.label, labelTypography)
 
     val totalHeight: Dp = primaryLabelHeightInDp + scalebarHeight *2  + alternateTextHeightInDp
     val totalWidth = primaryLabelWidthInDp/2 + displayLength.dp
@@ -752,14 +752,13 @@ private fun DrawScope.drawTickMarksWithLabels(
  * @since 200.7.0
  */
 @Composable
-private fun getTextHeightInDp(
+private fun TextMeasurer.getTextHeightInDp(
     text: String,
     labelTypography: LabelTypography,
-    textMeasurer: TextMeasurer
 ): Dp {
     val density = LocalDensity.current
 
-    val textHeightInPx = textMeasurer.measure(
+    val textHeightInPx = this.measure(
         text = text,
         style = labelTypography.labelStyle
     ).size.height
@@ -775,14 +774,13 @@ private fun getTextHeightInDp(
  * @since 200.7.0
  */
 @Composable
-private fun getTextWidthInDp(
+private fun TextMeasurer.getTextWidthInDp(
     text: String,
     labelTypography: LabelTypography,
-    textMeasurer: TextMeasurer
 ): Dp {
     val density = LocalDensity.current
 
-    val textHeightInPx = textMeasurer.measure(
+    val textHeightInPx = this.measure(
         text = text,
         style = labelTypography.labelStyle
     ).size.width
