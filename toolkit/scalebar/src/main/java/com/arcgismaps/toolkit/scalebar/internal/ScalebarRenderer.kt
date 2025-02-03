@@ -77,9 +77,10 @@ internal fun LineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = with(density) { labelTypography.labelStyle.fontSize.toDp() }
+    val textHeightInDp= getTextHeightInDp(label, labelTypography, textMeasurer)
 
-    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInDp
+
+    val totalHeight = scalebarHeight + textHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment + (lineWidth/2)
 
     Canvas(
@@ -632,4 +633,28 @@ private fun DrawScope.drawTickMarksWithLabels(
             alignment = if (i == 0) TextAlignment.RIGHT else TextAlignment.CENTER
         )
     }
+}
+
+/**
+ * Measures the height of the text in dp.
+ *
+ * @param text The text to measure.
+ * @param labelTypography The typography to use for the text.
+ * @param textMeasurer The [TextMeasurer] to measure the text.
+ * @since 200.7.0
+ */
+@Composable
+private fun getTextHeightInDp(
+    text: String,
+    labelTypography: LabelTypography,
+    textMeasurer: TextMeasurer
+): Dp {
+    val density = LocalDensity.current
+
+    val textHeightInPx = textMeasurer.measure(
+        text = text,
+        style = labelTypography.labelStyle
+    ).size.height
+
+    return with(density) { textHeightInPx.toDp() }
 }
