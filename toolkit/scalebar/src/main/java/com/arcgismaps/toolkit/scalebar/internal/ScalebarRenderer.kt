@@ -315,13 +315,14 @@ internal fun GraduatedLineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = with(density) { labelTypography.labelStyle.fontSize.toDp() }
+    val textHeightInDp = getTextHeightInDp(tickMarks.last().label, labelTypography, textMeasurer)
+    val lastLabelWidthInDp = getTextWidthInDp(tickMarks.last().label, labelTypography, textMeasurer)
 
-    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInDp
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+    val totalHeight = scalebarHeight +  textHeightInDp
+    val totalWidth = displayLength.dp + lastLabelWidthInDp/2
 
     Canvas(
-        modifier = modifier
+        modifier = Modifier
             .width(totalWidth)
             .height(totalHeight)
     ) {
@@ -344,30 +345,9 @@ internal fun GraduatedLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight.toPx(),
             left = 0f,
-            right = displayLength.toPx(density),
+            right = displayLength.toPx(density) + (lineWidth/2).toPx(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
-        )
-
-        // right line
-        drawVerticalLineAndShadow(
-            xPos = displayLength.toPx(density),
-            top = 0f,
-            bottom = scalebarHeight.toPx(),
-            lineColor = colorScheme.lineColor,
-            shadowColor = colorScheme.shadowColor
-        )
-
-        // draw last label
-        drawText(
-            text = tickMarks.last().label,
-            textMeasurer = textMeasurer,
-            labelTypography = labelTypography,
-            xPos = tickMarks.last().xOffset.toPx(density),
-            color = colorScheme.textColor,
-            shadowColor = colorScheme.textShadowColor,
-            shadowBlurRadius = shapes.textShadowBlurRadius,
-            alignment = TextAlignment.CENTER
         )
     }
 }
@@ -614,9 +594,9 @@ private fun DrawScope.drawTickMarksWithLabels(
     textShadowBlurRadius: Float
 ) {
 
-    for (i in 0 until tickMarks.size - 1) {
+    for (i in tickMarks.indices) {
         drawVerticalLineAndShadow(
-            xPos = tickMarks[i].xOffset.toFloat(),
+            xPos = tickMarks[i].xOffset.toFloat()+  (lineWidth/2).toPx(),
             top = 0f,
             bottom = scalebarHeight.toPx() + shadowOffset.toPx(),
             lineColor = color,
@@ -626,7 +606,7 @@ private fun DrawScope.drawTickMarksWithLabels(
             text = tickMarks[i].label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = tickMarks[i].xOffset.toFloat(),
+            xPos = tickMarks[i].xOffset.toFloat() + (lineWidth/2).toPx(),
             color = textColor,
             shadowColor = textShadowColor,
             shadowBlurRadius = textShadowBlurRadius,
