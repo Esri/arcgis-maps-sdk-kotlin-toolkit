@@ -87,7 +87,7 @@ public fun Scalebar(
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
-    autoHideDelay: Duration = 1.75.seconds,
+    autoHideDelay: Duration = Duration.INFINITE,
     minScale: Double = 0.0,
     useGeodeticCalculations: Boolean = true,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
