@@ -80,7 +80,7 @@ internal fun LineScalebar(
     val textSizeInDp = with(density) { labelTypography.labelStyle.fontSize.toDp() }
 
     val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInDp
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+    val totalWidth = displayLength.dp + shadowOffset + pixelAlignment + (lineWidth/2)
 
     Canvas(
         modifier = Modifier
