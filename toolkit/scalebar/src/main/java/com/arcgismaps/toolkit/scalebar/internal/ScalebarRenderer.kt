@@ -154,15 +154,15 @@ internal fun BarScalebar(
     val density = LocalDensity.current
     val textHeightInDp = getTextHeightInDp(label, labelTypography, textMeasurer)
 
-    val totalHeight = scalebarHeight + textHeightInDp
+    val totalHeightInDp = scalebarHeight + textHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment
-    val topLeftPoint = Offset( (lineWidth/2).value + 0f, 0f)
+    val topLeftPoint = Offset( lineWidth.value + 0f, lineWidth.value +0f)
 
     Canvas(
         modifier = Modifier
             .testTag("BarScalebar")
             .width(totalWidth)
-            .height(totalHeight)
+            .height(totalHeightInDp)
     ) {
         // draws the rectangle's shadow
         drawRoundRect(
@@ -231,7 +231,7 @@ internal fun AlternatingBarScalebar(
     val primaryLabelWidthInDp = getTextWidthInDp(scalebarDivisions.last().label, labelTypography, textMeasurer)
     val totalHeight = scalebarHeight + textSizeInDp
     val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
-    val topLeftPoint = Offset(0f, 0f)
+    val topLeftPoint = Offset(0f + (lineWidth).value, 0f+(lineWidth).value)
 
     Canvas(
         modifier = Modifier
@@ -256,7 +256,7 @@ internal fun AlternatingBarScalebar(
             // Draw the inner fill color
             drawRoundRect(
                 color = if (index % 2 == 0) colorScheme.fillColor else colorScheme.alternateFillColor,
-                topLeft = Offset(startX + lineWidth.toPx() / 2, 0f),
+                topLeft = Offset(startX + (lineWidth.toPx() / 2) + pixelAlignment.toPx(), 0f),
                 cornerRadius = CornerRadius(shapes.barCornerRadius),
                 size = Size(width - lineWidth.toPx(), scalebarHeight.toPx())
             )
@@ -264,8 +264,8 @@ internal fun AlternatingBarScalebar(
             // Draw the segment line
             drawLine(
                 color = colorScheme.lineColor,
-                start = Offset(endX, 0f),
-                end = Offset(endX, scalebarHeight.toPx()),
+                start = Offset(endX + pixelAlignment.toPx(), 0f),
+                end = Offset(endX + pixelAlignment.toPx(), scalebarHeight.toPx()),
                 strokeWidth = lineWidth.toPx(),
             )
 
