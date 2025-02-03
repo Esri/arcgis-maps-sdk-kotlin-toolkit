@@ -230,12 +230,11 @@ internal fun ScalebarPreview() {
         Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator()),
         10000000.0
     )
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Gray)) {
         Scalebar(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(25.dp)
-                .background(Color.Red),
+                .padding(25.dp),
             maxWidth = 175.dp,
             unitsPerDip = 2645.833333330476,
             viewpoint = viewPoint,
@@ -286,7 +285,7 @@ internal fun measureAvailableLineDisplayLength(
 
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
-            maxWidth - lineWidth.value
+            maxWidth - (lineWidth.value /2.0f)
         }
     }
 }
