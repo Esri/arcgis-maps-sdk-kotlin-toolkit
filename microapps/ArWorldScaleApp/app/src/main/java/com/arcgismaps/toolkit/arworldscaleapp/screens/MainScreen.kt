@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -30,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
@@ -60,7 +60,8 @@ fun MainScreen() {
                 onDismiss = { displayCalibrationView = false },
                 modifier = Modifier,
                 colorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
-                typography = WorldScaleCalibrationViewDefaults.typography()
+                typography = WorldScaleCalibrationViewDefaults.typography(),
+                verticalArrangement = Arrangement.Bottom
             )
         } else {
             FloatingActionButton(onClick = {displayCalibrationView = true}) {
