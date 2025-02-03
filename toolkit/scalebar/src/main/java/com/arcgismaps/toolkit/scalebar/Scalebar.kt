@@ -192,6 +192,7 @@ private fun Scalebar(
         ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth,
+            displayLength = displayLength,
             primaryScalebarDivision = labels.first(),
             alternateScalebarDivision = labels.last(),
             colorScheme = colorScheme,

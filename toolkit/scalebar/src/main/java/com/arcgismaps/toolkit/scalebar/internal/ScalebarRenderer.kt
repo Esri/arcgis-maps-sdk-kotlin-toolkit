@@ -370,6 +370,7 @@ internal fun GraduatedLineScalebar(
 internal fun DualUnitLineScalebar(
     modifier: Modifier = Modifier.testTag("DualUnitLineScalebar"),
     maxWidth: Dp,
+    displayLength: Double,
     primaryScalebarDivision: ScalebarDivision,
     alternateScalebarDivision: ScalebarDivision,
     colorScheme: ScalebarColors,
@@ -378,49 +379,49 @@ internal fun DualUnitLineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toDp() }
+    val primaryTextHeightInDp = getTextHeightInDp(primaryScalebarDivision.label, labelTypography, textMeasurer)
+    val primaryTextWidthInDp = getTextWidthInDp(primaryScalebarDivision.label, labelTypography, textMeasurer)
+    val alternateTextHeightInDp = getTextHeightInDp(alternateScalebarDivision.label, labelTypography, textMeasurer)
 
-    val totalHeight: Dp = scalebarHeight + (textSizeInPx * 2) + shadowOffset + (textOffset * 2)
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
-
-    val totalHeightInPx = with(density) { totalHeight.toPx() }
+    val totalHeight: Dp = primaryTextHeightInDp + scalebarHeight *2  + alternateTextHeightInDp
+    val totalWidth = primaryTextWidthInDp/2 + displayLength.dp
     val scalebarHeightInPx = with(density) { scalebarHeight.toPx() }
 
     Canvas(
-        modifier = modifier
+        modifier = Modifier
             .width(totalWidth)
             .height(totalHeight)
     ) {
         // left end line
         drawVerticalLineAndShadow(
-            xPos = 0f,
-            top = totalHeightInPx / 2 - scalebarHeightInPx,
-            bottom = (totalHeightInPx / 2) + scalebarHeightInPx + lineWidth.toPx(),
+            xPos = 0f + (lineWidth/2).toPx(),
+            top = primaryTextHeightInDp.toPx(),
+            bottom = scalebarHeightInPx * 2 + primaryTextHeightInDp.toPx(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
         // Scalebar line
         drawHorizontalLineAndShadow(
-            yPos = totalHeightInPx / 2,
-            left = lineWidth.toPx(),
-            right = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
+            yPos = primaryTextHeightInDp.toPx() + scalebarHeightInPx,
+            left = 0f,
+            right = primaryScalebarDivision.xOffset.toPx(density),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
         // right end line
         drawVerticalLineAndShadow(
-            xPos = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
-            top = totalHeightInPx / 2 - scalebarHeightInPx,
-            bottom = totalHeightInPx / 2,
+            xPos = primaryScalebarDivision.xOffset.toPx(density),
+            top = primaryTextHeightInDp.toPx(), //totalHeightInPx / 2 - scalebarHeightInPx,
+            bottom = primaryTextHeightInDp.toPx() + scalebarHeightInPx,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
-        // draw last label
+        // draw primary label
         drawText(
             text = primaryScalebarDivision.label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = primaryScalebarDivision.xOffset.toPx(density).toFloat(),
+            xPos = primaryScalebarDivision.xOffset.toPx(density),
             yPos = 0f,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
@@ -429,9 +430,9 @@ internal fun DualUnitLineScalebar(
         )
         // draw end line for alternate scalebar
         drawVerticalLineAndShadow(
-            xPos = alternateScalebarDivision.xOffset.toPx(density).toFloat(),
-            top = (totalHeightInPx / 2) + (lineWidth.toPx() / 2),
-            bottom = (totalHeightInPx / 2) + scalebarHeightInPx + lineWidth.toPx(),
+            xPos = alternateScalebarDivision.xOffset.toPx(density),
+            top = primaryTextHeightInDp.toPx() + scalebarHeightInPx + (lineWidth/2).toPx(),
+            bottom = primaryTextHeightInDp.toPx() + scalebarHeightInPx*2 ,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -441,7 +442,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = alternateScalebarDivision.xOffset.toPx(density),
-            yPos = (totalHeightInPx / 2) + scalebarHeightInPx,
+            yPos = primaryTextHeightInDp.toPx() + scalebarHeightInPx*2 ,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -509,6 +510,7 @@ internal fun DualUnitLineScalebarPreview() {
         DualUnitLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
+            displayLength = 139.3,
             primaryScalebarDivision = primaryScalebarDivision,
             alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = ScalebarDefaults.colors(),
@@ -672,7 +674,7 @@ private fun DrawScope.drawText(
     textMeasurer: TextMeasurer,
     labelTypography: LabelTypography,
     xPos: Float,
-    yPos: Float = scalebarHeight.toPx() + textOffset.value,
+    yPos: Float = scalebarHeight.toPx()/* + textOffset.value*/,
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
     shadowBlurRadius: Float,

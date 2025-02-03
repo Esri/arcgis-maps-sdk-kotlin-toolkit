@@ -192,6 +192,7 @@ class ScalebarTests {
                 alternateScalebarDivision = alternateScalebarDivision,
                 colorScheme = ScalebarDefaults.colors(),
                 labelTypography = ScalebarDefaults.typography(),
+                displayLength = displayLength,
                 shapes = ScalebarDefaults.shapes()
             )
         }
