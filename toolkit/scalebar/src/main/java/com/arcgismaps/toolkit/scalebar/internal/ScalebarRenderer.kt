@@ -226,14 +226,14 @@ internal fun AlternatingBarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = with(density) { labelTypography.labelStyle.fontSize.toDp() }
-
-    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInDp
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
+    val textSizeInDp = getTextHeightInDp(scalebarDivisions.last().label, labelTypography, textMeasurer)
+    val lastLabelWidth = getTextWidthInDp(scalebarDivisions.last().label, labelTypography, textMeasurer)
+    val totalHeight = scalebarHeight + textSizeInDp
+    val totalWidth = displayLength.dp + lastLabelWidth/2
     val topLeftPoint = Offset(0f, 0f)
 
     Canvas(
-        modifier = modifier
+        modifier = Modifier
             .width(totalWidth)
             .height(totalHeight)
     ) {
@@ -655,6 +655,29 @@ private fun getTextHeightInDp(
         text = text,
         style = labelTypography.labelStyle
     ).size.height
+
+    return with(density) { textHeightInPx.toDp() }
+}
+/**
+ * Measures the height of the text in dp.
+ *
+ * @param text The text to measure.
+ * @param labelTypography The typography to use for the text.
+ * @param textMeasurer The [TextMeasurer] to measure the text.
+ * @since 200.7.0
+ */
+@Composable
+private fun getTextWidthInDp(
+    text: String,
+    labelTypography: LabelTypography,
+    textMeasurer: TextMeasurer
+): Dp {
+    val density = LocalDensity.current
+
+    val textHeightInPx = textMeasurer.measure(
+        text = text,
+        style = labelTypography.labelStyle
+    ).size.width
 
     return with(density) { textHeightInPx.toDp() }
 }
