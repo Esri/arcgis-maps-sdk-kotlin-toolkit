@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * The app
+ * The app.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
