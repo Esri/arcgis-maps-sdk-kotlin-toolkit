@@ -87,11 +87,11 @@ internal fun LineScalebar(
             .width(totalWidth)
             .height(totalHeight)
     ) {
-        // left line
+        // Since the lineWidth is drawn from the center, we need to offset the line by half the lineWidth
         drawVerticalLineAndShadow(
-            xPos = 0f,
+            xPos = 0f + (lineWidth/2).toPx(),
             top = 0f,
-            bottom = scalebarHeight.toPx(),
+            bottom = scalebarHeight.toPx() + pixelAlignment.toPx(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -107,9 +107,9 @@ internal fun LineScalebar(
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength.toPx(density),
+            xPos = displayLength.toPx(density) + (lineWidth/2).toPx(),
             top = 0f,
-            bottom = scalebarHeight.toPx(),
+            bottom = scalebarHeight.toPx() + pixelAlignment.toPx(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -170,7 +170,7 @@ internal fun BarScalebar(
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
-        
+
         // Draws the rectangle's fill color
         drawRoundRect(
             color = colorScheme.fillColor,
@@ -539,13 +539,13 @@ private fun DrawScope.drawHorizontalLineAndShadow(
     // draw shadow
     drawLine(
         color = shadowColor,
-        start = Offset((left - pixelAlignment.toPx()) + shadowOffset.toPx(), yPos + shadowOffset.toPx()),
-        end = Offset((right + pixelAlignment.toPx()) + shadowOffset.toPx(), yPos + shadowOffset.toPx()),
+        start = Offset((left + pixelAlignment.toPx()) + shadowOffset.toPx(), yPos + shadowOffset.toPx()),
+        end = Offset((right + pixelAlignment.toPx()) + shadowOffset.toPx() , yPos + shadowOffset.toPx()),
         strokeWidth = lineWidth.toPx(),
     )
     drawLine(
         color = lineColor,
-        start = Offset(left - pixelAlignment.toPx(), yPos),
+        start = Offset(left + pixelAlignment.toPx(), yPos),
         end = Offset(right + pixelAlignment.toPx(), yPos),
         strokeWidth = lineWidth.toPx(),
     )
