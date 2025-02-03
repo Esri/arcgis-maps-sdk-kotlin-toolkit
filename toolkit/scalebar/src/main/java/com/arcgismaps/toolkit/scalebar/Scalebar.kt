@@ -278,7 +278,8 @@ internal fun measureAvailableLineDisplayLength(
 }
 
 /**
- * Returns the minimum segment width in pixels required to display the labels without overlapping.
+ * Returns the minimum segment width in device independent pixels required to display the labels
+ * without overlapping.
  *
  * @return minimum segment width
  * @since 200.7.0

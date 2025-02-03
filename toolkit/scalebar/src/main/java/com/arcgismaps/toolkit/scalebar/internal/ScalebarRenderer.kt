@@ -57,7 +57,7 @@ internal const val labelXPadding = 4f // padding between scalebar labels
  * Displays a scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in pixels.
+ * @param maxWidth The width of the scalebar container displaying line and text in dp.
  * @param displayLength The width of the scalebar in pixels.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -131,7 +131,7 @@ internal fun LineScalebar(
  * Displays bar scalebar with a single label.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -205,7 +205,7 @@ internal fun BarScalebar(
  * Displays AlternatingBar scalebar with segmented bars of alternating fill color.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param scalebarDivisions The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -294,7 +294,7 @@ internal fun AlternatingBarScalebar(
  * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in pixels.
+ * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
