@@ -83,7 +83,7 @@ internal fun LineScalebar(
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
 
     Canvas(
-        modifier = modifier
+        modifier = Modifier
             .width(totalWidth)
             .height(totalHeight)
     ) {

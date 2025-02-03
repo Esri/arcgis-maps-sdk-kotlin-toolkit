@@ -21,9 +21,10 @@ package com.arcgismaps.toolkit.scalebar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -133,7 +135,7 @@ public fun Scalebar(
     )
 
     AnimatedVisibility(
-        modifier = Modifier.width(maxWidth),
+        modifier = modifier,
         visible = isScalebarVisible.value,
         enter = fadeIn(),
         exit = fadeOut()
@@ -160,7 +162,7 @@ private fun Scalebar(
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
     labelTypography: LabelTypography,
-    modifier: Modifier /*= Modifier.testTag("Scalebar")*/
+    modifier: Modifier
 ) {
     if (labels.isEmpty()) {
         return
@@ -217,11 +219,12 @@ internal fun ScalebarPreview() {
         Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator()),
         10000000.0
     )
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Scalebar(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(25.dp)
+                .background(Color.Red),
             maxWidth = 175.dp,
             unitsPerDip = 2645.833333330476,
             viewpoint = viewPoint,
