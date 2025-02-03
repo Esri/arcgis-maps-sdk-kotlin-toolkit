@@ -64,59 +64,69 @@ internal fun ScalebarProperties.computeDivisions(
     scalebarStyle: ScalebarStyle,
     units: UnitSystem
 ): List<ScalebarDivision> {
-    return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
-        listOf(
-            createPrimaryDivision(
-                displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
-                scalebarLengthInMapUnits = scalebarLengthInMapUnits,
-                xOffset = displayLength
+    return when (scalebarStyle) {
+        ScalebarStyle.Bar,ScalebarStyle.Line -> {
+            listOf(
+                createPrimaryDivision(
+                    displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
+                    scalebarLengthInMapUnits = scalebarLengthInMapUnits,
+                    xOffset = displayLength
+                )
             )
-        )
-    } else {
-        val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
-        val maxNumSegments = minOf(suggestedNumSegments, MAX_NUM_OF_SEGMENTS)
-
-        val numSegments = ScalebarUtils.numSegments(
-            scalebarLengthInMapUnits,
-            maxNumSegments
-        )
-
-        val segmentScreenLength = displayLength / numSegments
-        var currSegmentX = 0.0
-        var localLabels = mutableListOf<ScalebarDivision>()
-
-        // Add the first label at 0
-        localLabels.add(
-            ScalebarDivision(
-                xOffset = 0.0,
-                label = "0"
-            )
-        )
-
-        for (index in 1 until numSegments) {
-            currSegmentX += segmentScreenLength
-            val segmentLengthInMapUnits: Double =
-                (segmentScreenLength * index / displayLength) * scalebarLengthInMapUnits
-
-            val label = ScalebarDivision(
-                xOffset = currSegmentX,
-                label = segmentLengthInMapUnits.format()
-            )
-            localLabels.add(label)
         }
-
-        localLabels.add(
-            createPrimaryDivision(
-                displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
-                scalebarLengthInMapUnits = scalebarLengthInMapUnits,
-                xOffset = displayLength
+        ScalebarStyle.DualUnitLine -> {
+            listOf(
+                createPrimaryDivision(
+                    displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
+                    scalebarLengthInMapUnits = scalebarLengthInMapUnits,
+                    xOffset = displayLength
+                ),
+                computeAlternateUnitScalebarDivision(units)
             )
-        )
-        if (scalebarStyle == ScalebarStyle.DualUnitLine) {
-            localLabels = mutableListOf(localLabels.last(), computeAlternateUnitScalebarDivision(units))
         }
+        else -> {
+            val suggestedNumSegments = (displayLength / minSegmentWidth).toInt()
+            val maxNumSegments = minOf(suggestedNumSegments, MAX_NUM_OF_SEGMENTS)
 
-        localLabels
+            val numSegments = ScalebarUtils.numSegments(
+                scalebarLengthInMapUnits,
+                maxNumSegments
+            )
+
+            val segmentScreenLength = displayLength / numSegments
+            var currSegmentX = 0.0
+            val localLabels = mutableListOf<ScalebarDivision>()
+
+            // Add the first label at 0
+            localLabels.add(
+                ScalebarDivision(
+                    xOffset = 0.0,
+                    label = "0"
+                )
+            )
+
+            for (index in 1 until numSegments) {
+                currSegmentX += segmentScreenLength
+                val segmentLengthInMapUnits: Double =
+                    (segmentScreenLength * index / displayLength) * scalebarLengthInMapUnits
+
+                val label = ScalebarDivision(
+                    xOffset = currSegmentX,
+                    label = segmentLengthInMapUnits.format()
+                )
+                localLabels.add(label)
+            }
+
+            localLabels.add(
+                createPrimaryDivision(
+                    displayUnitAbbreviation = mapUnitsToDisplay.getAbbreviation(),
+                    scalebarLengthInMapUnits = scalebarLengthInMapUnits,
+                    xOffset = displayLength
+                )
+            )
+            
+            localLabels
+        }
     }
 }
 
