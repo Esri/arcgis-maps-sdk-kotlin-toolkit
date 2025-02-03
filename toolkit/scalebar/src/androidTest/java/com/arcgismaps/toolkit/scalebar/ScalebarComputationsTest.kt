@@ -112,6 +112,27 @@ class ScalebarComputationsTest {
             labels = listOf("0", "100", "200", "300 km")
         )
     }
+    /**
+     * Given a Scalebar
+     * When the Scalebar of Dual unit line style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testDualUnitLineStyle() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.DualUnitLine,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 137,
+            labels = listOf("300 km", "175 mi")
+        )
+    }
 
     /**
      * Given a Scalebar
@@ -182,7 +203,8 @@ class ScalebarComputationsTest {
                 val minimumSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
                 val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
-                    scalebarStyle = style
+                    scalebarStyle = style,
+                    units
                 )
                 assertThat(scalebarProperties.displayLength.roundToInt()).isEqualTo(displayLength)
                 assertThat(scalebarLabels.size).isEqualTo(labels.size)

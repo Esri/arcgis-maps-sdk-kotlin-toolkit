@@ -36,6 +36,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
+import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -54,6 +55,7 @@ class ScalebarTests {
     private val graduatedLineScalebarTag = "GraduatedLineScalebar"
     private val barScalebarTag = "BarScalebar"
     private val alternatingBarScalebarTag = "AlternatingBarScalebar"
+    private val dualUnitLineScalebarTag = "DualUnitLineScalebar"
     private val scalebarTag = "Scalebar"
     private val esriRedlands = Point(-13046081.04434825, 4036489.208008117, SpatialReference.webMercator())
 
@@ -167,6 +169,33 @@ class ScalebarTests {
             )
         }
         composeTestRule.onNodeWithTag(barScalebarTag).assertIsDisplayed()
+    }
+
+    /**
+     * Given a dual unit line scalebar
+     * When it is displayed
+     * Then it should be visible
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testDualUnitLineScalebarIsDisplayed() {
+        val maxWidth = 300f
+        val displayLength = 290.0
+        val endScalebarDivision = ScalebarDivision(displayLength, "3000 mi")
+        val alternateScalebarDivision = ScalebarDivision(0.75 * (displayLength),"3500 Km")
+        // Test the scalebar
+        composeTestRule.setContent {
+            DualUnitLineScalebar(
+                maxWidth = maxWidth,
+                primaryScalebarDivision = endScalebarDivision,
+                alternateScalebarDivision = alternateScalebarDivision,
+                colorScheme = ScalebarDefaults.colors(),
+                labelTypography = ScalebarDefaults.typography(),
+                shapes = ScalebarDefaults.shapes()
+            )
+        }
+        composeTestRule.onNodeWithTag(dualUnitLineScalebarTag).assertIsDisplayed()
     }
 
     /**

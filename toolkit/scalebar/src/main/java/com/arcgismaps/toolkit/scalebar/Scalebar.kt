@@ -43,6 +43,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
+import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
@@ -129,7 +130,8 @@ public fun Scalebar(
     // update the label text and offsets
     val scalebarDivisions = scalebarProperties.computeDivisions(
         minSegmentWidth = minSegmentWidth,
-        scalebarStyle = style
+        scalebarStyle = style,
+        units = units
     )
 
     AnimatedVisibility(
@@ -175,7 +177,6 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
-
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
             maxWidth = maxWidth,
@@ -185,8 +186,15 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
-
-        ScalebarStyle.DualUnitLine -> TODO()
+        ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
+            modifier = modifier,
+            maxWidth = maxWidth,
+            primaryScalebarDivision = labels.first(),
+            alternateScalebarDivision = labels.last(),
+            colorScheme = colorScheme,
+            labelTypography = labelTypography,
+            shapes = shapes
+        )
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
             maxWidth = maxWidth,
@@ -196,7 +204,6 @@ private fun Scalebar(
             labelTypography = labelTypography,
             shapes = shapes
         )
-
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
             maxWidth = maxWidth,
