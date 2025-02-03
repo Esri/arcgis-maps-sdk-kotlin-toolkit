@@ -1,5 +1,5 @@
 public final class com/arcgismaps/toolkit/scalebar/ScalebarKt {
-	public static final fun Scalebar-MPUtEvE (DDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/UnitSystem;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/runtime/Composer;III)V
+	public static final fun Scalebar-TCCHP28 (FDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/UnitSystem;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/arcgismaps/toolkit/scalebar/ScalebarStyle : java/lang/Enum {

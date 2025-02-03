@@ -31,7 +31,6 @@ import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.closestDistanceWit
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.format
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.linearUnitsForDistance
 
-
 /**
  * A data class to hold the properties of the Scalebar.
  *

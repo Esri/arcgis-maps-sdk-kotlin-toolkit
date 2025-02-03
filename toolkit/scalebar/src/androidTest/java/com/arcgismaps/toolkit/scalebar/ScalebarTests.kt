@@ -30,6 +30,7 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
@@ -70,15 +71,15 @@ class ScalebarTests {
     fun testLineScalebarIsDisplayed() {
         // Test the scalebar
         composeTestRule.setContent {
-            LineScalebar(
-                maxWidth = 300f,
-                displayLength = 290.0,
-                label = "1000 km",
-                colorScheme = ScalebarDefaults.colors(),
-                labelTypography = ScalebarDefaults.typography(),
-                shapes = ScalebarDefaults.shapes()
-            )
-        }
+                LineScalebar(
+                    maxWidth = 175.dp,
+                    displayLength = 160.0,
+                    label = "1000 km",
+                    colorScheme = ScalebarDefaults.colors(),
+                    labelTypography = ScalebarDefaults.typography(),
+                    shapes = ScalebarDefaults.shapes()
+                )
+            }
         composeTestRule.onNodeWithTag(lineScalebarTag).assertIsDisplayed()
     }
 
@@ -91,8 +92,8 @@ class ScalebarTests {
      */
     @Test
     fun testGraduatedLineScalebarIsDisplayed() {
-        val maxWidth = 510f
-        val displayLength = 500.0
+        val maxWidth = 175.dp
+        val displayLength = 139.3
         val tickMarks = listOf(
             ScalebarDivision(0.0, "0"),
             ScalebarDivision((displayLength / 4.0), "25"),
@@ -131,7 +132,7 @@ class ScalebarTests {
             Scalebar(
                 minScale = minScale,
                 modifier = Modifier.testTag(scalebarTag),
-                maxWidth = 175.0,
+                maxWidth = 175.dp,
                 unitsPerDip = 2645.833333330476,
                 viewpoint = viewPoint.value,
                 spatialReference = SpatialReference.webMercator(),
@@ -157,8 +158,8 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             BarScalebar(
-                maxWidth = 300f,
-                displayLength = 290.0,
+                maxWidth = 175.dp,
+                displayLength = 160.0,
                 label = "1000 km",
                 colorScheme = ScalebarDefaults.colors(),
                 shapes = ScalebarDefaults.shapes(),
@@ -178,8 +179,8 @@ class ScalebarTests {
     @Test
     fun testAlternatingBarScaleBarIsDisplayed() {
         // Test the scalebar
-        val maxWidth = 550f
-        val displayLength = 500.0
+        val maxWidth = 175.dp
+        val displayLength = 139.3
         val scalebarDivisions = listOf(
             ScalebarDivision(0.0, "0"),
             ScalebarDivision((displayLength / 3.0), "100"),
@@ -218,7 +219,7 @@ class ScalebarTests {
         composeTestRule.setContent {
             Scalebar(
                 modifier = Modifier.testTag(scalebarTag),
-                maxWidth = 175.0,
+                maxWidth = 175.dp,
                 unitsPerDip = 2645.833333330476,
                 viewpoint = viewPoint,
                 spatialReference = SpatialReference.webMercator(),
@@ -246,8 +247,8 @@ class ScalebarTests {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
-                    maxWidth = 300f,
-                    displayLength = 290.0,
+                    maxWidth = 175.dp,
+                    displayLength = 160.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),
                     labelTypography = ScalebarDefaults.typography(),

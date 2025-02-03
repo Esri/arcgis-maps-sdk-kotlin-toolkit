@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.Point
@@ -46,8 +47,8 @@ import com.arcgismaps.toolkit.scalebar.internal.GraduatedLineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.LineScalebar
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarDivision
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarProperties
-import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.labelXPadding
 import com.arcgismaps.toolkit.scalebar.internal.lineWidth
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
@@ -81,7 +82,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 public fun Scalebar(
-    maxWidth: Double, //  maximum screen width allotted to the scalebar
+    maxWidth: Dp,
     unitsPerDip: Double,
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
@@ -104,7 +105,7 @@ public fun Scalebar(
         }
     }
     val availableLineDisplayLength =
-        measureAvailableLineDisplayLength(maxWidth, labelTypography, style)
+        measureAvailableLineDisplayLength(maxWidth.value.toDouble(), labelTypography, style)
 
     val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
         mutableStateOf(
@@ -132,7 +133,7 @@ public fun Scalebar(
     )
 
     AnimatedVisibility(
-        modifier = Modifier.width(maxWidth.dp),
+        modifier = Modifier.width(maxWidth),
         visible = isScalebarVisible.value,
         enter = fadeIn(),
         exit = fadeOut()
@@ -152,7 +153,7 @@ public fun Scalebar(
 
 @Composable
 private fun Scalebar(
-    maxWidth: Double,
+    maxWidth: Dp,
     displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
@@ -167,7 +168,7 @@ private fun Scalebar(
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             scalebarDivisions = labels,
             colorScheme = colorScheme,
@@ -177,7 +178,7 @@ private fun Scalebar(
 
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -188,7 +189,7 @@ private fun Scalebar(
         ScalebarStyle.DualUnitLine -> TODO()
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
@@ -198,7 +199,7 @@ private fun Scalebar(
 
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth.toFloat(),
+            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -221,7 +222,7 @@ internal fun ScalebarPreview() {
         contentAlignment = Alignment.BottomCenter
     ) {
         Scalebar(
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             unitsPerDip = 2645.833333330476,
             viewpoint = viewPoint,
             units = UnitSystem.Metric,
@@ -243,7 +244,7 @@ private fun rememberDefaultUnitSystem(): UnitSystem {
 }
 
 /**
- * Returns the display length in pixels of the Scalebar line.
+ * Returns the display length in device independent pixels of the Scalebar line.
  *
  * @return maxWidth the maximum width of the Scalebar taking into account the text units
  * @since 200.7.0
@@ -277,7 +278,8 @@ internal fun measureAvailableLineDisplayLength(
 }
 
 /**
- * Returns the minimum segment width in pixels required to display the labels without overlapping.
+ * Returns the minimum segment width in device independent pixels required to display the labels
+ * without overlapping.
  *
  * @return minimum segment width
  * @since 200.7.0
