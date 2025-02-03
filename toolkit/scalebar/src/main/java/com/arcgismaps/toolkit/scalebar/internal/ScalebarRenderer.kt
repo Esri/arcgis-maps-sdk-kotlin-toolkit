@@ -518,8 +518,8 @@ internal fun BarScaleBarPreview() {
 internal fun DualUnitLineScalebarPreview() {
     val maxWidth = 175.dp
     val displayLength = 139.3
-    val endScalebarDivision = ScalebarDivision(displayLength,"3000 m")
-    val alternateScalebarDivision = ScalebarDivision(0.75 * displayLength,"3500 Km")
+    val primaryScalebarDivision = ScalebarDivision(displayLength,"1750 mi")
+    val alternateScalebarDivision = ScalebarDivision(0.75 * displayLength,"2500 Km")
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -528,7 +528,7 @@ internal fun DualUnitLineScalebarPreview() {
         DualUnitLineScalebar(
             modifier = Modifier,
             maxWidth = maxWidth,
-            primaryScalebarDivision = endScalebarDivision,
+            primaryScalebarDivision = primaryScalebarDivision,
             alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = ScalebarDefaults.colors(),
             labelTypography = ScalebarDefaults.typography(),
