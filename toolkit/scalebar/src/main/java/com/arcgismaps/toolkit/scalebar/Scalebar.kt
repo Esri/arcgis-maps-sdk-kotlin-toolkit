@@ -57,7 +57,6 @@ import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarShapes
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * A composable UI component to display a Scalebar.
@@ -87,7 +86,7 @@ public fun Scalebar(
     viewpoint: Viewpoint?,
     spatialReference: SpatialReference?,
     modifier: Modifier = Modifier,
-    autoHideDelay: Duration = 1.75.seconds,
+    autoHideDelay: Duration = Duration.INFINITE,
     minScale: Double = 0.0,
     useGeodeticCalculations: Boolean = true,
     style: ScalebarStyle = ScalebarStyle.AlternatingBar,
