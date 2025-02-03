@@ -152,14 +152,14 @@ internal fun BarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = with(density) { labelTypography.labelStyle.fontSize.toDp() }
+    val textSizeInDp = getTextHeightInDp(label, labelTypography, textMeasurer)
 
-    val totalHeight = scalebarHeight + shadowOffset + textOffset + textSizeInDp
-    val totalWidth = maxWidth + shadowOffset + pixelAlignment
-    val topLeftPoint = Offset(0f, 0f)
+    val totalHeight = scalebarHeight + textSizeInDp
+    val totalWidth = displayLength.dp + shadowOffset + pixelAlignment
+    val topLeftPoint = Offset( (lineWidth/2).value + 0f, 0f)
 
     Canvas(
-        modifier = modifier
+        modifier = Modifier
             .width(totalWidth)
             .height(totalHeight)
     ) {
