@@ -227,11 +227,11 @@ internal fun AlternatingBarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textSizeInDp = textMeasurer.getTextHeightInDp(scalebarDivisions.last().label, labelTypography)
+    val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(scalebarDivisions.last().label, labelTypography)
     val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(scalebarDivisions.last().label, labelTypography)
-    val totalHeight = scalebarHeight + textSizeInDp
+    val totalHeight = scalebarHeight + primaryLabelHeightInDp
     val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
-    val topLeftPoint = Offset(0f + (lineWidth).value, 0f+(lineWidth).value)
+    val topLeftPoint = Offset(0f + lineWidth.value, 0f + lineWidth.value)
 
     Canvas(
         modifier = Modifier
@@ -678,7 +678,7 @@ private fun DrawScope.drawText(
     textMeasurer: TextMeasurer,
     labelTypography: LabelTypography,
     xPos: Float,
-    yPos: Float = scalebarHeight.toPx()/* + textOffset.value*/,
+    yPos: Float = scalebarHeight.toPx(),
     color: Color = Color.Black,
     shadowColor: Color = Color.White,
     shadowBlurRadius: Float,
