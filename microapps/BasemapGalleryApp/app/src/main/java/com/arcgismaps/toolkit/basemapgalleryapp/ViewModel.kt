@@ -29,6 +29,12 @@ import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 
+/**
+ * The view model.
+ *
+ * @param application the applicatinon associated with this view model
+ * @constructor constructs a viewmodel
+ */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
     var items = mutableStateListOf<BasemapGalleryItem>()
@@ -43,6 +49,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             val service = BasemapStylesService()
             service.load().getOrThrow()
 
+            // for each basemap style info create a gallery item and add it to the list of items
             service.info?.stylesInfo?.forEach { basemapStyleInfo ->
                 //val galleryItem = BasemapGalleryItem(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
                 val galleryItem = BasemapGalleryItem(basemapStyleInfo)

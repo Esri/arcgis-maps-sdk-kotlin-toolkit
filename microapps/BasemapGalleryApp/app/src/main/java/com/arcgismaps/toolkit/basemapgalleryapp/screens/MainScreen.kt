@@ -26,11 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
-import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
+/**
+ * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
+ * an item in the gallery will set that basemap in the map view.
+ */
 @Composable
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
@@ -48,12 +51,7 @@ fun MainScreen() {
                 is BasemapStyleInfo -> {
                     Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
                     viewModel.arcGISMap.setBasemap(Basemap(tag.style))
-                }
-                is Item -> {
-                    Log.d("BasemapGallery", "Item clicked: ${tag.itemId}")
-                    viewModel.arcGISMap.setBasemap(Basemap(tag))
-                }
-                else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
             }
         })
     }

@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.basemapgallery
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -31,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -39,6 +41,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/**
+ * Produces the composable parts required to compose a [BasemapGalleryItem] in a [BasemapGallery].
+ *
+ * @param basemapGalleryItem the [BasemapGalleryItem]
+ */
 @Composable
 internal fun item(basemapGalleryItem: BasemapGalleryItem) {
     val placeholder = painterResource(R.drawable.basemap)
@@ -58,12 +65,21 @@ internal fun item(basemapGalleryItem: BasemapGalleryItem) {
     Text(text = basemapGalleryItem.title)
 }
 
+/**
+ * A gallery of [BasemapGalleryItem]s.
+ *
+ * @param basemapGalleryItems the items to show in the gallery
+ * @param modifier the modifier to apply to this gallery
+ * @param onItemClick a lambda to execute when a gallery item is clicked
+ */
 @Composable
 public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifier: Modifier = Modifier, onItemClick: (BasemapGalleryItem) -> Unit) {
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(128.dp)) {
         basemapGalleryItems.forEach { basemapGalleryItem ->
             item {
-                Column(modifier = Modifier
+                Column(verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
                     .padding(8.dp)
                     .clickable { onItemClick(basemapGalleryItem) }) {
                     item(basemapGalleryItem)
@@ -73,6 +89,9 @@ public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifie
     }
 }
 
+/**
+ * A preview of the [BasemapGallery].
+ */
 @Preview
 @Composable
 internal fun BasemapGalleryPreview() {

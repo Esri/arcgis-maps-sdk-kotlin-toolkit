@@ -29,12 +29,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.basemapgalleryapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
+/**
+ * The main activity of the application.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * The app
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasemapGalleryApp() {
@@ -56,14 +61,5 @@ fun BasemapGalleryApp() {
         Box(Modifier.padding(it)) {
             MainScreen()
         }
-    }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        BasemapGalleryApp()
     }
 }
