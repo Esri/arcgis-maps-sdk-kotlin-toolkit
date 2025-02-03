@@ -51,7 +51,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
             // for each basemap style info create a gallery item and add it to the list of items
             service.info?.stylesInfo?.forEach { basemapStyleInfo ->
-                //val galleryItem = BasemapGalleryItem(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
                 val galleryItem = BasemapGalleryItem(basemapStyleInfo)
                 items.add(galleryItem)
             }
