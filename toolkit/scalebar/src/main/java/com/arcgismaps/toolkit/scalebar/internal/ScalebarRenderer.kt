@@ -398,10 +398,13 @@ internal fun DualUnitLineScalebar(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val textSizeInPx = with(density) { labelTypography.labelStyle.fontSize.toDp() }
+
     val totalHeight: Dp = scalebarHeight + (textSizeInPx * 2) + shadowOffset + (textOffset * 2)
     val totalWidth = maxWidth + shadowOffset + pixelAlignment
+
     val totalHeightInPx = with(density) { totalHeight.toPx() }
     val scalebarHeightInPx = with(density) { scalebarHeight.toPx() }
+
     Canvas(
         modifier = modifier
             .width(totalWidth)
