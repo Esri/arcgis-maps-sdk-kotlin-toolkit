@@ -61,7 +61,8 @@ private const val MAX_NUM_OF_SEGMENTS = 4
  */
 internal fun ScalebarProperties.computeDivisions(
     minSegmentWidth: Double,
-    scalebarStyle: ScalebarStyle
+    scalebarStyle: ScalebarStyle,
+    units: UnitSystem
 ): List<ScalebarDivision> {
     return if (scalebarStyle == ScalebarStyle.Bar || scalebarStyle == ScalebarStyle.Line) {
         listOf(
@@ -82,7 +83,7 @@ internal fun ScalebarProperties.computeDivisions(
 
         val segmentScreenLength = displayLength / numSegments
         var currSegmentX = 0.0
-        val localLabels = mutableListOf<ScalebarDivision>()
+        var localLabels = mutableListOf<ScalebarDivision>()
 
         // Add the first label at 0
         localLabels.add(
@@ -111,6 +112,9 @@ internal fun ScalebarProperties.computeDivisions(
                 xOffset = displayLength
             )
         )
+        if (scalebarStyle == ScalebarStyle.DualUnitLine) {
+            localLabels = mutableListOf(localLabels.last(), computeAlternateUnitScalebarDivision(units))
+        }
 
         localLabels
     }
@@ -179,6 +183,34 @@ internal fun computeScalebarProperties(
         displayLength = localDisplayLength,
         mapUnitsToDisplay = localDisplayUnit,
         scalebarLengthInMapUnits = localLineMapLength
+    )
+}
+
+/**
+ * Computes the alternate unit scalebar division based on the given parameters for the dual unit line style.
+ *
+ * @param unit The unit system of the scalebar
+ *
+ * @since 200.7.0
+ */
+internal fun ScalebarProperties.computeAlternateUnitScalebarDivision(
+    unit: UnitSystem,
+): ScalebarDivision {
+    val altUnit = if (unit == UnitSystem.Imperial) UnitSystem.Metric else UnitSystem.Imperial
+    val altMapBaseLength =
+        mapUnitsToDisplay.convertTo(altUnit.baseLinearUnit, scalebarLengthInMapUnits)
+    val altClosestBaseLength =
+        altUnit.closestDistanceWithoutGoingOver(altMapBaseLength, altUnit.baseLinearUnit)
+    val altDisplayUnits = altUnit.linearUnitsForDistance(altClosestBaseLength)
+    val altLengthInMapUnits = altUnit.baseLinearUnit.convertTo(altDisplayUnits, altClosestBaseLength)
+    val displayFactor = scalebarLengthInMapUnits / displayLength
+    val convertedDisplayFactor = mapUnitsToDisplay.convertTo(altDisplayUnits, displayFactor)
+    val altDisplayLength = altLengthInMapUnits / convertedDisplayFactor
+    val altUnitAbbr = altDisplayUnits.getAbbreviation()
+    val label = "${altLengthInMapUnits.format()} $altUnitAbbr"
+    return ScalebarDivision(
+        xOffset = altDisplayLength,
+        label = label
     )
 }
 
