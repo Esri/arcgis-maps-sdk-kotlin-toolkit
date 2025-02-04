@@ -4,9 +4,25 @@ The Basemap Gallery displays a grid of available basemap styles. The gallery acc
 ![Screenshot](screenshot.png)
 
 ### Basic usage for displaying a Baemap Gallery
+A simple workflow is to disply the Basemap Gallery below a Map View and use the `onItemClick` to set the map of the Map View.
 
 ```kotlin
-
+Column {
+        MapView(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(0.5f),
+            arcGISMap = viewModel.arcGISMap,
+        )
+        BasemapGallery(modifier = Modifier.weight(0.5f), basemapGalleryItems = viewModel.items, onItemClick = {
+            when (val tag = it.tag) {
+                is BasemapStyleInfo -> {
+                    Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
+                    viewModel.arcGISMap.setBasemap(Basemap(tag.style))
+                } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+            }
+        })
+    }
 ```
 
 ## Example
