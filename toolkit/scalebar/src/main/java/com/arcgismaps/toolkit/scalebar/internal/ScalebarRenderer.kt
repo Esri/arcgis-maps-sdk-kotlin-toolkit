@@ -69,7 +69,6 @@ internal const val labelXPadding = 4f // padding between scalebar labels
 @Composable
 internal fun LineScalebar(
     modifier: Modifier = Modifier,
-    maxWidth: Dp,
     displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
@@ -78,10 +77,10 @@ internal fun LineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
+    val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
 
-    val totalHeight = scalebarHeight + textHeightInDp
-    val totalWidth = displayLength.dp + shadowOffset + pixelAlignment + (lineWidth/2)
+    val totalHeight = scalebarHeight + primaryLabelHeightInDp
+    val totalWidth = displayLength.dp + shadowOffset + pixelAlignment + (lineWidth / 2)
 
     Canvas(
         modifier = Modifier
@@ -91,7 +90,7 @@ internal fun LineScalebar(
     ) {
         // Since the lineWidth is drawn from the center, we need to offset the line by half the lineWidth
         drawVerticalLineAndShadow(
-            xPos = 0f + (lineWidth/2).toPx(),
+            xPos = 0f + (lineWidth / 2).toPx(),
             top = 0f,
             bottom = scalebarHeight.toPx() + pixelAlignment.toPx(),
             lineColor = colorScheme.lineColor,
@@ -109,7 +108,7 @@ internal fun LineScalebar(
 
         // right line
         drawVerticalLineAndShadow(
-            xPos = displayLength.toPx(density) + (lineWidth/2).toPx(),
+            xPos = displayLength.toPx(density) + (lineWidth / 2).toPx(),
             top = 0f,
             bottom = scalebarHeight.toPx() + pixelAlignment.toPx(),
             lineColor = colorScheme.lineColor,
@@ -144,7 +143,6 @@ internal fun LineScalebar(
 @Composable
 internal fun BarScalebar(
     modifier: Modifier = Modifier,
-    maxWidth: Dp,
     displayLength: Double,
     label: String,
     colorScheme: ScalebarColors,
@@ -153,17 +151,17 @@ internal fun BarScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
+    val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(label, labelTypography)
 
-    val totalHeightInDp = scalebarHeight + textHeightInDp
+    val totalHeight = scalebarHeight + primaryLabelHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment
-    val topLeftPoint = Offset( lineWidth.value + 0f, lineWidth.value +0f)
+    val topLeftPoint = Offset(lineWidth.value + 0f, lineWidth.value + 0f)
 
     Canvas(
         modifier = Modifier
             .testTag("BarScalebar")
             .width(totalWidth)
-            .height(totalHeightInDp)
+            .height(totalHeight)
     ) {
         // draws the rectangle's shadow
         drawRoundRect(
@@ -181,7 +179,7 @@ internal fun BarScalebar(
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
 
-        )
+            )
         // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
@@ -219,7 +217,6 @@ internal fun BarScalebar(
 @Composable
 internal fun AlternatingBarScalebar(
     modifier: Modifier = Modifier,
-    maxWidth: Dp,
     displayLength: Double,
     scalebarDivisions: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
@@ -231,7 +228,7 @@ internal fun AlternatingBarScalebar(
     val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(scalebarDivisions.last().label, labelTypography)
     val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(scalebarDivisions.last().label, labelTypography)
     val totalHeight = scalebarHeight + primaryLabelHeightInDp
-    val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
+    val totalWidth = displayLength.dp + primaryLabelWidthInDp / 2
     val topLeftPoint = Offset(0f + lineWidth.value, 0f + lineWidth.value)
 
     Canvas(
@@ -309,7 +306,6 @@ internal fun AlternatingBarScalebar(
 @Composable
 internal fun GraduatedLineScalebar(
     modifier: Modifier = Modifier,
-    maxWidth: Dp,
     displayLength: Double,
     tickMarks: List<ScalebarDivision>,
     colorScheme: ScalebarColors,
@@ -318,11 +314,11 @@ internal fun GraduatedLineScalebar(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val textHeightInDp = textMeasurer.getTextHeightInDp(tickMarks.last().label, labelTypography)
+    val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(tickMarks.last().label, labelTypography)
     val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(tickMarks.last().label, labelTypography)
 
-    val totalHeight = scalebarHeight +  textHeightInDp
-    val totalWidth = displayLength.dp + primaryLabelWidthInDp/2
+    val totalHeight = scalebarHeight + primaryLabelHeightInDp
+    val totalWidth = displayLength.dp + primaryLabelWidthInDp / 2
 
     Canvas(
         modifier = Modifier
@@ -349,7 +345,7 @@ internal fun GraduatedLineScalebar(
         drawHorizontalLineAndShadow(
             yPos = scalebarHeight.toPx(),
             left = 0f,
-            right = displayLength.toPx(density) + (lineWidth/2).toPx(),
+            right = displayLength.toPx(density) + (lineWidth / 2).toPx(),
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -373,8 +369,6 @@ internal fun GraduatedLineScalebar(
 @Composable
 internal fun DualUnitLineScalebar(
     modifier: Modifier = Modifier,
-    maxWidth: Dp,
-    displayLength: Double,
     primaryScalebarDivision: ScalebarDivision,
     alternateScalebarDivision: ScalebarDivision,
     colorScheme: ScalebarColors,
@@ -385,13 +379,13 @@ internal fun DualUnitLineScalebar(
     val density = LocalDensity.current
     val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(primaryScalebarDivision.label, labelTypography)
     val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(primaryScalebarDivision.label, labelTypography)
-    val alternateTextHeightInDp = textMeasurer.getTextHeightInDp(alternateScalebarDivision.label, labelTypography)
-    val alternateTextWidthInDp = textMeasurer.getTextWidthInDp(alternateScalebarDivision.label, labelTypography)
+    val alternateLabelHeightInDp = textMeasurer.getTextHeightInDp(alternateScalebarDivision.label, labelTypography)
+    val alternateLabelWidthInDp = textMeasurer.getTextWidthInDp(alternateScalebarDivision.label, labelTypography)
 
-    val totalHeight: Dp = primaryLabelHeightInDp + scalebarHeight * 2 + alternateTextHeightInDp
+    val totalHeight: Dp = primaryLabelHeightInDp + scalebarHeight * 2 + alternateLabelHeightInDp
     val totalWidth = max(
         (primaryLabelWidthInDp / 2) + primaryScalebarDivision.xOffset.dp,
-        (alternateTextWidthInDp / 2) + alternateScalebarDivision.xOffset.dp
+        (alternateLabelWidthInDp / 2) + alternateScalebarDivision.xOffset.dp
     )
     val scalebarHeightInPx = with(density) { scalebarHeight.toPx() }
 
@@ -440,8 +434,8 @@ internal fun DualUnitLineScalebar(
         // draw end line for alternate scalebar
         drawVerticalLineAndShadow(
             xPos = alternateScalebarDivision.xOffset.toPx(density),
-            top = primaryLabelHeightInDp.toPx() + scalebarHeightInPx + (lineWidth/2).toPx(),
-            bottom = primaryLabelHeightInDp.toPx() + scalebarHeightInPx*2 ,
+            top = primaryLabelHeightInDp.toPx() + scalebarHeightInPx + (lineWidth / 2).toPx(),
+            bottom = primaryLabelHeightInDp.toPx() + scalebarHeightInPx * 2,
             lineColor = colorScheme.lineColor,
             shadowColor = colorScheme.shadowColor
         )
@@ -451,7 +445,7 @@ internal fun DualUnitLineScalebar(
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
             xPos = alternateScalebarDivision.xOffset.toPx(density),
-            yPos = primaryLabelHeightInDp.toPx() + scalebarHeightInPx*2 ,
+            yPos = primaryLabelHeightInDp.toPx() + scalebarHeightInPx * 2,
             color = colorScheme.textColor,
             shadowColor = colorScheme.textShadowColor,
             shadowBlurRadius = shapes.textShadowBlurRadius,
@@ -472,7 +466,6 @@ internal fun LineScaleBarPreview() {
     ) {
         LineScalebar(
             modifier = Modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = "1,000 km",
             colorScheme = ScalebarDefaults.colors(),
@@ -494,7 +487,6 @@ internal fun BarScaleBarPreview() {
     ) {
         BarScalebar(
             modifier = Modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = "1000 km",
             colorScheme = ScalebarDefaults.colors(shadowColor = Color.Red, textShadowColor = Color.Red),
@@ -509,8 +501,8 @@ internal fun BarScaleBarPreview() {
 internal fun DualUnitLineScalebarPreview() {
     val maxWidth = 175.dp
     val displayLength = 139.3
-    val primaryScalebarDivision = ScalebarDivision(displayLength,"1750 mi")
-    val alternateScalebarDivision = ScalebarDivision(0.75 * displayLength,"2500 Km")
+    val primaryScalebarDivision = ScalebarDivision(displayLength, "1750 mi")
+    val alternateScalebarDivision = ScalebarDivision(0.75 * displayLength, "2500 Km")
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -518,8 +510,6 @@ internal fun DualUnitLineScalebarPreview() {
     ) {
         DualUnitLineScalebar(
             modifier = Modifier,
-            maxWidth = maxWidth,
-            displayLength = 139.3,
             primaryScalebarDivision = primaryScalebarDivision,
             alternateScalebarDivision = alternateScalebarDivision,
             colorScheme = ScalebarDefaults.colors(),
@@ -535,10 +525,10 @@ internal fun GraduatedLineScaleBarPreview() {
     val maxWidth = 175.dp
     val displayLength = 139.3
     val tickMarks = listOf(
-        ScalebarDivision(0.0,  "0"),
-        ScalebarDivision( 0.33 * displayLength, "100"),
+        ScalebarDivision(0.0, "0"),
+        ScalebarDivision(0.33 * displayLength, "100"),
         ScalebarDivision(0.66 * displayLength, "200"),
-        ScalebarDivision(displayLength,  "300 km")
+        ScalebarDivision(displayLength, "300 km")
     )
     Box(
         modifier = Modifier
@@ -547,7 +537,6 @@ internal fun GraduatedLineScaleBarPreview() {
     ) {
         GraduatedLineScalebar(
             modifier = Modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             colorScheme = ScalebarDefaults.colors(),
             tickMarks = tickMarks,
@@ -564,9 +553,9 @@ internal fun AlternatingBarScaleBarPreview() {
     val displayLength = 139.3
     val scalebarDivisions = listOf(
         ScalebarDivision(0.0, "0"),
-        ScalebarDivision(0.33 * displayLength,"100"),
+        ScalebarDivision(0.33 * displayLength, "100"),
         ScalebarDivision(0.66 * displayLength, "200"),
-        ScalebarDivision(displayLength,"300 km")
+        ScalebarDivision(displayLength, "300 km")
     )
     Box(
         modifier = Modifier
@@ -575,7 +564,6 @@ internal fun AlternatingBarScaleBarPreview() {
     ) {
         AlternatingBarScalebar(
             modifier = Modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             colorScheme = ScalebarDefaults.colors(),
             scalebarDivisions = scalebarDivisions,
@@ -623,20 +611,21 @@ private fun DrawScope.drawVerticalLineAndShadow(
     lineColor: Color,
     shadowColor: Color,
 ) {
-        // draw shadow
-        drawLine(
-            color = shadowColor,
-            start = Offset(xPos + shadowOffset.toPx(), top),
-            end = Offset(xPos + shadowOffset.toPx(), bottom),
-            strokeWidth = lineWidth.toPx(),
-        )
-        drawLine(
-            color = lineColor,
-            start = Offset(xPos, top),
-            end = Offset(xPos, bottom),
-            strokeWidth = lineWidth.toPx(),
-        )
-    }
+    // draw shadow
+    drawLine(
+        color = shadowColor,
+        start = Offset(xPos + shadowOffset.toPx(), top),
+        end = Offset(xPos + shadowOffset.toPx(), bottom),
+        strokeWidth = lineWidth.toPx(),
+    )
+    drawLine(
+        color = lineColor,
+        start = Offset(xPos, top),
+        end = Offset(xPos, bottom),
+        strokeWidth = lineWidth.toPx(),
+    )
+}
+
 /**
  * Draws a horizontal line of [color] on the canvas at the [yPos] with a shadow of [shadowColor].
  * The line width will be determined by [left] and [right] positions.
@@ -654,7 +643,7 @@ private fun DrawScope.drawHorizontalLineAndShadow(
     drawLine(
         color = shadowColor,
         start = Offset((left + pixelAlignment.toPx()) + shadowOffset.toPx(), yPos + shadowOffset.toPx()),
-        end = Offset((right + pixelAlignment.toPx()) + shadowOffset.toPx() , yPos + shadowOffset.toPx()),
+        end = Offset((right + pixelAlignment.toPx()) + shadowOffset.toPx(), yPos + shadowOffset.toPx()),
         strokeWidth = lineWidth.toPx(),
     )
     drawLine(
@@ -729,7 +718,7 @@ private fun DrawScope.drawTickMarksWithLabels(
 
     for (i in tickMarks.indices) {
         drawVerticalLineAndShadow(
-            xPos = tickMarks[i].xOffset.toFloat()+  (lineWidth/2).toPx(),
+            xPos = tickMarks[i].xOffset.toFloat() + (lineWidth / 2).toPx(),
             top = 0f,
             bottom = scalebarHeight.toPx() + shadowOffset.toPx(),
             lineColor = color,
@@ -739,7 +728,7 @@ private fun DrawScope.drawTickMarksWithLabels(
             text = tickMarks[i].label,
             textMeasurer = textMeasurer,
             labelTypography = labelTypography,
-            xPos = tickMarks[i].xOffset.toFloat() + (lineWidth/2).toPx(),
+            xPos = tickMarks[i].xOffset.toFloat() + (lineWidth / 2).toPx(),
             color = textColor,
             shadowColor = textShadowColor,
             shadowBlurRadius = textShadowBlurRadius,
@@ -753,7 +742,6 @@ private fun DrawScope.drawTickMarksWithLabels(
  *
  * @param text The text to measure.
  * @param labelTypography The typography to use for the text.
- * @param textMeasurer The [TextMeasurer] to measure the text.
  * @since 200.7.0
  */
 @Composable
@@ -770,12 +758,12 @@ private fun TextMeasurer.getTextHeightInDp(
 
     return with(density) { textHeightInPx.toDp() }
 }
+
 /**
  * Measures the height of the text in dp.
  *
  * @param text The text to measure.
  * @param labelTypography The typography to use for the text.
- * @param textMeasurer The [TextMeasurer] to measure the text.
  * @since 200.7.0
  */
 @Composable

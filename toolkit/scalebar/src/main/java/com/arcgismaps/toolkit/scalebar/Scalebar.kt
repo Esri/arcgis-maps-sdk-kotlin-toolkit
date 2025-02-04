@@ -171,7 +171,6 @@ private fun Scalebar(
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             scalebarDivisions = labels,
             colorScheme = colorScheme,
@@ -181,7 +180,6 @@ private fun Scalebar(
 
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -191,8 +189,6 @@ private fun Scalebar(
 
         ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
-            displayLength = displayLength,
             primaryScalebarDivision = labels.first(),
             alternateScalebarDivision = labels.last(),
             colorScheme = colorScheme,
@@ -202,7 +198,6 @@ private fun Scalebar(
 
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
@@ -212,7 +207,6 @@ private fun Scalebar(
 
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
