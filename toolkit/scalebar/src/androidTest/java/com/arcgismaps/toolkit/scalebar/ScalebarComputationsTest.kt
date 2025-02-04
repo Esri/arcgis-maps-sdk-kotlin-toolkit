@@ -62,7 +62,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.Line,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -84,7 +84,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.Bar,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -106,7 +106,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.GraduatedLine,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("0", "100", "200", "300 km")
@@ -128,7 +128,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.DualUnitLine,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("300 km", "175 mi")
@@ -195,7 +195,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.AlternatingBar,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             useGeodeticCalculations = false,
             displayLength = 142,
