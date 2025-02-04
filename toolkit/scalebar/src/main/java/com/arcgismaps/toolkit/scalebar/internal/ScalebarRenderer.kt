@@ -152,7 +152,7 @@ internal fun BarScalebar(
 
     val totalHeight = scalebarHeight + primaryLabelHeightInDp
     val totalWidth = displayLength.dp + shadowOffset + pixelAlignment
-    val topLeftPoint = Offset(lineWidth.value + 0f, lineWidth.value + 0f)
+    val topLeftPoint = Offset(0f + lineWidth.value, 0f + lineWidth.value)
 
     Canvas(
         modifier = Modifier
@@ -451,7 +451,6 @@ internal fun DualUnitLineScalebar(
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun LineScaleBarPreview() {
-    val maxWidth = 175.dp
     val displayLength = 160.0
     Box(
         modifier = Modifier
@@ -472,7 +471,6 @@ internal fun LineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun BarScaleBarPreview() {
-    val maxWidth = 175.dp
     val displayLength = 160.0
     Box(
         modifier = Modifier
@@ -493,7 +491,6 @@ internal fun BarScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun DualUnitLineScalebarPreview() {
-    val maxWidth = 175.dp
     val displayLength = 139.3
     val primaryScalebarDivision = ScalebarDivision(displayLength, "1750 mi")
     val alternateScalebarDivision = ScalebarDivision(0.75 * displayLength, "2500 Km")
@@ -516,7 +513,6 @@ internal fun DualUnitLineScalebarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun GraduatedLineScaleBarPreview() {
-    val maxWidth = 175.dp
     val displayLength = 139.3
     val tickMarks = listOf(
         ScalebarDivision(0.0, "0"),
@@ -543,7 +539,6 @@ internal fun GraduatedLineScaleBarPreview() {
 @Preview(showBackground = true, backgroundColor = 0xff91d2ff)
 @Composable
 internal fun AlternatingBarScaleBarPreview() {
-    val maxWidth = 175.dp
     val displayLength = 139.3
     val scalebarDivisions = listOf(
         ScalebarDivision(0.0, "0"),
