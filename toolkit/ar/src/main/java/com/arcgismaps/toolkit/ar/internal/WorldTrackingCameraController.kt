@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.location.Criteria
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import java.time.Instant
+import kotlin.math.abs
 
 /**
  * Wraps a [TransformationMatrixCameraController] and uses the position of the device to update the camera.
@@ -66,11 +68,15 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = SystemLocationDataSource()
-    val cameraController = TransformationMatrixCameraController()
+    private val locationDataSource = SystemLocationDataSource(criteria = Criteria())
+    val cameraController = TransformationMatrixCameraController().apply {
+        clippingDistance = 500.0
+    }
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
+
+    private var hasSetOriginHeading = false
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -154,6 +160,33 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     }
                 }
         }
+//        scope.launch {
+//            locationDataSource.headingChanged
+//                .filter { heading ->
+//                    val transformationMatrix = cameraController.transformationMatrix
+//                    if (transformationMatrix.translationX == 0.0 && transformationMatrix.translationY == 0.0 && transformationMatrix.translationZ == 0.0) return@filter false
+//                    !hasSetOriginHeading || shouldUpdateHeading(
+//                        Camera(cameraController.transformationMatrix).heading,
+//                        heading
+//                    )
+//                }
+//                .collect { heading ->
+//                    val location = cameraController.originCamera.value.location
+//                    cameraController.setOriginCamera(
+//                        Camera(
+//                            location.x,
+//                            location.y,
+//                            if (location.hasZ) location.z!! else 0.0,
+//                            heading,
+//                            90.0,
+//                            0.0
+//                        )
+//                    )
+//                    if (!hasSetOriginHeading) {
+//                        hasSetOriginHeading = true
+//                    }
+//                }
+//        }
     }
 }
 
@@ -210,5 +243,11 @@ internal fun shouldUpdateCamera(
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
+
     return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
+}
+
+internal fun shouldUpdateHeading(currentHeading: Double, newHeading: Double): Boolean {
+    val angle = abs(currentHeading - newHeading)
+    return angle > WorldScaleParameters.LOCATION_ANGLE_THRESHOLD_DEGREES
 }
