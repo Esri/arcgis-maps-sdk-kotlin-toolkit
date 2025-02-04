@@ -74,7 +74,6 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
                 LineScalebar(
-                    maxWidth = 175.dp,
                     displayLength = 160.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(),
@@ -106,7 +105,6 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             GraduatedLineScalebar(
-                maxWidth = maxWidth,
                 displayLength = displayLength,
                 colorScheme = ScalebarDefaults.colors(),
                 tickMarks = tickMarks,
@@ -160,7 +158,6 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             BarScalebar(
-                maxWidth = 175.dp,
                 displayLength = 160.0,
                 label = "1000 km",
                 colorScheme = ScalebarDefaults.colors(),
@@ -187,7 +184,6 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             DualUnitLineScalebar(
-                maxWidth = maxWidth,
                 primaryScalebarDivision = endScalebarDivision,
                 alternateScalebarDivision = alternateScalebarDivision,
                 colorScheme = ScalebarDefaults.colors(),
@@ -219,7 +215,6 @@ class ScalebarTests {
         // Test the scalebar
         composeTestRule.setContent {
             AlternatingBarScalebar(
-                maxWidth = maxWidth,
                 displayLength = displayLength,
                 scalebarDivisions = scalebarDivisions,
                 colorScheme = ScalebarDefaults.colors(),
@@ -276,7 +271,6 @@ class ScalebarTests {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 LineScalebar(
-                    maxWidth = 175.dp,
                     displayLength = 160.0,
                     label = "1000 km",
                     colorScheme = ScalebarDefaults.colors(lineColor = Color.Red),

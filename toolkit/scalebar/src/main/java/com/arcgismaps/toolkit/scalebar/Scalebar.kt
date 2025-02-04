@@ -21,9 +21,10 @@ package com.arcgismaps.toolkit.scalebar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -134,13 +136,12 @@ public fun Scalebar(
     )
 
     AnimatedVisibility(
-        modifier = Modifier.width(maxWidth),
+        modifier = modifier,
         visible = isScalebarVisible.value,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
         Scalebar(
-            maxWidth = maxWidth,
             displayLength = scalebarProperties.displayLength,
             labels = scalebarDivisions,
             scalebarStyle = style,
@@ -154,14 +155,13 @@ public fun Scalebar(
 
 @Composable
 private fun Scalebar(
-    maxWidth: Dp,
     displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,
     colorScheme: ScalebarColors,
     shapes: ScalebarShapes,
     labelTypography: LabelTypography,
-    modifier: Modifier /*= Modifier.testTag("Scalebar")*/
+    modifier: Modifier
 ) {
     if (labels.isEmpty()) {
         return
@@ -169,7 +169,6 @@ private fun Scalebar(
     when (scalebarStyle) {
         ScalebarStyle.AlternatingBar -> AlternatingBarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             scalebarDivisions = labels,
             colorScheme = colorScheme,
@@ -179,7 +178,6 @@ private fun Scalebar(
 
         ScalebarStyle.Bar -> BarScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -189,7 +187,6 @@ private fun Scalebar(
 
         ScalebarStyle.DualUnitLine -> DualUnitLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             primaryScalebarDivision = labels.first(),
             alternateScalebarDivision = labels.last(),
             colorScheme = colorScheme,
@@ -199,7 +196,6 @@ private fun Scalebar(
 
         ScalebarStyle.GraduatedLine -> GraduatedLineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             tickMarks = labels,
             colorScheme = colorScheme,
@@ -209,7 +205,6 @@ private fun Scalebar(
 
         ScalebarStyle.Line -> LineScalebar(
             modifier = modifier,
-            maxWidth = maxWidth,
             displayLength = displayLength,
             label = labels[0].label,
             colorScheme = colorScheme,
@@ -228,10 +223,14 @@ internal fun ScalebarPreview() {
         10000000.0
     )
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Gray)
     ) {
         Scalebar(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(25.dp),
             maxWidth = 175.dp,
             unitsPerDip = 2645.833333330476,
             viewpoint = viewPoint,
@@ -282,7 +281,7 @@ internal fun measureAvailableLineDisplayLength(
 
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
-            maxWidth - lineWidth.value
+            maxWidth - (lineWidth.value / 2.0f)
         }
     }
 }
