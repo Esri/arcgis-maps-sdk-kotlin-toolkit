@@ -241,45 +241,39 @@ internal fun AlternatingBarScalebar(
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
+
         // Draws the alternating fill colors, bars and text labels
-        for (index in scalebarDivisions.indices) {
-            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density)
-            val endX = scalebarDivisions[index].xOffset.toPx(density)
+        for (index in 0 until scalebarDivisions.size - 1) {
+            val startX = scalebarDivisions[index].xOffset.toPx(density)
+            val endX = scalebarDivisions[index + 1].xOffset.toPx(density)
             val width = endX - startX
 
             // Draw the inner fill color
             drawRoundRect(
-                color = if (index % 2 == 0) colorScheme.fillColor else colorScheme.alternateFillColor,
-                topLeft = Offset(startX + (lineWidth.toPx() / 2) + pixelAlignment.toPx(), 0f),
-                cornerRadius = CornerRadius(shapes.barCornerRadius),
-                size = Size(width - lineWidth.toPx(), scalebarHeight.toPx())
+                color = if (index % 2 == 0) Color.Green else Color.Blue,
+                topLeft = Offset(topLeftPoint.x + startX, topLeftPoint.y),
+                size = Size(width, scalebarHeight.toPx()),
+                cornerRadius = CornerRadius(shapes.barCornerRadius)
             )
 
-            // Draw the segment line
-            drawLine(
-                color = colorScheme.lineColor,
-                start = Offset(endX + pixelAlignment.toPx(), 0f),
-                end = Offset(endX + pixelAlignment.toPx(), scalebarHeight.toPx()),
-                strokeWidth = lineWidth.toPx(),
-            )
-
-            // draw text label
-            drawText(
-                text = scalebarDivisions[index].label,
-                textMeasurer = textMeasurer,
-                labelTypography = labelTypography,
-                xPos = scalebarDivisions[index].xOffset.toPx(density),
-                color = colorScheme.textColor,
-                shadowColor = colorScheme.textShadowColor,
-                shadowBlurRadius = shapes.textShadowBlurRadius,
-                alignment = if (index == 0) TextAlignment.RIGHT else TextAlignment.CENTER
-            )
+            if (index != 0) {
+                // Draw only the segment line
+                drawLine(
+                    color = colorScheme.lineColor,
+                    start = Offset(scalebarDivisions[index].xOffset.toPx(density) + topLeftPoint.x, topLeftPoint.y),
+                    end = Offset(
+                        scalebarDivisions[index].xOffset.toPx(density) + topLeftPoint.x,
+                        scalebarHeight.toPx()
+                    ),
+                    strokeWidth = lineWidth.toPx(),
+                )
+            }
         }
 
-        // draw the rectangle's border
+        // draws the rectangle's outline
         drawRoundRect(
             color = colorScheme.lineColor,
-            topLeft = topLeftPoint,
+            topLeft = Offset(topLeftPoint.x, topLeftPoint.y),
             size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
