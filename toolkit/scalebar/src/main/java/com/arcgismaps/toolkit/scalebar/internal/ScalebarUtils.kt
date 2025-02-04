@@ -138,7 +138,7 @@ internal object ScalebarUtils {
      *
      * @since 200.7.0
      */
-    fun Double.toPx(density: Density): Double = this * density.density
+    fun Double.toPx(density: Density): Float = (this * density.density).toFloat()
 
     /**
      * Determines an appropriate base linear unit for this [UnitSystem].

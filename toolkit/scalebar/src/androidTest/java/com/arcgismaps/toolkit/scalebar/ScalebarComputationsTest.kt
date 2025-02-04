@@ -21,12 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.internal.computeDivisions
+import com.arcgismaps.toolkit.scalebar.internal.computeScalebarProperties
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarDefaults
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -58,9 +59,9 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Line,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10_000_000.0,
+            scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -80,9 +81,9 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.Bar,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10_000_000.0,
+            scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -102,12 +103,34 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.GraduatedLine,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10_000_000.0,
+            scale = 10000000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("0", "100", "200", "300 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of Dual unit line style is updated
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testDualUnitLineStyle() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.DualUnitLine,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10000000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 137,
+            labels = listOf("300 km", "175 mi")
         )
     }
 
@@ -124,7 +147,7 @@ class ScalebarComputationsTest {
             x = esriRedlands.x,
             y = esriRedlands.y,
             style = ScalebarStyle.AlternatingBar,
-            maxWidth = 175.0,
+            maxWidth = 175.dp,
             units = UnitSystem.Metric,
             scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
@@ -431,7 +454,7 @@ class ScalebarComputationsTest {
         y: Double,
         spatialReference: SpatialReference = SpatialReference.webMercator(),
         style: ScalebarStyle,
-        maxWidth: Double,
+        maxWidth: Dp,
         units: UnitSystem,
         scale: Double,
         unitsPerDip: Double,
@@ -455,8 +478,7 @@ class ScalebarComputationsTest {
             ) {
                 val defaultLabelTypography = ScalebarDefaults.typography()
 
-                val availableLineDisplayLength =
-                    measureAvailableLineDisplayLength(maxWidth, defaultLabelTypography, style)
+                val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth.value.toDouble(), defaultLabelTypography, style)
                 val scalebarProperties = computeScalebarProperties(
                     minScale = 0.0,
                     spatialReference,
@@ -470,7 +492,8 @@ class ScalebarComputationsTest {
                     measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
                 val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
-                    scalebarStyle = style
+                    scalebarStyle = style,
+                    units = units
                 )
                 assertThat(scalebarProperties.displayLength.roundToInt()).isEqualTo(displayLength)
                 assertThat(scalebarLabels.map { it.label }).containsExactlyElementsIn(labels).inOrder()
