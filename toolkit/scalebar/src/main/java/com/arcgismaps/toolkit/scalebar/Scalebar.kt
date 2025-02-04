@@ -142,7 +142,6 @@ public fun Scalebar(
         exit = fadeOut()
     ) {
         Scalebar(
-            maxWidth = maxWidth,
             displayLength = scalebarProperties.displayLength,
             labels = scalebarDivisions,
             scalebarStyle = style,
@@ -156,7 +155,6 @@ public fun Scalebar(
 
 @Composable
 private fun Scalebar(
-    maxWidth: Dp,
     displayLength: Double,
     labels: List<ScalebarDivision>,
     scalebarStyle: ScalebarStyle,

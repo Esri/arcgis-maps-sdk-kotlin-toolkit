@@ -51,14 +51,12 @@ private val pixelAlignment = 1.dp // Aligns the horizontal line edges
 internal val lineWidth = 2.dp
 private val shadowOffset = 1.dp
 private val scalebarHeight = 7.dp // Height of the scalebar in pixels
-private val textOffset = 7.dp
 internal const val labelXPadding = 4f // padding between scalebar labels
 
 /**
  * Displays a line scalebar with single label and endpoint lines.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scalebar container displaying line and text in dp.
  * @param displayLength The width of the scalebar in pixels.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -132,7 +130,6 @@ internal fun LineScalebar(
  * Displays bar scalebar with a single label.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param label The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -206,7 +203,6 @@ internal fun BarScalebar(
  * Displays AlternatingBar scalebar with segmented bars of alternating fill color.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param scalebarDivisions The scale value to display.
  * @param colorScheme The color scheme to use.
@@ -295,7 +291,6 @@ internal fun AlternatingBarScalebar(
  * Displays a graduated line scalebar with multiple labels and tick marks.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param displayLength The width of the scale bar.
  * @param tickMarks The list of tick marks to display.
  * @param colorScheme The color scheme to use.
@@ -357,7 +352,6 @@ internal fun GraduatedLineScalebar(
  * alternate unit.
  *
  * @param modifier The modifier to apply to the layout.
- * @param maxWidth The width of the scale bar container displaying line and text in dp.
  * @param primaryScalebarDivision The end segment for the primary unit.
  * @param alternateScalebarDivision The end segment for the alternate unit.
  * @param colorScheme The color scheme to use.
@@ -656,7 +650,6 @@ private fun DrawScope.drawHorizontalLineAndShadow(
 
 /**
  * Draws the text on the canvas with a shadow.
- * This method adds blank space of size [textOffset] between the scaleBar and the text.
  *
  * @param text The text to be drawn.
  * @param textMeasurer The [TextMeasurer] to measure the text.
@@ -700,7 +693,7 @@ private fun DrawScope.drawText(
 }
 
 /**
- * Draws the tick marks on the canvas of [tickHeight] with a [color] with a shadow of [shadowColor].
+ * Draws tick marks of size [scalebarHeight] the canvas with the specified [color] and [shadowColor].
  *
  * The label of the tick marks will be drawn with a [textColor] and shadow of [textShadowColor]. The tickmark
  * position will be determined by [ScalebarDivision.xOffset].
