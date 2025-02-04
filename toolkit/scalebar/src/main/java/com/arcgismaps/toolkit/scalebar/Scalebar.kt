@@ -41,6 +41,7 @@ import com.arcgismaps.UnitSystem
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.toolkit.scalebar.internal.AlternatingBarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.BarScalebar
 import com.arcgismaps.toolkit.scalebar.internal.DualUnitLineScalebar
@@ -64,6 +65,46 @@ import kotlin.time.Duration
  * A Scalebar displays the representation of an accurate linear measurement on the map.
  * It provides a visual indication through which users can determine the size of features or
  * the distance between features on a map.
+ *
+ * The required parameters to display a Scalebar are the maximum width of the Scalebar in device independent pixels (dp),
+ * the current unitsPerDip of the MapView, and the current [ViewpointType.CenterAndScale] of the MapView and the
+ * [SpatialReference] of the MapView. The current value of unitsPerDip can be obtained from the Composable
+ * MapView's onUnitsPerDipChanged callback. The [Viewpoint] can be obtained from the Composable MapView's
+ * onViewpointChangedForCenterAndScale callback and the [SpatialReference] can be obtained from the Composable MapView's
+ * onSpatialReferenceChanged callback.
+ *
+ * The Scalebar will be automatically updated when the Viewpoint changes.
+ *
+ * _Workflow example:_
+ *
+ *  ```
+ *     var viewpoint: Viewpoint? by remember { mutableStateOf(null) }
+ *     var unitsPerDip by remember { mutableDoubleStateOf(Double.NaN) }
+ *     var spatialReference: SpatialReference? by remember { mutableStateOf(null) }
+ *     // show composable MapView with a Scalebar
+ *     Box(
+ *         modifier = modifier.fillMaxSize()
+ *     ) {
+ *         MapView(
+ *             modifier = Modifier.fillMaxSize(),
+ *             arcGISMap = arcGISMap,
+ *             onSpatialReferenceChanged = { spatialReference = it },
+ *             onUnitsPerDipChanged = { unitsPerDip = it },
+ *             onViewpointChangedForCenterAndScale = { viewpoint = it }
+ *         )
+ *
+ *         Scalebar(
+ *             modifier = Modifier
+ *                 .padding(25.dp)
+ *                 .align(Alignment.BottomStart),
+ *             maxWidth = 175.0,
+ *             unitsPerDip = unitsPerDip,
+ *             viewpoint = viewpoint,
+ *             spatialReference = spatialReference,
+ *             style = ScalebarStyle.AlternatingBar,
+ *         )
+ *     }
+ *  ```
  *
  * @param maxWidth the maximum screen width allotted to the scalebar in dp.
  * @param unitsPerDip the number of map units per density-independent pixel (dp).
