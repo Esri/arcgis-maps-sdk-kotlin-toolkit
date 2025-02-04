@@ -40,6 +40,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.arcgismaps.toolkit.scalebar.internal.ScalebarUtils.toPx
 import com.arcgismaps.toolkit.scalebar.theme.LabelTypography
 import com.arcgismaps.toolkit.scalebar.theme.ScalebarColors
@@ -385,9 +386,13 @@ internal fun DualUnitLineScalebar(
     val primaryLabelHeightInDp = textMeasurer.getTextHeightInDp(primaryScalebarDivision.label, labelTypography)
     val primaryLabelWidthInDp = textMeasurer.getTextWidthInDp(primaryScalebarDivision.label, labelTypography)
     val alternateTextHeightInDp = textMeasurer.getTextHeightInDp(alternateScalebarDivision.label, labelTypography)
+    val alternateTextWidthInDp = textMeasurer.getTextWidthInDp(alternateScalebarDivision.label, labelTypography)
 
-    val totalHeight: Dp = primaryLabelHeightInDp + scalebarHeight *2  + alternateTextHeightInDp
-    val totalWidth = primaryLabelWidthInDp/2 + displayLength.dp
+    val totalHeight: Dp = primaryLabelHeightInDp + scalebarHeight * 2 + alternateTextHeightInDp
+    val totalWidth = max(
+        (primaryLabelWidthInDp / 2) + primaryScalebarDivision.xOffset.dp,
+        (alternateTextWidthInDp / 2) + alternateScalebarDivision.xOffset.dp
+    )
     val scalebarHeightInPx = with(density) { scalebarHeight.toPx() }
 
     Canvas(
@@ -398,7 +403,7 @@ internal fun DualUnitLineScalebar(
     ) {
         // left end line
         drawVerticalLineAndShadow(
-            xPos = 0f + (lineWidth/2).toPx(),
+            xPos = 0f + (lineWidth / 2).toPx(),
             top = primaryLabelHeightInDp.toPx(),
             bottom = scalebarHeightInPx * 2 + primaryLabelHeightInDp.toPx(),
             lineColor = colorScheme.lineColor,
