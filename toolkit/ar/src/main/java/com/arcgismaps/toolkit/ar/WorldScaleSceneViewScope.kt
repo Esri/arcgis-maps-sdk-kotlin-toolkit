@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -88,7 +87,6 @@ public class WorldScaleSceneViewScope internal constructor(
      *
      * @param onDismiss Action to take when the calibration view is dismissed by the user
      * @param modifier Modifier to be applied to the composable calibration view
-     * @param verticalArrangement Position within the WorldScaleSceneView to display the calibration view
      * @param colorScheme Color scheme applied to the calibration view
      * @param typography Typography style applied to text in the calibration view
      *
@@ -98,26 +96,20 @@ public class WorldScaleSceneViewScope internal constructor(
     public fun CalibrationView(
         onDismiss: () -> Unit,
         modifier: Modifier = Modifier,
-        verticalArrangement: Arrangement.Vertical = Arrangement.Bottom,
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
         typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
     ) {
         WorldScaleCalibrationViewTheme {
-            Column(
-                modifier.fillMaxSize(),
-                verticalArrangement = verticalArrangement
-            ) {
-                CalibrationViewInternal(
-                    onDismiss = onDismiss,
-                    modifier = modifier,
-                    colorScheme = colorScheme,
-                    typography = typography,
-                    onHeadingChange = onHeadingChange,
-                    onElevationChange = onElevationChange,
-                    onHeadingReset = onHeadingReset,
-                    onElevationReset = onElevationReset
-                )
-            }
+            CalibrationViewInternal(
+                onDismiss = onDismiss,
+                modifier = modifier,
+                colorScheme = colorScheme,
+                typography = typography,
+                onHeadingChange = onHeadingChange,
+                onElevationChange = onElevationChange,
+                onHeadingReset = onHeadingReset,
+                onElevationReset = onElevationReset
+            )
         }
     }
 
@@ -226,7 +218,7 @@ public class WorldScaleSceneViewScope internal constructor(
             Card(
                 modifier = modifier,
                 colors = CardDefaults.cardColors(
-                    containerColor = LocalColorScheme.current.backgroundColor.copy(alpha = 0.85F),
+                    containerColor = LocalColorScheme.current.backgroundColor,
                 )
             ) {
                 Column(
@@ -257,7 +249,7 @@ public class WorldScaleSceneViewScope internal constructor(
                     // heading
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = LocalColorScheme.current.containerColor.copy(alpha = 0.9F),
+                            containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
 
@@ -295,7 +287,7 @@ public class WorldScaleSceneViewScope internal constructor(
                     // elevation
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = LocalColorScheme.current.containerColor.copy(0.9F),
+                            containerColor = LocalColorScheme.current.containerColor,
                         )
                     ) {
                         JoysliderBar(

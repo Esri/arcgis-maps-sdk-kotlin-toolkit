@@ -19,7 +19,7 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -30,12 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
-import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
 
 @Composable
 fun MainScreen() {
@@ -56,15 +56,14 @@ fun MainScreen() {
         }
     ) {
         if (displayCalibrationView) {
-            CalibrationView(
-                onDismiss = { displayCalibrationView = false },
-                modifier = Modifier,
-                colorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
-                typography = WorldScaleCalibrationViewDefaults.typography(),
-                verticalArrangement = Arrangement.Bottom
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                CalibrationView(
+                    onDismiss = { displayCalibrationView = false },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
         } else {
-            FloatingActionButton(onClick = {displayCalibrationView = true}) {
+            FloatingActionButton(onClick = { displayCalibrationView = true }) {
                 Icon(Icons.Default.Edit, contentDescription = "Calibration View button")
             }
         }

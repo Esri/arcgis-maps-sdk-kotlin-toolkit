@@ -9,8 +9,8 @@ public object WorldScaleCalibrationViewDefaults {
 
     @Composable
     public fun colorScheme(
-        backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
-        containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.85F),
+        containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9F),
         closeButtonContainerColor: Color = MaterialTheme.colorScheme.secondary,
         closeButtonContentColor: Color = MaterialTheme.colorScheme.onSecondary,
         buttonContainerColor: Color = MaterialTheme.colorScheme.primary,
