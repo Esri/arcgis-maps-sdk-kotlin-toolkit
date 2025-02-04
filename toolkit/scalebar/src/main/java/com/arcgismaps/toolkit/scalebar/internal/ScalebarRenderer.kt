@@ -250,7 +250,7 @@ internal fun AlternatingBarScalebar(
 
             // Draw the inner fill color
             drawRoundRect(
-                color = if (index % 2 == 0) Color.Green else Color.Blue,
+                color = if (index % 2 == 0) colorScheme.fillColor else colorScheme.alternateFillColor,
                 topLeft = Offset(topLeftPoint.x + startX, topLeftPoint.y),
                 size = Size(width, scalebarHeight.toPx()),
                 cornerRadius = CornerRadius(shapes.barCornerRadius)
@@ -268,8 +268,31 @@ internal fun AlternatingBarScalebar(
                     strokeWidth = lineWidth.toPx(),
                 )
             }
+
+            drawText(
+                text = scalebarDivisions[index].label,
+                textMeasurer = textMeasurer,
+                labelTypography = labelTypography,
+                xPos = scalebarDivisions[index].xOffset.toPx(density),
+                color = colorScheme.textColor,
+                shadowColor = colorScheme.textShadowColor,
+                shadowBlurRadius = shapes.textShadowBlurRadius,
+                alignment = if (index == 0) TextAlignment.RIGHT else TextAlignment.CENTER
+            )
         }
 
+        // draw last text label
+        drawText(
+            text = scalebarDivisions.last().label,
+            textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
+            xPos = scalebarDivisions.last().xOffset.toPx(density),
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            shadowBlurRadius = shapes.textShadowBlurRadius,
+            alignment = TextAlignment.CENTER
+        )
+        
         // draws the rectangle's outline
         drawRoundRect(
             color = colorScheme.lineColor,
