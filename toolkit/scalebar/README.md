@@ -27,10 +27,10 @@ To see it in action, check out the [microapp](../../microapps/ScalebarApp).
 The simplest workflow is to display the `Scalebar` composable over the top of a composable `MapView` using a `Box` 
 
 ```kotlin
-    // change in the viewpoint, unitsPerDip and spatialReference
-    // are need to be provided from the MapView to the Scalebar
-    // so it can recompose and show accurate values,
-    // when ever their value changes on panning and zooming on the MapView
+    // Changes in the `viewpoint`, `unitsPerDip` and `spatialReference`
+    // need to be provided from the MapView to the `Scalebar`.
+    // So it can recompose and show accurate values
+    // whenever their value change due to panning and zooming on the `MapView`
     var viewpoint: Viewpoint? by remember { mutableStateOf(null) }
     var unitsPerDip by remember { mutableDoubleStateOf(Double.NaN) }
     var spatialReference: SpatialReference? by remember { mutableStateOf(null) }
@@ -45,20 +45,16 @@ The simplest workflow is to display the `Scalebar` composable over the top of a 
             onUnitsPerDipChanged = { unitsPerDip = it },
             onViewpointChangedForCenterAndScale = { viewpoint = it }
         )
-        Row(
+        
+        Scalebar(
             modifier = Modifier
-                .height(IntrinsicSize.Max)
-                .fillMaxWidth()
                 .padding(25.dp)
-                .align(Alignment.BottomStart)
-        ) {
-            Scalebar(
-                maxWidth = 175.0,
-                unitsPerDip = unitsPerDip,
-                viewpoint = viewpoint,
-                spatialReference = spatialReference,
-                style = ScalebarStyle.AlternatingBar,
-            )
-        }
+                .align(Alignment.BottomStart),
+            maxWidth = 175.0,
+            unitsPerDip = unitsPerDip,
+            viewpoint = viewpoint,
+            spatialReference = spatialReference,
+            style = ScalebarStyle.AlternatingBar,
+        )
     }
 ```
