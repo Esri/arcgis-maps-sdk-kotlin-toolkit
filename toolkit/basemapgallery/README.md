@@ -1,7 +1,9 @@
 # Basemap Gallery
 The Basemap Gallery displays a grid of available basemap styles. The gallery accepts a lambda that defines an action to take when a gallery item is clicked.
 
-![Screenshot](screenshot.png### Basic usage for displaying a Baemap Gallery
+![Screenshot](screenshot.png)
+
+### Basic usage for displaying a Baemap Gallery
 
 ```kotlin
 
