@@ -257,7 +257,7 @@ internal fun AlternatingBarScalebar(
             )
 
             if (index != 0) {
-                // Draw only the segment line
+                // Draw only the inner lines
                 drawLine(
                     color = colorScheme.lineColor,
                     start = Offset(scalebarDivisions[index].xOffset.toPx(density) + topLeftPoint.x, topLeftPoint.y),
@@ -292,7 +292,7 @@ internal fun AlternatingBarScalebar(
             shadowBlurRadius = shapes.textShadowBlurRadius,
             alignment = TextAlignment.CENTER
         )
-        
+
         // draws the rectangle's outline
         drawRoundRect(
             color = colorScheme.lineColor,
