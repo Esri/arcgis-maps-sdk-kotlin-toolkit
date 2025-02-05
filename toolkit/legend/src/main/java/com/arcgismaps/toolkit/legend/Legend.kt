@@ -22,14 +22,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.GeoView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
-public fun Legend(viewModel: LegendInterface) {
-    val text = viewModel.someProperty.collectAsState()
-    Text(text = text.value)
+public fun Legend(
+//    viewModel: LegendInterface,
+    map: ArcGISMap,
+    geoViewLayerViewStateChanged: GeoView.GeoViewLayerViewStateChanged?,
+    viewPoint: Viewpoint?,
+
+    ) {
+//    val text = viewModel.someProperty.collectAsState()
+//    Text(text = text.value)
+
+
 }
 
 @Preview
@@ -39,5 +50,5 @@ internal fun LegendPreview() {
         private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Legend Preview")
         override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
     }
-    Legend(viewModel)
+//    Legend(viewModel, ArcGISMap(), GeoView.GeoViewLayerViewStateChanged(), Viewpoint())
 }

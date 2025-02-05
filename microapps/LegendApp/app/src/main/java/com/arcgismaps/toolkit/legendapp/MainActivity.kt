@@ -53,11 +53,8 @@ fun LegendAppApp() {
     Scaffold(
         topBar = { TopAppBar(title = { Text("LegendAppApp") }) }
     ) {
-        Box(Modifier.padding(it)) {
-            MainScreen()
-        }
+        MainScreen(Modifier.padding(it))
     }
-
 }
 
 @Preview(showBackground = true)

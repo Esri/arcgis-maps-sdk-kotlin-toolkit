@@ -18,19 +18,23 @@
 
 package com.arcgismaps.toolkit.legendapp.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.legend.Legend
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier) {
     val arcGISMap by remember {
         mutableStateOf(
             ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
@@ -42,8 +46,23 @@ fun MainScreen() {
             }
         )
     }
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap
-    )
+
+    var viewpoint: Viewpoint? by remember { mutableStateOf(null) }
+    var geoViewLayerViewStateChanged: GeoView.GeoViewLayerViewStateChanged? by remember { mutableStateOf(null) }
+
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = arcGISMap,
+            onLayerViewStateChanged = { geoViewLayerViewStateChanged = it },
+            onViewpointChangedForCenterAndScale = { viewpoint = it }
+        )
+        Legend(
+            map = arcGISMap,
+            geoViewLayerViewStateChanged = geoViewLayerViewStateChanged,
+            viewPoint = viewpoint!!
+        )
+    }
 }

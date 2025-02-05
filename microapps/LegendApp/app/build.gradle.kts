@@ -80,6 +80,7 @@ android {
 dependencies {
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
+    implementation(project(":legend"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
