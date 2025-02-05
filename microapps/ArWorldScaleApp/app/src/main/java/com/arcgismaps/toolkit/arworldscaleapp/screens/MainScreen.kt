@@ -51,6 +51,7 @@ import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
 fun MainScreen() {
     val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
         baseLayers.clear()
+
     }
     val arcGISScene = ArcGISScene(basemap).apply {
         initialViewpoint = Viewpoint(
@@ -62,6 +63,7 @@ fun MainScreen() {
         // if not used, the scene may appear far below the device position because the device position
         // is calculated with elevation
         baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
+        baseSurface.backgroundGrid.isVisible = false
         baseSurface.opacity = 0.3f
         // add the Esri 3D Buildings layer
         operationalLayers.add(
