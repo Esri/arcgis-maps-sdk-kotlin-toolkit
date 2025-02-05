@@ -241,29 +241,34 @@ internal fun AlternatingBarScalebar(
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
         )
+
         // Draws the alternating fill colors, bars and text labels
-        for (index in scalebarDivisions.indices) {
-            val startX = if (index == 0) 0f else scalebarDivisions[index - 1].xOffset.toPx(density)
-            val endX = scalebarDivisions[index].xOffset.toPx(density)
+        for (index in 0 until scalebarDivisions.size - 1) {
+            val startX = scalebarDivisions[index].xOffset.toPx(density)
+            val endX = scalebarDivisions[index + 1].xOffset.toPx(density)
             val width = endX - startX
 
             // Draw the inner fill color
             drawRoundRect(
                 color = if (index % 2 == 0) colorScheme.fillColor else colorScheme.alternateFillColor,
-                topLeft = Offset(startX + (lineWidth.toPx() / 2) + pixelAlignment.toPx(), 0f),
-                cornerRadius = CornerRadius(shapes.barCornerRadius),
-                size = Size(width - lineWidth.toPx(), scalebarHeight.toPx())
+                topLeft = Offset(topLeftPoint.x + startX, topLeftPoint.y),
+                size = Size(width, scalebarHeight.toPx()),
+                cornerRadius = CornerRadius(shapes.barCornerRadius)
             )
 
-            // Draw the segment line
-            drawLine(
-                color = colorScheme.lineColor,
-                start = Offset(endX + pixelAlignment.toPx(), 0f),
-                end = Offset(endX + pixelAlignment.toPx(), scalebarHeight.toPx()),
-                strokeWidth = lineWidth.toPx(),
-            )
+            if (index != 0) {
+                // Draw only the inner lines
+                drawLine(
+                    color = colorScheme.lineColor,
+                    start = Offset(scalebarDivisions[index].xOffset.toPx(density) + topLeftPoint.x, topLeftPoint.y),
+                    end = Offset(
+                        scalebarDivisions[index].xOffset.toPx(density) + topLeftPoint.x,
+                        scalebarHeight.toPx()
+                    ),
+                    strokeWidth = lineWidth.toPx(),
+                )
+            }
 
-            // draw text label
             drawText(
                 text = scalebarDivisions[index].label,
                 textMeasurer = textMeasurer,
@@ -276,7 +281,19 @@ internal fun AlternatingBarScalebar(
             )
         }
 
-        // draw the rectangle's border
+        // draw last text label
+        drawText(
+            text = scalebarDivisions.last().label,
+            textMeasurer = textMeasurer,
+            labelTypography = labelTypography,
+            xPos = scalebarDivisions.last().xOffset.toPx(density),
+            color = colorScheme.textColor,
+            shadowColor = colorScheme.textShadowColor,
+            shadowBlurRadius = shapes.textShadowBlurRadius,
+            alignment = TextAlignment.CENTER
+        )
+
+        // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
             topLeft = topLeftPoint,
