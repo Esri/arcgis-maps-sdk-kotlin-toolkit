@@ -213,45 +213,48 @@ public fun WorldScaleSceneView(
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
             content = {
-                content?.invoke(
-                    WorldScaleSceneViewScope(
-                        sceneViewScope = this,
-                        onHeadingChange = {
-                            locationTracker.cameraController.setOriginCamera(
-                                locationTracker.cameraController.originCamera.value.rotateAround(
-                                    locationTracker.cameraController.originCamera.value.location,
-                                    deltaPitch = 0.0,
-                                    deltaRoll = 0.0,
-                                    deltaHeading = -it
+                content?.let { content ->
+                    val worldScaleSceneViewScope = remember {
+                        WorldScaleSceneViewScope(
+                            sceneViewScope = this,
+                            onHeadingChange = {
+                                locationTracker.cameraController.setOriginCamera(
+                                    locationTracker.cameraController.originCamera.value.rotateAround(
+                                        locationTracker.cameraController.originCamera.value.location,
+                                        deltaPitch = 0.0,
+                                        deltaRoll = 0.0,
+                                        deltaHeading = -it
+                                    )
                                 )
-                            )
-                            totalHeadingOffset += it
-                        },
-                        onElevationChange = {
-                            locationTracker.cameraController.setOriginCamera(
-                                locationTracker.cameraController.originCamera.value.elevate(it)
-                            )
-                            totalElevationOffset += it
-                        },
-                        onHeadingReset = {
-                            locationTracker.cameraController.setOriginCamera(
-                                locationTracker.cameraController.originCamera.value.rotateAround(
-                                    locationTracker.cameraController.originCamera.value.location,
-                                    deltaPitch = 0.0,
-                                    deltaRoll = 0.0,
-                                    deltaHeading = totalHeadingOffset
+                                totalHeadingOffset += it
+                            },
+                            onElevationChange = {
+                                locationTracker.cameraController.setOriginCamera(
+                                    locationTracker.cameraController.originCamera.value.elevate(it)
                                 )
-                            )
-                            totalHeadingOffset = 0.0
-                                         },
-                        onElevationReset = {
-                            locationTracker.cameraController.setOriginCamera(
-                                locationTracker.cameraController.originCamera.value.elevate(-totalElevationOffset)
-                            )
-                            totalElevationOffset = 0.0
-                        }
-                    )
-                )
+                                totalElevationOffset += it
+                            },
+                            onHeadingReset = {
+                                locationTracker.cameraController.setOriginCamera(
+                                    locationTracker.cameraController.originCamera.value.rotateAround(
+                                        locationTracker.cameraController.originCamera.value.location,
+                                        deltaPitch = 0.0,
+                                        deltaRoll = 0.0,
+                                        deltaHeading = totalHeadingOffset
+                                    )
+                                )
+                                totalHeadingOffset = 0.0
+                            },
+                            onElevationReset = {
+                                locationTracker.cameraController.setOriginCamera(
+                                    locationTracker.cameraController.originCamera.value.elevate(-totalElevationOffset)
+                                )
+                                totalElevationOffset = 0.0
+                            }
+                        )
+                    }
+                    content.invoke(worldScaleSceneViewScope)
+                }
             }
         )
     }
