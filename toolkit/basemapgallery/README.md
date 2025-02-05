@@ -26,4 +26,4 @@ Column {
 ```
 
 ## Example
-To see it in action, try out the [Basemap Gallery micro-app](../../microapps/BasemapGAlleryApp) and refer to [MainScreen.kt](../../microapps/BasemapGalleryApp/app/src/main/java/com/arcgismaps/toolkit/basemapgalleryapp/screens/MainScreen.kt) in the project
+To see it in action, try out the [Basemap Gallery micro-app](../../microapps/BasemapGalleryApp) and refer to [MainScreen.kt](../../microapps/BasemapGalleryApp/app/src/main/java/com/arcgismaps/toolkit/basemapgalleryapp/screens/MainScreen.kt) in the project.
