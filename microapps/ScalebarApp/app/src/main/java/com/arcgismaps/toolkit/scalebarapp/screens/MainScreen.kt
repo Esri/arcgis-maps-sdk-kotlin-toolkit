@@ -68,19 +68,14 @@ fun MainScreen(modifier: Modifier) {
             onUnitsPerDipChanged = { unitsPerDip = it },
             onViewpointChangedForCenterAndScale = { viewpoint = it }
         )
-        Row(
+        Scalebar(
             modifier = Modifier
-                .height(IntrinsicSize.Max)
-                .fillMaxWidth()
                 .padding(25.dp)
-                .align(Alignment.BottomStart)
-        ) {
-            Scalebar(
-                maxWidth = 175.dp,
-                unitsPerDip = unitsPerDip,
-                viewpoint = viewpoint,
-                spatialReference = spatialReference,
-            )
-        }
+                .align(Alignment.BottomStart),
+            maxWidth = 175.dp,
+            unitsPerDip = unitsPerDip,
+            viewpoint = viewpoint,
+            spatialReference = spatialReference,
+        )
     }
 }
