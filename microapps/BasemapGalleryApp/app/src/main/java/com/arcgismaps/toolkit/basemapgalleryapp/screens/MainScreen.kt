@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2024 Esri
+ *  Copyright 2025 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.basemapgalleryapp.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,13 +49,12 @@ fun MainScreen() {
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded,
-            skipHiddenState = true
+            initialValue = SheetValue.PartiallyExpanded
         )
     )
 
     BottomSheetScaffold(
-        sheetPeekHeight = 150.dp,
+        sheetPeekHeight = 128.dp,
         sheetContent = {
             BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                 basemapGalleryItems = viewModel.items,
@@ -74,6 +72,6 @@ fun MainScreen() {
             TopAppBar(title = { Text("Basemap Gallery App") })
         },
     ) {
-        paddingValues -> MapView(modifier = Modifier.fillMaxSize().padding(paddingValues), arcGISMap = viewModel.arcGISMap)
+        paddingValues -> MapView(modifier = Modifier.padding(paddingValues), arcGISMap = viewModel.arcGISMap/*, insets = paddingValues*/)
     }
 }
