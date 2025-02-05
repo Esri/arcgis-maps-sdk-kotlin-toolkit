@@ -94,17 +94,20 @@ import kotlin.time.Duration
  *             onUnitsPerDipChanged = { unitsPerDip = it },
  *             onViewpointChangedForCenterAndScale = { viewpoint = it }
  *         )
- *
- *         Scalebar(
+ *         Row(
  *             modifier = Modifier
+ *                 .height(IntrinsicSize.Max)
+ *                 .fillMaxWidth()
  *                 .padding(25.dp)
- *                 .align(Alignment.BottomStart),
- *             maxWidth = 175.0,
- *             unitsPerDip = unitsPerDip,
- *             viewpoint = viewpoint,
- *             spatialReference = spatialReference,
- *             style = ScalebarStyle.AlternatingBar,
- *         )
+ *                 .align(Alignment.BottomStart)
+ *         ) {
+ *             Scalebar(
+ *                 maxWidth = 175.dp,
+ *                 unitsPerDip = unitsPerDip,
+ *                 viewpoint = viewpoint,
+ *                 spatialReference = spatialReference,
+ *             )
+ *         }
  *     }
  *  ```
  *
