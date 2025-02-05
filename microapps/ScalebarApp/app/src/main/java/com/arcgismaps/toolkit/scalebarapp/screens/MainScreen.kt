@@ -75,7 +75,7 @@ fun MainScreen(modifier: Modifier) {
             maxWidth = 175.dp,
             unitsPerDip = unitsPerDip,
             viewpoint = viewpoint,
-            spatialReference = spatialReference
+            spatialReference = spatialReference,
         )
     }
 }
