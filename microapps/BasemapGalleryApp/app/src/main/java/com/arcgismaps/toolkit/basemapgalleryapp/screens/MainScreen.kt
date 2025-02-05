@@ -19,10 +19,19 @@
 package com.arcgismaps.toolkit.basemapgalleryapp.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
@@ -35,24 +44,36 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
  * an item in the gallery will set that basemap in the map view.
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
 
-    Column {
-        MapView(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(0.5f),
-            arcGISMap = viewModel.arcGISMap,
-            mapViewProxy = viewModel.mapViewProxy
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.PartiallyExpanded,
+            skipHiddenState = true
         )
-        BasemapGallery(modifier = Modifier.weight(0.5f), basemapGalleryItems = viewModel.items, onItemClick = {
-            when (val tag = it.tag) {
-                is BasemapStyleInfo -> {
-                    Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
-                    viewModel.arcGISMap.setBasemap(Basemap(tag.style))
-                } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
-            }
-        })
+    )
+
+    BottomSheetScaffold(
+        sheetPeekHeight = 150.dp,
+        sheetContent = {
+            BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+                basemapGalleryItems = viewModel.items,
+                onItemClick = {
+                    when (val tag = it.tag) {
+                        is BasemapStyleInfo -> {
+                            Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
+                            viewModel.arcGISMap.setBasemap(Basemap(tag.style))
+                        } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                    }
+                })
+        },
+        scaffoldState = bottomSheetScaffoldState,
+        topBar = {
+            TopAppBar(title = { Text("Basemap Gallery App") })
+        },
+    ) {
+        paddingValues -> MapView(modifier = Modifier.fillMaxSize().padding(paddingValues), arcGISMap = viewModel.arcGISMap)
     }
 }
