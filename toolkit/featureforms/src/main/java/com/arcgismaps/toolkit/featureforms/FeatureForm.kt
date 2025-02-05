@@ -449,9 +449,6 @@ private fun FeatureFormBody(
     onUtilityElementClick: (UtilityElement) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var contentState by rememberSaveable(stateData, saver = FormNavRouteStateSaver) {
-        mutableStateOf(FormNavRoute.Form)
-    }
     val navController = rememberNavController(stateData)
     // create a state for the utility network associations element if the utility network is
     // provided
@@ -468,10 +465,6 @@ private fun FeatureFormBody(
                 scope = scope
             )
         }
-    }
-
-    val formContent = movableContentOf {
-
     }
 
     NavHost(
@@ -491,7 +484,6 @@ private fun FeatureFormBody(
                         stateId = 0,
                         selectedGroupIndex = index
                     )
-                    contentState = route
                     navController.navigate(route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
@@ -529,37 +521,6 @@ private fun FeatureFormBody(
             )
         }
     }
-
-    Box(modifier = modifier) {
-
-        AnimatedVisibility(
-            visible = contentState is FormNavRoute.UNAssociationsView,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            if (contentState is FormNavRoute.UNAssociationsView) {
-                UtilityAssociationContent(
-                    route = contentState as FormNavRoute.UNAssociationsView,
-                    unState = unState!!,
-                    onBack = {
-                        contentState = FormNavRoute.Form
-                    },
-                    onUtilityElementClick = onUtilityElementClick
-                )
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun UtilityAssociationContent(
-    route: FormNavRoute.UNAssociationsView,
-    unState: UtilityNetworkAssociationsElementState,
-    onBack: () -> Unit,
-    onUtilityElementClick: (UtilityElement) -> Unit,
-) {
-
 }
 
 @Composable
