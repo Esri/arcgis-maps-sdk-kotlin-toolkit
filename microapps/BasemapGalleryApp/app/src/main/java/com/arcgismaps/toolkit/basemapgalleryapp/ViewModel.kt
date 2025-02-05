@@ -26,13 +26,12 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 
 /**
  * The view model.
  *
- * @param application the applicatinon associated with this view model
+ * @param application the application associated with this view model
  * @constructor constructs a viewmodel
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
@@ -40,7 +39,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var items = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    val mapViewProxy = MapViewProxy()
     var arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery)
 
     init {

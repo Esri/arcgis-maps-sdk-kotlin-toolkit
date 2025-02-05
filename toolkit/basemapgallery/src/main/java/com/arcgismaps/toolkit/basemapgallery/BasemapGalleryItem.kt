@@ -32,21 +32,31 @@ import com.arcgismaps.portal.LoadableImage
  * @constructor creates a gallery item
  */
 public class BasemapGalleryItem(
-    public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend () -> Bitmap? = { null }
+    public val title: String,
+    public val tag: Any? = null,
+    internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
-    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?): this(title, tag, thumbnailProvider = {
-        var bitmap: Bitmap? = null
-        thumbnail?.load()?.onFailure { bitmap = null }?.onSuccess { bitmap = thumbnail.image?.bitmap }
-        bitmap
-    })
+    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(
+        title,
+        tag,
+        thumbnailProvider = {
+            var bitmap: Bitmap? = null
+            thumbnail?.load()?.onFailure { bitmap = null }
+                ?.onSuccess { bitmap = thumbnail.image?.bitmap }
+            bitmap
+        })
 
     /**
-     * Constructors a ref@BasemapGalleryItem with a ref@Basemap.
+     * Constructor a [BasemapGalleryItem] with a [BasemapStyleInfo]
      *
      * If the [BasemapStyleInfo] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
      * @param basemapStyleInfo the [BasemapStyleInfo]. If the [BasemapStyleInfo] has a thumbnail, this
      * is used for the thumbnail otherwise a default thumbnail is used.
      */
-    public constructor(basemapStyleInfo: BasemapStyleInfo): this(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
+    public constructor(basemapStyleInfo: BasemapStyleInfo) : this(
+        basemapStyleInfo.styleName,
+        basemapStyleInfo,
+        basemapStyleInfo.thumbnail
+    )
 }

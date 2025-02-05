@@ -63,7 +63,9 @@ fun MainScreen() {
                         is BasemapStyleInfo -> {
                             Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
                             viewModel.arcGISMap.setBasemap(Basemap(tag.style))
-                        } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                        }
+
+                        else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
                     }
                 })
         },
@@ -71,7 +73,9 @@ fun MainScreen() {
         topBar = {
             TopAppBar(title = { Text("Basemap Gallery App") })
         },
-    ) {
-        paddingValues -> MapView(modifier = Modifier.padding(paddingValues), arcGISMap = viewModel.arcGISMap/*, insets = paddingValues*/)
+    ) { paddingValues ->
+        MapView(
+            modifier = Modifier.padding(paddingValues),
+            arcGISMap = viewModel.arcGISMap
     }
 }

@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
  * @param basemapGalleryItem the [BasemapGalleryItem]
  */
 @Composable
-internal fun item(basemapGalleryItem: BasemapGalleryItem) {
+internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem) {
     val placeholder = painterResource(R.drawable.basemap)
     val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
     LaunchedEffect(thumbnail) {
@@ -73,16 +73,20 @@ internal fun item(basemapGalleryItem: BasemapGalleryItem) {
  * @param onItemClick a lambda to execute when a gallery item is clicked
  */
 @Composable
-public fun BasemapGallery(basemapGalleryItems: List<BasemapGalleryItem>, modifier: Modifier = Modifier, onItemClick: (BasemapGalleryItem) -> Unit) {
+public fun BasemapGallery(
+    basemapGalleryItems: List<BasemapGalleryItem>,
+    modifier: Modifier = Modifier,
+    onItemClick: (BasemapGalleryItem) -> Unit
+) {
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(128.dp)) {
         basemapGalleryItems.forEach { basemapGalleryItem ->
             item {
-                Column(verticalArrangement = Arrangement.Center,
+                Column(
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                    .padding(8.dp)
-                    .clickable { onItemClick(basemapGalleryItem) }) {
-                    item(basemapGalleryItem)
+                    modifier = Modifier.padding(8.dp)
+                        .clickable { onItemClick(basemapGalleryItem) }) {
+                    BasemapGalleryItem(basemapGalleryItem)
                 }
             }
         }
