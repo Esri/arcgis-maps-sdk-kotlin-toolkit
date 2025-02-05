@@ -293,10 +293,10 @@ internal fun AlternatingBarScalebar(
             alignment = TextAlignment.CENTER
         )
 
-        // draws the rectangle's outline
+        // draws the rectangle's border
         drawRoundRect(
             color = colorScheme.lineColor,
-            topLeft = Offset(topLeftPoint.x, topLeftPoint.y),
+            topLeft = topLeftPoint,
             size = Size(displayLength.toPx(density), scalebarHeight.toPx()),
             cornerRadius = CornerRadius(shapes.barCornerRadius),
             style = Stroke(width = lineWidth.toPx())
