@@ -278,7 +278,6 @@ internal fun measureAvailableLineDisplayLength(
             }
             maxWidth - (lineWidth.value / 2.0f) - maxUnitDisplayWidth
         }
-
         ScalebarStyle.Bar,
         ScalebarStyle.Line -> {
             maxWidth - (lineWidth.value / 2.0f)

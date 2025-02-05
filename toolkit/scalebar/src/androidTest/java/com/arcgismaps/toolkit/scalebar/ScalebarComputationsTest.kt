@@ -62,7 +62,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.Line,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -84,7 +84,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.Bar,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 171,
             labels = listOf("375 km")
@@ -106,7 +106,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.GraduatedLine,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("0", "100", "200", "300 km")
@@ -128,7 +128,7 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.DualUnitLine,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("300 km", "175 mi")
@@ -150,10 +150,298 @@ class ScalebarComputationsTest {
             style = ScalebarStyle.AlternatingBar,
             maxWidth = 175.dp,
             units = UnitSystem.Metric,
-            scale = 10000000.0,
+            scale = 10_000_000.0,
             unitsPerDip = 2645.833333330476,
             displayLength = 137,
             labels = listOf("0", "100", "200", "300 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with Imperial units
+     * Then the display length and labels should be correct
+     * And the labels should be in miles
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleImperial() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Imperial,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 147,
+            labels = listOf("0", "100", "200 mi")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with Geodetic calculations disabled
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleDisableGeodetic() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            useGeodeticCalculations = false,
+            displayLength = 142,
+            labels = listOf("0", "125", "250", "375 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 100 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleWidth_100() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 100.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 68,
+            labels = listOf("0", "150 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 300 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleWidth_300() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 300.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 273,
+            labels = listOf("0", "200", "400", "600 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a width of 500 dp
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleWidth_500() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 500.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 456,
+            labels = listOf("0", "250", "500", "750", "1000 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a view centered near the Arctic Ocean
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleArcticOcean() = runTest {
+        testScalebar(
+            x = -24752697.0,
+            y = 15406913.0,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 128,
+            labels = listOf("0", "20", "40", "60 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a view centered near the Antarctica
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleNearAntarctica() = runTest {
+        testScalebar(
+            x = -35729271.0,
+            y = -13943757.0,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10_000_000.0,
+            unitsPerDip = 2645.833333330476,
+            displayLength = 136,
+            labels = listOf("0", "40", "80 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 100
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_100() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 100.0,
+            unitsPerDip = 0.02645833333330476,
+            displayLength = 137,
+            labels = listOf("0", "1", "2", "3 m")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 1000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_1000() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 1000.0,
+            unitsPerDip = 0.26458333333304757,
+            displayLength = 137,
+            labels = listOf("0", "10", "20", "30 m")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 10000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_10000() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 10000.0,
+            unitsPerDip = 2.6458333333304758,
+            displayLength = 137,
+            labels = listOf("0", "100", "200", "300 m")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 100000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_100000() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 100000.0,
+            unitsPerDip = 26.458333333304758,
+            displayLength = 137,
+            labels = listOf("0", "1", "2", "3 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 1000000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_1000000() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 1000000.0,
+            unitsPerDip = 264.58333333304756,
+            displayLength = 137,
+            labels = listOf("0", "10", "20", "30 km")
+        )
+    }
+
+    /**
+     * Given a Scalebar
+     * When the Scalebar of AlternatingBar style is created with a scale of 80,000,000
+     * Then the display length and labels should be correct
+     *
+     * @since 200.7.0
+     */
+    @Test
+    fun testAlternatingBarStyleScale_80000000() = runTest {
+        testScalebar(
+            x = esriRedlands.x,
+            y = esriRedlands.y,
+            style = ScalebarStyle.AlternatingBar,
+            maxWidth = 175.dp,
+            units = UnitSystem.Metric,
+            scale = 80000000.0,
+            unitsPerDip = 21166.666666643807,
+            displayLength = 143,
+            labels = listOf("0", "1250", "2500 km")
         )
     }
 
@@ -193,25 +481,23 @@ class ScalebarComputationsTest {
 
                 val availableLineDisplayLength = measureAvailableLineDisplayLength(maxWidth.value.toDouble(), defaultLabelTypography, style)
                 val scalebarProperties = computeScalebarProperties(
-                    0.0,
+                    minScale = 0.0,
                     spatialReference,
                     viewpoint,
                     unitsPerDip,
-                    availableLineDisplayLength,
+                    maxLength = availableLineDisplayLength,
                     useGeodeticCalculations,
                     units
                 )
-                val minimumSegmentWidth = measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
+                val minimumSegmentWidth =
+                    measureMinSegmentWidth(scalebarProperties.scalebarLengthInMapUnits, defaultLabelTypography)
                 val scalebarLabels = scalebarProperties.computeDivisions(
                     minSegmentWidth = minimumSegmentWidth,
                     scalebarStyle = style,
                     units = units
                 )
                 assertThat(scalebarProperties.displayLength.roundToInt()).isEqualTo(displayLength)
-                assertThat(scalebarLabels.size).isEqualTo(labels.size)
-                for (i in labels.indices) {
-                    assertThat(scalebarLabels[i].label).isEqualTo(labels[i])
-                }
+                assertThat(scalebarLabels.map { it.label }).containsExactlyElementsIn(labels).inOrder()
             }
         }
     }
