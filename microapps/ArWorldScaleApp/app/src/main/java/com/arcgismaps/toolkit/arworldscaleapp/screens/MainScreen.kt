@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Viewpoint
@@ -41,13 +42,17 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
 
 @Composable
 fun MainScreen() {
-    val arcGISScene = ArcGISScene(BasemapStyle.ArcGISStreets).apply {
+    val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
+        baseLayers.clear()
+    }
+    val arcGISScene = ArcGISScene(basemap).apply {
         initialViewpoint = Viewpoint(
             latitude = 39.8,
             longitude = -98.6,
@@ -57,11 +62,11 @@ fun MainScreen() {
         // if not used, the scene may appear far below the device position because the device position
         // is calculated with elevation
         baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
-        baseSurface.opacity = 0.5f
+        baseSurface.opacity = 0.3f
         // add the Esri 3D Buildings layer
         operationalLayers.add(
             ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282").apply {
-                opacity = 0.3f
+                this.altitudeOffset = 10.0
             }
         )
     }
