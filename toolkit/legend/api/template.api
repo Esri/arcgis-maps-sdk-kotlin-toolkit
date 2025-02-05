@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/legend/LegendInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/legend/LegendKt {
+	public static final fun Legend (Lcom/arcgismaps/toolkit/legend/LegendInterface;Landroidx/compose/runtime/Composer;I)V
+}
+
