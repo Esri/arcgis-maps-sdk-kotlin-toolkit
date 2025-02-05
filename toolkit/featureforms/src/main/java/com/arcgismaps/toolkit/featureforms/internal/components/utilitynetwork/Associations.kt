@@ -75,7 +75,7 @@ internal fun UtilityNetworkAssociationLayers(
         }
     }
     Surface(modifier = modifier) {
-        Column() {
+        Column {
             Header(
                 title,
                 source.objectId.toString(),

@@ -315,7 +315,6 @@ public fun FeatureForm(
     ) {
         composable<NavigationRoute.Form> {
             val form = state.getActiveFeatureForm()
-            Log.e("TAG", "FeatureForm: ${form.feature.objectId}")
             val stateData = StateData(form)
             FeatureFormTheme(colorScheme, typography) {
                 FeatureForm(
@@ -396,7 +395,7 @@ private fun FeatureForm(
         scope = scope
     )
     FeatureFormBody(
-        stateData = stateData,
+        form = featureForm,
         states = states,
         modifier = modifier,
         onExpressionsEvaluated = {
@@ -440,7 +439,7 @@ private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modi
 
 @Composable
 private fun FeatureFormBody(
-    stateData: StateData,
+    form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
     utilityNetwork: UtilityNetwork?,
@@ -449,14 +448,14 @@ private fun FeatureFormBody(
     onUtilityElementClick: (UtilityElement) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val navController = rememberNavController(stateData)
+    val navController = rememberNavController(form)
     // create a state for the utility network associations element if the utility network is
     // provided
-    val unState = remember(stateData) {
+    val unState = remember(form) {
         utilityNetwork?.let {
-            val utilityElement = utilityNetwork.createElementOrNull(stateData.featureForm.feature)
+            val utilityElement = utilityNetwork.createElementOrNull(form.feature)
             UtilityNetworkAssociationsElementState(
-                id = stateData.featureForm.hashCode(),
+                id = form.hashCode(),
                 label = "Associations",
                 description = "This is a description",
                 isVisible = MutableStateFlow(true),
@@ -474,7 +473,7 @@ private fun FeatureFormBody(
     ) {
         composable<FormNavRoute.Form> {
             FormContent(
-                stateData = stateData,
+                form = form,
                 states = states,
                 unState = unState,
                 onExpressionsEvaluated = onExpressionsEvaluated,
@@ -500,7 +499,6 @@ private fun FeatureFormBody(
             unState ?: return@composable
             val group = unState.groups.value.getOrNull(route.selectedGroupIndex) ?: run {
                 // guard against out of bounds index
-                //contentState = NavRoute.FormView
                 return@composable
             }
             UtilityNetworkAssociationLayers(
@@ -525,14 +523,13 @@ private fun FeatureFormBody(
 
 @Composable
 private fun FormContent(
-    stateData: StateData,
+    form: FeatureForm,
     states: FormStateCollection,
     unState: UtilityNetworkAssociationsElementState?,
     onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityAssociationTypeClick: (Int) -> Unit = {}
 ) {
-    val form = stateData.featureForm
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
         LazyListState()
