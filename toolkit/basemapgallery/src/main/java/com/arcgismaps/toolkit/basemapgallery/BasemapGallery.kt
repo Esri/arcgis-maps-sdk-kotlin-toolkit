@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -62,7 +63,7 @@ internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem) {
         painter = thumbnail.value,
         contentDescription = basemapGalleryItem.title
     )
-    Text(text = basemapGalleryItem.title)
+    Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
 }
 
 /**
