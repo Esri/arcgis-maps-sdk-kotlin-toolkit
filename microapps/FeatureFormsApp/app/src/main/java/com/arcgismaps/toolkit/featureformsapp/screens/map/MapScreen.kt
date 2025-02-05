@@ -118,6 +118,7 @@ import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
@@ -137,47 +138,19 @@ import kotlin.math.log
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     val uiState by mapViewModel.uiState
     val scope = rememberCoroutineScope()
-    val (featureForm, errorVisibility) = remember(uiState) {
+    val featureFormState = remember(uiState) {
         when (uiState) {
             is UIState.Editing -> {
-                val state = (uiState as UIState.Editing)
-                Pair(state.featureForm, state.validationErrorVisibility)
-            }
-
-            is UIState.Validating -> {
-                val state = (uiState as UIState.Validating)
-                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
-            }
-
-            is UIState.FinishingEdits -> {
-                val state = (uiState as UIState.FinishingEdits)
-                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
-            }
-
-            is UIState.Committing -> {
-                val state = (uiState as UIState.Committing)
-                Pair(state.featureForm, ValidationErrorVisibility.Automatic)
-            }
-
-            is UIState.Error -> {
-                Pair(
-                    (uiState as UIState.Error).featureForm,
-                    ValidationErrorVisibility.Automatic
-                )
-            }
-
-            is UIState.Switching -> {
-                val state = uiState as UIState.Switching
-                Pair(
-                    state.oldState.featureForm, state.oldState.validationErrorVisibility
-                )
+                (uiState as UIState.Editing).featureFormState
             }
 
             else -> {
-                Pair(null, ValidationErrorVisibility.Automatic)
+                null
             }
         }
     }
+    val isBusy by mapViewModel.isBusy
+    val errors by mapViewModel.errors
     var showDiscardEditsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -235,19 +208,17 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 }
             }
             AnimatedVisibility(
-                visible = featureForm != null,
+                visible = featureFormState != null,
                 enter = slideInVertically { h -> h },
                 exit = slideOutVertically { h -> h },
                 label = "feature form"
             ) {
-                val isSwitching = uiState is UIState.Switching
                 // remember the form and update it when a new form is opened
-                val rememberedForm = remember(this, isSwitching) {
-                    featureForm!!
+                val rememberedForm = remember(this) {
+                    featureFormState!!
                 }
                 FeatureFormSheet(
-                    featureForm = rememberedForm,
-                    errorVisibility = errorVisibility,
+                    state = rememberedForm,
                     modifier = Modifier.padding(padding),
                     onUtilityElementClick = {
                         scope.launch {
@@ -280,29 +251,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     }
     when (uiState) {
-        is UIState.Validating, is UIState.FinishingEdits, is UIState.Committing -> {
-            ProgressDialog()
-        }
-
-        is UIState.Switching -> {
-            DiscardEditsDialog(
-                onConfirm = { mapViewModel.selectNewFeature() },
-                onCancel = { mapViewModel.continueEditing() }
-            )
-        }
-
-        is UIState.Error -> {
-            ErrorDialog(
-                error = uiState as UIState.Error,
-                onContinue = {
-                    mapViewModel.cancelCommit()
-                },
-                onDismissRequest = {
-                    mapViewModel.rollbackEdits()
-                }
-            )
-        }
-
         // show pick a feature dialog if the layer is a sublayer
         is UIState.SelectFeature -> {
             SelectFeatureDialog(
@@ -323,6 +271,20 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             },
             onCancel = {
                 showDiscardEditsDialog = false
+            }
+        )
+    }
+    if (isBusy) {
+        ProgressDialog()
+    }
+    if (errors != null) {
+        ErrorDialog(
+            error = errors!!,
+            onContinue = {
+                mapViewModel.clearErrors()
+            },
+            onDismissRequest = {
+                mapViewModel.rollbackEdits()
             }
         )
     }
@@ -450,8 +412,7 @@ fun FeatureItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureFormSheet(
-    featureForm: FeatureForm,
-    errorVisibility: ValidationErrorVisibility,
+    state: FeatureFormState,
     modifier: Modifier = Modifier,
     onUtilityElementClick : (UtilityElement) -> Unit,
     utilityNetwork: UtilityNetwork?
@@ -478,12 +439,15 @@ fun FeatureFormSheet(
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
         ) {
             // set bottom sheet content to the FeatureForm
-             FeatureForm(
-                featureForm = featureForm,
-                modifier = Modifier.fillMaxSize(),
-                validationErrorVisibility = errorVisibility,
-                onUtilityFeatureEdit = { true },
-                utilityNetwork = utilityNetwork
+//             FeatureForm(
+//                featureForm = featureForm,
+//                modifier = Modifier.fillMaxSize(),
+//                validationErrorVisibility = errorVisibility,
+//                utilityNetwork = utilityNetwork
+//            )
+            FeatureForm(
+                state = state,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -577,7 +541,7 @@ fun ProgressDialog() {
 
 @Composable
 fun ErrorDialog(
-    error: UIState.Error,
+    error: Error,
     onContinue: () -> Unit,
     onDismissRequest: () -> Unit
 ) {

@@ -21,15 +21,16 @@ package com.arcgismaps.toolkit.featureforms
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,18 +39,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,11 +64,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
@@ -141,6 +147,25 @@ public sealed class ValidationErrorVisibility {
     public object Visible : ValidationErrorVisibility()
 }
 
+@Serializable
+private sealed class FormNavRoute {
+
+    @Serializable
+    data object Form : FormNavRoute()
+
+    @Serializable
+    data class UNAssociationsView(
+        val stateId: Int,
+        val selectedGroupIndex: Int
+    ) : FormNavRoute()
+}
+
+@Serializable
+internal sealed class NavigationRoute {
+    @Serializable
+    data object Form : NavigationRoute()
+}
+
 @Deprecated(
     message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
     level = DeprecationLevel.HIDDEN
@@ -182,8 +207,6 @@ public fun FeatureForm(
         onBarcodeButtonClick = null
     )
 }
-
-private val store = mutableMapOf<String, FeatureForm>()
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
@@ -240,83 +263,93 @@ private val store = mutableMapOf<String, FeatureForm>()
  *
  * @since 200.4.0
  */
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that uses the FeatureFormState object",
+    level = DeprecationLevel.WARNING
+)
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    utilityNetwork: UtilityNetwork? = null,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onUtilityFeatureEdit: ((FeatureForm) -> Boolean)? = null,
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography()
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
-    var isGraphReady by rememberSaveable(featureForm) { mutableStateOf(false) }
+    val state = remember(featureForm, validationErrorVisibility) {
+        FeatureFormState(
+            featureForm = featureForm,
+            validationErrorVisibility = validationErrorVisibility
+        )
+    }
+    FeatureForm(
+        state = state,
+        modifier = modifier,
+        colorScheme = colorScheme,
+        typography = typography,
+        onBarcodeButtonClick = onBarcodeButtonClick
+    )
+}
+
+@Composable
+public fun FeatureForm(
+    state: FeatureFormState,
+    modifier: Modifier = Modifier,
+    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
+) {
     val scope = rememberCoroutineScope()
-    val navController = rememberNavController()
-    val homeRoute = NavigationRoute.Form(featureForm.id)
-    if (isGraphReady) {
-        NavHost(
-            navController,
-            startDestination = homeRoute,
-            enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = { slideOutHorizontally { h -> h } }
-        ) {
-            composable<NavigationRoute.Form> {
-                val routeData = it.toRoute<NavigationRoute.Form>()
-                val form = store[routeData.formId] ?: return@composable
-                val stateData = StateData(form)
-                FeatureFormTheme(colorScheme, typography) {
-                    FeatureForm(
-                        stateData = stateData,
-                        modifier = modifier,
-                        validationErrorVisibility = validationErrorVisibility,
-                        onBarcodeButtonClick = onBarcodeButtonClick,
-                        onUtilityElementClicked = { element ->
-                            stateData.featureForm.clearSelection()
-                            scope.launch {
-                                if (utilityNetwork != null) {
-                                    utilityNetwork.getFeaturesForElements(listOf(element))
-                                        .onSuccess { results ->
-                                            val feature =
-                                                results.firstOrNull() ?: return@onSuccess
-                                            val newForm = FeatureForm(feature)
-                                            // invoke the callback if provided, else navigate to the element
-                                            val res = onUtilityFeatureEdit?.invoke(newForm) ?: true
-                                            // if the callback returns false, do not navigate
-                                            if (res) {
-                                                store[newForm.id] = newForm
-                                                val newRoute = NavigationRoute.Form(newForm.id)
-                                                navController.navigate(newRoute) {
-                                                    // to prevent a circular navigation
-                                                    popUpTo(newRoute) {
-                                                        inclusive = true
-                                                    }
-                                                }
-                                            }
-                                        }
-                                }
+    val navController = rememberNavController(state)
+    state.setNavController(navController)
+    val validationErrorVisibility by state.validationErrorVisibility
+    var showLoadingScreen by rememberSaveable(state.getActiveFeatureForm()) { mutableStateOf(false) }
+    val homeRoute = NavigationRoute.Form
+    NavHost(
+        navController,
+        startDestination = homeRoute,
+        enterTransition = { slideInHorizontally { h -> h } },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutHorizontally { h -> h } }
+    ) {
+        composable<NavigationRoute.Form> {
+            val form = state.getActiveFeatureForm()
+            Log.e("TAG", "FeatureForm: ${form.feature.objectId}")
+            val stateData = StateData(form)
+            FeatureFormTheme(colorScheme, typography) {
+                FeatureForm(
+                    stateData = stateData,
+                    modifier = modifier,
+                    validationErrorVisibility = validationErrorVisibility,
+                    onBarcodeButtonClick = onBarcodeButtonClick,
+                    onUtilityElementClicked = { element ->
+                        stateData.featureForm.clearSelection()
+                        scope.launch {
+                            showLoadingScreen = true
+                            state.fetchFeatureForm(element).onSuccess { newForm ->
+                                state.navigateTo(newForm)
                             }
-                        },
-                        utilityNetwork = utilityNetwork
-                    )
-                }
+                            showLoadingScreen = false
+                        }
+                    },
+                    utilityNetwork = state.utilityNetwork,
+                )
                 // only enable back navigation if there is a previous route
-                BackHandler(navController.previousBackStackEntry != null) {
-                    if (navController.popBackStack()) {
+                BackHandler(state.hasBackStack()) {
+                    if (state.popBackStack()) {
                         form.clearSelection()
                     }
                 }
             }
         }
     }
-    LaunchedEffect(featureForm) {
-        if (!isGraphReady) {
-            store.clear()
-            store[featureForm.id] = featureForm
-            isGraphReady = true
+    if (showLoadingScreen) {
+        LoadingScreen(modifier = Modifier.fillMaxSize())
+    }
+    DisposableEffect(state) {
+        onDispose {
+            state.setNavController(null)
         }
     }
 }
@@ -328,6 +361,16 @@ public fun FeatureForm(
 @Immutable
 internal data class StateData(@Stable val featureForm: FeatureForm)
 
+@Composable
+private fun LoadingScreen(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f)
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
 /**
  * This composable uses the [StateData] class to display a [FeatureForm].
  */
@@ -338,7 +381,7 @@ private fun FeatureForm(
     utilityNetwork: UtilityNetwork?,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityElementClicked: (UtilityElement) -> Unit,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
 ) {
     val featureForm = stateData.featureForm
     featureForm.selectFeature()
@@ -353,7 +396,7 @@ private fun FeatureForm(
         scope = scope
     )
     FeatureFormBody(
-        form = featureForm,
+        stateData = stateData,
         states = states,
         modifier = modifier,
         onExpressionsEvaluated = {
@@ -362,7 +405,7 @@ private fun FeatureForm(
         },
         onBarcodeButtonClick = onBarcodeButtonClick,
         onUtilityElementClick = onUtilityElementClicked,
-        utilityNetwork = utilityNetwork
+        utilityNetwork = utilityNetwork,
     )
     FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -389,7 +432,7 @@ private fun FeatureForm(
 private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
     val title by featureForm.title.collectAsState()
     Text(
-        text = title + " ${featureForm.id}",
+        text = title + " ${featureForm.feature.objectId}",
         style = MaterialTheme.typography.titleMedium,
         modifier = modifier
     )
@@ -397,107 +440,138 @@ private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modi
 
 @Composable
 private fun FeatureFormBody(
-    form: FeatureForm,
+    stateData: StateData,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
     utilityNetwork: UtilityNetwork?,
     onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityElementClick: (UtilityElement) -> Unit
+    onUtilityElementClick: (UtilityElement) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var contentState by rememberSaveable(form, saver = NavRouteStateSaver) {
-        mutableStateOf(NavRoute.FormView)
+    var contentState by rememberSaveable(stateData, saver = FormNavRouteStateSaver) {
+        mutableStateOf(FormNavRoute.Form)
     }
+    val navController = rememberNavController(stateData)
     // create a state for the utility network associations element if the utility network is
     // provided
-    val unState = utilityNetwork?.let {
-        val utilityElement = utilityNetwork.createElementOrNull(form.feature)
-        UtilityNetworkAssociationsElementState(
-            id = form.hashCode(),
-            label = "Associations",
-            description = "This is a description",
-            isVisible = MutableStateFlow(true),
-            utilityNetwork = it,
-            utilityElement = utilityElement,
-            scope = scope
-        )
-    }
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AnimatedContent(
-            targetState = contentState, label = "content",
-            transitionSpec = {
-                fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-            }
-        ) { state ->
-            when(state) {
-                is NavRoute.FormView -> {
-                    FormContent(
-                        form = form,
-                        states = states,
-                        unState = unState,
-                        onExpressionsEvaluated = onExpressionsEvaluated,
-                        onBarcodeButtonClick = onBarcodeButtonClick,
-                        onUtilityAssociationTypeClick = { index ->
-                            contentState = NavRoute.UNAssociationsView(
-                                stateId = 0,
-                                selectedGroupIndex = index
-                            )
-                        }
-                    )
-                }
-
-                is NavRoute.UNAssociationsView -> {
-                    unState ?: return@AnimatedContent
-                    val group = unState.groups.value.getOrNull(state.selectedGroupIndex) ?: run {
-                        // guard against out of bounds index
-                        contentState = NavRoute.FormView
-                        return@AnimatedContent
-                    }
-                    UtilityNetworkAssociationLayers(
-                        group = group,
-                        source = unState.utilityElement!!,
-                        onBackPressed = {
-                            contentState = NavRoute.FormView
-                        },
-                        onUtilityElementClick = onUtilityElementClick
-                    )
-                }
-            }
+    val unState = remember(stateData) {
+        utilityNetwork?.let {
+            val utilityElement = utilityNetwork.createElementOrNull(stateData.featureForm.feature)
+            UtilityNetworkAssociationsElementState(
+                id = stateData.featureForm.hashCode(),
+                label = "Associations",
+                description = "This is a description",
+                isVisible = MutableStateFlow(true),
+                utilityNetwork = it,
+                utilityElement = utilityElement,
+                scope = scope
+            )
         }
     }
+
+    val formContent = movableContentOf {
+
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = FormNavRoute.Form,
+        modifier = modifier
+    ) {
+        composable<FormNavRoute.Form> {
+            FormContent(
+                stateData = stateData,
+                states = states,
+                unState = unState,
+                onExpressionsEvaluated = onExpressionsEvaluated,
+                onBarcodeButtonClick = onBarcodeButtonClick,
+                onUtilityAssociationTypeClick = { index ->
+                    val route = FormNavRoute.UNAssociationsView(
+                        stateId = 0,
+                        selectedGroupIndex = index
+                    )
+                    contentState = route
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        composable<FormNavRoute.UNAssociationsView> {
+            val route = it.toRoute<FormNavRoute.UNAssociationsView>()
+            unState ?: return@composable
+            val group = unState.groups.value.getOrNull(route.selectedGroupIndex) ?: run {
+                // guard against out of bounds index
+                //contentState = NavRoute.FormView
+                return@composable
+            }
+            UtilityNetworkAssociationLayers(
+                group = group,
+                source = unState.utilityElement!!,
+                onBackPressed = {
+                    //contentState = FormNavRoute.Form
+                    navController.navigate(FormNavRoute.Form) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onUtilityElementClick = onUtilityElementClick,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+
+    Box(modifier = modifier) {
+
+        AnimatedVisibility(
+            visible = contentState is FormNavRoute.UNAssociationsView,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            if (contentState is FormNavRoute.UNAssociationsView) {
+                UtilityAssociationContent(
+                    route = contentState as FormNavRoute.UNAssociationsView,
+                    unState = unState!!,
+                    onBack = {
+                        contentState = FormNavRoute.Form
+                    },
+                    onUtilityElementClick = onUtilityElementClick
+                )
+            }
+        }
+
+    }
 }
 
-@Serializable
-private sealed class NavRoute {
-    @Serializable
-    data object FormView : NavRoute()
+@Composable
+private fun UtilityAssociationContent(
+    route: FormNavRoute.UNAssociationsView,
+    unState: UtilityNetworkAssociationsElementState,
+    onBack: () -> Unit,
+    onUtilityElementClick: (UtilityElement) -> Unit,
+) {
 
-    @Serializable
-    data class UNAssociationsView(
-        val stateId: Int,
-        val selectedGroupIndex: Int
-    ) : NavRoute()
-}
-
-@Serializable
-private sealed class NavigationRoute {
-    @Serializable
-    data class Form(val formId: String) : NavigationRoute()
 }
 
 @Composable
 private fun FormContent(
-    form: FeatureForm,
+    stateData: StateData,
     states: FormStateCollection,
-    unState : UtilityNetworkAssociationsElementState?,
+    unState: UtilityNetworkAssociationsElementState?,
     onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityAssociationTypeClick: (Int) -> Unit = {}
 ) {
+    val form = stateData.featureForm
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
         LazyListState()
@@ -605,19 +679,20 @@ private fun FormContent(
     }
 }
 
-private val NavRouteStateSaver: Saver<MutableState<NavRoute>, Bundle> = object : Saver<MutableState<NavRoute>, Bundle> {
-    override fun SaverScope.save(value: MutableState<NavRoute>): Bundle? {
-        return Bundle().apply {
-            putString("navRoute", Json.encodeToString(NavRoute.serializer(), value.value))
+private val FormNavRouteStateSaver: Saver<MutableState<FormNavRoute>, Bundle> =
+    object : Saver<MutableState<FormNavRoute>, Bundle> {
+        override fun SaverScope.save(value: MutableState<FormNavRoute>): Bundle? {
+            return Bundle().apply {
+                putString("navRoute", Json.encodeToString(FormNavRoute.serializer(), value.value))
+            }
+        }
+
+        override fun restore(value: Bundle): MutableState<FormNavRoute>? {
+            val json = value.getString("navRoute") ?: return null
+            val restoredValue = Json.decodeFromString<FormNavRoute>(json)
+            return mutableStateOf(restoredValue)
         }
     }
-
-    override fun restore(value: Bundle): MutableState<NavRoute>? {
-        val json = value.getString("navRoute") ?: return null
-        val restoredValue = Json.decodeFromString<NavRoute>(json)
-        return mutableStateOf(restoredValue)
-    }
-}
 
 /**
  * Handles the tap action for a [FormElement] based on the  input type and the provided tap
@@ -845,12 +920,9 @@ private fun createNavController(context: Context): NavHostController {
     }
 }
 
-private val FeatureForm.id: String
-    get() = feature.attributes["objectid"].toString()
-
 private fun FeatureForm.selectFeature() {
     val table = feature.featureTable as? ArcGISFeatureTable ?: return
-    val layer = when(table.layer) {
+    val layer = when (table.layer) {
         is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
         is FeatureLayer -> table.layer as FeatureLayer
         else -> return
@@ -860,7 +932,7 @@ private fun FeatureForm.selectFeature() {
 
 private fun FeatureForm.clearSelection() {
     val table = feature.featureTable as? ArcGISFeatureTable ?: return
-    val layer = when(table.layer) {
+    val layer = when (table.layer) {
         is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
         is FeatureLayer -> table.layer as FeatureLayer
         else -> return

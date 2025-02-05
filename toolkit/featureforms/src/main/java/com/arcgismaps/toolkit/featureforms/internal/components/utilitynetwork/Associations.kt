@@ -74,34 +74,36 @@ internal fun UtilityNetworkAssociationLayers(
             onBackPressed()
         }
     }
-    Column(modifier = modifier) {
-        Header(
-            title,
-            source.objectId.toString(),
-            onBackPressed = backHandler,
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        )
-        HorizontalDivider()
-        AnimatedContent(
-            targetState = selectedLayer, label = "associations",
-        ) { targetState ->
-            if (targetState == null) {
-                Layers(
-                    group = group,
-                    onClick = {
-                        selectedLayer = it
-                    },
-                    modifier = Modifier.padding(16.dp)
-                )
-            } else {
-                Associations(
-                    associations = group.elements[targetState] ?: emptyList(),
-                    source = source,
-                    onUtilityElementClick = onUtilityElementClick,
-                    modifier = Modifier.padding(16.dp)
-                )
+    Surface(modifier = modifier) {
+        Column() {
+            Header(
+                title,
+                source.objectId.toString(),
+                onBackPressed = backHandler,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            )
+            HorizontalDivider()
+            AnimatedContent(
+                targetState = selectedLayer, label = "associations",
+            ) { targetState ->
+                if (targetState == null) {
+                    Layers(
+                        group = group,
+                        onClick = {
+                            selectedLayer = it
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    Associations(
+                        associations = group.elements[targetState] ?: emptyList(),
+                        source = source,
+                        onUtilityElementClick = onUtilityElementClick,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
