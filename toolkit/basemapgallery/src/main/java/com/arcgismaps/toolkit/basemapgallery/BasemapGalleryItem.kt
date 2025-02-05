@@ -1,19 +1,19 @@
 /*
- COPYRIGHT 1995-2025 ESRI
- 
- TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
- Unpublished material - all rights reserved under the
- Copyright Laws of the United States and applicable international
- laws, treaties, and conventions.
- 
- For additional information, contact:
- Environmental Systems Research Institute, Inc.
- Attn: Contracts and Legal Services Department
- 380 New York Street
- Redlands, California, 92373
- USA
- 
- email: contracts@esri.com
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package com.arcgismaps.toolkit.basemapgallery
@@ -32,21 +32,31 @@ import com.arcgismaps.portal.LoadableImage
  * @constructor creates a gallery item
  */
 public class BasemapGalleryItem(
-    public val title: String, public val tag: Any? = null, internal val thumbnailProvider: suspend () -> Bitmap? = { null }
+    public val title: String,
+    public val tag: Any? = null,
+    internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
-    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?): this(title, tag, thumbnailProvider = {
-        var bitmap: Bitmap? = null
-        thumbnail?.load()?.onFailure { bitmap = null }?.onSuccess { bitmap = thumbnail.image?.bitmap }
-        bitmap
-    })
+    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(
+        title,
+        tag,
+        thumbnailProvider = {
+            var bitmap: Bitmap? = null
+            thumbnail?.load()?.onFailure { bitmap = null }
+                ?.onSuccess { bitmap = thumbnail.image?.bitmap }
+            bitmap
+        })
 
     /**
-     * Constructors a ref@BasemapGalleryItem with a ref@Basemap.
+     * Constructor a [BasemapGalleryItem] with a [BasemapStyleInfo]
      *
      * If the [BasemapStyleInfo] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
      * @param basemapStyleInfo the [BasemapStyleInfo]. If the [BasemapStyleInfo] has a thumbnail, this
      * is used for the thumbnail otherwise a default thumbnail is used.
      */
-    public constructor(basemapStyleInfo: BasemapStyleInfo): this(basemapStyleInfo.styleName, basemapStyleInfo, basemapStyleInfo.thumbnail)
+    public constructor(basemapStyleInfo: BasemapStyleInfo) : this(
+        basemapStyleInfo.styleName,
+        basemapStyleInfo,
+        basemapStyleInfo.thumbnail
+    )
 }
