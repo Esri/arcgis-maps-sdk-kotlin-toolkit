@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.math.abs
@@ -70,13 +71,13 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
 
     private val locationDataSource = SystemLocationDataSource(criteria = Criteria())
     val cameraController = TransformationMatrixCameraController().apply {
-        clippingDistance = 500.0
+        clippingDistance = 50.0
     }
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
-    private var hasSetOriginHeading = false
+    private var originHeading: Double = 0.0
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -106,7 +107,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 location.position.y,
                 location.position.x,
                 if (location.position.hasZ) location.position.z!! else 0.0,
-                0.0,
+                location.course,
                 90.0,
                 0.0
             )
@@ -160,33 +161,21 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     }
                 }
         }
-//        scope.launch {
-//            locationDataSource.headingChanged
-//                .filter { heading ->
-//                    val transformationMatrix = cameraController.transformationMatrix
-//                    if (transformationMatrix.translationX == 0.0 && transformationMatrix.translationY == 0.0 && transformationMatrix.translationZ == 0.0) return@filter false
-//                    !hasSetOriginHeading || shouldUpdateHeading(
-//                        Camera(cameraController.transformationMatrix).heading,
-//                        heading
-//                    )
-//                }
-//                .collect { heading ->
-//                    val location = cameraController.originCamera.value.location
-//                    cameraController.setOriginCamera(
-//                        Camera(
-//                            location.x,
-//                            location.y,
-//                            if (location.hasZ) location.z!! else 0.0,
-//                            heading,
-//                            90.0,
-//                            0.0
-//                        )
-//                    )
-//                    if (!hasSetOriginHeading) {
-//                        hasSetOriginHeading = true
-//                    }
-//                }
-//        }
+        scope.launch {
+            val heading = locationDataSource.headingChanged.first()
+            val location = cameraController.originCamera.value.location
+            cameraController.setOriginCamera(
+                Camera(
+                    location.x,
+                    location.y,
+                    if (location.hasZ) location.z!! else 0.0,
+                    heading,
+                    90.0,
+                    0.0
+                )
+            )
+            originHeading = heading
+        }
     }
 }
 
