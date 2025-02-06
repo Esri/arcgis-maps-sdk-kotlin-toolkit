@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +73,9 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
+    private var totalHeadingOffset = 0.0
+    private var totalElevationOffset = 0.0
+
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
      *
@@ -87,7 +91,19 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
      *
      * @since 200.7.0
      */
-    internal fun updateCamera(headingOffset: Double, elevationOffset: Double): Unit = TODO()
+    internal fun updateCamera(headingOffset: Double, elevationOffset: Double) {
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .rotateAround(
+                targetPoint = cameraController.originCamera.value.location,
+                deltaHeading = headingOffset,
+                deltaPitch = 0.0,
+                deltaRoll = 0.0
+            ).elevate(elevationOffset)
+        )
+
+        totalHeadingOffset += headingOffset
+        totalElevationOffset += elevationOffset
+    }
 
     /**
      * Sets the origin position of the camera to the given location.
@@ -106,6 +122,24 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
             )
         )
 
+    internal fun resetHeadingOffset(){
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .rotateAround(
+                targetPoint = cameraController.originCamera.value.location,
+                deltaHeading = -totalHeadingOffset,
+                deltaPitch = 0.0,
+                deltaRoll = 0.0
+            )
+        )
+        totalHeadingOffset = 0.0
+    }
+
+    internal fun resetElevationOffset(){
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .elevate(-totalElevationOffset))
+        totalElevationOffset = 0.0
+    }
+
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
@@ -122,6 +156,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     }
 
     override fun onResume(owner: LifecycleOwner) {
+        Log.i("WTCC", "Camera resumed!")
         super.onResume(owner)
         scope.launch {
             locationDataSource.start()
