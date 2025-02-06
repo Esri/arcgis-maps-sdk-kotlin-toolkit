@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar
 
 import android.icu.text.DecimalFormat
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,17 +47,16 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.toolkit.ar.internal.DefaultThemeTokens
 import com.arcgismaps.toolkit.ar.internal.Joyslider
-import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewColorScheme
-import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewDefaults
-import com.arcgismaps.toolkit.ar.internal.WorldScaleCalibrationViewTypography
 import com.arcgismaps.toolkit.ar.internal.theme.WorldScaleCalibrationViewTheme
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
@@ -76,17 +76,14 @@ public class WorldScaleSceneViewScope internal constructor(
     private val onElevationReset: () -> Unit
 ) {
 
-    private var heading by  mutableFloatStateOf(0F)
-    private var elevation by mutableFloatStateOf(0F)
-
     /**
      * Displays a calibration view used to adjust the heading/altitude of the scene displayed
      * in the [WorldScaleSceneView].
      *
-     * @param onDismiss Action to take when the calibration view is dismissed by the user
+     * @param onDismiss lambda invoked when the close button of the calibration view is clicked
      * @param modifier Modifier to be applied to the composable calibration view
-     * @param colorScheme Color scheme applied to the calibration view
-     * @param typography Typography style applied to text in the calibration view
+     * @param colorScheme the [WorldScaleCalibrationViewColorScheme] to use for the calibration view
+     * @param typography the [WorldScaleCalibrationViewTypography] to use for the calibration view
      *
      * @since 200.7.0
      */
@@ -182,159 +179,157 @@ public class WorldScaleSceneViewScope internal constructor(
         content: @Composable BoxScope.() -> Unit
     ): Unit =
         sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+}
 
-    /**
-     *
-     * Internal implementation for the calibration view
-     *
-     * @param onDismiss Action to take when the calibration view is dismissed by the user
-     * @param modifier Modifier to be applied to the composable calibration view
-     * @param colorScheme Color scheme applied to the calibration view
-     * @param typography Typography style applied to text in the calibration view
-     * @param onHeadingChange Lambda invoked when the user adjusts heading offset
-     * @param onHeadingReset Lambda invoked when the user resets heading offset
-     * @param onElevationChange Lambda invoked when the user adjusts elevation offset
-     * @param onElevationReset Lambda invoked when the user resets elevation offset
-     *
-     * @since 200.7.0
-     */
-    @Composable
-    internal fun CalibrationViewInternal(
-        onDismiss: () -> Unit,
-        modifier: Modifier = Modifier,
-        colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
-        typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
-        onHeadingChange: (Double) -> Unit,
-        onElevationChange: (Double) -> Unit,
-        onHeadingReset: () -> Unit,
-        onElevationReset: () -> Unit
+private var heading by mutableFloatStateOf(0F)
+private var elevation by mutableFloatStateOf(0F)
+internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.calibrationViewColorScheme }
+internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.calibrationViewTypography }
+
+/**
+ *
+ * Internal implementation for the calibration view
+ *
+ * @param onDismiss lambda invoked when the close button of the calibration view is clicked
+ * @param modifier Modifier to be applied to the composable calibration view
+ * @param colorScheme Color scheme applied to the calibration view
+ * @param typography Typography style applied to text in the calibration view
+ * @param onHeadingChange Lambda invoked when the user adjusts heading offset
+ * @param onHeadingReset Lambda invoked when the user resets heading offset
+ * @param onElevationChange Lambda invoked when the user adjusts elevation offset
+ * @param onElevationReset Lambda invoked when the user resets elevation offset
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun CalibrationViewInternal(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
+    typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
+    onHeadingChange: (Double) -> Unit,
+    onElevationChange: (Double) -> Unit,
+    onHeadingReset: () -> Unit,
+    onElevationReset: () -> Unit
+) {
+
+    CompositionLocalProvider(
+        LocalColorScheme provides colorScheme,
+        LocalTypography provides typography
     ) {
-        CompositionLocalProvider(
-            LocalColorScheme provides colorScheme,
-            LocalTypography provides typography
+        Card(
+            modifier = modifier,
+            colors = CardDefaults.cardColors(
+                containerColor = LocalColorScheme.current.backgroundColor,
+            )
         ) {
-            Card(
-                modifier = modifier,
-                colors = CardDefaults.cardColors(
-                    containerColor = LocalColorScheme.current.backgroundColor,
-                )
+            Column(
+                modifier = Modifier.padding(5.dp),
             ) {
-                Column(
-                    modifier = Modifier.padding(5.dp),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    // title and close button
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = "Calibration",
-                            style = LocalTypography.current.titleTextStyle
+                    FilledIconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(bottom = 4.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = LocalColorScheme.current.buttonContainerColor,
+                            contentColor = LocalColorScheme.current.buttonContentColor
                         )
-                        FilledIconButton(
-                            onClick = onDismiss,
-                            modifier = Modifier.size(24.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = LocalColorScheme.current.buttonContainerColor,
-                                contentColor = LocalColorScheme.current.buttonContentColor
-                            )
-                        ) {
-                            Icon(
-                                Icons.Filled.Close,
-                                tint = LocalColorScheme.current.buttonContentColor,
-                                contentDescription = "Close Calibration"
-                            )
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            tint = LocalColorScheme.current.buttonContentColor,
+                            contentDescription = stringResource(R.string.close_calibration)
+                        )
+                    }
+                }
+                // heading
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = LocalColorScheme.current.containerColor,
+                    )
+                ) {
+
+                    JoysliderBar(
+                        title = stringResource(R.string.heading_title),
+                        value = heading,
+                        valueFormat = DecimalFormat("+0.#º ; -#.#º"),
+                        minusContentDescription = stringResource(R.string.decrease_heading),
+                        plusContentDescription = stringResource(R.string.increase_heading),
+                        resetContentDescription = stringResource(R.string.reset_heading),
+                        onMinusClick = {
+                            heading -= 1
+                            onHeadingChange(-1.0)
+                        },
+                        onPlusClick = {
+                            heading += 1
+                            onHeadingChange(1.0)
+                        },
+                        onResetClick = {
+                            heading = 0F
+                            onHeadingReset()
                         }
-                    }
-                    // heading
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = LocalColorScheme.current.containerColor,
-                        )
-                    ) {
-                        var value = DecimalFormat("#.#").format(heading)
-                        if (heading > 0) {value = "+$value"}
+                    )
+                    Joyslider(
+                        onValueChange = {
+                            onHeadingChange(it.toDouble())
+                            heading += it
+                        },
+                        contentDescription = stringResource(R.string.heading_slider_description),
+                    )
+                }
 
-                        JoysliderBar(
-                            "Heading",
-                            "${value}º",
-                            minusContentDescription = "Decrease Heading",
-                            plusContentDescription = "Increase Heading",
-                            resetContentDescription = "Reset Heading",
-                            onMinusClick = {
-                                onHeadingChange(-1.0)
-                                heading -= 1
-                            },
-                            onPlusClick = {
-                                onHeadingChange(1.0)
-                                heading += 1
-                            },
-                            onResetClick = {
-                                onHeadingReset()
-                                heading = 0F
-                            }
-                        )
-                        Joyslider(
-                            onValueChange = {
-                                onHeadingChange(it.toDouble())
-                                heading += it
-                            },
-                            contentDescription = "Heading slider",
-                        )
-                    }
+                Spacer(modifier = Modifier.size(5.dp))
 
-                    Spacer(modifier = Modifier.size(5.dp))
-
-                    // elevation
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = LocalColorScheme.current.containerColor,
-                        )
-                    ) {
-                        var value = DecimalFormat("#.##").format(elevation)
-                        if (elevation > 0) {value = "+$value"}
-                        JoysliderBar(
-                            "Elevation",
-                            "${value}m",
-                            minusContentDescription = "Decrease Elevation",
-                            plusContentDescription = "Increase Elevation",
-                            resetContentDescription = "Reset Elevation",
-                            onMinusClick = {
-                                onElevationChange(-1.0)
-                                elevation -= 1
-                            },
-                            onPlusClick = {
-                                onElevationChange(1.0)
-                                elevation += 1
-                            },
-                            onResetClick = {
-                                onElevationReset()
-                                elevation = 0F
-                            }
-                        )
-                        Joyslider(
-                            onValueChange = {
-                                onElevationChange(it.toDouble())
-                                elevation += it
-                            },
-                            contentDescription = "Elevation slider"
-                        )
-                    }
+                // elevation
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = LocalColorScheme.current.containerColor,
+                    )
+                ) {
+                    JoysliderBar(
+                        stringResource(R.string.elevation_title),
+                        elevation,
+                        valueFormat = DecimalFormat("+0.##m ; -#.##m"),
+                        minusContentDescription = stringResource(R.string.decrease_elevation),
+                        plusContentDescription = stringResource(R.string.increase_elevation),
+                        resetContentDescription = stringResource(R.string.reset_elevation),
+                        onMinusClick = {
+                            elevation -= 1
+                            onElevationChange(-1.0)
+                        },
+                        onPlusClick = {
+                            elevation += 1
+                            onElevationChange(1.0)
+                        },
+                        onResetClick = {
+                            elevation = 0F
+                            onElevationReset()
+                        }
+                    )
+                    Joyslider(
+                        onValueChange = {
+                            onElevationChange(it.toDouble())
+                            elevation += it
+                        },
+                        contentDescription = stringResource(R.string.elevation_slider_description)
+                    )
                 }
             }
         }
     }
 }
-
-internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.colorScheme }
-internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.typography }
-
 /**
  * UI element containing a [Joyslider] and plus/minus buttons for adjusting a value.
  *
  * @param title Name of the quantity being adjusted
  * @param value Quantity being adjusted, for display
+ * @param valueFormat Format to apply to the quantity being adjusted
  * @param minusContentDescription Content description for the minus button
  * @param resetContentDescription Content description for the reset button
  * @param plusContentDescription Content description for the plus button
@@ -348,7 +343,8 @@ internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.typograph
 @Composable
 internal fun JoysliderBar(
     title: String,
-    value: String,
+    value: Float,
+    valueFormat: DecimalFormat,
     minusContentDescription: String,
     plusContentDescription: String,
     resetContentDescription: String,
@@ -373,17 +369,33 @@ internal fun JoysliderBar(
             Text(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
-                text = value,
+                text = valueFormat.format(value),
                 style = LocalTypography.current.bodyTextStyle
             )
         }
-        PlusMinusResetButton(
+
+        FilledIconButton(
+            onClick = onResetClick,
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = LocalColorScheme.current.buttonContainerColor,
+                contentColor = LocalColorScheme.current.buttonContentColor,
+                disabledContainerColor = LocalColorScheme.current.buttonContainerColor,
+                disabledContentColor = LocalColorScheme.current.buttonContentColor
+            ),
+            modifier = Modifier.alpha(if (value != 0F) 1F else 0F)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                tint = LocalColorScheme.current.buttonContentColor,
+                contentDescription = resetContentDescription
+            )
+        }
+
+        PlusMinusButton(
             minusContentDescription = minusContentDescription,
             plusContentDescription = plusContentDescription,
-            resetContentDescription = resetContentDescription,
             onMinusClick = onMinusClick,
             onPlusClick = onPlusClick,
-            onResetClick = onResetClick
         )
     }
 }
@@ -393,22 +405,18 @@ internal fun JoysliderBar(
  *
  * @param minusContentDescription Content description for the minus button
  * @param plusContentDescription Content description for the plus button
- * @param resetContentDescription Content description for the reset button
  * @param onMinusClick Lambda invoked when user presses the minus button
  * @param onPlusClick Lambda invoked when user presses the plus button
- * @param onResetClick Lambda invoked when user presses the reset button
  * @param modifier Modifier to apply to the button
  *
  * @since 200.7.0
  */
 @Composable
-internal fun PlusMinusResetButton(
+internal fun PlusMinusButton(
     minusContentDescription: String,
     plusContentDescription: String,
-    resetContentDescription: String,
     onMinusClick: () -> Unit,
     onPlusClick: () -> Unit,
-    onResetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SingleChoiceSegmentedButtonRow(
@@ -417,7 +425,7 @@ internal fun PlusMinusResetButton(
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(
                 index = 0,
-                count = 3
+                count = 2
             ),
             colors = SegmentedButtonDefaults.colors(
                 activeContainerColor = LocalColorScheme.current.buttonContainerColor,
@@ -441,30 +449,7 @@ internal fun PlusMinusResetButton(
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(
                 index = 1,
-                count = 3
-            ),
-            colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = LocalColorScheme.current.buttonContainerColor,
-                activeContentColor = LocalColorScheme.current.buttonContentColor,
-                inactiveContainerColor = LocalColorScheme.current.buttonContainerColor,
-                inactiveContentColor = LocalColorScheme.current.buttonContentColor,
-                activeBorderColor = LocalColorScheme.current.buttonContainerColor,
-                inactiveBorderColor = LocalColorScheme.current.buttonContainerColor,
-            ),
-            onClick = onResetClick,
-            selected = false,
-            label = {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    tint = LocalColorScheme.current.buttonContentColor,
-                    contentDescription = resetContentDescription
-                )
-            }
-        )
-        SegmentedButton(
-            shape = SegmentedButtonDefaults.itemShape(
-                index = 2,
-                count = 3
+                count = 2
             ),
             colors = SegmentedButtonDefaults.colors(
                 activeContainerColor = LocalColorScheme.current.buttonContainerColor,

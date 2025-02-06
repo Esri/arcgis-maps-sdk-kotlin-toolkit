@@ -6,9 +6,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.arcgismaps.toolkit.ar.WorldScaleCalibrationViewColorScheme
+import com.arcgismaps.toolkit.ar.WorldScaleCalibrationViewTypography
 
 internal object DefaultThemeTokens {
-    val colorScheme = WorldScaleCalibrationViewColorScheme(
+    val calibrationViewColorScheme = WorldScaleCalibrationViewColorScheme(
         backgroundColor = ColorTokens.Surface,
         containerColor = ColorTokens.SurfaceVariant,
         closeButtonContainerColor = ColorTokens.Secondary,
@@ -19,7 +21,7 @@ internal object DefaultThemeTokens {
         sliderThumbColor = ColorTokens.OnPrimary
     )
 
-    val typography = WorldScaleCalibrationViewTypography(
+    val calibrationViewTypography = WorldScaleCalibrationViewTypography(
         titleTextStyle = TypographyTokens.bodyLarge,
         subtitleTextStyle = TypographyTokens.bodyMedium,
         bodyTextStyle = TypographyTokens.bodyMedium
