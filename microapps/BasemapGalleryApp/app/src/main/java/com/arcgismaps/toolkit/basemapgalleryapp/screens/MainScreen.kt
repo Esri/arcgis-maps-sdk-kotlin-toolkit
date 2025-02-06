@@ -30,7 +30,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
@@ -76,7 +75,6 @@ fun MainScreen() {
     ) { paddingValues ->
         MapView(
             modifier = Modifier.padding(paddingValues),
-            //insets = paddingValues,
             arcGISMap = viewModel.arcGISMap)
     }
 }
