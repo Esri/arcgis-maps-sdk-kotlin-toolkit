@@ -20,19 +20,29 @@ package com.arcgismaps.toolkit.basemapgalleryapp.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
+import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
@@ -52,16 +62,40 @@ fun MainScreen() {
         )
     )
 
+    val options = listOf("Basemap Styles", "Portal items")
+    var selectedBasemapSource by remember { mutableIntStateOf(0) }
+
     BottomSheetScaffold(
-        //sheetPeekHeight = 128.dp,
         sheetContent = {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(10.dp).fillMaxWidth()) {
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size
+                        ),
+                        onClick = { selectedBasemapSource = index },
+                        selected = index == selectedBasemapSource,
+                        label = { Text(label) }
+                    )
+                }
+            }
+
             BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
-                basemapGalleryItems = viewModel.items,
+                basemapGalleryItems = when (selectedBasemapSource) {
+                    0 -> viewModel.sytleItems
+                    else -> viewModel.portalItems
+                },
                 onItemClick = {
                     when (val tag = it.tag) {
                         is BasemapStyleInfo -> {
                             Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
-                            viewModel.arcGISMap.setBasemap(Basemap(tag.style))
+                            viewModel.arcGISMap.setBasemap(Basemap(basemapStyle = tag.style))
+                        }
+
+                        is Item -> {
+                            Log.d("BasemapGallery", "Item clicked: ${tag.name}")
+                            viewModel.arcGISMap.setBasemap(Basemap(item = tag))
                         }
 
                         else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
@@ -75,6 +109,7 @@ fun MainScreen() {
     ) { paddingValues ->
         MapView(
             modifier = Modifier.padding(paddingValues),
-            arcGISMap = viewModel.arcGISMap)
+            arcGISMap = viewModel.arcGISMap
+        )
     }
 }
