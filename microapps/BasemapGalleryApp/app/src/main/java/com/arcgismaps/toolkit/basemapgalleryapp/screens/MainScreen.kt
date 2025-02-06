@@ -30,7 +30,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
@@ -49,12 +48,12 @@ fun MainScreen() {
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded
+            initialValue = SheetValue.Expanded
         )
     )
 
     BottomSheetScaffold(
-        sheetPeekHeight = 128.dp,
+        //sheetPeekHeight = 128.dp,
         sheetContent = {
             BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                 basemapGalleryItems = viewModel.items,
