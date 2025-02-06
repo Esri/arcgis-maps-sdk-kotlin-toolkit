@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -59,9 +61,11 @@ internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem) {
         }
         thumbnail
     }
+
     Image(
         painter = thumbnail.value,
-        contentDescription = basemapGalleryItem.title
+        contentDescription = basemapGalleryItem.title,
+        modifier = Modifier.clip(RoundedCornerShape(8.dp))
     )
     Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
 }
