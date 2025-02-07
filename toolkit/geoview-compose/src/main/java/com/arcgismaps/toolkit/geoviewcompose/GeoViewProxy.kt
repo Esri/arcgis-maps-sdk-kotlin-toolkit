@@ -22,6 +22,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -304,5 +305,9 @@ public sealed class GeoViewProxy(className: String) {
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? {
         return geoView?.getLayerViewState(layer)
+    }
+
+    public fun getCurrentViewPoint(viewpointType: ViewpointType = ViewpointType.CenterAndScale): Viewpoint? {
+        return geoView?.getCurrentViewpoint(viewpointType)
     }
 }
