@@ -1,0 +1,221 @@
+package com.arcgismaps.toolkit.legend
+
+import android.util.Log
+import android.util.MutableBoolean
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.Basemap
+import com.arcgismaps.mapping.GeoModel
+import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.layers.LayerContent
+import com.arcgismaps.mapping.layers.LegendInfo
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+
+@Stable
+public class LegendState (
+    private val geoModel: GeoModel,
+    private val reverseLayerOrder: Boolean = false,
+    private val respectScaleRange: Boolean = true,
+) {
+
+    private lateinit var geoModelLayersInOrder: SnapshotStateList<Layer>
+    private val legendInfoMap: SnapshotStateMap<LayerContent, List<LegendInfo>> = mutableStateMapOf()
+
+    internal val sublayersList: SnapshotStateList<LayerContent> = mutableStateListOf()
+
+    private val _initializationStatus: MutableState<InitializationStatus> =
+        mutableStateOf(InitializationStatus.NotInitialized)
+    /**
+     * The status of the initialization of the state object.
+     *
+     * @since 200.6.0
+     */
+    public val initializationStatus: State<InitializationStatus> = _initializationStatus
+
+    private var _sublayerListUpdated: MutableState<Boolean> = mutableStateOf(false)
+    public val sublayerListUpdated: State<Boolean> = _sublayerListUpdated
+
+    /**
+     * Initializes the state object by loading the map, the Utility Networks contained in the map
+     * and its trace configurations.
+     *
+     * @return the [Result] indicating if the initialization was successful or not
+     * @since 200.6.0
+     */
+    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+        if (_initializationStatus.value is InitializationStatus.Initialized) {
+            return Result.success(Unit)
+        }
+        _initializationStatus.value = InitializationStatus.Initializing
+        geoModel.load().getOrElse {
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+            throw it
+        }
+        getGeoModelLayersInOrder()
+        loadLayers()
+
+        _sublayerListUpdated.value = true
+        _initializationStatus.value = InitializationStatus.Initialized
+    }
+
+    private fun getGeoModelLayersInOrder() {
+        val basemap: Basemap?
+        var reversedLayerList = mutableListOf<Layer>()
+        val layerListToDisplayInLegend = mutableStateListOf<Layer>()
+
+        when (geoModel) {
+            is ArcGISMap -> {
+                basemap = geoModel.basemap.value
+                geoModel.operationalLayers.let { reversedLayerList.addAll(it) }
+            }
+
+            is ArcGISScene -> {
+                basemap = geoModel.basemap.value
+                geoModel.operationalLayers.let { reversedLayerList.addAll(it) }
+            }
+        }
+
+        basemap?.let { it ->
+            it.referenceLayers.let { reversedLayerList.addAll(it) }
+            it.baseLayers.let { reversedLayerList.addAll(0, it) }
+        }
+
+        reversedLayerList = reversedLayerList.filter { it.isVisible && it.showInLegend }.toMutableList()
+
+        if (!reverseLayerOrder && reversedLayerList.isNotEmpty()) {
+            layerListToDisplayInLegend.addAll(reversedLayerList.reversed())
+        } else {
+            layerListToDisplayInLegend.addAll(reversedLayerList)
+        }
+
+        geoModelLayersInOrder = layerListToDisplayInLegend
+    }
+
+    internal suspend fun loadLayers() {
+        geoModelLayersInOrder.forEach { loadIndividualLayer(it) }
+    }
+
+    private suspend fun loadIndividualLayer(layerContent: LayerContent) {
+        if (layerContent is Layer) {
+            layerContent.load().onSuccess {
+                loadSublayersOrLegendInfos(layerContent)
+            }
+        } else {
+            loadSublayersOrLegendInfos(layerContent)
+        }
+    }
+
+    private suspend fun loadSublayersOrLegendInfos(layerContent: LayerContent) {
+        // TODO: Handle when subLayerContent changes and update legend accordingly
+        // This is the deepest level we can go and we're assured that
+        // the AGSLayer is loaded for this layer/sublayer, so
+        // set the contents changed handler.
+//    layerContent.subLayerContents.collect {
+//     TODO: Handle when subLayerContent changes and update legend accordingly
+//    }
+        //    layerContent.subLayerContentsChangedHandler = {
+//        Handler(Looper.getMainLooper()).post {
+//            updateLegendArray()
+//        }
+//    }
+//        setCollectOnSubLayerContents(layerContent)
+        sublayersList.add(layerContent)
+
+
+        if (layerContent.subLayerContents.value.isNotEmpty()) {
+            layerContent.subLayerContents.value.forEach { loadIndividualLayer(it) }
+        } else {
+            layerContent.fetchLegendInfos().onSuccess {
+                legendInfoMap[layerContent] = it
+            }
+        }
+    }
+
+    internal fun generateLegendContent(
+        legendContent: SnapshotStateList<Any>,
+        geoModelLayersInOrder: SnapshotStateList<Layer>,
+        legendInfos: SnapshotStateMap<LayerContent, List<LegendInfo>>
+    ) {
+        legendContent.clear()
+//    legendInfos.forEach { (layerContent, legendInfo) ->
+//        if (legendInfo.isNotEmpty()) {
+//            legendContent.add(legendInfo)
+//        }
+//    }
+
+    }
+
+//    private suspend fun setCollectOnSubLayerContents(layerContent: LayerContent) {
+////    layerContent.subLayerContents.collect {
+////        // TODO: Handle when subLayerContent changes and update legend accordingly
+////    }
+//        layerContent.subLayerContents.onEach {
+//            Log.e("MainScreen **", "SubLayerContents: layername: ${layerContent.name} isVisible - ${layerContent.isVisible}" )
+//        }
+//            .launchIn(CoroutineScope(Dispatchers.Main))
+//    }
+}
+
+/**
+ * Represents the status of the initialization of the state object.
+ *
+ * @since 200.6.0
+ */
+public sealed class InitializationStatus {
+    /**
+     * The state object is initialized and ready to use.
+     *
+     * @since 200.6.0
+     */
+    public data object Initialized : InitializationStatus()
+
+    /**
+     * The state object is initializing.
+     *
+     * @since 200.6.0
+     */
+    public data object Initializing : InitializationStatus()
+
+    /**
+     * The state object is not initialized.
+     *
+     * @since 200.6.0
+     */
+    public data object NotInitialized : InitializationStatus()
+
+    /**
+     * The state object failed to initialize.
+     *
+     * @since 200.6.0
+     */
+    public data class FailedToInitialize(val error: Throwable) : InitializationStatus()
+}
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
+    onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()

@@ -20,131 +20,77 @@ package com.arcgismaps.toolkit.legend
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.layers.Layer
-import com.arcgismaps.mapping.layers.LayerContent
-import com.arcgismaps.mapping.layers.LegendInfo
 import com.arcgismaps.mapping.view.GeoView
-import com.arcgismaps.toolkit.legend.internal.generateLegendContent
-import com.arcgismaps.toolkit.legend.internal.getGeoModelLayersInOrder
-import com.arcgismaps.toolkit.legend.internal.loadLayers
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 @Composable
 public fun Legend(
-//    viewModel: LegendInterface,
-    geoModel: GeoModel,
+    legendState: LegendState,
     geoViewLayerViewStateChanged: GeoView.GeoViewLayerViewStateChanged?,
 //    viewPoint: Viewpoint?,
     modifier: Modifier = Modifier,
-    reverseLayerOrder: Boolean = false,
-    respectScaleRange: Boolean = true,
     title: String = "Legend"
     ) {
+    val initializationStatus by legendState.initializationStatus
+    LaunchedEffect(legendState) {
+        legendState.initialize()
+    }
 
-//    val geoModelLayers = remember(geoModel, reverseLayerOrder) {
-//        getGeoModelLayersInOrder(geoModel, reverseLayerOrder)
-//    }
-//
-//    if (geoModelLayers.isNotEmpty()) {
-//        LaunchedEffect(geoModel, geoViewLayerViewStateChanged) {
-//            loadLayers(geoModelLayers)
-//        }
-//    }
-    val initializationStatus = rememberSaveable { mutableStateOf(InitializationStatus.NOT_INITIALIZED) }
-
-    when (initializationStatus.value) {
-        InitializationStatus.NOT_INITIALIZED -> {
-            // Handle not initialized state
-            getLegendContent(
-                geoModel,
-                geoViewLayerViewStateChanged,
-                reverseLayerOrder,
-                respectScaleRange,
-                updateInitializationStatus = {
-                    initializationStatus.value = it
+    val subLayerListUpdated by legendState.sublayerListUpdated
+    LaunchedEffect (subLayerListUpdated) {
+        legendState.sublayersList.forEach { layerContent ->
+//            Log.e("Legend **", "SubLayerContents: layername: ${layerContent.name} isVisible - ${layerContent.isVisible}" )
+//            Log.d("Legend **", "Layer ${layerContent.name} sublayers updated")
+            launch {
+                layerContent.subLayerContents.collect { sublayers ->
+                    Log.d("Legend **", "Layer ${layerContent.name} has ${sublayers.size} sublayers")
+                    Log.e(
+                        "Legend **",
+                        "SubLayerContents: layername: ${layerContent.name} isVisible - ${layerContent.isVisible}"
+                    )
                 }
-            )
-
-        }
-
-        InitializationStatus.INITIALIZING -> {
-            // Handle initializing state
-            Text("Initializing")
-        }
-
-        InitializationStatus.INITIALIZED -> {
-            // Handle initialized state
-            Log.e("Legend **", "Initialized")
-        }
-    }
-
-//    getLegendContent(geoModel, geoViewLayerViewStateChanged, reverseLayerOrder, respectScaleRange)
-
-}
-
-@Composable
-internal fun getLegendContent(
-    geoModel: GeoModel,
-    geoViewLayerViewStateChanged: GeoView.GeoViewLayerViewStateChanged?,
-    reverseLayerOrder: Boolean,
-    respectScaleRange: Boolean,
-    updateInitializationStatus: (InitializationStatus) -> Unit
-): Unit {
-//        SnapshotStateList<Any> {
-    val LegendContent = remember {
-        mutableStateListOf<Any>()
-    }
-    val legendInfos = remember {
-        mutableStateMapOf<LayerContent, List<LegendInfo>>()
-    }
-//    val geoModelLoadStatus = geoModel.loadStatus.collectAsState()
-//    Log.d("getLegendContent **", "geoModelLoadStatus: ${geoModelLoadStatus.value}")
-//    if (geoModelLoadStatus.value != LoadStatus.Loaded) {
-////        return remember { mutableStateListOf() }
-//        Log.d("getLegendContent **", "GeoModel is not loaded")
-//        return
-//    }
-
-    val geoModelLayersInOrder: SnapshotStateList<Layer> = getGeoModelLayersInOrder(geoModel, reverseLayerOrder)
-
-    if (geoModelLayersInOrder.isNotEmpty()) {
-        LaunchedEffect(geoModel, geoViewLayerViewStateChanged) {
-            geoModel.load().onSuccess {
-                Log.d("getLegendContent **", "LaunchedEffect started")
-                loadLayers(geoModelLayersInOrder, legendInfos)
-                generateLegendContent(LegendContent, geoModelLayersInOrder, legendInfos)
-                Log.d("getLegendContent **", "Updating initialization status to INITIALIZED")
-                updateInitializationStatus(InitializationStatus.INITIALIZED)
             }
         }
     }
 
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        when (initializationStatus) {
+            is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
 
-//    return remember { mutableStateListOf() }
+            is InitializationStatus.FailedToInitialize -> {
+            }
+
+            else -> {
+               Legend(modifier = modifier, map = ArcGISMap(), geoViewLayerViewStateChanged = geoViewLayerViewStateChanged, viewPoint = null)
+            }
+        }
+    }
 }
-
 
 @Composable
 private fun Legend(
@@ -168,9 +114,4 @@ internal fun LegendPreview() {
 //    Legend(viewModel, ArcGISMap(), GeoView.GeoViewLayerViewStateChanged(), Viewpoint())
 }
 
-internal enum class InitializationStatus {
-    NOT_INITIALIZED,
-    INITIALIZING,
-    INITIALIZED
-}
 
