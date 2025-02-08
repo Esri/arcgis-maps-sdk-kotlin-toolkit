@@ -78,7 +78,7 @@ fun MainScreen(modifier: Modifier) {
         Legend(
             legendState = legendViewModel.legendState,
             geoViewLayerViewStateChanged = geoViewLayerViewStateChanged,
-//            viewPoint = viewpoint,
+            viewPoint = viewpoint,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)

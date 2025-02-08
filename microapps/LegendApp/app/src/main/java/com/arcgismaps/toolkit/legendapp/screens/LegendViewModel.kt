@@ -27,9 +27,9 @@ class LegendViewModel : ViewModel() {
         )
     )
 
-    val mapViewProxy = MapViewProxy()
+    private val mapViewProxy = MapViewProxy()
 
-    val legendState = LegendState(arcGISMap)
+    val legendState = LegendState(arcGISMap, mapViewProxy)
 
     init {
         viewModelScope.launch {

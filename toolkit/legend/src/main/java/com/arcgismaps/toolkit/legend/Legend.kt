@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 public fun Legend(
     legendState: LegendState,
     geoViewLayerViewStateChanged: GeoView.GeoViewLayerViewStateChanged?,
-//    viewPoint: Viewpoint?,
+    viewPoint: Viewpoint?,
     modifier: Modifier = Modifier,
     title: String = "Legend"
     ) {
@@ -66,6 +66,11 @@ public fun Legend(
                 }
             }
         }
+    }
+
+    LaunchedEffect(viewPoint) {
+        Log.e("Legend **", "viewPoint: $viewPoint" )
+        viewPoint?.let { legendState.checkVisibilityAtScale(it) }
     }
 
     Column(

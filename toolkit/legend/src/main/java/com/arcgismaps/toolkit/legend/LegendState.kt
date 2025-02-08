@@ -14,9 +14,11 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.GeoModel
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 import com.arcgismaps.mapping.layers.LegendInfo
+import com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.onEach
 @Stable
 public class LegendState (
     private val geoModel: GeoModel,
+    private val geoViewProxy: GeoViewProxy,
     private val reverseLayerOrder: Boolean = false,
     private val respectScaleRange: Boolean = true,
 ) {
@@ -124,12 +127,7 @@ public class LegendState (
         // set the contents changed handler.
 //    layerContent.subLayerContents.collect {
 //     TODO: Handle when subLayerContent changes and update legend accordingly
-//    }
-        //    layerContent.subLayerContentsChangedHandler = {
-//        Handler(Looper.getMainLooper()).post {
-//            updateLegendArray()
-//        }
-//    }
+
 //        setCollectOnSubLayerContents(layerContent)
         sublayersList.add(layerContent)
 
@@ -139,6 +137,24 @@ public class LegendState (
         } else {
             layerContent.fetchLegendInfos().onSuccess {
                 legendInfoMap[layerContent] = it
+            }
+        }
+    }
+
+    internal fun checkVisibilityAtScale(viewPoint: Viewpoint) {
+        geoModelLayersInOrder.forEach {
+            if (it.isVisibleAtScale(viewPoint.targetScale)) {
+                Log.e("Legend **", "Layer ${it.name} is visible at scale $viewPoint.targetScale")
+            } else {
+                Log.e("Legend **", "Layer ${it.name} is NOT visible at scale $viewPoint.targetScale")
+            }
+        }
+
+        sublayersList.forEach {
+            if (it.isVisibleAtScale(viewPoint.targetScale)) {
+                Log.e("Legend **", "Layer ${it.name} is visible at scale $viewPoint.targetScale")
+            } else {
+                Log.e("Legend **", "Layer ${it.name} is NOT visible at scale $viewPoint.targetScale")
             }
         }
     }
@@ -156,16 +172,6 @@ public class LegendState (
 //    }
 
     }
-
-//    private suspend fun setCollectOnSubLayerContents(layerContent: LayerContent) {
-////    layerContent.subLayerContents.collect {
-////        // TODO: Handle when subLayerContent changes and update legend accordingly
-////    }
-//        layerContent.subLayerContents.onEach {
-//            Log.e("MainScreen **", "SubLayerContents: layername: ${layerContent.name} isVisible - ${layerContent.isVisible}" )
-//        }
-//            .launchIn(CoroutineScope(Dispatchers.Main))
-//    }
 }
 
 /**
