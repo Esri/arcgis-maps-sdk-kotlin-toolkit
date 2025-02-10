@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -104,6 +105,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -219,13 +221,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 }
                 FeatureFormSheet(
                     state = rememberedForm,
-                    modifier = Modifier.padding(padding),
-                    onUtilityElementClick = {
-                        scope.launch {
-                            //mapViewModel.selectUtilityElement(it)
-                        }
-                    },
-                    utilityNetwork = mapViewModel.map.utilityNetworks.firstOrNull()
+                    modifier = Modifier.padding(padding)
                 )
             }
             AnimatedVisibility(
@@ -413,9 +409,7 @@ fun FeatureItem(
 @Composable
 fun FeatureFormSheet(
     state: FeatureFormState,
-    modifier: Modifier = Modifier,
-    onUtilityElementClick : (UtilityElement) -> Unit,
-    utilityNetwork: UtilityNetwork?
+    modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
     val bottomSheetState = rememberStandardBottomSheetState(
@@ -438,13 +432,6 @@ fun FeatureFormSheet(
             layoutHeight = layoutHeight.toFloat(),
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
         ) {
-            // set bottom sheet content to the FeatureForm
-//             FeatureForm(
-//                featureForm = featureForm,
-//                modifier = Modifier.fillMaxSize(),
-//                validationErrorVisibility = errorVisibility,
-//                utilityNetwork = utilityNetwork
-//            )
             FeatureForm(
                 state = state,
                 modifier = Modifier.fillMaxSize()
@@ -572,11 +559,11 @@ fun ErrorDialog(
         },
         text = {
             // enable scrolling for the error details
-            LazyColumn {
+            LazyColumn(modifier = Modifier.fillMaxWidth(fraction = 0.8f)) {
                 item { Text(text = error.details) }
             }
         },
-        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     )
 }
 

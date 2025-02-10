@@ -18,12 +18,10 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -54,7 +52,7 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 
 @Composable
-internal fun UtilityNetworkAssociationLayers(
+internal fun UNAssociationsSource(
     group: UtilityAssociationGroup,
     source: UtilityElement,
     onBackPressed: () -> Unit,

@@ -576,7 +576,6 @@ private fun AttachmentFormElementPreview() {
                 FormAttachmentType.Image,
                 1,
                 {},
-                "",
                 scope = rememberCoroutineScope()
             )
         ),

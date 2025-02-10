@@ -74,8 +74,7 @@ internal class AttachmentElementState(
     id: Int,
     private val formElement: AttachmentsFormElement,
     private val scope: CoroutineScope,
-    private val evaluateExpressions: suspend () -> Unit,
-    private val filesDir: String
+    private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
     id = id,
     label = formElement.label,
@@ -121,7 +120,6 @@ internal class AttachmentElementState(
                 type = formAttachment.type,
                 elementStateId = id,
                 deleteAttachment = { deleteAttachment(formAttachment) },
-                filesDir = filesDir,
                 scope = scope,
                 formAttachment = formAttachment
             )
@@ -149,7 +147,6 @@ internal class AttachmentElementState(
             type = formAttachment.type,
             elementStateId = id,
             deleteAttachment = { deleteAttachment(formAttachment) },
-            filesDir = filesDir,
             scope = scope,
             formAttachment = formAttachment
         )
@@ -216,8 +213,7 @@ internal class AttachmentElementState(
                     id = attachmentFormElement.hashCode(),
                     formElement = attachmentFormElement,
                     scope = scope,
-                    evaluateExpressions = evaluateExpressions,
-                    filesDir = filesDir
+                    evaluateExpressions = evaluateExpressions
                 ).also {
                     scope.launch {
                         if (savedList.count() == 2) {
@@ -257,7 +253,6 @@ internal class FormAttachmentState(
     val type: FormAttachmentType,
     val elementStateId: Int,
     val deleteAttachment: () -> Unit,
-    private val filesDir: String,
     private val scope: CoroutineScope,
     val formAttachment: FormAttachment? = null
 ) : Loadable {
@@ -487,8 +482,7 @@ internal fun rememberAttachmentElementState(
             formElement = attachmentFormElement,
             scope = scope,
             id = attachmentFormElement.hashCode(),
-            evaluateExpressions = form::evaluateExpressions,
-            filesDir = context.cacheDir.absolutePath
+            evaluateExpressions = form::evaluateExpressions
         )
     }
 }

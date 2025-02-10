@@ -238,6 +238,7 @@ class MapViewModel @Inject constructor(
         }
         // discard the edits
         featureForm.discardEdits()
+        clearErrors()
         // unselect the feature
         (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
         // rollback local edits
@@ -314,6 +315,7 @@ class MapViewModel @Inject constructor(
                     FeatureFormState(
                         featureForm = featureForm,
                         utilityNetwork = map.utilityNetworks.firstOrNull(),
+                        coroutineScope = scope
                     )
                 )
                 scope.launch {
@@ -401,7 +403,8 @@ class MapViewModel @Inject constructor(
             _uiState.value = UIState.Editing(
                 FeatureFormState(
                     featureForm = featureForm,
-                    utilityNetwork = map.utilityNetworks.firstOrNull()
+                    utilityNetwork = map.utilityNetworks.firstOrNull(),
+                    coroutineScope = scope
                 )
             )
         }.onFailure {
