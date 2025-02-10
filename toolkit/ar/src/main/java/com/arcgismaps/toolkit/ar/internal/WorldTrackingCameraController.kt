@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -156,7 +155,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        Log.i("WTCC", "Camera resumed!")
         super.onResume(owner)
         scope.launch {
             locationDataSource.start()

@@ -44,6 +44,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -181,8 +182,6 @@ public class WorldScaleSceneViewScope internal constructor(
         sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
 }
 
-private var heading by mutableFloatStateOf(0F)
-private var elevation by mutableFloatStateOf(0F)
 internal val LocalColorScheme = compositionLocalOf { DefaultThemeTokens.calibrationViewColorScheme }
 internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.calibrationViewTypography }
 
@@ -212,6 +211,8 @@ internal fun CalibrationViewInternal(
     onHeadingReset: () -> Unit,
     onElevationReset: () -> Unit
 ) {
+    var heading by remember { mutableFloatStateOf(0F) }
+    var elevation by remember { mutableFloatStateOf(0F) }
 
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
