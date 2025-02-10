@@ -20,17 +20,16 @@ package com.arcgismaps.toolkit.basemapgallery
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,13 +49,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 /**
  * Produces the composable parts required to compose a [BasemapGalleryItem] in a [BasemapGallery].
  *
  * @param basemapGalleryItem the [BasemapGalleryItem]
  */
 @Composable
-internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem, selected: Boolean = false) {
+internal fun BasemapGalleryItem(
+    basemapGalleryItem: BasemapGalleryItem,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false
+) {
     val placeholder = painterResource(R.drawable.basemap)
     val thumbnail: MutableState<Painter> = remember { mutableStateOf(placeholder) }
     LaunchedEffect(thumbnail) {
@@ -68,29 +72,39 @@ internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem, selected
         thumbnail
     }
 
-    Card(
-        colors = CardDefaults.cardColors(
-            if (selected) {
-                Color.LightGray
-            } else {
-                Color.Transparent
-            }
-        )
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Image(
-                painter = thumbnail.value,
-                contentDescription = basemapGalleryItem.title,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
+//    Card(
+//        modifier = modifier,
+//        colors = CardDefaults.cardColors(
+//            if (selected) {
+//                Color(0xFFc6e0fc)
+//            } else {
+//                Color.Transparent
+//            }
+//        )
+//    ) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .background(
+                if (selected) {
+                    Color(0xFFc6e0fc)
+                } else {
+                    Color.Transparent
+                }
             )
-            Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
-        }
+            .padding(8.dp)
+            .fillMaxSize()
+    ) {
+        Image(
+            painter = thumbnail.value,
+            contentDescription = basemapGalleryItem.title,
+            modifier = Modifier
+                .padding(8.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+        Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
     }
+    //   }
 }
 
 /**
@@ -108,19 +122,19 @@ public fun BasemapGallery(
 ) {
     var selection: BasemapGalleryItem? by remember { mutableStateOf(null) }
 
-    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(128.dp)) {
+    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 128.dp)) {
         basemapGalleryItems.forEach { basemapGalleryItem ->
             item {
-                Box(
+                BasemapGalleryItem(
+                    basemapGalleryItem,
                     modifier = Modifier
                         .padding(8.dp)
-                        .selectable(selected = false, interactionSource = null, indication = null) {
+                        .clickable {
                             selection = basemapGalleryItem
                             onItemClick(basemapGalleryItem)
-                        }
-                ) {
-                    BasemapGalleryItem(basemapGalleryItem, selection === basemapGalleryItem)
-                }
+                        },
+                    selection === basemapGalleryItem
+                )
             }
         }
     }
@@ -129,7 +143,7 @@ public fun BasemapGallery(
 /**
  * A preview of the [BasemapGallery].
  */
-@Preview
+@Preview(showBackground = true)
 @Composable
 internal fun BasemapGalleryPreview() {
     val items = mutableListOf<BasemapGalleryItem>()
