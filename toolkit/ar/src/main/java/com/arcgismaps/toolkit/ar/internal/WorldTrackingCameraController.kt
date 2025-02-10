@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
-import kotlin.math.abs
 
 /**
  * Wraps a [TransformationMatrixCameraController] and uses the position of the device to update the camera.
@@ -76,8 +75,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
-
-    private var originHeading: Double = 0.0
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -174,7 +171,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     0.0
                 )
             )
-            originHeading = heading
         }
     }
 }
@@ -234,9 +230,4 @@ internal fun shouldUpdateCamera(
     )?.distance ?: return false
 
     return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
-}
-
-internal fun shouldUpdateHeading(currentHeading: Double, newHeading: Double): Boolean {
-    val angle = abs(currentHeading - newHeading)
-    return angle > WorldScaleParameters.LOCATION_ANGLE_THRESHOLD_DEGREES
 }
