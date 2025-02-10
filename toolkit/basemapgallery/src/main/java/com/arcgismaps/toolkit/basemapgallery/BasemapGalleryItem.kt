@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.basemapgallery
 
 import android.graphics.Bitmap
 import com.arcgismaps.mapping.BasemapStyleInfo
+import com.arcgismaps.mapping.Item
 import com.arcgismaps.portal.LoadableImage
 
 /**
@@ -47,16 +48,28 @@ public class BasemapGalleryItem(
         })
 
     /**
-     * Constructor a [BasemapGalleryItem] with a [BasemapStyleInfo]
+     * Construct a [BasemapGalleryItem] with a [BasemapStyleInfo].
      *
      * If the [BasemapStyleInfo] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
-     * @param basemapStyleInfo the [BasemapStyleInfo]. If the [BasemapStyleInfo] has a thumbnail, this
-     * is used for the thumbnail otherwise a default thumbnail is used.
+     * @param basemapStyleInfo the [BasemapStyleInfo]
      */
     public constructor(basemapStyleInfo: BasemapStyleInfo) : this(
         basemapStyleInfo.styleName,
         basemapStyleInfo,
         basemapStyleInfo.thumbnail
+    )
+
+    /**
+     * Construct a [BasemapGalleryItem] with an [Item].
+     *
+     * If the [Item] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
+     *
+     * @param item the [Item]
+     */
+    public constructor(item: Item) : this(
+        item.title,
+        item,
+        item.thumbnail
     )
 }

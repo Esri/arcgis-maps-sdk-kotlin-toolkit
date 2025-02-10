@@ -19,12 +19,14 @@
 package com.arcgismaps.toolkit.basemapgalleryapp
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import kotlinx.coroutines.launch
 
@@ -36,21 +38,37 @@ import kotlinx.coroutines.launch
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
-    var items = mutableStateListOf<BasemapGalleryItem>()
+    var sytleItems = mutableStateListOf<BasemapGalleryItem>()
+        private set
+    var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
     var arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery)
 
     init {
         viewModelScope.launch {
-            // get basemaps from a basemap style service
+            // get bassemap portal items from a portal
+            val portal = Portal("https://www.arcgis.com")
+            portal.load().getOrThrow()
+            val result = portal.fetchBasemaps().getOrThrow()
+
+            result.forEach {
+                Log.d("BasemapGallery", "${it.item?.itemId}")
+
+                it.item?.let { item ->
+                    val galleryItem = BasemapGalleryItem(item)
+                    portalItems.add(galleryItem)
+                }
+            }
+
+            // get basemap style info from a basemap style service
             val service = BasemapStylesService()
             service.load().getOrThrow()
 
             // for each basemap style info create a gallery item and add it to the list of items
             service.info?.stylesInfo?.forEach { basemapStyleInfo ->
                 val galleryItem = BasemapGalleryItem(basemapStyleInfo)
-                items.add(galleryItem)
+                sytleItems.add(galleryItem)
             }
         }
     }
