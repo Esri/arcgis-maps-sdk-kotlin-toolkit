@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
-import android.location.Criteria
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -68,10 +67,8 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = SystemLocationDataSource(criteria = Criteria())
-    val cameraController = TransformationMatrixCameraController().apply {
-        clippingDistance = 50.0
-    }
+    private val locationDataSource = SystemLocationDataSource()
+    val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
@@ -228,6 +225,5 @@ internal fun shouldUpdateCamera(
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
-
     return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
 }
