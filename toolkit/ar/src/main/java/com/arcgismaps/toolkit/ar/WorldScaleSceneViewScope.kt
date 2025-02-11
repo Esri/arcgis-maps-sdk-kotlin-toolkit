@@ -58,7 +58,6 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.toolkit.ar.internal.DefaultThemeTokens
 import com.arcgismaps.toolkit.ar.internal.Joyslider
-import com.arcgismaps.toolkit.ar.internal.theme.WorldScaleCalibrationViewTheme
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -95,18 +94,16 @@ public class WorldScaleSceneViewScope internal constructor(
         colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
         typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
     ) {
-        WorldScaleCalibrationViewTheme {
-            CalibrationViewInternal(
-                onDismiss = onDismiss,
-                modifier = modifier,
-                colorScheme = colorScheme,
-                typography = typography,
-                onHeadingChange = onHeadingChange,
-                onElevationChange = onElevationChange,
-                onHeadingReset = onHeadingReset,
-                onElevationReset = onElevationReset
-            )
-        }
+        CalibrationViewInternal(
+            onDismiss = onDismiss,
+            modifier = modifier,
+            colorScheme = colorScheme,
+            typography = typography,
+            onHeadingChange = onHeadingChange,
+            onElevationChange = onElevationChange,
+            onHeadingReset = onHeadingReset,
+            onElevationReset = onElevationReset
+        )
     }
 
 
@@ -440,7 +437,7 @@ internal fun PlusMinusButton(
             selected = false,
             label = {
                 Icon(
-                    painter = painterResource(R.drawable.ic_action_reduce_heading),
+                    painter = painterResource(R.drawable.ic_action_reduce),
                     tint = LocalColorScheme.current.buttonContentColor,
                     contentDescription = minusContentDescription
                 )
@@ -464,7 +461,7 @@ internal fun PlusMinusButton(
             selected = false,
             label = {
                 Icon(
-                    painter = painterResource(R.drawable.ic_action_add_heading),
+                    painter = painterResource(R.drawable.ic_action_add),
                     tint = LocalColorScheme.current.buttonContentColor,
                     contentDescription = plusContentDescription
                 )
