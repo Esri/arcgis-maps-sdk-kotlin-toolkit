@@ -59,26 +59,28 @@ import com.arcgismaps.toolkit.arworldscaleapp.R
 
 @Composable
 fun MainScreen() {
-    val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
-        // Clear the base layer so we only see the street and building outlines and labels
-        baseLayers.clear()
-    }
-    val arcGISScene = ArcGISScene(basemap).apply {
-        initialViewpoint = Viewpoint(
-            latitude = 39.8,
-            longitude = -98.6,
-            scale = 10e7
-        )
-        // an elevation source is required for the scene to be placed at the correct elevation
-        // if not used, the scene may appear far below the device position because the device position
-        // is calculated with elevation
-        baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
-        baseSurface.backgroundGrid.isVisible = false
-        baseSurface.opacity = 0.3f
-        // add the Esri 3D Buildings layer
-        operationalLayers.add(
-            ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
-        )
+    val arcGISScene = remember {
+        val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
+            // Clear the base layer so we only see the street and building outlines and labels
+            baseLayers.clear()
+        }
+        ArcGISScene(basemap).apply {
+            initialViewpoint = Viewpoint(
+                latitude = 39.8,
+                longitude = -98.6,
+                scale = 10e7
+            )
+            // an elevation source is required for the scene to be placed at the correct elevation
+            // if not used, the scene may appear far below the device position because the device position
+            // is calculated with elevation
+            baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
+            baseSurface.backgroundGrid.isVisible = false
+            baseSurface.opacity = 0.3f
+            // add the Esri 3D Buildings layer
+            operationalLayers.add(
+                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
+            )
+        }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
