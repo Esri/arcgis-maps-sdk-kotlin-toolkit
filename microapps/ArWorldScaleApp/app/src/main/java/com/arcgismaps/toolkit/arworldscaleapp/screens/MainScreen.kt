@@ -19,14 +19,24 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.location.SystemLocationDataSource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
+import com.arcgismaps.toolkit.arworldscaleapp.R
 
 @Composable
 fun MainScreen() {
@@ -37,11 +47,29 @@ fun MainScreen() {
             scale = 10e7
         )
     }
+    var displayCalibrationView by remember { mutableStateOf(false) }
+
     WorldScaleSceneView(
         arcGISScene = arcGISScene,
         modifier = Modifier.fillMaxSize(),
         onInitializationStatusChanged = {
             Log.d("ArWorldScaleApp", "Initialization status changed: $it")
         }
-    )
+    ) {
+        if (displayCalibrationView) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CalibrationView(
+                    onDismiss = { displayCalibrationView = false },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+        } else {
+            FloatingActionButton(onClick = { displayCalibrationView = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_straighten_24),
+                    contentDescription = stringResource(R.string.calibration_view_button_description)
+                )
+            }
+        }
+    }
 }

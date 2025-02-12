@@ -210,7 +210,26 @@ public fun WorldScaleSceneView(
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
             content = {
-                content?.invoke(WorldScaleSceneViewScope(this))
+                content?.let { content ->
+                    val worldScaleSceneViewScope = remember {
+                        WorldScaleSceneViewScope(
+                            sceneViewScope = this,
+                            onHeadingChange = {
+                                locationTracker.updateCamera(headingOffset = -it, elevationOffset = 0.0)
+                            },
+                            onElevationChange = {
+                                locationTracker.updateCamera(headingOffset = 0.0, elevationOffset = it)
+                            },
+                            onHeadingReset = {
+                                locationTracker.resetHeadingOffset()
+                            },
+                            onElevationReset = {
+                                locationTracker.resetElevationOffset()
+                            }
+                        )
+                    }
+                    content.invoke(worldScaleSceneViewScope)
+                }
             }
         )
     }

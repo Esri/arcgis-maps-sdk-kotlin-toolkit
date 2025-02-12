@@ -104,6 +104,9 @@ internal fun JoysliderPreview(){
                 style = TextStyle.Default.copy(),
                 text="Value: " + DecimalFormat("#.##").format(value))
         }
-        Joyslider (onValueChange = { newValue -> value += newValue}, contentDescription = "Joyslider")
+        Joyslider (
+            onValueChange = { newValue -> value += newValue},
+            contentDescription = "Slider"
+            )
     }
 }

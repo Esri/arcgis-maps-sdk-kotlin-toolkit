@@ -19,4 +19,5 @@
 <resources>
     <string name="app_name">ArWorldScaleApp</string>
     <string name="arcore_not_installed_screen_message">Google Play Services for AR must be installed to run this app.</string>
+    <string name="calibration_view_button_description">Show Calibration View</string>
 </resources>
