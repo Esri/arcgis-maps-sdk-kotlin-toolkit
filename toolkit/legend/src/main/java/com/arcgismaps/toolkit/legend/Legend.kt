@@ -23,11 +23,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.GeoModel
 
 @Composable
 public fun Legend(
-    arcGISMap: ArcGISMap,
+    geoModel: GeoModel,
     modifier: Modifier = Modifier
 ) {
     // Example list of legend items
