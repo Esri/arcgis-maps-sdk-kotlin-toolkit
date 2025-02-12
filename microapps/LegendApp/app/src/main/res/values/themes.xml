@@ -19,5 +19,5 @@
 
 <resources>
 
-    <style name="Theme.LegendAppApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.LegendApp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
