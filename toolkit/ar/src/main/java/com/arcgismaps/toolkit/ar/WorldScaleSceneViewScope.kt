@@ -378,7 +378,7 @@ internal fun JoysliderBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.weight(0.65f)
+            modifier = Modifier.weight(1f)
         ) {
             Row(
                 Modifier.align(Alignment.CenterStart)
@@ -416,7 +416,6 @@ internal fun JoysliderBar(
         }
 
         PlusMinusButton(
-            modifier = Modifier.weight(0.35f),
             minusContentDescription = minusContentDescription,
             plusContentDescription = plusContentDescription,
             onMinusClick = onMinusClick,
