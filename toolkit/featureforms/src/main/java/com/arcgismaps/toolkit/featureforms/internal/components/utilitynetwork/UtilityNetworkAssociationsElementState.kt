@@ -16,8 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
@@ -27,16 +29,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal data class UtilityAssociationGroup(
+@Immutable
+internal data class UAFilterResult(
     val type: UtilityAssociationType,
-    val elements: Map<String, List<UtilityAssociation>>
+    val groupResults: List<UAGroupResult>
 ) {
-    val count = elements.values.sumBy { it.size }
-
-    fun getLayers(): List<String> {
-        return elements.keys.toList()
-    }
+    val count = groupResults.sumOf { it.associationResults.size }
 }
+
+@Immutable
+internal data class UAGroupResult(
+    val name: String,
+    val associationResults: List<UAResult>
+)
+
+@Immutable
+internal data class UAResult(
+    val associatedFeature: ArcGISFeature,
+    val association: UtilityAssociation
+)
 
 internal class UtilityNetworkAssociationsElementState(
     id: Int,
@@ -52,16 +63,16 @@ internal class UtilityNetworkAssociationsElementState(
     description = description,
     isVisible = isVisible
 ) {
-    var groups: MutableState<List<UtilityAssociationGroup>> = mutableStateOf(emptyList())
+    var filters: MutableState<List<UAFilterResult>> = mutableStateOf(emptyList())
         private set
 
-    val source : String = (utilityElement?.objectId ?: "").toString()
+    val source: String = (utilityElement?.objectId ?: "").toString()
 
     init {
         scope.launch {
             if (utilityElement != null) {
                 utilityNetwork?.getAssociations(utilityElement)?.onSuccess { res ->
-                    groups.value = buildList {
+                    filters.value = buildList {
                         // Group by association type
                         val typeMap = res.groupBy { it.associationType }
                         typeMap.keys.forEach { type ->
@@ -69,26 +80,24 @@ internal class UtilityNetworkAssociationsElementState(
                             val x = typeMap[type] ?: emptyList()
                             val groups = x.groupBy {
                                 it.getTargetElement(utilityElement).networkSource.name
+                            }.map {
+                                val results = it.value.mapNotNull { association ->
+                                    association.getTargetElement(utilityElement).getFeature(utilityNetwork)?.let { feature ->
+                                        UAResult(feature, association)
+                                    }
+                                }
+                                UAGroupResult(
+                                    it.key,
+                                    results
+                                )
                             }
-                            add(UtilityAssociationGroup(type, groups))
+                            add(UAFilterResult(type, groups))
                         }
                     }
                 }
             }
         }
     }
-
-//    fun getLayerGroups(type: UtilityAssociationType): List<String> {
-//        return associations.value[type]?.map {
-//            it.getTargetElement(utilityElement!!).networkSource.name
-//        } ?: emptyList()
-//    }
-//
-//    fun getAssociations(layer: String, type: UtilityAssociationType): List<UtilityAssociation> {
-//        return associations.value[type]?.filter {
-//            it.getTargetElement(utilityElement!!).networkSource.name == layer
-//        } ?: emptyList()
-//    }
 }
 
 internal val UtilityAssociationType.name: String
@@ -100,9 +109,22 @@ internal val UtilityAssociationType.name: String
     }
 
 internal fun UtilityAssociation.getTargetElement(element: UtilityElement): UtilityElement {
-    return if (element.objectId == this.fromElement.objectId) {
+    return if (element.globalId == this.fromElement.globalId) {
         this.toElement
     } else {
         this.fromElement
     }
+}
+
+internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
+    return if (arcGISFeature.attributes["globalid"] == this.fromElement.globalId) {
+        this.toElement
+    } else {
+        this.fromElement
+    }
+}
+
+internal suspend fun UtilityElement.getFeature(utilityNetwork: UtilityNetwork): ArcGISFeature? {
+    val features = utilityNetwork.getFeaturesForElements(listOf(this)).getOrNull()
+    return features?.firstOrNull()
 }

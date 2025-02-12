@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +49,7 @@ internal fun UtilityNetworkAssociationsElement(
     onAssociationTypeClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val groups by state.groups
+    val groups by state.filters
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -102,7 +101,7 @@ private fun ElementHeader(
 
 @Composable
 private fun AssociationTypes(
-    groups: List<UtilityAssociationGroup>,
+    groups: List<UAFilterResult>,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {

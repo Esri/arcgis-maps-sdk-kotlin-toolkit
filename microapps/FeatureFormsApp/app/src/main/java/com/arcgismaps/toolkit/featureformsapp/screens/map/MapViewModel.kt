@@ -197,7 +197,7 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits() {
         val editingState = _uiState.value as? UIState.Editing ?: return
         val featureFormState = editingState.featureFormState
-        val activeFeatureForm = featureFormState.getActiveFeatureForm()
+        val activeFeatureForm = featureFormState.activeFeatureForm
         // set the busy state to true
         _isBusy.value = true
         val validationErrors = filterErrors(activeFeatureForm)
@@ -233,7 +233,7 @@ class MapViewModel @Inject constructor(
      */
     fun rollbackEdits() {
         val featureForm = when (val state = _uiState.value) {
-            is UIState.Editing -> state.featureFormState.getActiveFeatureForm()
+            is UIState.Editing -> state.featureFormState.activeFeatureForm
             else -> return
         }
         // discard the edits

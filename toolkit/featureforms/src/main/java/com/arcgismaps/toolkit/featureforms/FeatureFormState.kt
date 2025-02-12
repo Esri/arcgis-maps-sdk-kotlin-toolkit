@@ -68,41 +68,36 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Stable
 public class FeatureFormState private constructor(
-    private val featureForm: FeatureForm,
     private val coroutineScope: CoroutineScope
 ) {
-    public var utilityNetwork: UtilityNetwork? = null
-        private set
+    private var utilityNetwork: UtilityNetwork? = null
 
-    internal var unState : UtilityNetworkAssociationsElementState? = null
-        private set
-
-    private val store = ArrayDeque<StateData>()
+    private lateinit var store: NavigationStack
 
     private var navController: NavController? = null
 
-    //internal val startDestination = NavigationRoute.Form(featureForm.id)
-
     private var _validationErrorVisibility: MutableState<ValidationErrorVisibility> =
         mutableStateOf(ValidationErrorVisibility.Automatic)
+
     public val validationErrorVisibility: State<ValidationErrorVisibility>
         get() = _validationErrorVisibility
+
+    public val activeFeatureForm: FeatureForm
+        get() = getActiveStateData().featureForm
 
     public constructor(
         featureForm: FeatureForm,
         validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
         coroutineScope: CoroutineScope,
         utilityNetwork: UtilityNetwork? = null
-    ) : this(featureForm, coroutineScope) {
+    ) : this(coroutineScope) {
         _validationErrorVisibility.value = validationErrorVisibility
         this.utilityNetwork = utilityNetwork
 
         val states = createStates(featureForm, featureForm.elements, coroutineScope)
-        store.addLast(StateData(featureForm, states))
-
-        if (utilityNetwork != null) {
+        val unState = utilityNetwork?.let {
             val element = utilityNetwork.createElementOrNull(featureForm.feature)
-            unState = UtilityNetworkAssociationsElementState(
+            UtilityNetworkAssociationsElementState(
                 id = featureForm.hashCode(),
                 label = "Associations",
                 description = "This is a description",
@@ -112,6 +107,7 @@ public class FeatureFormState private constructor(
                 scope = coroutineScope
             )
         }
+        store = NavigationStack(StateData(featureForm, states, unState))
     }
 
     internal constructor(
@@ -119,11 +115,9 @@ public class FeatureFormState private constructor(
         stateCollection: FormStateCollection,
         validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
         coroutineScope: CoroutineScope
-    ) : this(featureForm, coroutineScope) {
+    ) : this(coroutineScope) {
         _validationErrorVisibility.value = validationErrorVisibility
-        this.utilityNetwork = utilityNetwork
-
-        store.addLast(StateData(featureForm, stateCollection))
+        store = NavigationStack(StateData(featureForm, stateCollection, null))
     }
 
     internal fun setNavController(navController: NavController?) {
@@ -132,24 +126,31 @@ public class FeatureFormState private constructor(
 
     internal fun navigateTo(form: FeatureForm) {
         val states = createStates(form, form.elements, coroutineScope)
-        store.addLast(StateData(form, states))
-        val newRoute = NavigationRoute.Form
-        navController?.navigate(newRoute) {
-//            popUpTo(newRoute) {
-//                saveState = true
-//            }
-//
-//            restoreState = true
+        val unState = utilityNetwork?.let {
+            val element = utilityNetwork!!.createElementOrNull(form.feature)
+            UtilityNetworkAssociationsElementState(
+                id = form.hashCode(),
+                label = "Associations",
+                description = "This is a description",
+                isVisible = MutableStateFlow(true),
+                utilityNetwork = utilityNetwork,
+                utilityElement = element,
+                scope = coroutineScope
+            )
+        }
+        if (navController != null) {
+            store.push(StateData(form, states, unState))
+            navController!!.navigate(NavigationRoute.Form)
         }
     }
 
     internal fun popBackStack(): Boolean {
         return if (navController != null) {
-            navController!!.popBackStack().also { result ->
-                if (result) {
-                    store.removeLastOrNull()
-                }
+            if (navController!!.currentBackStackEntry == null) {
+                return false
             }
+            store.pop()
+            navController!!.popBackStack()
         } else false
     }
 
@@ -157,33 +158,8 @@ public class FeatureFormState private constructor(
         return navController?.previousBackStackEntry != null
     }
 
-    internal suspend fun fetchFeatureForm(utilityElement: UtilityElement): Result<FeatureForm> {
-        if (utilityNetwork == null) {
-            return Result.failure(Exception("UtilityNetwork is not available"))
-        }
-        val features = utilityNetwork!!.getFeaturesForElements(listOf(utilityElement)).getOrNull()
-        if (features.isNullOrEmpty()) {
-            return Result.failure(Exception("No features found for UtilityElement"))
-        } else {
-            val feature = features.first()
-            val newForm = FeatureForm(feature)
-            return Result.success(newForm)
-        }
-    }
-
-    internal fun (CoroutineScope).launch(run: CoroutineScope.() -> Unit) {
-        run()
-    }
-
-    public fun getActiveFeatureForm(): FeatureForm {
-        return store.lastOrNull()?.featureForm ?: featureForm
-    }
-
     internal fun getActiveStateData(): StateData {
-        return store.lastOrNull() ?: StateData(featureForm, createStates(featureForm, featureForm.elements, coroutineScope))
-    }
-    public fun getRootFeatureForm(): FeatureForm {
-        return featureForm
+        return store.peek()
     }
 
     public fun setValidationErrorVisibility(visibility: ValidationErrorVisibility) {
@@ -232,7 +208,7 @@ public class FeatureFormState private constructor(
                 }
 
                 is TextFormElement -> {
-                    val state =     TextFormElementState(
+                    val state = TextFormElementState(
                         id = element.hashCode(),
                         label = element.label,
                         description = element.description,
@@ -450,9 +426,32 @@ public class FeatureFormState private constructor(
     }
 }
 
+internal class NavigationStack(
+    stateData: StateData
+) {
+    private val stack = ArrayDeque(listOf(stateData))
+
+    fun push(stateData: StateData) {
+        stack.addLast(stateData)
+    }
+
+    fun pop(): StateData? {
+        return if (stack.size <= 1) {
+            null
+        } else {
+            stack.removeLast()
+        }
+    }
+
+    fun peek(): StateData {
+        return stack.last()
+    }
+}
+
 internal data class StateData(
     val featureForm: FeatureForm,
-    val stateCollection: FormStateCollection
+    val stateCollection: FormStateCollection,
+    val unState: UtilityNetworkAssociationsElementState?
 )
 
 internal val FeatureForm.id: String

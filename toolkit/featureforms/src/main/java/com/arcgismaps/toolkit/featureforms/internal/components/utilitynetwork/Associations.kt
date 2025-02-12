@@ -16,8 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,73 +40,46 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.toolkit.featureforms.objectId
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 
 @Composable
-internal fun UNAssociationsSource(
-    group: UtilityAssociationGroup,
+internal fun UNAssociationGroups(
+    group: UAFilterResult,
     source: UtilityElement,
     onBackPressed: () -> Unit,
-    onUtilityElementClick: (UtilityElement) -> Unit,
+    onGroupClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedLayer by rememberSaveable { mutableStateOf<String?>(null) }
-    val title = if (selectedLayer != null) {
-        selectedLayer.toString()
-    } else {
-        group.type.name
-    }
-    val backHandler by rememberUpdatedState {
-        if (selectedLayer != null) {
-            selectedLayer = null
-        } else {
-            onBackPressed()
-        }
-    }
     Surface(modifier = modifier) {
         Column {
             Header(
-                title,
+                group.type.name,
                 source.objectId.toString(),
-                onBackPressed = backHandler,
+                onBackPressed = onBackPressed,
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
             )
             HorizontalDivider()
-            AnimatedContent(
-                targetState = selectedLayer, label = "associations",
-            ) { targetState ->
-                if (targetState == null) {
-                    Layers(
-                        group = group,
-                        onClick = {
-                            selectedLayer = it
-                        },
-                        modifier = Modifier.padding(16.dp)
-                    )
-                } else {
-                    Associations(
-                        associations = group.elements[targetState] ?: emptyList(),
-                        source = source,
-                        onUtilityElementClick = onUtilityElementClick,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
+            Layers(
+                filter = group,
+                onClick = onGroupClick,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
-    BackHandler(onBack = backHandler)
+    BackHandler(onBack = onBackPressed)
 }
 
 @Composable
@@ -147,23 +121,21 @@ private fun Header(
 
 @Composable
 private fun Layers(
-    group: UtilityAssociationGroup,
-    onClick: (String) -> Unit,
+    filter: UAFilterResult,
+    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    val layers = group.getLayers()
     // show the list of layers
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn {
-            itemsIndexed(layers) { index, layer ->
-                val count = group.elements[layer]?.size ?: 0
+            itemsIndexed(filter.groupResults) { index, result ->
+                val count = filter.groupResults[index].associationResults.size
                 ListItem(
                     headlineContent = {
-                        Text(text = layer, modifier = Modifier.padding(start = 16.dp))
+                        Text(text = result.name, modifier = Modifier.padding(start = 16.dp))
                     },
                     trailingContent = {
                         Text(
@@ -174,7 +146,7 @@ private fun Layers(
                     overlineContent = {
                     },
                     modifier = Modifier.clickable {
-                        onClick(layer)
+                        onClick(index)
                     },
                     colors = ListItemDefaults.colors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -184,7 +156,7 @@ private fun Layers(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest
                 ) {
-                    if (index < layers.size - 1) {
+                    if (index < count - 1) {
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     }
                 }
@@ -194,33 +166,58 @@ private fun Layers(
 }
 
 /**
- * Displays the provided list of associations [associations] for the given [element] grouped by
+ * Displays the provided list of associations [results] for the given [element] grouped by
  * [UtilityNetworkSource].
  */
 @Composable
 internal fun Associations(
-    associations: List<UtilityAssociation>,
-    source: UtilityElement,
-    onUtilityElementClick: (UtilityElement) -> Unit,
+    title : String,
+    results: List<UAResult>,
+    //source: UtilityElement,
+    onUtilityElementClick: (ArcGISFeature) -> Unit,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val lazyListState = rememberSaveable(inputs = arrayOf(), saver = LazyListState.Saver) {
+        LazyListState()
+    }
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
-        LazyColumn {
-            itemsIndexed(associations) { index, association ->
-                val target = association.getTargetElement(source)
-                AssociationItem(
-                    target,
-                    onUtilityElementClick
-                )
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    if (index < associations.size - 1) {
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        Column {
+            Header(
+                "Layer Name",
+                title,
+                onBackPressed = onBackPressed,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            )
+            HorizontalDivider()
+            LazyColumn(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clip(shape = RoundedCornerShape(15.dp)),
+                state = lazyListState
+            ) {
+                results.forEachIndexed { index, result ->
+                    item(result.association.hashCode()) {
+                        AssociationItem(
+                            association = result.association,
+                            arcGISFeature = result.associatedFeature,
+                            onClick = {
+                                onUtilityElementClick(result.associatedFeature)
+                            }
+                        )
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        ) {
+                            if (index < results.size - 1) {
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            }
+                        }
                     }
                 }
             }
@@ -230,26 +227,28 @@ internal fun Associations(
 
 @Composable
 private fun AssociationItem(
-    element: UtilityElement,
-    onClick: (UtilityElement) -> Unit,
+    association: UtilityAssociation,
+    arcGISFeature: ArcGISFeature,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val target = association.getTargetElement(arcGISFeature)
     ListItem(
         headlineContent = {
             Text(
-                text = "Object ID ${element.objectId}",
+                text = "Object ID ${arcGISFeature.objectId}",
                 modifier = Modifier.padding(start = 16.dp)
             )
         },
         supportingContent = {
             Text(
-                text = element.assetGroup.name,
+                text = target.assetGroup.name,
                 modifier = Modifier.padding(start = 16.dp),
                 style = MaterialTheme.typography.labelSmall
             )
         },
         modifier = modifier.clickable {
-            onClick(element)
+            onClick()
         },
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
