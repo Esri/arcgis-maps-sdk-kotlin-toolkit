@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -40,8 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,26 +51,26 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 
 @Composable
-internal fun UNAssociationGroups(
-    group: UAFilterResult,
-    source: UtilityElement,
-    onBackPressed: () -> Unit,
+internal fun UtilityAssociationFilter(
+    filter: UtilityFilterState,
+    subTitle : String,
     onGroupClick: (Int) -> Unit,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier) {
         Column {
             Header(
-                group.type.name,
-                source.objectId.toString(),
+                filter.type.name,
+                subTitle,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
             )
             HorizontalDivider()
-            Layers(
-                filter = group,
+            Groups(
+                filter = filter,
                 onClick = onGroupClick,
                 modifier = Modifier.padding(16.dp)
             )
@@ -120,8 +117,8 @@ private fun Header(
 }
 
 @Composable
-private fun Layers(
-    filter: UAFilterResult,
+private fun Groups(
+    filter: UtilityFilterState,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,15 +128,14 @@ private fun Layers(
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn {
-            itemsIndexed(filter.groupResults) { index, result ->
-                val count = filter.groupResults[index].associationResults.size
+            itemsIndexed(filter.groups) { index, group ->
                 ListItem(
                     headlineContent = {
-                        Text(text = result.name, modifier = Modifier.padding(start = 16.dp))
+                        Text(text = group.name, modifier = Modifier.padding(start = 16.dp))
                     },
                     trailingContent = {
                         Text(
-                            text = "$count",
+                            text = "${group.count}",
                             modifier = Modifier.padding(end = 16.dp)
                         )
                     },
@@ -156,7 +152,7 @@ private fun Layers(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest
                 ) {
-                    if (index < count - 1) {
+                    if (index < group.count - 1) {
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     }
                 }
@@ -171,10 +167,8 @@ private fun Layers(
  */
 @Composable
 internal fun Associations(
-    title : String,
-    results: List<UAResult>,
-    //source: UtilityElement,
-    onUtilityElementClick: (ArcGISFeature) -> Unit,
+    state : UtilityFilterGroupState,
+    onItemClick: (AssociationInfoState) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -187,8 +181,8 @@ internal fun Associations(
     ) {
         Column {
             Header(
-                "Layer Name",
-                title,
+                state.name,
+                state.type.name,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
                     .padding(16.dp)
@@ -201,20 +195,20 @@ internal fun Associations(
                     .clip(shape = RoundedCornerShape(15.dp)),
                 state = lazyListState
             ) {
-                results.forEachIndexed { index, result ->
-                    item(result.association.hashCode()) {
+                state.associationsInfo.forEachIndexed { index, info ->
+                    item(info.association.hashCode()) {
                         AssociationItem(
-                            association = result.association,
-                            arcGISFeature = result.associatedFeature,
+                            association = info.association,
+                            arcGISFeature = info.associatedFeature,
                             onClick = {
-                                onUtilityElementClick(result.associatedFeature)
+                                onItemClick(info)
                             }
                         )
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.surfaceContainerHighest
                         ) {
-                            if (index < results.size - 1) {
+                            if (index < state.count - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             }
                         }

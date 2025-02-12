@@ -96,13 +96,15 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Associations
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UNAssociationGroups
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
@@ -135,10 +137,10 @@ public sealed class ValidationErrorVisibility {
 internal sealed class NavigationRoute {
 
     @Serializable
-    data object Form : NavigationRoute()
+    data object FormView : NavigationRoute()
 
     @Serializable
-    data class UNSourceView(
+    data class UNFilterView(
         val stateId: Int,
         val selectedFilterIndex: Int
     ) : NavigationRoute()
@@ -294,21 +296,21 @@ public fun FeatureForm(
 ) {
     val navController = rememberNavController(state)
     state.setNavController(navController)
-    val scope = rememberCoroutineScope()
+    rememberCoroutineScope()
     FeatureFormTheme(
         colorScheme = colorScheme,
         typography = typography
     ) {
         NavHost(
             navController,
-            startDestination = NavigationRoute.Form,
+            startDestination = NavigationRoute.FormView,
             modifier = modifier,
             enterTransition = { slideInHorizontally { h -> h } },
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() },
             popExitTransition = { slideOutHorizontally { h -> h } }
         ) {
-            composable<NavigationRoute.Form> {
+            composable<NavigationRoute.FormView> {
                 val stateData = remember { state.getActiveStateData() }
                 val featureForm = stateData.featureForm
                 val states = stateData.stateCollection
@@ -319,7 +321,7 @@ public fun FeatureForm(
                     unState = stateData.unState,
                     onBarcodeButtonClick = onBarcodeButtonClick,
                     onUtilityAssociationFilterClick = { stateId, index ->
-                        val route = NavigationRoute.UNSourceView(
+                        val route = NavigationRoute.UNFilterView(
                             stateId = 0,
                             selectedFilterIndex = index
                         )
@@ -356,17 +358,17 @@ public fun FeatureForm(
                 }
             }
 
-            composable<NavigationRoute.UNSourceView> {
-                val stateData = state.getActiveStateData()
-                val route = it.toRoute<NavigationRoute.UNSourceView>()
-                if (stateData.unState == null) return@composable
-                val filter = stateData.unState.filters.value.getOrNull(route.selectedFilterIndex) ?: return@composable
-                UNAssociationGroups(
-                    group = filter,
-                    source = stateData.unState.utilityElement!!,
-                    onBackPressed = {
-                        navController.popBackStack()
-                    },
+            composable<NavigationRoute.UNFilterView> {
+                val stateData = remember { state.getActiveStateData() }
+                val unState = stateData.unState ?: return@composable
+                val route = it.toRoute<NavigationRoute.UNFilterView>()
+                val title by stateData.featureForm.title.collectAsState()
+                val filters by unState.filters
+                val filter = remember { filters.getOrNull(route.selectedFilterIndex) }
+                if (filter == null) return@composable
+                UtilityAssociationFilter(
+                    filter = filter,
+                    subTitle = title,
                     onGroupClick = { index ->
                         val newRoute = NavigationRoute.UNAssociationsView(
                             stateId = 0,
@@ -380,28 +382,60 @@ public fun FeatureForm(
                             restoreState = true
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxSize()
+                    onBackPressed = navController::popBackStack,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
 
-
             composable<NavigationRoute.UNAssociationsView> {
                 val stateData = remember { state.getActiveStateData() }
+                val unState = stateData.unState ?: return@composable
                 val route = it.toRoute<NavigationRoute.UNAssociationsView>()
-                if (stateData.unState == null) return@composable
-                val filter = stateData.unState.filters.value.getOrNull(route.selectedFilterIndex) ?: return@composable
+                val filters by unState.filters
+                val filter = remember { filters.getOrNull(route.selectedFilterIndex) }
+                if (filter == null) return@composable
+                val group = remember { filter.groups.getOrNull(route.selectedGroupIndex) }
+                if (group == null) return@composable
+                var showSaveEditsDialog by remember { mutableStateOf(false) }
+                var showErrorsDialog by remember { mutableStateOf(false) }
                 Associations(
-                    title = stateData.featureForm.feature.objectId.toString(),
-                    results = filter.groupResults[route.selectedGroupIndex].associationResults,
-                    onUtilityElementClick = { feature ->
+                    state = group,
+                    onItemClick = { info ->
+                        // show dialog here with a new mechanism..
                         stateData.featureForm.clearSelection()
-                        state.navigateTo(FeatureForm(feature))
+                        state.navigateTo(FeatureForm(info.associatedFeature))
                     },
                     onBackPressed = {
                         navController.popBackStack()
                     }
                 )
+                when {
+                    showSaveEditsDialog -> {
+                        SaveEditsDialog(
+                            onDismissRequest = {
+                                showSaveEditsDialog = false
+                            },
+                            onSave = {
+                                showSaveEditsDialog = false
+                            },
+                            onDiscard = {
+                                showSaveEditsDialog = false
+                                stateData.featureForm.discardEdits()
+                            }
+                        )
+                    }
+
+                    showErrorsDialog -> {
+                        val count = stateData.featureForm.validationErrors.value.size
+                        ErrorDialog(
+                            onDismissRequest = {
+                                showErrorsDialog = false
+                            },
+                            title = "The Form has errors",
+                            body = "$count fields have errors. Please correct them before saving.",
+                        )
+                    }
+                }
             }
         }
     }
@@ -516,7 +550,7 @@ private fun FormContent(
                 if (unState != null) {
                     UtilityNetworkAssociationsElement(
                         state = unState,
-                        onAssociationTypeClick = { index ->
+                        onFilterClick = { index ->
                             onUtilityAssociationFilterClick(unState.id, index)
                         },
                         modifier = Modifier

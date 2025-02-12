@@ -61,7 +61,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElem
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
-import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -140,7 +139,7 @@ public class FeatureFormState private constructor(
         }
         if (navController != null) {
             store.push(StateData(form, states, unState))
-            navController!!.navigate(NavigationRoute.Form)
+            navController!!.navigate(NavigationRoute.FormView)
         }
     }
 
@@ -453,11 +452,6 @@ internal data class StateData(
     val stateCollection: FormStateCollection,
     val unState: UtilityNetworkAssociationsElementState?
 )
-
-internal val FeatureForm.id: String
-    get() {
-        return feature.attributes["globalid"].toString()
-    }
 
 internal val ArcGISFeature.objectId: Long
     get() = attributes["objectid"] as Long

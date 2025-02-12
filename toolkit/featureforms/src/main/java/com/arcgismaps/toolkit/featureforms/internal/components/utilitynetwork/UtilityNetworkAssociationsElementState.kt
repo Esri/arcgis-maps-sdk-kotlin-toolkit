@@ -30,21 +30,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Immutable
-internal data class UAFilterResult(
+internal class UtilityFilterState(
     val type: UtilityAssociationType,
-    val groupResults: List<UAGroupResult>
+    val groups : List<UtilityFilterGroupState>
 ) {
-    val count = groupResults.sumOf { it.associationResults.size }
+    val count = groups.sumOf { it.count }
 }
 
 @Immutable
-internal data class UAGroupResult(
-    val name: String,
-    val associationResults: List<UAResult>
-)
+internal class UtilityFilterGroupState(
+    val name : String,
+    val type: UtilityAssociationType,
+    val associationsInfo : List<AssociationInfoState>
+) {
+    val count = associationsInfo.size
+}
 
 @Immutable
-internal data class UAResult(
+internal class AssociationInfoState(
     val associatedFeature: ArcGISFeature,
     val association: UtilityAssociation
 )
@@ -63,7 +66,7 @@ internal class UtilityNetworkAssociationsElementState(
     description = description,
     isVisible = isVisible
 ) {
-    var filters: MutableState<List<UAFilterResult>> = mutableStateOf(emptyList())
+    var filters: MutableState<List<UtilityFilterState>> = mutableStateOf(emptyList())
         private set
 
     val source: String = (utilityElement?.objectId ?: "").toString()
@@ -83,15 +86,16 @@ internal class UtilityNetworkAssociationsElementState(
                             }.map {
                                 val results = it.value.mapNotNull { association ->
                                     association.getTargetElement(utilityElement).getFeature(utilityNetwork)?.let { feature ->
-                                        UAResult(feature, association)
+                                        AssociationInfoState(feature, association)
                                     }
                                 }
-                                UAGroupResult(
+                                UtilityFilterGroupState(
                                     it.key,
+                                    type,
                                     results
                                 )
                             }
-                            add(UAFilterResult(type, groups))
+                            add(UtilityFilterState(type, groups))
                         }
                     }
                 }

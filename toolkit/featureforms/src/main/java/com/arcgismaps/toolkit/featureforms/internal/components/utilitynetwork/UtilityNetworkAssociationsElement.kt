@@ -46,10 +46,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun UtilityNetworkAssociationsElement(
     state: UtilityNetworkAssociationsElementState,
-    onAssociationTypeClick: (Int) -> Unit,
+    onFilterClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val groups by state.filters
+    val filters by state.filters
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -62,10 +62,10 @@ internal fun UtilityNetworkAssociationsElement(
             state.description,
             Modifier.padding(top = 16.dp, end = 16.dp)
         )
-        AssociationTypes(
-            groups = groups,
+        Filters(
+            filters = filters,
             onClick = {
-                onAssociationTypeClick(it)
+                onFilterClick(it)
             },
             modifier = Modifier
                 .padding(top = 16.dp)
@@ -100,8 +100,8 @@ private fun ElementHeader(
 }
 
 @Composable
-private fun AssociationTypes(
-    groups: List<UAFilterResult>,
+private fun Filters(
+    filters: List<UtilityFilterState>,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -109,7 +109,7 @@ private fun AssociationTypes(
         modifier = modifier
     ) {
         Column {
-            groups.forEachIndexed { i, group ->
+            filters.forEachIndexed { i, group ->
                 ListItem(
                     headlineContent = {
                         Text(text = group.type.name)
@@ -136,7 +136,7 @@ private fun AssociationTypes(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
                 )
-                if (i < groups.size - 1) {
+                if (i < filters.size - 1) {
                     HorizontalDivider()
                 }
             }
