@@ -78,6 +78,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":legend"))
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)

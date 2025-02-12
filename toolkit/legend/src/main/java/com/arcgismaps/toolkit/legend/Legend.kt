@@ -18,26 +18,24 @@
 
 package com.arcgismaps.toolkit.legend
 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.compose.ui.Modifier
+import com.arcgismaps.mapping.ArcGISMap
 
 @Composable
-public fun Legend(viewModel: LegendInterface) {
-    val text = viewModel.someProperty.collectAsState()
-    Text(text = text.value)
-}
+public fun Legend(
+    arcGISMap: ArcGISMap,
+    modifier: Modifier = Modifier
+) {
+    // Example list of legend items
+    val legendItems = listOf("Layer 1", "Layer 2", "BaseLayer")
 
-@Preview
-@Composable
-internal fun LegendPreview() {
-    val viewModel = object: LegendInterface {
-        private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Legend Preview")
-        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
+    LazyColumn(modifier = modifier) {
+        items(legendItems) { item ->
+            Text(text = item)
+        }
     }
-    Legend(viewModel)
 }

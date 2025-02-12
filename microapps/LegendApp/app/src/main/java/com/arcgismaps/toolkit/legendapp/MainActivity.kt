@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
-                LegendAppApp()
+                LegendApp()
             }
         }
     }
@@ -49,9 +49,9 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LegendAppApp() {
+fun LegendApp() {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("LegendAppApp") }) }
+        topBar = { TopAppBar(title = { Text("LegendApp") }) }
     ) {
         Box(Modifier.padding(it)) {
             MainScreen()
@@ -64,6 +64,6 @@ fun LegendAppApp() {
 @Composable
 fun AppPreview() {
     MicroAppTheme {
-        LegendAppApp()
+        LegendApp()
     }
 }

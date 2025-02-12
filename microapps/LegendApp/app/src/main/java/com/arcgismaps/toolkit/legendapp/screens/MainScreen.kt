@@ -18,32 +18,89 @@
 
 package com.arcgismaps.toolkit.legendapp.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.legend.Legend
 
+private val sanDiegoShortlist = "1966ef409a344d089b001df85332608f"
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISMap by remember {
         mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
+            ArcGISMap(
+                PortalItem(
+                    Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
+                    sanDiegoShortlist
                 )
-            }
+            )
         )
     }
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap
+
+    val loadState by arcGISMap.loadStatus.collectAsState()
+
+    LaunchedEffect(Unit) {
+        arcGISMap.load()
+    }
+
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
+        )
     )
+
+    LaunchedEffect(loadState) {
+        if (loadState is LoadStatus.Loaded) {
+            scaffoldState.bottomSheetState.expand()
+        }
+    }
+
+    BottomSheetScaffold(
+        sheetContent = {
+            AnimatedVisibility(
+                visible = loadState is LoadStatus.Loaded,
+                enter = slideInVertically { h -> h },
+                exit = slideOutVertically { h -> h },
+                label = "legend",
+                modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
+            ) {
+                Legend(arcGISMap)
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        sheetSwipeEnabled = true,
+        topBar = null
+    ) { padding ->
+        MapView(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            arcGISMap = arcGISMap
+        )
+    }
 }
