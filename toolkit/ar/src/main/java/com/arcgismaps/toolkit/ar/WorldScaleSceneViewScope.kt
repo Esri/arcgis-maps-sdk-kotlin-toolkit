@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.ar
 
 import android.icu.text.DecimalFormat
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,11 +49,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
@@ -322,6 +323,25 @@ internal fun CalibrationViewInternal(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun JoysliderBarPreview(){
+    var value by remember { mutableFloatStateOf(0F) }
+    JoysliderBar(
+        stringResource(R.string.elevation_title),
+        value,
+        valueFormat = DecimalFormat("+0.##m ; -#.##m"),
+        minusContentDescription = stringResource(R.string.decrease_elevation),
+        plusContentDescription = stringResource(R.string.increase_elevation),
+        resetContentDescription = stringResource(R.string.reset_elevation),
+        onMinusClick = {value -= 1},
+        onPlusClick = {value += 1},
+        onResetClick = {value = 0F},
+        modifier = Modifier
+    )
+}
+
 /**
  * UI element containing a [Joyslider] and plus/minus buttons for adjusting a value.
  *
@@ -357,39 +377,46 @@ internal fun JoysliderBar(
             .padding(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.weight(1f)
+        Box(
+            modifier = Modifier.weight(0.65f)
         ) {
-            Text(
-                text = title,
-                style = LocalTypography.current.subtitleTextStyle
-            )
-            Text(
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                text = valueFormat.format(value),
-                style = LocalTypography.current.bodyTextStyle
-            )
-        }
-
-        FilledIconButton(
-            onClick = onResetClick,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = LocalColorScheme.current.buttonContainerColor,
-                contentColor = LocalColorScheme.current.buttonContentColor,
-                disabledContainerColor = LocalColorScheme.current.buttonContainerColor,
-                disabledContentColor = LocalColorScheme.current.buttonContentColor
-            ),
-            modifier = Modifier.alpha(if (value != 0F) 1F else 0F)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                tint = LocalColorScheme.current.buttonContentColor,
-                contentDescription = resetContentDescription
-            )
+            Row(
+                Modifier.align(Alignment.CenterStart)
+            ) {
+                Text(
+                    text = title,
+                    style = LocalTypography.current.subtitleTextStyle
+                )
+                Spacer(Modifier.padding(horizontal = 12.dp))
+                Text(
+                    modifier = Modifier,
+                    textAlign = TextAlign.Center,
+                    text = valueFormat.format(value),
+                    style = LocalTypography.current.bodyTextStyle
+                )
+            }
+            if (value != 0f) {
+                FilledIconButton(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = onResetClick,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = LocalColorScheme.current.buttonContainerColor,
+                        contentColor = LocalColorScheme.current.buttonContentColor,
+                        disabledContainerColor = LocalColorScheme.current.buttonContainerColor,
+                        disabledContentColor = LocalColorScheme.current.buttonContentColor
+                    ),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        tint = LocalColorScheme.current.buttonContentColor,
+                        contentDescription = resetContentDescription
+                    )
+                }
+            }
         }
 
         PlusMinusButton(
+            modifier = Modifier.weight(0.35f),
             minusContentDescription = minusContentDescription,
             plusContentDescription = plusContentDescription,
             onMinusClick = onMinusClick,
