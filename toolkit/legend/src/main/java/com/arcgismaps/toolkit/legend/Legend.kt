@@ -48,6 +48,10 @@ public fun Legend(
         }
     }
 
+    if (currentScale == 0.0 || currentScale.isNaN()) {
+        return
+    }
+
     if (legendItems.isNotEmpty()) {
         Legend(modifier, legendItems, currentScale)
     }
@@ -59,9 +63,6 @@ private fun Legend(
     legendItems: List<LayerRow>,
     currentScale: Double,
     ) {
-    if (currentScale == 0.0 || currentScale.isNaN()) {
-        return
-    }
     LazyColumn(modifier = modifier) {
         items(legendItems) { item ->
             if (item.showLayer(currentScale)) {
