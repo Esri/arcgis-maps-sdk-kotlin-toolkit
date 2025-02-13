@@ -19,13 +19,15 @@
 package com.arcgismaps.toolkit.basemapgalleryapp
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import kotlinx.coroutines.launch
@@ -38,12 +40,18 @@ import kotlinx.coroutines.launch
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
-    var sytleItems = mutableStateListOf<BasemapGalleryItem>()
+    var styleItems = mutableStateListOf<BasemapGalleryItem>()
         private set
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    var arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery)
+    val initialViewpoint = Viewpoint(
+        center = Point(-11e6, 5e6, SpatialReference.webMercator()),
+        scale = 1e8
+    )
+
+    var arcGISMap =
+        ArcGISMap(BasemapStyle.ArcGISImagery).apply { initialViewpoint = initialViewpoint }
 
     init {
         viewModelScope.launch {
@@ -66,7 +74,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             // for each basemap style info create a gallery item and add it to the list of items
             service.info?.stylesInfo?.forEach { basemapStyleInfo ->
                 val galleryItem = BasemapGalleryItem(basemapStyleInfo)
-                sytleItems.add(galleryItem)
+                styleItems.add(galleryItem)
             }
         }
     }

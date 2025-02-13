@@ -46,6 +46,7 @@ import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 
 /**
  * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
@@ -55,6 +56,8 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 @OptIn(ExperimentalMaterial3Api::class)
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
+
+    val proxy = MapViewProxy()
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -83,13 +86,13 @@ fun MainScreen() {
 
             BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                 basemapGalleryItems = when (selectedBasemapSource) {
-                    0 -> viewModel.sytleItems
+                    0 -> viewModel.styleItems
                     else -> viewModel.portalItems
                 },
                 onItemClick = {
+                    proxy.setViewpoint(viewModel.initialViewpoint)
                     when (val tag = it.tag) {
-                        is BasemapStyleInfo ->
-                            viewModel.arcGISMap.setBasemap(Basemap(basemapStyle = tag.style))
+                        is BasemapStyleInfo -> viewModel.arcGISMap.setBasemap(Basemap(basemapStyle = tag.style))
 
                         is Item -> viewModel.arcGISMap.setBasemap(Basemap(item = tag))
 
@@ -104,7 +107,8 @@ fun MainScreen() {
     ) { paddingValues ->
         MapView(
             modifier = Modifier.padding(paddingValues),
-            arcGISMap = viewModel.arcGISMap
+            arcGISMap = viewModel.arcGISMap,
+            mapViewProxy = proxy,
         )
     }
 }
