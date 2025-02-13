@@ -53,8 +53,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             val result = portal.fetchBasemaps().getOrThrow()
 
             result.forEach {
-                Log.d("BasemapGallery", "${it.item?.itemId}")
-
                 it.item?.let { item ->
                     val galleryItem = BasemapGalleryItem(item)
                     portalItems.add(galleryItem)

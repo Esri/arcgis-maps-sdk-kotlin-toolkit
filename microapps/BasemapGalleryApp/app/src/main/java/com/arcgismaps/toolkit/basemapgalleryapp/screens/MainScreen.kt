@@ -88,15 +88,10 @@ fun MainScreen() {
                 },
                 onItemClick = {
                     when (val tag = it.tag) {
-                        is BasemapStyleInfo -> {
-                            Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
+                        is BasemapStyleInfo ->
                             viewModel.arcGISMap.setBasemap(Basemap(basemapStyle = tag.style))
-                        }
 
-                        is Item -> {
-                            Log.d("BasemapGallery", "Item clicked: ${tag.name}")
-                            viewModel.arcGISMap.setBasemap(Basemap(item = tag))
-                        }
+                        is Item -> viewModel.arcGISMap.setBasemap(Basemap(item = tag))
 
                         else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
                     }
