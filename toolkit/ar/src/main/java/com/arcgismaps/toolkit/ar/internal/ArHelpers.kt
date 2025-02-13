@@ -229,6 +229,6 @@ internal fun rememberPermissionsGranted(
  * @since 200.7.0
  */
 internal data object WorldScaleParameters {
-    const val LOCATION_DISTANCE_THRESHOLD_METERS = 2.0
+    const val LOCATION_DISTANCE_THRESHOLD_METERS = 3.0
     const val LOCATION_AGE_THRESHOLD_MS = 10000.0
 }

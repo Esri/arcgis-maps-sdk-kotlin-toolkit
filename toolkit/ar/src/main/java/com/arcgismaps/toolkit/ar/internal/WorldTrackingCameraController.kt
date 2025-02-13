@@ -34,6 +34,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
@@ -229,12 +230,14 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
-    val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentCamera.location,
+    val currentCameraLocation = GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+    val distance = GeometryEngine.distanceGeodeticOrNull (
+        currentCameraLocation,
         location.position,
         distanceUnit = LinearUnit.meters,
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
+    Log.e("Distance", distance.toString())
     return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
 }
