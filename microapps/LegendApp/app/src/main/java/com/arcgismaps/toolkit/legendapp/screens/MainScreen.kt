@@ -66,9 +66,7 @@ fun MainScreen() {
     val loadState by arcGISMap.loadStatus.collectAsState()
 
     LaunchedEffect(Unit) {
-        arcGISMap.load().onSuccess {
-            viewpoint = arcGISMap.initialViewpoint
-        }
+        arcGISMap.load()
     }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
