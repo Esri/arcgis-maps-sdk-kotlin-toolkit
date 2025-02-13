@@ -47,7 +47,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            // get bassemap portal items from a portal
+            // get basemap portal items from a portal
             val portal = Portal("https://www.arcgis.com")
             portal.load().getOrThrow()
             val result = portal.fetchBasemaps().getOrThrow()
