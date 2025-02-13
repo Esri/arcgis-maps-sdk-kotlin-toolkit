@@ -51,7 +51,10 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     var arcGISMap =
-        ArcGISMap(BasemapStyle.ArcGISImagery).apply { initialViewpoint = initialViewpoint }
+        ArcGISMap(BasemapStyle.ArcGISImagery).apply {
+            initialViewpoint =
+                this@ViewModel.initialViewpoint
+        }
 
     init {
         viewModelScope.launch {
