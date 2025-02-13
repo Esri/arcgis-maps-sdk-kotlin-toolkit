@@ -25,13 +25,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.GeoModel
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.LayerContent
 
 internal typealias LayerRow = LayerContent
@@ -39,14 +37,10 @@ internal typealias LayerRow = LayerContent
 @Composable
 public fun Legend(
     geoModel: GeoModel,
-    viewpoint: Viewpoint?,
+    currentScale: Double,
     modifier: Modifier = Modifier
 ) {
-    var legendItems by remember { mutableStateOf(emptyList<LayerContent>()) }
-
-    val currentScale by remember(viewpoint) {
-        mutableDoubleStateOf( viewpoint?.targetScale ?: Double.NaN)
-    }
+    var legendItems by remember { mutableStateOf(emptyList<LayerRow>()) }
 
     LaunchedEffect(geoModel) {
         geoModel.load().onSuccess {

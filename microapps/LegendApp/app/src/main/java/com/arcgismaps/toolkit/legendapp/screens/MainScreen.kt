@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,7 +62,12 @@ fun MainScreen() {
             )
         )
     }
-    var viewpoint: Viewpoint? by remember { mutableStateOf(null) }
+    var currentViewpoint: Viewpoint? by remember { mutableStateOf(null) }
+    val currentScale: Double by remember(currentViewpoint) {
+        mutableDoubleStateOf(
+            currentViewpoint?.targetScale ?: Double.NaN
+        )
+    }
 
     val loadState by arcGISMap.loadStatus.collectAsState()
 
@@ -91,7 +97,7 @@ fun MainScreen() {
                 label = "legend",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Legend(arcGISMap, viewpoint)
+                Legend(arcGISMap, currentScale)
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -105,7 +111,7 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISMap = arcGISMap,
             onViewpointChangedForCenterAndScale = {
-                viewpoint = it
+                currentViewpoint = it
             }
         )
     }
