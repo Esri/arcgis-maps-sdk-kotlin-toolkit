@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.legend.Legend
@@ -62,12 +61,8 @@ fun MainScreen() {
             )
         )
     }
-    var currentViewpoint: Viewpoint? by remember { mutableStateOf(null) }
-    val currentScale: Double by remember(currentViewpoint) {
-        mutableDoubleStateOf(
-            currentViewpoint?.targetScale ?: Double.NaN
-        )
-    }
+
+    var currentScale: Double by remember { mutableDoubleStateOf(Double.NaN) }
 
     val loadState by arcGISMap.loadStatus.collectAsState()
 
@@ -111,7 +106,7 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISMap = arcGISMap,
             onViewpointChangedForCenterAndScale = {
-                currentViewpoint = it
+                currentScale = it.targetScale
             }
         )
     }
