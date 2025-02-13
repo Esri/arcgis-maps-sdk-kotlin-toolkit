@@ -18,24 +18,80 @@
 
 package com.arcgismaps.toolkit.legend
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.GeoModel
+import com.arcgismaps.mapping.layers.LayerContent
+
+internal typealias LayerRow = LayerContent
 
 @Composable
 public fun Legend(
     geoModel: GeoModel,
+    currentScale: Double,
     modifier: Modifier = Modifier
 ) {
-    // Example list of legend items
-    val legendItems = listOf("Layer 1", "Layer 2", "BaseLayer")
+    var legendItems by remember { mutableStateOf(emptyList<LayerRow>()) }
 
+    LaunchedEffect(geoModel) {
+        geoModel.load().onSuccess {
+            legendItems = getGeoModelLayersInOrder(geoModel)
+        }
+    }
+
+    if (currentScale == 0.0 || currentScale.isNaN()) {
+        return
+    }
+
+    if (legendItems.isNotEmpty()) {
+        Legend(modifier, legendItems, currentScale)
+    }
+}
+
+@Composable
+private fun Legend(
+    modifier: Modifier,
+    legendItems: List<LayerRow>,
+    currentScale: Double,
+    ) {
     LazyColumn(modifier = modifier) {
         items(legendItems) { item ->
-            Text(text = item)
+            if (item.showLayer(currentScale)) {
+                Row {
+                    Text(text = item.name)
+                }
+            }
         }
     }
 }
+
+private fun LayerRow.showLayer(scale: Double): Boolean {
+    return this.isVisibleAtScale(scale)
+}
+
+private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerRow> {
+    var layerListToDisplayInLegend = mutableListOf<LayerRow>()
+
+    // add all operational layers
+    geoModel.operationalLayers.let { layerListToDisplayInLegend.addAll(it) }
+
+    val basemap = geoModel.basemap.value
+    basemap?.let { it ->
+        it.referenceLayers.let { layerListToDisplayInLegend.addAll(it) }
+        it.baseLayers.let { layerListToDisplayInLegend.addAll(0, it) }
+    }
+
+    layerListToDisplayInLegend = layerListToDisplayInLegend.filter { it.isVisible && it.showInLegend }.toMutableList()
+
+    return layerListToDisplayInLegend.reversed()
+}
+
