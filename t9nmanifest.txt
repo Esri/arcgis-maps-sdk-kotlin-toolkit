@@ -1,3 +1,4 @@
+toolkit/ar/src/main/res/values/strings.xml
 toolkit/authentication/src/main/res/values/strings.xml
 toolkit/indoors/src/main/res/values/strings.xml
 toolkit/featureforms/src/main/res/values/strings.xml
