@@ -128,6 +128,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansion
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.getString
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import com.arcgismaps.toolkit.geoviewcompose.MapView
@@ -154,6 +155,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val isBusy by mapViewModel.isBusy
     val errors by mapViewModel.errors
     var showDiscardEditsDialog by remember { mutableStateOf(false) }
+    val title = if (featureFormState != null) {
+        "${stringResource(R.string.edit)} ${featureFormState.activeFeatureForm.feature.label}"
+    } else {
+        mapViewModel.portalItem.title
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -162,7 +168,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 // show the top bar which changes available actions based on if the FeatureForm is
                 // being shown and is in edit mode
                 TopFormBar(
-                    title = mapViewModel.portalItem.title,
+                    title = title,
                     editingMode = uiState is UIState.Editing,
                     onClose = {
                         showDiscardEditsDialog = true
@@ -475,7 +481,7 @@ fun TopFormBar(
     TopAppBar(
         title = {
             Text(
-                text = if (editingMode) stringResource(R.string.edit_feature) else title,
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

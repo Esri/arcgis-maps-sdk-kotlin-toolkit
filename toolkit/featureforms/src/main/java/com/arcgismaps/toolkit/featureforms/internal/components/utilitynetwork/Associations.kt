@@ -45,9 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.toolkit.featureforms.objectId
 import com.arcgismaps.utilitynetworks.UtilityAssociation
-import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 
 @Composable
@@ -249,3 +247,6 @@ private fun AssociationItem(
         )
     )
 }
+
+private val ArcGISFeature.objectId: Long
+    get() = attributes["objectid"] as Long

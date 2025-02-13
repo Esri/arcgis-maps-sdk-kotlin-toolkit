@@ -16,9 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
 import com.arcgismaps.data.ArcGISFeature
@@ -64,35 +66,29 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @Stable
-public class FeatureFormState private constructor(
-    private val coroutineScope: CoroutineScope
+public class FeatureFormState(
+    private val featureForm: FeatureForm,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    private val coroutineScope: CoroutineScope,
+    private val utilityNetwork: UtilityNetwork? = null
 ) {
-    private var utilityNetwork: UtilityNetwork? = null
-
-    private lateinit var store: NavigationStack
+    private val store: ArrayDeque<StateData> = ArrayDeque()
 
     private var navController: NavController? = null
 
     private var _validationErrorVisibility: MutableState<ValidationErrorVisibility> =
-        mutableStateOf(ValidationErrorVisibility.Automatic)
+        mutableStateOf(validationErrorVisibility)
 
-    public val validationErrorVisibility: State<ValidationErrorVisibility>
-        get() = _validationErrorVisibility
+    private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
-    public val activeFeatureForm: FeatureForm
-        get() = getActiveStateData().featureForm
+    public val validationErrorVisibility: ValidationErrorVisibility by _validationErrorVisibility
 
-    public constructor(
-        featureForm: FeatureForm,
-        validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-        coroutineScope: CoroutineScope,
-        utilityNetwork: UtilityNetwork? = null
-    ) : this(coroutineScope) {
-        _validationErrorVisibility.value = validationErrorVisibility
-        this.utilityNetwork = utilityNetwork
+    public val activeFeatureForm : FeatureForm by _activeFeatureForm
 
+    init {
         val states = createStates(featureForm, featureForm.elements, coroutineScope)
         val unState = utilityNetwork?.let {
             val element = utilityNetwork.createElementOrNull(featureForm.feature)
@@ -106,7 +102,7 @@ public class FeatureFormState private constructor(
                 scope = coroutineScope
             )
         }
-        store = NavigationStack(StateData(featureForm, states, unState))
+        store.addLast(StateData(featureForm, states, unState))
     }
 
     internal constructor(
@@ -114,9 +110,14 @@ public class FeatureFormState private constructor(
         stateCollection: FormStateCollection,
         validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
         coroutineScope: CoroutineScope
-    ) : this(coroutineScope) {
-        _validationErrorVisibility.value = validationErrorVisibility
-        store = NavigationStack(StateData(featureForm, stateCollection, null))
+    ) : this(
+        featureForm,
+        validationErrorVisibility,
+        coroutineScope
+    ) {
+        // Since the state collection is provided, clear the store and add the provided state collection
+        store.clear()
+        store.addLast(StateData(featureForm, stateCollection, null))
     }
 
     internal fun setNavController(navController: NavController?) {
@@ -126,7 +127,7 @@ public class FeatureFormState private constructor(
     internal fun navigateTo(form: FeatureForm) {
         val states = createStates(form, form.elements, coroutineScope)
         val unState = utilityNetwork?.let {
-            val element = utilityNetwork!!.createElementOrNull(form.feature)
+            val element = utilityNetwork.createElementOrNull(form.feature)
             UtilityNetworkAssociationsElementState(
                 id = form.hashCode(),
                 label = "Associations",
@@ -138,18 +139,21 @@ public class FeatureFormState private constructor(
             )
         }
         if (navController != null) {
-            store.push(StateData(form, states, unState))
+            store.addLast(StateData(form, states, unState))
             navController!!.navigate(NavigationRoute.FormView)
+            _activeFeatureForm.value = form
         }
     }
 
     internal fun popBackStack(): Boolean {
         return if (navController != null) {
-            if (navController!!.currentBackStackEntry == null) {
+            if (navController!!.currentBackStackEntry == null || store.size <= 1) {
                 return false
             }
-            store.pop()
+            store.removeLast()
             navController!!.popBackStack()
+            _activeFeatureForm.value = getActiveStateData().featureForm
+            true
         } else false
     }
 
@@ -158,7 +162,7 @@ public class FeatureFormState private constructor(
     }
 
     internal fun getActiveStateData(): StateData {
-        return store.peek()
+        return store.last()
     }
 
     public fun setValidationErrorVisibility(visibility: ValidationErrorVisibility) {
@@ -425,33 +429,9 @@ public class FeatureFormState private constructor(
     }
 }
 
-internal class NavigationStack(
-    stateData: StateData
-) {
-    private val stack = ArrayDeque(listOf(stateData))
-
-    fun push(stateData: StateData) {
-        stack.addLast(stateData)
-    }
-
-    fun pop(): StateData? {
-        return if (stack.size <= 1) {
-            null
-        } else {
-            stack.removeLast()
-        }
-    }
-
-    fun peek(): StateData {
-        return stack.last()
-    }
-}
-
+@Immutable
 internal data class StateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection,
     val unState: UtilityNetworkAssociationsElementState?
 )
-
-internal val ArcGISFeature.objectId: Long
-    get() = attributes["objectid"] as Long

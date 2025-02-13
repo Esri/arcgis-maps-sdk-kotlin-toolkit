@@ -162,6 +162,17 @@ internal sealed class DialogType {
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
+
+    data class SaveFeatureDialog(
+        val onSave: suspend () -> Unit,
+        val onDiscard: () -> Unit
+    ) : DialogType()
+
+    data class ValidationErrorsDialog(
+        val onDismiss: () -> Unit,
+        val title: String,
+        val body: String
+    ) : DialogType()
 }
 
 /**
@@ -345,6 +356,40 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismiss = {
                     dialogRequester.dismissDialog()
                 }
+            )
+        }
+
+        is DialogType.SaveFeatureDialog -> {
+            val onSave = (dialogType as DialogType.SaveFeatureDialog).onSave
+            val onDiscard = (dialogType as DialogType.SaveFeatureDialog).onDiscard
+            SaveEditsDialog(
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                },
+                onSave = {
+                    dialogRequester.dismissDialog()
+                    scope.launch {
+                        onSave()
+                    }
+                },
+                onDiscard = {
+                    dialogRequester.dismissDialog()
+                    onDiscard()
+                }
+            )
+        }
+
+        is DialogType.ValidationErrorsDialog -> {
+            val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
+            val title = (dialogType as DialogType.ValidationErrorsDialog).title
+            val body = (dialogType as DialogType.ValidationErrorsDialog).body
+            ErrorDialog(
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                    onDismiss()
+                },
+                title = title,
+                body = body
             )
         }
 
