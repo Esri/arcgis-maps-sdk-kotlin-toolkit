@@ -1,4 +1,4 @@
 public final class com/arcgismaps/toolkit/legend/LegendKt {
-	public static final fun Legend (Lcom/arcgismaps/mapping/GeoModel;Lcom/arcgismaps/mapping/Viewpoint;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Legend (Lcom/arcgismaps/mapping/GeoModel;DLandroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
