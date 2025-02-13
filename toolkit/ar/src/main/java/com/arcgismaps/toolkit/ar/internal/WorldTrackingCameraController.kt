@@ -18,6 +18,14 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.hardware.SensorManager
+import android.location.LocationListener
+import android.location.LocationManager
+import android.location.OnNmeaMessageListener
+import android.os.Handler
+import android.os.Looper.prepare
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +43,8 @@ import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.NmeaLocation
+import com.arcgismaps.location.NmeaLocationDataSource
 import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
@@ -62,12 +72,12 @@ import java.time.Instant
  * @since 200.7.0
  */
 internal class WorldTrackingCameraController(private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
-    DefaultLifecycleObserver {
+    DefaultLifecycleObserver, OnNmeaMessageListener {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = SystemLocationDataSource()
+    private val locationDataSource = NmeaLocationDataSource()
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -95,12 +105,12 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location) =
+    private fun updateCamera(location: NmeaLocation) =
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z!! else 0.0,
+                location.heightAboveGeoid,
                 location.course,
                 90.0,
                 0.0
@@ -122,18 +132,41 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
         super.onPause(owner)
     }
 
+    @SuppressLint("ServiceCast", "MissingPermission")
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        scope.launch {
+        val locationManager = ArcGISEnvironment.applicationContext?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return
+        val selectedLocationProviders = mutableListOf<String>()
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) selectedLocationProviders.add(
+            LocationManager.NETWORK_PROVIDER
+        )
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) selectedLocationProviders.add(
+            LocationManager.GPS_PROVIDER
+        )
+        locationManager.addNmeaListener(this@WorldTrackingCameraController, Handler(ArcGISEnvironment.applicationContext!!.mainLooper))
+        scope.launch(Dispatchers.IO) {
             locationDataSource.start()
+            selectedLocationProviders.forEach { provider ->
+                locationManager.requestLocationUpdates(
+                    provider,
+                    100,
+                    0f,
+                    {
+                        //                            locationDataSource.pushData(location)
+                    },
+                    ArcGISEnvironment.applicationContext!!.mainLooper
+                )
+            }
         }
         scope.launch {
-            locationDataSource.status.filterIsInstance<LocationDataSourceStatus.FailedToStart>()
+            locationDataSource.status
                 .collect {
-                    locationDataSource.error.value?.let { error ->
-                        onLocationDataSourceFailedToStart(
-                            error
-                        )
+                    if (it is  LocationDataSourceStatus.FailedToStart) {
+                        locationDataSource.error.value?.let { error ->
+                            onLocationDataSourceFailedToStart(
+                                error
+                            )
+                        }
                     }
                 }
         }
@@ -169,6 +202,10 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 )
             )
         }
+    }
+
+    override fun onNmeaMessage(message: String?, timestamp: Long) {
+        locationDataSource.pushData(message?.toByteArray())
     }
 }
 
