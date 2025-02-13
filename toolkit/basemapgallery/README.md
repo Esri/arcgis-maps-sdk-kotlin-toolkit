@@ -6,6 +6,19 @@ The Basemap Gallery displays a grid of available basemap styles. The gallery acc
 ### Basic usage for displaying a Basemap Gallery
 A simple workflow is to disply the Basemap Gallery below a Map View and use the `onItemClick` to set the map of the Map View.
 
+Use the following code to create the `BasemapGalleryItem`s
+```kotlin
+viewModelScope.launch {
+    val service = BasemapStylesService()
+    service.load().getOrThrow()
+
+    service.info?.stylesInfo?.forEach { basemapStyleInfo ->
+        val galleryItem = BasemapGalleryItem(basemapStyleInfo)
+        items.add(galleryItem)
+    }
+}
+```
+then create the UI using with the `BasemapGallery` using those items like this
 ```kotlin
 Column {
         MapView(
