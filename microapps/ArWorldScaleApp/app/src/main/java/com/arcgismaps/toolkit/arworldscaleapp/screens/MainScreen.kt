@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -109,6 +110,7 @@ fun MainScreen() {
                             )
                         )
                     )
+                    Log.e("MainScreen", "Added graphic at elevation ${point.z}")
                 }
             },
             graphicsOverlays = graphicsOverlays

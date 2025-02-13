@@ -19,13 +19,7 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.hardware.SensorManager
-import android.location.LocationListener
-import android.location.LocationManager
-import android.location.OnNmeaMessageListener
-import android.os.Handler
-import android.os.Looper.prepare
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -40,12 +34,10 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
-import com.arcgismaps.location.NmeaLocation
-import com.arcgismaps.location.NmeaLocationDataSource
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -54,7 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -72,12 +63,15 @@ import java.time.Instant
  * @since 200.7.0
  */
 internal class WorldTrackingCameraController(private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
-    DefaultLifecycleObserver, OnNmeaMessageListener {
+    DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = NmeaLocationDataSource()
+    private val arLocationProvider = ArLocationProvider(scope)
+    private val locationDataSource = CustomLocationDataSource {
+        arLocationProvider
+    }
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -105,12 +99,12 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: NmeaLocation) =
+    private fun updateCamera(location: Location) =
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
-                location.heightAboveGeoid,
+                if (location.position.hasZ) location.position.z!! else 0.0,
                 location.course,
                 90.0,
                 0.0
@@ -120,6 +114,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            arLocationProvider.stop()
             scope.cancel()
         }
         super.onDestroy(owner)
@@ -128,6 +123,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            arLocationProvider.stop()
         }
         super.onPause(owner)
     }
@@ -135,39 +131,21 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     @SuppressLint("ServiceCast", "MissingPermission")
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        val locationManager = ArcGISEnvironment.applicationContext?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return
-        val selectedLocationProviders = mutableListOf<String>()
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) selectedLocationProviders.add(
-            LocationManager.NETWORK_PROVIDER
-        )
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) selectedLocationProviders.add(
-            LocationManager.GPS_PROVIDER
-        )
-        locationManager.addNmeaListener(this@WorldTrackingCameraController, Handler(ArcGISEnvironment.applicationContext!!.mainLooper))
-        scope.launch(Dispatchers.IO) {
+        scope.launch {
+            arLocationProvider.start()
             locationDataSource.start()
-            selectedLocationProviders.forEach { provider ->
-                locationManager.requestLocationUpdates(
-                    provider,
-                    100,
-                    0f,
-                    {
-                        //                            locationDataSource.pushData(location)
-                    },
-                    ArcGISEnvironment.applicationContext!!.mainLooper
-                )
-            }
         }
         scope.launch {
             locationDataSource.status
                 .collect {
-                    if (it is  LocationDataSourceStatus.FailedToStart) {
+                    if (it is LocationDataSourceStatus.FailedToStart) {
                         locationDataSource.error.value?.let { error ->
                             onLocationDataSourceFailedToStart(
                                 error
                             )
                         }
                     }
+                    Log.e("LocationDataSourceStatus", it.toString())
                 }
         }
         scope.launch {
@@ -202,10 +180,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 )
             )
         }
-    }
-
-    override fun onNmeaMessage(message: String?, timestamp: Long) {
-        locationDataSource.pushData(message?.toByteArray())
     }
 }
 
