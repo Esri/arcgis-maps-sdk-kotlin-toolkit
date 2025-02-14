@@ -59,7 +59,6 @@ internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem) {
                 thumbnail.value = BitmapPainter(imageBitmap)
             }
         }
-        thumbnail
     }
 
     Image(
@@ -74,14 +73,14 @@ internal fun BasemapGalleryItem(basemapGalleryItem: BasemapGalleryItem) {
  * A gallery of [BasemapGalleryItem]s.
  *
  * @param basemapGalleryItems the items to show in the gallery
- * @param modifier the modifier to apply to this gallery
  * @param onItemClick a lambda to execute when a gallery item is clicked
+ * @param modifier the modifier to apply to this gallery
  */
 @Composable
 public fun BasemapGallery(
     basemapGalleryItems: List<BasemapGalleryItem>,
-    modifier: Modifier = Modifier,
-    onItemClick: (BasemapGalleryItem) -> Unit
+    onItemClick: (BasemapGalleryItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(128.dp)) {
         basemapGalleryItems.forEach { basemapGalleryItem ->
@@ -101,7 +100,7 @@ public fun BasemapGallery(
 /**
  * A preview of the [BasemapGallery].
  */
-@Preview
+@Preview(showBackground = true)
 @Composable
 internal fun BasemapGalleryPreview() {
     val items = mutableListOf<BasemapGalleryItem>()

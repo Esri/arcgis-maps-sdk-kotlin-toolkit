@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.basemapgalleryapp
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,8 +52,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             val result = portal.fetchBasemaps().getOrThrow()
 
             result.forEach {
-                Log.d("BasemapGallery", "${it.item?.itemId}")
-
                 it.item?.let { item ->
                     val galleryItem = BasemapGalleryItem(item)
                     portalItems.add(galleryItem)

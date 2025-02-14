@@ -42,8 +42,7 @@ public class BasemapGalleryItem(
         tag,
         thumbnailProvider = {
             var bitmap: Bitmap? = null
-            thumbnail?.load()?.onFailure { bitmap = null }
-                ?.onSuccess { bitmap = thumbnail.image?.bitmap }
+            thumbnail?.load()?.onSuccess { bitmap = thumbnail.image?.bitmap }
             bitmap
         })
 
