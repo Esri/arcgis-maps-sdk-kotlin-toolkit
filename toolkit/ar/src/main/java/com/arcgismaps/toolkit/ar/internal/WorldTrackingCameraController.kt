@@ -238,6 +238,5 @@ internal fun shouldUpdateCamera(
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
     )?.distance ?: return false
-    Log.e("Distance", distance.toString())
-    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
+    return distance > location.horizontalAccuracy || distance > location.verticalAccuracy
 }
