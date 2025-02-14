@@ -7,6 +7,7 @@ import android.location.OnNmeaMessageListener
 import android.os.Handler
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.NmeaLocationDataSource
@@ -46,7 +47,7 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
                     it.position.y,
                     it.heightAboveGeoid,
                     it.position.m,
-                    it.position.spatialReference
+                    SpatialReference(it.position.spatialReference!!.wkid, 5773 /*EGM96*/)
                 ),
                 it.horizontalAccuracy,
                 it.verticalAccuracy,

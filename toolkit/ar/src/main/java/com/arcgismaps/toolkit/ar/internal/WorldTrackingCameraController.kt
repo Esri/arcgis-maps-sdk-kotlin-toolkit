@@ -34,6 +34,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
@@ -106,7 +107,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 location.position.y,
                 location.position.x,
                 if (location.position.hasZ) location.position.z!! else 0.0,
-                location.course,
+                cameraController.originCamera.value.heading,
                 90.0,
                 0.0
             )
@@ -230,7 +231,7 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
-    val currentCameraLocation = GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+    val currentCameraLocation = Point(currentCamera.location.x, currentCamera.location.y, currentCamera.location.z!!, SpatialReference(currentCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (
         currentCameraLocation,
         location.position,
