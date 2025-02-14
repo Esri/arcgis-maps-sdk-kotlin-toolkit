@@ -83,7 +83,7 @@ fun MainScreen() {
 
             BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                 basemapGalleryItems = when (selectedBasemapSource) {
-                    0 -> viewModel.sytleItems
+                    0 -> viewModel.styleItems
                     else -> viewModel.portalItems
                 },
                 onItemClick = {

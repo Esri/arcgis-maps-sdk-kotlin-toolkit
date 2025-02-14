@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
-    var sytleItems = mutableStateListOf<BasemapGalleryItem>()
+    var styleItems = mutableStateListOf<BasemapGalleryItem>()
         private set
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
@@ -65,7 +65,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             // for each basemap style info create a gallery item and add it to the list of items
             service.info?.stylesInfo?.forEach { basemapStyleInfo ->
                 val galleryItem = BasemapGalleryItem(basemapStyleInfo)
-                sytleItems.add(galleryItem)
+                styleItems.add(galleryItem)
             }
         }
     }
