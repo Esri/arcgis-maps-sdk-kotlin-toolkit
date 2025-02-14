@@ -5,7 +5,6 @@ import android.content.Context
 import android.location.LocationManager
 import android.location.OnNmeaMessageListener
 import android.os.Handler
-import android.os.Looper
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.location.CustomLocationDataSource
@@ -13,16 +12,14 @@ import com.arcgismaps.location.Location
 import com.arcgismaps.location.NmeaLocationDataSource
 import com.arcgismaps.location.SystemLocationDataSource
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.withContext
 
-internal class ArLocationProvider(scope: CoroutineScope) : CustomLocationDataSource.LocationProvider, OnNmeaMessageListener {
+internal class ArLocationProvider(private val scope: CoroutineScope) :
+    CustomLocationDataSource.LocationProvider, OnNmeaMessageListener {
 
     private val systemLocationDataSource = SystemLocationDataSource()
     private val nmeaLocationDataSource = NmeaLocationDataSource()
@@ -31,7 +28,8 @@ internal class ArLocationProvider(scope: CoroutineScope) : CustomLocationDataSou
 
     init {
         require(ArcGISEnvironment.applicationContext != null)
-        locationManager = ArcGISEnvironment.applicationContext!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager =
+            ArcGISEnvironment.applicationContext!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         handler = Handler(ArcGISEnvironment.applicationContext!!.mainLooper)
     }
 
@@ -40,33 +38,28 @@ internal class ArLocationProvider(scope: CoroutineScope) : CustomLocationDataSou
         replay = 1,
         started = SharingStarted.WhileSubscribed()
     )
-    override val locations: Flow<Location> = nmeaLocationDataSource.locationChanged.map {
-        Location.create(
-            Point(
-                it.position.x,
-                it.position.y,
-                it.heightAboveGeoid,
-                it.position.m,
-                it.position.spatialReference
-            ),
-            it.horizontalAccuracy,
-            it.verticalAccuracy,
-            it.speed,
-            headings.replayCache[0], // just use the last value emitted by the systemLocationDataSource's headingChanged flow
-            it.lastKnown,
-            it.timestamp,
-            it.additionalSourceProperties
-        )
-    }.shareIn(
-        scope = scope,
-        started = SharingStarted.WhileSubscribed()
-    )
+    override val locations: Flow<Location> =
+        nmeaLocationDataSource.locationChanged.map {
+            Location.create(
+                Point(
+                    it.position.x,
+                    it.position.y,
+                    it.heightAboveGeoid,
+                    it.position.m,
+                    it.position.spatialReference
+                ),
+                it.horizontalAccuracy,
+                it.verticalAccuracy,
+                it.speed,
+                headings.replayCache[0], // just use the last value emitted by the systemLocationDataSource's headingChanged flow
+                it.lastKnown,
+                it.timestamp,
+                it.additionalSourceProperties
+            )
+        }
 
     @SuppressLint("MissingPermission")
-    internal suspend fun start() = withContext(Dispatchers.IO){
-        systemLocationDataSource.start()
-        nmeaLocationDataSource.start()
-
+    internal suspend fun start() {
         val selectedLocationProviders = mutableListOf<String>()
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) selectedLocationProviders.add(
             LocationManager.NETWORK_PROVIDER
@@ -74,7 +67,6 @@ internal class ArLocationProvider(scope: CoroutineScope) : CustomLocationDataSou
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) selectedLocationProviders.add(
             LocationManager.GPS_PROVIDER
         )
-        locationManager.addNmeaListener(this@ArLocationProvider, handler)
         selectedLocationProviders.forEach { provider ->
             locationManager.requestLocationUpdates(
                 provider,
@@ -84,6 +76,9 @@ internal class ArLocationProvider(scope: CoroutineScope) : CustomLocationDataSou
                 ArcGISEnvironment.applicationContext!!.mainLooper
             )
         }
+        systemLocationDataSource.start()
+        nmeaLocationDataSource.start()
+        locationManager.addNmeaListener(this@ArLocationProvider, handler)
     }
 
     internal suspend fun stop() {
