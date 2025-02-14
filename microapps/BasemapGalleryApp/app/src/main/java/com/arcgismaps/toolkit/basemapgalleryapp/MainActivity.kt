@@ -29,6 +29,8 @@ import com.esri.microappslib.theme.MicroAppTheme
 
 /**
  * The main activity of the application.
+ *
+ * @since 200.7.0
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +46,8 @@ class MainActivity : ComponentActivity() {
 
 /**
  * The app.
+ *
+ * @since 200.7.0
  */
 @Composable
 fun BasemapGalleryApp() {

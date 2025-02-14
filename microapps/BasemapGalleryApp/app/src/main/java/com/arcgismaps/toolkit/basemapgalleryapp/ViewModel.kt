@@ -35,6 +35,8 @@ import kotlinx.coroutines.launch
  *
  * @param application the application associated with this view model
  * @constructor constructs a viewmodel
+ *
+ * @since 200.7.0
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 

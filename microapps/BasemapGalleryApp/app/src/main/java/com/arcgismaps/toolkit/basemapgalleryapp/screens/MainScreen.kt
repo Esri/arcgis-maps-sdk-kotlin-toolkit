@@ -50,6 +50,8 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 /**
  * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
  * an item in the gallery will set that basemap in the map view.
+ *
+ * @since 200.7.0
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +83,8 @@ fun MainScreen() {
                 }
             }
 
-            BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+            BasemapGallery(
+                modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                 basemapGalleryItems = when (selectedBasemapSource) {
                     0 -> viewModel.styleItems
                     else -> viewModel.portalItems
