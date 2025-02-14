@@ -19,11 +19,9 @@ package com.arcgismaps.toolkit.featureforms
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
-import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -68,10 +66,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * The state of a [FeatureForm] that is used to manage the form's state and navigation.
+ */
 @Stable
-public class FeatureFormState(
+public class FeatureFormState private constructor(
     private val featureForm: FeatureForm,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     private val coroutineScope: CoroutineScope,
     private val utilityNetwork: UtilityNetwork? = null
 ) {
@@ -80,16 +80,49 @@ public class FeatureFormState(
     private var navController: NavController? = null
 
     private var _validationErrorVisibility: MutableState<ValidationErrorVisibility> =
-        mutableStateOf(validationErrorVisibility)
+        mutableStateOf(ValidationErrorVisibility.Automatic)
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
+    private val _evaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     * The [ValidationErrorVisibility] setting for the current active form [activeFeatureForm].
+     *
+     * Note that this property is observable and if you use it in the composable function it will be
+     * recomposed on every change.
+     */
     public val validationErrorVisibility: ValidationErrorVisibility by _validationErrorVisibility
 
-    public val activeFeatureForm : FeatureForm by _activeFeatureForm
+    /**
+     * The currently active [FeatureForm]. This property is updated when navigating between forms.
+     *
+     * Note that this property is observable and if you use it in the composable function it will be
+     * recomposed on every change.
+     */
+    public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
-    init {
-        val states = createStates(featureForm, featureForm.elements, coroutineScope)
+    /**
+     * Indicates if the [activeFeatureForm] is currently evaluating expressions.
+     *
+     * Note that this property is observable and if you use it in the composable function it will be
+     * recomposed on every change.
+     */
+    public val evaluatingExpressions: Boolean by _evaluatingExpressions
+
+    public constructor(
+        featureForm: FeatureForm,
+        validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+        coroutineScope: CoroutineScope,
+        utilityNetwork: UtilityNetwork? = null
+    ) : this(
+        featureForm,
+        coroutineScope,
+        utilityNetwork
+    ) {
+        _validationErrorVisibility.value = validationErrorVisibility
+        // create state objects for all the supported element types that are part of the provided FeatureForm
+        val states = createStates(this.featureForm, this.featureForm.elements, coroutineScope)
         val unState = utilityNetwork?.let {
             val element = utilityNetwork.createElementOrNull(featureForm.feature)
             UtilityNetworkAssociationsElementState(
@@ -102,6 +135,7 @@ public class FeatureFormState(
                 scope = coroutineScope
             )
         }
+        // Add the provided state collection to the store.
         store.addLast(StateData(featureForm, states, unState))
     }
 
@@ -115,8 +149,8 @@ public class FeatureFormState(
         validationErrorVisibility,
         coroutineScope
     ) {
-        // Since the state collection is provided, clear the store and add the provided state collection
-        store.clear()
+        _validationErrorVisibility.value = validationErrorVisibility
+        // Add the provided state collection to the store.
         store.addLast(StateData(featureForm, stateCollection, null))
     }
 
@@ -125,36 +159,36 @@ public class FeatureFormState(
     }
 
     internal fun navigateTo(form: FeatureForm) {
-        val states = createStates(form, form.elements, coroutineScope)
-        val unState = utilityNetwork?.let {
-            val element = utilityNetwork.createElementOrNull(form.feature)
-            UtilityNetworkAssociationsElementState(
-                id = form.hashCode(),
-                label = "Associations",
-                description = "This is a description",
-                isVisible = MutableStateFlow(true),
-                utilityNetwork = utilityNetwork,
-                utilityElement = element,
-                scope = coroutineScope
-            )
-        }
-        if (navController != null) {
+        navController?.let { controller ->
+            val states = createStates(form, form.elements, coroutineScope)
+            val unState = utilityNetwork?.let {
+                val element = utilityNetwork.createElementOrNull(form.feature)
+                UtilityNetworkAssociationsElementState(
+                    id = form.hashCode(),
+                    label = "Associations",
+                    description = "This is a description",
+                    isVisible = MutableStateFlow(true),
+                    utilityNetwork = utilityNetwork,
+                    utilityElement = element,
+                    scope = coroutineScope
+                )
+            }
             store.addLast(StateData(form, states, unState))
-            navController!!.navigate(NavigationRoute.FormView)
+            controller.navigate(NavigationRoute.FormView)
             _activeFeatureForm.value = form
         }
     }
 
     internal fun popBackStack(): Boolean {
-        return if (navController != null) {
-            if (navController!!.currentBackStackEntry == null || store.size <= 1) {
+        return navController?.let { controller ->
+            if (controller.currentBackStackEntry == null || store.size <= 1) {
                 return false
             }
             store.removeLast()
-            navController!!.popBackStack()
+            controller.popBackStack()
             _activeFeatureForm.value = getActiveStateData().featureForm
             true
-        } else false
+        } ?: false
     }
 
     internal fun hasBackStack(): Boolean {

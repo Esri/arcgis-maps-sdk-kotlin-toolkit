@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -42,13 +41,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -67,7 +66,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -98,8 +96,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
@@ -118,12 +114,12 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
  */
+@Immutable
 public sealed class ValidationErrorVisibility {
 
     /**
