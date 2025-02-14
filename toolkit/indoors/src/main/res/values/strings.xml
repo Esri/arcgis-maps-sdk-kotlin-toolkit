@@ -9,6 +9,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Select a facility</string>
     <string name="floor_filter_no_results">No results found.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel has no floor-aware data</string>
+    <string name="an_error_has_occurred">An error has occurred</string>
     <string name="not_available">Not available</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Site - %1$s</string>
@@ -24,6 +26,8 @@
     <string name="clear_search">Clear search</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Close</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Collapse</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Go back to site selector</string>
 </resources>

@@ -82,8 +82,8 @@ class ArtifactPublisher : Plugin<Project> {
                     }
                 }
             }
-            
-            tasks.findByName("publish${project.name.capitalized()}PublicationToMavenRepository")
+
+            tasks.findByName("publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
                 ?.dependsOn("assembleRelease")
             tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
         }

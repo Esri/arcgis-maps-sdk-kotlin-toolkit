@@ -37,8 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -241,17 +241,7 @@ public fun TableTopSceneView(
                     session = arSession,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.translation.let {
-                                TransformationMatrix.createWithQuaternionAndTranslation(
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    it[0].toDouble(),
-                                    it[1].toDouble(),
-                                    it[2].toDouble()
-                                )
-                            }
+                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
                             val cameraPosition =
                                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
                             cameraController.transformationMatrix = cameraPosition
@@ -264,10 +254,10 @@ public fun TableTopSceneView(
                                 imageIntrinsics.imageDimensions[0].toFloat(),
                                 imageIntrinsics.imageDimensions[1].toFloat(),
                                 deviceOrientation = when (displayRotation) {
-                                    0 -> DeviceOrientation.Portrait
-                                    90 -> DeviceOrientation.LandscapeRight
-                                    180 -> DeviceOrientation.ReversePortrait
-                                    270 -> DeviceOrientation.LandscapeLeft
+                                    0 -> DeviceOrientation.LandscapeLeft
+                                    90 -> DeviceOrientation.Portrait
+                                    180 -> DeviceOrientation.LandscapeRight
+                                    270 -> DeviceOrientation.ReversePortrait
                                     else -> DeviceOrientation.Portrait
                                 }
                             )
@@ -277,7 +267,8 @@ public fun TableTopSceneView(
                     onTapWithHitResult = { hit ->
                         hit?.let { hitResult ->
                             if (arCoreAnchor == null) {
-                                arCoreAnchor = hitResult.createAnchor()
+                                // use `extractTranslation` to ignore any rotation
+                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation())
                                 // stop rendering planes
                                 visualizePlanes = false
                             }
@@ -410,14 +401,11 @@ private fun MutableState<TableTopSceneViewStatus>.update(
  * @since 200.6.0
  */
 private val Pose.transformationMatrix: TransformationMatrix
-    get() {
-        return TransformationMatrix.createWithQuaternionAndTranslation(
-            rotationQuaternion[0].toDouble(),
-            rotationQuaternion[1].toDouble(),
-            rotationQuaternion[2].toDouble(),
-            rotationQuaternion[3].toDouble(),
-            translation[0].toDouble(),
-            translation[1].toDouble(),
-            translation[2].toDouble()
-        )
-    }
+    get() = TransformationMatrix.createWithQuaternionAndTranslation(
+        qx().toDouble(),
+        qy().toDouble(),
+        qz().toDouble(),
+        qw().toDouble(),
+        tx().toDouble(),
+        ty().toDouble(),
+        tz().toDouble())

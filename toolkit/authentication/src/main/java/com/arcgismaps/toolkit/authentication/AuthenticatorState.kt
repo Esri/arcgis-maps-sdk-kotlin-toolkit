@@ -44,10 +44,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -202,41 +199,19 @@ private class AuthenticatorStateImpl(
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        var error: Throwable = IllegalStateException("Authentication failed.")
-        return awaitUsernamePassword(challenge.requestUrl)
-            // map UsernamePassword values to an ArcGISAuthenticationChallengeResponse
-            .map { usernamePassword ->
-                // usernamePassword is null if the user presses "cancel"
-                if (usernamePassword == null) return@map ArcGISAuthenticationChallengeResponse.Cancel
-                val credential =
-                    TokenCredential.createWithChallenge(
-                        challenge,
-                        usernamePassword.username,
-                        usernamePassword.password
-                    ).getOrElse {
-                        error = it
-                        null
-                    }
-                // a null credential from TokenCredential.createWithChallenge indicates a failure,
-                // ie. an invalid username or password. We will map those failures to a null value
-                return@map if (credential != null) {
-                    ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
-                } else {
-                    _pendingUsernamePasswordChallenge.value?.setAdditionalMessage("Invalid username or password.")
-                    null
+        val maxRetryCount = 5
+        var error: Throwable? = null
+        repeat(maxRetryCount) {
+            val credential = awaitUsernamePassword(challenge.requestUrl).firstOrNull()
+                ?: return ArcGISAuthenticationChallengeResponse.Cancel
+            TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
+                .onSuccess {
+                    return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it)
+                }.onFailure {
+                    error = it
                 }
-            }
-            // IWA challenges allow 5 retries, so we do the same here
-            .take(5)
-            // If a value is null coming out of map, it means an invalid credential. In that case,
-            // we want to continue collecting the flow. If we do get a proper response from map,
-            // then we will pass through the filter and return from this function (which cancels
-            // flow collection).
-            .filterNotNull()
-            // Cancels collection when the first value is received.
-            .firstOrNull()
-            // If after 5 tries we don't get any valid credentials, we will just fail.
-            ?: ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(error)
+        }
+        return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(error ?: challenge.cause)
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {

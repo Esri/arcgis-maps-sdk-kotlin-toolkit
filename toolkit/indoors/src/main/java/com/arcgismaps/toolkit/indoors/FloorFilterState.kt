@@ -19,6 +19,9 @@ package com.arcgismaps.toolkit.indoors
 
 import android.view.View
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -28,11 +31,11 @@ import com.arcgismaps.mapping.floor.FloorLevel
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.mapping.floor.FloorSite
 import com.arcgismaps.mapping.view.GeoView
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Represents the state for the FloorFilter.
@@ -60,6 +63,7 @@ import kotlinx.coroutines.launch
  */
 public sealed interface FloorFilterState {
     public val floorManager: StateFlow<FloorManager?>
+    public val initializationStatus: State<InitializationStatus>
     public val sites: List<FloorSite>
     public val facilities: List<FloorFacility>
 
@@ -67,11 +71,13 @@ public sealed interface FloorFilterState {
     public var selectedFacilityId: String?
     public var selectedLevelId: String?
 
+    public val onSiteChanged: StateFlow<FloorSite?>
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
 
     public val uiProperties: UIProperties
 
+    public suspend fun initialize(): Result<Unit>
     public fun getSelectedSite(): FloorSite?
     public fun getSelectedFacility(): FloorFacility?
 }
@@ -83,7 +89,6 @@ public sealed interface FloorFilterState {
  */
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
-    coroutineScope: CoroutineScope,
     override var uiProperties: UIProperties,
     var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
@@ -91,11 +96,24 @@ private class FloorFilterStateImpl(
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
     override val floorManager: StateFlow<FloorManager?> = _floorManager.asStateFlow()
 
+    private val _onSiteChanged: MutableStateFlow<FloorSite?> = MutableStateFlow(null)
+    override val onSiteChanged: StateFlow<FloorSite?> = _onSiteChanged.asStateFlow()
+
     private val _onFacilityChanged: MutableStateFlow<FloorFacility?> = MutableStateFlow(null)
     override val onFacilityChanged: StateFlow<FloorFacility?> = _onFacilityChanged.asStateFlow()
 
     private val _onLevelChanged: MutableStateFlow<FloorLevel?> = MutableStateFlow(null)
     override val onLevelChanged: StateFlow<FloorLevel?> = _onLevelChanged.asStateFlow()
+
+    private val _initializationStatus: MutableState<InitializationStatus> =
+        mutableStateOf(InitializationStatus.NotInitialized)
+
+    /**
+     * The status of the initialization of the state object.
+     *
+     * @since 200.6.0
+     */
+    override val initializationStatus: State<InitializationStatus> = _initializationStatus
 
     /**
      * The list of [FloorLevel]s from the [FloorManager].
@@ -140,6 +158,7 @@ private class FloorFilterStateImpl(
         set(value) {
             _selectedSiteId = value
             selectedFacilityId = null
+            _onSiteChanged.value = getSelectedSite()
             getSelectedSite()?.let {
                 onSelectionChangedListener(
                     FloorFilterSelection(
@@ -212,30 +231,59 @@ private class FloorFilterStateImpl(
             }
         }
 
-    init {
-        coroutineScope.launch {
-            loadFloorManager()
+    /**
+     * Initializes the state object by loading the GeoModel and the GeoModel's FloorManager.
+     *
+     * @return the [Result] indicating if the initialization was successful or not
+     * @since 200.6.0
+     */
+    override suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+        if (_initializationStatus.value is InitializationStatus.Initialized) {
+            return Result.success(Unit)
+        }
+        _initializationStatus.value = InitializationStatus.Initializing
+        geoModel.load().onSuccess {
+            val floorManager: FloorManager? = geoModel.floorManager
+            if (floorManager == null) {
+                val error = FloorFilterException(FloorFilterError.GEOMODEL_HAS_NO_FLOOR_AWARE_DATA)
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                throw error
+            }
+            floorManager.load().onSuccess {
+                _floorManager.value = floorManager
+                // make sure the UI gets updated with the values for selectedSiteId, selectedFacilityId
+                // and selectedLevelId that were applied before initialization
+                setSelectedValuesAppliedBeforeInitialization()
+                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
+                filterMap()
+                _initializationStatus.value = InitializationStatus.Initialized
+                return Result.success(Unit)
+            }.onFailure {
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+                throw it
+            }
+        }.onFailure {
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+            throw it
         }
     }
 
     /**
-     * Loads the floorManager when the Map is loaded.
+     * Sets the selected values that were applied before initialization by the user.
      *
-     * @since 200.2.0
+     * @since 200.6.0
      */
-    private suspend fun loadFloorManager() {
-        geoModel.load().onSuccess {
-            val floorManager: FloorManager = geoModel.floorManager
-                ?: return
-            floorManager.load().onSuccess {
-                _floorManager.value = floorManager
-                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
-                filterMap()
-            }.onFailure {
-                return
-            }
-        }.onFailure {
-            return
+    private fun setSelectedValuesAppliedBeforeInitialization() {
+        if (_selectedSiteId != null) {
+            selectedSiteId = _selectedSiteId
+        }
+        if (_selectedFacilityId != null) {
+            selectedFacilityId = _selectedFacilityId
+        }
+        if (_selectedLevelId != null) {
+            val temp = _selectedLevelId
+            _selectedLevelId = null
+            selectedLevelId = temp
         }
     }
 
@@ -388,13 +436,68 @@ public enum class ButtonPosition {
  *        with the Site or Facilities extent whenever a new Site or Facility is selected
  * @since 200.2.0
  */
+@Deprecated(
+    "Use the factory function without the coroutineScope parameter",
+    ReplaceWith("FloorFilterState(geoModel, uiProperties, onSelectionChangedListener)")
+)
 public fun FloorFilterState(
     geoModel: GeoModel,
     coroutineScope: CoroutineScope,
     uiProperties: UIProperties = UIProperties(),
     onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, uiProperties, onSelectionChangedListener)
+    FloorFilterStateImpl(geoModel, uiProperties, onSelectionChangedListener)
+
+/**
+ * Factory function for the creating FloorFilterState.
+ *
+ * @param geoModel the floor aware geoModel that drives the [FloorFilter]
+ * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
+ * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
+ *        with the Site or Facilities extent whenever a new Site or Facility is selected
+ * @since 200.6.0
+ */
+public fun FloorFilterState(
+    geoModel: GeoModel,
+    uiProperties: UIProperties = UIProperties(),
+    onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
+): FloorFilterState =
+    FloorFilterStateImpl(geoModel, uiProperties, onSelectionChangedListener)
+
+/**
+ * Represents the status of the initialization of the state object.
+ *
+ * @since 200.6.0
+ */
+public sealed class InitializationStatus {
+    /**
+     * The state object is initialized and ready to use.
+     *
+     * @since 200.6.0
+     */
+    public data object Initialized : InitializationStatus()
+
+    /**
+     * The state object is initializing.
+     *
+     * @since 200.6.0
+     */
+    public data object Initializing : InitializationStatus()
+
+    /**
+     * The state object is not initialized.
+     *
+     * @since 200.6.0
+     */
+    public data object NotInitialized : InitializationStatus()
+
+    /**
+     * The state object failed to initialize.
+     *
+     * @since 200.6.0
+     */
+    public data class FailedToInitialize(val error: Throwable) : InitializationStatus()
+}
 
 /**
  * The selection that was made by the user
@@ -448,3 +551,19 @@ public data class UIProperties(
     var buttonSize: Size = Size(60.dp.value, 40.dp.value),
     var typography: Typography = Typography()
 )
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()

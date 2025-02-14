@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s tarafından sağlanmış sertifika, güvenilir bir otorite tarafından imzalanmamış.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">İptal</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Tehlikeli: Bağlantıya İzin Ver</string>
-    <string name="username_password_login_message">Lütfen %1$s\'ta oturum açın</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kullanıcı adı</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parola</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Oturum aç</string>
+
 </resources>
