@@ -38,8 +38,6 @@ import androidx.compose.ui.graphics.Color
 public data class WorldScaleCalibrationViewColorScheme internal constructor(
     val backgroundColor: Color,
     val containerColor: Color,
-    val closeButtonContainerColor: Color,
-    val closeButtonContentColor: Color,
     val buttonContainerColor: Color,
     val buttonContentColor: Color,
     val sliderTrackColor: Color,

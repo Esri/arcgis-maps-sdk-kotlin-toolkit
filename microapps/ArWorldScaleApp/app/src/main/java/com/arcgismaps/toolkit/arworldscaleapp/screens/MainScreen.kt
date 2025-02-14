@@ -113,15 +113,13 @@ fun MainScreen() {
             },
             graphicsOverlays = graphicsOverlays
         ) {
-            if (displayCalibrationView) {
-                Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (displayCalibrationView) {
                     CalibrationView(
                         onDismiss = { displayCalibrationView = false },
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
-                }
-            } else {
-                Box(modifier = Modifier.fillMaxSize()) {
+                } else {
                     FloatingActionButton(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -134,40 +132,40 @@ fun MainScreen() {
                     }
                 }
             }
-        }
-        when (val status = initializationStatus) {
-            is WorldScaleSceneViewStatus.Initializing -> {
-                TextWithScrim(text = stringResource(R.string.ar_initializing))
-            }
-
-            is WorldScaleSceneViewStatus.Initialized -> {
-                val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                when (sceneLoadStatus) {
-                    is LoadStatus.Loading, LoadStatus.NotLoaded -> {
-                        // The scene may take a while to load, so show a progress indicator
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    is LoadStatus.FailedToLoad -> {
-                        TextWithScrim(
-                            text = stringResource(
-                                R.string.failed_to_load_scene,
-                                sceneLoadStatus.error
-                            )
-                        )
-                    }
-
-                    else -> {}
+            when (val status = initializationStatus) {
+                is WorldScaleSceneViewStatus.Initializing -> {
+                    TextWithScrim(text = stringResource(R.string.ar_initializing))
                 }
-            }
 
-            is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                TextWithScrim(
-                    text = stringResource(
-                        R.string.failed_to_initialize_overlay,
-                        status.error.message ?: status.error
+                is WorldScaleSceneViewStatus.Initialized -> {
+                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                    when (sceneLoadStatus) {
+                        is LoadStatus.Loading, LoadStatus.NotLoaded -> {
+                            // The scene may take a while to load, so show a progress indicator
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        else -> {}
+                    }
+                }
+
+                is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                    TextWithScrim(
+                        text = stringResource(
+                            R.string.failed_to_initialize_overlay,
+                            status.error.message ?: status.error
+                        )
                     )
-                )
+                }
             }
         }
     }
