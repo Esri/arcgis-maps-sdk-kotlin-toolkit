@@ -72,16 +72,6 @@ internal fun BasemapGalleryItem(
         thumbnail
     }
 
-//    Card(
-//        modifier = modifier,
-//        colors = CardDefaults.cardColors(
-//            if (selected) {
-//                Color(0xFFc6e0fc)
-//            } else {
-//                Color.Transparent
-//            }
-//        )
-//    ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -104,7 +94,6 @@ internal fun BasemapGalleryItem(
         )
         Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
     }
-    //   }
 }
 
 /**
