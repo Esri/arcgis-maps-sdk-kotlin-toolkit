@@ -79,17 +79,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
             // get basemap style info from a basemap style service
-            portal.load().getOrThrow()
-            val result = portal.fetchBasemaps().getOrThrow()
-
-            result.forEach {
-                it.item?.let { item ->
-                    val galleryItem = BasemapGalleryItem(item)
-                    portalItems.add(galleryItem)
-                }
-            }
-
-            // get basemap style info from a basemap style service
             val service = BasemapStylesService()
             service.load()
                 .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
