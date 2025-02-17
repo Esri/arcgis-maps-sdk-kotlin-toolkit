@@ -64,7 +64,7 @@ fun MainScreen() {
         )
     )
 
-    val options = listOf("Basemap Styles", "Portal items")
+    val options = remember { listOf("Basemap Styles", "Portal items") }
     var selectedBasemapSource by remember { mutableIntStateOf(0) }
 
     BottomSheetScaffold(
