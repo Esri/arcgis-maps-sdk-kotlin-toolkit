@@ -99,7 +99,7 @@ fun MainScreen() {
                             viewModel.arcGISMap.setBasemap(Basemap(item = tag))
                         }
 
-                        else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                        else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
                     }
                 })
         },
