@@ -31,6 +31,7 @@ import com.arcgismaps.portal.LoadableImage
  * @param thumbnailProvider a lambda that returns a bitmap to use for the thumbnail image. If the
  * lambda returns null a default thumbnail is used.
  * @constructor creates a gallery item
+ * @since 200.7.0
  */
 public class BasemapGalleryItem(
     public val title: String,
@@ -42,8 +43,7 @@ public class BasemapGalleryItem(
         tag,
         thumbnailProvider = {
             var bitmap: Bitmap? = null
-            thumbnail?.load()?.onFailure { bitmap = null }
-                ?.onSuccess { bitmap = thumbnail.image?.bitmap }
+            thumbnail?.load()?.onSuccess { bitmap = thumbnail.image?.bitmap }
             bitmap
         })
 
@@ -53,6 +53,7 @@ public class BasemapGalleryItem(
      * If the [BasemapStyleInfo] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
      * @param basemapStyleInfo the [BasemapStyleInfo]
+     * @since 200.7.0
      */
     public constructor(basemapStyleInfo: BasemapStyleInfo) : this(
         basemapStyleInfo.styleName,
@@ -66,6 +67,7 @@ public class BasemapGalleryItem(
      * If the [Item] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
      * @param item the [Item]
+     * @since 200.7.0
      */
     public constructor(item: Item) : this(
         item.title,

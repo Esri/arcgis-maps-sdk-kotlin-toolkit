@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
  * Produces the composable parts required to compose a [BasemapGalleryItem] in a [BasemapGallery].
  *
  * @param basemapGalleryItem the [BasemapGalleryItem]
+ * @since 200.7.0
  */
 @Composable
 internal fun BasemapGalleryItem(
@@ -69,7 +70,6 @@ internal fun BasemapGalleryItem(
                 thumbnail.value = BitmapPainter(imageBitmap)
             }
         }
-        thumbnail
     }
 
     Column(
@@ -100,14 +100,15 @@ internal fun BasemapGalleryItem(
  * A gallery of [BasemapGalleryItem]s.
  *
  * @param basemapGalleryItems the items to show in the gallery
- * @param modifier the modifier to apply to this gallery
  * @param onItemClick a lambda to execute when a gallery item is clicked
+ * @param modifier the modifier to apply to this gallery
+ * @since 200.7.0
  */
 @Composable
 public fun BasemapGallery(
     basemapGalleryItems: List<BasemapGalleryItem>,
-    modifier: Modifier = Modifier,
-    onItemClick: (BasemapGalleryItem) -> Unit
+    onItemClick: (BasemapGalleryItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var selection: BasemapGalleryItem? by remember { mutableStateOf(null) }
 
@@ -131,6 +132,8 @@ public fun BasemapGallery(
 
 /**
  * A preview of the [BasemapGallery].
+ *
+ * @since 200.7.0
  */
 @Preview(showBackground = true)
 @Composable
@@ -139,7 +142,10 @@ internal fun BasemapGalleryPreview() {
     for (i in 0..100) {
         items.add(BasemapGalleryItem(title = "Item $i"))
     }
-    BasemapGallery(items, onItemClick = {
-        Log.d("BaseMapGallery", "Item clicked: ${it.title}")
-    })
+    BasemapGallery(
+        items,
+        onItemClick = {
+            Log.d("BaseMapGallery", "Item clicked: ${it.title}")
+        }
+    )
 }

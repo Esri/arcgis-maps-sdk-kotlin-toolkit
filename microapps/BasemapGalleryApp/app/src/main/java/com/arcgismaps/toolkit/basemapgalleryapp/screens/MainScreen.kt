@@ -51,6 +51,8 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 /**
  * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
  * an item in the gallery will set that basemap in the map view.
+ *
+ * @since 200.7.0
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +67,7 @@ fun MainScreen() {
         )
     )
 
-    val options = listOf("Basemap Styles", "Portal items")
+    val options = remember { listOf("Basemap Styles", "Portal items") }
     var selectedBasemapSource by remember { mutableIntStateOf(0) }
 
     BottomSheetScaffold(
@@ -96,7 +98,7 @@ fun MainScreen() {
 
                         is Item -> viewModel.arcGISMap.setBasemap(Basemap(item = tag))
 
-                        else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                        else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
                     }
                 })
         },
