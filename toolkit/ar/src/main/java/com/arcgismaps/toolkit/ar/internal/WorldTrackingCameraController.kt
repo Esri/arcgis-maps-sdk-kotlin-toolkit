@@ -49,7 +49,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -213,20 +212,6 @@ internal class WorldTrackingCameraController(
                         hasSetOriginCamera = true
                     }
                 }
-        }
-        scope.launch {
-            val heading = locationDataSource.headingChanged.first()
-            val location = cameraController.originCamera.value.location
-            cameraController.setOriginCamera(
-                Camera(
-                    location.x,
-                    location.y,
-                    if (location.hasZ) location.z!! else 0.0,
-                    heading + headingOffsetFromRotation(deviceRotation),
-                    90.0,
-                    0.0
-                )
-            )
         }
     }
 }
