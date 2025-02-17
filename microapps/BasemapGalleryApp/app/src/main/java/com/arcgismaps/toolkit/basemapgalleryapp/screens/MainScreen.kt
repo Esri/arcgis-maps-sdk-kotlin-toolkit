@@ -46,7 +46,6 @@ import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 
 /**
  * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
@@ -58,8 +57,6 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 @OptIn(ExperimentalMaterial3Api::class)
 fun MainScreen() {
     val viewModel: ViewModel = viewModel()
-
-    val proxy = MapViewProxy()
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -92,11 +89,10 @@ fun MainScreen() {
                     else -> viewModel.portalItems
                 },
                 onItemClick = {
-                    proxy.setViewpoint(viewModel.initialViewpoint)
                     when (val tag = it.tag) {
-                        is BasemapStyleInfo -> viewModel.arcGISMap.setBasemap(Basemap(basemapStyle = tag.style))
+                        is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
 
-                        is Item -> viewModel.arcGISMap.setBasemap(Basemap(item = tag))
+                        is Item -> viewModel.changeBasemap(Basemap(item = tag))
 
                         else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
                     }
@@ -110,7 +106,7 @@ fun MainScreen() {
         MapView(
             modifier = Modifier.padding(paddingValues),
             arcGISMap = viewModel.arcGISMap,
-            mapViewProxy = proxy,
+            mapViewProxy = viewModel.proxy,
         )
     }
 }

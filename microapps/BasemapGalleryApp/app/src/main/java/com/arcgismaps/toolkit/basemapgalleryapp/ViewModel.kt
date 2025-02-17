@@ -26,11 +26,13 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 
 /**
@@ -43,12 +45,14 @@ import kotlinx.coroutines.launch
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
+    val proxy = MapViewProxy()
+
     var styleItems = mutableStateListOf<BasemapGalleryItem>()
         private set
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    val initialViewpoint = Viewpoint(
+    private val initialViewpoint = Viewpoint(
         center = Point(-11e6, 5e6, SpatialReference.webMercator()),
         scale = 1e8
     )
@@ -90,5 +94,16 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
         }
+    }
+
+    /**
+     * Change the basemap and reset the viewpoint.
+     *
+     * @param basemap to set
+     * @since 200.7.0
+     */
+    fun changeBasemap(basemap: Basemap) {
+        proxy.setViewpoint(initialViewpoint)
+        arcGISMap.setBasemap(basemap)
     }
 }
