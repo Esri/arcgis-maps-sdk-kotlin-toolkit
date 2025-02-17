@@ -18,6 +18,10 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.content.Context
+import android.os.Build
+import android.view.Surface
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -60,7 +65,9 @@ import java.time.Instant
  *
  * @since 200.7.0
  */
-internal class WorldTrackingCameraController(private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
+internal class WorldTrackingCameraController(
+    context: Context,
+    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
     DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
@@ -72,8 +79,27 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
-    private var totalHeadingOffset = 0.0
-    private var totalElevationOffset = 0.0
+    private var headingCalibrationOffset = 0.0
+    private var elevationCalibrationOffset = 0.0
+
+    private var deviceRotation = if (Build.VERSION.SDK_INT >= 30) {
+        context.display.rotation
+    } else {
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
+    }
+
+    /**
+     * Returns the appropriate heading offset to apply to the origin camera, given device rotation
+     *
+     * @param deviceRotation Device rotation as enumerated in [Surface]
+     */
+    private fun headingOffsetFromRotation(deviceRotation: Int) : Double {
+        return when (deviceRotation) {
+            Surface.ROTATION_270 -> -90.0
+            Surface.ROTATION_90 -> 90.0
+            else -> 0.0
+        }
+    }
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -100,8 +126,8 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
             ).elevate(elevationOffset)
         )
 
-        totalHeadingOffset += headingOffset
-        totalElevationOffset += elevationOffset
+        headingCalibrationOffset += headingOffset
+        elevationCalibrationOffset += elevationOffset
     }
 
     /**
@@ -109,34 +135,35 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location) =
+    private fun updateCamera(location: Location) {
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: totalElevationOffset else totalElevationOffset,
-                totalHeadingOffset,
+                if (location.position.hasZ) location.position.z ?: elevationCalibrationOffset else elevationCalibrationOffset,
+                location.course + headingCalibrationOffset + headingOffsetFromRotation(deviceRotation),
                 90.0,
                 0.0
             )
         )
+    }
 
-    internal fun resetHeadingOffset(){
+    internal fun resetHeadingOffset() {
         cameraController.setOriginCamera(cameraController.originCamera.value
             .rotateAround(
                 targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = -totalHeadingOffset,
+                deltaHeading = -headingCalibrationOffset,
                 deltaPitch = 0.0,
                 deltaRoll = 0.0
             )
         )
-        totalHeadingOffset = 0.0
+        headingCalibrationOffset = 0.0
     }
 
     internal fun resetElevationOffset(){
         cameraController.setOriginCamera(cameraController.originCamera.value
-            .elevate(-totalElevationOffset))
-        totalElevationOffset = 0.0
+            .elevate(-elevationCalibrationOffset))
+        elevationCalibrationOffset = 0.0
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -187,6 +214,20 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     }
                 }
         }
+        scope.launch {
+            val heading = locationDataSource.headingChanged.first()
+            val location = cameraController.originCamera.value.location
+            cameraController.setOriginCamera(
+                Camera(
+                    location.x,
+                    location.y,
+                    if (location.hasZ) location.z!! else 0.0,
+                    heading + headingOffsetFromRotation(deviceRotation),
+                    90.0,
+                    0.0
+                )
+            )
+        }
     }
 }
 
@@ -199,9 +240,10 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
  */
 @Composable
 internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
-    ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
+    val context = LocalContext.current
+    ArcGISEnvironment.applicationContext = context.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart) }
+    val wrapper = remember { WorldTrackingCameraController(context, onLocationDataSourceFailedToStart) }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
