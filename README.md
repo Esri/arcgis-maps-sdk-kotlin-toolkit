@@ -14,6 +14,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
 * **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
+* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
 
 ## API Reference
 
@@ -56,6 +57,7 @@ implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-scalebar")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-utilitynetworks")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-ar")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.
