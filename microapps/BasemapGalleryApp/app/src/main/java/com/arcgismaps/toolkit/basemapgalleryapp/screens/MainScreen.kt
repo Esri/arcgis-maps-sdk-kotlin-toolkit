@@ -91,9 +91,7 @@ fun MainScreen() {
                 onItemClick = {
                     when (val tag = it.tag) {
                         is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
-
                         is Item -> viewModel.changeBasemap(Basemap(item = tag))
-
                         else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
                     }
                 })
