@@ -143,6 +143,8 @@ public fun Scalebar(
             isScalebarVisible.value = true
             delay(autoHideDelay)
             isScalebarVisible.value = false
+        } else {
+            isScalebarVisible.value = true
         }
     }
     val availableLineDisplayLength =
