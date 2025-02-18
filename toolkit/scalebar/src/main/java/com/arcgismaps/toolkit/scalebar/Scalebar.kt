@@ -137,7 +137,7 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    val isScalebarVisible = remember { mutableStateOf(true) }
+    val isScalebarVisible = remember(autoHideDelay) { mutableStateOf(true) }
     LaunchedEffect(viewpoint, autoHideDelay) {
         if (autoHideDelay > Duration.ZERO && autoHideDelay != Duration.INFINITE) {
             isScalebarVisible.value = true
