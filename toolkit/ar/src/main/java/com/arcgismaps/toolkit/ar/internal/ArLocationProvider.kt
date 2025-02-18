@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.LocationManager
 import android.location.OnNmeaMessageListener
 import android.os.Handler
+import android.util.Log
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -16,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 
@@ -26,6 +28,8 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
     private val nmeaLocationDataSource = NmeaLocationDataSource()
     private val locationManager: LocationManager
     private val handler: Handler
+
+    private var lastKnownBearing: Float? = null
 
     init {
         require(ArcGISEnvironment.applicationContext != null)
@@ -41,23 +45,25 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
     )
     override val locations: Flow<Location> =
         nmeaLocationDataSource.locationChanged.map {
-            Location.create(
-                Point(
-                    it.position.x,
-                    it.position.y,
-                    it.heightAboveGeoid,
-                    it.position.m,
-                    SpatialReference(it.position.spatialReference!!.wkid, 5773 /*EGM96*/)
-                ),
-                it.horizontalAccuracy,
-                it.verticalAccuracy,
-                it.speed,
-                headings.replayCache[0], // just use the last value emitted by the systemLocationDataSource's headingChanged flow
-                it.lastKnown,
-                it.timestamp,
-                it.additionalSourceProperties
-            )
-        }
+            lastKnownBearing?.let { bearing ->
+                Location.create(
+                    Point(
+                        it.position.x,
+                        it.position.y,
+                        it.heightAboveGeoid,
+                        it.position.m,
+                        SpatialReference(it.position.spatialReference!!.wkid, 5773 /*EGM96*/)
+                    ),
+                    it.horizontalAccuracy,
+                    it.verticalAccuracy,
+                    it.speed,
+                    bearing.toDouble(),
+                    it.lastKnown,
+                    it.timestamp,
+                    it.additionalSourceProperties
+                )
+            }
+        }.filterNotNull()
 
     @SuppressLint("MissingPermission")
     internal suspend fun start() {
@@ -73,7 +79,15 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
                 provider,
                 100,
                 0f,
-                {},
+                {
+                    if (it.hasBearing()) {
+                        lastKnownBearing = it.bearing
+                    }
+                    Log.e("ArLocationProvider", "Satellites: ${it.extras?.getInt("satellites")}")
+                    Log.e("ArLocationProvider", "Has bearing: ${it.hasBearing()}")
+                    Log.e("ArLocationProvider", "Bearing accuracy: ${it.bearingAccuracyDegrees}")
+                    Log.e("ArLocationProvider", "Bearing: ${it.bearing}")
+                },
                 ArcGISEnvironment.applicationContext!!.mainLooper
             )
         }

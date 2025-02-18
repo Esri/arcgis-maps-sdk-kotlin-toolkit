@@ -19,11 +19,16 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -170,92 +175,111 @@ public fun WorldScaleSceneView(
         }
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
-        SceneView(
-            arcGISScene = arcGISScene,
-            modifier = Modifier.fillMaxSize(),
-            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-            graphicsOverlays = graphicsOverlays,
-            sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
-            sceneViewInteractionOptions = remember {
-                // Disable interaction, which is not supported in WorldScale scenarios
-                SceneViewInteractionOptions().apply {
-                    isEnabled = false
-                }
-            },
-            viewLabelProperties = viewLabelProperties,
-            selectionProperties = selectionProperties,
-            isAttributionBarVisible = isAttributionBarVisible,
-            onAttributionTextChanged = onAttributionTextChanged,
-            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = locationTracker.cameraController,
-            analysisOverlays = analysisOverlays,
-            imageOverlays = imageOverlays,
-            atmosphereEffect = AtmosphereEffect.None,
-            timeExtent = timeExtent,
-            onTimeExtentChanged = onTimeExtentChanged,
-            spaceEffect = SpaceEffect.Transparent,
-            sunTime = sunTime,
-            sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor,
-            onNavigationChanged = onNavigationChanged,
-            onSpatialReferenceChanged = onSpatialReferenceChanged,
-            onLayerViewStateChanged = onLayerViewStateChanged,
-            onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-            onRotate = onRotate,
-            onScale = onScale,
-            onUp = onUp,
-            onDown = onDown,
-            onSingleTapConfirmed = onSingleTapConfirmed,
-            onDoubleTap = onDoubleTap,
-            onLongPress = onLongPress,
-            onTwoPointerTap = onTwoPointerTap,
-            onPan = onPan,
-            content = {
-                content?.let { content ->
-                    val worldScaleSceneViewScope = remember {
-                        WorldScaleSceneViewScope(
-                            sceneViewScope = this,
-                            onHeadingChange = {
-                                locationTracker.cameraController.setOriginCamera(
-                                    locationTracker.cameraController.originCamera.value.rotateAround(
-                                        locationTracker.cameraController.originCamera.value.location,
-                                        deltaPitch = 0.0,
-                                        deltaRoll = 0.0,
-                                        deltaHeading = -it
-                                    )
-                                )
-                                totalHeadingOffset += it
-                            },
-                            onElevationChange = {
-                                locationTracker.cameraController.setOriginCamera(
-                                    locationTracker.cameraController.originCamera.value.elevate(it)
-                                )
-                                totalElevationOffset += it
-                            },
-                            onHeadingReset = {
-                                locationTracker.cameraController.setOriginCamera(
-                                    locationTracker.cameraController.originCamera.value.rotateAround(
-                                        locationTracker.cameraController.originCamera.value.location,
-                                        deltaPitch = 0.0,
-                                        deltaRoll = 0.0,
-                                        deltaHeading = totalHeadingOffset
-                                    )
-                                )
-                                totalHeadingOffset = 0.0
-                            },
-                            onElevationReset = {
-                                locationTracker.cameraController.setOriginCamera(
-                                    locationTracker.cameraController.originCamera.value.elevate(-totalElevationOffset)
-                                )
-                                totalElevationOffset = 0.0
-                            }
-                        )
+        var currentCamera by remember { mutableStateOf<Camera?>(null) }
+        Box(modifier = Modifier.fillMaxSize()) {
+            SceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier.fillMaxSize(),
+                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+                graphicsOverlays = graphicsOverlays,
+                sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
+                sceneViewInteractionOptions = remember {
+                    // Disable interaction, which is not supported in WorldScale scenarios
+                    SceneViewInteractionOptions().apply {
+                        isEnabled = false
                     }
-                    content.invoke(worldScaleSceneViewScope)
+                },
+                viewLabelProperties = viewLabelProperties,
+                selectionProperties = selectionProperties,
+                isAttributionBarVisible = isAttributionBarVisible,
+                onAttributionTextChanged = onAttributionTextChanged,
+                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+                cameraController = locationTracker.cameraController,
+                analysisOverlays = analysisOverlays,
+                imageOverlays = imageOverlays,
+                atmosphereEffect = AtmosphereEffect.None,
+                timeExtent = timeExtent,
+                onTimeExtentChanged = onTimeExtentChanged,
+                spaceEffect = SpaceEffect.Transparent,
+                sunTime = sunTime,
+                sunLighting = sunLighting,
+                ambientLightColor = ambientLightColor,
+                onNavigationChanged = onNavigationChanged,
+                onSpatialReferenceChanged = onSpatialReferenceChanged,
+                onLayerViewStateChanged = onLayerViewStateChanged,
+                onInteractingChanged = onInteractingChanged,
+                onCurrentViewpointCameraChanged = {
+                    currentCamera = it
+                    onCurrentViewpointCameraChanged?.invoke(it)
+                },
+                onRotate = onRotate,
+                onScale = onScale,
+                onUp = onUp,
+                onDown = onDown,
+                onSingleTapConfirmed = onSingleTapConfirmed,
+                onDoubleTap = onDoubleTap,
+                onLongPress = onLongPress,
+                onTwoPointerTap = onTwoPointerTap,
+                onPan = onPan,
+                content = {
+                    content?.let { content ->
+                        val worldScaleSceneViewScope = remember {
+                            WorldScaleSceneViewScope(
+                                sceneViewScope = this,
+                                onHeadingChange = {
+                                    locationTracker.cameraController.setOriginCamera(
+                                        locationTracker.cameraController.originCamera.value.rotateAround(
+                                            locationTracker.cameraController.originCamera.value.location,
+                                            deltaPitch = 0.0,
+                                            deltaRoll = 0.0,
+                                            deltaHeading = -it
+                                        )
+                                    )
+                                    totalHeadingOffset += it
+                                },
+                                onElevationChange = {
+                                    locationTracker.cameraController.setOriginCamera(
+                                        locationTracker.cameraController.originCamera.value.elevate(
+                                            it
+                                        )
+                                    )
+                                    totalElevationOffset += it
+                                },
+                                onHeadingReset = {
+                                    locationTracker.cameraController.setOriginCamera(
+                                        locationTracker.cameraController.originCamera.value.rotateAround(
+                                            locationTracker.cameraController.originCamera.value.location,
+                                            deltaPitch = 0.0,
+                                            deltaRoll = 0.0,
+                                            deltaHeading = totalHeadingOffset
+                                        )
+                                    )
+                                    totalHeadingOffset = 0.0
+                                },
+                                onElevationReset = {
+                                    locationTracker.cameraController.setOriginCamera(
+                                        locationTracker.cameraController.originCamera.value.elevate(
+                                            -totalElevationOffset
+                                        )
+                                    )
+                                    totalElevationOffset = 0.0
+                                }
+                            )
+                        }
+                        content.invoke(worldScaleSceneViewScope)
+                    }
                 }
+            )
+            Column(
+                modifier = Modifier.background(Color.Gray)
+            ) {
+                val originCamera = locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
+                Text("Origin Camera: ${originCamera.location.x}, ${originCamera.location.y}, ${originCamera.location.z}")
+                Text("Origin heading: ${originCamera.heading}")
+                Text("Current Viewpoint Camera: ${currentCamera?.location?.x}, ${currentCamera?.location?.y}, ${currentCamera?.location?.z}")
+                Text("Current Viewpoint Heading: ${currentCamera?.heading}")
             }
-        )
+        }
     }
 }

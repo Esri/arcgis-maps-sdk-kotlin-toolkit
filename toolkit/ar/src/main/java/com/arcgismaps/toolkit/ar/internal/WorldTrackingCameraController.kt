@@ -217,7 +217,7 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
  */
 internal fun shouldUpdateCamera(
     location: Location,
-    currentCamera: Camera,
+    currentOriginCamera: Camera,
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -231,7 +231,7 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
-    val currentCameraLocation = Point(currentCamera.location.x, currentCamera.location.y, currentCamera.location.z!!, SpatialReference(currentCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+    val currentCameraLocation = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (
         currentCameraLocation,
         location.position,
