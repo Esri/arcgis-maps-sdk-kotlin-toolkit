@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyleInfo
 import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
+import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
@@ -67,6 +68,14 @@ fun MainScreen() {
     val options = remember { listOf("Basemap Styles", "Portal items") }
     var selectedBasemapSource by remember { mutableIntStateOf(0) }
 
+    val onItemClick: (BasemapGalleryItem) -> Unit = {
+        when (val tag = it.tag) {
+            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
+            is Item -> viewModel.changeBasemap(Basemap(item = tag))
+            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+        }
+    }
+
     BottomSheetScaffold(
         sheetContent = {
             SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(10.dp).fillMaxWidth()) {
@@ -76,7 +85,9 @@ fun MainScreen() {
                             index = index,
                             count = options.size
                         ),
-                        onClick = { selectedBasemapSource = index },
+                        onClick = {
+                            selectedBasemapSource = index
+                        },
                         selected = index == selectedBasemapSource,
                         label = { Text(label) }
                     )
@@ -84,25 +95,17 @@ fun MainScreen() {
             }
 
             if (selectedBasemapSource == 0) {
-                BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+                BasemapGallery(
+                    modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                     basemapGalleryItems = viewModel.styleItems,
-                    onItemClick = {
-                        when (val tag = it.tag) {
-                            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
-                            is Item -> viewModel.changeBasemap(Basemap(item = tag))
-                            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
-                        }
-                    })
+                    onItemClick = onItemClick
+                )
             } else {
-                BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+                BasemapGallery(
+                    modifier = Modifier.fillMaxHeight(fraction = 0.5f),
                     basemapGalleryItems = viewModel.portalItems,
-                    onItemClick = {
-                        when (val tag = it.tag) {
-                            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
-                            is Item -> viewModel.changeBasemap(Basemap(item = tag))
-                            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
-                        }
-                    })
+                    onItemClick = onItemClick
+                )
             }
         },
         scaffoldState = bottomSheetScaffoldState,
