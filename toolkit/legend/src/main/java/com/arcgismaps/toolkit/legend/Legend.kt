@@ -51,7 +51,9 @@ public fun Legend(
     LaunchedEffect(geoModel) {
         geoModel.load().onSuccess {
             val geoModelLayers = getGeoModelLayersInOrder(geoModel)
-            legendItems = loadAndGetAllLayerRows(geoModelLayers)
+            loadAndGetAllLayerRows(geoModelLayers) { loadedLayerRows ->
+                legendItems = loadedLayerRows
+            }
         }
     }
 
@@ -103,14 +105,16 @@ private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerContent> {
  * Returns a list of LayerRow objects, which are the layers and sublayers of the GeoModel in order.
  *
  * @param geoModel The GeoModel to load the layers and sublayers from.
- * @return A list of LayerRow objects.
+ * @param onComplete The callback to execute when the layers and sublayers are loaded.
  */
-private suspend fun loadAndGetAllLayerRows(geoModelLayersInOrder: List<LayerContent>): List<LayerRow> {
-    val layerRows = mutableListOf<LayerRow>()
-    geoModelLayersInOrder.forEach { layerContent ->
-        layerRows.addAll(loadLayerRow(layerContent))
+private suspend fun loadAndGetAllLayerRows(
+    geoModelLayersInOrder: List<LayerContent>,
+    onComplete: (List<LayerRow>) -> Unit
+) {
+    val layerRows = geoModelLayersInOrder.flatMap { layerContent ->
+        loadLayerRow(layerContent)
     }
-    return layerRows
+    onComplete(layerRows)
 }
 
 /**
@@ -120,15 +124,16 @@ private suspend fun loadAndGetAllLayerRows(geoModelLayersInOrder: List<LayerCont
  * @return A list of LayerRow objects.
  */
 private suspend fun loadLayerRow(layerContent: LayerContent): List<LayerRow> {
-    val layerRows = mutableListOf<LayerRow>()
-    if (layerContent is Layer) {
-        layerContent.load().onSuccess {
-            layerRows.addAll(fetchLayerRowsWithSublayersAndLegendInfos(layerContent))
+    return if (layerContent is Layer) {
+        val result = layerContent.load()
+        if (result.isSuccess) {
+            fetchLayerRowsWithSublayersAndLegendInfos(layerContent)
+        } else {
+            emptyList()
         }
     } else {
-        layerRows.addAll(fetchLayerRowsWithSublayersAndLegendInfos(layerContent))
+        fetchLayerRowsWithSublayersAndLegendInfos(layerContent)
     }
-    return layerRows
 }
 
 /**
