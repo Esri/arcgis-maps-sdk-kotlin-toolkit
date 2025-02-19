@@ -18,7 +18,7 @@ viewModelScope.launch {
     }
 }
 ```
-then create the UI using with the `BasemapGallery` using those items like this
+then create the UI with the `BasemapGallery` using those items like this
 ```kotlin
 Column {
         MapView(
