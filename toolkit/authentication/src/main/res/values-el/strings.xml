@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">π_Untrusted host_______________Ω</string>
+    <string name="server_trust_message">π_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________Ω?</string>
     <string name="cancel">Ακύρωση</string>
+    <string name="allow_connection">π_Allow connection_________________Ω</string>
+    <string name="username_password_login_title">π_Authentication required________________________Ω</string>
+    <string name="username_password_login_message">π_You need to sign in to access %1$s__________________Ω</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Όνομα χρήστη</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Κωδικός πρόσβασης</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">π_Sign in_______________Ω</string>
 </resources>

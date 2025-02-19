@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Ř_Untrusted host_______________ů</string>
+    <string name="server_trust_message">Ř_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ů?</string>
     <string name="cancel">Storno</string>
+    <string name="allow_connection">Ř_Allow connection_________________ů</string>
+    <string name="username_password_login_title">Ř_Authentication required________________________ů</string>
+    <string name="username_password_login_message">Ř_You need to sign in to access %1$s__________________ů</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Uživatelské jméno</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Heslo</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Ř_Sign in_______________ů</string>
 </resources>

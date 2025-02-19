@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Š_Enter %1$d character_____________________ä</item>
         <item quantity="one">Sisestage %1$d tähemärk</item>
+        <item quantity="two">Š_Enter %1$d characters______________________ä</item>
+        <item quantity="few">Š_Enter %1$d characters______________________ä</item>
+        <item quantity="many">Š_Enter %1$d characters______________________ä</item>
         <item quantity="other">Sisestage %1$d tähemärki</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Š_Value must be %1$d character_____________________________ä</item>
         <item quantity="one">Väärtus peab olema %1$d tähemärk</item>
+        <item quantity="two">Š_Value must be %1$d characters______________________________ä</item>
+        <item quantity="few">Š_Value must be %1$d characters______________________________ä</item>
+        <item quantity="many">Š_Value must be %1$d characters______________________________ä</item>
         <item quantity="other">Väärtus peab olema %1$d tähemärki</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Sisestage %1$d kuni %2$d tähemärki</string>
-    <string name="value_must_be_from_to_characters">Väärtus peab olema %1$d kuni %2$d tähemärki</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Š_Maximum %1$d character_______________________ä</item>
         <item quantity="one">Maksimaalne tähemärkide arv: %1$d</item>
+        <item quantity="two">Š_Maximum %1$d characters________________________ä</item>
+        <item quantity="few">Š_Maximum %1$d characters________________________ä</item>
+        <item quantity="many">Š_Maximum %1$d characters________________________ä</item>
         <item quantity="other">Maksimaalne tähemärkide arv: %1$d</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Sisestage %1$d kuni %2$d tähemärki</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Väärtus peab olema %1$d kuni %2$d tähemärki</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimaalne tähemärkide arv: %1$d</string>
     <string name="no_value">Väärtus puudub</string>
     <string name="enter_value">Sisestage väärtus</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Valmis</string>
     <string name="filter">Filtreeri %1$s</string>
+    <string name="search">Š_Search_____________ä</string>
     <string name="numeric_range_helper_text">Sisestage väärtus vahemikus %1$s kuni %2$s</string>
     <string name="value_must_be_from_to">Väärtus peab olema vahemikus %1$s kuni %2$s</string>
     <string name="less_than_min_value">Väiksem kui miinimumväärtus %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">e.l.</string>
     <string name="ff_time_picker_hour">Tund</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d tundi</string>
     <string name="ff_time_picker_hour_selection">Valige tund</string>
     <string name="ff_time_picker_hour_suffix">Kell %1$d</string>
     <string name="ff_time_picker_hour_text_field">tund</string>
     <string name="ff_time_picker_minute">Minut</string>
     <string name="ff_time_picker_minute_selection">Valige minuti</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minutit</string>
     <string name="ff_time_picker_minute_text_field">minutid</string>
     <string name="ff_time_picker_period_toggle_description">Valige AM või PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Tühje faile ei saa alla laadida</string>
     <string name="attachment_deleted">%1s kustutati edukalt</string>
     <string name="attachment_size_limit_exceeded">Suuremaid manuseid kui %1$s ei saa alla laadida</string>
+    <string name="barcode_tooltip">Š_Point your camera at a barcode_______________________________ä</string>
+    <string name="barcode_permission_denied">Š_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ä.</string>
+    <string name="unsupported_value">Š_Unsupported Value__________________ä</string>
+    <string name="tap_to_scan">Š_Tap to scan____________ä</string>
+    <string name="unable_to_open_the_camera">Š_Unable to open the camera__________________________ä</string>
+    <string name="value_must_be_a_guid">Š_Value must be a valid GUID___________________________ä</string>
 </resources>
