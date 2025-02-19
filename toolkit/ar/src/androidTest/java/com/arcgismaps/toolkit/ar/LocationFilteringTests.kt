@@ -22,7 +22,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.toolkit.ar.internal.shouldUpdateCamera
+import com.arcgismaps.toolkit.ar.internal.shouldUpdateLocation
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.Instant
@@ -67,11 +67,11 @@ class LocationFilteringTests {
             Instant.now().minusMillis(50)
         )
 
-        assertThat(shouldUpdateCamera(recentLocationAtNullIsland, cameraAtNullIsland)).isFalse()
-        assertThat(shouldUpdateCamera(oldLocationAtNullIsland, cameraAtNullIsland)).isFalse()
-        assertThat(shouldUpdateCamera(oldLocationFarFarAway, cameraAtNullIsland)).isFalse()
-        assertThat(shouldUpdateCamera(recentLocationWithNoAccuracy, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateLocation(recentLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateLocation(oldLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateLocation(oldLocationFarFarAway, cameraAtNullIsland)).isFalse()
+        assertThat(shouldUpdateLocation(recentLocationWithNoAccuracy, cameraAtNullIsland)).isFalse()
 
-        assertThat(shouldUpdateCamera(recentLocationFarFarAway, cameraAtNullIsland)).isTrue()
+        assertThat(shouldUpdateLocation(recentLocationFarFarAway, cameraAtNullIsland)).isTrue()
     }
 }

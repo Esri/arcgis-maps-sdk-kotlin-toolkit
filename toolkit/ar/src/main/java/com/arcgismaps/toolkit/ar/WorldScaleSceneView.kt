@@ -275,10 +275,13 @@ public fun WorldScaleSceneView(
                 modifier = Modifier.background(Color.Gray)
             ) {
                 val originCamera = locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
+                val arLocationProviderDebugInfo = locationTracker.arLocationProvider.debugInfo.value
                 Text("Origin Camera: ${originCamera.location.x}, ${originCamera.location.y}, ${originCamera.location.z}")
                 Text("Origin heading: ${originCamera.heading}")
-                Text("Current Viewpoint Camera: ${currentCamera?.location?.x}, ${currentCamera?.location?.y}, ${currentCamera?.location?.z}")
-                Text("Current Viewpoint Heading: ${currentCamera?.heading}")
+                Text("Has bearing: ${arLocationProviderDebugInfo.hasBearing}")
+                Text("Bearing accuracy: ${arLocationProviderDebugInfo.bearingAccuracyDegrees}")
+                Text("Bearing: ${arLocationProviderDebugInfo.bearing}")
+                Text("Satellite count: ${arLocationProviderDebugInfo.satelliteCount}")
             }
         }
     }
