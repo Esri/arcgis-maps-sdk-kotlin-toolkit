@@ -30,9 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.GeoModel
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
+import com.arcgismaps.mapping.layers.LegendInfo
 
-internal typealias LayerRow = LayerContent
+internal data class LayerRow (
+    val layer: LayerContent,
+    val isVisibleAtScale: (Double) -> Boolean,
+    val legendInfos: List<LegendInfo>
+)
 
 @Composable
 public fun Legend(
@@ -44,7 +50,8 @@ public fun Legend(
 
     LaunchedEffect(geoModel) {
         geoModel.load().onSuccess {
-            legendItems = getGeoModelLayersInOrder(geoModel)
+            val geoModelLayers = getGeoModelLayersInOrder(geoModel)
+            legendItems = loadAndGetAllLayerRows(geoModelLayers)
         }
     }
 
@@ -65,21 +72,17 @@ private fun Legend(
     ) {
     LazyColumn(modifier = modifier) {
         items(legendItems) { item ->
-            if (item.showLayer(currentScale)) {
+            if (item.isVisibleAtScale(currentScale)) {
                 Row {
-                    Text(text = item.name)
+                    Text(text = item.layer.name)
                 }
             }
         }
     }
 }
 
-private fun LayerRow.showLayer(scale: Double): Boolean {
-    return this.isVisibleAtScale(scale)
-}
-
-private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerRow> {
-    var layerListToDisplayInLegend = mutableListOf<LayerRow>()
+private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerContent> {
+    var layerListToDisplayInLegend = mutableListOf<LayerContent>()
 
     // add all operational layers
     geoModel.operationalLayers.let { layerListToDisplayInLegend.addAll(it) }
@@ -95,3 +98,65 @@ private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerRow> {
     return layerListToDisplayInLegend.reversed()
 }
 
+/**
+ * Loads all the layers and sublayers in the GeoModel.
+ * Returns a list of LayerRow objects, which are the layers and sublayers of the GeoModel in order.
+ *
+ * @param geoModel The GeoModel to load the layers and sublayers from.
+ * @return A list of LayerRow objects.
+ */
+private suspend fun loadAndGetAllLayerRows(geoModelLayersInOrder: List<LayerContent>): List<LayerRow> {
+    val layerRows = mutableListOf<LayerRow>()
+    geoModelLayersInOrder.forEach { layerContent ->
+        layerRows.addAll(loadLayerRow(layerContent))
+    }
+    return layerRows
+}
+
+/**
+ * Loads the layer and its sublayers.
+ *
+ * @param layerContent The layer to load.
+ * @return A list of LayerRow objects.
+ */
+private suspend fun loadLayerRow(layerContent: LayerContent): List<LayerRow> {
+    val layerRows = mutableListOf<LayerRow>()
+    if (layerContent is Layer) {
+        layerContent.load().onSuccess {
+            layerRows.addAll(fetchLayerRowsWithSublayersAndLegendInfos(layerContent))
+        }
+    } else {
+        layerRows.addAll(fetchLayerRowsWithSublayersAndLegendInfos(layerContent))
+    }
+    return layerRows
+}
+
+/**
+ * Fetches the layer's sublayers and legend infos.
+ *
+ * @param layerContent The layer to fetch the sublayers and legend infos from.
+ * @return A list of LayerRow objects.
+ */
+private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(layerContent: LayerContent): List<LayerRow> {
+    val layerRows = mutableListOf<LayerRow>()
+    if (layerContent.subLayerContents.value.isNotEmpty()) {
+        layerContent.subLayerContents.value.forEach { subLayer ->
+            layerRows.addAll(loadLayerRow(subLayer))
+        }
+    } else {
+        layerContent.fetchLegendInfos().onSuccess { legendInfos ->
+            layerRows.add(
+                LayerRow(
+                    layerContent,
+                    { scale ->
+                        layerContent.isVisibleAtScale(
+                            scale
+                        )
+                    },
+                    legendInfos
+                )
+            )
+        }
+    }
+    return layerRows
+}
