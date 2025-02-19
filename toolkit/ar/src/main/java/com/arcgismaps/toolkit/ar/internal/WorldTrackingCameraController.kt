@@ -183,8 +183,8 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                         Camera(
                             location.position.y,
                             location.position.x,
-                            if (location.position.hasZ) location.position.z!! else 0.0,
-                            heading,
+                            if (location.position.hasZ) location.position.z!!+totalElevationOffset else totalElevationOffset,
+                            heading+totalHeadingOffset,
                             90.0,
                             0.0
                         )
