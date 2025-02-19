@@ -83,18 +83,27 @@ fun MainScreen() {
                 }
             }
 
-            BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
-                basemapGalleryItems = when (selectedBasemapSource) {
-                    0 -> viewModel.styleItems
-                    else -> viewModel.portalItems
-                },
-                onItemClick = {
-                    when (val tag = it.tag) {
-                        is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
-                        is Item -> viewModel.changeBasemap(Basemap(item = tag))
-                        else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
-                    }
-                })
+            if (selectedBasemapSource == 0) {
+                BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+                    basemapGalleryItems = viewModel.styleItems,
+                    onItemClick = {
+                        when (val tag = it.tag) {
+                            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
+                            is Item -> viewModel.changeBasemap(Basemap(item = tag))
+                            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+                        }
+                    })
+            } else {
+                BasemapGallery(modifier = Modifier.fillMaxHeight(fraction = 0.5f),
+                    basemapGalleryItems = viewModel.portalItems,
+                    onItemClick = {
+                        when (val tag = it.tag) {
+                            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
+                            is Item -> viewModel.changeBasemap(Basemap(item = tag))
+                            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+                        }
+                    })
+            }
         },
         scaffoldState = bottomSheetScaffoldState,
         topBar = {
