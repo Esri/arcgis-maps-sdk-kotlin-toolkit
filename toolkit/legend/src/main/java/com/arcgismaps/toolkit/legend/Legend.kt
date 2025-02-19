@@ -102,7 +102,8 @@ private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerContent> {
 
 /**
  * Loads all the layers and sublayers in the GeoModel.
- * Returns a list of LayerRow objects, which are the layers and sublayers of the GeoModel in order.
+ * Returns a list of LayerRow objects in the onComplete lambda, which are the layers and sublayers of
+ * the GeoModel in order.
  *
  * @param geoModel The GeoModel to load the layers and sublayers from.
  * @param onComplete The callback to execute when the layers and sublayers are loaded.
