@@ -80,6 +80,9 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
+    private var totalHeadingOffset = 0.0
+    private var totalElevationOffset = 0.0
+
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
      *
@@ -95,9 +98,39 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
      *
      * @since 200.7.0
      */
-    internal fun updateCamera(headingOffset: Double, elevationOffset: Double): Unit = TODO()
+    internal fun updateCamera(headingOffset: Double, elevationOffset: Double) {
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .rotateAround(
+                targetPoint = cameraController.originCamera.value.location,
+                deltaHeading = headingOffset,
+                deltaPitch = 0.0,
+                deltaRoll = 0.0
+            ).elevate(elevationOffset)
+        )
+
+        totalHeadingOffset += headingOffset
+        totalElevationOffset += elevationOffset
+    }
 
     private var heading: Double = 0.0
+
+    internal fun resetHeadingOffset(){
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .rotateAround(
+                targetPoint = cameraController.originCamera.value.location,
+                deltaHeading = -totalHeadingOffset,
+                deltaPitch = 0.0,
+                deltaRoll = 0.0
+            )
+        )
+        totalHeadingOffset = 0.0
+    }
+
+    internal fun resetElevationOffset(){
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .elevate(-totalElevationOffset))
+        totalElevationOffset = 0.0
+    }
 
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {

@@ -23,14 +23,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 
+/**
+ * Object holding the default theming for the [WorldScaleCalibrationView].
+ *
+ * @since 200.7.0
+ */
 public object WorldScaleCalibrationViewDefaults {
 
+    /**
+     * Default color scheme for the [WorldScaleCalibrationView].
+     *
+     * @param backgroundColor The background color of the [WorldScaleCalibrationView].
+     * @param containerColor The color of the containers of the [WorldScaleCalibrationView], such as
+     * the area for heading controls as well as elevation controls.
+     * @param buttonContainerColor The color of the container for the buttons in the [WorldScaleCalibrationView].
+     * @param buttonContentColor The color of the content of the buttons in the [WorldScaleCalibrationView].
+     * @param sliderTrackColor The color of the track of the sliders in the [WorldScaleCalibrationView].
+     * @param sliderThumbColor The color of the thumb of the sliders in the [WorldScaleCalibrationView].
+     *
+     * @since 200.7.0
+     */
     @Composable
     public fun colorScheme(
         backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.85F),
         containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9F),
-        closeButtonContainerColor: Color = MaterialTheme.colorScheme.secondary,
-        closeButtonContentColor: Color = MaterialTheme.colorScheme.onSecondary,
         buttonContainerColor: Color = MaterialTheme.colorScheme.primary,
         buttonContentColor: Color = MaterialTheme.colorScheme.onPrimary,
         sliderTrackColor: Color = MaterialTheme.colorScheme.primary,
@@ -39,8 +55,6 @@ public object WorldScaleCalibrationViewDefaults {
         return WorldScaleCalibrationViewColorScheme(
             backgroundColor = backgroundColor,
             containerColor = containerColor,
-            closeButtonContainerColor = closeButtonContainerColor,
-            closeButtonContentColor = closeButtonContentColor,
             buttonContainerColor = buttonContainerColor,
             buttonContentColor = buttonContentColor,
             sliderTrackColor = sliderTrackColor,
@@ -48,6 +62,15 @@ public object WorldScaleCalibrationViewDefaults {
         )
     }
 
+    /**
+     * Default typography scheme for the [WorldScaleCalibrationView]
+     *
+     * @param titleTextStyle The text style for the title of the [WorldScaleCalibrationView].
+     * @param subtitleTextStyle The text style for any subtitles of the [WorldScaleCalibrationView].
+     * @param bodyTextStyle The text style for any body text of the [WorldScaleCalibrationView].
+     *
+     * @since 200.7.0
+     */
     @Composable
     public fun typography(
         titleTextStyle: TextStyle = MaterialTheme.typography.titleLarge.copy(

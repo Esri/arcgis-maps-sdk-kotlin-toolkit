@@ -144,9 +144,6 @@ public fun WorldScaleSceneView(
         }
     )
 
-    var totalHeadingOffset = remember { 0.0 }
-    var totalElevationOffset = remember { 0.0 }
-
     Box(modifier = modifier) {
         val arSessionWrapper =
             rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
@@ -209,10 +206,7 @@ public fun WorldScaleSceneView(
                 onSpatialReferenceChanged = onSpatialReferenceChanged,
                 onLayerViewStateChanged = onLayerViewStateChanged,
                 onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = {
-                    currentCamera = it
-                    onCurrentViewpointCameraChanged?.invoke(it)
-                },
+                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
                 onRotate = onRotate,
                 onScale = onScale,
                 onUp = onUp,
@@ -228,42 +222,22 @@ public fun WorldScaleSceneView(
                             WorldScaleSceneViewScope(
                                 sceneViewScope = this,
                                 onHeadingChange = {
-                                    locationTracker.cameraController.setOriginCamera(
-                                        locationTracker.cameraController.originCamera.value.rotateAround(
-                                            locationTracker.cameraController.originCamera.value.location,
-                                            deltaPitch = 0.0,
-                                            deltaRoll = 0.0,
-                                            deltaHeading = -it
-                                        )
+                                    locationTracker.updateCamera(
+                                        headingOffset = -it,
+                                        elevationOffset = 0.0
                                     )
-                                    totalHeadingOffset += it
                                 },
                                 onElevationChange = {
-                                    locationTracker.cameraController.setOriginCamera(
-                                        locationTracker.cameraController.originCamera.value.elevate(
-                                            it
-                                        )
+                                    locationTracker.updateCamera(
+                                        headingOffset = 0.0,
+                                        elevationOffset = it
                                     )
-                                    totalElevationOffset += it
                                 },
                                 onHeadingReset = {
-                                    locationTracker.cameraController.setOriginCamera(
-                                        locationTracker.cameraController.originCamera.value.rotateAround(
-                                            locationTracker.cameraController.originCamera.value.location,
-                                            deltaPitch = 0.0,
-                                            deltaRoll = 0.0,
-                                            deltaHeading = totalHeadingOffset
-                                        )
-                                    )
-                                    totalHeadingOffset = 0.0
+                                    locationTracker.resetHeadingOffset()
                                 },
                                 onElevationReset = {
-                                    locationTracker.cameraController.setOriginCamera(
-                                        locationTracker.cameraController.originCamera.value.elevate(
-                                            -totalElevationOffset
-                                        )
-                                    )
-                                    totalElevationOffset = 0.0
+                                    locationTracker.resetElevationOffset()
                                 }
                             )
                         }
@@ -271,10 +245,12 @@ public fun WorldScaleSceneView(
                     }
                 }
             )
+
             Column(
                 modifier = Modifier.background(Color.Gray)
             ) {
-                val originCamera = locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
+                val originCamera =
+                    locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
                 val arLocationProviderDebugInfo = locationTracker.arLocationProvider.debugInfo.value
                 Text("Origin Camera: ${originCamera.location.x}, ${originCamera.location.y}, ${originCamera.location.z}")
                 Text("Origin heading: ${originCamera.heading}")
