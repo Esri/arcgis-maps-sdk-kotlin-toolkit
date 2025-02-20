@@ -77,9 +77,9 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
     @SuppressLint("MissingPermission")
     internal suspend fun start() {
         val selectedLocationProviders = mutableListOf<String>()
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) selectedLocationProviders.add(
-            LocationManager.NETWORK_PROVIDER
-        )
+//        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) selectedLocationProviders.add(
+//            LocationManager.NETWORK_PROVIDER
+//        )
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) selectedLocationProviders.add(
             LocationManager.GPS_PROVIDER
         )

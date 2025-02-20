@@ -74,7 +74,9 @@ public class WorldScaleSceneViewScope internal constructor(
     private val onHeadingChange: (Double) -> Unit,
     private val onElevationChange: (Double) -> Unit,
     private val onHeadingReset: () -> Unit,
-    private val onElevationReset: () -> Unit
+    private val onElevationReset: () -> Unit,
+    private val getTotalHeading: () -> Double,
+    private val getTotalElevation: () -> Double
 ) {
 
     /**
@@ -103,7 +105,9 @@ public class WorldScaleSceneViewScope internal constructor(
             onHeadingChange = onHeadingChange,
             onElevationChange = onElevationChange,
             onHeadingReset = onHeadingReset,
-            onElevationReset = onElevationReset
+            onElevationReset = onElevationReset,
+            getTotalHeading = getTotalHeading,
+            getTotalElevation = getTotalElevation
         )
     }
 
@@ -207,10 +211,12 @@ internal fun CalibrationViewInternal(
     onHeadingChange: (Double) -> Unit,
     onElevationChange: (Double) -> Unit,
     onHeadingReset: () -> Unit,
-    onElevationReset: () -> Unit
+    onElevationReset: () -> Unit,
+    getTotalHeading: () -> Double,
+    getTotalElevation: () -> Double
 ) {
-    var heading by remember { mutableFloatStateOf(0F) }
-    var elevation by remember { mutableFloatStateOf(0F) }
+    var heading by remember { mutableFloatStateOf(getTotalHeading().toFloat()) }
+    var elevation by remember { mutableFloatStateOf(getTotalElevation().toFloat()) }
 
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
@@ -262,22 +268,22 @@ internal fun CalibrationViewInternal(
                         plusContentDescription = stringResource(R.string.increase_heading),
                         resetContentDescription = stringResource(R.string.reset_heading),
                         onMinusClick = {
-                            heading -= 1
                             onHeadingChange(-1.0)
+                            heading = getTotalHeading().toFloat()
                         },
                         onPlusClick = {
-                            heading += 1
                             onHeadingChange(1.0)
+                            heading = getTotalHeading().toFloat()
                         },
                         onResetClick = {
-                            heading = 0F
                             onHeadingReset()
+                            heading = getTotalHeading().toFloat()
                         }
                     )
                     Joyslider(
                         onValueChange = {
                             onHeadingChange(it.toDouble())
-                            heading += it
+                            heading = getTotalHeading().toFloat()
                         },
                         contentDescription = stringResource(R.string.heading_slider_description),
                     )
@@ -299,22 +305,22 @@ internal fun CalibrationViewInternal(
                         plusContentDescription = stringResource(R.string.increase_elevation),
                         resetContentDescription = stringResource(R.string.reset_elevation),
                         onMinusClick = {
-                            elevation -= 1
                             onElevationChange(-1.0)
+                            elevation = getTotalElevation().toFloat()
                         },
                         onPlusClick = {
-                            elevation += 1
                             onElevationChange(1.0)
+                            elevation = getTotalElevation().toFloat()
                         },
                         onResetClick = {
-                            elevation = 0F
                             onElevationReset()
+                            elevation = getTotalElevation().toFloat()
                         }
                     )
                     Joyslider(
                         onValueChange = {
                             onElevationChange(it.toDouble())
-                            elevation += it
+                            elevation = getTotalElevation().toFloat()
                         },
                         contentDescription = stringResource(R.string.elevation_slider_description)
                     )

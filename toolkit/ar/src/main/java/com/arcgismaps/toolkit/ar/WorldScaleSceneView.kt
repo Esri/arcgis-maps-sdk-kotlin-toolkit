@@ -206,7 +206,10 @@ public fun WorldScaleSceneView(
                 onSpatialReferenceChanged = onSpatialReferenceChanged,
                 onLayerViewStateChanged = onLayerViewStateChanged,
                 onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+                onCurrentViewpointCameraChanged = {
+                    currentCamera = it
+                    onCurrentViewpointCameraChanged?.invoke(it)
+                },
                 onRotate = onRotate,
                 onScale = onScale,
                 onUp = onUp,
@@ -238,6 +241,12 @@ public fun WorldScaleSceneView(
                                 },
                                 onElevationReset = {
                                     locationTracker.resetElevationOffset()
+                                },
+                                getTotalElevation = {
+                                    locationTracker.totalElevationOffset
+                                },
+                                getTotalHeading = {
+                                    locationTracker.totalHeadingOffset
                                 }
                             )
                         }
@@ -252,11 +261,17 @@ public fun WorldScaleSceneView(
                 val originCamera =
                     locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
                 val arLocationProviderDebugInfo = locationTracker.arLocationProvider.debugInfo.value
+                val worldTrackingDebugInfo = locationTracker.debugInfo.value
                 Text("Origin Camera: ${originCamera.location.x}, ${originCamera.location.y}, ${originCamera.location.z}")
                 Text("Origin heading: ${originCamera.heading}")
-                Text("Has bearing: ${arLocationProviderDebugInfo.hasBearing}")
-                Text("Bearing accuracy: ${arLocationProviderDebugInfo.bearingAccuracyDegrees}")
-                Text("Bearing: ${arLocationProviderDebugInfo.bearing}")
+                Text("Current Camera: ${currentCamera?.location?.x}, ${currentCamera?.location?.y}, ${currentCamera?.location?.z}")
+                Text("Current heading: ${currentCamera?.heading}")
+                Text("hAcc: ${worldTrackingDebugInfo.lastLocationHorizontalAccuracy}")
+                Text("vAcc: ${worldTrackingDebugInfo.lastLocationVerticalAccuracy}")
+                Text("distance: ${worldTrackingDebugInfo.lastDistanceFromOriginLocation}")
+//                Text("Has bearing: ${arLocationProviderDebugInfo.hasBearing}")
+//                Text("Bearing accuracy: ${arLocationProviderDebugInfo.bearingAccuracyDegrees}")
+//                Text("Bearing: ${arLocationProviderDebugInfo.bearing}")
                 Text("Satellite count: ${arLocationProviderDebugInfo.satelliteCount}")
             }
         }

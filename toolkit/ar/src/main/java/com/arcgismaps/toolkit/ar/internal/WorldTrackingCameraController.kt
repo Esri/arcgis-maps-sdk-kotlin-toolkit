@@ -48,7 +48,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.math.abs
@@ -80,8 +79,12 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
 
-    private var totalHeadingOffset = 0.0
-    private var totalElevationOffset = 0.0
+    internal var totalHeadingOffset = 0.0
+        private set
+    internal var totalElevationOffset = 0.0
+        private set
+
+    internal val debugInfo = mutableStateOf(WorldTrackingDebugInfo(0.0, 0.0, 0.0))
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -170,7 +173,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 }
         }
         scope.launch {
-            heading = locationDataSource.headingChanged.first()
+//            heading = locationDataSource.headingChanged.first()
             locationDataSource.locationChanged
                 .filter { location ->
                     !hasSetOriginCamera || shouldUpdateLocation(
@@ -184,7 +187,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                             location.position.y,
                             location.position.x,
                             if (location.position.hasZ) location.position.z!!+totalElevationOffset else totalElevationOffset,
-                            heading+totalHeadingOffset,
+                            0.0+totalHeadingOffset,
                             90.0,
                             0.0
                         )
@@ -212,6 +215,54 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
 //            )
 //        }
     }
+
+
+    /**
+     * Returns false if the location timestamp is older than 10 seconds,
+     * if the horizontal or vertical accuracy is negative,
+     * or if the distance between the location and the current camera is less than 2 meters.
+     * Otherwise, returns true.
+     *
+     * @since 200.7.0
+     */
+    internal fun shouldUpdateLocation(
+        location: Location,
+        currentOriginCamera: Camera,
+    ): Boolean {
+        // filter out old locations
+        if (Instant.now()
+                .toEpochMilli() - location.timestamp.toEpochMilli() > WorldScaleParameters.LOCATION_AGE_THRESHOLD_MS
+        ) return false
+
+        // filter out locations with no accuracy
+        if (location.horizontalAccuracy < 0.0
+            || location.verticalAccuracy < 0.0
+            || location.horizontalAccuracy.isNaN()
+            || location.verticalAccuracy.isNaN()
+        ) return false
+
+        val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+        val distance = GeometryEngine.distanceGeodeticOrNull (
+            currentOriginCameraPosition,
+            location.position,
+            distanceUnit = LinearUnit.meters,
+            azimuthUnit = null,
+            curveType = GeodeticCurveType.Geodesic
+        )?.distance ?: return false
+
+        debugInfo.value = WorldTrackingDebugInfo(
+            lastLocationHorizontalAccuracy = location.horizontalAccuracy,
+            lastLocationVerticalAccuracy = location.verticalAccuracy,
+            lastDistanceFromOriginLocation = distance
+        )
+
+        // filter out locations with low accuracy
+        if (location.horizontalAccuracy > 10.0) return false
+
+        if (distance < WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS) return false
+
+        return distance > location.horizontalAccuracy// || distance > location.verticalAccuracy
+    }
 }
 
 /**
@@ -236,44 +287,6 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
     return wrapper
 }
 
-/**
- * Returns false if the location timestamp is older than 10 seconds,
- * if the horizontal or vertical accuracy is negative,
- * or if the distance between the location and the current camera is less than 2 meters.
- * Otherwise, returns true.
- *
- * @since 200.7.0
- */
-internal fun shouldUpdateLocation(
-    location: Location,
-    currentOriginCamera: Camera,
-): Boolean {
-    // filter out old locations
-    if (Instant.now()
-            .toEpochMilli() - location.timestamp.toEpochMilli() > WorldScaleParameters.LOCATION_AGE_THRESHOLD_MS
-    ) return false
-
-    // filter out locations with no accuracy
-    if (location.horizontalAccuracy < 0.0
-        || location.verticalAccuracy < 0.0
-        || location.horizontalAccuracy.isNaN()
-        || location.verticalAccuracy.isNaN()
-    ) return false
-
-    val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
-    val distance = GeometryEngine.distanceGeodeticOrNull (
-        currentOriginCameraPosition,
-        location.position,
-        distanceUnit = LinearUnit.meters,
-        azimuthUnit = null,
-        curveType = GeodeticCurveType.Geodesic
-    )?.distance ?: return false
-
-    if (distance < WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS) return false
-
-    return distance > location.horizontalAccuracy || distance > location.verticalAccuracy
-}
-
 internal fun shouldUpdateHeading(
     location: Location,
     currentOriginCamera: Camera,
@@ -281,3 +294,9 @@ internal fun shouldUpdateHeading(
     val angleDifference = abs(location.course - currentOriginCamera.heading)
     return angleDifference > WorldScaleParameters.HEADING_ANGLE_THRESHOLD_DEGREES
 }
+
+internal data class WorldTrackingDebugInfo(
+    val lastLocationHorizontalAccuracy: Double,
+    val lastLocationVerticalAccuracy: Double,
+    val lastDistanceFromOriginLocation: Double,
+)
