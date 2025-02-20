@@ -63,6 +63,7 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -137,6 +138,7 @@ public class FeatureFormState private constructor(
         }
         // Add the provided state collection to the store.
         store.addLast(StateData(featureForm, states, unState))
+        evaluateExpressions()
     }
 
     internal constructor(
@@ -152,6 +154,7 @@ public class FeatureFormState private constructor(
         _validationErrorVisibility.value = validationErrorVisibility
         // Add the provided state collection to the store.
         store.addLast(StateData(featureForm, stateCollection, null))
+        evaluateExpressions()
     }
 
     internal fun setNavController(navController: NavController?) {
@@ -176,6 +179,7 @@ public class FeatureFormState private constructor(
             store.addLast(StateData(form, states, unState))
             controller.navigate(NavigationRoute.FormView)
             _activeFeatureForm.value = form
+            evaluateExpressions()
         }
     }
 
@@ -187,6 +191,7 @@ public class FeatureFormState private constructor(
             store.removeLast()
             controller.popBackStack()
             _activeFeatureForm.value = getActiveStateData().featureForm
+            evaluateExpressions()
             true
         } ?: false
     }
@@ -459,6 +464,14 @@ public class FeatureFormState private constructor(
             else -> {
                 null
             }
+        }
+    }
+
+    private fun evaluateExpressions() {
+        coroutineScope.launch {
+            _evaluatingExpressions.value = true
+            activeFeatureForm.evaluateExpressions()
+            _evaluatingExpressions.value = false
         }
     }
 }

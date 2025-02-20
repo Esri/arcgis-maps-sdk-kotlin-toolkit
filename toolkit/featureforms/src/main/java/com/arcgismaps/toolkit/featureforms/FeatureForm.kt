@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -347,6 +348,7 @@ public fun FeatureForm(
                 FormContent(
                     form = featureForm,
                     states = states,
+                    evaluatingExpressions = state.evaluatingExpressions,
                     unState = stateData.unState,
                     onBarcodeButtonClick = onBarcodeButtonClick,
                     onUtilityAssociationFilterClick = { stateId, index ->
@@ -482,6 +484,7 @@ private fun FeatureFormTitle(
 private fun FormContent(
     form: FeatureForm,
     states: FormStateCollection,
+    evaluatingExpressions: Boolean,
     modifier: Modifier = Modifier,
     unState: UtilityNetworkAssociationsElementState?,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
@@ -489,7 +492,7 @@ private fun FormContent(
     onBackPressed: () -> Unit,
     showBackButton: Boolean
 ) {
-    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
+    //var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
         LazyListState()
     }
@@ -510,7 +513,7 @@ private fun FormContent(
             showBackButton = showBackButton
         )
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-            initialEvaluation
+            evaluatingExpressions
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
@@ -591,11 +594,12 @@ private fun FormContent(
             }
         }
     }
-    LaunchedEffect(form) {
-        // ensure expressions are evaluated
-        form.evaluateExpressions()
-        initialEvaluation = true
-    }
+//    LaunchedEffect(form) {
+//        // ensure expressions are evaluated
+//        Log.e("TAG", "FormContent: running exp", )
+//        form.evaluateExpressions()
+//        initialEvaluation = true
+//    }
 }
 
 /**
@@ -653,7 +657,7 @@ internal fun InitializingExpressions(
     evaluationProvider: () -> Boolean
 ) {
     val alpha by animateFloatAsState(
-        if (evaluationProvider()) 0f else 1f,
+        if (evaluationProvider()) 1f else 0f,
         label = "evaluation loading alpha"
     )
     Surface(
