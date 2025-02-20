@@ -85,6 +85,20 @@ android {
     }
 }
 
+apiValidation {
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+
+    // ComposableSingletons$WorldScaleSceneViewScopeKt is generated due to internal compose function CalibrationViewInternal(),
+    // we don't want to check binary compatiblity for this internal function
+    val composableSingletons = listOf(
+        "com/arcgismaps/toolkit/ar/ComposableSingletons\$WorldScaleSceneViewScopeKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
+}
+
 dependencies {
     implementation(project(":geoview-compose"))
     implementation(libs.arcore)
