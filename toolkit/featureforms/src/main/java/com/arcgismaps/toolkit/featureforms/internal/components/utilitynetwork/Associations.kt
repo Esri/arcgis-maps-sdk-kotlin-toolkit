@@ -40,12 +40,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.Guid
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
@@ -198,7 +203,7 @@ internal fun Associations(
                     item(info.association.hashCode()) {
                         AssociationItem(
                             association = info.association,
-                            arcGISFeature = info.associatedFeature,
+                            associatedFeature = info.associatedFeature,
                             onClick = {
                                 onItemClick(info)
                             }
@@ -221,11 +226,12 @@ internal fun Associations(
 @Composable
 private fun AssociationItem(
     association: UtilityAssociation,
-    arcGISFeature: ArcGISFeature,
+    associatedFeature: ArcGISFeature,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val target = association.getTargetElement(arcGISFeature)
+    val target = association.getTargetElement(associatedFeature)
+    val icon = association.getIcon(associatedFeature.globalId)
     val (terminal, fractionAlongEdge) = when (association.associationType) {
         is UtilityAssociationType.Connectivity -> {
             Pair(target.terminal, null)
@@ -248,7 +254,7 @@ private fun AssociationItem(
     ListItem(
         headlineContent = {
             Text(
-                text = "Object ID ${arcGISFeature.objectId}",
+                text = associatedFeature.label,
                 modifier = Modifier.padding(start = 16.dp)
             )
         },
@@ -259,9 +265,17 @@ private fun AssociationItem(
                 style = MaterialTheme.typography.labelSmall
             )
         },
-        trailingContent = {
-            when {
-                terminal != null -> {
+        leadingContent = icon?.let {
+            {
+                Icon(
+                    painter = it,
+                    contentDescription = null
+                )
+            }
+        },
+        trailingContent = when {
+            terminal != null -> {
+                {
                     Text(
                         text = "Terminal : ${terminal.name}",
                         modifier = Modifier
@@ -274,8 +288,10 @@ private fun AssociationItem(
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
+            }
 
-                fractionAlongEdge != null -> {
+            fractionAlongEdge != null -> {
+                {
                     Text(
                         text = "$fractionAlongEdge %",
                         modifier = Modifier
@@ -288,8 +304,10 @@ private fun AssociationItem(
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
+            }
 
-                association.associationType is UtilityAssociationType.Containment -> {
+            association.associationType is UtilityAssociationType.Containment -> {
+                {
                     Text(
                         text = "Containment Visible : ${association.isContainmentVisible}",
                         modifier = Modifier.padding(end = 16.dp),
@@ -298,6 +316,7 @@ private fun AssociationItem(
                 }
             }
 
+            else -> null
         },
         modifier = modifier.clickable {
             onClick()
@@ -308,5 +327,39 @@ private fun AssociationItem(
     )
 }
 
-private val ArcGISFeature.objectId: Long
-    get() = attributes["objectid"] as Long
+internal val ArcGISFeature.label: String
+    get() {
+        return if (objectId != null) {
+            "Object ID : $objectId"
+        } else if (attributes["name"] != null) {
+            attributes["name"] as String
+        } else {
+            "Unnamed Feature"
+        }
+    }
+
+internal val ArcGISFeature.objectId: Long?
+    get() = attributes["objectid"] as? Long
+
+internal val ArcGISFeature.globalId: Guid
+    get() = attributes["globalid"] as Guid
+
+@Composable
+internal fun UtilityAssociation.getIcon(targetElementGuid: Guid): Painter? {
+    return when (this.associationType) {
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
+            painterResource(R.drawable.connection_mid)
+        }
+
+        is UtilityAssociationType.Connectivity, UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+            if (targetElementGuid == fromElement.globalId) {
+                painterResource(R.drawable.connection_end_left)
+            } else {
+                painterResource(R.drawable.connection_end_right)
+            }
+        }
+
+        else -> null
+    }
+}

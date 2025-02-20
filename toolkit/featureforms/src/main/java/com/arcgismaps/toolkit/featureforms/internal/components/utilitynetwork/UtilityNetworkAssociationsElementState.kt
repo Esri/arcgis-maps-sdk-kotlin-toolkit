@@ -121,7 +121,7 @@ internal fun UtilityAssociation.getTargetElement(element: UtilityElement): Utili
 }
 
 internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
-    return if (arcGISFeature.attributes["globalid"] == this.fromElement.globalId) {
+    return if (arcGISFeature.globalId == this.fromElement.globalId) {
         this.toElement
     } else {
         this.fromElement
