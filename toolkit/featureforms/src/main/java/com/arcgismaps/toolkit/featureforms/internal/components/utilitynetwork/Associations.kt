@@ -17,13 +17,13 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -33,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -46,12 +47,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.utilitynetworks.UtilityAssociation
+import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
+import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 
 @Composable
 internal fun UtilityAssociationFilter(
     filter: UtilityFilterState,
-    subTitle : String,
+    subTitle: String,
     onGroupClick: (Int) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
@@ -63,7 +66,7 @@ internal fun UtilityAssociationFilter(
                 subTitle,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .fillMaxWidth()
             )
             HorizontalDivider()
@@ -88,16 +91,14 @@ private fun Header(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(4.dp)
-                .size(32.dp)
-                .clickable {
-                    onBackPressed()
-                },
-        )
+        IconButton(
+            onClick = onBackPressed
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
         Spacer(modifier = Modifier.width(12.dp))
         Column(
             horizontalAlignment = Alignment.Start
@@ -165,7 +166,7 @@ private fun Groups(
  */
 @Composable
 internal fun Associations(
-    state : UtilityFilterGroupState,
+    state: UtilityFilterGroupState,
     onItemClick: (AssociationInfoState) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
@@ -183,7 +184,7 @@ internal fun Associations(
                 state.type.name,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .fillMaxWidth()
             )
             HorizontalDivider()
@@ -225,6 +226,25 @@ private fun AssociationItem(
     modifier: Modifier = Modifier
 ) {
     val target = association.getTargetElement(arcGISFeature)
+    val (terminal, fractionAlongEdge) = when (association.associationType) {
+        is UtilityAssociationType.Connectivity -> {
+            Pair(target.terminal, null)
+        }
+
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
+            if (target.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
+                Pair(null, association.fractionAlongEdge)
+            } else {
+                Pair(target.terminal, null)
+            }
+        }
+
+        else -> {
+            Pair(null, null)
+        }
+    }
     ListItem(
         headlineContent = {
             Text(
@@ -238,6 +258,46 @@ private fun AssociationItem(
                 modifier = Modifier.padding(start = 16.dp),
                 style = MaterialTheme.typography.labelSmall
             )
+        },
+        trailingContent = {
+            when {
+                terminal != null -> {
+                    Text(
+                        text = "Terminal : ${terminal.name}",
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(8.dp),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                fractionAlongEdge != null -> {
+                    Text(
+                        text = "$fractionAlongEdge %",
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(8.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+
+                association.associationType is UtilityAssociationType.Containment -> {
+                    Text(
+                        text = "Containment Visible : ${association.isContainmentVisible}",
+                        modifier = Modifier.padding(end = 16.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+
         },
         modifier = modifier.clickable {
             onClick()

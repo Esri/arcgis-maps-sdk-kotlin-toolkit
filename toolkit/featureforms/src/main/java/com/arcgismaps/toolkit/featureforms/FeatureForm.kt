@@ -26,7 +26,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +36,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -321,21 +328,8 @@ public fun FeatureForm(
                 val stateData = remember(backStackEntry) { state.getActiveStateData() }
                 val featureForm = stateData.featureForm
                 val states = stateData.stateCollection
-                FormContent(
-                    form = featureForm,
-                    states = states,
-                    unState = stateData.unState,
-                    onBarcodeButtonClick = onBarcodeButtonClick,
-                    onUtilityAssociationFilterClick = { stateId, index ->
-                        val route = NavigationRoute.UNFilterView(
-                            stateId = 0,
-                            selectedFilterIndex = index
-                        )
-                        navController.navigate(route)
-                    }
-                )
-                // only enable back navigation if there is a previous route
-                BackHandler(state.hasBackStack()) {
+                val hasBackStack = remember(featureForm) { state.hasBackStack() }
+                val onBack: (FeatureFormState) -> Unit = { state ->
                     val dialog = createSaveEditsDialog(
                         featureForm = featureForm,
                         navigationAction = {
@@ -349,6 +343,27 @@ public fun FeatureForm(
                         dialogRequester = dialogRequester
                     )
                     dialogRequester.requestDialog(dialog)
+                }
+                FormContent(
+                    form = featureForm,
+                    states = states,
+                    unState = stateData.unState,
+                    onBarcodeButtonClick = onBarcodeButtonClick,
+                    onUtilityAssociationFilterClick = { stateId, index ->
+                        val route = NavigationRoute.UNFilterView(
+                            stateId = 0,
+                            selectedFilterIndex = index
+                        )
+                        navController.navigate(route)
+                    },
+                    onBackPressed = {
+                        onBack(state)
+                    },
+                    showBackButton = hasBackStack
+                )
+                // only enable back navigation if there is a previous route
+                BackHandler(hasBackStack) {
+                    onBack(state)
                 }
                 FeatureFormDialog(states)
                 // launch a new side effect in a launched effect when validationErrorVisibility changes
@@ -439,13 +454,28 @@ public fun FeatureForm(
 }
 
 @Composable
-private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
+private fun FeatureFormTitle(
+    featureForm: FeatureForm,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    showBackButton: Boolean
+) {
     val title by featureForm.title.collectAsState()
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
         modifier = modifier
-    )
+    ) {
+        if (showBackButton) {
+            IconButton(onClick = onBackPressed) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Navigate back")
+            }
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+        )
+    }
 }
 
 @Composable
@@ -455,7 +485,9 @@ private fun FormContent(
     modifier: Modifier = Modifier,
     unState: UtilityNetworkAssociationsElementState?,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityAssociationFilterClick: (Int, Int) -> Unit
+    onUtilityAssociationFilterClick: (Int, Int) -> Unit,
+    onBackPressed: () -> Unit,
+    showBackButton: Boolean
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberSaveable(inputs = arrayOf(form), saver = LazyListState.Saver) {
@@ -468,12 +500,14 @@ private fun FormContent(
         // title
         FeatureFormTitle(
             featureForm = form,
-            modifier = Modifier.padding(horizontal = 15.dp)
-        )
-        Spacer(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
+                .padding(
+                    vertical = if (showBackButton) 8.dp else 16.dp,
+                    horizontal = if (showBackButton) 8.dp else 16.dp
+                )
+                .fillMaxWidth(),
+            onBackPressed = onBackPressed,
+            showBackButton = showBackButton
         )
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
             initialEvaluation
