@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
 import com.arcgismaps.data.RangeDomain
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
@@ -63,12 +64,28 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * The state of a [FeatureForm] that is used to manage the form's state and navigation.
+ * The state object for a [FeatureForm] used by the [FeatureForm] composable. This class is
+ * responsible for managing the state of the form and its elements. Hoist this state out of the
+ * composition to ensure that the state is not lost during configuration changes.
+ *
+ * This class also provides a way to navigate between different [FeatureForm]s of different [ArcGISFeature]s
+ * when viewing associations for an UtilityAssociationFormElement, if it is part of the provided
+ * [FeatureForm]. Use the [activeFeatureForm] property to get the currently active form as it is
+ * is updated when navigating from one form to another.
+ *
+ * [FeatureForm.evaluateExpressions] is called automatically when navigating to a new [FeatureForm]
+ * or when navigating back to a previous [FeatureForm]. When expressions are running, this in indicated
+ * by the [evaluatingExpressions] property. Expressions are also run when this class is created so
+ * you do not need to call [FeatureForm.evaluateExpressions] manually.
+ *
+ * @param featureForm the [FeatureForm] to create the state for.
+ * @param coroutineScope a [CoroutineScope] to run collectors and calculations on.
+ *
+ * @since 200.7.0
  */
 @Stable
 public class FeatureFormState private constructor(
@@ -76,7 +93,7 @@ public class FeatureFormState private constructor(
     private val coroutineScope: CoroutineScope,
     private val utilityNetwork: UtilityNetwork? = null
 ) {
-    private val store: ArrayDeque<StateData> = ArrayDeque()
+    private val store: ArrayDeque<FormStateData> = ArrayDeque()
 
     private var navController: NavController? = null
 
@@ -137,7 +154,7 @@ public class FeatureFormState private constructor(
             )
         }
         // Add the provided state collection to the store.
-        store.addLast(StateData(featureForm, states, unState))
+        store.addLast(FormStateData(featureForm, states, unState))
         evaluateExpressions()
     }
 
@@ -153,7 +170,7 @@ public class FeatureFormState private constructor(
     ) {
         _validationErrorVisibility.value = validationErrorVisibility
         // Add the provided state collection to the store.
-        store.addLast(StateData(featureForm, stateCollection, null))
+        store.addLast(FormStateData(featureForm, stateCollection, null))
         evaluateExpressions()
     }
 
@@ -176,7 +193,7 @@ public class FeatureFormState private constructor(
                     scope = coroutineScope
                 )
             }
-            store.addLast(StateData(form, states, unState))
+            store.addLast(FormStateData(form, states, unState))
             controller.navigate(NavigationRoute.FormView)
             _activeFeatureForm.value = form
             evaluateExpressions()
@@ -200,7 +217,7 @@ public class FeatureFormState private constructor(
         return navController?.previousBackStackEntry != null
     }
 
-    internal fun getActiveStateData(): StateData {
+    internal fun getActiveStateData(): FormStateData {
         return store.last()
     }
 
@@ -467,6 +484,10 @@ public class FeatureFormState private constructor(
         }
     }
 
+    /**
+     * Evaluates expressions for the [activeFeatureForm] and sets the [evaluatingExpressions] to
+     * true while the expressions are being evaluated.
+     */
     private fun evaluateExpressions() {
         coroutineScope.launch {
             _evaluatingExpressions.value = true
@@ -476,8 +497,13 @@ public class FeatureFormState private constructor(
     }
 }
 
+/**
+ * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
+ *
+ * This class is also [Immutable] and enables composition optimizations.
+ */
 @Immutable
-internal data class StateData(
+internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection,
     val unState: UtilityNetworkAssociationsElementState?
