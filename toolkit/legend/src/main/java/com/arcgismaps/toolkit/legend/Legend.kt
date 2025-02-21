@@ -69,7 +69,7 @@ public fun Legend(
     currentScale: Double,
     modifier: Modifier = Modifier
 ) {
-    var legendItems by rememberSaveable { mutableStateOf(emptyList<LayerRow>()) }
+    var legendItems by rememberSaveable(geoModel) { mutableStateOf(emptyList<LayerRow>()) }
 
     if (legendItems.isEmpty()) {
         LaunchedEffect(geoModel) {
