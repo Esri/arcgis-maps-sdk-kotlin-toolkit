@@ -135,11 +135,9 @@ private fun LegendInfoRow(legendInfo: LegendInfo, context: Context) {
                     model = it,
                     contentDescription = null
                 )
-                Text(text = legendInfo.name)
             }
-        } else {
-            Text(text = legendInfo.name)
         }
+        Text(text = legendInfo.name)
     }
 }
 
