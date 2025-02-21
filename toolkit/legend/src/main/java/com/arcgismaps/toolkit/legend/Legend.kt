@@ -117,24 +117,8 @@ private fun LegendInfoRow(legendInfo: LegendInfo, context: Context) {
     Row {
         val symbol = legendInfo.symbol
         if (symbol != null) {
-            val imageFetcher = SymbolImageFetcher.Factory(symbol, context)
-            val imageLoader = ImageLoader(context).newBuilder()
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .memoryCache {
-                    MemoryCache.Builder(context)
-                        .maxSizePercent(0.25)
-                        .strongReferencesEnabled(true)
-                        .build()
-                }
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .diskCache {
-                    DiskCache.Builder()
-                        .directory(context.cacheDir)
-                        .maxSizePercent(.03)
-                        .build()
-                }
-                .logger(DebugLogger())
-                .build()
+            val imageFetcher = remember { SymbolImageFetcher.Factory(symbol, context) }
+            val imageLoader = rememberImageLoader(context)
             val image = remember { mutableStateOf<Bitmap?>(null) }
 
             LaunchedEffect(legendInfo) {
@@ -241,6 +225,29 @@ private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(layerContent: Laye
         }
     }
     return layerRows
+}
+
+@Composable
+private fun rememberImageLoader(context: Context): ImageLoader {
+    return remember {
+        ImageLoader(context).newBuilder()
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .memoryCache {
+                MemoryCache.Builder(context)
+                    .maxSizePercent(0.25)
+                    .strongReferencesEnabled(true)
+                    .build()
+            }
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir)
+                    .maxSizePercent(.03)
+                    .build()
+            }
+            .logger(DebugLogger())
+            .build()
+    }
 }
 
 internal class SymbolImageFetcher(
