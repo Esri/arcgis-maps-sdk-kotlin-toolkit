@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -30,16 +29,13 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,12 +49,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -205,61 +199,6 @@ public fun FeatureForm(
     )
 }
 
-/**
- * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
- * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
- * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
- *
- * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
- * - [AttachmentsFormElement]
- * - [FieldFormElement] with the following [FormInput] types -
- *     * [BarcodeScannerFormInput]
- *     * [ComboBoxFormInput]
- *     * [DateTimePickerFormInput]
- *     * [RadioButtonsFormInput]
- *     * [SwitchFormInput]
- *     * [TextAreaFormInput]
- *     * [TextBoxFormInput]
- * - [GroupFormElement]
- * - [TextFormElement]
- *
- * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
- * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
- * A callback is also provided via the [onBarcodeButtonClick] parameter, which is invoked with
- * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
- * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
- * value to update the field value.
- *
- * For adding any attachments, camera permissions are required. If the permissions are not granted,
- * then the specific functionality is disabled in the form.
- *
- * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
- * currently supported. A default attachments editing support is provided using the
- * [FeatureForm.defaultAttachmentsElement] property.
- *
- * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
- * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
- * If a custom color is specified in both the color scheme and the typography, the color from the
- * color scheme will take precedence and will be merged with the text style, if one is provided.
- *
- * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
- * enable smart recompositions.
- *
- * @param featureForm The [FeatureForm] configuration.
- * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
- * FeatureForm.
- * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
- * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
- * indicates errors are only visible once the respective field gains focus.
- * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
- * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
- * default barcode scanner is used.
- * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
- * @param typography The [FeatureFormTypography] to use for the FeatureForm.
- *
- * @since 200.4.0
- */
 @Deprecated(
     message = "Maintained for binary compatibility. Use the overload that uses the FeatureFormState object",
     level = DeprecationLevel.WARNING
@@ -300,6 +239,50 @@ public fun FeatureForm(
 }
 
 /**
+ * A composable Form toolkit component that enables users to edit field values of features in a
+ * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
+ * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
+ *
+ * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
+ * - [AttachmentsFormElement]
+ * - [FieldFormElement] with the following [FormInput] types -
+ *     * [BarcodeScannerFormInput]
+ *     * [ComboBoxFormInput]
+ *     * [DateTimePickerFormInput]
+ *     * [RadioButtonsFormInput]
+ *     * [SwitchFormInput]
+ *     * [TextAreaFormInput]
+ *     * [TextBoxFormInput]
+ * - [GroupFormElement]
+ * - [TextFormElement]
+ *
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
+ * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
+ * A callback is also provided via the [onBarcodeButtonClick] parameter, which is invoked with
+ * the [FieldFormElement] when its barcode accessory is clicked. This can be used to provide a custom
+ * barcode scanning experience. Simply call [FieldFormElement.updateValue] with the scanned barcode
+ * value to update the field value.
+ *
+ * For adding any attachments, camera permissions are required. If the permissions are not granted,
+ * then the specific functionality is disabled in the form.
+ *
+ * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
+ * currently supported. A default attachments editing support is provided using the
+ * [FeatureForm.defaultAttachmentsElement] property.
+ *
+ * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
+ * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
+ * If a custom color is specified in both the color scheme and the typography, the color from the
+ * color scheme will take precedence and will be merged with the text style, if one is provided.
+ *
+ * @param state the [FeatureFormState] object that contains the state of the form.
+ * @param modifier the modifier to apply to this layout.
+ * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
+ * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
+ * default barcode scanner is used.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
+ * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
  * @since 200.7.0
  */
