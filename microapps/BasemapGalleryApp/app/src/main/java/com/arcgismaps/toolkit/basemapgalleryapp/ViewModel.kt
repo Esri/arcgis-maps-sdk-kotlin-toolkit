@@ -50,7 +50,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    var arcGISMap =
+    val arcGISMap =
         ArcGISMap(BasemapStyle.ArcGISImagery).apply {
             initialViewpoint =
                 Viewpoint(
