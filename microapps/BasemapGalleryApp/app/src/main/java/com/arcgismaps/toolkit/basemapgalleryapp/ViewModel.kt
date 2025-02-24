@@ -45,8 +45,6 @@ import kotlinx.coroutines.launch
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
-    val proxy = MapViewProxy()
-
     var styleItems = mutableStateListOf<BasemapGalleryItem>()
         private set
     var portalItems = mutableStateListOf<BasemapGalleryItem>()

@@ -115,8 +115,7 @@ fun MainScreen() {
     ) { paddingValues ->
         MapView(
             modifier = Modifier.padding(paddingValues),
-            arcGISMap = viewModel.arcGISMap,
-            mapViewProxy = viewModel.proxy,
+            arcGISMap = viewModel.arcGISMap
         )
     }
 }
