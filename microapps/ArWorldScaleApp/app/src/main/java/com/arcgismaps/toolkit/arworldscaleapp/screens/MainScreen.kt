@@ -132,40 +132,41 @@ fun MainScreen() {
                     }
                 }
             }
-            when (val status = initializationStatus) {
-                is WorldScaleSceneViewStatus.Initializing -> {
-                    TextWithScrim(text = stringResource(R.string.ar_initializing))
-                }
+        }
 
-                is WorldScaleSceneViewStatus.Initialized -> {
-                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                    when (sceneLoadStatus) {
-                        is LoadStatus.Loading, LoadStatus.NotLoaded -> {
-                            // The scene may take a while to load, so show a progress indicator
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
+        when (val status = initializationStatus) {
+            is WorldScaleSceneViewStatus.Initializing -> {
+                TextWithScrim(text = stringResource(R.string.ar_initializing))
+            }
 
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        else -> {}
+            is WorldScaleSceneViewStatus.Initialized -> {
+                val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                when (sceneLoadStatus) {
+                    is LoadStatus.Loading, LoadStatus.NotLoaded -> {
+                        // The scene may take a while to load, so show a progress indicator
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
-                }
 
-                is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                    TextWithScrim(
-                        text = stringResource(
-                            R.string.failed_to_initialize_overlay,
-                            status.error.message ?: status.error
+                    is LoadStatus.FailedToLoad -> {
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_load_scene,
+                                sceneLoadStatus.error
+                            )
                         )
-                    )
+                    }
+
+                    else -> {}
                 }
+            }
+
+            is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                TextWithScrim(
+                    text = stringResource(
+                        R.string.failed_to_initialize_overlay,
+                        status.error.message ?: status.error
+                    )
+                )
             }
         }
     }
