@@ -52,15 +52,13 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    private val initialViewpoint = Viewpoint(
-        center = Point(-11e6, 5e6, SpatialReference.webMercator()),
-        scale = 1e8
-    )
-
     var arcGISMap =
         ArcGISMap(BasemapStyle.ArcGISImagery).apply {
             initialViewpoint =
-                this@ViewModel.initialViewpoint
+                Viewpoint(
+                    center = Point(-11e6, 5e6, SpatialReference.webMercator()),
+                    scale = 1e8
+                )
         }
 
     init {
@@ -103,7 +101,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
      * @since 200.7.0
      */
     fun changeBasemap(basemap: Basemap) {
-        proxy.setViewpoint(initialViewpoint)
         arcGISMap.setBasemap(basemap)
     }
 }
