@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -66,13 +67,15 @@ fun MainScreen() {
     )
 
     val options = remember { listOf("Basemap Styles", "Portal items") }
-    var selectedBasemapSource by remember { mutableIntStateOf(0) }
+    var selectedBasemapSource by rememberSaveable { mutableIntStateOf(0) }
 
-    val onItemClick: (BasemapGalleryItem) -> Unit = {
-        when (val tag = it.tag) {
-            is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
-            is Item -> viewModel.changeBasemap(Basemap(item = tag))
-            else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+    val onItemClick: (BasemapGalleryItem) -> Unit = remember {
+        {
+            when (val tag = it.tag) {
+                is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
+                is Item -> viewModel.changeBasemap(Basemap(item = tag))
+                else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+            }
         }
     }
 
