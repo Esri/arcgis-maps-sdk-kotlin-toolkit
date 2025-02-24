@@ -29,14 +29,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.geometry.GeodeticCurveType
-import com.arcgismaps.geometry.GeometryEngine
-import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -69,9 +65,9 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    internal val arLocationProvider = ArLocationProvider(scope)
+    private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
     private val locationDataSource = CustomLocationDataSource {
-        arLocationProvider
+        worldScaleNmeaLocationProvider
     }
     val cameraController = TransformationMatrixCameraController()
 
@@ -148,7 +144,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
-            arLocationProvider.stop()
+            worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
         super.onDestroy(owner)
@@ -157,7 +153,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
-            arLocationProvider.stop()
+            worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
     }
@@ -165,7 +161,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         scope.launch {
-            arLocationProvider.start()
+            worldScaleNmeaLocationProvider.start()
             locationDataSource.start()
         }
         scope.launch {

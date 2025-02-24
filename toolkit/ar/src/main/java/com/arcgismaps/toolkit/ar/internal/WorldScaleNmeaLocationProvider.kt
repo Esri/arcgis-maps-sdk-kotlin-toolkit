@@ -43,9 +43,10 @@ import kotlinx.coroutines.flow.shareIn
  * NMEA messages are used because this enables us to read the orthometric height (height above geoid) from the GPS,
  * whereas normal Android location updates only provide the ellipsoidal height.
  *
+ * @throws IllegalStateException if [ArcGISEnvironment.applicationContext] is null.
  * @since 200.7.0
  */
-internal class ArLocationProvider(private val scope: CoroutineScope) :
+internal class WorldScaleNmeaLocationProvider(private val scope: CoroutineScope) :
     CustomLocationDataSource.LocationProvider, OnNmeaMessageListener {
 
     private val systemLocationDataSource = SystemLocationDataSource()
@@ -54,10 +55,11 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
     private val handler: Handler
 
     init {
-        require(ArcGISEnvironment.applicationContext != null)
+        val applicationContext = ArcGISEnvironment.applicationContext
+        require(applicationContext != null)
         locationManager =
-            ArcGISEnvironment.applicationContext!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        handler = Handler(ArcGISEnvironment.applicationContext!!.mainLooper)
+            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        handler = Handler(applicationContext.mainLooper)
     }
 
     override val headings: SharedFlow<Double> = systemLocationDataSource.headingChanged.shareIn(
@@ -74,7 +76,7 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
                     it.position.y,
                     it.heightAboveGeoid,
                     it.position.m,
-                    SpatialReference(it.position.spatialReference!!.wkid, 5773 /*EGM96*/)
+                    SpatialReference(it.position.spatialReference?.wkid ?: WKID_WGS84, WKID_EGM96)
                 ),
                 it.horizontalAccuracy,
                 it.verticalAccuracy,
@@ -86,8 +88,16 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
             )
         }.filterNotNull()
 
+    /**
+     * Starts listening for NMEA messages from the GPS and headings from a [SystemLocationDataSource].
+     *
+     * @throws IllegalStateException if [ArcGISEnvironment.applicationContext] is null.
+     * @since 200.7.0
+     */
     @SuppressLint("MissingPermission")
     internal suspend fun start() {
+        val applicationContext = ArcGISEnvironment.applicationContext
+        require(applicationContext != null)
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
@@ -95,14 +105,19 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
                 0f,
                 {
                 },
-                ArcGISEnvironment.applicationContext!!.mainLooper
+                applicationContext.mainLooper
             )
         }
         systemLocationDataSource.start()
         nmeaLocationDataSource.start()
-        locationManager.addNmeaListener(this@ArLocationProvider, handler)
+        locationManager.addNmeaListener(this@WorldScaleNmeaLocationProvider, handler)
     }
 
+    /**
+     * Stops listening for NMEA messages from the GPS and headings from a [SystemLocationDataSource].
+     *
+     * @since 200.7.0
+     */
     internal suspend fun stop() {
         systemLocationDataSource.stop()
         nmeaLocationDataSource.stop()
@@ -111,5 +126,10 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
 
     override fun onNmeaMessage(message: String?, timestamp: Long) {
         nmeaLocationDataSource.pushData(message?.toByteArray())
+    }
+
+    companion object {
+        private const val WKID_WGS84 = 4326
+        private const val WKID_EGM96 = 5773
     }
 }
