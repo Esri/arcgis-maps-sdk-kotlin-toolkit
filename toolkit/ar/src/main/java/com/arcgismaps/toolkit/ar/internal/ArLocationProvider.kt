@@ -3,10 +3,15 @@ package com.arcgismaps.toolkit.ar.internal
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
+import android.location.LocationRequest
 import android.location.OnNmeaMessageListener
+import android.os.Build
 import android.os.Handler
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.location.LocationManagerCompat
+import androidx.core.location.LocationRequestCompat
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -74,6 +79,7 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
             )
         }.filterNotNull()
 
+    @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("MissingPermission")
     internal suspend fun start() {
         val selectedLocationProviders = mutableListOf<String>()
@@ -84,28 +90,37 @@ internal class ArLocationProvider(private val scope: CoroutineScope) :
             LocationManager.GPS_PROVIDER
         )
         selectedLocationProviders.forEach { provider ->
-            locationManager.requestLocationUpdates(
+            LocationManagerCompat.requestLocationUpdates(
+                locationManager,
                 provider,
-                100,
-                0f,
+                LocationRequestCompat.Builder(30*1000).setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY).build(),
+                ArcGISEnvironment.applicationContext!!.mainExecutor,
                 {
-                    if (it.hasBearing() && it.bearingAccuracyDegrees < 60.0) {
-                        lastKnownBearing = it.bearing
-                    }
-                    Log.e("ArLocationProvider", "Satellites: ${it.extras?.getInt("satellites")}")
-                    Log.e("ArLocationProvider", "Has bearing: ${it.hasBearing()}")
-                    Log.e("ArLocationProvider", "Bearing accuracy: ${it.bearingAccuracyDegrees}")
-                    Log.e("ArLocationProvider", "Bearing: ${it.bearing}")
-                    debugInfo.value =
-                        ArLocationProviderDebugInfo(
-                            hasBearing = it.hasBearing(),
-                            bearingAccuracyDegrees = it.bearingAccuracyDegrees,
-                            bearing = it.bearing,
-                            satelliteCount = it.extras?.getInt("satellites") ?: 0
-                        )
-                },
-                ArcGISEnvironment.applicationContext!!.mainLooper
+
+                }
             )
+//            locationManager.requestLocationUpdates(
+//                provider,
+//                100,
+//                0f,
+//                {
+//                    if (it.hasBearing() && it.bearingAccuracyDegrees < 60.0) {
+//                        lastKnownBearing = it.bearing
+//                    }
+//                    Log.e("ArLocationProvider", "Satellites: ${it.extras?.getInt("satellites")}")
+//                    Log.e("ArLocationProvider", "Has bearing: ${it.hasBearing()}")
+//                    Log.e("ArLocationProvider", "Bearing accuracy: ${it.bearingAccuracyDegrees}")
+//                    Log.e("ArLocationProvider", "Bearing: ${it.bearing}")
+//                    debugInfo.value =
+//                        ArLocationProviderDebugInfo(
+//                            hasBearing = it.hasBearing(),
+//                            bearingAccuracyDegrees = it.bearingAccuracyDegrees,
+//                            bearing = it.bearing,
+//                            satelliteCount = it.extras?.getInt("satellites") ?: 0
+//                        )
+//                },
+//                ArcGISEnvironment.applicationContext!!.mainLooper
+//            )
         }
         systemLocationDataSource.start()
         nmeaLocationDataSource.start()

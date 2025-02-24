@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -135,19 +137,19 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
+    val arSessionWrapper =
+        rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
     val locationTracker = rememberWorldTrackingCameraController(
         onLocationDataSourceFailedToStart = {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),
                 onInitializationStatusChanged
             )
-        }
+        },
+        sessionWrapper = arSessionWrapper
     )
 
     Box(modifier = modifier) {
-        val arSessionWrapper =
-            rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
-
         val session = arSessionWrapper.session.collectAsStateWithLifecycle()
         session.value?.let { arSession ->
             ArCameraFeed(
@@ -161,7 +163,9 @@ public fun WorldScaleSceneView(
                     worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
                 },
                 onTapWithHitResult = { },
-                onFirstPlaneDetected = { },
+                onFirstPlaneDetected = {
+
+                },
                 visualizePlanes = false
             )
             // Once the session is created, we can say we're initialized
@@ -172,6 +176,10 @@ public fun WorldScaleSceneView(
         }
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
+        val lifecycleOwner = LocalLifecycleOwner.current
+        SideEffect {
+//            arSessionWrapper.reset(lifecycleOwner)
+        }
         var currentCamera by remember { mutableStateOf<Camera?>(null) }
         Box(modifier = Modifier.fillMaxSize()) {
             SceneView(
