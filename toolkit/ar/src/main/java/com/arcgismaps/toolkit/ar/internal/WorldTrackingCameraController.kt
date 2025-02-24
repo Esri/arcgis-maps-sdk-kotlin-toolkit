@@ -32,6 +32,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
@@ -45,6 +46,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -66,7 +69,10 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = SystemLocationDataSource()
+    internal val arLocationProvider = ArLocationProvider(scope)
+    private val locationDataSource = CustomLocationDataSource {
+        arLocationProvider
+    }
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -142,6 +148,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            arLocationProvider.stop()
             scope.cancel()
         }
         super.onDestroy(owner)
@@ -150,6 +157,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            arLocationProvider.stop()
         }
         super.onPause(owner)
     }
@@ -157,6 +165,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         scope.launch {
+            arLocationProvider.start()
             locationDataSource.start()
         }
         scope.launch {
@@ -170,22 +179,23 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                 }
         }
         scope.launch {
-            locationDataSource.locationChanged
+            val location = locationDataSource.locationChanged
                 .filter { location ->
-                    !hasSetOriginCamera || shouldUpdateCamera(
+                    shouldUpdateCamera(
                         location,
                         cameraController.originCamera.value
                     )
                 }
-                .collect { location ->
-                    updateCamera(location)
-                    // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix =
-                        TransformationMatrix.createIdentityMatrix()
-                    if (!hasSetOriginCamera) {
-                        hasSetOriginCamera = true
-                    }
-                }
+                .take(5)
+                .toList()
+                .minBy { it.horizontalAccuracy }
+            updateCamera(location)
+            // We have to do this or the error gets bigger and bigger.
+            cameraController.transformationMatrix =
+                TransformationMatrix.createIdentityMatrix()
+            if (!hasSetOriginCamera) {
+                hasSetOriginCamera = true
+            }
         }
     }
 }
@@ -236,12 +246,10 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
-    val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentCamera.location,
-        location.position,
-        distanceUnit = LinearUnit.meters,
-        azimuthUnit = null,
-        curveType = GeodeticCurveType.Geodesic
-    )?.distance ?: return false
-    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
+
+    // filter out locations with low accuracy
+    if (location.horizontalAccuracy > 6.0) return false
+    if (location.verticalAccuracy > 6.0) return false
+
+    return true
 }
