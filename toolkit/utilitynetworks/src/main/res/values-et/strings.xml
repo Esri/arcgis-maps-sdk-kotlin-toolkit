@@ -28,4 +28,36 @@
     <string name="feature_results">Objekti tulemused</string>
     <string name="function_results">Funktsiooni tulemused</string>
     <string name="clear_all_results">Kustuta kõik tulemused</string>
+    <string name="delete">Š_Delete_____________ä</string>
+    <string name="not_available">Š_Not available______________ä</string>
+    <string name="zoom_to">Š_Zoom to_______________ä</string>
+    <string name="zoom_in">Š_Zoom in_______________ä</string>
+    <string name="fraction_along_edge">Š_Fraction Along Edge____________________ä</string>
+    <string name="attributes">Š_Attributes_____________________ä</string>
+    <string name="terminal_configuration">Š_Terminal Configuration_______________________ä</string>
+    <string name="an_error_has_occurred">Š_An error has occurred______________________ä</string>
+    <string name="ok">Š_OK_____ä</string>
+    <string name="cancel">Š_Cancel_____________ä</string>
+    <string name="clear_all_results_confirmation">Š_All trace results will be lost_________________ä.</string>
+    <string name="object_id">Š_Object ID: %s______________ä</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Š_No Utility Network found__________________________ä.</string>
+    <string name="no_trace_configurations_found">Š_No trace configurations found_______________________________ä.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Š_Not enough starting points. Please set at least 1 starting location___________________________________ä.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Š_Not enough starting points. Please set at least 2 starting locations____________________________________ä.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Š_Could not create utility element from ArcGISFeature___________________________ä.</string>
+    <string name="one_or_more_starting_points_already_exists">Š_One or more starting points already exist______________________ä.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Š_Could not create drawable from feature symbol________________________ä.</string>
+    <string name="no_configuration_selected">Š_No Configuration Selected__________________________ä</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Š_Trace component________________ä</string>
+    <string name="more_options">Š_More options_____________ä</string>
+    <string name="go_back">Š_Go back_______________ä</string>
+    <string name="edit_terminal_configuration">Š_Edit terminal configuration____________________________ä</string>
+    <string name="selected">Š_Selected_________________ä</string>
+    <string name="feature_icon">Š_Feature icon_____________ä</string>
+    <string name="zoom_to_result_description">Š_Enable or disable zoom to result_________________ä</string>
+    <string name="select_previous_result">Š_Select previous result_______________________ä</string>
+    <string name="select_next_result">Š_Select next result___________________ä</string>
+    <string name="error">Š_Error___________ä</string>
 </resources>

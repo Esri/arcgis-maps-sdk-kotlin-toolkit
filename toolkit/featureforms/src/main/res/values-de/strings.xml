@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">ä_Enter %1$d character_____________________Ü</item>
         <item quantity="one">Geben Sie %1$d Zeichen ein.</item>
+        <item quantity="two">ä_Enter %1$d characters______________________Ü</item>
+        <item quantity="few">ä_Enter %1$d characters______________________Ü</item>
+        <item quantity="many">ä_Enter %1$d characters______________________Ü</item>
         <item quantity="other">Geben Sie %1$d Zeichen ein.</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">ä_Value must be %1$d character_____________________________Ü</item>
         <item quantity="one">Wert muss %1$d Zeichen enthalten.</item>
+        <item quantity="two">ä_Value must be %1$d characters______________________________Ü</item>
+        <item quantity="few">ä_Value must be %1$d characters______________________________Ü</item>
+        <item quantity="many">ä_Value must be %1$d characters______________________________Ü</item>
         <item quantity="other">Wert muss %1$d Zeichen enthalten.</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Geben Sie %1$d bis %2$d Zeichen ein.</string>
-    <string name="value_must_be_from_to_characters">Wert muss zwischen %1$d und %2$d Zeichen enthalten</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">ä_Maximum %1$d character_______________________Ü</item>
         <item quantity="one">Maximal %1$d Zeichen</item>
+        <item quantity="two">ä_Maximum %1$d characters________________________Ü</item>
+        <item quantity="few">ä_Maximum %1$d characters________________________Ü</item>
+        <item quantity="many">ä_Maximum %1$d characters________________________Ü</item>
         <item quantity="other">Maximal %1$d Zeichen</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Geben Sie %1$d bis %2$d Zeichen ein.</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Wert muss zwischen %1$d und %2$d Zeichen enthalten</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximal %1$d Zeichen</string>
     <string name="no_value">Kein Wert</string>
     <string name="enter_value">Wert eingeben</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Fertig</string>
     <string name="filter">%1$s filtern</string>
+    <string name="search">ä_Search_____________Ü</string>
     <string name="numeric_range_helper_text">Geben Sie einen Wert zwischen %1$s und %2$s ein.</string>
     <string name="value_must_be_from_to">Wert muss zwischen %1$s und %2$s liegen</string>
     <string name="less_than_min_value">Kleiner als Minimalwert %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Stunde</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d Stunden</string>
     <string name="ff_time_picker_hour_selection">Stunde auswählen</string>
     <string name="ff_time_picker_hour_suffix">%1$d Uhr</string>
     <string name="ff_time_picker_hour_text_field">für Stunde</string>
     <string name="ff_time_picker_minute">Minute</string>
     <string name="ff_time_picker_minute_selection">Minuten auswählen</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d Minuten</string>
     <string name="ff_time_picker_minute_text_field">für Minuten</string>
     <string name="ff_time_picker_period_toggle_description">AM oder PM auswählen</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Leere Dateien können nicht heruntergeladen werden.</string>
     <string name="attachment_deleted">%1s wurde erfolgreich gelöscht.</string>
     <string name="attachment_size_limit_exceeded">Anlagen, die größer als %1$s sind, können nicht heruntergeladen werden.</string>
+    <string name="barcode_tooltip">ä_Point your camera at a barcode_______________________________Ü</string>
+    <string name="barcode_permission_denied">ä_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________Ü.</string>
+    <string name="unsupported_value">ä_Unsupported Value__________________Ü</string>
+    <string name="tap_to_scan">ä_Tap to scan____________Ü</string>
+    <string name="unable_to_open_the_camera">ä_Unable to open the camera__________________________Ü</string>
+    <string name="value_must_be_a_guid">ä_Value must be a valid GUID___________________________Ü</string>
 </resources>

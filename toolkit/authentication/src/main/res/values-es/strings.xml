@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">á_Untrusted host_______________Ó</string>
+    <string name="server_trust_message">á_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________Ó?</string>
     <string name="cancel">Cancelar</string>
+    <string name="allow_connection">á_Allow connection_________________Ó</string>
+    <string name="username_password_login_title">á_Authentication required________________________Ó</string>
+    <string name="username_password_login_message">á_You need to sign in to access %1$s__________________Ó</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nombre de usuario</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Contraseña</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">á_Sign in_______________Ó</string>
 </resources>

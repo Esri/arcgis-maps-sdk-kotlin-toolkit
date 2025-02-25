@@ -28,4 +28,36 @@
     <string name="feature_results">Vektoros elem eredményei</string>
     <string name="function_results">Funkció eredményei</string>
     <string name="clear_all_results">Összes eredmény törlése</string>
+    <string name="delete">í_Delete_____________ő</string>
+    <string name="not_available">í_Not available______________ő</string>
+    <string name="zoom_to">í_Zoom to_______________ő</string>
+    <string name="zoom_in">í_Zoom in_______________ő</string>
+    <string name="fraction_along_edge">í_Fraction Along Edge____________________ő</string>
+    <string name="attributes">í_Attributes_____________________ő</string>
+    <string name="terminal_configuration">í_Terminal Configuration_______________________ő</string>
+    <string name="an_error_has_occurred">í_An error has occurred______________________ő</string>
+    <string name="ok">í_OK_____ő</string>
+    <string name="cancel">í_Cancel_____________ő</string>
+    <string name="clear_all_results_confirmation">í_All trace results will be lost_________________ő.</string>
+    <string name="object_id">í_Object ID: %s______________ő</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">í_No Utility Network found__________________________ő.</string>
+    <string name="no_trace_configurations_found">í_No trace configurations found_______________________________ő.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">í_Not enough starting points. Please set at least 1 starting location___________________________________ő.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">í_Not enough starting points. Please set at least 2 starting locations____________________________________ő.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">í_Could not create utility element from ArcGISFeature___________________________ő.</string>
+    <string name="one_or_more_starting_points_already_exists">í_One or more starting points already exist______________________ő.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">í_Could not create drawable from feature symbol________________________ő.</string>
+    <string name="no_configuration_selected">í_No Configuration Selected__________________________ő</string>
+<!--Content Descriptions-->
+    <string name="trace_component">í_Trace component________________ő</string>
+    <string name="more_options">í_More options_____________ő</string>
+    <string name="go_back">í_Go back_______________ő</string>
+    <string name="edit_terminal_configuration">í_Edit terminal configuration____________________________ő</string>
+    <string name="selected">í_Selected_________________ő</string>
+    <string name="feature_icon">í_Feature icon_____________ő</string>
+    <string name="zoom_to_result_description">í_Enable or disable zoom to result_________________ő</string>
+    <string name="select_previous_result">í_Select previous result_______________________ő</string>
+    <string name="select_next_result">í_Select next result___________________ő</string>
+    <string name="error">í_Error___________ő</string>
 </resources>
