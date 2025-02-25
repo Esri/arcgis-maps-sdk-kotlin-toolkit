@@ -29,7 +29,10 @@ val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "fal
     .run { this == "true" }
 
 val localProperties = java.util.Properties().apply {
-    load(file("local.properties").inputStream())
+    val localPropertiesFile = file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
 }
 
 // The version of the ArcGIS Maps SDK for Kotlin dependency.
