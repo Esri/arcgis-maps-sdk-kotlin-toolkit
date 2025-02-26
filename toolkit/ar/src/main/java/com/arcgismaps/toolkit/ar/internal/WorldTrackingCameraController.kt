@@ -38,6 +38,7 @@ import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -186,7 +187,7 @@ internal class WorldTrackingCameraController(
                     shouldUpdateCamera(
                         location,
                         cameraController.originCamera.value
-                    )
+                    ) || !hasSetOriginCamera
                 }.collect { location ->
                     updateCamera(location)
                     // We have to do this or the error gets bigger and bigger.
@@ -252,10 +253,10 @@ internal fun shouldUpdateCamera(
 
 
     // filter out locations with low accuracy
-    if (location.horizontalAccuracy > 6.0) return false
-    if (location.verticalAccuracy > 6.0) return false
+//    if (location.horizontalAccuracy > 6.0) return false
+//    if (location.verticalAccuracy > 6.0) return false
 
-    val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+    val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, location.position.spatialReference) ?: return false //, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (
         currentOriginCameraPosition,
         location.position,
