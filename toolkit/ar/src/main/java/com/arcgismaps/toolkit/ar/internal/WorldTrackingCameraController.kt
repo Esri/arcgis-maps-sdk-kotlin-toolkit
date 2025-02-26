@@ -253,8 +253,8 @@ internal fun shouldUpdateCamera(
 
 
     // filter out locations with low accuracy
-//    if (location.horizontalAccuracy > 6.0) return false
-//    if (location.verticalAccuracy > 6.0) return false
+    if (location.horizontalAccuracy > 6.0) return false
+    if (location.verticalAccuracy > 6.0) return false
 
     val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, location.position.spatialReference) ?: return false //, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (
