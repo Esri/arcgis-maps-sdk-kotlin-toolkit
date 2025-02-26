@@ -57,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.DefaultThemeTokens
 import com.arcgismaps.toolkit.ar.internal.Joyslider
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
@@ -71,10 +72,7 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
  */
 public class WorldScaleSceneViewScope internal constructor(
     private val sceneViewScope: SceneViewScope,
-    private val onHeadingChange: (Double) -> Unit,
-    private val onElevationChange: (Double) -> Unit,
-    private val onHeadingReset: () -> Unit,
-    private val onElevationReset: () -> Unit
+    private val calibrationState: CalibrationState,
 ) {
 
     /**
@@ -100,10 +98,7 @@ public class WorldScaleSceneViewScope internal constructor(
             modifier = modifier,
             colorScheme = colorScheme,
             typography = typography,
-            onHeadingChange = onHeadingChange,
-            onElevationChange = onElevationChange,
-            onHeadingReset = onHeadingReset,
-            onElevationReset = onElevationReset
+            calibrationState = calibrationState
         )
     }
 
@@ -191,11 +186,7 @@ internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.calibrati
  * @param modifier Modifier to be applied to the composable calibration view
  * @param colorScheme Color scheme applied to the calibration view
  * @param typography Typography style applied to text in the calibration view
- * @param onHeadingChange Lambda invoked when the user adjusts heading offset
- * @param onHeadingReset Lambda invoked when the user resets heading offset
- * @param onElevationChange Lambda invoked when the user adjusts elevation offset
- * @param onElevationReset Lambda invoked when the user resets elevation offset
- *
+ * @param calibrationState State holder for calibration offsets
  * @since 200.7.0
  */
 @Composable
@@ -204,13 +195,8 @@ internal fun CalibrationViewInternal(
     modifier: Modifier = Modifier,
     colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
     typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
-    onHeadingChange: (Double) -> Unit,
-    onElevationChange: (Double) -> Unit,
-    onHeadingReset: () -> Unit,
-    onElevationReset: () -> Unit
+    calibrationState: CalibrationState,
 ) {
-    var heading by remember { mutableFloatStateOf(0F) }
-    var elevation by remember { mutableFloatStateOf(0F) }
 
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
@@ -256,29 +242,29 @@ internal fun CalibrationViewInternal(
 
                     JoysliderBar(
                         title = stringResource(R.string.heading_title),
-                        value = heading,
+                        value = calibrationState.headingOffset,
                         valueFormat = DecimalFormat("+0.#º ; -#.#º"),
                         minusContentDescription = stringResource(R.string.decrease_heading),
                         plusContentDescription = stringResource(R.string.increase_heading),
                         resetContentDescription = stringResource(R.string.reset_heading),
                         onMinusClick = {
-                            heading -= 1
-                            onHeadingChange(-1.0)
+                            calibrationState.onHeadingChange(-1.0f)
+                            calibrationState.headingOffset -= 1f
                         },
                         onPlusClick = {
-                            heading += 1
-                            onHeadingChange(1.0)
+                            calibrationState.onHeadingChange(1.0f)
+                            calibrationState.headingOffset += 1f
                         },
                         onResetClick = {
-                            heading = 0F
-                            onHeadingReset()
+                            calibrationState.onHeadingReset()
+                            calibrationState.headingOffset = 0f
                         }
                     )
                     Joyslider(
                         onValueChange = {
-                            onHeadingChange(it.toDouble())
-                            heading += it
-                        },
+                            calibrationState.onHeadingChange(it)
+                            calibrationState.headingOffset += it
+                                        },
                         contentDescription = stringResource(R.string.heading_slider_description),
                     )
                 }
@@ -293,28 +279,28 @@ internal fun CalibrationViewInternal(
                 ) {
                     JoysliderBar(
                         stringResource(R.string.elevation_title),
-                        elevation,
+                        calibrationState.elevationOffset,
                         valueFormat = DecimalFormat("+0.##m ; -#.##m"),
                         minusContentDescription = stringResource(R.string.decrease_elevation),
                         plusContentDescription = stringResource(R.string.increase_elevation),
                         resetContentDescription = stringResource(R.string.reset_elevation),
                         onMinusClick = {
-                            elevation -= 1
-                            onElevationChange(-1.0)
+                            calibrationState.onElevationChange(-1.0f)
+                            calibrationState.elevationOffset -= 1f
                         },
                         onPlusClick = {
-                            elevation += 1
-                            onElevationChange(1.0)
+                            calibrationState.onElevationChange(1.0f)
+                            calibrationState.headingOffset += 1f
                         },
                         onResetClick = {
-                            elevation = 0F
-                            onElevationReset()
+                            calibrationState.onElevationReset()
+                            calibrationState.elevationOffset = 0f
                         }
                     )
                     Joyslider(
                         onValueChange = {
-                            onElevationChange(it.toDouble())
-                            elevation += it
+                            calibrationState.onElevationChange(it)
+                            calibrationState.elevationOffset += it
                         },
                         contentDescription = stringResource(R.string.elevation_slider_description)
                     )

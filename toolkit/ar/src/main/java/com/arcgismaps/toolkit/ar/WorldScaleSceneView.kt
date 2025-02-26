@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
@@ -139,6 +140,23 @@ public fun WorldScaleSceneView(
         }
     )
 
+    val calibrationState = remember {
+        CalibrationState(
+            onHeadingChange = {
+                locationTracker.updateCamera(headingOffset = -it.toDouble(), elevationOffset = 0.0)
+            },
+            onElevationChange = {
+                locationTracker.updateCamera(headingOffset = 0.0, elevationOffset = it.toDouble())
+            },
+            onHeadingReset = {
+                locationTracker.resetHeadingOffset()
+            },
+            onElevationReset = {
+                locationTracker.resetElevationOffset()
+            }
+        )
+    }
+
     Box(modifier = modifier) {
         val arSessionWrapper =
             rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
@@ -214,18 +232,7 @@ public fun WorldScaleSceneView(
                     val worldScaleSceneViewScope = remember {
                         WorldScaleSceneViewScope(
                             sceneViewScope = this,
-                            onHeadingChange = {
-                                locationTracker.updateCamera(headingOffset = -it, elevationOffset = 0.0)
-                            },
-                            onElevationChange = {
-                                locationTracker.updateCamera(headingOffset = 0.0, elevationOffset = it)
-                            },
-                            onHeadingReset = {
-                                locationTracker.resetHeadingOffset()
-                            },
-                            onElevationReset = {
-                                locationTracker.resetElevationOffset()
-                            }
+                            calibrationState = calibrationState
                         )
                     }
                     content.invoke(worldScaleSceneViewScope)
