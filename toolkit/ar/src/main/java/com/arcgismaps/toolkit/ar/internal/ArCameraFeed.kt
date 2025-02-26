@@ -51,7 +51,7 @@ import com.google.ar.core.Session
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ArCameraFeed(
-    session: Session,
+    session: ArSessionWrapper,
     onFrame: (Frame, Int) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit,

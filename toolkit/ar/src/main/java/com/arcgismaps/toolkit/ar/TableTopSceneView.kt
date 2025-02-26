@@ -223,7 +223,7 @@ public fun TableTopSceneView(
             val session = arSessionWrapper.session.collectAsStateWithLifecycle()
             session.value?.let { arSession ->
                 ArCameraFeed(
-                    session = arSession,
+                    session = arSessionWrapper,
                     onFrame = { frame, displayRotation ->
                         arCoreAnchor?.let { anchor ->
                             val anchorPosition = identityMatrix - anchor.pose.translation.let {

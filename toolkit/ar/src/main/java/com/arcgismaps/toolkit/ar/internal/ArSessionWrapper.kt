@@ -40,12 +40,15 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
     private val _session = MutableStateFlow<Session?>(null)
     val session: StateFlow<Session?> = _session.asStateFlow()
 
+    var isPaused: Boolean = false
+
     override fun onDestroy(owner: LifecycleOwner) {
         session.value?.close()
         _session.value = null
     }
 
     override fun onPause(owner: LifecycleOwner) {
+        isPaused = true
         session.value?.pause()
     }
 
@@ -53,6 +56,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
         val session = this.session.value ?: Session(applicationContext)
         configureSession()
         session.resume()
+        isPaused = false
         _session.value = session
     }
 
@@ -65,6 +69,20 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
         )
+    }
+
+    fun resetSession(lifecycleOwner: LifecycleOwner) {
+        session.value?.let {
+            isPaused = true
+            it.pause()
+            it.close()
+        }
+        _session.value = null
+        val session = Session(applicationContext)
+        configureSession()
+        session.resume()
+        isPaused = false
+        _session.value = session
     }
 }
 

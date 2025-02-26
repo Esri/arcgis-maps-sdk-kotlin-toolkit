@@ -22,6 +22,7 @@ import android.content.res.AssetManager
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
@@ -41,7 +42,7 @@ import java.nio.FloatBuffer
  */
 internal class CameraFeedRenderer(
     context: Context,
-    private val session: Session,
+    private val session: ArSessionWrapper,
     private val assets: AssetManager,
     private val onFrame: (Frame, Int) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
@@ -156,17 +157,18 @@ internal class CameraFeedRenderer(
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
+        if (session.isPaused) return
         // Texture names should only be set once on a GL thread unless they change. This is done during
         // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
         // initialized during the execution of onSurfaceCreated.
         if (!hasSetTextureNames) {
-            session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
+            session.session.value?.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
             hasSetTextureNames = true
         }
 
         // Call [onFirstPlaneDetected] only once a plane has actually been detected
         if (!hasDetectedFirstPlane) {
-            if (session.getAllTrackables(Plane::class.java).isNotEmpty()) {
+            if (session.session.value?.getAllTrackables(Plane::class.java)?.isNullOrEmpty() == false) {
                 hasDetectedFirstPlane = true
                 onFirstPlaneDetected()
             }
@@ -174,14 +176,14 @@ internal class CameraFeedRenderer(
 
         // Notify ARCore session that the view size changed so that the perspective matrix and
         // the video background can be properly adjusted.
-        displayRotationHelper.updateSessionIfNeeded(session)
+        displayRotationHelper.updateSessionIfNeeded(session.session.value)
 
         // Obtain the current frame from ARSession. When the configuration is set to
         // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
         // camera framerate.
         val frame =
             try {
-                session.update()
+                session.session.value?.update()
             } catch (e: CameraNotAvailableException) {
                 logArMessage("Camera not available during onDrawFrame", e)
                 return
@@ -191,33 +193,39 @@ internal class CameraFeedRenderer(
         // used to draw the background camera image. This coordinates with [displayRotationHelper.updateSessionIfNeeded]
         // above, which tells the session the screen has changed, and then the frame will update our
         // local property tex coordinates in this function
-        updateDisplayGeometry(frame)
+        if (frame != null) {
+            updateDisplayGeometry(frame)
+        }
 
         // -- Draw background
-        if (frame.timestamp != 0L) {
+        if (frame?.timestamp != 0L) {
             // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
             // drawing possible leftover data from previous sessions if the texture is reused.
             drawBackground(surfaceDrawHandler)
         }
 
-        handleTap(frame, onTapWithHitResult)
+        if (frame != null) {
+            handleTap(frame, onTapWithHitResult)
+        }
 
         if (visualizePlanes) {
-            with(frame.camera) {
-                getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
+            frame?.camera?.let { camera ->
+                camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
                 planeRenderer.drawPlanes(
                     surfaceDrawHandler,
-                    session.getAllTrackables(Plane::class.java),
-                    displayOrientedPose,
+                    session.session.value?.getAllTrackables(Plane::class.java) ?: emptyList(),
+                    camera.displayOrientedPose,
                     projectionMatrix
                 )
             }
         }
 
-        onFrame(
-            frame,
-            displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
-        )
+        if (frame != null) {
+            onFrame(
+                frame,
+                displayRotationHelper.getCameraSensorToDisplayRotation(session.session.value?.cameraConfig?.cameraId)
+            )
+        }
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {

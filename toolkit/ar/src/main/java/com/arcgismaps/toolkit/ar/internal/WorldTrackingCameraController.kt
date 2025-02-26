@@ -29,6 +29,11 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
@@ -42,8 +47,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -59,7 +62,10 @@ import java.time.Instant
  *
  * @since 200.7.0
  */
-internal class WorldTrackingCameraController(private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
+internal class WorldTrackingCameraController(
+    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    private val onResetSession: () -> Unit
+) :
     DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
@@ -181,17 +187,16 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                         location,
                         cameraController.originCamera.value
                     )
+                }.collect { location ->
+                    updateCamera(location)
+                    // We have to do this or the error gets bigger and bigger.
+                    cameraController.transformationMatrix =
+                        TransformationMatrix.createIdentityMatrix()
+                    onResetSession()
+                    if (!hasSetOriginCamera) {
+                        hasSetOriginCamera = true
+                    }
                 }
-                .take(5)
-                .toList()
-                .minBy { it.horizontalAccuracy }
-            updateCamera(location)
-            // We have to do this or the error gets bigger and bigger.
-            cameraController.transformationMatrix =
-                TransformationMatrix.createIdentityMatrix()
-            if (!hasSetOriginCamera) {
-                hasSetOriginCamera = true
-            }
         }
     }
 }
@@ -204,10 +209,13 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
  * @since 200.7.0
  */
 @Composable
-internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
+internal fun rememberWorldTrackingCameraController(
+    onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    onResetSession: () -> Unit
+): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart) }
+    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart, onResetSession) }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
@@ -228,7 +236,7 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
  */
 internal fun shouldUpdateCamera(
     location: Location,
-    currentCamera: Camera,
+    currentOriginCamera: Camera,
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -247,5 +255,14 @@ internal fun shouldUpdateCamera(
     if (location.horizontalAccuracy > 6.0) return false
     if (location.verticalAccuracy > 6.0) return false
 
-    return true
+    val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
+    val distance = GeometryEngine.distanceGeodeticOrNull (
+        currentOriginCameraPosition,
+        location.position,
+        distanceUnit = LinearUnit.meters,
+        azimuthUnit = null,
+        curveType = GeodeticCurveType.Geodesic
+    )?.distance ?: return false
+
+    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
 }

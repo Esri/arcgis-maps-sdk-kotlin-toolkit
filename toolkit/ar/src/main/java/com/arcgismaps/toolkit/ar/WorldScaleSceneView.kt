@@ -19,14 +19,21 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -62,6 +69,7 @@ import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Pose
 import java.time.Instant
 
 @Composable
@@ -130,25 +138,32 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
+    val arSessionWrapper =
+        rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
+
+    val session = arSessionWrapper.session.collectAsStateWithLifecycle()
+
+    val localLifecycleOwner = LocalLifecycleOwner.current
     val locationTracker = rememberWorldTrackingCameraController(
         onLocationDataSourceFailedToStart = {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),
                 onInitializationStatusChanged
             )
+        },
+        onResetSession = {
+            arSessionWrapper.resetSession(localLifecycleOwner)
         }
     )
+    var currentARCoreCameraTranslation by remember { mutableStateOf(Pose.IDENTITY.translation) }
 
     Box(modifier = modifier) {
-        val arSessionWrapper =
-            rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
-
-        val session = arSessionWrapper.session.collectAsStateWithLifecycle()
         session.value?.let { arSession ->
             ArCameraFeed(
-                session = arSession,
+                session = arSessionWrapper,
                 onFrame = { frame, displayRotation ->
                     locationTracker.updateCamera(frame)
+                    currentARCoreCameraTranslation = frame.camera.displayOrientedPose.translation
                     worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                         frame.camera,
                         displayRotation
@@ -167,6 +182,7 @@ public fun WorldScaleSceneView(
         }
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
+        var currentCamera by remember { mutableStateOf<Camera?>(null)}
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -199,7 +215,10 @@ public fun WorldScaleSceneView(
             onSpatialReferenceChanged = onSpatialReferenceChanged,
             onLayerViewStateChanged = onLayerViewStateChanged,
             onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onCurrentViewpointCameraChanged = {
+                currentCamera = it
+                onCurrentViewpointCameraChanged?.invoke(it)
+            },
             onRotate = onRotate,
             onScale = onScale,
             onUp = onUp,
@@ -232,5 +251,9 @@ public fun WorldScaleSceneView(
                 }
             }
         )
+        Column(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.5f))) {
+            val originCamera = locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
+            Text(text = "Current Camera translation: ${currentARCoreCameraTranslation[0]}, ${currentARCoreCameraTranslation[1]}, ${currentARCoreCameraTranslation[2]}")
+        }
     }
 }
