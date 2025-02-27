@@ -22,6 +22,7 @@ import android.content.res.AssetManager
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
@@ -30,6 +31,8 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.TextureNotSetException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -43,7 +46,7 @@ import java.nio.FloatBuffer
  */
 internal class CameraFeedRenderer(
     context: Context,
-    private val session: ArSessionWrapper,
+    private val arSessionWrapper: ArSessionWrapper,
     private val assets: AssetManager,
     private val onFrame: (Frame, Int) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
@@ -157,9 +160,11 @@ internal class CameraFeedRenderer(
         displayRotationHelper.onSurfaceChanged(width, height)
     }
 
+    var session: Session? = null
+
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        if (session.isPaused) return
-        val session = session.session.value ?: return
+        val session = session ?: return
+        if (arSessionWrapper.isPaused) return
         // Texture names should only be set once on a GL thread unless they change. This is done during
         // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
         // initialized during the execution of onSurfaceCreated.
@@ -190,7 +195,8 @@ internal class CameraFeedRenderer(
                 logArMessage("Camera not available during onDrawFrame", e)
                 return
             } catch (e: TextureNotSetException) {
-                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
+                logArMessage("Texture names not set on the session", e)
+//                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
                 return
 //                session.update()
             }
@@ -284,6 +290,13 @@ internal class CameraFeedRenderer(
         displayRotationHelper.onResume()
         // not sure why we do this in onResume
         hasSetTextureNames = false
+        owner.lifecycleScope.launch(Dispatchers.Default) {
+            arSessionWrapper.session.collect {
+                session = it
+                hasSetTextureNames = false
+                displayRotationHelper.updateSessionIfNeeded(session, true)
+            }
+        }
     }
 
     override fun onPause(owner: LifecycleOwner) {

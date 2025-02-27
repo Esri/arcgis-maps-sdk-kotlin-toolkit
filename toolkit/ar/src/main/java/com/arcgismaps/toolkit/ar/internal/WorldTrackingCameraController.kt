@@ -73,9 +73,7 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
-    private val locationDataSource = CustomLocationDataSource {
-        worldScaleNmeaLocationProvider
-    }
+    private val locationDataSource = SystemLocationDataSource()
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -253,8 +251,8 @@ internal fun shouldUpdateCamera(
 
 
     // filter out locations with low accuracy
-    if (location.horizontalAccuracy > 6.0) return false
-    if (location.verticalAccuracy > 6.0) return false
+//    if (location.horizontalAccuracy > 6.0) return false
+//    if (location.verticalAccuracy > 6.0) return false
 
     val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, location.position.spatialReference) ?: return false //, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (

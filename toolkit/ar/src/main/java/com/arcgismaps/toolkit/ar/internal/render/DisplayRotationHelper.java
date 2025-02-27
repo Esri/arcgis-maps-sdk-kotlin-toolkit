@@ -97,12 +97,15 @@ final class DisplayRotationHelper implements DisplayListener {
      *
      * @param session the {@link Session} object to update if display geometry changed.
      */
-    public void updateSessionIfNeeded(Session session) {
+    public void updateSessionIfNeeded(Session session, boolean forceUpdate) {
         if (viewportChanged) {
             int displayRotation = display.getRotation();
             session.setDisplayGeometry(displayRotation, viewportWidth, viewportHeight);
             viewportChanged = false;
         }
+    }
+    public void updateSessionIfNeeded(Session session) {
+        updateSessionIfNeeded(session, false);
     }
 
     /**
