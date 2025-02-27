@@ -247,24 +247,14 @@ internal fun CalibrationViewInternal(
                         minusContentDescription = stringResource(R.string.decrease_heading),
                         plusContentDescription = stringResource(R.string.increase_heading),
                         resetContentDescription = stringResource(R.string.reset_heading),
-                        onMinusClick = {
-                            calibrationState.onHeadingChange(-1.0f)
-                            calibrationState.headingOffset -= 1f
-                        },
-                        onPlusClick = {
-                            calibrationState.onHeadingChange(1.0f)
-                            calibrationState.headingOffset += 1f
-                        },
-                        onResetClick = {
-                            calibrationState.onHeadingReset()
-                            calibrationState.headingOffset = 0f
-                        }
+                        onMinusClick = { calibrationState.onHeadingChange(-1.0f) },
+                        onPlusClick = { calibrationState.onHeadingChange(1.0f) },
+                        onResetClick = { calibrationState.onHeadingReset() }
                     )
                     Joyslider(
                         onValueChange = {
                             calibrationState.onHeadingChange(it)
-                            calibrationState.headingOffset += it
-                                        },
+                        },
                         contentDescription = stringResource(R.string.heading_slider_description),
                     )
                 }
@@ -284,23 +274,13 @@ internal fun CalibrationViewInternal(
                         minusContentDescription = stringResource(R.string.decrease_elevation),
                         plusContentDescription = stringResource(R.string.increase_elevation),
                         resetContentDescription = stringResource(R.string.reset_elevation),
-                        onMinusClick = {
-                            calibrationState.onElevationChange(-1.0f)
-                            calibrationState.elevationOffset -= 1f
-                        },
-                        onPlusClick = {
-                            calibrationState.onElevationChange(1.0f)
-                            calibrationState.headingOffset += 1f
-                        },
-                        onResetClick = {
-                            calibrationState.onElevationReset()
-                            calibrationState.elevationOffset = 0f
-                        }
+                        onMinusClick = { calibrationState.onElevationChange(-1.0f) },
+                        onPlusClick = { calibrationState.onElevationChange(1.0f) },
+                        onResetClick = { calibrationState.onElevationReset() }
                     )
                     Joyslider(
                         onValueChange = {
                             calibrationState.onElevationChange(it)
-                            calibrationState.elevationOffset += it
                         },
                         contentDescription = stringResource(R.string.elevation_slider_description)
                     )
