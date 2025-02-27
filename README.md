@@ -5,6 +5,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 ## Toolkit Components
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
+* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
@@ -48,6 +49,7 @@ The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" 
 ```
 implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.6.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
