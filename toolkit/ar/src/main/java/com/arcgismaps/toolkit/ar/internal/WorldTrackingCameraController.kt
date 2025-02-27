@@ -178,8 +178,7 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
             val location = locationDataSource.locationChanged
                 .filter { location ->
                     shouldUpdateCamera(
-                        location,
-                        cameraController.originCamera.value
+                        location
                     )
                 }
                 .take(5)
@@ -227,8 +226,7 @@ internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToS
  * @since 200.7.0
  */
 internal fun shouldUpdateCamera(
-    location: Location,
-    currentCamera: Camera,
+    location: Location
 ): Boolean {
     // filter out old locations
     if (Instant.now()
