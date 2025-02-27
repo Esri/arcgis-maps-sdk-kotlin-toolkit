@@ -72,9 +72,9 @@ androidx-window = { group = "androidx.window", name = "window", version.ref = "a
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "androidxWindow" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkitBarcodeScanning" }
 coil-bom = { group = "io.coil-kt", name = "coil-bom", version.ref = "coilBOM" }
-coil = { group = "io.coil-kt", name = "coil", version.ref = "coilBOM" }
-coil-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coilBOM" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilBOM" }
+coil = { group = "io.coil-kt", name = "coil" }
+coil-base = { group = "io.coil-kt", name = "coil-base" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose" }
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref="commonMark" }
 commonmark-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gfm-strikethrough", version.ref="commonMark" }
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
