@@ -20,48 +20,55 @@ package com.arcgismaps.toolkit.ar.internal
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 
 /**
  * State holder class for calibration view
  *
- * @param onHeadingChange Lambda invoked when the user adjusts heading offset
- * @param onHeadingReset Lambda invoked when the user resets heading offset
- * @param onElevationChange Lambda invoked when the user adjusts elevation offset
- * @param onElevationReset Lambda invoked when the user resets elevation offset
- *
  * @since 200.7.0
  */
 @Stable
-internal class CalibrationState(
-    private val onHeadingChange: (Float) -> Unit,
-    private val onElevationChange: (Float) -> Unit,
-    private val onHeadingReset: () -> Unit,
-    private val onElevationReset: () -> Unit,
-) {
-    var headingOffset by mutableFloatStateOf(0f)
-    var elevationOffset by mutableFloatStateOf(0f)
+internal class CalibrationState(private val scope: CoroutineScope) {
+    private val _headingDeltas: MutableSharedFlow<Double> = MutableSharedFlow()
+    val headingDeltas = _headingDeltas.asSharedFlow()
 
-    fun onHeadingChange(value: Float) {
-        onHeadingChange.invoke(value)
-        headingOffset += value
+    private val _elevationDeltas: MutableSharedFlow<Double> = MutableSharedFlow()
+    val elevationDeltas = _elevationDeltas.asSharedFlow()
+
+    var totalHeadingOffset by mutableDoubleStateOf(0.0)
+    var totalElevationOffset by mutableDoubleStateOf(0.0)
+
+    fun onHeadingChange(value: Double) {
+        scope.launch {
+            _headingDeltas.emit(value)
+            totalHeadingOffset += value
+        }
     }
 
-    fun onElevationChange(value: Float) {
-        onElevationChange.invoke(value)
-        elevationOffset += value
+    fun onElevationChange(value: Double) {
+        scope.launch {
+            _elevationDeltas.emit(value)
+            totalElevationOffset += value
+        }
     }
 
     fun onHeadingReset() {
-        onHeadingReset.invoke()
-        headingOffset = 0f
+        scope.launch {
+            _headingDeltas.emit(-totalHeadingOffset)
+            totalHeadingOffset = 0.0
+        }
     }
 
-
     fun onElevationReset() {
-        onElevationReset.invoke()
-        elevationOffset = 0f
+        scope.launch {
+            _elevationDeltas.emit(-totalElevationOffset)
+            totalElevationOffset = 0.0
+        }
     }
 }

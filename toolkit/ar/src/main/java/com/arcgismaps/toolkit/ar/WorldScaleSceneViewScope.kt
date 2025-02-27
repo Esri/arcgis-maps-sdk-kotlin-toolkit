@@ -44,7 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -242,19 +242,17 @@ internal fun CalibrationViewInternal(
 
                     JoysliderBar(
                         title = stringResource(R.string.heading_title),
-                        value = calibrationState.headingOffset,
+                        value = calibrationState.totalHeadingOffset,
                         valueFormat = DecimalFormat("+0.#º ; -#.#º"),
                         minusContentDescription = stringResource(R.string.decrease_heading),
                         plusContentDescription = stringResource(R.string.increase_heading),
                         resetContentDescription = stringResource(R.string.reset_heading),
-                        onMinusClick = { calibrationState.onHeadingChange(-1.0f) },
-                        onPlusClick = { calibrationState.onHeadingChange(1.0f) },
+                        onMinusClick = { calibrationState.onHeadingChange(-1.0) },
+                        onPlusClick = { calibrationState.onHeadingChange(1.0) },
                         onResetClick = { calibrationState.onHeadingReset() }
                     )
                     Joyslider(
-                        onValueChange = {
-                            calibrationState.onHeadingChange(it)
-                        },
+                        onValueChange = { calibrationState.onHeadingChange(it.toDouble()) },
                         contentDescription = stringResource(R.string.heading_slider_description),
                     )
                 }
@@ -268,20 +266,18 @@ internal fun CalibrationViewInternal(
                     )
                 ) {
                     JoysliderBar(
-                        stringResource(R.string.elevation_title),
-                        calibrationState.elevationOffset,
+                        title = stringResource(R.string.elevation_title),
+                        value = calibrationState.totalElevationOffset,
                         valueFormat = DecimalFormat("+0.##m ; -#.##m"),
                         minusContentDescription = stringResource(R.string.decrease_elevation),
                         plusContentDescription = stringResource(R.string.increase_elevation),
                         resetContentDescription = stringResource(R.string.reset_elevation),
-                        onMinusClick = { calibrationState.onElevationChange(-1.0f) },
-                        onPlusClick = { calibrationState.onElevationChange(1.0f) },
+                        onMinusClick = { calibrationState.onElevationChange(-1.0) },
+                        onPlusClick = { calibrationState.onElevationChange(1.0) },
                         onResetClick = { calibrationState.onElevationReset() }
                     )
                     Joyslider(
-                        onValueChange = {
-                            calibrationState.onElevationChange(it)
-                        },
+                        onValueChange = { calibrationState.onElevationChange(it.toDouble()) },
                         contentDescription = stringResource(R.string.elevation_slider_description)
                     )
                 }
@@ -293,7 +289,7 @@ internal fun CalibrationViewInternal(
 @Preview(showBackground = true)
 @Composable
 private fun JoysliderBarPreview(){
-    var value by remember { mutableFloatStateOf(0F) }
+    var value by remember { mutableDoubleStateOf(0.0) }
     JoysliderBar(
         stringResource(R.string.elevation_title),
         value,
@@ -303,7 +299,7 @@ private fun JoysliderBarPreview(){
         resetContentDescription = stringResource(R.string.reset_elevation),
         onMinusClick = {value -= 1},
         onPlusClick = {value += 1},
-        onResetClick = {value = 0F},
+        onResetClick = {value = 0.0},
         modifier = Modifier
     )
 }
@@ -327,7 +323,7 @@ private fun JoysliderBarPreview(){
 @Composable
 internal fun JoysliderBar(
     title: String,
-    value: Float,
+    value: Double,
     valueFormat: DecimalFormat,
     minusContentDescription: String,
     plusContentDescription: String,
@@ -361,7 +357,7 @@ internal fun JoysliderBar(
                     style = LocalTypography.current.bodyTextStyle
                 )
             }
-            if (value != 0f) {
+            if (value != 0.0) {
                 FilledIconButton(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     onClick = onResetClick,
