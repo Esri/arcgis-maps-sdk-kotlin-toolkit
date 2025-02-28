@@ -32,12 +32,11 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
-import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -99,13 +98,14 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     internal fun updateCamera(headingOffset: Double, elevationOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = headingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            ).elevate(elevationOffset)
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .rotateAround(
+                    targetPoint = cameraController.originCamera.value.location,
+                    deltaHeading = headingOffset,
+                    deltaPitch = 0.0,
+                    deltaRoll = 0.0
+                ).elevate(elevationOffset)
         )
 
         totalHeadingOffset += headingOffset
@@ -122,28 +122,32 @@ internal class WorldTrackingCameraController(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: totalElevationOffset else totalElevationOffset,
+                if (location.position.hasZ) location.position.z
+                    ?: totalElevationOffset else totalElevationOffset,
                 totalHeadingOffset,
                 90.0,
                 0.0
             )
         )
 
-    internal fun resetHeadingOffset(){
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = -totalHeadingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            )
+    internal fun resetHeadingOffset() {
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .rotateAround(
+                    targetPoint = cameraController.originCamera.value.location,
+                    deltaHeading = -totalHeadingOffset,
+                    deltaPitch = 0.0,
+                    deltaRoll = 0.0
+                )
         )
         totalHeadingOffset = 0.0
     }
 
-    internal fun resetElevationOffset(){
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .elevate(-totalElevationOffset))
+    internal fun resetElevationOffset() {
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .elevate(-totalElevationOffset)
+        )
         totalElevationOffset = 0.0
     }
 
@@ -216,7 +220,12 @@ internal fun rememberWorldTrackingCameraController(
 ): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart, onResetOriginCamera) }
+    val wrapper = remember {
+        WorldTrackingCameraController(
+            onLocationDataSourceFailedToStart,
+            onResetOriginCamera
+        )
+    }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
@@ -256,8 +265,10 @@ internal fun shouldUpdateCamera(
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
     if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
 
-    val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, location.position.spatialReference) ?: return false //, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
-    val distance = GeometryEngine.distanceGeodeticOrNull (
+    val currentOriginCameraPosition =
+        GeometryEngine.projectOrNull(currentOriginCamera.location, SpatialReference(4326, 5773))
+            ?: return false
+    val distance = GeometryEngine.distanceGeodeticOrNull(
         currentOriginCameraPosition,
         location.position,
         distanceUnit = LinearUnit.meters,
