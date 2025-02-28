@@ -40,7 +40,8 @@ import kotlinx.coroutines.withContext
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context) : DefaultLifecycleObserver {
+internal class ArSessionWrapper(private val applicationContext: Context) :
+    DefaultLifecycleObserver {
 
     private val _session = MutableStateFlow<Session?>(null)
     private val session: StateFlow<Session?> = _session.asStateFlow()
@@ -82,8 +83,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
         if (!locked) return
         try {
             block(session.value ?: return, shouldInitializeDisplay)
-        }
-        finally {
+        } finally {
             mutex.unlock()
         }
     }

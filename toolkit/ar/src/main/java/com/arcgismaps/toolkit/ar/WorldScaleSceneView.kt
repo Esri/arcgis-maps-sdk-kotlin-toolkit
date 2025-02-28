@@ -19,22 +19,15 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -70,7 +63,6 @@ import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.google.ar.core.Pose
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -229,10 +221,16 @@ public fun WorldScaleSceneView(
                         WorldScaleSceneViewScope(
                             sceneViewScope = this,
                             onHeadingChange = {
-                                locationTracker.updateCamera(headingOffset = -it, elevationOffset = 0.0)
+                                locationTracker.updateCamera(
+                                    headingOffset = -it,
+                                    elevationOffset = 0.0
+                                )
                             },
                             onElevationChange = {
-                                locationTracker.updateCamera(headingOffset = 0.0, elevationOffset = it)
+                                locationTracker.updateCamera(
+                                    headingOffset = 0.0,
+                                    elevationOffset = it
+                                )
                             },
                             onHeadingReset = {
                                 locationTracker.resetHeadingOffset()

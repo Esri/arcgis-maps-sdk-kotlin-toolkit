@@ -22,7 +22,6 @@ import android.content.res.AssetManager
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
@@ -31,8 +30,6 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.TextureNotSetException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -212,7 +209,7 @@ internal class CameraFeedRenderer(
                     camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
                     planeRenderer.drawPlanes(
                         surfaceDrawHandler,
-                        session.getAllTrackables(Plane::class.java) ?: emptyList(),
+                        session.getAllTrackables(Plane::class.java),
                         camera.displayOrientedPose,
                         projectionMatrix
                     )
@@ -283,7 +280,7 @@ internal class CameraFeedRenderer(
         displayRotationHelper.onResume()
     }
 
-    private var forceUpdateDisplayGeometry = false;
+    private var forceUpdateDisplayGeometry = false
 
     override fun onPause(owner: LifecycleOwner) {
         displayRotationHelper.onPause()
