@@ -47,7 +47,9 @@ internal class CalibrationState {
     val elevationDeltas = _elevationDeltas.asSharedFlow()
 
     var totalHeadingOffset by mutableDoubleStateOf(0.0)
+        private set
     var totalElevationOffset by mutableDoubleStateOf(0.0)
+        private set
 
     fun onHeadingChange(value: Double) {
         _headingDeltas.tryEmit(value)
