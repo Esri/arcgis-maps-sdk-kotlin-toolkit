@@ -158,14 +158,12 @@ public fun WorldScaleSceneView(
             }
         }
     )
-    var currentARCoreCameraTranslation by remember { mutableStateOf(Pose.IDENTITY.translation) }
 
     Box(modifier = modifier) {
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation ->
                 locationTracker.updateCamera(frame)
-                currentARCoreCameraTranslation = frame.camera.displayOrientedPose.translation
                 worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                     frame.camera,
                     displayRotation
@@ -183,7 +181,6 @@ public fun WorldScaleSceneView(
         )
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
-        var currentCamera by remember { mutableStateOf<Camera?>(null)}
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -216,10 +213,7 @@ public fun WorldScaleSceneView(
             onSpatialReferenceChanged = onSpatialReferenceChanged,
             onLayerViewStateChanged = onLayerViewStateChanged,
             onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = {
-                currentCamera = it
-                onCurrentViewpointCameraChanged?.invoke(it)
-            },
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
             onRotate = onRotate,
             onScale = onScale,
             onUp = onUp,
@@ -252,9 +246,5 @@ public fun WorldScaleSceneView(
                 }
             }
         )
-        Column(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.5f))) {
-            val originCamera = locationTracker.cameraController.originCamera.collectAsStateWithLifecycle().value
-            Text(text = "Current Camera translation: ${currentARCoreCameraTranslation[0]}, ${currentARCoreCameraTranslation[1]}, ${currentARCoreCameraTranslation[2]}")
-        }
     }
 }
