@@ -33,7 +33,6 @@ import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
@@ -65,7 +64,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
-    private val onResetSession: () -> Unit
+    private val onResetOriginCamera: () -> Unit
 ) :
     DefaultLifecycleObserver {
 
@@ -73,7 +72,9 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
-    private val locationDataSource = SystemLocationDataSource()
+    private val locationDataSource = CustomLocationDataSource {
+        worldScaleNmeaLocationProvider
+    }
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -186,12 +187,13 @@ internal class WorldTrackingCameraController(
                         location,
                         cameraController.originCamera.value
                     ) || !hasSetOriginCamera
-                }.collect { location ->
+                }
+                .collect { location ->
                     updateCamera(location)
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
-                    onResetSession()
+                    onResetOriginCamera()
                     if (!hasSetOriginCamera) {
                         hasSetOriginCamera = true
                     }
@@ -210,11 +212,11 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     onLocationDataSourceFailedToStart: (Throwable) -> Unit,
-    onResetSession: () -> Unit
+    onResetOriginCamera: () -> Unit
 ): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart, onResetSession) }
+    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart, onResetOriginCamera) }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
@@ -251,8 +253,8 @@ internal fun shouldUpdateCamera(
 
 
     // filter out locations with low accuracy
-//    if (location.horizontalAccuracy > 6.0) return false
-//    if (location.verticalAccuracy > 6.0) return false
+    if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
+    if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
 
     val currentOriginCameraPosition = Point(currentOriginCamera.location.x, currentOriginCamera.location.y, currentOriginCamera.location.z!!, location.position.spatialReference) ?: return false //, SpatialReference(currentOriginCamera.location.spatialReference?.wkid ?: 4326, 5773 /*EGM96*/))//GeometryEngine.projectOrNull(currentCamera.location, SpatialReference(4326, 115700)) ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull (

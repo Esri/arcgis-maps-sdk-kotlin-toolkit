@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -30,6 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -40,9 +43,11 @@ import kotlinx.coroutines.withContext
 internal class ArSessionWrapper(private val applicationContext: Context) : DefaultLifecycleObserver {
 
     private val _session = MutableStateFlow<Session?>(null)
-    val session: StateFlow<Session?> = _session.asStateFlow()
+    private val session: StateFlow<Session?> = _session.asStateFlow()
 
     var isPaused: Boolean = false
+
+    private val mutex: Mutex = Mutex()
 
     override fun onDestroy(owner: LifecycleOwner) {
         session.value?.close()
@@ -73,18 +78,39 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
         )
     }
 
-    suspend fun resetSession(lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO){
-        session.value?.let {
-            isPaused = true
-            it.pause()
-            it.close()
+    internal fun withLock(block: (Session) -> Unit) {
+        val locked = mutex.tryLock()
+        if (!locked) return
+        try {
+            block(session.value ?: return)
         }
-        _session.value = null
-        val session = Session(applicationContext)
-        configureSession()
-        session.resume()
-        isPaused = false
-        _session.value = session
+        finally {
+            mutex.unlock()
+        }
+    }
+
+    internal fun acquireLock() {
+        mutex.tryLock()
+    }
+
+    internal fun releaseLock() {
+        mutex.unlock()
+    }
+
+    suspend fun resetSession(lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            Log.e("ArSessionWrapper", "resetSession")
+            session.value?.let {
+                it.pause()
+                it.close()
+            }
+            _session.value = null
+            val session = Session(applicationContext)
+            configureSession()
+            session.resume()
+            isPaused = false
+            _session.value = session
+        }
     }
 }
 

@@ -143,7 +143,6 @@ public fun WorldScaleSceneView(
     val arSessionWrapper =
         rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
 
-    val session = arSessionWrapper.session.collectAsStateWithLifecycle()
 
     val localLifecycleOwner = LocalLifecycleOwner.current
     val locationTracker = rememberWorldTrackingCameraController(
@@ -153,7 +152,7 @@ public fun WorldScaleSceneView(
                 onInitializationStatusChanged
             )
         },
-        onResetSession = {
+        onResetOriginCamera = {
             localLifecycleOwner.lifecycleScope.launch {
                 arSessionWrapper.resetSession(localLifecycleOwner)
             }

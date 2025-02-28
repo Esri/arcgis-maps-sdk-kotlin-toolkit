@@ -220,8 +220,6 @@ public fun TableTopSceneView(
                 )
             }
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-            session.value?.let { arSession ->
                 ArCameraFeed(
                     session = arSessionWrapper,
                     onFrame = { frame, displayRotation ->
@@ -265,7 +263,6 @@ public fun TableTopSceneView(
                     visualizePlanes = visualizePlanes
                 )
             }
-        }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
             // Disable interaction, which is not supported in TableTop scenarios
             val interactionOptions = remember {

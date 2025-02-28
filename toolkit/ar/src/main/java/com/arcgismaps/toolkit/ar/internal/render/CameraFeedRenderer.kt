@@ -160,78 +160,76 @@ internal class CameraFeedRenderer(
         displayRotationHelper.onSurfaceChanged(width, height)
     }
 
-    var session: Session? = null
-
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        val session = session ?: return
-        if (arSessionWrapper.isPaused) return
-        // Texture names should only be set once on a GL thread unless they change. This is done during
-        // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
-        // initialized during the execution of onSurfaceCreated.
-        if (!hasSetTextureNames) {
-            session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
-            hasSetTextureNames = true
-        }
-
-        // Call [onFirstPlaneDetected] only once a plane has actually been detected
-        if (!hasDetectedFirstPlane) {
-            if (!session.getAllTrackables(Plane::class.java).isEmpty()) {
-                hasDetectedFirstPlane = true
-                onFirstPlaneDetected()
+        arSessionWrapper.withLock { session ->
+            // Texture names should only be set once on a GL thread unless they change. This is done during
+            // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
+            // initialized during the execution of onSurfaceCreated.
+//            if (!hasSetTextureNames) {
+            // TODO: mv this function and updateSessionIfNeeded to arSessionWrapper
+                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
+                hasSetTextureNames = true
+//            }
+            displayRotationHelper.updateSessionIfNeeded(session, true)
+            // Call [onFirstPlaneDetected] only once a plane has actually been detected
+            if (!hasDetectedFirstPlane) {
+                if (!session.getAllTrackables(Plane::class.java).isEmpty()) {
+                    hasDetectedFirstPlane = true
+                    onFirstPlaneDetected()
+                }
             }
-        }
 
-        // Notify ARCore session that the view size changed so that the perspective matrix and
-        // the video background can be properly adjusted.
-        displayRotationHelper.updateSessionIfNeeded(session)
+            // Notify ARCore session that the view size changed so that the perspective matrix and
+            // the video background can be properly adjusted.
+            displayRotationHelper.updateSessionIfNeeded(session)
 
-        // Obtain the current frame from ARSession. When the configuration is set to
-        // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-        // camera framerate.
-        val frame =
-            try {
-                session.update()
-            } catch (e: CameraNotAvailableException) {
-                logArMessage("Camera not available during onDrawFrame", e)
-                return
-            } catch (e: TextureNotSetException) {
-                logArMessage("Texture names not set on the session", e)
-//                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
-                return
+            // Obtain the current frame from ARSession. When the configuration is set to
+            // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
+            // camera framerate.
+            val frame =
+                try {
+                    session.update()
+                } catch (e: CameraNotAvailableException) {
+                    logArMessage("Camera not available during onDrawFrame", e)
+                    return@withLock
+                } catch (e: TextureNotSetException) {
+                    logArMessage("Texture names not set on the session", e)
+                    return@withLock
 //                session.update()
+                }
+
+            // updateDisplayGeometry must be called every frame to update the coordinates
+            // used to draw the background camera image. This coordinates with [displayRotationHelper.updateSessionIfNeeded]
+            // above, which tells the session the screen has changed, and then the frame will update our
+            // local property tex coordinates in this function
+            updateDisplayGeometry(frame)
+
+            // -- Draw background
+            if (frame.timestamp != 0L) {
+                // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
+                // drawing possible leftover data from previous sessions if the texture is reused.
+                drawBackground(surfaceDrawHandler)
             }
 
-        // updateDisplayGeometry must be called every frame to update the coordinates
-        // used to draw the background camera image. This coordinates with [displayRotationHelper.updateSessionIfNeeded]
-        // above, which tells the session the screen has changed, and then the frame will update our
-        // local property tex coordinates in this function
-        updateDisplayGeometry(frame)
+            handleTap(frame, onTapWithHitResult)
 
-        // -- Draw background
-        if (frame.timestamp != 0L) {
-            // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
-            // drawing possible leftover data from previous sessions if the texture is reused.
-            drawBackground(surfaceDrawHandler)
-        }
-
-        handleTap(frame, onTapWithHitResult)
-
-        if (visualizePlanes) {
-            frame.camera.let { camera ->
-                camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
-                planeRenderer.drawPlanes(
-                    surfaceDrawHandler,
-                    session.getAllTrackables(Plane::class.java) ?: emptyList(),
-                    camera.displayOrientedPose,
-                    projectionMatrix
-                )
+            if (visualizePlanes) {
+                frame.camera.let { camera ->
+                    camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
+                    planeRenderer.drawPlanes(
+                        surfaceDrawHandler,
+                        session.getAllTrackables(Plane::class.java) ?: emptyList(),
+                        camera.displayOrientedPose,
+                        projectionMatrix
+                    )
+                }
             }
-        }
 
-        onFrame(
-            frame,
-            displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
-        )
+            onFrame(
+                frame,
+                displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
+            )
+        }
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
@@ -259,7 +257,7 @@ internal class CameraFeedRenderer(
      * @param frame The current `Frame` as returned by [Session.update].
      */
     private fun updateDisplayGeometry(frame: Frame) {
-        if (frame.hasDisplayGeometryChanged()) {
+        if (frame.hasDisplayGeometryChanged() || forceUpdateDisplayGeometry) {
             // If display rotation changed (also includes view size change), we need to re-query the UV
             // coordinates for the screen rect, as they may have changed as well.
 
@@ -273,6 +271,7 @@ internal class CameraFeedRenderer(
                 cameraTexCoords
             )
             cameraTexCoordsVertexBuffer.set(cameraTexCoords)
+            forceUpdateDisplayGeometry = false
         }
     }
 
@@ -290,14 +289,17 @@ internal class CameraFeedRenderer(
         displayRotationHelper.onResume()
         // not sure why we do this in onResume
         hasSetTextureNames = false
-        owner.lifecycleScope.launch(Dispatchers.Default) {
-            arSessionWrapper.session.collect {
-                session = it
-                hasSetTextureNames = false
-                displayRotationHelper.updateSessionIfNeeded(session, true)
-            }
-        }
+//        owner.lifecycleScope.launch(Dispatchers.Default) {
+//            arSessionWrapper.session.collect {
+//                session = it
+//                hasSetTextureNames = false
+//                displayRotationHelper.updateSessionIfNeeded(session, true)
+//                forceUpdateDisplayGeometry = true
+//            }
+//        }
     }
+
+    private var forceUpdateDisplayGeometry = false;
 
     override fun onPause(owner: LifecycleOwner) {
         displayRotationHelper.onPause()
