@@ -22,11 +22,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
-
 
 /**
  * State holder class for calibration view
@@ -34,41 +32,41 @@ import kotlinx.coroutines.launch
  * @since 200.7.0
  */
 @Stable
-internal class CalibrationState(private val scope: CoroutineScope) {
-    private val _headingDeltas: MutableSharedFlow<Double> = MutableSharedFlow()
+internal class CalibrationState {
+    private val _headingDeltas: MutableSharedFlow<Double> = MutableSharedFlow(
+        extraBufferCapacity = Int.MAX_VALUE,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val headingDeltas = _headingDeltas.asSharedFlow()
 
-    private val _elevationDeltas: MutableSharedFlow<Double> = MutableSharedFlow()
+    private val _elevationDeltas: MutableSharedFlow<Double> = MutableSharedFlow(
+        extraBufferCapacity = Int.MAX_VALUE,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     val elevationDeltas = _elevationDeltas.asSharedFlow()
 
     var totalHeadingOffset by mutableDoubleStateOf(0.0)
     var totalElevationOffset by mutableDoubleStateOf(0.0)
 
     fun onHeadingChange(value: Double) {
-        scope.launch {
-            _headingDeltas.emit(value)
-            totalHeadingOffset += value
-        }
+        _headingDeltas.tryEmit(value)
+        totalHeadingOffset += value
     }
 
     fun onElevationChange(value: Double) {
-        scope.launch {
-            _elevationDeltas.emit(value)
-            totalElevationOffset += value
-        }
+        _elevationDeltas.tryEmit(value)
+        totalElevationOffset += value
+
     }
 
     fun onHeadingReset() {
-        scope.launch {
-            _headingDeltas.emit(-totalHeadingOffset)
-            totalHeadingOffset = 0.0
-        }
+        _headingDeltas.tryEmit(-totalHeadingOffset)
+        totalHeadingOffset = 0.0
     }
 
     fun onElevationReset() {
-        scope.launch {
-            _elevationDeltas.emit(-totalElevationOffset)
-            totalElevationOffset = 0.0
-        }
+        _elevationDeltas.tryEmit(-totalElevationOffset)
+        totalElevationOffset = 0.0
     }
 }

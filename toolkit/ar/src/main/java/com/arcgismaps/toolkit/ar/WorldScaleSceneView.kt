@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -104,7 +103,6 @@ public fun WorldScaleSceneView(
     content: (@Composable WorldScaleSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
-    val scope = rememberCoroutineScope()
 
     val arCoreInstalled by rememberArCoreInstalled(
         onFailed = {
@@ -133,7 +131,7 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
-    val calibrationState = remember { CalibrationState(scope) }
+    val calibrationState = remember { CalibrationState() }
 
     val locationTracker = rememberWorldTrackingCameraController(
         calibrationState = calibrationState,

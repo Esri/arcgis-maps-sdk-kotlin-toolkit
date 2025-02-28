@@ -86,22 +86,6 @@ internal class WorldTrackingCameraController(
     }
 
     /**
-     * Modifies the origin position of the camera by the given heading and elevation offsets.
-     *
-     * @since 200.7.0
-     */
-    internal fun updateCamera(headingOffset: Double = 0.0, elevationOffset: Double = 0.0) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = headingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            ).elevate(elevationOffset)
-        )
-    }
-
-    /**
      * Sets the origin position of the camera to the given location.
      *
      * @since 200.7.0
@@ -112,11 +96,38 @@ internal class WorldTrackingCameraController(
                 location.position.y,
                 location.position.x,
                 if (location.position.hasZ) location.position.z ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                calibrationState.totalElevationOffset,
+                calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
             )
         )
+
+    /**
+     * Rotates the origin position of the camera by the given heading offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraHeading(headingOffset: Double) {
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .rotateAround(
+                targetPoint = cameraController.originCamera.value.location,
+                deltaHeading = headingOffset,
+                deltaPitch = 0.0,
+                deltaRoll = 0.0
+            )
+        )
+    }
+
+    /**
+     * Elevates the origin position of the camera by the given elevation offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraElevation(elevationOffset: Double) {
+        cameraController.setOriginCamera(cameraController.originCamera.value
+            .elevate(elevationOffset)
+        )
+    }
 
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
@@ -167,17 +178,13 @@ internal class WorldTrackingCameraController(
                 }
         }
         scope.launch {
-            calibrationState.headingDeltas.collect{
-                updateCamera(
-                    headingOffset = -it
-                )
+            calibrationState.headingDeltas.collect {
+                updateCameraHeading(-it)
             }
         }
         scope.launch {
-            calibrationState.elevationDeltas.collect{
-                updateCamera(
-                    elevationOffset = it
-                )
+            calibrationState.elevationDeltas.collect {
+                updateCameraElevation(it)
             }
         }
     }
