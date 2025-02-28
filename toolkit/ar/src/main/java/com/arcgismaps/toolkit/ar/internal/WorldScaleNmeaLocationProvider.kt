@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.shareIn
  * @throws IllegalStateException if [ArcGISEnvironment.applicationContext] is null.
  * @since 200.7.0
  */
-internal class WorldScaleNmeaLocationProvider(private val scope: CoroutineScope) :
+internal class WorldScaleNmeaLocationProvider(scope: CoroutineScope) :
     CustomLocationDataSource.LocationProvider, OnNmeaMessageListener {
 
     private val systemLocationDataSource = SystemLocationDataSource()
