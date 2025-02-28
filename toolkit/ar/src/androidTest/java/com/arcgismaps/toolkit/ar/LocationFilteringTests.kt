@@ -21,8 +21,6 @@ package com.arcgismaps.toolkit.ar
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
-import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
 import com.arcgismaps.toolkit.ar.internal.shouldUpdateCamera
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
