@@ -60,7 +60,10 @@ import java.time.Instant
  *
  * @since 200.7.0
  */
-internal class WorldTrackingCameraController(private val onLocationDataSourceFailedToStart: (Throwable) -> Unit) :
+internal class WorldTrackingCameraController(
+    private val calibrationState: CalibrationState,
+    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit
+) :
     DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
@@ -71,9 +74,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
-
-    private var totalHeadingOffset = 0.0
-    private var totalElevationOffset = 0.0
 
     /**
      * Sets the current position of the camera using the orientation of the [Frame.getCamera].
@@ -86,25 +86,6 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
     }
 
     /**
-     * Modifies the origin position of the camera by the given heading and elevation offsets.
-     *
-     * @since 200.7.0
-     */
-    internal fun updateCamera(headingOffset: Double, elevationOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = headingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            ).elevate(elevationOffset)
-        )
-
-        totalHeadingOffset += headingOffset
-        totalElevationOffset += elevationOffset
-    }
-
-    /**
      * Sets the origin position of the camera to the given location.
      *
      * @since 200.7.0
@@ -114,29 +95,38 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: totalElevationOffset else totalElevationOffset,
-                totalHeadingOffset,
+                if (location.position.hasZ) location.position.z ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
             )
         )
 
-    internal fun resetHeadingOffset(){
+    /**
+     * Rotates the origin position of the camera by the given heading offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraHeading(headingOffset: Double) {
         cameraController.setOriginCamera(cameraController.originCamera.value
             .rotateAround(
                 targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = -totalHeadingOffset,
+                deltaHeading = headingOffset,
                 deltaPitch = 0.0,
                 deltaRoll = 0.0
             )
         )
-        totalHeadingOffset = 0.0
     }
 
-    internal fun resetElevationOffset(){
+    /**
+     * Elevates the origin position of the camera by the given elevation offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraElevation(elevationOffset: Double) {
         cameraController.setOriginCamera(cameraController.originCamera.value
-            .elevate(-totalElevationOffset))
-        totalElevationOffset = 0.0
+            .elevate(elevationOffset)
+        )
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -187,6 +177,16 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
                     }
                 }
         }
+        scope.launch {
+            calibrationState.headingDeltas.collect {
+                updateCameraHeading(-it)
+            }
+        }
+        scope.launch {
+            calibrationState.elevationDeltas.collect {
+                updateCameraElevation(it)
+            }
+        }
     }
 }
 
@@ -198,10 +198,12 @@ internal class WorldTrackingCameraController(private val onLocationDataSourceFai
  * @since 200.7.0
  */
 @Composable
-internal fun rememberWorldTrackingCameraController(onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
+internal fun rememberWorldTrackingCameraController(
+    calibrationState: CalibrationState,
+    onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(onLocationDataSourceFailedToStart) }
+    val wrapper = remember { WorldTrackingCameraController(calibrationState, onLocationDataSourceFailedToStart) }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {

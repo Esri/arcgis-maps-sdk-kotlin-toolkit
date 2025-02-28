@@ -44,7 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.DefaultThemeTokens
 import com.arcgismaps.toolkit.ar.internal.Joyslider
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
@@ -71,10 +72,7 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
  */
 public class WorldScaleSceneViewScope internal constructor(
     private val sceneViewScope: SceneViewScope,
-    private val onHeadingChange: (Double) -> Unit,
-    private val onElevationChange: (Double) -> Unit,
-    private val onHeadingReset: () -> Unit,
-    private val onElevationReset: () -> Unit
+    private val calibrationState: CalibrationState,
 ) {
 
     /**
@@ -100,10 +98,7 @@ public class WorldScaleSceneViewScope internal constructor(
             modifier = modifier,
             colorScheme = colorScheme,
             typography = typography,
-            onHeadingChange = onHeadingChange,
-            onElevationChange = onElevationChange,
-            onHeadingReset = onHeadingReset,
-            onElevationReset = onElevationReset
+            calibrationState = calibrationState
         )
     }
 
@@ -191,11 +186,7 @@ internal val LocalTypography = compositionLocalOf { DefaultThemeTokens.calibrati
  * @param modifier Modifier to be applied to the composable calibration view
  * @param colorScheme Color scheme applied to the calibration view
  * @param typography Typography style applied to text in the calibration view
- * @param onHeadingChange Lambda invoked when the user adjusts heading offset
- * @param onHeadingReset Lambda invoked when the user resets heading offset
- * @param onElevationChange Lambda invoked when the user adjusts elevation offset
- * @param onElevationReset Lambda invoked when the user resets elevation offset
- *
+ * @param calibrationState State holder for calibration offsets
  * @since 200.7.0
  */
 @Composable
@@ -204,13 +195,8 @@ internal fun CalibrationViewInternal(
     modifier: Modifier = Modifier,
     colorScheme: WorldScaleCalibrationViewColorScheme = WorldScaleCalibrationViewDefaults.colorScheme(),
     typography: WorldScaleCalibrationViewTypography = WorldScaleCalibrationViewDefaults.typography(),
-    onHeadingChange: (Double) -> Unit,
-    onElevationChange: (Double) -> Unit,
-    onHeadingReset: () -> Unit,
-    onElevationReset: () -> Unit
+    calibrationState: CalibrationState,
 ) {
-    var heading by remember { mutableFloatStateOf(0F) }
-    var elevation by remember { mutableFloatStateOf(0F) }
 
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
@@ -256,29 +242,17 @@ internal fun CalibrationViewInternal(
 
                     JoysliderBar(
                         title = stringResource(R.string.heading_title),
-                        value = heading,
+                        value = calibrationState.totalHeadingOffset,
                         valueFormat = DecimalFormat("+0.#º ; -#.#º"),
                         minusContentDescription = stringResource(R.string.decrease_heading),
                         plusContentDescription = stringResource(R.string.increase_heading),
                         resetContentDescription = stringResource(R.string.reset_heading),
-                        onMinusClick = {
-                            heading -= 1
-                            onHeadingChange(-1.0)
-                        },
-                        onPlusClick = {
-                            heading += 1
-                            onHeadingChange(1.0)
-                        },
-                        onResetClick = {
-                            heading = 0F
-                            onHeadingReset()
-                        }
+                        onMinusClick = { calibrationState.onHeadingChange(-1.0) },
+                        onPlusClick = { calibrationState.onHeadingChange(1.0) },
+                        onResetClick = { calibrationState.onHeadingReset() }
                     )
                     Joyslider(
-                        onValueChange = {
-                            onHeadingChange(it.toDouble())
-                            heading += it
-                        },
+                        onValueChange = { calibrationState.onHeadingChange(it.toDouble()) },
                         contentDescription = stringResource(R.string.heading_slider_description),
                     )
                 }
@@ -292,30 +266,18 @@ internal fun CalibrationViewInternal(
                     )
                 ) {
                     JoysliderBar(
-                        stringResource(R.string.elevation_title),
-                        elevation,
+                        title = stringResource(R.string.elevation_title),
+                        value = calibrationState.totalElevationOffset,
                         valueFormat = DecimalFormat("+0.##m ; -#.##m"),
                         minusContentDescription = stringResource(R.string.decrease_elevation),
                         plusContentDescription = stringResource(R.string.increase_elevation),
                         resetContentDescription = stringResource(R.string.reset_elevation),
-                        onMinusClick = {
-                            elevation -= 1
-                            onElevationChange(-1.0)
-                        },
-                        onPlusClick = {
-                            elevation += 1
-                            onElevationChange(1.0)
-                        },
-                        onResetClick = {
-                            elevation = 0F
-                            onElevationReset()
-                        }
+                        onMinusClick = { calibrationState.onElevationChange(-1.0) },
+                        onPlusClick = { calibrationState.onElevationChange(1.0) },
+                        onResetClick = { calibrationState.onElevationReset() }
                     )
                     Joyslider(
-                        onValueChange = {
-                            onElevationChange(it.toDouble())
-                            elevation += it
-                        },
+                        onValueChange = { calibrationState.onElevationChange(it.toDouble()) },
                         contentDescription = stringResource(R.string.elevation_slider_description)
                     )
                 }
@@ -327,7 +289,7 @@ internal fun CalibrationViewInternal(
 @Preview(showBackground = true)
 @Composable
 private fun JoysliderBarPreview(){
-    var value by remember { mutableFloatStateOf(0F) }
+    var value by remember { mutableDoubleStateOf(0.0) }
     JoysliderBar(
         stringResource(R.string.elevation_title),
         value,
@@ -337,7 +299,7 @@ private fun JoysliderBarPreview(){
         resetContentDescription = stringResource(R.string.reset_elevation),
         onMinusClick = {value -= 1},
         onPlusClick = {value += 1},
-        onResetClick = {value = 0F},
+        onResetClick = {value = 0.0},
         modifier = Modifier
     )
 }
@@ -361,7 +323,7 @@ private fun JoysliderBarPreview(){
 @Composable
 internal fun JoysliderBar(
     title: String,
-    value: Float,
+    value: Double,
     valueFormat: DecimalFormat,
     minusContentDescription: String,
     plusContentDescription: String,
@@ -395,7 +357,7 @@ internal fun JoysliderBar(
                     style = LocalTypography.current.bodyTextStyle
                 )
             }
-            if (value != 0f) {
+            if (value != 0.0) {
                 FilledIconButton(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     onClick = onResetClick,
