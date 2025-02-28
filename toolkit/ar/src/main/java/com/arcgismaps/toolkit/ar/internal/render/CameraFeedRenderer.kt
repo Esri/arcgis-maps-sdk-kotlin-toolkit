@@ -64,9 +64,6 @@ internal class CameraFeedRenderer(
     // used to keep track of whether we have detected any planes and call [onFirstPlaneDetected] only once
     private var hasDetectedFirstPlane: Boolean = false
 
-    // must initialize texture names before drawing the background
-    private var hasSetTextureNames: Boolean = false
-
     // helps with setting viewport size after rotation
     private val displayRotationHelper = DisplayRotationHelper(context)
 
@@ -161,16 +158,18 @@ internal class CameraFeedRenderer(
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        arSessionWrapper.withLock { session ->
+        arSessionWrapper.withLock { session, shouldInitializeDisplay ->
             // Texture names should only be set once on a GL thread unless they change. This is done during
             // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
             // initialized during the execution of onSurfaceCreated.
-//            if (!hasSetTextureNames) {
-            // TODO: mv this function and updateSessionIfNeeded to arSessionWrapper
+            if (shouldInitializeDisplay) {
                 session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
-                hasSetTextureNames = true
-//            }
-            displayRotationHelper.updateSessionIfNeeded(session, true)
+            }
+
+            // Notify ARCore session that the view size changed so that the perspective matrix and
+            // the video background can be properly adjusted.
+            displayRotationHelper.updateSessionIfNeeded(session, shouldInitializeDisplay)
+
             // Call [onFirstPlaneDetected] only once a plane has actually been detected
             if (!hasDetectedFirstPlane) {
                 if (!session.getAllTrackables(Plane::class.java).isEmpty()) {
@@ -178,10 +177,6 @@ internal class CameraFeedRenderer(
                     onFirstPlaneDetected()
                 }
             }
-
-            // Notify ARCore session that the view size changed so that the perspective matrix and
-            // the video background can be properly adjusted.
-            displayRotationHelper.updateSessionIfNeeded(session)
 
             // Obtain the current frame from ARSession. When the configuration is set to
             // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
@@ -195,7 +190,6 @@ internal class CameraFeedRenderer(
                 } catch (e: TextureNotSetException) {
                     logArMessage("Texture names not set on the session", e)
                     return@withLock
-//                session.update()
                 }
 
             // updateDisplayGeometry must be called every frame to update the coordinates
@@ -232,7 +226,7 @@ internal class CameraFeedRenderer(
         }
     }
 
-    fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
+    private fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         lastTapCoordinates?.let { tap ->
             val hit = frame.hitTest(tap.x, tap.y).firstOrNull {
                 // sometimes ARCore will consider a hit if the hit point is just barely outside the
@@ -287,16 +281,6 @@ internal class CameraFeedRenderer(
 
     override fun onResume(owner: LifecycleOwner) {
         displayRotationHelper.onResume()
-        // not sure why we do this in onResume
-        hasSetTextureNames = false
-//        owner.lifecycleScope.launch(Dispatchers.Default) {
-//            arSessionWrapper.session.collect {
-//                session = it
-//                hasSetTextureNames = false
-//                displayRotationHelper.updateSessionIfNeeded(session, true)
-//                forceUpdateDisplayGeometry = true
-//            }
-//        }
     }
 
     private var forceUpdateDisplayGeometry = false;

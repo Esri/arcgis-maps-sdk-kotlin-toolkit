@@ -45,9 +45,9 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
     private val _session = MutableStateFlow<Session?>(null)
     private val session: StateFlow<Session?> = _session.asStateFlow()
 
-    var isPaused: Boolean = false
-
     private val mutex: Mutex = Mutex()
+
+    private var shouldInitializeDisplay = true
 
     override fun onDestroy(owner: LifecycleOwner) {
         session.value?.close()
@@ -55,7 +55,6 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        isPaused = true
         session.value?.pause()
     }
 
@@ -63,8 +62,8 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
         val session = this.session.value ?: Session(applicationContext)
         configureSession()
         session.resume()
-        isPaused = false
         _session.value = session
+        shouldInitializeDisplay = true
     }
 
     private fun configureSession() {
@@ -78,11 +77,11 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
         )
     }
 
-    internal fun withLock(block: (Session) -> Unit) {
+    internal fun withLock(block: (Session, shouldInitializeDisplay: Boolean) -> Unit) {
         val locked = mutex.tryLock()
         if (!locked) return
         try {
-            block(session.value ?: return)
+            block(session.value ?: return, shouldInitializeDisplay)
         }
         finally {
             mutex.unlock()
@@ -108,8 +107,8 @@ internal class ArSessionWrapper(private val applicationContext: Context) : Defau
             val session = Session(applicationContext)
             configureSession()
             session.resume()
-            isPaused = false
             _session.value = session
+            shouldInitializeDisplay = true
         }
     }
 }
