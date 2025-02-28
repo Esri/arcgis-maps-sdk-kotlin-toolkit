@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="camera_permission_not_granted">ng_Camera permission not granted______________________________ny</string>
-    <string name="arcore_not_installed_message">ng_ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s_______________________________________ny</string>
+    <string name="camera_permission_not_granted">Izin kamera tidak diberikan</string>
+    <string name="arcore_not_installed_message">ARCore harus diinstal untuk menggunakan TableTopSceneView. Ketersediaan ARCore: %1$s</string>
 </resources>

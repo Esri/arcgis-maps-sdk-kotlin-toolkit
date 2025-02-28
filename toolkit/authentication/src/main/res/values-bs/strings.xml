@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">Č_Untrusted host_______________ž</string>
-    <string name="server_trust_message">Č_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ž?</string>
+    <string name="server_trust_title">Nepouzdani host</string>
+    <string name="server_trust_message">Nepouzdani certifikat poslužitelja za %1$s. Spajanje može ugroziti vaše podatke. Želite li nastaviti?</string>
     <string name="cancel">Odustani</string>
-    <string name="allow_connection">Č_Allow connection_________________ž</string>
-    <string name="username_password_login_title">Č_Authentication required________________________ž</string>
-    <string name="username_password_login_message">Č_You need to sign in to access %1$s__________________ž</string>
+    <string name="allow_connection">Dozvoli povezivanje</string>
+    <string name="username_password_login_title">Potrebna je provjera autentičnosti</string>
+    <string name="username_password_login_message">Trebate se prijaviti za pristup %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Korisničko ime</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Lozinka</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">Č_Sign in_______________ž</string>
+    <string name="sign_in">Prijavite se</string>
 </resources>

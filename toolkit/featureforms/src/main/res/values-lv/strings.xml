@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ķ_Enter %1$d character_____________________ū</item>
+        <item quantity="zero">Ievadīt %1$d rakstzīmi</item>
         <item quantity="one">Ievadīt %1$d rakstzīmi</item>
-        <item quantity="two">ķ_Enter %1$d characters______________________ū</item>
-        <item quantity="few">ķ_Enter %1$d characters______________________ū</item>
-        <item quantity="many">ķ_Enter %1$d characters______________________ū</item>
+        <item quantity="two">Ievadiet %1$d rakstzīmes</item>
+        <item quantity="few">Ievadiet %1$d rakstzīmes</item>
+        <item quantity="many">Ievadiet %1$d rakstzīmes</item>
         <item quantity="other">Ievadiet %1$d rakstzīmes</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ķ_Value must be %1$d character_____________________________ū</item>
+        <item quantity="zero">Vērtībai ir jābūt %1$d rakstzīmei</item>
         <item quantity="one">Vērtībai ir jābūt %1$d rakstzīmei</item>
-        <item quantity="two">ķ_Value must be %1$d characters______________________________ū</item>
-        <item quantity="few">ķ_Value must be %1$d characters______________________________ū</item>
-        <item quantity="many">ķ_Value must be %1$d characters______________________________ū</item>
+        <item quantity="two">Vērtībai ir jābūt %1$d rakstzīmēm</item>
+        <item quantity="few">Vērtībai ir jābūt %1$d rakstzīmēm</item>
+        <item quantity="many">Vērtībai ir jābūt %1$d rakstzīmēm</item>
         <item quantity="other">Vērtībai ir jābūt %1$d rakstzīmēm</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ķ_Maximum %1$d character_______________________ū</item>
+        <item quantity="zero">Ne vairāk kā %1$d rakstzīme</item>
         <item quantity="one">Ne vairāk kā %1$d rakstzīme</item>
-        <item quantity="two">ķ_Maximum %1$d characters________________________ū</item>
-        <item quantity="few">ķ_Maximum %1$d characters________________________ū</item>
-        <item quantity="many">ķ_Maximum %1$d characters________________________ū</item>
+        <item quantity="two">Ne vairāk kā %1$d rakstzīmes</item>
+        <item quantity="few">Ne vairāk kā %1$d rakstzīmes</item>
+        <item quantity="many">Ne vairāk kā %1$d rakstzīmes</item>
         <item quantity="other">Ne vairāk kā %1$d rakstzīmes</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">Labi</string>
     <string name="done">Pabeigts</string>
     <string name="filter">Filtrēt %1$s</string>
-    <string name="search">ķ_Search_____________ū</string>
+    <string name="search">Meklēt</string>
     <string name="numeric_range_helper_text">Ievadiet vērtību no %1$s līdz %2$s</string>
     <string name="value_must_be_from_to">Vērtībai ir jābūt no %1$s līdz %2$s</string>
     <string name="less_than_min_value">Mazāk par minimālo vērtību %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Tukšu failu lejupielāde nav iespējama</string>
     <string name="attachment_deleted">%1s ir veiksmīgi dzēsts</string>
     <string name="attachment_size_limit_exceeded">Pielikumus, kuru izmērs pārsniedz %1$s, lejupielādēt nav iespējams</string>
-    <string name="barcode_tooltip">ķ_Point your camera at a barcode_______________________________ū</string>
-    <string name="barcode_permission_denied">ķ_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ū.</string>
-    <string name="unsupported_value">ķ_Unsupported Value__________________ū</string>
-    <string name="tap_to_scan">ķ_Tap to scan____________ū</string>
-    <string name="unable_to_open_the_camera">ķ_Unable to open the camera__________________________ū</string>
-    <string name="value_must_be_a_guid">ķ_Value must be a valid GUID___________________________ū</string>
+    <string name="barcode_tooltip">Pavērsiet kameru uz svītrkodu</string>
+    <string name="barcode_permission_denied">Lai skenētu svītrkodus, ir nepieciešamas kameras atļaujas. Lūdzu, iespējojiet kameras atļaujas savas ierīces iestatījumos.</string>
+    <string name="unsupported_value">Neatbalstīta vērtība</string>
+    <string name="tap_to_scan">Pieskarties, lai skenētu</string>
+    <string name="unable_to_open_the_camera">Nevar atvērt kameru</string>
+    <string name="value_must_be_a_guid">Vērtībai ir jābūt derīgam GUID</string>
 </resources>

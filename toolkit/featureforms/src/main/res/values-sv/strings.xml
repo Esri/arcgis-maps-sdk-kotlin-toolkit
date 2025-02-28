@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">Å_Enter %1$d character_____________________ö</item>
+        <item quantity="zero">Ange %1$d tecken</item>
         <item quantity="one">Ange %1$d tecken</item>
-        <item quantity="two">Å_Enter %1$d characters______________________ö</item>
-        <item quantity="few">Å_Enter %1$d characters______________________ö</item>
-        <item quantity="many">Å_Enter %1$d characters______________________ö</item>
+        <item quantity="two">Ange %1$d tecken</item>
+        <item quantity="few">Ange %1$d tecken</item>
+        <item quantity="many">Ange %1$d tecken</item>
         <item quantity="other">Ange %1$d tecken</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">Å_Value must be %1$d character_____________________________ö</item>
+        <item quantity="zero">Värdet måste ha %1$d tecken</item>
         <item quantity="one">Värdet måste ha %1$d tecken</item>
-        <item quantity="two">Å_Value must be %1$d characters______________________________ö</item>
-        <item quantity="few">Å_Value must be %1$d characters______________________________ö</item>
-        <item quantity="many">Å_Value must be %1$d characters______________________________ö</item>
+        <item quantity="two">Värdet måste ha %1$d tecken</item>
+        <item quantity="few">Värdet måste ha %1$d tecken</item>
+        <item quantity="many">Värdet måste ha %1$d tecken</item>
         <item quantity="other">Värdet måste ha %1$d tecken</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">Å_Maximum %1$d character_______________________ö</item>
+        <item quantity="zero">Maximum %1$d tecken</item>
         <item quantity="one">Maximum %1$d tecken</item>
-        <item quantity="two">Å_Maximum %1$d characters________________________ö</item>
-        <item quantity="few">Å_Maximum %1$d characters________________________ö</item>
-        <item quantity="many">Å_Maximum %1$d characters________________________ö</item>
+        <item quantity="two">Maximum %1$d tecken</item>
+        <item quantity="few">Maximum %1$d tecken</item>
+        <item quantity="many">Maximum %1$d tecken</item>
         <item quantity="other">Maximum %1$d tecken</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Klart</string>
     <string name="filter">Filter %1$s</string>
-    <string name="search">Å_Search_____________ö</string>
+    <string name="search">Sök</string>
     <string name="numeric_range_helper_text">Ange ett värde mellan %1$s och %2$s</string>
     <string name="value_must_be_from_to">Värdet måste vara från %1$s till %2$s</string>
     <string name="less_than_min_value">Mindre än minimivärdet %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Tomma filer kan inte laddas ner</string>
     <string name="attachment_deleted">%1s har tagits bort</string>
     <string name="attachment_size_limit_exceeded">Bilagor större än %1$s kan inte hämtas</string>
-    <string name="barcode_tooltip">Å_Point your camera at a barcode_______________________________ö</string>
-    <string name="barcode_permission_denied">Å_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ö.</string>
-    <string name="unsupported_value">Å_Unsupported Value__________________ö</string>
-    <string name="tap_to_scan">Å_Tap to scan____________ö</string>
-    <string name="unable_to_open_the_camera">Å_Unable to open the camera__________________________ö</string>
-    <string name="value_must_be_a_guid">Å_Value must be a valid GUID___________________________ö</string>
+    <string name="barcode_tooltip">Rikta kameran mot en streckkod</string>
+    <string name="barcode_permission_denied">Kamerabehörighet krävs för att skanna streckkoder. Aktivera kamerabehörigheter i enhetsinställningarna.</string>
+    <string name="unsupported_value">Värde stöds inte</string>
+    <string name="tap_to_scan">Tryck för att skanna</string>
+    <string name="unable_to_open_the_camera">Det gick inte att öppna kameran</string>
+    <string name="value_must_be_a_guid">Värdet måste vara ett giltigt GUID</string>
 </resources>

@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">й_Untrusted host_______________й</string>
-    <string name="server_trust_message">й_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________й?</string>
+    <string name="server_trust_title">Ненадежден хост</string>
+    <string name="server_trust_message">Сертификатът на сървъра за %1$s не е доверен. Свързването може да компрометира Вашите данни. Искате ли да продължите?</string>
     <string name="cancel">Отказ</string>
-    <string name="allow_connection">й_Allow connection_________________й</string>
-    <string name="username_password_login_title">й_Authentication required________________________й</string>
-    <string name="username_password_login_message">й_You need to sign in to access %1$s__________________й</string>
+    <string name="allow_connection">Разрешете свързването</string>
+    <string name="username_password_login_title">Изисква се автентикация</string>
+    <string name="username_password_login_message">Трябва да се впишете, за да получите достъп до %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Потребителско име</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Парола</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">й_Sign in_______________й</string>
+    <string name="sign_in">Вписване</string>
 </resources>

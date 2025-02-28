@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Selecteer een faciliteit</string>
     <string name="floor_filter_no_results">Kan geen resultaten vinden.</string>
-    <string name="geomodel_has_no_floor_aware_data">Ĳ_GeoModel has no floor-aware data_________________ä</string>
-    <string name="an_error_has_occurred">Ĳ_An error has occurred______________________ä</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel bevat geen verdiepingsbewuste gegevens</string>
+    <string name="an_error_has_occurred">Er is een fout opgetreden</string>
     <string name="not_available">Niet beschikbaar</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Locatie - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Sluiten</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">Ĳ_Collapse_________________ä</string>
+    <string name="collapse">Samenvouwen</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Terug naar Site Selector</string>
 </resources>

@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">Ĳ_Enter %1$d character_____________________ä</item>
+        <item quantity="zero">Voer %1$d teken in</item>
         <item quantity="one">Voer %1$d teken in</item>
-        <item quantity="two">Ĳ_Enter %1$d characters______________________ä</item>
-        <item quantity="few">Ĳ_Enter %1$d characters______________________ä</item>
-        <item quantity="many">Ĳ_Enter %1$d characters______________________ä</item>
+        <item quantity="two">Voer %1$d tekens in</item>
+        <item quantity="few">Voer %1$d tekens in</item>
+        <item quantity="many">Voer %1$d tekens in</item>
         <item quantity="other">Voer %1$d tekens in</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">Ĳ_Value must be %1$d character_____________________________ä</item>
+        <item quantity="zero">Waarde moet uit %1$d teken bestaan</item>
         <item quantity="one">Waarde moet uit %1$d teken bestaan</item>
-        <item quantity="two">Ĳ_Value must be %1$d characters______________________________ä</item>
-        <item quantity="few">Ĳ_Value must be %1$d characters______________________________ä</item>
-        <item quantity="many">Ĳ_Value must be %1$d characters______________________________ä</item>
+        <item quantity="two">Waarde moet uit %1$d tekens bestaan</item>
+        <item quantity="few">Waarde moet uit %1$d tekens bestaan</item>
+        <item quantity="many">Waarde moet uit %1$d tekens bestaan</item>
         <item quantity="other">Waarde moet uit %1$d tekens bestaan</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">Ĳ_Maximum %1$d character_______________________ä</item>
+        <item quantity="zero">Maximum %1$d teken</item>
         <item quantity="one">Maximum %1$d teken</item>
-        <item quantity="two">Ĳ_Maximum %1$d characters________________________ä</item>
-        <item quantity="few">Ĳ_Maximum %1$d characters________________________ä</item>
-        <item quantity="many">Ĳ_Maximum %1$d characters________________________ä</item>
+        <item quantity="two">Maximum %1$d tekens</item>
+        <item quantity="few">Maximum %1$d tekens</item>
+        <item quantity="many">Maximum %1$d tekens</item>
         <item quantity="other">Maximum %1$d tekens</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Gereed</string>
     <string name="filter">Filter %1$s</string>
-    <string name="search">Ĳ_Search_____________ä</string>
+    <string name="search">Zoeken</string>
     <string name="numeric_range_helper_text">Voer waarde in van %1$s tot %2$s</string>
     <string name="value_must_be_from_to">De waarde moet tussen %1$s en %2$s liggen.</string>
     <string name="less_than_min_value">Minder dan minimumwaarde %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Kan geen lege bestanden downloaden</string>
     <string name="attachment_deleted">%1s is verwijderd</string>
     <string name="attachment_size_limit_exceeded">U kunt geen bijlagen downloaden die groter zijn dan %1$s</string>
-    <string name="barcode_tooltip">Ĳ_Point your camera at a barcode_______________________________ä</string>
-    <string name="barcode_permission_denied">Ĳ_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ä.</string>
-    <string name="unsupported_value">Ĳ_Unsupported Value__________________ä</string>
-    <string name="tap_to_scan">Ĳ_Tap to scan____________ä</string>
-    <string name="unable_to_open_the_camera">Ĳ_Unable to open the camera__________________________ä</string>
-    <string name="value_must_be_a_guid">Ĳ_Value must be a valid GUID___________________________ä</string>
+    <string name="barcode_tooltip">Richt uw camera op een barcode</string>
+    <string name="barcode_permission_denied">Er zijn cameramachtigingen nodig voor het scannen van barcodes. Ga naar de instellingen voor uw apparaat en schakel cameramachtigingen in.</string>
+    <string name="unsupported_value">Niet-ondersteunde waarde</string>
+    <string name="tap_to_scan">Tik om te scannen</string>
+    <string name="unable_to_open_the_camera">Kan de camera niet openen</string>
+    <string name="value_must_be_a_guid">Waarde moet een geldige GUID zijn</string>
 </resources>

@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Seleziona un servizio</string>
     <string name="floor_filter_no_results">Risultati non trovati.</string>
-    <string name="geomodel_has_no_floor_aware_data">é_GeoModel has no floor-aware data_________________È</string>
-    <string name="an_error_has_occurred">é_An error has occurred______________________È</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel non presenta dati con riconoscimento del piano</string>
+    <string name="an_error_has_occurred">Si è verificato un errore</string>
     <string name="not_available">Non disponibile</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Sito - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Chiudi</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">é_Collapse_________________È</string>
+    <string name="collapse">Comprimi</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Torna alla selezione del sito</string>
 </resources>

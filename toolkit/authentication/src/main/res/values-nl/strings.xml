@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">Ĳ_Untrusted host_______________ä</string>
-    <string name="server_trust_message">Ĳ_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ä?</string>
+    <string name="server_trust_title">Niet-vertrouwde host</string>
+    <string name="server_trust_message">Het servercertificaat voor %1$s wordt niet vertrouwd. Een verbinding maken zou een risico kunnen inhouden voor uw gegevens. Wilt u doorgaan?</string>
     <string name="cancel">Annuleren</string>
-    <string name="allow_connection">Ĳ_Allow connection_________________ä</string>
-    <string name="username_password_login_title">Ĳ_Authentication required________________________ä</string>
-    <string name="username_password_login_message">Ĳ_You need to sign in to access %1$s__________________ä</string>
+    <string name="allow_connection">Verbinding toestaan</string>
+    <string name="username_password_login_title">Verificatie verplicht</string>
+    <string name="username_password_login_message">U moet zich aanmelden voor toegang tot %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Gebruikersnaam</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Wachtwoord</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">Ĳ_Sign in_______________ä</string>
+    <string name="sign_in">Aanmelden</string>
 </resources>

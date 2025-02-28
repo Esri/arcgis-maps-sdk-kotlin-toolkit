@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="camera_permission_not_granted">Ĳ_Camera permission not granted______________________________ä</string>
-    <string name="arcore_not_installed_message">Ĳ_ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s_______________________________________ä</string>
+    <string name="camera_permission_not_granted">Cameramachtiging wordt niet verleend</string>
+    <string name="arcore_not_installed_message">Als u TableTopSceneView wilt gebruiken, moet ARCore geïnstalleerd zijn. Beschikbaarheid ARCore: %1$s</string>
 </resources>

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="camera_permission_not_granted">須_Camera permission not granted______________________________鷗</string>
-    <string name="arcore_not_installed_message">須_ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s_______________________________________鷗</string>
+    <string name="camera_permission_not_granted">カメラの権限が付与されていません</string>
+    <string name="arcore_not_installed_message">TableTopSceneView を使用するには ARCore をインストールする必要があります。 ARCore の利用可否: %1$s</string>
 </resources>

@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">ó_Untrusted host_______________à</string>
-    <string name="server_trust_message">ó_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________à?</string>
+    <string name="server_trust_title">Amfitrió no fiable</string>
+    <string name="server_trust_message">El certificat del servidor per a %1$s no és fiable. Establir la connexió podria posar en risc les dades. Voleu continuar?</string>
     <string name="cancel">Cancel·la</string>
-    <string name="allow_connection">ó_Allow connection_________________à</string>
-    <string name="username_password_login_title">ó_Authentication required________________________à</string>
-    <string name="username_password_login_message">ó_You need to sign in to access %1$s__________________à</string>
+    <string name="allow_connection">Permet la connexió</string>
+    <string name="username_password_login_title">Es necessita autenticació</string>
+    <string name="username_password_login_message">Heu d\'iniciar la sessió per accedir a %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nom d\'usuari</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Contrasenya</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">ó_Sign in_______________à</string>
+    <string name="sign_in">Inicia la sessió</string>
 </resources>

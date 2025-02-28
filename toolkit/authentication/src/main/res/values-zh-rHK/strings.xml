@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">試_Untrusted host_______________驗</string>
-    <string name="server_trust_message">試_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________驗?</string>
+    <string name="server_trust_title">不受信任的主機</string>
+    <string name="server_trust_message">不信任 %1$s 的伺服器憑證。 連線可能會危及您的資料。 是否要繼續?</string>
     <string name="cancel">取消</string>
-    <string name="allow_connection">試_Allow connection_________________驗</string>
-    <string name="username_password_login_title">試_Authentication required________________________驗</string>
-    <string name="username_password_login_message">試_You need to sign in to access %1$s__________________驗</string>
+    <string name="allow_connection">允許連線</string>
+    <string name="username_password_login_title">需要驗證</string>
+    <string name="username_password_login_message">您需要登入才能存取 %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">使用者名稱</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">密碼</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">試_Sign in_______________驗</string>
+    <string name="sign_in">登入</string>
 </resources>

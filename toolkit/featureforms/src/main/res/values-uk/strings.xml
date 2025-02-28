@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ґ_Enter %1$d character_____________________Ї</item>
+        <item quantity="zero">Введіть %1$d символ</item>
         <item quantity="one">Введіть %1$d символ</item>
-        <item quantity="two">ґ_Enter %1$d characters______________________Ї</item>
-        <item quantity="few">ґ_Enter %1$d characters______________________Ї</item>
-        <item quantity="many">ґ_Enter %1$d characters______________________Ї</item>
+        <item quantity="two">Введіть %1$d символи(-ів)</item>
+        <item quantity="few">Введіть %1$d символи(-ів)</item>
+        <item quantity="many">Введіть %1$d символи(-ів)</item>
         <item quantity="other">Введіть %1$d символи(-ів)</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ґ_Value must be %1$d character_____________________________Ї</item>
+        <item quantity="zero">Значення має містити %1$d символ</item>
         <item quantity="one">Значення має містити %1$d символ</item>
-        <item quantity="two">ґ_Value must be %1$d characters______________________________Ї</item>
-        <item quantity="few">ґ_Value must be %1$d characters______________________________Ї</item>
-        <item quantity="many">ґ_Value must be %1$d characters______________________________Ї</item>
+        <item quantity="two">Значення має містити %1$d символи(-ів)</item>
+        <item quantity="few">Значення має містити %1$d символи(-ів)</item>
+        <item quantity="many">Значення має містити %1$d символи(-ів)</item>
         <item quantity="other">Значення має містити %1$d символи(-ів)</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ґ_Maximum %1$d character_______________________Ї</item>
+        <item quantity="zero">Максимум %1$d символ</item>
         <item quantity="one">Максимум %1$d символ</item>
-        <item quantity="two">ґ_Maximum %1$d characters________________________Ї</item>
-        <item quantity="few">ґ_Maximum %1$d characters________________________Ї</item>
-        <item quantity="many">ґ_Maximum %1$d characters________________________Ї</item>
+        <item quantity="two">Максимум %1$d символи</item>
+        <item quantity="few">Максимум %1$d символи</item>
+        <item quantity="many">Максимум %1$d символи</item>
         <item quantity="other">Максимум %1$d символи</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Готово</string>
     <string name="filter">Фільтр %1$s</string>
-    <string name="search">ґ_Search_____________Ї</string>
+    <string name="search">Пошук</string>
     <string name="numeric_range_helper_text">Ввести значення від %1$s до %2$s</string>
     <string name="value_must_be_from_to">Значення має бути від %1$s до %2$s</string>
     <string name="less_than_min_value">Менше мінімального значення %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Порожні файли не можна завантажити</string>
     <string name="attachment_deleted">%1s успішно видалено</string>
     <string name="attachment_size_limit_exceeded">Прикріплення з розміром %1$s не можна завантажити</string>
-    <string name="barcode_tooltip">ґ_Point your camera at a barcode_______________________________Ї</string>
-    <string name="barcode_permission_denied">ґ_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________Ї.</string>
-    <string name="unsupported_value">ґ_Unsupported Value__________________Ї</string>
-    <string name="tap_to_scan">ґ_Tap to scan____________Ї</string>
-    <string name="unable_to_open_the_camera">ґ_Unable to open the camera__________________________Ї</string>
-    <string name="value_must_be_a_guid">ґ_Value must be a valid GUID___________________________Ї</string>
+    <string name="barcode_tooltip">Направте камеру на штрихкод.</string>
+    <string name="barcode_permission_denied">Дозвіл на використання камери потрібен для сканування штрихкодів. Увімкніть у налаштуваннях пристрою доступ до камери.</string>
+    <string name="unsupported_value">Непідтримуване значення</string>
+    <string name="tap_to_scan">Натисніть, щоб відсканувати</string>
+    <string name="unable_to_open_the_camera">Неможливо відкрити камеру</string>
+    <string name="value_must_be_a_guid">Значення має бути дійсним GUID</string>
 </resources>

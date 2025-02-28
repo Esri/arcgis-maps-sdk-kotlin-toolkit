@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">כן_Enter %1$d character_____________________ש</item>
+        <item quantity="zero">הזן תו %1$d</item>
         <item quantity="one">הזן תו %1$d</item>
-        <item quantity="two">כן_Enter %1$d characters______________________ש</item>
-        <item quantity="few">כן_Enter %1$d characters______________________ש</item>
-        <item quantity="many">כן_Enter %1$d characters______________________ש</item>
+        <item quantity="two">הזן %1$d תווים</item>
+        <item quantity="few">הזן %1$d תווים</item>
+        <item quantity="many">הזן %1$d תווים</item>
         <item quantity="other">הזן %1$d תווים</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">כן_Value must be %1$d character_____________________________ש</item>
+        <item quantity="zero">הערך חייב להיות תו %1$d</item>
         <item quantity="one">הערך חייב להיות תו %1$d</item>
-        <item quantity="two">כן_Value must be %1$d characters______________________________ש</item>
-        <item quantity="few">כן_Value must be %1$d characters______________________________ש</item>
-        <item quantity="many">כן_Value must be %1$d characters______________________________ש</item>
+        <item quantity="two">הערך חייב להיות %1$d תווים</item>
+        <item quantity="few">הערך חייב להיות %1$d תווים</item>
+        <item quantity="many">הערך חייב להיות %1$d תווים</item>
         <item quantity="other">הערך חייב להיות %1$d תווים</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">כן_Maximum %1$d character_______________________ש</item>
+        <item quantity="zero">לכל היותר תו %1$d</item>
         <item quantity="one">לכל היותר תו %1$d</item>
-        <item quantity="two">כן_Maximum %1$d characters________________________ש</item>
-        <item quantity="few">כן_Maximum %1$d characters________________________ש</item>
-        <item quantity="many">כן_Maximum %1$d characters________________________ש</item>
+        <item quantity="two">לכל היותר %1$d תווים</item>
+        <item quantity="few">לכל היותר %1$d תווים</item>
+        <item quantity="many">לכל היותר %1$d תווים</item>
         <item quantity="other">לכל היותר %1$d תווים</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">אישור</string>
     <string name="done">בוצע</string>
     <string name="filter">מסנן %1$s</string>
-    <string name="search">כן_Search_____________ש</string>
+    <string name="search">חיפוש</string>
     <string name="numeric_range_helper_text">הזן ערך בין %1$s ל-%2$s</string>
     <string name="value_must_be_from_to">הערך חייב להיות בין %1$s ל-%2$s.</string>
     <string name="less_than_min_value">פחות מהערך המינימלי %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">לא ניתן להוריד קבצים ריקים</string>
     <string name="attachment_deleted">המחיקה של %1s בוצעה בהצלחה</string>
     <string name="attachment_size_limit_exceeded">לא ניתן להוריד צרופות גדולות מ-%1$s</string>
-    <string name="barcode_tooltip">כן_Point your camera at a barcode_______________________________ש</string>
-    <string name="barcode_permission_denied">כן_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ש.</string>
-    <string name="unsupported_value">כן_Unsupported Value__________________ש</string>
-    <string name="tap_to_scan">כן_Tap to scan____________ש</string>
-    <string name="unable_to_open_the_camera">כן_Unable to open the camera__________________________ש</string>
-    <string name="value_must_be_a_guid">כן_Value must be a valid GUID___________________________ש</string>
+    <string name="barcode_tooltip">כוון את המצלמה שלך לברקוד</string>
+    <string name="barcode_permission_denied">הרשאות מצלמה נדרשות כדי לסרוק ברקודים. הפעל הרשאות מצלמה בהגדרות המכשיר שלך.</string>
+    <string name="unsupported_value">ערך שאינו נתמך</string>
+    <string name="tap_to_scan">הקש כדי לסרוק</string>
+    <string name="unable_to_open_the_camera">לא ניתן לפתוח את המצלמה</string>
+    <string name="value_must_be_a_guid">הערך חייב להיות GUID חוקי</string>
 </resources>

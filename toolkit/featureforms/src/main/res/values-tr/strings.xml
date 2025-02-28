@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ı_Enter %1$d character_____________________İ</item>
+        <item quantity="zero">%1$d karakter gir</item>
         <item quantity="one">%1$d karakter gir</item>
-        <item quantity="two">ı_Enter %1$d characters______________________İ</item>
-        <item quantity="few">ı_Enter %1$d characters______________________İ</item>
-        <item quantity="many">ı_Enter %1$d characters______________________İ</item>
+        <item quantity="two">%1$d karakter girin</item>
+        <item quantity="few">%1$d karakter girin</item>
+        <item quantity="many">%1$d karakter girin</item>
         <item quantity="other">%1$d karakter girin</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ı_Value must be %1$d character_____________________________İ</item>
+        <item quantity="zero">Değer %1$d karakter olmalıdır</item>
         <item quantity="one">Değer %1$d karakter olmalıdır</item>
-        <item quantity="two">ı_Value must be %1$d characters______________________________İ</item>
-        <item quantity="few">ı_Value must be %1$d characters______________________________İ</item>
-        <item quantity="many">ı_Value must be %1$d characters______________________________İ</item>
+        <item quantity="two">Değer %1$d karakter olmalıdır</item>
+        <item quantity="few">Değer %1$d karakter olmalıdır</item>
+        <item quantity="many">Değer %1$d karakter olmalıdır</item>
         <item quantity="other">Değer %1$d karakter olmalıdır</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ı_Maximum %1$d character_______________________İ</item>
+        <item quantity="zero">Maksimum %1$d karakter</item>
         <item quantity="one">Maksimum %1$d karakter</item>
-        <item quantity="two">ı_Maximum %1$d characters________________________İ</item>
-        <item quantity="few">ı_Maximum %1$d characters________________________İ</item>
-        <item quantity="many">ı_Maximum %1$d characters________________________İ</item>
+        <item quantity="two">Maksimum %1$d karakter</item>
+        <item quantity="few">Maksimum %1$d karakter</item>
+        <item quantity="many">Maksimum %1$d karakter</item>
         <item quantity="other">Maksimum %1$d karakter</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">Tamam</string>
     <string name="done">Bitti</string>
     <string name="filter">%1$s filtrele</string>
-    <string name="search">ı_Search_____________İ</string>
+    <string name="search">Ara</string>
     <string name="numeric_range_helper_text">%1$s\'den %2$s\'e değer gir</string>
     <string name="value_must_be_from_to">Değer %1$s\'den %2$s\'e olmalıdır</string>
     <string name="less_than_min_value">Minimum değerden daha küçük %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Boş dosyalar indirilemez</string>
     <string name="attachment_deleted">%1s başarıyla silindi</string>
     <string name="attachment_size_limit_exceeded">%1$s\'den büyük ekler indirilemez</string>
-    <string name="barcode_tooltip">ı_Point your camera at a barcode_______________________________İ</string>
-    <string name="barcode_permission_denied">ı_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________İ.</string>
-    <string name="unsupported_value">ı_Unsupported Value__________________İ</string>
-    <string name="tap_to_scan">ı_Tap to scan____________İ</string>
-    <string name="unable_to_open_the_camera">ı_Unable to open the camera__________________________İ</string>
-    <string name="value_must_be_a_guid">ı_Value must be a valid GUID___________________________İ</string>
+    <string name="barcode_tooltip">Kamerayı barkoda doğru tutun</string>
+    <string name="barcode_permission_denied">Barkod taramak için kamera izinleri gerekli. Lütfen cihaz ayarlarınızdan kamera izinlerini etkinleştirin.</string>
+    <string name="unsupported_value">Desteklenmeyen Değer</string>
+    <string name="tap_to_scan">Taramak için dokun</string>
+    <string name="unable_to_open_the_camera">Kamera açılamıyor</string>
+    <string name="value_must_be_a_guid">Değer geçerli bir GUID olmalıdır</string>
 </resources>

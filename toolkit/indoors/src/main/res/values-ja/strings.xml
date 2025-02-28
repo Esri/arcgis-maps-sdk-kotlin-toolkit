@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">施設の選択</string>
     <string name="floor_filter_no_results">結果が見つかりません。</string>
-    <string name="geomodel_has_no_floor_aware_data">須_GeoModel has no floor-aware data_________________鷗</string>
-    <string name="an_error_has_occurred">須_An error has occurred______________________鷗</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel にフロア対応データがありません</string>
+    <string name="an_error_has_occurred">エラーが発生しました</string>
     <string name="not_available">利用できません</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">サイト - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">閉じる</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">須_Collapse_________________鷗</string>
+    <string name="collapse">折りたたむ</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">サイト セレクターに戻る</string>
 </resources>

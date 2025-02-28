@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">Ă_Untrusted host_______________ș</string>
-    <string name="server_trust_message">Ă_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ș?</string>
+    <string name="server_trust_title">Hostul nu este de încredere</string>
+    <string name="server_trust_message">Certificatul serverului pentru %1$s nu este de încredere. Conectarea v-ar putea compromite datele. Doriți să continuați?</string>
     <string name="cancel">Anulare</string>
-    <string name="allow_connection">Ă_Allow connection_________________ș</string>
-    <string name="username_password_login_title">Ă_Authentication required________________________ș</string>
-    <string name="username_password_login_message">Ă_You need to sign in to access %1$s__________________ș</string>
+    <string name="allow_connection">Permiteți conectarea</string>
+    <string name="username_password_login_title">Autentificare necesară</string>
+    <string name="username_password_login_message">Trebuie să vă autentificați pentru a accesa %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nume de utilizator</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parolă</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">Ă_Sign in_______________ș</string>
+    <string name="sign_in">Autentificaţi-vă</string>
 </resources>

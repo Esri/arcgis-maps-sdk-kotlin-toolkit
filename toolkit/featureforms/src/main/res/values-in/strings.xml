@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ng_Enter %1$d character_____________________ny</item>
+        <item quantity="zero">Masukkan %1$d karakter</item>
         <item quantity="one">Masukkan %1$d karakter</item>
-        <item quantity="two">ng_Enter %1$d characters______________________ny</item>
-        <item quantity="few">ng_Enter %1$d characters______________________ny</item>
-        <item quantity="many">ng_Enter %1$d characters______________________ny</item>
+        <item quantity="two">Masukkan %1$d karakter</item>
+        <item quantity="few">Masukkan %1$d karakter</item>
+        <item quantity="many">Masukkan %1$d karakter</item>
         <item quantity="other">Masukkan %1$d karakter</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ng_Value must be %1$d character_____________________________ny</item>
+        <item quantity="zero">Nilai harus %1$d karakter</item>
         <item quantity="one">Nilai harus %1$d karakter</item>
-        <item quantity="two">ng_Value must be %1$d characters______________________________ny</item>
-        <item quantity="few">ng_Value must be %1$d characters______________________________ny</item>
-        <item quantity="many">ng_Value must be %1$d characters______________________________ny</item>
+        <item quantity="two">Nilai harus %1$d karakter</item>
+        <item quantity="few">Nilai harus %1$d karakter</item>
+        <item quantity="many">Nilai harus %1$d karakter</item>
         <item quantity="other">Nilai harus %1$d karakter</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ng_Maximum %1$d character_______________________ny</item>
+        <item quantity="zero">Maksimal %1$d karakter</item>
         <item quantity="one">Maksimal %1$d karakter</item>
-        <item quantity="two">ng_Maximum %1$d characters________________________ny</item>
-        <item quantity="few">ng_Maximum %1$d characters________________________ny</item>
-        <item quantity="many">ng_Maximum %1$d characters________________________ny</item>
+        <item quantity="two">Maksimal %1$d karakter</item>
+        <item quantity="few">Maksimal %1$d karakter</item>
+        <item quantity="many">Maksimal %1$d karakter</item>
         <item quantity="other">Maksimal %1$d karakter</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Selesai</string>
     <string name="filter">Filter %1$s</string>
-    <string name="search">ng_Search_____________ny</string>
+    <string name="search">Cari</string>
     <string name="numeric_range_helper_text">Masukkan nilai dari %1$s hingga %2$s</string>
     <string name="value_must_be_from_to">Nilai harus dari %1$s hingga %2$s</string>
     <string name="less_than_min_value">Kurang dari nilai minimal %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">File kosong tidak dapat diunduh</string>
     <string name="attachment_deleted">%1s berhasil dihapus</string>
     <string name="attachment_size_limit_exceeded">Lampiran yang lebih besar dari %1$s tidak bisa diunduh</string>
-    <string name="barcode_tooltip">ng_Point your camera at a barcode_______________________________ny</string>
-    <string name="barcode_permission_denied">ng_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ny.</string>
-    <string name="unsupported_value">ng_Unsupported Value__________________ny</string>
-    <string name="tap_to_scan">ng_Tap to scan____________ny</string>
-    <string name="unable_to_open_the_camera">ng_Unable to open the camera__________________________ny</string>
-    <string name="value_must_be_a_guid">ng_Value must be a valid GUID___________________________ny</string>
+    <string name="barcode_tooltip">Arahkan kamera Anda ke kode batang</string>
+    <string name="barcode_permission_denied">Diperlukan izin kamera untuk memindai kode batang. Aktifkan izin kamera di pengaturan perangkat Anda.</string>
+    <string name="unsupported_value">Nilai Tidak Didukung</string>
+    <string name="tap_to_scan">Ketuk untuk memindai</string>
+    <string name="unable_to_open_the_camera">Tidak dapat membuka kamera</string>
+    <string name="value_must_be_a_guid">Nilai harus berupa GUID yang valid</string>
 </resources>
