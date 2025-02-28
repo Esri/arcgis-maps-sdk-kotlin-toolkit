@@ -43,33 +43,39 @@ import kotlinx.coroutines.withContext
 internal class ArSessionWrapper(private val applicationContext: Context) :
     DefaultLifecycleObserver {
 
-    private val _session = MutableStateFlow<Session?>(null)
-    private val session: StateFlow<Session?> = _session.asStateFlow()
+    private val _isReady = MutableStateFlow<Boolean>(false)
+    internal val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
+
+    private var session: Session? = null
+        set(value) {
+            _isReady.value = value != null
+            field = value
+        }
 
     private val mutex: Mutex = Mutex()
 
     private var shouldInitializeDisplay = true
 
     override fun onDestroy(owner: LifecycleOwner) {
-        session.value?.close()
-        _session.value = null
+        session?.close()
+        session = null
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        session.value?.pause()
+        session?.pause()
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val session = this.session.value ?: Session(applicationContext)
+        val newSession = this.session ?: Session(applicationContext)
         configureSession()
-        session.resume()
-        _session.value = session
+        newSession.resume()
+        session = newSession
         shouldInitializeDisplay = true
     }
 
     private fun configureSession() {
-        session.value?.configure(
-            session.value?.config?.apply {
+        session?.configure(
+            session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
 
                 // We only want to detect horizontal planes.
@@ -82,7 +88,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         val locked = mutex.tryLock()
         if (!locked) return
         try {
-            block(session.value ?: return, shouldInitializeDisplay)
+            block(session?: return, shouldInitializeDisplay)
         } finally {
             mutex.unlock()
         }
@@ -99,15 +105,15 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
     suspend fun resetSession(lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
         mutex.withLock {
             Log.e("ArSessionWrapper", "resetSession")
-            session.value?.let {
+            session?.let {
                 it.pause()
                 it.close()
             }
-            _session.value = null
-            val session = Session(applicationContext)
+            session = null
+            val newSession = Session(applicationContext)
             configureSession()
-            session.resume()
-            _session.value = session
+            newSession.resume()
+            session = newSession
             shouldInitializeDisplay = true
         }
     }
