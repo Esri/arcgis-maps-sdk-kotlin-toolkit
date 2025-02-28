@@ -31,7 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.toolkit.ar.internal.render.CameraFeedRenderer
 import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler
 import com.google.ar.core.Frame
@@ -56,7 +56,7 @@ internal fun ArCameraFeed(
     onFirstPlaneDetected: () -> Unit,
     visualizePlanes: Boolean = true
 ) {
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val surfaceViewWrapper = remember { GLSurfaceViewWrapper(context) }
 
