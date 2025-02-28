@@ -29,13 +29,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.geometry.GeodeticCurveType
-import com.arcgismaps.geometry.GeometryEngine
-import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
-import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -45,6 +42,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -69,7 +68,10 @@ internal class WorldTrackingCameraController(
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val locationDataSource = SystemLocationDataSource()
+    private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
+    private val locationDataSource = CustomLocationDataSource {
+        worldScaleNmeaLocationProvider
+    }
     val cameraController = TransformationMatrixCameraController()
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -132,6 +134,7 @@ internal class WorldTrackingCameraController(
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
         super.onDestroy(owner)
@@ -140,6 +143,7 @@ internal class WorldTrackingCameraController(
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
     }
@@ -147,6 +151,7 @@ internal class WorldTrackingCameraController(
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         scope.launch {
+            worldScaleNmeaLocationProvider.start()
             locationDataSource.start()
         }
         scope.launch {
@@ -160,22 +165,22 @@ internal class WorldTrackingCameraController(
                 }
         }
         scope.launch {
-            locationDataSource.locationChanged
+            val location = locationDataSource.locationChanged
                 .filter { location ->
-                    !hasSetOriginCamera || shouldUpdateCamera(
-                        location,
-                        cameraController.originCamera.value
+                    shouldUpdateCamera(
+                        location
                     )
                 }
-                .collect { location ->
-                    updateCamera(location)
-                    // We have to do this or the error gets bigger and bigger.
-                    cameraController.transformationMatrix =
-                        TransformationMatrix.createIdentityMatrix()
-                    if (!hasSetOriginCamera) {
-                        hasSetOriginCamera = true
-                    }
-                }
+                .take(5)
+                .toList()
+                .minBy { it.horizontalAccuracy }
+            updateCamera(location)
+            // We have to do this or the error gets bigger and bigger.
+            cameraController.transformationMatrix =
+                TransformationMatrix.createIdentityMatrix()
+            if (!hasSetOriginCamera) {
+                hasSetOriginCamera = true
+            }
         }
         scope.launch {
             calibrationState.headingDeltas.collect {
@@ -223,8 +228,7 @@ internal fun rememberWorldTrackingCameraController(
  * @since 200.7.0
  */
 internal fun shouldUpdateCamera(
-    location: Location,
-    currentCamera: Camera,
+    location: Location
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -238,12 +242,10 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
-    val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentCamera.location,
-        location.position,
-        distanceUnit = LinearUnit.meters,
-        azimuthUnit = null,
-        curveType = GeodeticCurveType.Geodesic
-    )?.distance ?: return false
-    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
+
+    // filter out locations with low accuracy
+    if (location.horizontalAccuracy > 6.0) return false
+    if (location.verticalAccuracy > 6.0) return false
+
+    return true
 }
