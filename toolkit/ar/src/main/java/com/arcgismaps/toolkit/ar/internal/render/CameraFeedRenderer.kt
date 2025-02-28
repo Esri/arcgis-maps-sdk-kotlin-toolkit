@@ -248,7 +248,7 @@ internal class CameraFeedRenderer(
      * @param frame The current `Frame` as returned by [Session.update].
      */
     private fun updateDisplayGeometry(frame: Frame) {
-        if (frame.hasDisplayGeometryChanged() || forceUpdateDisplayGeometry) {
+        if (frame.hasDisplayGeometryChanged()) {
             // If display rotation changed (also includes view size change), we need to re-query the UV
             // coordinates for the screen rect, as they may have changed as well.
 
@@ -262,7 +262,6 @@ internal class CameraFeedRenderer(
                 cameraTexCoords
             )
             cameraTexCoordsVertexBuffer.set(cameraTexCoords)
-            forceUpdateDisplayGeometry = false
         }
     }
 
@@ -279,8 +278,6 @@ internal class CameraFeedRenderer(
     override fun onResume(owner: LifecycleOwner) {
         displayRotationHelper.onResume()
     }
-
-    private var forceUpdateDisplayGeometry = false
 
     override fun onPause(owner: LifecycleOwner) {
         displayRotationHelper.onPause()
