@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +56,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
+import com.arcgismaps.toolkit.ar.internal.WorldScaleSurfaceElevationProvider
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
@@ -131,10 +133,13 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
+    val scope = rememberCoroutineScope()
     val calibrationState = remember { CalibrationState() }
+    val elevationProvider = remember { WorldScaleSurfaceElevationProvider(arcGISScene.baseSurface, scope) }
 
     val locationTracker = rememberWorldTrackingCameraController(
         calibrationState = calibrationState,
+        elevationProvider = elevationProvider,
         onLocationDataSourceFailedToStart = {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),

@@ -42,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -61,6 +62,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
+    private val elevationProvider: WorldScaleSurfaceElevationProvider?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit
 ) :
     DefaultLifecycleObserver {
@@ -92,17 +94,44 @@ internal class WorldTrackingCameraController(
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location) =
+    private fun updateCamera(location: Location) {
+        // We have to do this or the error gets bigger and bigger.
+        cameraController.transformationMatrix =
+            TransformationMatrix.createIdentityMatrix()
+        if (!hasSetOriginCamera) {
+            hasSetOriginCamera = true
+        }
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                if (location.position.hasZ) location.position.z
+                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
                 calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
             )
         )
+    }
+
+    private fun updateCamera(elevationInfo: WorldScaleSurfaceElevationProvider.ElevationInfo) {
+        // We have to do this or the error gets bigger and bigger.
+        cameraController.transformationMatrix =
+            TransformationMatrix.createIdentityMatrix()
+        if (!hasSetOriginCamera) {
+            hasSetOriginCamera = true
+        }
+        cameraController.setOriginCamera(
+            Camera(
+                elevationInfo.location.y,
+                elevationInfo.location.x,
+                elevationInfo.elevation + calibrationState.totalElevationOffset,
+                calibrationState.totalHeadingOffset,
+                90.0,
+                0.0
+            )
+        )
+    }
 
     /**
      * Rotates the origin position of the camera by the given heading offset.
@@ -154,6 +183,13 @@ internal class WorldTrackingCameraController(
             worldScaleNmeaLocationProvider.start()
             locationDataSource.start()
         }
+        elevationProvider?.let {
+            scope.launch {
+                it.elevation.filterNotNull().collect {
+                    updateCamera(it)
+                }
+            }
+        }
         scope.launch {
             locationDataSource.status.filterIsInstance<LocationDataSourceStatus.FailedToStart>()
                 .collect {
@@ -174,13 +210,9 @@ internal class WorldTrackingCameraController(
                 .take(5)
                 .toList()
                 .minBy { it.horizontalAccuracy }
+
             updateCamera(location)
-            // We have to do this or the error gets bigger and bigger.
-            cameraController.transformationMatrix =
-                TransformationMatrix.createIdentityMatrix()
-            if (!hasSetOriginCamera) {
-                hasSetOriginCamera = true
-            }
+            elevationProvider?.obtainElevation(location.position)
         }
         scope.launch {
             calibrationState.headingDeltas.collect {
@@ -205,10 +237,17 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
+    elevationProvider: WorldScaleSurfaceElevationProvider?,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(calibrationState, onLocationDataSourceFailedToStart) }
+    val wrapper = remember {
+        WorldTrackingCameraController(
+            calibrationState,
+            elevationProvider,
+            onLocationDataSourceFailedToStart
+        )
+    }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
