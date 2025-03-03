@@ -80,4 +80,3 @@ public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
 	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
 }
 
-
