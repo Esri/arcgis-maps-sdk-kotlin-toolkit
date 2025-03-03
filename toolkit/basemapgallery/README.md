@@ -4,7 +4,7 @@ The Basemap Gallery displays a grid of available basemap styles. The gallery acc
 ![Screenshot](screenshot.png)
 
 ### Basic usage for displaying a Basemap Gallery
-A simple workflow is to display the Basemap Gallery below a Map View and use the `onItemClick` to set the map of the Map View.
+A simple workflow is to display the Basemap Gallery below a Map View and use `onItemClick` to set the map of the Map View.
 
 Use the following code to create the `BasemapGalleryItem`s
 ```kotlin
