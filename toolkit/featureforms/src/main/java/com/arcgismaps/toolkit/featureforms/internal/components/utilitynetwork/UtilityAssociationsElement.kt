@@ -35,17 +35,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun UtilityNetworkAssociationsElement(
-    state: UtilityNetworkAssociationsElementState,
+internal fun UtilityAssociationsElement(
+    state: UtilityAssociationsElementState,
     onFilterClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -91,10 +89,12 @@ private fun ElementHeader(
                 text = label,
                 style = MaterialTheme.typography.titleMedium
             )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.labelMedium,
-            )
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
     }
 }
@@ -109,12 +109,15 @@ private fun Filters(
         modifier = modifier
     ) {
         Column {
-            filters.forEachIndexed { i, group ->
+            filters.forEachIndexed { i, filterState ->
+                val enabled = filterState.count > 0
                 ListItem(
                     headlineContent = {
-                        Text(text = group.type.name)
+                        Text(text = filterState.filter.title)
                     },
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(
+                        enabled = enabled,
+                    ) {
                         onClick(i)
                     },
                     trailingContent = {
@@ -123,7 +126,7 @@ private fun Filters(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = group.count.toString(),
+                                text = filterState.count.toString(),
                             )
                             Image(
                                 imageVector = Icons.AutoMirrored.Default.ArrowRight,
@@ -142,21 +145,6 @@ private fun Filters(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun UtilityNetworkAssociationsElementPreview() {
-    val state = UtilityNetworkAssociationsElementState(
-        id = 0,
-        label = "Associations",
-        description = "This is a description",
-        isVisible = MutableStateFlow(true),
-        utilityNetwork = null,
-        utilityElement = null,
-        scope = rememberCoroutineScope()
-    )
-    UtilityNetworkAssociationsElement(state = state, {})
 }
 
 @Preview(showBackground = true)

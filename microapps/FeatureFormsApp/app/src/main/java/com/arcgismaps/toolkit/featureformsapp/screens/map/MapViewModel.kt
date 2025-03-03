@@ -22,13 +22,16 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.snap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
@@ -42,6 +45,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeSublayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -54,6 +59,7 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -177,12 +183,28 @@ class MapViewModel @Inject constructor(
     val errors: State<Error?>
         get() = _errors
 
+    /**
+     * A flow that emits the active feature form in the editing state, or null if not editing.
+     */
+    private var activeFeatureFormFlow = snapshotFlow {
+        (_uiState.value as? UIState.Editing)?.featureFormState?.activeFeatureForm
+    }
+
     init {
         scope.launch {
             // load the map and set the UI state to not editing
             map.load()
             map.utilityNetworks.firstOrNull()?.load()
             _uiState.value = UIState.NotEditing
+        }
+        scope.launch {
+            // observe the active feature form and select the feature if available
+            activeFeatureFormFlow.collectLatest { featureForm ->
+                // clear any features selected on the map
+                map.clearSelection()
+                // if there is an active feature form then select the feature
+                featureForm?.selectFeature()
+            }
         }
     }
 
@@ -209,7 +231,6 @@ class MapViewModel @Inject constructor(
                     "These must be fixed to submit the form.",
                 subTitle = errorText
             )
-            featureFormState.setValidationErrorVisibility(ValidationErrorVisibility.Visible)
         } else {
             activeFeatureForm.finishEditing().onFailure {
             }.onSuccess {
@@ -239,8 +260,6 @@ class MapViewModel @Inject constructor(
         // discard the edits
         featureForm.discardEdits()
         clearErrors()
-        // unselect the feature
-        (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
         // rollback local edits
         _uiState.value = UIState.NotEditing
     }
@@ -306,18 +325,13 @@ class MapViewModel @Inject constructor(
         when (_uiState.value) {
             is UIState.SelectFeature, UIState.NotEditing -> {
                 // if the current state is selecting a feature or not editing then select the feature
-                val layer = feature.featureTable!!.layer as FeatureLayer
                 val featureForm = FeatureForm(feature)
-                // select the feature
-                //layer.selectFeature(feature)
-                // set the UI to an editing state with the FeatureForm
-                _uiState.value = UIState.Editing(
-                    FeatureFormState(
-                        featureForm = featureForm,
-                        utilityNetwork = map.utilityNetworks.firstOrNull(),
-                        coroutineScope = scope
-                    )
+                val featureFormState = FeatureFormState(
+                    featureForm = featureForm,
+                    coroutineScope = scope
                 )
+                // set the UI to an editing state with the FeatureForm
+                _uiState.value = UIState.Editing(featureFormState)
                 scope.launch {
                     // set the viewpoint to the feature extent
                     feature.geometry?.let {
@@ -390,7 +404,7 @@ class MapViewModel @Inject constructor(
             table.createFeature(emptyMap(), location) as ArcGISFeature
         }
         table.addFeature(feature).onSuccess {
-            // select the feature and open a FeatureForm for editing the feature
+            // create a FeatureForm
             val featureForm = FeatureForm(feature)
             if (location != null) {
                 // set the viewpoint to the feature location
@@ -403,20 +417,11 @@ class MapViewModel @Inject constructor(
             _uiState.value = UIState.Editing(
                 FeatureFormState(
                     featureForm = featureForm,
-                    utilityNetwork = map.utilityNetworks.firstOrNull(),
                     coroutineScope = scope
                 )
             )
         }.onFailure {
             Log.e("MapViewModel", "Failed to add feature", it)
-        }
-    }
-
-    suspend fun selectUtilityElement(utilityElement: UtilityElement) {
-        val utilityNetwork = map.utilityNetworks.firstOrNull() ?: return
-        utilityNetwork.getFeaturesForElements(listOf(utilityElement)).onSuccess {
-            val feature = it.firstOrNull() ?: return@onSuccess
-            //selectFeature(feature)
         }
     }
 
@@ -473,8 +478,6 @@ class MapViewModel @Inject constructor(
             )
             return
         }
-        // unselect the feature after the edits have been saved
-        (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
     }
 
     /**
@@ -547,7 +550,7 @@ fun Map<String, List<ArcGISFeature>>.getFeatureCount(): Int {
 fun FeatureFormValidationException.getMessage(): String {
     return when (this) {
         is FeatureFormValidationException.RequiredException -> "Field is required"
-        else -> additionalMessage ?: message
+        else -> message
     }
 }
 
@@ -563,3 +566,33 @@ val List<FeatureEditResult>.errors: List<Throwable>
             editResult.error
         }
     }
+
+/**
+ * Clears any previously selected features in the map by clearing the selection on all the layers.
+ */
+fun ArcGISMap.clearSelection() {
+    operationalLayers.forEach { layer ->
+        when (layer) {
+            is SubtypeFeatureLayer -> {
+                layer.clearSelection()
+            }
+            is FeatureLayer -> {
+                layer.clearSelection()
+            }
+            else -> {}
+        }
+    }
+}
+
+/**
+ * Selects the [FeatureForm.feature] on its corresponding layer.
+ */
+fun FeatureForm.selectFeature() {
+    val table = feature.featureTable as? ArcGISFeatureTable ?: return
+    val layer = when (table.layer) {
+        is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
+        is FeatureLayer -> table.layer as FeatureLayer
+        else -> return
+    }
+    layer.selectFeature(feature)
+}

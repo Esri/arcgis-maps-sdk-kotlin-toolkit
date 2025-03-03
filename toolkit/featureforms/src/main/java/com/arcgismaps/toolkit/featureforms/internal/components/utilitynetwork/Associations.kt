@@ -29,6 +29,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
@@ -67,7 +69,7 @@ internal fun UtilityAssociationFilter(
     Surface(modifier = modifier) {
         Column {
             Header(
-                filter.type.name,
+                filter.filter.title,
                 subTitle,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
@@ -186,7 +188,7 @@ internal fun Associations(
         Column {
             Header(
                 state.name,
-                state.type.name,
+                "Source",
                 onBackPressed = onBackPressed,
                 modifier = Modifier
                     .padding(8.dp)

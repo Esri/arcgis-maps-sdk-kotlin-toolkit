@@ -21,6 +21,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavController
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.data.ArcGISFeature
@@ -38,6 +39,7 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.featureforms.TextFormElement
+import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
@@ -59,12 +61,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTime
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityNetworkAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
-import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -83,40 +83,33 @@ import kotlinx.coroutines.launch
  * you do not need to call [FeatureForm.evaluateExpressions] manually.
  *
  * @param featureForm the [FeatureForm] to create the state for.
- * @param coroutineScope a [CoroutineScope] to run collectors and calculations on.
  *
  * @since 200.7.0
  */
 @Stable
 public class FeatureFormState private constructor(
-    private val featureForm: FeatureForm,
-    private val coroutineScope: CoroutineScope,
-    private val utilityNetwork: UtilityNetwork? = null
+    private val featureForm: FeatureForm
 ) {
     private val store: ArrayDeque<FormStateData> = ArrayDeque()
 
-    private var navController: NavController? = null
+    private lateinit var coroutineScope: CoroutineScope
 
-    private var _validationErrorVisibility: MutableState<ValidationErrorVisibility> =
-        mutableStateOf(ValidationErrorVisibility.Automatic)
+    private var navController: NavController? = null
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
     private val _evaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
 
     /**
-     * The [ValidationErrorVisibility] setting for the current active form [activeFeatureForm].
-     *
-     * Note that this property is observable and if you use it in the composable function it will be
-     * recomposed on every change.
-     */
-    public val validationErrorVisibility: ValidationErrorVisibility by _validationErrorVisibility
-
-    /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
      *
      * Note that this property is observable and if you use it in the composable function it will be
      * recomposed on every change.
+     *
+     * To observe changes to this property outside a restartable function, use [snapshotFlow]:
+     * ```
+     * snapshotFlow { activeFeatureForm }
+     * ```
      */
     public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
@@ -125,52 +118,34 @@ public class FeatureFormState private constructor(
      *
      * Note that this property is observable and if you use it in the composable function it will be
      * recomposed on every change.
+     *
+     * To observe changes to this property outside a restartable function, use [snapshotFlow]:
+     * ```
+     * snapshotFlow { evaluatingExpressions }
+     * ```
      */
     public val evaluatingExpressions: Boolean by _evaluatingExpressions
 
     public constructor(
         featureForm: FeatureForm,
-        validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-        coroutineScope: CoroutineScope,
-        utilityNetwork: UtilityNetwork? = null
-    ) : this(
-        featureForm,
-        coroutineScope,
-        utilityNetwork
-    ) {
-        _validationErrorVisibility.value = validationErrorVisibility
+        coroutineScope: CoroutineScope
+    ) : this(featureForm) {
+        this.coroutineScope = coroutineScope
         // create state objects for all the supported element types that are part of the provided FeatureForm
         val states = createStates(this.featureForm, this.featureForm.elements, coroutineScope)
-        val unState = utilityNetwork?.let {
-            val element = utilityNetwork.createElementOrNull(featureForm.feature)
-            UtilityNetworkAssociationsElementState(
-                id = featureForm.hashCode(),
-                label = "Associations",
-                description = "This is a description",
-                isVisible = MutableStateFlow(true),
-                utilityNetwork = utilityNetwork,
-                utilityElement = element,
-                scope = coroutineScope
-            )
-        }
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, states, unState))
+        store.addLast(FormStateData(featureForm, states))
         evaluateExpressions()
     }
 
     internal constructor(
         featureForm: FeatureForm,
         stateCollection: FormStateCollection,
-        validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
         coroutineScope: CoroutineScope
-    ) : this(
-        featureForm,
-        validationErrorVisibility,
-        coroutineScope
-    ) {
-        _validationErrorVisibility.value = validationErrorVisibility
+    ) : this(featureForm) {
+        this.coroutineScope = coroutineScope
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, stateCollection, null))
+        store.addLast(FormStateData(featureForm, stateCollection))
         evaluateExpressions()
     }
 
@@ -181,21 +156,9 @@ public class FeatureFormState private constructor(
     internal fun navigateTo(form: FeatureForm) {
         navController?.let { controller ->
             val states = createStates(form, form.elements, coroutineScope)
-            val unState = utilityNetwork?.let {
-                val element = utilityNetwork.createElementOrNull(form.feature)
-                UtilityNetworkAssociationsElementState(
-                    id = form.hashCode(),
-                    label = "Associations",
-                    description = "This is a description",
-                    isVisible = MutableStateFlow(true),
-                    utilityNetwork = utilityNetwork,
-                    utilityElement = element,
-                    scope = coroutineScope
-                )
-            }
-            store.addLast(FormStateData(form, states, unState))
-            controller.navigate(NavigationRoute.FormView)
+            store.addLast(FormStateData(form, states))
             _activeFeatureForm.value = form
+            controller.navigate(NavigationRoute.FormView)
             evaluateExpressions()
         }
     }
@@ -219,10 +182,6 @@ public class FeatureFormState private constructor(
 
     internal fun getActiveStateData(): FormStateData {
         return store.last()
-    }
-
-    public fun setValidationErrorVisibility(visibility: ValidationErrorVisibility) {
-        _validationErrorVisibility.value = visibility
     }
 
     /**
@@ -274,6 +233,14 @@ public class FeatureFormState private constructor(
                         isVisible = element.isVisible,
                         text = element.text,
                         format = element.format
+                    )
+                    states.add(element, state)
+                }
+
+                is UtilityAssociationsFormElement -> {
+                    val state = UtilityAssociationsElementState(
+                        element = element,
+                        scope = scope
                     )
                     states.add(element, state)
                 }
@@ -505,6 +472,5 @@ public class FeatureFormState private constructor(
 @Immutable
 internal data class FormStateData(
     val featureForm: FeatureForm,
-    val stateCollection: FormStateCollection,
-    val unState: UtilityNetworkAssociationsElementState?
+    val stateCollection: FormStateCollection
 )
