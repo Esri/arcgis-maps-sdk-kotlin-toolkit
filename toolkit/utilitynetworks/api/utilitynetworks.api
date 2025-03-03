@@ -80,9 +80,4 @@ public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
 	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
 }
 
-public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt {
-	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt;
-	public fun <init> ()V
-	public final fun getLambda-1$utilitynetworks_release ()Lkotlin/jvm/functions/Function3;
-}
 
