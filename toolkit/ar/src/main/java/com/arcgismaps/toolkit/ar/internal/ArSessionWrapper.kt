@@ -28,9 +28,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -43,14 +40,7 @@ import kotlinx.coroutines.withContext
 internal class ArSessionWrapper(private val applicationContext: Context) :
     DefaultLifecycleObserver {
 
-    private val _isReady = MutableStateFlow<Boolean>(false)
-    internal val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
-
     private var session: Session? = null
-        set(value) {
-            _isReady.value = value != null
-            field = value
-        }
 
     private val mutex: Mutex = Mutex()
 
@@ -88,7 +78,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         val locked = mutex.tryLock()
         if (!locked) return
         try {
-            block(session?: return, shouldInitializeDisplay)
+            block(session ?: return, shouldInitializeDisplay)
         } finally {
             mutex.unlock()
         }
