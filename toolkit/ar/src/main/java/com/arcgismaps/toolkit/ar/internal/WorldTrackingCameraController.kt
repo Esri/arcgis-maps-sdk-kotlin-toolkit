@@ -100,7 +100,8 @@ internal class WorldTrackingCameraController(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                if (location.position.hasZ) location.position.z
+                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
                 calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
@@ -113,13 +114,14 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCameraHeading(headingOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = headingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            )
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .rotateAround(
+                    targetPoint = cameraController.originCamera.value.location,
+                    deltaHeading = headingOffset,
+                    deltaPitch = 0.0,
+                    deltaRoll = 0.0
+                )
         )
     }
 
@@ -129,8 +131,9 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCameraElevation(elevationOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .elevate(elevationOffset)
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .elevate(elevationOffset)
         )
     }
 
