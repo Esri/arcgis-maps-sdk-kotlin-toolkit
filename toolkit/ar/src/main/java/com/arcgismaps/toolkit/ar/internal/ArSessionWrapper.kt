@@ -58,9 +58,9 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
     override fun onResume(owner: LifecycleOwner) {
         val newSession = this.session ?: Session(applicationContext)
         configureSession()
+        shouldInitializeDisplay = true
         newSession.resume()
         session = newSession
-        shouldInitializeDisplay = true
     }
 
     private fun configureSession() {
@@ -84,7 +84,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         }
     }
 
-    suspend fun resetSession(lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
+    suspend fun resetSession(lifecycleOwner: LifecycleOwner) {
         mutex.withLock {
             Log.e("ArSessionWrapper", "resetSession")
             session?.let {
@@ -94,9 +94,9 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
             session = null
             val newSession = Session(applicationContext)
             configureSession()
+            shouldInitializeDisplay = true
             newSession.resume()
             session = newSession
-            shouldInitializeDisplay = true
         }
     }
 }
