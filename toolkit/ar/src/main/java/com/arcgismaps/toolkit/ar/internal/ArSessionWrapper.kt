@@ -84,14 +84,6 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         }
     }
 
-    internal fun acquireLock() {
-        mutex.tryLock()
-    }
-
-    internal fun releaseLock() {
-        mutex.unlock()
-    }
-
     suspend fun resetSession(lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
         mutex.withLock {
             Log.e("ArSessionWrapper", "resetSession")
