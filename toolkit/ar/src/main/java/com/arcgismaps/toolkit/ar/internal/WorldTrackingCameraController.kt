@@ -172,8 +172,9 @@ internal class WorldTrackingCameraController(
                 .filter { location ->
                     shouldUpdateCamera(
                         location,
-                        cameraController.originCamera.value
-                    ) || !hasSetOriginCamera
+                        cameraController.originCamera.value,
+                        measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
+                    )
                 }
                 .collect { location ->
                     updateCamera(location)
@@ -242,6 +243,7 @@ internal fun rememberWorldTrackingCameraController(
 internal fun shouldUpdateCamera(
     location: Location,
     currentOriginCamera: Camera,
+    measureDistance: Boolean = true
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -259,6 +261,8 @@ internal fun shouldUpdateCamera(
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
     if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
+
+    if (!measureDistance) return true
 
     val currentOriginCameraPosition =
         GeometryEngine.projectOrNull(currentOriginCamera.location, SpatialReference(4326, 5773))
