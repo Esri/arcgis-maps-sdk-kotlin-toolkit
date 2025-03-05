@@ -18,7 +18,7 @@
 
 package com.arcgismaps.toolkit.legend
 
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,16 +39,16 @@ import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 
 @Immutable
-internal data class LegendInfoWithBitmap(
+internal data class LegendInfoWrapper(
     val name: String,
-    val bitmap: BitmapDrawable?
+    val bitmap: Bitmap?
 )
 
 @Immutable
 internal data class LayerRow (
     val layer: LayerContent,
     val isVisibleAtScale: (Double) -> Boolean,
-    val legendInfos: List<LegendInfoWithBitmap>
+    val legendInfos: List<LegendInfoWrapper>
 )
 
 @Composable
@@ -94,9 +94,7 @@ private fun Legend(
                 }
                 if (item.legendInfos.isNotEmpty()) {
                     item.legendInfos.forEach { legendInfo ->
-                        LegendInfoRow(
-                            legendInfo
-                        )
+                        LegendInfoRow(legendInfo)
                     }
                 }
             }
@@ -106,12 +104,12 @@ private fun Legend(
 
 @Composable
 private fun LegendInfoRow(
-    legendInfo: LegendInfoWithBitmap,
+    legendInfo: LegendInfoWrapper,
 ) {
     Row {
         legendInfo.bitmap?.let {
             Image(
-                bitmap = it.bitmap.asImageBitmap(),
+                bitmap = it.asImageBitmap(),
                 contentDescription = null
             )
         }
@@ -192,9 +190,9 @@ private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(density: Float, la
     } else {
         layerContent.fetchLegendInfos().onSuccess { legendInfos ->
             val legendInfosWithBitmap = legendInfos.map { legendInfo ->
-                LegendInfoWithBitmap(
+                LegendInfoWrapper(
                     legendInfo.name,
-                    legendInfo.symbol?.createSwatch(density)?.getOrNull()
+                    legendInfo.symbol?.createSwatch(density)?.getOrNull()?.bitmap
                 )
             }
 
