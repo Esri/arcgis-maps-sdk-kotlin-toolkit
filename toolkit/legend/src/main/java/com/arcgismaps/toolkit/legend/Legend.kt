@@ -39,13 +39,13 @@ import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 
 @Immutable
-internal data class LegendInfoWrapper(
+private data class LegendInfoWrapper(
     val name: String,
     val bitmap: Bitmap?
 )
 
 @Immutable
-internal data class LayerRow (
+private data class LayerRow (
     val layer: LayerContent,
     val isVisibleAtScale: (Double) -> Boolean,
     val legendInfos: List<LegendInfoWrapper>
@@ -181,7 +181,10 @@ private suspend fun loadLayerRow(density: Float, layerContent: LayerContent): Li
  * @param layerContent The layer to fetch the sublayers and legend infos from.
  * @return A list of LayerRow objects.
  */
-private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(density: Float, layerContent: LayerContent): List<LayerRow> {
+private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(
+    density: Float,
+    layerContent: LayerContent
+): List<LayerRow> {
     val layerRows = mutableListOf<LayerRow>()
     if (layerContent.subLayerContents.value.isNotEmpty()) {
         layerContent.subLayerContents.value.forEach { subLayer ->
