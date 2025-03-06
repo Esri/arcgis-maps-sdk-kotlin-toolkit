@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Vybrat zařízení</string>
     <string name="floor_filter_no_results">Nebyly nalezeny žádné výsledky.</string>
-    <string name="geomodel_has_no_floor_aware_data">Ř_GeoModel has no floor-aware data_________________ů</string>
-    <string name="an_error_has_occurred">Ř_An error has occurred______________________ů</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel nemá žádná data s informacemi o podlaží</string>
+    <string name="an_error_has_occurred">Došlo k chybě</string>
     <string name="not_available">Není k dispozici</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Místo – %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Zavřít</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">Ř_Collapse_________________ů</string>
+    <string name="collapse">Sbalit</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Zpět k nástroji pro výběr místa</string>
 </resources>

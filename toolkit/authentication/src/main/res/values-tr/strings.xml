@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">ı_Untrusted host_______________İ</string>
-    <string name="server_trust_message">ı_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________İ?</string>
+    <string name="server_trust_title">Güvenilmeyen ana makine</string>
+    <string name="server_trust_message">%1$s sunucu sertifikası güvenilir değil. Bağlanmak verilerinizi tehlikeye atabilir. Devam etmek istiyor musunuz?</string>
     <string name="cancel">İptal</string>
-    <string name="allow_connection">ı_Allow connection_________________İ</string>
-    <string name="username_password_login_title">ı_Authentication required________________________İ</string>
-    <string name="username_password_login_message">ı_You need to sign in to access %1$s__________________İ</string>
+    <string name="allow_connection">Bağlantıya izin ver</string>
+    <string name="username_password_login_title">Kimlik doğrulaması gerekiyor</string>
+    <string name="username_password_login_message">%1$s\'ye erişmek için oturum açmanız gerekiyor</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kullanıcı adı</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parola</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">ı_Sign in_______________İ</string>
+    <string name="sign_in">Oturumu Aç</string>
 </resources>

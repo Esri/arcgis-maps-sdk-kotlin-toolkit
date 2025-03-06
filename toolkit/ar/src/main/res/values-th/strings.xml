@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="camera_permission_not_granted">ก้_Camera permission not granted______________________________ษฺ</string>
-    <string name="arcore_not_installed_message">ก้_ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s_______________________________________ษฺ</string>
+    <string name="camera_permission_not_granted">ไม่ได้อนุมัติสิทธิ์การเข้าถึงกล้อง</string>
+    <string name="arcore_not_installed_message">ต้องติดตั้ง ARCore เพื่อใช้งาน TableTopSceneView ความพร้อมใช้งานของ ARCore: %1$s</string>
 </resources>

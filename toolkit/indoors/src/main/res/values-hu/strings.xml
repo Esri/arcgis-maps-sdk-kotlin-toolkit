@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Válasszon ki egy létesítményt</string>
     <string name="floor_filter_no_results">Nincs találat.</string>
-    <string name="geomodel_has_no_floor_aware_data">í_GeoModel has no floor-aware data_________________ő</string>
-    <string name="an_error_has_occurred">í_An error has occurred______________________ő</string>
+    <string name="geomodel_has_no_floor_aware_data">A GeoModel nem rendelkezik emeletet figyelembe vevő adatokkal</string>
+    <string name="an_error_has_occurred">Hiba történt.</string>
     <string name="not_available">Nem áll rendelkezésre</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Telephely – %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Bezárás</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">í_Collapse_________________ő</string>
+    <string name="collapse">Összecsukás</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Visszalépés a telephelyválasztóra</string>
 </resources>

@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">õ_Untrusted host_______________ç</string>
-    <string name="server_trust_message">õ_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ç?</string>
+    <string name="server_trust_title">Anfitrião não fidedigno</string>
+    <string name="server_trust_message">O certificado do servidor para %1$s não é fidedigno. A ligação pode comprometer os seus dados. Pretende continuar?</string>
     <string name="cancel">Cancelar</string>
-    <string name="allow_connection">õ_Allow connection_________________ç</string>
-    <string name="username_password_login_title">õ_Authentication required________________________ç</string>
-    <string name="username_password_login_message">õ_You need to sign in to access %1$s__________________ç</string>
+    <string name="allow_connection">Permitir ligação</string>
+    <string name="username_password_login_title">Autenticação necessária</string>
+    <string name="username_password_login_message">É necessário iniciar sessão para aceder a %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nome de utilizador</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Palavra-passe</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">õ_Sign in_______________ç</string>
+    <string name="sign_in">Iniciar sessão</string>
 </resources>

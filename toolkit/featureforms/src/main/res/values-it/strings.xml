@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">é_Enter %1$d character_____________________È</item>
+        <item quantity="zero">Inserire %1$d caratteri</item>
         <item quantity="one">Inserire %1$d caratteri</item>
-        <item quantity="two">é_Enter %1$d characters______________________È</item>
-        <item quantity="few">é_Enter %1$d characters______________________È</item>
-        <item quantity="many">é_Enter %1$d characters______________________È</item>
+        <item quantity="two">Digitare %1$d caratteri</item>
+        <item quantity="few">Digitare %1$d caratteri</item>
+        <item quantity="many">Digitare %1$d caratteri</item>
         <item quantity="other">Digitare %1$d caratteri</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">é_Value must be %1$d character_____________________________È</item>
+        <item quantity="zero">Il valore deve contenere %1$d carattere</item>
         <item quantity="one">Il valore deve contenere %1$d carattere</item>
-        <item quantity="two">é_Value must be %1$d characters______________________________È</item>
-        <item quantity="few">é_Value must be %1$d characters______________________________È</item>
-        <item quantity="many">é_Value must be %1$d characters______________________________È</item>
+        <item quantity="two">Il valore deve contenere %1$d caratteri</item>
+        <item quantity="few">Il valore deve contenere %1$d caratteri</item>
+        <item quantity="many">Il valore deve contenere %1$d caratteri</item>
         <item quantity="other">Il valore deve contenere %1$d caratteri</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">é_Maximum %1$d character_______________________È</item>
+        <item quantity="zero">Carattere %1$d massimo</item>
         <item quantity="one">Carattere %1$d massimo</item>
-        <item quantity="two">é_Maximum %1$d characters________________________È</item>
-        <item quantity="few">é_Maximum %1$d characters________________________È</item>
-        <item quantity="many">é_Maximum %1$d characters________________________È</item>
+        <item quantity="two">Caratteri %1$d massimi</item>
+        <item quantity="few">Caratteri %1$d massimi</item>
+        <item quantity="many">Caratteri %1$d massimi</item>
         <item quantity="other">Caratteri %1$d massimi</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Completato</string>
     <string name="filter">Filtro %1$s</string>
-    <string name="search">é_Search_____________È</string>
+    <string name="search">Cerca</string>
     <string name="numeric_range_helper_text">Inserire valore da%1$s a %2$s</string>
     <string name="value_must_be_from_to">Il valore deve essere compreso fra %1$s e %2$s</string>
     <string name="less_than_min_value">Minore del valore minimo %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Impossibile scaricare file vuoti</string>
     <string name="attachment_deleted">%1s eliminato con successo</string>
     <string name="attachment_size_limit_exceeded">Gli allegati più grandi di %1$s non possono essere scaricati</string>
-    <string name="barcode_tooltip">é_Point your camera at a barcode_______________________________È</string>
-    <string name="barcode_permission_denied">é_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________È.</string>
-    <string name="unsupported_value">é_Unsupported Value__________________È</string>
-    <string name="tap_to_scan">é_Tap to scan____________È</string>
-    <string name="unable_to_open_the_camera">é_Unable to open the camera__________________________È</string>
-    <string name="value_must_be_a_guid">é_Value must be a valid GUID___________________________È</string>
+    <string name="barcode_tooltip">Punta la fotocamera su un codice a barre</string>
+    <string name="barcode_permission_denied">Per la scansione dei codici a barre sono richieste le autorizzazioni della fotocamera Abilita le autorizzazioni della fotocamera nelle impostazioni del dispositivo.</string>
+    <string name="unsupported_value">Valore supportato</string>
+    <string name="tap_to_scan">Tocca per scansionare</string>
+    <string name="unable_to_open_the_camera">Impossibile aprire la fotocamera</string>
+    <string name="value_must_be_a_guid">Il valore deve essere un GUID valido</string>
 </resources>

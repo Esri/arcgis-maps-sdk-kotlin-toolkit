@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ø_Enter %1$d character_____________________å</item>
+        <item quantity="zero">Indtast %1$d tegn</item>
         <item quantity="one">Indtast %1$d tegn</item>
-        <item quantity="two">ø_Enter %1$d characters______________________å</item>
-        <item quantity="few">ø_Enter %1$d characters______________________å</item>
-        <item quantity="many">ø_Enter %1$d characters______________________å</item>
+        <item quantity="two">Indtast %1$d tegn</item>
+        <item quantity="few">Indtast %1$d tegn</item>
+        <item quantity="many">Indtast %1$d tegn</item>
         <item quantity="other">Indtast %1$d tegn</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ø_Value must be %1$d character_____________________________å</item>
+        <item quantity="zero">Værdi skal være på %1$d tegn</item>
         <item quantity="one">Værdi skal være på %1$d tegn</item>
-        <item quantity="two">ø_Value must be %1$d characters______________________________å</item>
-        <item quantity="few">ø_Value must be %1$d characters______________________________å</item>
-        <item quantity="many">ø_Value must be %1$d characters______________________________å</item>
+        <item quantity="two">Værdi skal være på %1$d tegn</item>
+        <item quantity="few">Værdi skal være på %1$d tegn</item>
+        <item quantity="many">Værdi skal være på %1$d tegn</item>
         <item quantity="other">Værdi skal være på %1$d tegn</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ø_Maximum %1$d character_______________________å</item>
+        <item quantity="zero">Maks. %1$d tegn</item>
         <item quantity="one">Maks. %1$d tegn</item>
-        <item quantity="two">ø_Maximum %1$d characters________________________å</item>
-        <item quantity="few">ø_Maximum %1$d characters________________________å</item>
-        <item quantity="many">ø_Maximum %1$d characters________________________å</item>
+        <item quantity="two">Maks. %1$d tegn</item>
+        <item quantity="few">Maks. %1$d tegn</item>
+        <item quantity="many">Maks. %1$d tegn</item>
         <item quantity="other">Maks. %1$d tegn</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Udført</string>
     <string name="filter">Filtrér %1$s</string>
-    <string name="search">ø_Search_____________å</string>
+    <string name="search">Søg</string>
     <string name="numeric_range_helper_text">Indtast en værdi fra %1$s til %2$s</string>
     <string name="value_must_be_from_to">Værdien skal være fra %1$s til %2$s</string>
     <string name="less_than_min_value">Mindre end minimumværdien %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Tomme filer kan ikke downloades</string>
     <string name="attachment_deleted">%1s er slettet</string>
     <string name="attachment_size_limit_exceeded">Vedhæftede filer, der er større end %1$s, kan ikke downloades</string>
-    <string name="barcode_tooltip">ø_Point your camera at a barcode_______________________________å</string>
-    <string name="barcode_permission_denied">ø_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________å.</string>
-    <string name="unsupported_value">ø_Unsupported Value__________________å</string>
-    <string name="tap_to_scan">ø_Tap to scan____________å</string>
-    <string name="unable_to_open_the_camera">ø_Unable to open the camera__________________________å</string>
-    <string name="value_must_be_a_guid">ø_Value must be a valid GUID___________________________å</string>
+    <string name="barcode_tooltip">Peg dit kamera mod en stregkode</string>
+    <string name="barcode_permission_denied">Der kræves kameratilladelse for at scanne stregkoder. Aktivér kameratilladelse i enhedsindstillingerne.</string>
+    <string name="unsupported_value">Ikke-understøttet værdi</string>
+    <string name="tap_to_scan">Tryk for at scanne</string>
+    <string name="unable_to_open_the_camera">Kan ikke åbne kameraet</string>
+    <string name="value_must_be_a_guid">Værdi skal være en gyldig GUID</string>
 </resources>

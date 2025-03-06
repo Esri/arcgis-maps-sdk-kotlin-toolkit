@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">한_Enter %1$d character_____________________빠</item>
+        <item quantity="zero">%1$d자 입력</item>
         <item quantity="one">%1$d자 입력</item>
-        <item quantity="two">한_Enter %1$d characters______________________빠</item>
-        <item quantity="few">한_Enter %1$d characters______________________빠</item>
-        <item quantity="many">한_Enter %1$d characters______________________빠</item>
+        <item quantity="two">%1$d자 입력</item>
+        <item quantity="few">%1$d자 입력</item>
+        <item quantity="many">%1$d자 입력</item>
         <item quantity="other">%1$d자 입력</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">한_Value must be %1$d character_____________________________빠</item>
+        <item quantity="zero">값은 %1$d자여야 함</item>
         <item quantity="one">값은 %1$d자여야 함</item>
-        <item quantity="two">한_Value must be %1$d characters______________________________빠</item>
-        <item quantity="few">한_Value must be %1$d characters______________________________빠</item>
-        <item quantity="many">한_Value must be %1$d characters______________________________빠</item>
+        <item quantity="two">값은 %1$d자여야 함</item>
+        <item quantity="few">값은 %1$d자여야 함</item>
+        <item quantity="many">값은 %1$d자여야 함</item>
         <item quantity="other">값은 %1$d자여야 함</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">한_Maximum %1$d character_______________________빠</item>
+        <item quantity="zero">최대 %1$d자</item>
         <item quantity="one">최대 %1$d자</item>
-        <item quantity="two">한_Maximum %1$d characters________________________빠</item>
-        <item quantity="few">한_Maximum %1$d characters________________________빠</item>
-        <item quantity="many">한_Maximum %1$d characters________________________빠</item>
+        <item quantity="two">최대 %1$d자</item>
+        <item quantity="few">최대 %1$d자</item>
+        <item quantity="many">최대 %1$d자</item>
         <item quantity="other">최대 %1$d자</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">확인</string>
     <string name="done">완료</string>
     <string name="filter">필터 %1$s</string>
-    <string name="search">한_Search_____________빠</string>
+    <string name="search">검색</string>
     <string name="numeric_range_helper_text">%1$s~%2$s의 값 입력</string>
     <string name="value_must_be_from_to">값은 %1$s~%2$s여야 합니다.</string>
     <string name="less_than_min_value">최소값(%1$s)보다 작음</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">비어 있는 파일은 다운로드할 수 없음</string>
     <string name="attachment_deleted">%1s이(가) 성공적으로 삭제됨</string>
     <string name="attachment_size_limit_exceeded">%1$s보다 큰 첨부 파일은 다운로드할 수 없음</string>
-    <string name="barcode_tooltip">한_Point your camera at a barcode_______________________________빠</string>
-    <string name="barcode_permission_denied">한_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________빠.</string>
-    <string name="unsupported_value">한_Unsupported Value__________________빠</string>
-    <string name="tap_to_scan">한_Tap to scan____________빠</string>
-    <string name="unable_to_open_the_camera">한_Unable to open the camera__________________________빠</string>
-    <string name="value_must_be_a_guid">한_Value must be a valid GUID___________________________빠</string>
+    <string name="barcode_tooltip">카메라로 바코드를 가리키세요</string>
+    <string name="barcode_permission_denied">바코드를 스캔하려면 카메라 권한이 필요합니다. 기기 설정에서 카메라 권한을 활성화하세요.</string>
+    <string name="unsupported_value">지원되지 않는 값</string>
+    <string name="tap_to_scan">탭하여 스캔</string>
+    <string name="unable_to_open_the_camera">카메라를 열 수 없음</string>
+    <string name="value_must_be_a_guid">값은 유효한 GUID여야 함</string>
 </resources>

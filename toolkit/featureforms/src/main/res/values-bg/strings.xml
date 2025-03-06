@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">й_Enter %1$d character_____________________й</item>
+        <item quantity="zero">Въведете %1$d символ</item>
         <item quantity="one">Въведете %1$d символ</item>
-        <item quantity="two">й_Enter %1$d characters______________________й</item>
-        <item quantity="few">й_Enter %1$d characters______________________й</item>
-        <item quantity="many">й_Enter %1$d characters______________________й</item>
+        <item quantity="two">Въведете %1$d символа</item>
+        <item quantity="few">Въведете %1$d символа</item>
+        <item quantity="many">Въведете %1$d символа</item>
         <item quantity="other">Въведете %1$d символа</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">й_Value must be %1$d character_____________________________й</item>
+        <item quantity="zero">Стойността трябва да бъде %1$d символ</item>
         <item quantity="one">Стойността трябва да бъде %1$d символ</item>
-        <item quantity="two">й_Value must be %1$d characters______________________________й</item>
-        <item quantity="few">й_Value must be %1$d characters______________________________й</item>
-        <item quantity="many">й_Value must be %1$d characters______________________________й</item>
+        <item quantity="two">Стойността трябва да бъде %1$d символа</item>
+        <item quantity="few">Стойността трябва да бъде %1$d символа</item>
+        <item quantity="many">Стойността трябва да бъде %1$d символа</item>
         <item quantity="other">Стойността трябва да бъде %1$d символа</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">й_Maximum %1$d character_______________________й</item>
+        <item quantity="zero">Максимум %1$d символ</item>
         <item quantity="one">Максимум %1$d символ</item>
-        <item quantity="two">й_Maximum %1$d characters________________________й</item>
-        <item quantity="few">й_Maximum %1$d characters________________________й</item>
-        <item quantity="many">й_Maximum %1$d characters________________________й</item>
+        <item quantity="two">Максимум %1$d символа</item>
+        <item quantity="few">Максимум %1$d символа</item>
+        <item quantity="many">Максимум %1$d символа</item>
         <item quantity="other">Максимум %1$d символа</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">Добре</string>
     <string name="done">Готово</string>
     <string name="filter">Филтър %1$s</string>
-    <string name="search">й_Search_____________й</string>
+    <string name="search">Търсене</string>
     <string name="numeric_range_helper_text">Въведете стойност от %1$s до %2$s</string>
     <string name="value_must_be_from_to">Стойността трябва да бъде от %1$s до %2$s</string>
     <string name="less_than_min_value">По-малко от минималната стойност %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Празни файлове не могат да бъдат свалени</string>
     <string name="attachment_deleted">%1s беше изтрит успешно</string>
     <string name="attachment_size_limit_exceeded">Прикачени файлове, по-големи от %1$s не могат да бъдат изтеглени</string>
-    <string name="barcode_tooltip">й_Point your camera at a barcode_______________________________й</string>
-    <string name="barcode_permission_denied">й_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________й.</string>
-    <string name="unsupported_value">й_Unsupported Value__________________й</string>
-    <string name="tap_to_scan">й_Tap to scan____________й</string>
-    <string name="unable_to_open_the_camera">й_Unable to open the camera__________________________й</string>
-    <string name="value_must_be_a_guid">й_Value must be a valid GUID___________________________й</string>
+    <string name="barcode_tooltip">Насочете камерата си към баркод</string>
+    <string name="barcode_permission_denied">Изискват се разрешения за камерата, за да се сканират баркодове. Моля, активирайте разрешенията за камерата в настройките на Вашето устройство.</string>
+    <string name="unsupported_value">Неподдържана стойност</string>
+    <string name="tap_to_scan">Докоснете, за да сканирате</string>
+    <string name="unable_to_open_the_camera">Не може да отвори камерата</string>
+    <string name="value_must_be_a_guid">Стойността трябва да бъде валиден GUID</string>
 </resources>

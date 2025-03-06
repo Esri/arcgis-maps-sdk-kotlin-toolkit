@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Izaberite objekat</string>
     <string name="floor_filter_no_results">Nema pronađenih rezultata.</string>
-    <string name="geomodel_has_no_floor_aware_data">Č_GeoModel has no floor-aware data_________________ž</string>
-    <string name="an_error_has_occurred">Č_An error has occurred______________________ž</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel nema podataka usklađenih sa spratom</string>
+    <string name="an_error_has_occurred">Došlo je do greške</string>
     <string name="not_available">Nije dostupno</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Sajt - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Zatvori</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">Č_Collapse_________________ž</string>
+    <string name="collapse">Skupi</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Vrati se na birač lokacije</string>
 </resources>

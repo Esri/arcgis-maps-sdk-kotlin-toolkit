@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">Č_Enter %1$d character_____________________ž</item>
+        <item quantity="zero">Unesite %1$d znak</item>
         <item quantity="one">Unesite %1$d znak</item>
-        <item quantity="two">Č_Enter %1$d characters______________________ž</item>
-        <item quantity="few">Č_Enter %1$d characters______________________ž</item>
-        <item quantity="many">Č_Enter %1$d characters______________________ž</item>
+        <item quantity="two">Unesite %1$d znakova</item>
+        <item quantity="few">Unesite %1$d znakova</item>
+        <item quantity="many">Unesite %1$d znakova</item>
         <item quantity="other">Unesite %1$d znakova</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">Č_Value must be %1$d character_____________________________ž</item>
+        <item quantity="zero">Vrijednost treba biti %1$d znak</item>
         <item quantity="one">Vrijednost treba biti %1$d znak</item>
-        <item quantity="two">Č_Value must be %1$d characters______________________________ž</item>
-        <item quantity="few">Č_Value must be %1$d characters______________________________ž</item>
-        <item quantity="many">Č_Value must be %1$d characters______________________________ž</item>
+        <item quantity="two">Vrijednost treba biti %1$d znakova</item>
+        <item quantity="few">Vrijednost treba biti %1$d znakova</item>
+        <item quantity="many">Vrijednost treba biti %1$d znakova</item>
         <item quantity="other">Vrijednost treba biti %1$d znakova</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">Č_Maximum %1$d character_______________________ž</item>
+        <item quantity="zero">Maksimalno %1$d znak</item>
         <item quantity="one">Maksimalno %1$d znak</item>
-        <item quantity="two">Č_Maximum %1$d characters________________________ž</item>
-        <item quantity="few">Č_Maximum %1$d characters________________________ž</item>
-        <item quantity="many">Č_Maximum %1$d characters________________________ž</item>
+        <item quantity="two">Maksimalno %1$d znakova</item>
+        <item quantity="few">Maksimalno %1$d znakova</item>
+        <item quantity="many">Maksimalno %1$d znakova</item>
         <item quantity="other">Maksimalno %1$d znakova</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">U redu</string>
     <string name="done">Gotovo</string>
     <string name="filter">Filtar %1$s</string>
-    <string name="search">Č_Search_____________ž</string>
+    <string name="search">Pretraga</string>
     <string name="numeric_range_helper_text">Unesite vrijednost od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Vrijednost mora biti od %1$s do %2$s</string>
     <string name="less_than_min_value">Manje od minimalne vrijednosti %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Prazne datoteke ne mogu se preuzeti</string>
     <string name="attachment_deleted">%1s je uspješno izbrisan</string>
     <string name="attachment_size_limit_exceeded">Privici veći od %1$s ne mogu se preuzeti</string>
-    <string name="barcode_tooltip">Č_Point your camera at a barcode_______________________________ž</string>
-    <string name="barcode_permission_denied">Č_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ž.</string>
-    <string name="unsupported_value">Č_Unsupported Value__________________ž</string>
-    <string name="tap_to_scan">Č_Tap to scan____________ž</string>
-    <string name="unable_to_open_the_camera">Č_Unable to open the camera__________________________ž</string>
-    <string name="value_must_be_a_guid">Č_Value must be a valid GUID___________________________ž</string>
+    <string name="barcode_tooltip">Usmjerite kameru prema barkodu</string>
+    <string name="barcode_permission_denied">Za skeniranje barkoda potrebna su dopuštenja za kameru. Aktivirajte dopuštenja za kameru u postavkama svog uređaja.</string>
+    <string name="unsupported_value">Nepodržana vrijednost</string>
+    <string name="tap_to_scan">Dodirni i skeniraj</string>
+    <string name="unable_to_open_the_camera">Nije moguće otvoriti kameru</string>
+    <string name="value_must_be_a_guid">Vrijednost mora biti ispravni GUID</string>
 </resources>

@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">Ă_Enter %1$d character_____________________ș</item>
+        <item quantity="zero">Introduceți %1$d caracter</item>
         <item quantity="one">Introduceți %1$d caracter</item>
-        <item quantity="two">Ă_Enter %1$d characters______________________ș</item>
-        <item quantity="few">Ă_Enter %1$d characters______________________ș</item>
-        <item quantity="many">Ă_Enter %1$d characters______________________ș</item>
+        <item quantity="two">Introduceți %1$d caractere</item>
+        <item quantity="few">Introduceți %1$d caractere</item>
+        <item quantity="many">Introduceți %1$d caractere</item>
         <item quantity="other">Introduceți %1$d caractere</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">Ă_Value must be %1$d character_____________________________ș</item>
+        <item quantity="zero">Valoarea trebuie să aibă %1$d caracter</item>
         <item quantity="one">Valoarea trebuie să aibă %1$d caracter</item>
-        <item quantity="two">Ă_Value must be %1$d characters______________________________ș</item>
-        <item quantity="few">Ă_Value must be %1$d characters______________________________ș</item>
-        <item quantity="many">Ă_Value must be %1$d characters______________________________ș</item>
+        <item quantity="two">Valoarea trebuie să aibă %1$d caractere</item>
+        <item quantity="few">Valoarea trebuie să aibă %1$d caractere</item>
+        <item quantity="many">Valoarea trebuie să aibă %1$d caractere</item>
         <item quantity="other">Valoarea trebuie să aibă %1$d caractere</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">Ă_Maximum %1$d character_______________________ș</item>
+        <item quantity="zero">Maximum %1$d caracter</item>
         <item quantity="one">Maximum %1$d caracter</item>
-        <item quantity="two">Ă_Maximum %1$d characters________________________ș</item>
-        <item quantity="few">Ă_Maximum %1$d characters________________________ș</item>
-        <item quantity="many">Ă_Maximum %1$d characters________________________ș</item>
+        <item quantity="two">Maximum %1$d (de) caractere</item>
+        <item quantity="few">Maximum %1$d (de) caractere</item>
+        <item quantity="many">Maximum %1$d (de) caractere</item>
         <item quantity="other">Maximum %1$d (de) caractere</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Gata</string>
     <string name="filter">Filtru %1$s</string>
-    <string name="search">Ă_Search_____________ș</string>
+    <string name="search">Căutare</string>
     <string name="numeric_range_helper_text">Introduceți o valoare de la %1$s la %2$s</string>
     <string name="value_must_be_from_to">Valoarea trebuie să fie de la %1$s până la %2$s</string>
     <string name="less_than_min_value">Mai puțin decât valoarea minimă %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Fișierele goale nu pot fi descărcate</string>
     <string name="attachment_deleted">%1s a fost șters cu succes</string>
     <string name="attachment_size_limit_exceeded">Fișierele atașate mai mari de %1$s nu pot fi descărcate</string>
-    <string name="barcode_tooltip">Ă_Point your camera at a barcode_______________________________ș</string>
-    <string name="barcode_permission_denied">Ă_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ș.</string>
-    <string name="unsupported_value">Ă_Unsupported Value__________________ș</string>
-    <string name="tap_to_scan">Ă_Tap to scan____________ș</string>
-    <string name="unable_to_open_the_camera">Ă_Unable to open the camera__________________________ș</string>
-    <string name="value_must_be_a_guid">Ă_Value must be a valid GUID___________________________ș</string>
+    <string name="barcode_tooltip">Îndreptați camera spre un cod de bare</string>
+    <string name="barcode_permission_denied">Permisiunile camerei sunt necesare pentru a scana coduri de bare. Activați permisiunile camerei din setările dispozitivului dvs.</string>
+    <string name="unsupported_value">Valoare neacceptată</string>
+    <string name="tap_to_scan">Atingeți pentru a scana</string>
+    <string name="unable_to_open_the_camera">Nu se poate deschide camera</string>
+    <string name="value_must_be_a_guid">Valoarea trebuie să fie un GUID valid</string>
 </resources>

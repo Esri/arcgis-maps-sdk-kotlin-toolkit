@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">כן_Untrusted host_______________ש</string>
-    <string name="server_trust_message">כן_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ש?</string>
+    <string name="server_trust_title">מארח לא מהימן</string>
+    <string name="server_trust_message">אישור השרת עבור %1$s אינו מהימן. התחברות עלולה לסכן את הנתונים שלך. האם ברצונך להמשיך?</string>
     <string name="cancel">ביטול</string>
-    <string name="allow_connection">כן_Allow connection_________________ש</string>
-    <string name="username_password_login_title">כן_Authentication required________________________ש</string>
-    <string name="username_password_login_message">כן_You need to sign in to access %1$s__________________ש</string>
+    <string name="allow_connection">הרשה חיבור</string>
+    <string name="username_password_login_title">נדרש אימות</string>
+    <string name="username_password_login_message">עליך להתחבר כדי לגשת אל %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">שם משתמש</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">סיסמה</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">כן_Sign in_______________ש</string>
+    <string name="sign_in">התחבר</string>
 </resources>

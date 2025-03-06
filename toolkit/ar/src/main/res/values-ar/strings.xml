@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="camera_permission_not_granted">بيت_Camera permission not granted______________________________لاحقة</string>
-    <string name="arcore_not_installed_message">بيت_ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s_______________________________________لاحقة</string>
+    <string name="camera_permission_not_granted">لم يتم منح إذن الكاميرا</string>
+    <string name="arcore_not_installed_message">يجب تثبيت ARCore لاستخدام TableTopSceneView. توفر ARCore: %1$s</string>
 </resources>

@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">בחר מתקן</string>
     <string name="floor_filter_no_results">לא נמצאו תוצאות.</string>
-    <string name="geomodel_has_no_floor_aware_data">כן_GeoModel has no floor-aware data_________________ש</string>
-    <string name="an_error_has_occurred">כן_An error has occurred______________________ש</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel לא כולל נתונים מודעים לקומה</string>
+    <string name="an_error_has_occurred">אירעה שגיאה</string>
     <string name="not_available">לא זמין</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">אתר - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">סגירה</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">כן_Collapse_________________ש</string>
+    <string name="collapse">כווץ</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">חזור לבורר האתרים</string>
 </resources>

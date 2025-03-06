@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">Į_Enter %1$d character_____________________š</item>
+        <item quantity="zero">Įveskite %1$d simbolį</item>
         <item quantity="one">Įveskite %1$d simbolį</item>
-        <item quantity="two">Į_Enter %1$d characters______________________š</item>
-        <item quantity="few">Į_Enter %1$d characters______________________š</item>
-        <item quantity="many">Į_Enter %1$d characters______________________š</item>
+        <item quantity="two">Įveskite %1$d simb.</item>
+        <item quantity="few">Įveskite %1$d simb.</item>
+        <item quantity="many">Įveskite %1$d simb.</item>
         <item quantity="other">Įveskite %1$d simb.</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">Į_Value must be %1$d character_____________________________š</item>
+        <item quantity="zero">Reikšmė turi būti %1$d simbolis</item>
         <item quantity="one">Reikšmė turi būti %1$d simbolis</item>
-        <item quantity="two">Į_Value must be %1$d characters______________________________š</item>
-        <item quantity="few">Į_Value must be %1$d characters______________________________š</item>
-        <item quantity="many">Į_Value must be %1$d characters______________________________š</item>
+        <item quantity="two">Reikšmė turi būti %1$d simboliai</item>
+        <item quantity="few">Reikšmė turi būti %1$d simboliai</item>
+        <item quantity="many">Reikšmė turi būti %1$d simboliai</item>
         <item quantity="other">Reikšmė turi būti %1$d simboliai</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">Į_Maximum %1$d character_______________________š</item>
+        <item quantity="zero">Maks. %1$d simbolis</item>
         <item quantity="one">Maks. %1$d simbolis</item>
-        <item quantity="two">Į_Maximum %1$d characters________________________š</item>
-        <item quantity="few">Į_Maximum %1$d characters________________________š</item>
-        <item quantity="many">Į_Maximum %1$d characters________________________š</item>
+        <item quantity="two">Maks. %1$d simboliai (-ių)</item>
+        <item quantity="few">Maks. %1$d simboliai (-ių)</item>
+        <item quantity="many">Maks. %1$d simboliai (-ių)</item>
         <item quantity="other">Maks. %1$d simboliai (-ių)</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">Gerai</string>
     <string name="done">Atlikta</string>
     <string name="filter">Filtruoti %1$s</string>
-    <string name="search">Į_Search_____________š</string>
+    <string name="search">Ieškoti</string>
     <string name="numeric_range_helper_text">Įveskite reikšmę nuo %1$s iki %2$s</string>
     <string name="value_must_be_from_to">Reikšmė turi būti nuo %1$s iki %2$s</string>
     <string name="less_than_min_value">Mažiau negu minimali reikšmė %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Negalima atsisiųsti tuščių failų</string>
     <string name="attachment_deleted">%1s sėkmingai ištrinta</string>
     <string name="attachment_size_limit_exceeded">Didesnių nei %1$s priedų atsisiųsti negalima</string>
-    <string name="barcode_tooltip">Į_Point your camera at a barcode_______________________________š</string>
-    <string name="barcode_permission_denied">Į_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________š.</string>
-    <string name="unsupported_value">Į_Unsupported Value__________________š</string>
-    <string name="tap_to_scan">Į_Tap to scan____________š</string>
-    <string name="unable_to_open_the_camera">Į_Unable to open the camera__________________________š</string>
-    <string name="value_must_be_a_guid">Į_Value must be a valid GUID___________________________š</string>
+    <string name="barcode_tooltip">Nukreipkite kamerą į brūkšninį kodą.</string>
+    <string name="barcode_permission_denied">Norint nuskaityti brūkšninius kodus reikia suteikti leidimą naudoti kamerą. Įjunkite leidimą naudoti kamerą savo įrenginio nustatymuose.</string>
+    <string name="unsupported_value">Nepalaikoma reikšmė</string>
+    <string name="tap_to_scan">Bakstelėkite, kad nuskaitytumėte</string>
+    <string name="unable_to_open_the_camera">Nepavyksta atidaryti kameros</string>
+    <string name="value_must_be_a_guid">Reikšmė turi būti tinkama GUID</string>
 </resources>

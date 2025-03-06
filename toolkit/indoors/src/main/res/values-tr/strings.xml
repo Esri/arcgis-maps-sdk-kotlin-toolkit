@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Bir tesis seç</string>
     <string name="floor_filter_no_results">Herhangi bir sonuç bulunamadı.</string>
-    <string name="geomodel_has_no_floor_aware_data">ı_GeoModel has no floor-aware data_________________İ</string>
-    <string name="an_error_has_occurred">ı_An error has occurred______________________İ</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel\'de zemine duyarlı veri yok</string>
+    <string name="an_error_has_occurred">Bir hata oluştu</string>
     <string name="not_available">Mevcut değil</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Şantiye - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Kapat</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">ı_Collapse_________________İ</string>
+    <string name="collapse">Daralt</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Şantiye seçiciye geri dön</string>
 </resources>

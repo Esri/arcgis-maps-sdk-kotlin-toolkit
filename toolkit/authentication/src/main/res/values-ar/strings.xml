@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">بيت_Untrusted host_______________لاحقة</string>
-    <string name="server_trust_message">بيت_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________لاحقة?</string>
+    <string name="server_trust_title">مضيف غير موثوق به</string>
+    <string name="server_trust_message">شهادة الخادم لـ %1$s غير موثوقة. قد يؤدي الاتصال إلى تعريض بياناتك للخطر. هل تريد المتابعة؟</string>
     <string name="cancel">إلغاء الأمر</string>
-    <string name="allow_connection">بيت_Allow connection_________________لاحقة</string>
-    <string name="username_password_login_title">بيت_Authentication required________________________لاحقة</string>
-    <string name="username_password_login_message">بيت_You need to sign in to access %1$s__________________لاحقة</string>
+    <string name="allow_connection">السماح بالاتصال</string>
+    <string name="username_password_login_title">المصادقة مطلوبة</string>
+    <string name="username_password_login_message">يتعين عليك تسجيل الدخول للوصول إلى %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">اسم المستخدم</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">كلمة المرور</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">بيت_Sign in_______________لاحقة</string>
+    <string name="sign_in">تسجيل الدخول</string>
 </resources>

@@ -8,8 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Välj en anläggning</string>
     <string name="floor_filter_no_results">Inga resultat hittades.</string>
-    <string name="geomodel_has_no_floor_aware_data">Å_GeoModel has no floor-aware data_________________ö</string>
-    <string name="an_error_has_occurred">Å_An error has occurred______________________ö</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel har inga våningsmedvetna data</string>
+    <string name="an_error_has_occurred">Ett fel har inträffat</string>
     <string name="not_available">Inte tillgänglig</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Plats - %1$s</string>
@@ -26,7 +26,7 @@
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Stäng</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="collapse">Å_Collapse_________________ö</string>
+    <string name="collapse">Dölj</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Gå tillbaka till platsväljaren</string>
 </resources>

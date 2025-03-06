@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">á_Enter %1$d character_____________________Ó</item>
+        <item quantity="zero">Introducir %1$d carácter</item>
         <item quantity="one">Introducir %1$d carácter</item>
-        <item quantity="two">á_Enter %1$d characters______________________Ó</item>
-        <item quantity="few">á_Enter %1$d characters______________________Ó</item>
-        <item quantity="many">á_Enter %1$d characters______________________Ó</item>
+        <item quantity="two">Introducir %1$d caracteres</item>
+        <item quantity="few">Introducir %1$d caracteres</item>
+        <item quantity="many">Introducir %1$d caracteres</item>
         <item quantity="other">Introducir %1$d caracteres</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">á_Value must be %1$d character_____________________________Ó</item>
+        <item quantity="zero">El valor debe tener %1$d carácter</item>
         <item quantity="one">El valor debe tener %1$d carácter</item>
-        <item quantity="two">á_Value must be %1$d characters______________________________Ó</item>
-        <item quantity="few">á_Value must be %1$d characters______________________________Ó</item>
-        <item quantity="many">á_Value must be %1$d characters______________________________Ó</item>
+        <item quantity="two">El valor debe tener %1$d caracteres</item>
+        <item quantity="few">El valor debe tener %1$d caracteres</item>
+        <item quantity="many">El valor debe tener %1$d caracteres</item>
         <item quantity="other">El valor debe tener %1$d caracteres</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">á_Maximum %1$d character_______________________Ó</item>
+        <item quantity="zero">%1$d carácter máximo</item>
         <item quantity="one">%1$d carácter máximo</item>
-        <item quantity="two">á_Maximum %1$d characters________________________Ó</item>
-        <item quantity="few">á_Maximum %1$d characters________________________Ó</item>
-        <item quantity="many">á_Maximum %1$d characters________________________Ó</item>
+        <item quantity="two">%1$d caracteres máximo</item>
+        <item quantity="few">%1$d caracteres máximo</item>
+        <item quantity="many">%1$d caracteres máximo</item>
         <item quantity="other">%1$d caracteres máximo</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">Aceptar</string>
     <string name="done">Listo</string>
     <string name="filter">Filtro %1$s</string>
-    <string name="search">á_Search_____________Ó</string>
+    <string name="search">Buscar</string>
     <string name="numeric_range_helper_text">Introduzca un valor de %1$s a %2$s</string>
     <string name="value_must_be_from_to">El valor debe estar comprendido entre %1$s y %2$s</string>
     <string name="less_than_min_value">Inferior al valor mínimo %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Los archivos vacíos no se pueden descargar</string>
     <string name="attachment_deleted">%1s se eliminó correctamente</string>
     <string name="attachment_size_limit_exceeded">Los adjuntos de más de %1$s no se pueden descargar</string>
-    <string name="barcode_tooltip">á_Point your camera at a barcode_______________________________Ó</string>
-    <string name="barcode_permission_denied">á_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________Ó.</string>
-    <string name="unsupported_value">á_Unsupported Value__________________Ó</string>
-    <string name="tap_to_scan">á_Tap to scan____________Ó</string>
-    <string name="unable_to_open_the_camera">á_Unable to open the camera__________________________Ó</string>
-    <string name="value_must_be_a_guid">á_Value must be a valid GUID___________________________Ó</string>
+    <string name="barcode_tooltip">Apuntar la cámara a un código de barras</string>
+    <string name="barcode_permission_denied">Se requieren los permisos de la cámara para escanear un código de barras. Habilite los permisos de la cámara en la configuración de su dispositivo.</string>
+    <string name="unsupported_value">Valor no admitido</string>
+    <string name="tap_to_scan">Tocar para escanear</string>
+    <string name="unable_to_open_the_camera">No se puede abrir la cámara</string>
+    <string name="value_must_be_a_guid">El valor tiene que ser un GUID válido</string>
 </resources>

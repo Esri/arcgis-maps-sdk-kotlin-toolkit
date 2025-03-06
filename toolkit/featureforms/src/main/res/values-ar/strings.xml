@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">بيت_Enter %1$d character_____________________لاحقة</item>
+        <item quantity="zero">أدخل %1$d أحرف</item>
         <item quantity="one">أدخل %1$d أحرف</item>
-        <item quantity="two">بيت_Enter %1$d characters______________________لاحقة</item>
-        <item quantity="few">بيت_Enter %1$d characters______________________لاحقة</item>
-        <item quantity="many">بيت_Enter %1$d characters______________________لاحقة</item>
+        <item quantity="two">إدخال %1$d من الرموز</item>
+        <item quantity="few">إدخال %1$d من الرموز</item>
+        <item quantity="many">إدخال %1$d من الرموز</item>
         <item quantity="other">إدخال %1$d من الرموز</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">بيت_Value must be %1$d character_____________________________لاحقة</item>
+        <item quantity="zero">يجب أن تتكون القيمة من %1$d حرف</item>
         <item quantity="one">يجب أن تتكون القيمة من %1$d حرف</item>
-        <item quantity="two">بيت_Value must be %1$d characters______________________________لاحقة</item>
-        <item quantity="few">بيت_Value must be %1$d characters______________________________لاحقة</item>
-        <item quantity="many">بيت_Value must be %1$d characters______________________________لاحقة</item>
+        <item quantity="two">يجب أن تتكون القيمة من %1$d من الحروف</item>
+        <item quantity="few">يجب أن تتكون القيمة من %1$d من الحروف</item>
+        <item quantity="many">يجب أن تتكون القيمة من %1$d من الحروف</item>
         <item quantity="other">يجب أن تتكون القيمة من %1$d من الحروف</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">بيت_Maximum %1$d character_______________________لاحقة</item>
+        <item quantity="zero">الحد الأقصى %1$d حرف</item>
         <item quantity="one">الحد الأقصى %1$d حرف</item>
-        <item quantity="two">بيت_Maximum %1$d characters________________________لاحقة</item>
-        <item quantity="few">بيت_Maximum %1$d characters________________________لاحقة</item>
-        <item quantity="many">بيت_Maximum %1$d characters________________________لاحقة</item>
+        <item quantity="two">الحد الأقصى %1$d من الحروف</item>
+        <item quantity="few">الحد الأقصى %1$d من الحروف</item>
+        <item quantity="many">الحد الأقصى %1$d من الحروف</item>
         <item quantity="other">الحد الأقصى %1$d من الحروف</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">موافق</string>
     <string name="done">تم</string>
     <string name="filter">عامل التصفية %1$s</string>
-    <string name="search">بيت_Search_____________لاحقة</string>
+    <string name="search">بحث</string>
     <string name="numeric_range_helper_text">إدخال قيمة من %1$s إلى %2$s</string>
     <string name="value_must_be_from_to">يجب أن تتراوح القيمة بين %1$s و %2$s.</string>
     <string name="less_than_min_value">أقل من أدنى قيمة %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">لا يمكن تنزيل الملفات الفارغة</string>
     <string name="attachment_deleted">تم حذف %1s بنجاح</string>
     <string name="attachment_size_limit_exceeded">لا يمكن تنزيل المرفقات التي يزيد حجمها عن %1$s</string>
-    <string name="barcode_tooltip">بيت_Point your camera at a barcode_______________________________لاحقة</string>
-    <string name="barcode_permission_denied">بيت_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________لاحقة.</string>
-    <string name="unsupported_value">بيت_Unsupported Value__________________لاحقة</string>
-    <string name="tap_to_scan">بيت_Tap to scan____________لاحقة</string>
-    <string name="unable_to_open_the_camera">بيت_Unable to open the camera__________________________لاحقة</string>
-    <string name="value_must_be_a_guid">بيت_Value must be a valid GUID___________________________لاحقة</string>
+    <string name="barcode_tooltip">قم بتوجيه الكاميرا نحو الرمز الشريطي</string>
+    <string name="barcode_permission_denied">مطلوب إذن الوصول إلى الكاميرا لمسح الباركود ضوئيًا. يرجى تفعيل أذونات الكاميرا من إعدادات جهازك.</string>
+    <string name="unsupported_value">قيمة غير مدعومة</string>
+    <string name="tap_to_scan">انقر للمسح الضوئي</string>
+    <string name="unable_to_open_the_camera">يتعذر فتح الكاميرا</string>
+    <string name="value_must_be_a_guid">يجب أن تكون القيمة GUID صالحًا</string>
 </resources>

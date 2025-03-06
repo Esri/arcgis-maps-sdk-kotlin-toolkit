@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">ķ_Untrusted host_______________ū</string>
-    <string name="server_trust_message">ķ_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________ū?</string>
+    <string name="server_trust_title">Neuzticams resursdators</string>
+    <string name="server_trust_message">Servera sertifikāts %1$s nav uzticams. Savienojuma izveide var apdraudēt Jūsu datus. Vai vēlaties turpināt?</string>
     <string name="cancel">Atcelt</string>
-    <string name="allow_connection">ķ_Allow connection_________________ū</string>
-    <string name="username_password_login_title">ķ_Authentication required________________________ū</string>
-    <string name="username_password_login_message">ķ_You need to sign in to access %1$s__________________ū</string>
+    <string name="allow_connection">Atļaut savienojumu</string>
+    <string name="username_password_login_title">Nepieciešama autentifikācija</string>
+    <string name="username_password_login_message">Jums ir jāpierakstās, lai piekļūtu %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Lietotājvārds</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parole</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">ķ_Sign in_______________ū</string>
+    <string name="sign_in">Pierakstīties</string>
 </resources>

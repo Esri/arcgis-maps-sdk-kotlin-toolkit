@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ł_Enter %1$d character_____________________ą</item>
+        <item quantity="zero">Wprowadź %1$d znak</item>
         <item quantity="one">Wprowadź %1$d znak</item>
-        <item quantity="two">ł_Enter %1$d characters______________________ą</item>
-        <item quantity="few">ł_Enter %1$d characters______________________ą</item>
-        <item quantity="many">ł_Enter %1$d characters______________________ą</item>
+        <item quantity="two">Wprowadź następującą liczbę znaków: %1$d</item>
+        <item quantity="few">Wprowadź następującą liczbę znaków: %1$d</item>
+        <item quantity="many">Wprowadź następującą liczbę znaków: %1$d</item>
         <item quantity="other">Wprowadź następującą liczbę znaków: %1$d</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ł_Value must be %1$d character_____________________________ą</item>
+        <item quantity="zero">Wartość musi zawierać %1$d znak</item>
         <item quantity="one">Wartość musi zawierać %1$d znak</item>
-        <item quantity="two">ł_Value must be %1$d characters______________________________ą</item>
-        <item quantity="few">ł_Value must be %1$d characters______________________________ą</item>
-        <item quantity="many">ł_Value must be %1$d characters______________________________ą</item>
+        <item quantity="two">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
+        <item quantity="few">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
+        <item quantity="many">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
         <item quantity="other">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ł_Maximum %1$d character_______________________ą</item>
+        <item quantity="zero">Maksymalna liczba znaków: %1$d</item>
         <item quantity="one">Maksymalna liczba znaków: %1$d</item>
-        <item quantity="two">ł_Maximum %1$d characters________________________ą</item>
-        <item quantity="few">ł_Maximum %1$d characters________________________ą</item>
-        <item quantity="many">ł_Maximum %1$d characters________________________ą</item>
+        <item quantity="two">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="few">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="many">Maksymalna liczba znaków: %1$d</item>
         <item quantity="other">Maksymalna liczba znaków: %1$d</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Wykonano</string>
     <string name="filter">Filtruj %1$s</string>
-    <string name="search">ł_Search_____________ą</string>
+    <string name="search">Szukaj</string>
     <string name="numeric_range_helper_text">Wprowadź wartość od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Wartość pola musi być z zakresu od %1$s do %2$s</string>
     <string name="less_than_min_value">Wartość mniejsza niż minimalna %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">Nie można pobrać pustych plików</string>
     <string name="attachment_deleted">Pomyślnie usunięto %1s</string>
     <string name="attachment_size_limit_exceeded">Nie można pobierać załączników większych niż %1$s</string>
-    <string name="barcode_tooltip">ł_Point your camera at a barcode_______________________________ą</string>
-    <string name="barcode_permission_denied">ł_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ą.</string>
-    <string name="unsupported_value">ł_Unsupported Value__________________ą</string>
-    <string name="tap_to_scan">ł_Tap to scan____________ą</string>
-    <string name="unable_to_open_the_camera">ł_Unable to open the camera__________________________ą</string>
-    <string name="value_must_be_a_guid">ł_Value must be a valid GUID___________________________ą</string>
+    <string name="barcode_tooltip">Skieruj kamerę na kod kreskowy</string>
+    <string name="barcode_permission_denied">Do skanowania kodów kreskowych wymagane są uprawnienia kamery. Włącz uprawnienia kamery w ustawieniach urządzenia.</string>
+    <string name="unsupported_value">Nieobsługiwana wartość</string>
+    <string name="tap_to_scan">Naciśnij, aby zeskanować</string>
+    <string name="unable_to_open_the_camera">Nie można otworzyć kamery</string>
+    <string name="value_must_be_a_guid">Wartość musi być prawidłowym identyfikatorem GUID</string>
 </resources>

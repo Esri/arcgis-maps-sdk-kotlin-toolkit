@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_title">æ_Untrusted host_______________Â</string>
-    <string name="server_trust_message">æ_The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed________________________________________________________Â?</string>
+    <string name="server_trust_title">Hôte non approuvé</string>
+    <string name="server_trust_message">Le certificat de serveur pour %1$s n’est pas approuvé. Autoriser la connexion pourrait compromettre vos données. Voulez-vous continuer ?</string>
     <string name="cancel">Annuler</string>
-    <string name="allow_connection">æ_Allow connection_________________Â</string>
-    <string name="username_password_login_title">æ_Authentication required________________________Â</string>
-    <string name="username_password_login_message">æ_You need to sign in to access %1$s__________________Â</string>
+    <string name="allow_connection">Autoriser la connexion</string>
+    <string name="username_password_login_title">Authentification requise</string>
+    <string name="username_password_login_message">Vous devez vous connecter pour accéder à %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nom d’utilisateur</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Mot de passe</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="sign_in">æ_Sign in_______________Â</string>
+    <string name="sign_in">Se connecter</string>
 </resources>

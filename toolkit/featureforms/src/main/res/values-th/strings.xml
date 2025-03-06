@@ -18,31 +18,31 @@
     <!-- Helper text that tells the user how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
-        <item quantity="zero">ก้_Enter %1$d character_____________________ษฺ</item>
+        <item quantity="zero">ป้อน %1$d ตัวอักขระ</item>
         <item quantity="one">ป้อน %1$d ตัวอักขระ</item>
-        <item quantity="two">ก้_Enter %1$d characters______________________ษฺ</item>
-        <item quantity="few">ก้_Enter %1$d characters______________________ษฺ</item>
-        <item quantity="many">ก้_Enter %1$d characters______________________ษฺ</item>
+        <item quantity="two">ป้อน %1$d อักขระ</item>
+        <item quantity="few">ป้อน %1$d อักขระ</item>
+        <item quantity="many">ป้อน %1$d อักขระ</item>
         <item quantity="other">ป้อน %1$d อักขระ</item>
     </plurals>
     <!-- Helper text that tells the user exactly how many characters to enter in a field
         All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
-        <item quantity="zero">ก้_Value must be %1$d character_____________________________ษฺ</item>
+        <item quantity="zero">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
         <item quantity="one">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
-        <item quantity="two">ก้_Value must be %1$d characters______________________________ษฺ</item>
-        <item quantity="few">ก้_Value must be %1$d characters______________________________ษฺ</item>
-        <item quantity="many">ก้_Value must be %1$d characters______________________________ษฺ</item>
+        <item quantity="two">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="few">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="many">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
         <item quantity="other">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
     </plurals>
     <!-- Helper text that tells the user the maximum number of characters allowed in a field
         All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
-        <item quantity="zero">ก้_Maximum %1$d character_______________________ษฺ</item>
+        <item quantity="zero">สูงสุด %1$d อักขระ</item>
         <item quantity="one">สูงสุด %1$d อักขระ</item>
-        <item quantity="two">ก้_Maximum %1$d characters________________________ษฺ</item>
-        <item quantity="few">ก้_Maximum %1$d characters________________________ษฺ</item>
-        <item quantity="many">ก้_Maximum %1$d characters________________________ษฺ</item>
+        <item quantity="two">สูงสุด %1$d อักขระ</item>
+        <item quantity="few">สูงสุด %1$d อักขระ</item>
+        <item quantity="many">สูงสุด %1$d อักขระ</item>
         <item quantity="other">สูงสุด %1$d อักขระ</item>
     </plurals>
     <!--suppress AndroidLintPluralsCandidate-->
@@ -60,7 +60,7 @@
     <string name="ok">ตกลง</string>
     <string name="done">สำเร็จ</string>
     <string name="filter">ตัวกรอง %1$s</string>
-    <string name="search">ก้_Search_____________ษฺ</string>
+    <string name="search">ค้นหา</string>
     <string name="numeric_range_helper_text">ป้อนค่าตั้งแต่ %1$s ถึง %2$s</string>
     <string name="value_must_be_from_to">ค่าต้องอยู่ระหว่าง %1$s ถึง %2$s</string>
     <string name="less_than_min_value">น้อยกว่าค่าขั้นต่ำ %1$s</string>
@@ -139,10 +139,10 @@
     <string name="download_empty_file">ไม่สามารถดาวน์โหลดไฟล์เปล่าได้</string>
     <string name="attachment_deleted">ลบ %1s สำเร็จแล้ว</string>
     <string name="attachment_size_limit_exceeded">ไม่สามารถดาวน์โหลดไฟล์แนบที่ใหญ่เกิน %1$s ได้</string>
-    <string name="barcode_tooltip">ก้_Point your camera at a barcode_______________________________ษฺ</string>
-    <string name="barcode_permission_denied">ก้_Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings_______________________________________________________ษฺ.</string>
-    <string name="unsupported_value">ก้_Unsupported Value__________________ษฺ</string>
-    <string name="tap_to_scan">ก้_Tap to scan____________ษฺ</string>
-    <string name="unable_to_open_the_camera">ก้_Unable to open the camera__________________________ษฺ</string>
-    <string name="value_must_be_a_guid">ก้_Value must be a valid GUID___________________________ษฺ</string>
+    <string name="barcode_tooltip">หันกล้องของคุณไปที่บาร์โค้ด</string>
+    <string name="barcode_permission_denied">จำเป็นต้องใช้งานสิทธิ์กล้องเพื่อสแกนบาร์โค้ด โปรดเปิดใช้งานสิทธิ์กล้องในการตั้งค่าอุปกรณ์ของคุณ</string>
+    <string name="unsupported_value">ค่าที่ไม่รองรับ</string>
+    <string name="tap_to_scan">แตะเพื่อสแกน</string>
+    <string name="unable_to_open_the_camera">ไม่สามารถเปิดกล้องได้</string>
+    <string name="value_must_be_a_guid">ค่าต้องเป็น GUID ที่ใช้งานได้</string>
 </resources>
