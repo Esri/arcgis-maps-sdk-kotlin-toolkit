@@ -29,10 +29,13 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -43,6 +46,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -62,7 +67,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val elevationProvider: WorldScaleSurfaceElevationProvider?,
+    private val scene: ArcGISScene,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit
 ) :
     DefaultLifecycleObserver {
@@ -105,7 +110,7 @@ internal class WorldTrackingCameraController(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z
+                if (location.position.hasZ) location.position.z?.plus(calibrationState.totalElevationOffset)
                     ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
                 calibrationState.totalHeadingOffset,
                 90.0,
@@ -183,13 +188,6 @@ internal class WorldTrackingCameraController(
             worldScaleNmeaLocationProvider.start()
             locationDataSource.start()
         }
-        elevationProvider?.let {
-            scope.launch {
-                it.elevation.filterNotNull().collect {
-                    updateCamera(it)
-                }
-            }
-        }
         scope.launch {
             locationDataSource.status.filterIsInstance<LocationDataSourceStatus.FailedToStart>()
                 .collect {
@@ -207,12 +205,34 @@ internal class WorldTrackingCameraController(
                         location
                     )
                 }
+                .map { location ->
+                    val elevation = scene.load().mapCatching {
+                        val elevation = scene.baseSurface.getElevation(location.position)
+                        elevation.getOrThrow()
+                    }.getOrElse {
+                        if (location.position.hasZ) location.position.z ?: 0.0 else 0.0
+                    }
+                    Location.create(
+                        position = Point(
+                            location.position.x,
+                            location.position.y,
+                            elevation,
+                            location.position.spatialReference
+                        ),
+                        horizontalAccuracy = location.horizontalAccuracy,
+                        verticalAccuracy = location.verticalAccuracy,
+                        speed = location.speed,
+                        course = location.course,
+                        lastKnown = location.lastKnown,
+                        timestamp = location.timestamp,
+                        additionalSourceProperties = location.additionalSourceProperties
+                    )
+                }
                 .take(5)
                 .toList()
                 .minBy { it.horizontalAccuracy }
 
             updateCamera(location)
-            elevationProvider?.obtainElevation(location.position)
         }
         scope.launch {
             calibrationState.headingDeltas.collect {
@@ -237,14 +257,14 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
-    elevationProvider: WorldScaleSurfaceElevationProvider?,
+    scene: ArcGISScene,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
     val wrapper = remember {
         WorldTrackingCameraController(
             calibrationState,
-            elevationProvider,
+            scene,
             onLocationDataSourceFailedToStart
         )
     }
