@@ -26,45 +26,74 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context) : DefaultLifecycleObserver {
+internal class ArSessionWrapper(private val applicationContext: Context) :
+    DefaultLifecycleObserver {
 
-    private val _session = MutableStateFlow<Session?>(null)
-    val session: StateFlow<Session?> = _session.asStateFlow()
+    private var session: Session? = null
+
+    private val mutex: Mutex = Mutex()
+
+    private var shouldInitializeDisplay = true
 
     override fun onDestroy(owner: LifecycleOwner) {
-        session.value?.close()
-        _session.value = null
+        session?.close()
+        session = null
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        session.value?.pause()
+        session?.pause()
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val session = this.session.value ?: Session(applicationContext)
+        val newSession = this.session ?: Session(applicationContext)
         configureSession()
-        session.resume()
-        _session.value = session
+        shouldInitializeDisplay = true
+        newSession.resume()
+        session = newSession
     }
 
     private fun configureSession() {
-        session.value?.configure(
-            session.value?.config?.apply {
+        session?.configure(
+            session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
 
                 // We only want to detect horizontal planes.
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
         )
+    }
+
+    internal fun withLock(block: (Session, shouldInitializeDisplay: Boolean) -> Unit) {
+        val locked = mutex.tryLock()
+        if (!locked) return
+        try {
+            block(session ?: return, shouldInitializeDisplay)
+        } finally {
+            mutex.unlock()
+        }
+    }
+
+    suspend fun resetSession() {
+        mutex.withLock {
+            session?.let {
+                it.pause()
+                it.close()
+            }
+            session = null
+            val newSession = Session(applicationContext)
+            configureSession()
+            shouldInitializeDisplay = true
+            newSession.resume()
+            session = newSession
+        }
     }
 }
 

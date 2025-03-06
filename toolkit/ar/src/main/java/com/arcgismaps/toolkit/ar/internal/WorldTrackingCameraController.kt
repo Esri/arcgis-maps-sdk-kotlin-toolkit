@@ -29,6 +29,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
@@ -42,8 +46,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -61,7 +63,8 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit
+    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    private val onResetOriginCamera: () -> Unit
 ) :
     DefaultLifecycleObserver {
 
@@ -97,7 +100,8 @@ internal class WorldTrackingCameraController(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                if (location.position.hasZ) location.position.z
+                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
                 calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
@@ -110,13 +114,14 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCameraHeading(headingOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .rotateAround(
-                targetPoint = cameraController.originCamera.value.location,
-                deltaHeading = headingOffset,
-                deltaPitch = 0.0,
-                deltaRoll = 0.0
-            )
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .rotateAround(
+                    targetPoint = cameraController.originCamera.value.location,
+                    deltaHeading = headingOffset,
+                    deltaPitch = 0.0,
+                    deltaRoll = 0.0
+                )
         )
     }
 
@@ -126,8 +131,9 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCameraElevation(elevationOffset: Double) {
-        cameraController.setOriginCamera(cameraController.originCamera.value
-            .elevate(elevationOffset)
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .elevate(elevationOffset)
         )
     }
 
@@ -165,22 +171,24 @@ internal class WorldTrackingCameraController(
                 }
         }
         scope.launch {
-            val location = locationDataSource.locationChanged
+            locationDataSource.locationChanged
                 .filter { location ->
                     shouldUpdateCamera(
-                        location
+                        location,
+                        cameraController.originCamera.value,
+                        measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
                     )
                 }
-                .take(5)
-                .toList()
-                .minBy { it.horizontalAccuracy }
-            updateCamera(location)
-            // We have to do this or the error gets bigger and bigger.
-            cameraController.transformationMatrix =
-                TransformationMatrix.createIdentityMatrix()
-            if (!hasSetOriginCamera) {
-                hasSetOriginCamera = true
-            }
+                .collect { location ->
+                    updateCamera(location)
+                    // We have to do this or the error gets bigger and bigger.
+                    cameraController.transformationMatrix =
+                        TransformationMatrix.createIdentityMatrix()
+                    onResetOriginCamera()
+                    if (!hasSetOriginCamera) {
+                        hasSetOriginCamera = true
+                    }
+                }
         }
         scope.launch {
             calibrationState.headingDeltas.collect {
@@ -205,10 +213,18 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
-    onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
+    onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    onResetOriginCamera: () -> Unit
+): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
-    val wrapper = remember { WorldTrackingCameraController(calibrationState, onLocationDataSourceFailedToStart) }
+    val wrapper = remember {
+        WorldTrackingCameraController(
+            calibrationState,
+            onLocationDataSourceFailedToStart,
+            onResetOriginCamera
+        )
+    }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(wrapper)
         onDispose {
@@ -228,7 +244,9 @@ internal fun rememberWorldTrackingCameraController(
  * @since 200.7.0
  */
 internal fun shouldUpdateCamera(
-    location: Location
+    location: Location,
+    currentOriginCamera: Camera,
+    measureDistance: Boolean = true
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -244,8 +262,21 @@ internal fun shouldUpdateCamera(
 
 
     // filter out locations with low accuracy
-    if (location.horizontalAccuracy > 6.0) return false
-    if (location.verticalAccuracy > 6.0) return false
+    if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
+    if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
 
-    return true
+    if (!measureDistance) return true
+
+    val currentOriginCameraPosition =
+        GeometryEngine.projectOrNull(currentOriginCamera.location, SpatialReference(4326, 5773))
+            ?: return false
+    val distance = GeometryEngine.distanceGeodeticOrNull(
+        currentOriginCameraPosition,
+        location.position,
+        distanceUnit = LinearUnit.meters,
+        azimuthUnit = null,
+        curveType = GeodeticCurveType.Geodesic
+    )?.distance ?: return false
+
+    return distance > WorldScaleParameters.LOCATION_DISTANCE_THRESHOLD_METERS
 }

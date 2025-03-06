@@ -27,7 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -63,6 +64,7 @@ import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import kotlinx.coroutines.launch
 import java.time.Instant
 
 @Composable
@@ -131,6 +133,11 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
+    val arSessionWrapper =
+        rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
+
+
+    val localLifecycleOwner = LocalLifecycleOwner.current
     val calibrationState = remember { CalibrationState() }
 
     val locationTracker = rememberWorldTrackingCameraController(
@@ -140,35 +147,34 @@ public fun WorldScaleSceneView(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),
                 onInitializationStatusChanged
             )
+        },
+        onResetOriginCamera = {
+            localLifecycleOwner.lifecycleScope.launch {
+                arSessionWrapper.resetSession()
+            }
         }
     )
 
     Box(modifier = modifier) {
-        val arSessionWrapper =
-            rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
-
-        val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-        session.value?.let { arSession ->
-            ArCameraFeed(
-                session = arSession,
-                onFrame = { frame, displayRotation ->
-                    locationTracker.updateCamera(frame)
-                    worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                        frame.camera,
-                        displayRotation
-                    )
-                    worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
-                },
-                onTapWithHitResult = { },
-                onFirstPlaneDetected = { },
-                visualizePlanes = false
-            )
-            // Once the session is created, we can say we're initialized
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.Initialized,
-                onInitializationStatusChanged
-            )
-        }
+        ArCameraFeed(
+            session = arSessionWrapper,
+            onFrame = { frame, displayRotation ->
+                locationTracker.updateCamera(frame)
+                worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                    frame.camera,
+                    displayRotation
+                )
+                worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
+            },
+            onTapWithHitResult = { },
+            onFirstPlaneDetected = { },
+            visualizePlanes = false
+        )
+        // Once the session is created, we can say we're initialized
+        initializationStatus.update(
+            WorldScaleSceneViewStatus.Initialized,
+            onInitializationStatusChanged
+        )
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
         SceneView(
