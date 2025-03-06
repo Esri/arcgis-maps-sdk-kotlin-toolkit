@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2024 Esri
+ *  Copyright 2025 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,21 +16,16 @@
  *
  */
 
+
 plugins {
+    alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    alias(libs.plugins.binary.compatibility.validator) apply true
+    id("org.jetbrains.kotlin.plugin.compose")
 }
-
-secrets {
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
 android {
-    namespace = "com.arcgismaps.toolkit.utilitynetworks"
+    namespace = "com.arcgismaps.toolkit.basemapgallery"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -51,13 +46,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
-    
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
@@ -81,45 +73,17 @@ android {
     }
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
-        disable += "MissingTranslation"
     }
-}
-
-apiValidation {
-    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
-    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
-    // compiler.
-    val composableSingletons = listOf(
-        "com.arcgismaps.toolkit.utilitynetworks.BuildConfig",
-        "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$AddStartingPointScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceErrorDialogKt",
-        "com.arcgismaps.toolkit.utilitynetworks.internal.util.ComposableSingletons\$TitleRowKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
-    )
-
-    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.navigation)
-    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(libs.truth)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }

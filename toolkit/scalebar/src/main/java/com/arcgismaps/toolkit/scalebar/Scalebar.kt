@@ -137,7 +137,7 @@ public fun Scalebar(
     shapes: ScalebarShapes = ScalebarDefaults.shapes(),
     labelTypography: LabelTypography = ScalebarDefaults.typography()
 ) {
-    val isScalebarVisible = remember { mutableStateOf(true) }
+    val isScalebarVisible = remember(autoHideDelay) { mutableStateOf(true) }
     LaunchedEffect(viewpoint, autoHideDelay) {
         if (autoHideDelay > Duration.ZERO && autoHideDelay != Duration.INFINITE) {
             isScalebarVisible.value = true
@@ -148,7 +148,15 @@ public fun Scalebar(
     val availableLineDisplayLength =
         measureAvailableLineDisplayLength(maxWidth.value.toDouble(), labelTypography, style)
 
-    val scalebarProperties by remember(spatialReference, viewpoint, unitsPerDip, availableLineDisplayLength) {
+    val scalebarProperties by remember(
+        minScale,
+        spatialReference,
+        viewpoint,
+        unitsPerDip,
+        availableLineDisplayLength,
+        useGeodeticCalculations,
+        units
+    ) {
         mutableStateOf(
             computeScalebarProperties(
                 minScale = minScale,
@@ -157,7 +165,7 @@ public fun Scalebar(
                 unitsPerDip = unitsPerDip,
                 maxLength = availableLineDisplayLength,
                 useGeodeticCalculations = useGeodeticCalculations,
-                units = units,
+                units = units
             )
         )
     }
