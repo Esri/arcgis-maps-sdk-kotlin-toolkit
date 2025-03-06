@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -27,10 +26,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
@@ -84,9 +81,8 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         }
     }
 
-    suspend fun resetSession(lifecycleOwner: LifecycleOwner) {
+    suspend fun resetSession() {
         mutex.withLock {
-            Log.e("ArSessionWrapper", "resetSession")
             session?.let {
                 it.pause()
                 it.close()
