@@ -209,37 +209,11 @@ class MapViewModel @Inject constructor(
     }
 
     /**
-     * Apply attribute edits to the Geodatabase backing
-     * the ServiceFeatureTable and refresh the local feature.
-     *
-     * Persisting changes to attributes is not part of the FeatureForm API.
-     *
-     * @return a Result indicating success, or any error encountered.
+     * Sets the UI state to not editing.
      */
-    suspend fun commitEdits() {
-        val editingState = _uiState.value as? UIState.Editing ?: return
-        val featureFormState = editingState.featureFormState
-        val activeFeatureForm = featureFormState.activeFeatureForm
-        // set the busy state to true
-        _isBusy.value = true
-        val validationErrors = filterErrors(activeFeatureForm)
-        if (validationErrors.isNotEmpty()) {
-            val errorText = validationErrors.joinToString(separator = "\n\n") { "$it" }
-            _errors.value = Error(
-                title = "The Form has errors",
-                details = "There are ${validationErrors.count()} validation errors." +
-                    "These must be fixed to submit the form.",
-                subTitle = errorText
-            )
-        } else {
-            activeFeatureForm.finishEditing().onFailure {
-            }.onSuccess {
-                applyEditsToService(activeFeatureForm)
-                _uiState.value = UIState.NotEditing
-            }
-        }
-        // clear the busy state
-        _isBusy.value = false
+    fun setDefaultState() {
+        clearErrors()
+        _uiState.value = UIState.NotEditing
     }
 
     /**
@@ -247,21 +221,6 @@ class MapViewModel @Inject constructor(
      */
     fun clearErrors() {
         _errors.value = null
-    }
-
-    /**
-     * Rolls back any edits on the current feature and sets the UI state to not editing.
-     */
-    fun rollbackEdits() {
-        val featureForm = when (val state = _uiState.value) {
-            is UIState.Editing -> state.featureFormState.activeFeatureForm
-            else -> return
-        }
-        // discard the edits
-        featureForm.discardEdits()
-        clearErrors()
-        // rollback local edits
-        _uiState.value = UIState.NotEditing
     }
 
     /**
@@ -342,6 +301,26 @@ class MapViewModel @Inject constructor(
 
             else -> return
         }
+    }
+
+    /**
+     * Apply attribute edits to the Geodatabase backing
+     * the ServiceFeatureTable and refresh the local feature.
+     *
+     * Persisting changes to attributes is not part of the FeatureForm API.
+     *
+     * @return a Result indicating success, or any error encountered.
+     */
+    suspend fun commitEdits() {
+        val editingState = _uiState.value as? UIState.Editing ?: return
+        val featureFormState = editingState.featureFormState
+        val activeFeatureForm = featureFormState.activeFeatureForm
+        // set the busy state to true
+        _isBusy.value = true
+        applyEditsToService(activeFeatureForm)
+        // clear the busy state
+        _isBusy.value = false
+        setDefaultState()
     }
 
     /**
@@ -426,14 +405,6 @@ class MapViewModel @Inject constructor(
     }
 
     /**
-     * Sets the UI state to not editing.
-     */
-    fun setDefaultState() {
-        _uiState.value = UIState.NotEditing
-    }
-
-
-    /**
      * Applies the edits in the [featureForm]'s table to the service and sets the UI state to error
      * if there are any errors.
      *
@@ -445,6 +416,11 @@ class MapViewModel @Inject constructor(
                 title = "Failed to sync edits with the service",
                 details = "Cannot save edits without a ServiceFeatureTable"
             )
+            return
+        }
+        if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
+            // if there are no local edits across all the tables in the service geodatabase
+            // then return as there is nothing to sync
             return
         }
         // check if the service supports applyEdits using the service geodatabase

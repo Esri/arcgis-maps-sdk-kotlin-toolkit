@@ -69,8 +69,6 @@ internal class UtilityAssociationsElementState(
     var filters: MutableState<List<UtilityFilterState>> = mutableStateOf(emptyList())
         private set
 
-    //val source: String = (utilityElement?.objectId ?: "").toString()
-
     init {
         scope.launch {
             element.fetchAssociationsFilterResults()
@@ -98,31 +96,10 @@ internal class UtilityAssociationsElementState(
     }
 }
 
-internal val UtilityAssociationType.name: String
-    get() {
-        val input = this.toString()
-        val regex = Regex("UtilityAssociationType\\$(\\w+)@")
-        val matchResult = regex.find(input)
-        return matchResult?.groupValues?.get(1) ?: input
-    }
-
-internal fun UtilityAssociation.getTargetElement(element: UtilityElement): UtilityElement {
-    return if (element.globalId == this.fromElement.globalId) {
-        this.toElement
-    } else {
-        this.fromElement
-    }
-}
-
 internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
     return if (arcGISFeature.globalId == this.fromElement.globalId) {
         this.toElement
     } else {
         this.fromElement
     }
-}
-
-internal suspend fun UtilityElement.getFeature(utilityNetwork: UtilityNetwork): ArcGISFeature? {
-    val features = utilityNetwork.getFeaturesForElements(listOf(this)).getOrNull()
-    return features?.firstOrNull()
 }

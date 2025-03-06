@@ -40,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
 
 @Composable
 internal fun UtilityAssociationsElement(
@@ -151,4 +153,25 @@ private fun Filters(
 @Composable
 private fun ElementHeaderPreview() {
     ElementHeader("Associations", "This is a description", Modifier.fillMaxWidth())
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FiltersPreview() {
+    val filters = buildList {
+        add(
+            UtilityFilterState(
+                filter = UtilityAssociationsFilter(
+                    UtilityAssociationsFilterType.Connectivity
+                ),
+                groups = listOf(),
+                count = 5
+            )
+        )
+    }
+    Filters(
+        filters = filters,
+        onClick = {},
+        modifier = Modifier.fillMaxWidth()
+    )
 }

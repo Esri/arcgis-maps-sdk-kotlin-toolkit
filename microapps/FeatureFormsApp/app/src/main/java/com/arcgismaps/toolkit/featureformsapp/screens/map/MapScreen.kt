@@ -154,7 +154,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     }
     val isBusy by mapViewModel.isBusy
     val errors by mapViewModel.errors
-    var showDiscardEditsDialog by remember { mutableStateOf(false) }
     val title = if (featureFormState != null) {
         "${stringResource(R.string.edit)} ${featureFormState.activeFeatureForm.feature.label}"
     } else {
@@ -170,12 +169,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 TopFormBar(
                     title = title,
                     editingMode = uiState is UIState.Editing,
-                    onClose = {
-                        showDiscardEditsDialog = true
-                    },
-                    onSave = {
-                        scope.launch { mapViewModel.commitEdits() }
-                    },
                     onBackPressed = onBackPressed
                 )
                 if (uiState is UIState.Loading) {
@@ -227,6 +220,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 }
                 FeatureFormSheet(
                     state = rememberedForm,
+                    onDismiss = {
+                        scope.launch { mapViewModel.commitEdits() }
+                    },
                     modifier = Modifier.padding(padding)
                 )
             }
@@ -265,17 +261,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         else -> {}
     }
 
-    if (showDiscardEditsDialog) {
-        DiscardEditsDialog(
-            onConfirm = {
-                mapViewModel.rollbackEdits()
-                showDiscardEditsDialog = false
-            },
-            onCancel = {
-                showDiscardEditsDialog = false
-            }
-        )
-    }
     if (isBusy) {
         ProgressDialog()
     }
@@ -286,16 +271,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 mapViewModel.clearErrors()
             },
             onDismissRequest = {
-                mapViewModel.rollbackEdits()
+                //mapViewModel.rollbackEdits()
             }
         )
     }
-    BackHandler {
-        if (uiState is UIState.Editing) {
-            showDiscardEditsDialog = true
-        } else {
-            onBackPressed()
-        }
+    BackHandler(enabled = uiState !is UIState.Editing) {
+        onBackPressed()
     }
 }
 
@@ -415,6 +396,7 @@ fun FeatureItem(
 @Composable
 fun FeatureFormSheet(
     state: FeatureFormState,
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -440,7 +422,8 @@ fun FeatureFormSheet(
         ) {
             FeatureForm(
                 state = state,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onDismiss = onDismiss
             )
         }
     }
@@ -474,8 +457,6 @@ fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
 fun TopFormBar(
     title: String,
     editingMode: Boolean,
-    onClose: () -> Unit = {},
-    onSave: () -> Unit = {},
     onBackPressed: () -> Unit = {}
 ) {
     TopAppBar(
@@ -488,26 +469,12 @@ fun TopFormBar(
             )
         },
         navigationIcon = {
-            if (editingMode) {
-                IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close Feature Editor"
-                    )
-                }
-            } else {
+            if (!editingMode) {
                 IconButton(onClick = onBackPressed) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
-                }
-            }
-        },
-        actions = {
-            if (editingMode) {
-                IconButton(onClick = onSave) {
-                    Icon(imageVector = Icons.Default.Check, contentDescription = "Save Feature")
                 }
             }
         }

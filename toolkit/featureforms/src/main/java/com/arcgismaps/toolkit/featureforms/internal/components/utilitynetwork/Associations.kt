@@ -19,32 +19,20 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
@@ -61,65 +49,16 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 @Composable
 internal fun UtilityAssociationFilter(
     filter: UtilityFilterState,
-    subTitle: String,
     onGroupClick: (Int) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier = modifier) {
-        Column {
-            Header(
-                filter.filter.title,
-                subTitle,
-                onBackPressed = onBackPressed,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            )
-            HorizontalDivider()
-            Groups(
-                filter = filter,
-                onClick = onGroupClick,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
+    Groups(
+        filter = filter,
+        onClick = onGroupClick,
+        modifier = modifier.padding(16.dp)
+    )
     BackHandler(onBack = onBackPressed)
-}
-
-@Composable
-private fun Header(
-    label: String,
-    source: String,
-    onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(
-            onClick = onBackPressed
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = "Back"
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = source,
-                style = MaterialTheme.typography.labelMedium,
-            )
-        }
-    }
 }
 
 @Composable
@@ -133,33 +72,35 @@ private fun Groups(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
-        LazyColumn {
-            itemsIndexed(filter.groups) { index, group ->
-                ListItem(
-                    headlineContent = {
-                        Text(text = group.name, modifier = Modifier.padding(start = 16.dp))
-                    },
-                    trailingContent = {
-                        Text(
-                            text = "${group.count}",
-                            modifier = Modifier.padding(end = 16.dp)
+        LazyColumn(modifier = Modifier) {
+            filter.groups.forEachIndexed { index, group ->
+                item {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = group.name, modifier = Modifier.padding(start = 16.dp))
+                        },
+                        trailingContent = {
+                            Text(
+                                text = "${group.count}",
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        },
+                        overlineContent = {
+                        },
+                        modifier = Modifier.clickable {
+                            onClick(index)
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
-                    },
-                    overlineContent = {
-                    },
-                    modifier = Modifier.clickable {
-                        onClick(index)
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
-                )
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    if (index < group.count - 1) {
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    if (index < filter.groups.count() - 1) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        ) {
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        }
                     }
                 }
             }
@@ -175,7 +116,6 @@ private fun Groups(
 internal fun Associations(
     state: UtilityFilterGroupState,
     onItemClick: (AssociationInfoState) -> Unit,
-    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberSaveable(inputs = arrayOf(), saver = LazyListState.Saver) {
@@ -185,38 +125,27 @@ internal fun Associations(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
-        Column {
-            Header(
-                state.name,
-                "Source",
-                onBackPressed = onBackPressed,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            )
-            HorizontalDivider()
-            LazyColumn(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clip(shape = RoundedCornerShape(15.dp)),
-                state = lazyListState
-            ) {
-                state.associationsInfo.forEachIndexed { index, info ->
-                    item(info.association.hashCode()) {
-                        AssociationItem(
-                            association = info.association,
-                            associatedFeature = info.associatedFeature,
-                            onClick = {
-                                onItemClick(info)
-                            }
-                        )
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest
-                        ) {
-                            if (index < state.count - 1) {
-                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                            }
+        LazyColumn(
+            modifier = Modifier
+                .padding(16.dp)
+                .clip(shape = RoundedCornerShape(15.dp)),
+            state = lazyListState
+        ) {
+            state.associationsInfo.forEachIndexed { index, info ->
+                item(info.association.hashCode()) {
+                    AssociationItem(
+                        association = info.association,
+                        associatedFeature = info.associatedFeature,
+                        onClick = {
+                            onItemClick(info)
+                        }
+                    )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest
+                    ) {
+                        if (index < state.count - 1) {
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
                 }
@@ -308,11 +237,18 @@ private fun AssociationItem(
                 }
             }
 
-            association.associationType is UtilityAssociationType.Containment -> {
+            association.associationType is UtilityAssociationType.Containment &&
+                associatedFeature.globalId == association.toElement.globalId -> {
                 {
                     Text(
                         text = "Containment Visible : ${association.isContainmentVisible}",
-                        modifier = Modifier.padding(end = 16.dp),
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(8.dp),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

@@ -258,9 +258,9 @@ internal abstract class BaseFieldState<T>(
             // if the field has a value expression
             hasValueExpression -> errors.first()
             // if the field was focused and is focused
-            wasFocused && isFocused.value -> handleFocusedErrors(errors)
+            isFocused.value -> handleFocusedErrors(errors)
             // if the field was focused but is not currently focused
-            wasFocused && !isFocused.value -> handleNonFocusedErrors(errors)
+            !isFocused.value -> handleNonFocusedErrors(errors)
             // if the field has never been focused
             else -> ValidationErrorState.NoError
         }
