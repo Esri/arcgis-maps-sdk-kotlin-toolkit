@@ -150,7 +150,7 @@ public fun WorldScaleSceneView(
         },
         onResetOriginCamera = {
             localLifecycleOwner.lifecycleScope.launch {
-                arSessionWrapper.resetSession(localLifecycleOwner)
+                arSessionWrapper.resetSession()
             }
         }
     )
