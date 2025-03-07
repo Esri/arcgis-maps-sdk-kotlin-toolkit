@@ -29,6 +29,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
@@ -46,6 +47,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
@@ -67,7 +69,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val scene: ArcGISScene,
+    private val baseSurface: Surface,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit
 ) :
     DefaultLifecycleObserver {
@@ -206,12 +208,12 @@ internal class WorldTrackingCameraController(
                     )
                 }
                 .map { location ->
-                    val elevation = scene.load().mapCatching {
-                        val elevation = scene.baseSurface.getElevation(location.position)
-                        elevation.getOrThrow()
-                    }.getOrElse {
-                        if (location.position.hasZ) location.position.z ?: 0.0 else 0.0
-                    }
+                    val loaded = baseSurface.loadStatus.first { it.isTerminal } is LoadStatus.Loaded
+                    val locationZ = if (location.position.hasZ) location.position.z ?: 0.0 else 0.0
+                    val elevation = if (loaded) {
+                        baseSurface.getElevation(location.position).getOrDefault(locationZ)
+                    } else locationZ
+
                     Location.create(
                         position = Point(
                             location.position.x,
@@ -257,14 +259,14 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
-    scene: ArcGISScene,
+    baseSurface: Surface,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit): WorldTrackingCameraController {
     ArcGISEnvironment.applicationContext = LocalContext.current.applicationContext
     val lifecycleOwner = LocalLifecycleOwner.current
     val wrapper = remember {
         WorldTrackingCameraController(
             calibrationState,
-            scene,
+            baseSurface,
             onLocationDataSourceFailedToStart
         )
     }

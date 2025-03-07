@@ -138,11 +138,13 @@ public fun WorldScaleSceneView(
 
     val scope = rememberCoroutineScope()
     val calibrationState = remember { CalibrationState() }
-    val elevationProvider = remember { WorldScaleSurfaceElevationProvider(arcGISScene.baseSurface, scope) }
 
+    LaunchedEffect(arcGISScene) {
+        arcGISScene.load()
+    }
     val locationTracker = rememberWorldTrackingCameraController(
         calibrationState = calibrationState,
-        scene = arcGISScene,
+        baseSurface = arcGISScene.baseSurface,
         onLocationDataSourceFailedToStart = {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),
