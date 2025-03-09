@@ -42,29 +42,19 @@ import com.arcgismaps.Guid
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
+import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 
 @Composable
 internal fun UtilityAssociationFilter(
-    filter: UtilityFilterState,
+    filterResult: UtilityAssociationsFilterResult,
     onGroupClick: (Int) -> Unit,
     onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Groups(
-        filter = filter,
-        onClick = onGroupClick,
-        modifier = modifier.padding(16.dp)
-    )
-    BackHandler(onBack = onBackPressed)
-}
-
-@Composable
-private fun Groups(
-    filter: UtilityFilterState,
-    onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // show the list of layers
@@ -73,7 +63,7 @@ private fun Groups(
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn(modifier = Modifier) {
-            filter.groups.forEachIndexed { index, group ->
+            filterResult.groupResults.forEachIndexed { index, group ->
                 item {
                     ListItem(
                         headlineContent = {
@@ -81,20 +71,20 @@ private fun Groups(
                         },
                         trailingContent = {
                             Text(
-                                text = "${group.count}",
+                                text = "${group.associationResults.count()}",
                                 modifier = Modifier.padding(end = 16.dp)
                             )
                         },
                         overlineContent = {
                         },
                         modifier = Modifier.clickable {
-                            onClick(index)
+                            onGroupClick(index)
                         },
                         colors = ListItemDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
                     )
-                    if (index < filter.groups.count() - 1) {
+                    if (index < filterResult.groupResults.count() - 1) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -106,6 +96,7 @@ private fun Groups(
             }
         }
     }
+    BackHandler(onBack = onBackPressed)
 }
 
 /**
@@ -114,11 +105,14 @@ private fun Groups(
  */
 @Composable
 internal fun Associations(
-    state: UtilityFilterGroupState,
-    onItemClick: (AssociationInfoState) -> Unit,
+    groupResult: UtilityAssociationGroupResult,
+    onItemClick: (UtilityAssociationResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val lazyListState = rememberSaveable(inputs = arrayOf(), saver = LazyListState.Saver) {
+    val lazyListState = rememberSaveable(
+        inputs = arrayOf(),
+        saver = LazyListState.Saver
+    ) {
         LazyListState()
     }
     Surface(
@@ -131,7 +125,7 @@ internal fun Associations(
                 .clip(shape = RoundedCornerShape(15.dp)),
             state = lazyListState
         ) {
-            state.associationsInfo.forEachIndexed { index, info ->
+            groupResult.associationResults.forEachIndexed { index, info ->
                 item(info.association.hashCode()) {
                     AssociationItem(
                         association = info.association,
@@ -144,7 +138,7 @@ internal fun Associations(
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.surfaceContainerHighest
                     ) {
-                        if (index < state.count - 1) {
+                        if (index < groupResult.associationResults.count() - 1) {
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
@@ -182,6 +176,22 @@ private fun AssociationItem(
             Pair(null, null)
         }
     }
+    val trailingText = when {
+        terminal != null -> {
+            "Terminal : ${terminal.name}"
+        }
+
+        fractionAlongEdge != null -> {
+            "$fractionAlongEdge %"
+        }
+
+        association.associationType is UtilityAssociationType.Containment &&
+            associatedFeature.globalId == association.toElement.globalId -> {
+            "Containment Visible : ${association.isContainmentVisible}"
+        }
+
+        else -> ""
+    }
     ListItem(
         headlineContent = {
             Text(
@@ -204,65 +214,34 @@ private fun AssociationItem(
                 )
             }
         },
-        trailingContent = when {
-            terminal != null -> {
-                {
-                    Text(
-                        text = "Terminal : ${terminal.name}",
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            .padding(8.dp),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
+        trailingContent = if (trailingText.isNotEmpty()) {
+            {
+                Text(
+                    text = trailingText,
+                    modifier = Modifier
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .padding(8.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
-
-            fractionAlongEdge != null -> {
-                {
-                    Text(
-                        text = "$fractionAlongEdge %",
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            .padding(8.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
-            association.associationType is UtilityAssociationType.Containment &&
-                associatedFeature.globalId == association.toElement.globalId -> {
-                {
-                    Text(
-                        text = "Containment Visible : ${association.isContainmentVisible}",
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            .padding(8.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
-            else -> null
-        },
-        modifier = modifier.clickable {
-            onClick()
-        },
+        } else null,
+        modifier = modifier.clickable(onClick = onClick),
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         )
     )
+}
+
+internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
+    return if (arcGISFeature.globalId == this.fromElement.globalId) {
+        this.toElement
+    } else {
+        this.fromElement
+    }
 }
 
 internal val ArcGISFeature.label: String

@@ -34,22 +34,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
-import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
+/**
+ * A composable that represents a utility associations element.
+ *
+ * @param state The [UtilityAssociationsElementState] of the element.
+ * @param onItemClick A callback that is called when an item is clicked with the index of the item.
+ * The index is the index of the item in the [UtilityAssociationsElementState.filters] list.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 internal fun UtilityAssociationsElement(
     state: UtilityAssociationsElementState,
-    onFilterClick: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val filters by state.filters
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -63,10 +68,8 @@ internal fun UtilityAssociationsElement(
             Modifier.padding(top = 16.dp, end = 16.dp)
         )
         Filters(
-            filters = filters,
-            onClick = {
-                onFilterClick(it)
-            },
+            filterResults = state.filters,
+            onClick = onItemClick,
             modifier = Modifier
                 .padding(top = 16.dp)
                 .clip(RoundedCornerShape(15.dp))
@@ -74,6 +77,13 @@ internal fun UtilityAssociationsElement(
     }
 }
 
+/**
+ * Represents the header of a utility associations element.
+ *
+ * @param label The label of the element.
+ * @param description The description of the element.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 private fun ElementHeader(
     label: String,
@@ -101,25 +111,28 @@ private fun ElementHeader(
     }
 }
 
+/**
+ * Displays the filters for the utility associations element.
+ *
+ * @param filterResults The list of [UtilityAssociationsFilterResult] to display.
+ * @param onClick A callback that is called when a filter is clicked with the index of the filter.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 private fun Filters(
-    filters: List<UtilityFilterState>,
+    filterResults: List<UtilityAssociationsFilterResult>,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier
-    ) {
+    Surface(modifier = modifier) {
         Column {
-            filters.forEachIndexed { i, filterState ->
-                val enabled = filterState.count > 0
+            filterResults.forEachIndexed { i, filterResult ->
+                val enabled = filterResult.resultCount > 0
                 ListItem(
                     headlineContent = {
-                        Text(text = filterState.filter.title)
+                        Text(text = filterResult.filter.title)
                     },
-                    modifier = Modifier.clickable(
-                        enabled = enabled,
-                    ) {
+                    modifier = Modifier.clickable(enabled = enabled) {
                         onClick(i)
                     },
                     trailingContent = {
@@ -127,9 +140,7 @@ private fun Filters(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = filterState.count.toString(),
-                            )
+                            Text(text = filterResult.resultCount.toString())
                             Image(
                                 imageVector = Icons.AutoMirrored.Default.ArrowRight,
                                 contentDescription = null,
@@ -141,7 +152,7 @@ private fun Filters(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
                 )
-                if (i < filters.size - 1) {
+                if (i < filterResults.size - 1) {
                     HorizontalDivider()
                 }
             }
@@ -153,25 +164,4 @@ private fun Filters(
 @Composable
 private fun ElementHeaderPreview() {
     ElementHeader("Associations", "This is a description", Modifier.fillMaxWidth())
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FiltersPreview() {
-    val filters = buildList {
-        add(
-            UtilityFilterState(
-                filter = UtilityAssociationsFilter(
-                    UtilityAssociationsFilterType.Connectivity
-                ),
-                groups = listOf(),
-                count = 5
-            )
-        )
-    }
-    Filters(
-        filters = filters,
-        onClick = {},
-        modifier = Modifier.fillMaxWidth()
-    )
 }

@@ -30,23 +30,17 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -59,7 +53,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -76,7 +69,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -452,8 +444,9 @@ public fun FeatureForm(
                     stateData.stateCollection[routeData.stateId] as? UtilityAssociationsElementState
                         ?: return@composable
                 val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val filters by unState.filters
-                val filter = remember(filters) { filters.getOrNull(route.selectedFilterIndex) }
+                val filter = remember(unState.filters) {
+                    unState.filters.getOrNull(route.selectedFilterIndex)
+                }
                 if (filter == null) return@composable
                 val hasEdits by stateData.featureForm.hasEdits.collectAsState()
                 FeatureFormLayout(
@@ -479,7 +472,7 @@ public fun FeatureForm(
                     },
                     content = {
                         UtilityAssociationFilter(
-                            filter = filter,
+                            filterResult = filter,
                             onGroupClick = { index ->
                                 val newRoute = NavigationRoute.UNAssociationsView(
                                     stateId = unState.id,
@@ -498,15 +491,16 @@ public fun FeatureForm(
             composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
                 val routeData = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
                 val stateData = remember(backStackEntry) { state.getActiveStateData() }
-                val unState =
-                    stateData.stateCollection[routeData.stateId] as? UtilityAssociationsElementState
-                        ?: return@composable
+                val unState = stateData.stateCollection[routeData.stateId] as?
+                    UtilityAssociationsElementState ?: return@composable
                 val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val filters by unState.filters
-                val filter = remember(filters) { filters.getOrNull(route.selectedFilterIndex) }
+                val filter = remember(unState.filters) {
+                    unState.filters.getOrNull(route.selectedFilterIndex)
+                }
                 if (filter == null) return@composable
-                val group =
-                    remember(filters) { filter.groups.getOrNull(route.selectedGroupIndex) }
+                val group = remember(unState.filters) {
+                    filter.groupResults.getOrNull(route.selectedGroupIndex)
+                }
                 if (group == null) return@composable
                 val hasEdits by stateData.featureForm.hasEdits.collectAsState()
                 FeatureFormLayout(
@@ -531,7 +525,7 @@ public fun FeatureForm(
                     },
                     content = {
                         Associations(
-                            state = group,
+                            groupResult = group,
                             onItemClick = { info ->
                                 if (stateData.featureForm.hasEdits.value) {
                                     val dialog = createSaveEditsDialog(
@@ -735,7 +729,7 @@ private fun FormContent(
                         val state = entry.getState<UtilityAssociationsElementState>()
                         UtilityAssociationsElement(
                             state = state,
-                            onFilterClick = { index ->
+                            onItemClick = { index ->
                                 onUtilityAssociationFilterClick(state.id, index)
                             },
                             modifier = Modifier

@@ -16,42 +16,20 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
-import com.arcgismaps.utilitynetworks.UtilityAssociation
-import com.arcgismaps.utilitynetworks.UtilityAssociationType
-import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
-import com.arcgismaps.utilitynetworks.UtilityElement
-import com.arcgismaps.utilitynetworks.UtilityNetwork
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Immutable
-internal class UtilityFilterState(
-    val filter: UtilityAssociationsFilter,
-    val groups: List<UtilityFilterGroupState>,
-    val count: Int
-)
-
-@Immutable
-internal class UtilityFilterGroupState(
-    val name: String,
-    val associationsInfo: List<AssociationInfoState>
-) {
-    val count = associationsInfo.size
-}
-
-@Immutable
-internal class AssociationInfoState(
-    val associatedFeature: ArcGISFeature,
-    val association: UtilityAssociation
-)
-
+/**
+ * State holder for the [UtilityAssociationsElement].
+ *
+ * @param element The [UtilityAssociationsFormElement] to represent.
+ * @param scope The [CoroutineScope] to launch coroutines from.
+ */
 internal class UtilityAssociationsElementState(
     element: UtilityAssociationsFormElement,
     scope: CoroutineScope
@@ -61,45 +39,34 @@ internal class UtilityAssociationsElementState(
     description = element.description,
     isVisible = element.isVisible
 ) {
-    private var _loading = mutableStateOf(true)
+    private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
-    val loading: State<Boolean>
-        get() = _loading
+    private var _filters: MutableState<List<UtilityAssociationsFilterResult>> =
+        mutableStateOf(emptyList())
 
-    var filters: MutableState<List<UtilityFilterState>> = mutableStateOf(emptyList())
-        private set
+    /**
+     * Indicates if the state is loading data to fetch the filters [filters].
+     *
+     * This property is observable and if used within a composition it will be notified on every change.
+     */
+    val loading: Boolean
+        get() = _loading.value
+
+    /**
+     * The list of [UtilityAssociationsFilterResult] to display. This is empty until the data is fetched
+     * as part of the initialization.
+     *
+     * This property is observable and if used within a composition it will be notified on every change.
+     */
+    val filters: List<UtilityAssociationsFilterResult>
+        get() = _filters.value
 
     init {
         scope.launch {
+            // fetch the associations filter results for the element
             element.fetchAssociationsFilterResults()
-            filters.value = element.associationsFilterResults.map { filterResult ->
-                val groups = filterResult.groupResults.map { groupResult ->
-                    val infos = groupResult.associationResults.map { associationResult ->
-                        AssociationInfoState(
-                            associationResult.associatedFeature,
-                            associationResult.association
-                        )
-                    }
-                    UtilityFilterGroupState(
-                        groupResult.name,
-                        infos
-                    )
-                }
-                UtilityFilterState(
-                    filterResult.filter,
-                    groups,
-                    filterResult.resultCount
-                )
-            }
+            _filters.value = element.associationsFilterResults
             _loading.value = false
         }
-    }
-}
-
-internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
-    return if (arcGISFeature.globalId == this.fromElement.globalId) {
-        this.toElement
-    } else {
-        this.fromElement
     }
 }
