@@ -34,7 +34,7 @@ mockkAndroid = "1.13.12"
 room = "2.6.1"
 truth = "1.4.4"
 uiautomator = "2.3.0"
-arcore = "1.46.0"
+arcore = "1.47.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
