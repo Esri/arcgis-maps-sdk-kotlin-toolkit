@@ -264,6 +264,8 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
+    // filter out locations with a NaN z value
+    if (location.position.z?.isNaN() == true) return false
 
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
