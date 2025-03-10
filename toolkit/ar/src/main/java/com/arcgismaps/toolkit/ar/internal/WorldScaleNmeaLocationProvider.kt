@@ -31,12 +31,9 @@ import com.arcgismaps.location.NmeaLocationDataSource
 import com.arcgismaps.location.SystemLocationDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 
 /**
  * Provides locations and headings to a [CustomLocationDataSource] using NMEA messages from the device's GPS.
@@ -63,7 +60,7 @@ internal class WorldScaleNmeaLocationProvider(scope: CoroutineScope) :
         handler = Handler(applicationContext.mainLooper)
     }
 
-    override val headings: SharedFlow<Double> = systemLocationDataSource.headingChanged
+    override val headings: Flow<Double> = emptyFlow()
 
     override val locations: Flow<Location> =
         nmeaLocationDataSource.locationChanged.map {
@@ -78,7 +75,7 @@ internal class WorldScaleNmeaLocationProvider(scope: CoroutineScope) :
                 it.horizontalAccuracy,
                 it.verticalAccuracy,
                 it.speed,
-                headings.first(),
+                0.0,
                 it.lastKnown,
                 it.timestamp,
                 it.additionalSourceProperties
