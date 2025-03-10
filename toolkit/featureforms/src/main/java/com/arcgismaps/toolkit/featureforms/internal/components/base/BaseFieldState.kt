@@ -141,11 +141,6 @@ internal abstract class BaseFieldState<T>(
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     /**
-     * A flag to indicate if the field ever gained focus.
-     */
-    protected var wasFocused = false
-
-    /**
      * The [FieldType] of the field.
      */
     val fieldType = properties.fieldType
@@ -196,9 +191,6 @@ internal abstract class BaseFieldState<T>(
      * sets the value on the feature using [updateValue] and calls [evaluateExpressions].
      */
     fun onValueChanged(input: T) {
-        // infer that a value change event comes from a user interaction and hence treat it as a
-        // focus event
-        wasFocused = true
         // set the ui state immediately with the current error if any
         _value.value = Value(input, _value.value.error)
         // update the attributes
@@ -220,18 +212,7 @@ internal abstract class BaseFieldState<T>(
      * Changes the current focus state for the field. Use [isFocused] to read the value.
      */
     fun onFocusChanged(focus: Boolean) {
-        if (focus) wasFocused = true
         _isFocused.value = focus
-    }
-
-    /**
-     * Forces the validation of this field irrespective of the current focus state [isFocused] and
-     * generates any validation errors via the [value] property. Avoid calling this method in any
-     * open/abstract class constructors since it indirectly invokes open members.
-     */
-    fun forceValidation() {
-        wasFocused = true
-        updateValueWithValidation(_value.value.data, validationErrors.value)
     }
 
     /**

@@ -120,6 +120,7 @@ import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormEditingEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
@@ -221,7 +222,14 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     state = rememberedForm,
                     onDismiss = {
-                        scope.launch { mapViewModel.commitEdits() }
+                       mapViewModel.setDefaultState()
+                    },
+                    onEditingEvent = {
+                        if (it is FeatureFormEditingEvent.SavedEdits) {
+                            scope.launch {
+                                mapViewModel.commitEdits()
+                            }
+                        }
                     },
                     modifier = Modifier.padding(padding)
                 )
@@ -397,6 +405,7 @@ fun FeatureItem(
 fun FeatureFormSheet(
     state: FeatureFormState,
     onDismiss: () -> Unit,
+    onEditingEvent: (FeatureFormEditingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -421,9 +430,10 @@ fun FeatureFormSheet(
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
         ) {
             FeatureForm(
-                state = state,
+                featureFormState = state,
                 modifier = Modifier.fillMaxSize(),
-                onDismiss = onDismiss
+                onDismiss = onDismiss,
+                onEditingEvent = onEditingEvent
             )
         }
     }

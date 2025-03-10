@@ -108,7 +108,7 @@ internal class DateTimeFieldState(
             scope: CoroutineScope
         ): Saver<DateTimeFieldState, Any> = listSaver(
             save = {
-                listOf(it.value.value.data, it.wasFocused)
+                emptyList<Any>()
             },
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput

@@ -320,7 +320,6 @@ class MapViewModel @Inject constructor(
         applyEditsToService(activeFeatureForm)
         // clear the busy state
         _isBusy.value = false
-        setDefaultState()
     }
 
     /**
@@ -452,7 +451,6 @@ class MapViewModel @Inject constructor(
                 title = "Failed to sync edits with the service",
                 details = errorText
             )
-            return
         }
     }
 

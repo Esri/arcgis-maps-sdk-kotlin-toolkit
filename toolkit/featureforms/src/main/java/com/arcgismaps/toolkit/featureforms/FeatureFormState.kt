@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -132,7 +133,11 @@ public class FeatureFormState private constructor(
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
         // create state objects for all the supported element types that are part of the provided FeatureForm
-        val states = createStates(this.featureForm, this.featureForm.elements, coroutineScope)
+        val states = createStates(
+            form = this.featureForm,
+            elements = this.featureForm.elements,
+            scope = coroutineScope
+        )
         // Add the provided state collection to the store.
         store.addLast(FormStateData(featureForm, states))
         evaluateExpressions()
@@ -149,13 +154,25 @@ public class FeatureFormState private constructor(
         evaluateExpressions()
     }
 
+    /**
+     * Sets the [NavController] to use for navigation between different [FeatureForm]s. Set this
+     * value to null when the Composition is destroyed.
+     */
     internal fun setNavController(navController: NavController?) {
         this.navController = navController
     }
 
-    internal fun navigateTo(form: FeatureForm) {
+    /**
+     * Navigates to the [FeatureForm] associated with the provided [feature].
+     */
+    internal fun navigateTo(feature : ArcGISFeature) {
         navController?.let { controller ->
-            val states = createStates(form, form.elements, coroutineScope)
+            val form = FeatureForm(feature)
+            val states = createStates(
+                form = form,
+                elements = form.elements,
+                scope = coroutineScope
+            )
             store.addLast(FormStateData(form, states))
             _activeFeatureForm.value = form
             controller.navigate(NavigationRoute.FormView)
@@ -163,6 +180,9 @@ public class FeatureFormState private constructor(
         }
     }
 
+    /**
+     * Navigates back to the previous [FeatureForm] if there is one.
+     */
     internal fun popBackStack(): Boolean {
         return navController?.let { controller ->
             if (controller.currentBackStackEntry == null || store.size <= 1) {
@@ -176,279 +196,18 @@ public class FeatureFormState private constructor(
         } ?: false
     }
 
+    /**
+     * Returns true if there is a back stack entry in the [NavController].
+     */
     internal fun hasBackStack(): Boolean {
         return navController?.previousBackStackEntry != null
     }
 
+    /**
+     * Returns the [FormStateData] for the currently active [FeatureForm].
+     */
     internal fun getActiveStateData(): FormStateData {
         return store.last()
-    }
-
-    /**
-     * Creates and remembers state objects for all the supported element types that are part of the
-     * provided FeatureForm. These state objects are returned as part of a [FormStateCollection].
-     *
-     * @param form the [FeatureForm] to create the states for.
-     * @param scope a [CoroutineScope] to run collectors and calculations on.
-     *
-     * @return returns the [FormStateCollection] created.
-     */
-    private fun createStates(
-        form: FeatureForm,
-        elements: List<FormElement>,
-        scope: CoroutineScope
-    ): FormStateCollection {
-        val states = MutableFormStateCollection()
-        elements.forEach { element ->
-            when (element) {
-                is FieldFormElement -> {
-                    val state = createFieldState(element, form, scope)
-                    if (state != null) {
-                        states.add(element, state)
-                    }
-                }
-
-                is GroupFormElement -> {
-                    val fieldStates = createStates(
-                        form = form,
-                        elements = element.elements,
-                        scope = scope
-                    )
-                    val groupState = BaseGroupState(
-                        id = element.hashCode(),
-                        label = element.label,
-                        description = element.description,
-                        isVisible = element.isVisible,
-                        expanded = element.initialState == FormGroupState.Expanded,
-                        fieldStates = fieldStates
-                    )
-                    states.add(element, groupState)
-                }
-
-                is TextFormElement -> {
-                    val state = TextFormElementState(
-                        id = element.hashCode(),
-                        label = element.label,
-                        description = element.description,
-                        isVisible = element.isVisible,
-                        text = element.text,
-                        format = element.format
-                    )
-                    states.add(element, state)
-                }
-
-                is UtilityAssociationsFormElement -> {
-                    val state = UtilityAssociationsElementState(
-                        element = element,
-                        scope = scope
-                    )
-                    states.add(element, state)
-                }
-
-                else -> {}
-            }
-        }
-        // The Toolkit currently only supports AttachmentsFormElements via the
-        // default attachments element. Once AttachmentsFormElements can be authored
-        // the switch case above should have a case added for AttachmentsFormElement.
-        if (form.defaultAttachmentsElement != null) {
-            val state = AttachmentElementState(
-                formElement = form.defaultAttachmentsElement!!,
-                scope = scope,
-                id = form.defaultAttachmentsElement!!.hashCode(),
-                evaluateExpressions = form::evaluateExpressions
-            )
-            states.add(form.defaultAttachmentsElement!!, state)
-        }
-        return states
-    }
-
-    /**
-     * Creates and remembers a [BaseFieldState] for the provided [element].
-     *
-     * @param element the [FieldFormElement] to create the state for.
-     * @param form the [FeatureForm] the [element] is part of.
-     * @param scope a [CoroutineScope] to run collectors and calculations on.
-     *
-     * @return returns the [BaseFieldState] created.
-     */
-    private fun createFieldState(
-        element: FieldFormElement,
-        form: FeatureForm,
-        scope: CoroutineScope
-    ): BaseFieldState<out Any?>? {
-        return when (element.input) {
-            is TextBoxFormInput, is TextAreaFormInput -> {
-                val minLength = if (element.input is TextBoxFormInput) {
-                    (element.input as TextBoxFormInput).minLength.toInt()
-                } else {
-                    (element.input as TextAreaFormInput).minLength.toInt()
-                }
-                val maxLength = if (element.input is TextBoxFormInput) {
-                    (element.input as TextBoxFormInput).maxLength.toInt()
-                } else {
-                    (element.input as TextAreaFormInput).maxLength.toInt()
-                }
-                FormTextFieldState(
-                    id = element.hashCode(),
-                    properties = TextFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.formattedValueAsStateFlow(scope),
-                        validationErrors = element.mapValidationErrors(scope),
-                        required = element.isRequired,
-                        editable = element.isEditable,
-                        visible = element.isVisible,
-                        domain = element.domain as? RangeDomain,
-                        fieldType = element.fieldType,
-                        singleLine = element.input is TextBoxFormInput,
-                        minLength = minLength,
-                        maxLength = maxLength
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            is BarcodeScannerFormInput -> {
-                BarcodeTextFieldState(
-                    id = element.hashCode(),
-                    properties = BarcodeFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.formattedValueAsStateFlow(scope),
-                        required = element.isRequired,
-                        editable = element.isEditable,
-                        visible = element.isVisible,
-                        validationErrors = element.mapValidationErrors(scope),
-                        fieldType = element.fieldType,
-                        domain = element.domain,
-                        minLength = (element.input as BarcodeScannerFormInput).minLength.toInt(),
-                        maxLength = (element.input as BarcodeScannerFormInput).maxLength.toInt()
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            is DateTimePickerFormInput -> {
-                val input = element.input as DateTimePickerFormInput
-                DateTimeFieldState(
-                    id = element.hashCode(),
-                    properties = DateTimeFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.mapValueAsStateFlow(scope),
-                        validationErrors = element.mapValidationErrors(scope),
-                        editable = element.isEditable,
-                        required = element.isRequired,
-                        visible = element.isVisible,
-                        minEpochMillis = input.min,
-                        maxEpochMillis = input.min,
-                        shouldShowTime = input.includeTime,
-                        fieldType = element.fieldType
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            is ComboBoxFormInput -> {
-                val input = element.input as ComboBoxFormInput
-                ComboBoxFieldState(
-                    id = element.hashCode(),
-                    properties = CodedValueFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.value,
-                        validationErrors = element.mapValidationErrors(scope),
-                        editable = element.isEditable,
-                        required = element.isRequired,
-                        visible = element.isVisible,
-                        codedValues = input.codedValues.toMap(),
-                        showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel,
-                        fieldType = element.fieldType
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            is SwitchFormInput -> {
-                val input = element.input as SwitchFormInput
-                val initialValue = element.formattedValue
-                val fallback = initialValue.isEmpty()
-                    || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
-                SwitchFieldState(
-                    id = element.hashCode(),
-                    properties = SwitchFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.value,
-                        validationErrors = element.mapValidationErrors(scope),
-                        editable = element.isEditable,
-                        required = element.isRequired,
-                        visible = element.isVisible,
-                        fieldType = element.fieldType,
-                        onValue = input.onValue,
-                        offValue = input.offValue,
-                        fallback = fallback,
-                        showNoValueOption = if (form.fieldIsNullable(element))
-                            FormInputNoValueOption.Show
-                        else
-                            FormInputNoValueOption.Hide,
-                        noValueLabel = "No Value"
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            is RadioButtonsFormInput -> {
-                val input = element.input as RadioButtonsFormInput
-                RadioButtonFieldState(
-                    id = element.hashCode(),
-                    properties = RadioButtonFieldProperties(
-                        label = element.label,
-                        placeholder = element.hint,
-                        description = element.description,
-                        value = element.value,
-                        validationErrors = element.mapValidationErrors(scope),
-                        editable = element.isEditable,
-                        required = element.isRequired,
-                        visible = element.isVisible,
-                        fieldType = element.fieldType,
-                        codedValues = input.codedValues.toMap(),
-                        showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
-                    ),
-                    hasValueExpression = element.hasValueExpression,
-                    scope = scope,
-                    updateValue = element::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-
-            else -> {
-                null
-            }
-        }
     }
 
     /**
@@ -474,3 +233,276 @@ internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
 )
+
+/**
+ * Creates and remembers state objects for all the supported element types that are part of the
+ * provided FeatureForm. These state objects are returned as part of a [FormStateCollection].
+ *
+ * @param form the [FeatureForm] to create the states for.
+ * @param scope a [CoroutineScope] to run collectors and calculations on.
+ *
+ * @return returns the [FormStateCollection] created.
+ */
+internal fun createStates(
+    form: FeatureForm,
+    elements: List<FormElement>,
+    scope: CoroutineScope,
+    ignoreList : Set<Class<out FormElement>> = emptySet(),
+): FormStateCollection {
+    val states = MutableFormStateCollection()
+    // Filter out elements that are part of the ignore list.
+    val filteredElements = elements.filter {
+        element -> !ignoreList.contains(element::class.java)
+    }
+    filteredElements.forEach { element ->
+        when (element) {
+            is FieldFormElement -> {
+                val state = createFieldState(element, form, scope)
+                if (state != null) {
+                    states.add(element, state)
+                }
+            }
+
+            is GroupFormElement -> {
+                val fieldStates = createStates(
+                    form = form,
+                    elements = element.elements,
+                    scope = scope,
+                    ignoreList = ignoreList
+                )
+                val groupState = BaseGroupState(
+                    id = element.hashCode(),
+                    label = element.label,
+                    description = element.description,
+                    isVisible = element.isVisible,
+                    expanded = element.initialState == FormGroupState.Expanded,
+                    fieldStates = fieldStates
+                )
+                states.add(element, groupState)
+            }
+
+            is TextFormElement -> {
+                val state = TextFormElementState(
+                    id = element.hashCode(),
+                    label = element.label,
+                    description = element.description,
+                    isVisible = element.isVisible,
+                    text = element.text,
+                    format = element.format
+                )
+                states.add(element, state)
+            }
+
+            is UtilityAssociationsFormElement -> {
+                val state = UtilityAssociationsElementState(
+                    element = element,
+                    scope = scope
+                )
+                states.add(element, state)
+            }
+
+            else -> {}
+        }
+    }
+    // The Toolkit currently only supports AttachmentsFormElements via the
+    // default attachments element. Once AttachmentsFormElements can be authored
+    // the switch case above should have a case added for AttachmentsFormElement.
+    if (form.defaultAttachmentsElement != null) {
+        val state = AttachmentElementState(
+            formElement = form.defaultAttachmentsElement!!,
+            scope = scope,
+            id = form.defaultAttachmentsElement!!.hashCode(),
+            evaluateExpressions = form::evaluateExpressions
+        )
+        states.add(form.defaultAttachmentsElement!!, state)
+    }
+    return states
+}
+
+/**
+ * Creates and remembers a [BaseFieldState] for the provided [element].
+ *
+ * @param element the [FieldFormElement] to create the state for.
+ * @param form the [FeatureForm] the [element] is part of.
+ * @param scope a [CoroutineScope] to run collectors and calculations on.
+ *
+ * @return returns the [BaseFieldState] created.
+ */
+internal fun createFieldState(
+    element: FieldFormElement,
+    form: FeatureForm,
+    scope: CoroutineScope
+): BaseFieldState<out Any?>? {
+    return when (element.input) {
+        is TextBoxFormInput, is TextAreaFormInput -> {
+            val minLength = if (element.input is TextBoxFormInput) {
+                (element.input as TextBoxFormInput).minLength.toInt()
+            } else {
+                (element.input as TextAreaFormInput).minLength.toInt()
+            }
+            val maxLength = if (element.input is TextBoxFormInput) {
+                (element.input as TextBoxFormInput).maxLength.toInt()
+            } else {
+                (element.input as TextAreaFormInput).maxLength.toInt()
+            }
+            FormTextFieldState(
+                id = element.hashCode(),
+                properties = TextFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.formattedValueAsStateFlow(scope),
+                    validationErrors = element.mapValidationErrors(scope),
+                    required = element.isRequired,
+                    editable = element.isEditable,
+                    visible = element.isVisible,
+                    domain = element.domain as? RangeDomain,
+                    fieldType = element.fieldType,
+                    singleLine = element.input is TextBoxFormInput,
+                    minLength = minLength,
+                    maxLength = maxLength
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        is BarcodeScannerFormInput -> {
+            BarcodeTextFieldState(
+                id = element.hashCode(),
+                properties = BarcodeFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.formattedValueAsStateFlow(scope),
+                    required = element.isRequired,
+                    editable = element.isEditable,
+                    visible = element.isVisible,
+                    validationErrors = element.mapValidationErrors(scope),
+                    fieldType = element.fieldType,
+                    domain = element.domain,
+                    minLength = (element.input as BarcodeScannerFormInput).minLength.toInt(),
+                    maxLength = (element.input as BarcodeScannerFormInput).maxLength.toInt()
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        is DateTimePickerFormInput -> {
+            val input = element.input as DateTimePickerFormInput
+            DateTimeFieldState(
+                id = element.hashCode(),
+                properties = DateTimeFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.mapValueAsStateFlow(scope),
+                    validationErrors = element.mapValidationErrors(scope),
+                    editable = element.isEditable,
+                    required = element.isRequired,
+                    visible = element.isVisible,
+                    minEpochMillis = input.min,
+                    maxEpochMillis = input.min,
+                    shouldShowTime = input.includeTime,
+                    fieldType = element.fieldType
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        is ComboBoxFormInput -> {
+            val input = element.input as ComboBoxFormInput
+            ComboBoxFieldState(
+                id = element.hashCode(),
+                properties = CodedValueFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.value,
+                    validationErrors = element.mapValidationErrors(scope),
+                    editable = element.isEditable,
+                    required = element.isRequired,
+                    visible = element.isVisible,
+                    codedValues = input.codedValues.toMap(),
+                    showNoValueOption = input.noValueOption,
+                    noValueLabel = input.noValueLabel,
+                    fieldType = element.fieldType
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        is SwitchFormInput -> {
+            val input = element.input as SwitchFormInput
+            val initialValue = element.formattedValue
+            val fallback = initialValue.isEmpty()
+                || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
+            SwitchFieldState(
+                id = element.hashCode(),
+                properties = SwitchFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.value,
+                    validationErrors = element.mapValidationErrors(scope),
+                    editable = element.isEditable,
+                    required = element.isRequired,
+                    visible = element.isVisible,
+                    fieldType = element.fieldType,
+                    onValue = input.onValue,
+                    offValue = input.offValue,
+                    fallback = fallback,
+                    showNoValueOption = if (form.fieldIsNullable(element))
+                        FormInputNoValueOption.Show
+                    else
+                        FormInputNoValueOption.Hide,
+                    noValueLabel = ""
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        is RadioButtonsFormInput -> {
+            val input = element.input as RadioButtonsFormInput
+            RadioButtonFieldState(
+                id = element.hashCode(),
+                properties = RadioButtonFieldProperties(
+                    label = element.label,
+                    placeholder = element.hint,
+                    description = element.description,
+                    value = element.value,
+                    validationErrors = element.mapValidationErrors(scope),
+                    editable = element.isEditable,
+                    required = element.isRequired,
+                    visible = element.isVisible,
+                    fieldType = element.fieldType,
+                    codedValues = input.codedValues.toMap(),
+                    showNoValueOption = input.noValueOption,
+                    noValueLabel = input.noValueLabel
+                ),
+                hasValueExpression = element.hasValueExpression,
+                scope = scope,
+                updateValue = element::updateValue,
+                evaluateExpressions = form::evaluateExpressions
+            )
+        }
+
+        else -> {
+            null
+        }
+    }
+}

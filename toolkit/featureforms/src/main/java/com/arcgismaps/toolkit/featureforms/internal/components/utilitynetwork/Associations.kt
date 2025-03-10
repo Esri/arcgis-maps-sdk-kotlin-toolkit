@@ -47,9 +47,17 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
-import com.arcgismaps.utilitynetworks.UtilityNetworkSource
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 
+/**
+ * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
+ * list of its groups as given by [UtilityAssociationsFilterResult.groupResults].
+ *
+ * @param filterResult The [UtilityAssociationsFilterResult] to display.
+ * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
+ * @param onBackPressed A callback that is called when the back button is pressed.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 internal fun UtilityAssociationFilter(
     filterResult: UtilityAssociationsFilterResult,
@@ -75,8 +83,6 @@ internal fun UtilityAssociationFilter(
                                 modifier = Modifier.padding(end = 16.dp)
                             )
                         },
-                        overlineContent = {
-                        },
                         modifier = Modifier.clickable {
                             onGroupClick(index)
                         },
@@ -100,8 +106,11 @@ internal fun UtilityAssociationFilter(
 }
 
 /**
- * Displays the provided list of associations [results] for the given [element] grouped by
- * [UtilityNetworkSource].
+ * Displays the provided list of associations that are part of the [UtilityAssociationGroupResult].
+ *
+ * @param groupResult The [UtilityAssociationGroupResult] to display.
+ * @param onItemClick A callback that is called when an association is clicked.
+ * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun Associations(
@@ -120,9 +129,7 @@ internal fun Associations(
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn(
-            modifier = Modifier
-                .padding(16.dp)
-                .clip(shape = RoundedCornerShape(15.dp)),
+            modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
             state = lazyListState
         ) {
             groupResult.associationResults.forEachIndexed { index, info ->
@@ -148,6 +155,19 @@ internal fun Associations(
     }
 }
 
+/**
+ * Displays the provided [UtilityAssociation] and its associated feature.
+ *
+ * If the association is of type JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
+ * or JunctionEdgeObjectConnectivityMidspan and the target feature is an edge, the fractionAlongEdge
+ * is displayed. Otherwise, the terminal is displayed.
+ *
+ * For a Connectivity association, the terminal is displayed.
+ *
+ * For a Containment association, the isContainmentVisible property is displayed if the associated
+ * feature is the toElement.
+ *
+ */
 @Composable
 private fun AssociationItem(
     association: UtilityAssociation,
@@ -236,6 +256,9 @@ private fun AssociationItem(
     )
 }
 
+/**
+ * Returns the target element of the association that is not the provided [ArcGISFeature].
+ */
 internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
     return if (arcGISFeature.globalId == this.fromElement.globalId) {
         this.toElement
@@ -244,6 +267,10 @@ internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): 
     }
 }
 
+/**
+ * Returns the label for the [ArcGISFeature]. This can be the object ID, the name attribute or a default
+ * label if none of these are available.
+ */
 internal val ArcGISFeature.label: String
     get() {
         return if (objectId != null) {
@@ -255,12 +282,21 @@ internal val ArcGISFeature.label: String
         }
     }
 
+/**
+ * Returns the object ID of the [ArcGISFeature] if available.
+ */
 internal val ArcGISFeature.objectId: Long?
     get() = attributes["objectid"] as? Long
 
+/**
+ * Returns the global ID of the [ArcGISFeature].
+ */
 internal val ArcGISFeature.globalId: Guid
     get() = attributes["globalid"] as Guid
 
+/**
+ * Returns an icon for the association based on the association type and the GUID of the target element.
+ */
 @Composable
 internal fun UtilityAssociation.getIcon(targetElementGuid: Guid): Painter? {
     return when (this.associationType) {

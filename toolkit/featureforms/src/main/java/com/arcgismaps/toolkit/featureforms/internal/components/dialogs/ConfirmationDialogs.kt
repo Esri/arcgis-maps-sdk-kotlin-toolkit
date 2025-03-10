@@ -31,7 +31,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
 internal fun SaveEditsDialog(
@@ -47,7 +49,7 @@ internal fun SaveEditsDialog(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("The form has edits")
+                Text(stringResource(R.string.the_form_has_edits))
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = onDismissRequest) {
                     Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close")
@@ -55,16 +57,16 @@ internal fun SaveEditsDialog(
             }
         },
         text = {
-            Text("Do you want to save your changes?")
+            Text(stringResource(R.string.do_you_want_to_save_your_changes))
         },
         confirmButton = {
             TextButton(onClick = onSave) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDiscard) {
-                Text("Discard")
+                Text(stringResource(R.string.discard))
             }
         },
     )
@@ -86,11 +88,8 @@ internal fun ErrorDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("Okay")
+                Text(stringResource(R.string.ok))
             }
-        },
-        icon = {
-            Icon(imageVector = Icons.Rounded.Warning, contentDescription = "Close")
         }
     )
 }
