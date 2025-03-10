@@ -75,7 +75,7 @@ internal class WorldScaleNmeaLocationProvider(scope: CoroutineScope) :
                 it.horizontalAccuracy,
                 it.verticalAccuracy,
                 it.speed,
-                0.0,
+                it.course,
                 it.lastKnown,
                 it.timestamp,
                 it.additionalSourceProperties
