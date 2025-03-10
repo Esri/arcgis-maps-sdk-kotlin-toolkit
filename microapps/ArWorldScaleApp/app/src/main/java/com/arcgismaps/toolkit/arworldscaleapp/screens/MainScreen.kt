@@ -91,6 +91,7 @@ fun MainScreen() {
         WorldScaleSceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
+            clippingDistance = 50.0,
             onInitializationStatusChanged = {
                 initializationStatus = it
             },
