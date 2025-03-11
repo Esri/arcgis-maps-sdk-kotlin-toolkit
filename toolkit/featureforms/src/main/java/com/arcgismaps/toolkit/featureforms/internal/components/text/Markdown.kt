@@ -48,6 +48,7 @@ import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.node.BulletList
 import org.commonmark.node.Code
+import org.commonmark.node.Document
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
 import org.commonmark.node.Heading
@@ -60,7 +61,6 @@ import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
 import org.commonmark.parser.Parser
-import org.commonmark.node.Document
 
 private const val URL_LINK = "URL_LINK"
 

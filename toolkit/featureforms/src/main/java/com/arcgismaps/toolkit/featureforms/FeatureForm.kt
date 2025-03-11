@@ -89,6 +89,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -108,7 +109,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.As
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.utils.DialogRequester
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
@@ -116,7 +116,7 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
-import com.google.android.datatransport.cct.StringMerger
+import com.arcgismaps.utilitynetworks.UtilityAssociation
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -151,18 +151,20 @@ public sealed class ValidationErrorVisibility {
 public sealed class FeatureFormEditingEvent {
 
     /**
-     * Indicates that the edits have been discarded.
+     * Indicates that the edits have been discarded on the [featureForm].
      *
+     * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after discarding the edits.
      */
-    public data class DiscardedEdits(val willNavigate: Boolean) : FeatureFormEditingEvent()
+    public data class DiscardedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) : FeatureFormEditingEvent()
 
     /**
-     * Indicates that the edits have been saved successfully.
+     * Indicates that the edits have been saved successfully on the [featureForm].
      *
+     * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after saving the edits.
      */
-    public data class SavedEdits(val willNavigate: Boolean) : FeatureFormEditingEvent()
+    public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) : FeatureFormEditingEvent()
 }
 
 /**
@@ -181,7 +183,7 @@ internal sealed class NavigationRoute {
     @Serializable
     data class UNFilterView(
         val stateId: Int,
-        val selectedFilterIndex: Int
+        val selectedFilterIndex: Int,
     ) : NavigationRoute()
 
     @Serializable
@@ -329,6 +331,11 @@ public fun FeatureForm(
  * - [TextFormElement]
  * - [UtilityAssociationsFormElement]
  *
+ * If there are any edits on the current [FeatureForm] as indicated by [FeatureForm.hasEdits], an
+ * action bar is displayed at the top of the form with save and discard buttons. The save button
+ * will save the edits and the discard button will discard the edits. The save or discard actions
+ * will trigger the [onEditingEvent] callback with the appropriate event.
+ *
  * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
  * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
  * A callback is also provided via the [onBarcodeButtonClick] parameter, which is invoked with
@@ -342,6 +349,17 @@ public fun FeatureForm(
  * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
  * currently supported. A default attachments editing support is provided using the
  * [FeatureForm.defaultAttachmentsElement] property.
+ *
+ * If any [UtilityAssociationsFormElement] are present in the [FeatureForm.elements] collection,
+ * the Form supports navigation between the associated [ArcGISFeature]s and their [FeatureForm]
+ *
+ * If any [UtilityAssociationsFormElement] is part of the [FeatureForm.elements] collection, the
+ * Form will display [UtilityAssociation]s that are associated with the selected feature and allow
+ * the user to navigate to the associated feature on the other end of the association. The Android
+ * system's back action can be used to navigate back to the previous [FeatureForm] screen. The
+ * [FeatureFormState.activeFeatureForm] will be updated when the user navigates forward or back
+ * through the associations. If there are any edits on the current [FeatureForm], the user will be
+ * prompted to save or discard the edits before navigating to the next [FeatureForm].
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
@@ -358,6 +376,9 @@ public fun FeatureForm(
  * default barcode scanner is used.
  * @param onEditingEvent A callback that is invoked when an editing event occurs in the form. This
  * is triggered when the edits are saved or discarded using the save or discard buttons, respectively.
+ * If the edit action is triggered by navigating to another form, the `willNavigate` parameter will
+ * be true. Note that if the action happens due to the close button, the `willNavigate` parameter
+ * will be false.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
@@ -391,7 +412,7 @@ public fun FeatureForm(
             // Finish editing the form if there are no validation errors
             form.finishEditing().onSuccess {
                 // Send a saved edits event
-                val event = FeatureFormEditingEvent.SavedEdits(willNavigate)
+                val event = FeatureFormEditingEvent.SavedEdits(form, willNavigate)
                 onEditingEvent(event)
             }
         } else {
@@ -401,6 +422,7 @@ public fun FeatureForm(
                 title = context.getString(R.string.the_form_has_validation_errors),
                 body = context.resources.getQuantityString(
                     R.plurals.you_have_errors_that_must_be_fixed_before_saving,
+                    errorCount,
                     errorCount
                 )
             )
@@ -413,7 +435,7 @@ public fun FeatureForm(
     fun discardForm(form: FeatureForm, willNavigate: Boolean) {
         form.discardEdits()
         // Send a discarded edits event
-        val event = FeatureFormEditingEvent.DiscardedEdits(willNavigate)
+        val event = FeatureFormEditingEvent.DiscardedEdits(form, willNavigate)
         onEditingEvent(event)
     }
 
@@ -530,18 +552,21 @@ public fun FeatureForm(
 
             composable<NavigationRoute.UNFilterView> { backStackEntry ->
                 val routeData = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val formData = remember(backStackEntry) { state.getActiveStateData() }
-                val unState =
-                    formData.stateCollection[routeData.stateId] as? UtilityAssociationsElementState
-                        ?: return@composable
                 val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val filterResult = remember(unState.filters) {
-                    unState.filters.getOrNull(route.selectedFilterIndex)
+                val formData = remember(backStackEntry) { state.getActiveStateData() }
+                val featureForm = formData.featureForm
+                val states = formData.stateCollection
+                // Get the selected UtilityAssociationsElementState from the state collection
+                val utilityAssociationsElementState = states[routeData.stateId]
+                    as? UtilityAssociationsElementState ?: return@composable
+                // Get the selected filter from the UtilityAssociationsElementState
+                val filterResult = remember(utilityAssociationsElementState.filters) {
+                    utilityAssociationsElementState.filters.getOrNull(route.selectedFilterIndex)
                 }
-                val hasEdits by formData.featureForm.hasEdits.collectAsState()
+                val hasEdits by featureForm.hasEdits.collectAsState()
                 FeatureFormLayout(
                     title = {
-                        val title by formData.featureForm.title.collectAsState()
+                        val title by featureForm.title.collectAsState()
                         FeatureFormTitle(
                             title = filterResult?.filter?.title
                                 ?: stringResource(R.string.none_selected),
@@ -556,12 +581,12 @@ public fun FeatureForm(
                             onBackPressed = navController::popBackStack,
                             onClose = onDismiss?.let {
                                 // Show the close button only if the onDismiss callback is provided
-                                { dismissForm(formData.featureForm, onDismiss) }
+                                { dismissForm(featureForm, onDismiss) }
                             },
                             onSave = {
-                                scope.launch { saveForm(formData.featureForm, false) }
+                                scope.launch { saveForm(featureForm, false) }
                             },
-                            onDiscard = { discardForm(formData.featureForm, false) }
+                            onDiscard = { discardForm(featureForm, false) }
                         )
                     },
                     content = {
@@ -570,7 +595,7 @@ public fun FeatureForm(
                                 filterResult = filterResult,
                                 onGroupClick = { index ->
                                     val newRoute = NavigationRoute.UNAssociationsView(
-                                        stateId = unState.id,
+                                        stateId = utilityAssociationsElementState.id,
                                         selectedFilterIndex = route.selectedFilterIndex,
                                         selectedGroupIndex = index
                                     )
@@ -588,18 +613,24 @@ public fun FeatureForm(
 
             composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
                 val routeData = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val formData = remember(backStackEntry) { state.getActiveStateData() }
-                val unState = formData.stateCollection[routeData.stateId] as?
-                    UtilityAssociationsElementState ?: return@composable
                 val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val filter = remember(unState.filters) {
-                    unState.filters.getOrNull(route.selectedFilterIndex)
+                val formData = remember(backStackEntry) { state.getActiveStateData() }
+                val featureForm = formData.featureForm
+                val states = formData.stateCollection
+                // Get the selected UtilityAssociationsElementState from the state collection
+                val utilityAssociationsElementState = states[routeData.stateId] as?
+                    UtilityAssociationsElementState ?: return@composable
+                // Get the selected filter from the UtilityAssociationsElementState
+                val filter = remember(utilityAssociationsElementState.filters) {
+                    utilityAssociationsElementState.filters.getOrNull(route.selectedFilterIndex)
                 }
+                // Guard against null filter.
                 if (filter == null) return@composable
-                val group = remember(unState.filters) {
+                // Get the selected group from the filter
+                val group = remember(utilityAssociationsElementState.filters) {
                     filter.groupResults.getOrNull(route.selectedGroupIndex)
                 }
-                val hasEdits by formData.featureForm.hasEdits.collectAsState()
+                val hasEdits by featureForm.hasEdits.collectAsState()
                 FeatureFormLayout(
                     title = {
                         FeatureFormTitle(
@@ -615,12 +646,12 @@ public fun FeatureForm(
                             onBackPressed = navController::popBackStack,
                             onClose = onDismiss?.let {
                                 // Show the close button only if the onDismiss callback is provided
-                                { dismissForm(formData.featureForm, onDismiss) }
+                                { dismissForm(featureForm, onDismiss) }
                             },
                             onSave = {
-                                scope.launch { saveForm(formData.featureForm, false) }
+                                scope.launch { saveForm(featureForm, false) }
                             },
-                            onDiscard = { discardForm(formData.featureForm, false) }
+                            onDiscard = { discardForm(featureForm, false) }
                         )
                     },
                     content = {
@@ -632,14 +663,14 @@ public fun FeatureForm(
                                         val dialog = DialogType.SaveFeatureDialog(
                                             onSave = {
                                                 saveForm(
-                                                    formData.featureForm,
+                                                    featureForm,
                                                     true
                                                 ).onSuccess {
                                                     state.navigateTo(info.associatedFeature)
                                                 }
                                             },
                                             onDiscard = {
-                                                discardForm(formData.featureForm, true)
+                                                discardForm(featureForm, true)
                                                 state.navigateTo(info.associatedFeature)
                                             },
                                         )
@@ -653,7 +684,7 @@ public fun FeatureForm(
                         }
                     }
                 )
-                FeatureFormDialog(formData.stateCollection)
+                FeatureFormDialog(states)
             }
         }
     }

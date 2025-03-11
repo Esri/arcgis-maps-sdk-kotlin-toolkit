@@ -154,6 +154,7 @@
     <string name="the_form_has_edits">The form has edits</string>
     <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
         <item quantity="one">You have %1$d error that must be fixed before saving.</item>
         <item quantity="two">You have %1$d errors that must be fixed before saving</item>
         <item quantity="few">You have %1$d errors that must be fixed before saving</item>

@@ -309,15 +309,12 @@ class MapViewModel @Inject constructor(
      *
      * Persisting changes to attributes is not part of the FeatureForm API.
      *
-     * @return a Result indicating success, or any error encountered.
+     * @param featureForm the FeatureForm to commit edits from
      */
-    suspend fun commitEdits() {
-        val editingState = _uiState.value as? UIState.Editing ?: return
-        val featureFormState = editingState.featureFormState
-        val activeFeatureForm = featureFormState.activeFeatureForm
+    suspend fun commitEdits(featureForm: FeatureForm) {
         // set the busy state to true
         _isBusy.value = true
-        applyEditsToService(activeFeatureForm)
+        applyEditsToService(featureForm)
         // clear the busy state
         _isBusy.value = false
     }

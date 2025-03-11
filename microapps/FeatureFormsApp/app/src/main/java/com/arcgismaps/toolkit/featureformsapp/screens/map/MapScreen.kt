@@ -224,10 +224,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     onDismiss = {
                        mapViewModel.setDefaultState()
                     },
-                    onEditingEvent = {
-                        if (it is FeatureFormEditingEvent.SavedEdits) {
+                    onEditingEvent = { event ->
+                        if (event is FeatureFormEditingEvent.SavedEdits) {
                             scope.launch {
-                                mapViewModel.commitEdits()
+                                mapViewModel.commitEdits(featureForm = event.featureForm)
                             }
                         }
                     },

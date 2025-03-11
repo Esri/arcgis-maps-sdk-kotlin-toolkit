@@ -78,8 +78,8 @@ import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.closeIconSize
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.DIALOG_MAX_HEIGHT_RATIO
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.closeIconSize
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.dialogMaxWidth
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.dialogShape
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialogDefaults.headerPadding

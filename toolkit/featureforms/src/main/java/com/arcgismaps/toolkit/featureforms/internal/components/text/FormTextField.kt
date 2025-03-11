@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue

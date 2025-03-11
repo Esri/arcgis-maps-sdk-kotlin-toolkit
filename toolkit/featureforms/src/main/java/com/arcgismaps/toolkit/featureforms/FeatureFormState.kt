@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -24,8 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavController
-import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput

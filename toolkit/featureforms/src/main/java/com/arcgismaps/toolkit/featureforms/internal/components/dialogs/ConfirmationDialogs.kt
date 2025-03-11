@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
@@ -103,9 +103,12 @@ private fun SaveEditsDialogPreview() {
 @Preview
 @Composable
 private fun ValidationErrorsDialogPreview() {
+    val context = LocalContext.current
     ErrorDialog(
         onDismissRequest = {},
-        title = "Validation Errors",
-        body = "Please correct the errors in the form"
-    )
+        title = context.getString(R.string.the_form_has_validation_errors),
+        body = context.resources.getQuantityString(
+            R.plurals.you_have_errors_that_must_be_fixed_before_saving,
+            1, 1)
+        )
 }

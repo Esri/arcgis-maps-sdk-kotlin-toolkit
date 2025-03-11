@@ -18,20 +18,11 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -100,82 +91,4 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
 
     override fun typeConverter(input: Instant?): Any? = input
-    
-    companion object {
-        fun Saver(
-            field: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope
-        ): Saver<DateTimeFieldState, Any> = listSaver(
-            save = {
-                emptyList<Any>()
-            },
-            restore = { list ->
-                val input = field.input as DateTimePickerFormInput
-                DateTimeFieldState(
-                    id = field.hashCode(),
-                    properties = DateTimeFieldProperties(
-                        label = field.label,
-                        placeholder = field.hint,
-                        description = field.description,
-                        value = field.mapValueAsStateFlow(scope),
-                        validationErrors = field.mapValidationErrors(scope),
-                        editable = field.isEditable,
-                        required = field.isRequired,
-                        visible = field.isVisible,
-                        minEpochMillis = input.min,
-                        maxEpochMillis = input.max,
-                        shouldShowTime = input.includeTime,
-                        fieldType = field.fieldType
-                    ),
-                    initialValue = list[0] as Instant?,
-                    hasValueExpression = field.hasValueExpression,
-                    scope = scope,
-                    updateValue = field::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                ).apply {
-                    onFocusChanged(list[1] as Boolean)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberDateTimeFieldState(
-    field: FieldFormElement,
-    minEpochMillis: Instant?,
-    maxEpochMillis: Instant?,
-    shouldShowTime: Boolean,
-    form: FeatureForm,
-    scope: CoroutineScope
-): DateTimeFieldState = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = DateTimeFieldState.Saver(
-        field = field,
-        form = form,
-        scope = scope
-    )
-) {
-    DateTimeFieldState(
-        id = field.hashCode(),
-        properties = DateTimeFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.mapValueAsStateFlow(scope),
-            validationErrors = field.mapValidationErrors(scope),
-            editable = field.isEditable,
-            required = field.isRequired,
-            visible = field.isVisible,
-            minEpochMillis = minEpochMillis,
-            maxEpochMillis = maxEpochMillis,
-            shouldShowTime = shouldShowTime,
-            fieldType = field.fieldType
-        ),
-        hasValueExpression = field.hasValueExpression,
-        scope = scope,
-        updateValue = field::updateValue,
-        evaluateExpressions = form::evaluateExpressions
-    )
 }
