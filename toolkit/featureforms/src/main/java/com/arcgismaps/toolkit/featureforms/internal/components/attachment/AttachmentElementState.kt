@@ -151,7 +151,6 @@ internal class AttachmentElementState(
         // scroll to the new attachment after a delay to allow the recomposition to complete
         scope.launch {
             delay(100)
-            lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
         return Result.success(Unit)
