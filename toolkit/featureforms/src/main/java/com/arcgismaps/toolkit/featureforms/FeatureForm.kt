@@ -198,6 +198,7 @@ internal sealed class NavigationRoute {
     message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
     level = DeprecationLevel.HIDDEN
 )
+@Suppress("DEPRECATION")
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
@@ -219,6 +220,7 @@ public fun FeatureForm(
     level = DeprecationLevel.HIDDEN
 )
 @Composable
+@Suppress("DEPRECATION")
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,

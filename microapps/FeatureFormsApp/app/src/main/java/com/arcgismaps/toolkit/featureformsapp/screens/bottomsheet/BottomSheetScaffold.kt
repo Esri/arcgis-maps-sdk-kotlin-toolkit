@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.BottomSheetDefaults
@@ -51,7 +50,6 @@ import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.lang.Float.max
 import kotlin.math.roundToInt
@@ -301,7 +299,6 @@ fun StandardBottomSheet(
                 Box(
                     Modifier
                         .align(CenterHorizontally)
-                        //.height(32.dp)
                         .semantics(mergeDescendants = true) {
                             with(state) {
                                 // Provides semantics to interact with the bottomsheet if there is more
