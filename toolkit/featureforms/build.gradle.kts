@@ -108,6 +108,10 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$AssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
+
     )
     
     ignoredClasses.addAll(composableSingletons)

@@ -349,8 +349,9 @@ public fun FeatureForm(
  * color scheme will take precedence and will be merged with the text style, if one is provided.
  *
  * @param featureFormState the [FeatureFormState] object that contains the state of the form.
- * @param onDismiss A callback that is invoked when the close button is clicked. If null, the close
- * button is not displayed.
+ * @param onDismiss A callback that is invoked when the close button is clicked. This can be used
+ * to dismiss the Form. If you want to disable this functionality, simply pass in null and this
+ * will hide the close button.
  * @param modifier the modifier to apply to this layout.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the

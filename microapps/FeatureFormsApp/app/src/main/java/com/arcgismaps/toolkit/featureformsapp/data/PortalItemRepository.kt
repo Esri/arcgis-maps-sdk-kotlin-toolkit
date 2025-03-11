@@ -126,11 +126,9 @@ class PortalItemRepository(
         portalItems.map { item ->
             // load each portal item and its thumbnail in a new coroutine
             launch {
-                Log.e("TAG", "loadAndCachePortalItems: before ${item.type}", )
                 item.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
                 }
-                Log.e("TAG", "loadAndCachePortalItems: after ${item.type}", )
                 item.thumbnail?.load()
             }
             // suspend till all the portal loading jobs are complete
