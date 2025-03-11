@@ -23,6 +23,7 @@ import android.util.Log
 import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.concurrent.ExecutorService
@@ -38,7 +39,10 @@ internal class WorldScaleHeadingProvider(context: Context) {
     private val request = DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    private val _headings = MutableSharedFlow<Float>()
+    private val _headings = MutableSharedFlow<Float>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val headings = _headings.asSharedFlow()
 
     fun start(){
