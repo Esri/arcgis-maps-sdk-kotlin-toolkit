@@ -44,6 +44,7 @@ import com.google.ar.core.Frame
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
@@ -72,10 +73,18 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
+    private val worldScaleHeadingProvider : WorldScaleHeadingProvider
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
     val cameraController = TransformationMatrixCameraController()
+
+    init {
+        val applicationContext = ArcGISEnvironment.applicationContext
+        require(applicationContext != null)
+
+        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext)
+    }
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
@@ -89,24 +98,6 @@ internal class WorldTrackingCameraController(
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
         cameraController.transformationMatrix = cameraPosition
     }
-
-    /**
-     * Sets the origin position of the camera to the given location.
-     *
-     * @since 200.7.0
-     */
-    private fun updateCamera(location: Location) =
-        cameraController.setOriginCamera(
-            Camera(
-                location.position.y,
-                location.position.x,
-                if (location.position.hasZ) location.position.z
-                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                calibrationState.totalHeadingOffset,
-                90.0,
-                0.0
-            )
-        )
 
     /**
      * Rotates the origin position of the camera by the given heading offset.
@@ -140,6 +131,7 @@ internal class WorldTrackingCameraController(
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
@@ -149,6 +141,7 @@ internal class WorldTrackingCameraController(
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
@@ -158,6 +151,7 @@ internal class WorldTrackingCameraController(
         super.onResume(owner)
         scope.launch {
             worldScaleNmeaLocationProvider.start()
+            worldScaleHeadingProvider.start()
             locationDataSource.start()
         }
         scope.launch {
@@ -179,8 +173,20 @@ internal class WorldTrackingCameraController(
                         measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
                     )
                 }
-                .collect { location ->
-                    updateCamera(location)
+                .combine(worldScaleHeadingProvider.headings) {
+                    location, heading ->
+                    Camera(
+                        latitude = location.position.y,
+                        longitude = location.position.x,
+                        altitude = if (location.position.hasZ) location.position.z
+                            ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                        heading = heading + calibrationState.totalHeadingOffset,
+                        pitch = 90.0,
+                        roll = 0.0
+                    )
+                }
+                .collect { camera ->
+                    cameraController.setOriginCamera(camera)
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
