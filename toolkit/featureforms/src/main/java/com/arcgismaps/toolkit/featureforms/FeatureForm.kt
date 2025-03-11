@@ -171,7 +171,7 @@ public sealed class FeatureFormEditingEvent {
  * A composition local that determines if the action bar is visible in the form. This is used to
  * internally hide the action bar in the form.
  */
-internal val LocalActionBarVisible: ProvidableCompositionLocal<Boolean> =
+internal val LocalActionBarVisibility: ProvidableCompositionLocal<Boolean> =
     staticCompositionLocalOf { true }
 
 @Serializable
@@ -299,7 +299,7 @@ public fun FeatureForm(
         )
     }
     // Hide the action bar in the form since it is not supported via this API
-    CompositionLocalProvider(LocalActionBarVisible provides false) {
+    CompositionLocalProvider(LocalActionBarVisibility provides false) {
         FeatureForm(
             featureFormState = state,
             modifier = modifier,
@@ -401,7 +401,7 @@ public fun FeatureForm(
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
-    val showActionBar = LocalActionBarVisible.current
+    val showActionBar = LocalActionBarVisibility.current
 
     // A function that provides the action to save edits on the form
     suspend fun saveForm(form: FeatureForm, willNavigate: Boolean): Result<Unit> {
