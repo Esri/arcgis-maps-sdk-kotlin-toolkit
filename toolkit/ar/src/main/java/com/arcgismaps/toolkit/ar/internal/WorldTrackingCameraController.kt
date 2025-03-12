@@ -44,9 +44,9 @@ import com.google.ar.core.Frame
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -173,19 +173,17 @@ internal class WorldTrackingCameraController(
                         measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
                     )
                 }
-                .combine(worldScaleHeadingProvider.headings) {
-                    location, heading ->
-                    Camera(
-                        latitude = location.position.y,
-                        longitude = location.position.x,
-                        altitude = if (location.position.hasZ) location.position.z
+                .collect {
+                    val camera = Camera(
+                        latitude = it.position.y,
+                        longitude = it.position.x,
+                        altitude = if (it.position.hasZ) it.position.z
                             ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                        heading = heading + calibrationState.totalHeadingOffset,
+                        heading = worldScaleHeadingProvider.headings.first() + calibrationState.totalHeadingOffset,
                         pitch = 90.0,
                         roll = 0.0
                     )
-                }
-                .collect { camera ->
+
                     cameraController.setOriginCamera(camera)
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
