@@ -100,6 +100,24 @@ internal class WorldTrackingCameraController(
     }
 
     /**
+     * Sets the origin position of the camera to the given location and heading.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCamera(location: Location, heading: Float) =
+        cameraController.setOriginCamera(
+            Camera(
+                location.position.y,
+                location.position.x,
+                if (location.position.hasZ) location.position.z
+                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                heading + calibrationState.totalHeadingOffset,
+                90.0,
+                0.0
+            )
+        )
+
+    /**
      * Rotates the origin position of the camera by the given heading offset.
      *
      * @since 200.7.0
@@ -173,18 +191,8 @@ internal class WorldTrackingCameraController(
                         measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
                     )
                 }
-                .collect {
-                    val camera = Camera(
-                        latitude = it.position.y,
-                        longitude = it.position.x,
-                        altitude = if (it.position.hasZ) it.position.z
-                            ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                        heading = worldScaleHeadingProvider.headings.first() + calibrationState.totalHeadingOffset,
-                        pitch = 90.0,
-                        roll = 0.0
-                    )
-
-                    cameraController.setOriginCamera(camera)
+                .collect { location ->
+                    updateCamera(location, worldScaleHeadingProvider.headings.first())
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
