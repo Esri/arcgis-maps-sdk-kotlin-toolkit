@@ -436,6 +436,8 @@ public fun FeatureForm(
     // A function that provides the action to discard edits on the form
     fun discardForm(form: FeatureForm, willNavigate: Boolean) {
         form.discardEdits()
+        // run expressions evaluation
+        state.evaluateExpressions()
         // Send a discarded edits event
         val event = FeatureFormEditingEvent.DiscardedEdits(form, willNavigate)
         onEditingEvent(event)

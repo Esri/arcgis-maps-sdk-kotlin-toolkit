@@ -213,7 +213,7 @@ public class FeatureFormState private constructor(
      * Evaluates expressions for the [activeFeatureForm] and sets the [evaluatingExpressions] to
      * true while the expressions are being evaluated.
      */
-    private fun evaluateExpressions() {
+    internal fun evaluateExpressions() {
         coroutineScope.launch {
             _evaluatingExpressions.value = true
             activeFeatureForm.evaluateExpressions()
