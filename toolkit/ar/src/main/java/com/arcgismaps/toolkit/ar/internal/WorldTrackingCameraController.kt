@@ -64,6 +64,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
+    clippingDistance: Double?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) :
@@ -77,7 +78,9 @@ internal class WorldTrackingCameraController(
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
-    val cameraController = TransformationMatrixCameraController()
+    val cameraController = TransformationMatrixCameraController().apply {
+        this.clippingDistance = clippingDistance
+    }
 
     init {
         val applicationContext = ArcGISEnvironment.applicationContext
@@ -225,6 +228,7 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
+    clippingDistance: Double?,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     onResetOriginCamera: () -> Unit
 ): WorldTrackingCameraController {
@@ -233,6 +237,7 @@ internal fun rememberWorldTrackingCameraController(
     val wrapper = remember {
         WorldTrackingCameraController(
             calibrationState,
+            clippingDistance,
             onLocationDataSourceFailedToStart,
             onResetOriginCamera
         )
