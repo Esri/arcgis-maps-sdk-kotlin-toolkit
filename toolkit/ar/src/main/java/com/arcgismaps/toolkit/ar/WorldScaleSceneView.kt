@@ -71,6 +71,7 @@ import java.time.Instant
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
+    clippingDistance: Double? = null,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -142,6 +143,7 @@ public fun WorldScaleSceneView(
 
     val locationTracker = rememberWorldTrackingCameraController(
         calibrationState = calibrationState,
+        clippingDistance = clippingDistance,
         onLocationDataSourceFailedToStart = {
             initializationStatus.update(
                 WorldScaleSceneViewStatus.FailedToInitialize(it),

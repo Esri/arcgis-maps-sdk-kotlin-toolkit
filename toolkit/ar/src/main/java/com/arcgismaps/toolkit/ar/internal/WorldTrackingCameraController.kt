@@ -63,6 +63,7 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
+    clippingDistance: Double?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) :
@@ -75,7 +76,9 @@ internal class WorldTrackingCameraController(
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
-    val cameraController = TransformationMatrixCameraController()
+    val cameraController = TransformationMatrixCameraController().apply {
+        this.clippingDistance = clippingDistance
+    }
 
     internal var hasSetOriginCamera by mutableStateOf(false)
         private set
@@ -213,6 +216,7 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
+    clippingDistance: Double?,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     onResetOriginCamera: () -> Unit
 ): WorldTrackingCameraController {
@@ -221,6 +225,7 @@ internal fun rememberWorldTrackingCameraController(
     val wrapper = remember {
         WorldTrackingCameraController(
             calibrationState,
+            clippingDistance,
             onLocationDataSourceFailedToStart,
             onResetOriginCamera
         )
@@ -260,6 +265,8 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
+    // filter out locations with a NaN z value
+    if (location.position.z?.isNaN() == true) return false
 
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
