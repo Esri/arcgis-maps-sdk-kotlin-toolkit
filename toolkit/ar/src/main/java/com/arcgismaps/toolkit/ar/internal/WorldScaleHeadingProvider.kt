@@ -19,16 +19,23 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
-import android.util.Log
 import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.Executor
 
+/**
+ * Provides headings for [WorldScaleNmeaLocationProvider] using the Fused Orientation Provider API.
+ *
+ * @param context the context the app is running in
+ *
+ * @since 200.7.0
+ */
 internal class WorldScaleHeadingProvider(context: Context) {
 
     private val fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(context)
@@ -37,7 +44,7 @@ internal class WorldScaleHeadingProvider(context: Context) {
     }
 
     private val request = DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
-    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val executor: Executor = Dispatchers.IO.asExecutor()
 
     private val _headings = MutableSharedFlow<Float>(
         replay = 1,
@@ -47,8 +54,6 @@ internal class WorldScaleHeadingProvider(context: Context) {
 
     fun start(){
         fusedOrientationProviderClient.requestOrientationUpdates(request, executor, listener)
-            .addOnSuccessListener { Log.d("WSHP", "Registration successful") }
-            .addOnFailureListener { Log.e("WSHP", it.message.toString()) }
     }
 
     fun stop(){
