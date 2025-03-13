@@ -56,6 +56,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
+import com.arcgismaps.toolkit.ar.internal.WorldTrackingSceneView
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
@@ -71,6 +72,7 @@ import java.time.Instant
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
+    trackingMode: WorldScaleTrackingMode = WorldScaleTrackingMode.WorldTracking,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -133,57 +135,46 @@ public fun WorldScaleSceneView(
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
-    val arSessionWrapper =
-        rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
-
-
-    val localLifecycleOwner = LocalLifecycleOwner.current
-    val calibrationState = remember { CalibrationState() }
-
-    val locationTracker = rememberWorldTrackingCameraController(
-        calibrationState = calibrationState,
-        onLocationDataSourceFailedToStart = {
-            initializationStatus.update(
-                WorldScaleSceneViewStatus.FailedToInitialize(it),
-                onInitializationStatusChanged
-            )
-        },
-        onResetOriginCamera = {
-            localLifecycleOwner.lifecycleScope.launch {
-                arSessionWrapper.resetSession()
-            }
-        }
-    )
-
-    Box(modifier = modifier) {
-        ArCameraFeed(
-            session = arSessionWrapper,
-            onFrame = { frame, displayRotation ->
-                locationTracker.updateCamera(frame)
-                worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                    frame.camera,
-                    displayRotation
-                )
-                worldScaleSceneViewProxy.sceneViewProxy.renderFrame()
-            },
-            onTapWithHitResult = { },
-            onFirstPlaneDetected = { },
-            visualizePlanes = false
-        )
-        // Once the session is created, we can say we're initialized
-        initializationStatus.update(
-            WorldScaleSceneViewStatus.Initialized,
-            onInitializationStatusChanged
-        )
-        // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
-        if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
-        SceneView(
+    when(trackingMode) {
+        WorldScaleTrackingMode.WorldTracking -> WorldTrackingSceneView(
             arcGISScene = arcGISScene,
+            onInitializationStatusChanged = { status ->
+                initializationStatus.update(
+                    status,
+                    onInitializationStatusChanged
+                )
+            },
             modifier = Modifier.fillMaxSize(),
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
             graphicsOverlays = graphicsOverlays,
-            sceneViewProxy = worldScaleSceneViewProxy.sceneViewProxy,
+            worldScaleSceneViewProxy = worldScaleSceneViewProxy,
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = onSpatialReferenceChanged,
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+
             sceneViewInteractionOptions = remember {
                 // Disable interaction, which is not supported in WorldScale scenarios
                 SceneViewInteractionOptions().apply {
@@ -231,5 +222,6 @@ public fun WorldScaleSceneView(
                 }
             }
         )
+        WorldScaleTrackingMode.GeoTracking -> TODO()
     }
 }
