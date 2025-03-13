@@ -233,4 +233,5 @@ internal data object WorldScaleParameters {
     const val HORIZONTAL_ACCURACY_THRESHOLD_METERS = 4.0
     const val VERTICAL_ACCURACY_THRESHOLD_METERS = 4.0
     const val LOCATION_AGE_THRESHOLD_MS = 10000.0
+    const val HEADING_ERROR_DEGREES = 10.0
 }

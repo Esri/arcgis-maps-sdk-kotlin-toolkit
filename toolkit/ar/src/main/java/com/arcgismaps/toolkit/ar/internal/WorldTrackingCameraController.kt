@@ -74,7 +74,7 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
-    private val worldScaleHeadingProvider : WorldScaleHeadingProvider
+    public val worldScaleHeadingProvider : WorldScaleHeadingProvider
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }

@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.google.android.gms.location.DeviceOrientationListener
 import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.LocationServices
@@ -32,9 +34,25 @@ import java.util.concurrent.Executors
 internal class WorldScaleHeadingProvider(context: Context) {
 
     private val fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(context)
+
     private val listener = DeviceOrientationListener { deviceOrientation ->
-        _headings.tryEmit(deviceOrientation.headingDegrees)
+        val headingError = if (deviceOrientation.hasConservativeHeadingErrorDegrees()) {
+            conservativeHeadingError.value = deviceOrientation.conservativeHeadingErrorDegrees
+            deviceOrientation.conservativeHeadingErrorDegrees
+        } else {
+            headingError.value = deviceOrientation.headingErrorDegrees
+            deviceOrientation.headingErrorDegrees
+        }
+
+        //debugInfo.value = "Is conservative: ${deviceOrientation.hasConservativeHeadingErrorDegrees()} Con error: ${deviceOrientation.conservativeHeadingErrorDegrees} H error: ${deviceOrientation.headingErrorDegrees}"
+        //Log.d("HeadingTest", debugInfo.value)
+        //if (headingError < WorldScaleParameters.HEADING_ERROR_DEGREES) {
+            _headings.tryEmit(deviceOrientation.headingDegrees)
+        //}
     }
+
+    val headingError: MutableState<Float?> = mutableStateOf(null)
+    val conservativeHeadingError: MutableState<Float?> = mutableStateOf(null)
 
     private val request = DeviceOrientationRequest.Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build()
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
