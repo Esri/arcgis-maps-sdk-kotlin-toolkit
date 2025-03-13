@@ -54,17 +54,18 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
 
     override fun onResume(owner: LifecycleOwner) {
         val newSession = this.session ?: Session(applicationContext)
-        configureSession()
         shouldInitializeDisplay = true
         newSession.resume()
         session = newSession
+        configureSession()
     }
 
     private fun configureSession() {
+       if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) return
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
-
+                geospatialMode = Config.GeospatialMode.ENABLED
                 // We only want to detect horizontal planes.
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
@@ -89,10 +90,10 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
             }
             session = null
             val newSession = Session(applicationContext)
-            configureSession()
             shouldInitializeDisplay = true
             newSession.resume()
             session = newSession
+            configureSession()
         }
     }
 }

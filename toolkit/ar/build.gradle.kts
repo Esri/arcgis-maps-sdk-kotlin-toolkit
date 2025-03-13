@@ -100,6 +100,7 @@ apiValidation {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(project(":geoview-compose"))
     implementation(libs.arcore)
     api(arcgis.mapsSdk)

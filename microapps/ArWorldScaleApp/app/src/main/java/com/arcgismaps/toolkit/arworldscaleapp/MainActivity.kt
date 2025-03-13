@@ -34,10 +34,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.TransformationCatalog
 import com.arcgismaps.toolkit.arworldscaleapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.io.File
 
 class MainActivity : ComponentActivity() {
 
@@ -52,6 +54,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         ArcGISEnvironment.applicationContext = applicationContext
+
+        val peDataPath = File(getExternalFilesDir(null), "pedata").canonicalPath
+        check(File(peDataPath).exists())
+        check(File(peDataPath).isDirectory)
+        TransformationCatalog.projectionEngineDirectory = peDataPath
         setContent {
             MicroAppTheme {
                 if (isGooglePlayServicesArInstalled.collectAsStateWithLifecycle().value) {

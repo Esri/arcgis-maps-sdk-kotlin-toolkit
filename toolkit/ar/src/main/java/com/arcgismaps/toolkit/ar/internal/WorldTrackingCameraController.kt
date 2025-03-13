@@ -66,7 +66,7 @@ internal class WorldTrackingCameraController(
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) :
-    DefaultLifecycleObserver {
+    WorldScaleCameraController, DefaultLifecycleObserver {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
@@ -75,9 +75,9 @@ internal class WorldTrackingCameraController(
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
-    val cameraController = TransformationMatrixCameraController()
+    override val cameraController = TransformationMatrixCameraController()
 
-    internal var hasSetOriginCamera by mutableStateOf(false)
+    override var hasSetOriginCamera by mutableStateOf(false)
         private set
 
     /**
@@ -85,7 +85,7 @@ internal class WorldTrackingCameraController(
      *
      * @since 200.7.0
      */
-    internal fun updateCamera(frame: Frame) {
+    override fun updateCamera(frame: Frame) {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
         cameraController.transformationMatrix = cameraPosition
     }
