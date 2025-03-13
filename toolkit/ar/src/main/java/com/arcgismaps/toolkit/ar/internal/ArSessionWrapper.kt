@@ -34,7 +34,7 @@ import kotlinx.coroutines.sync.withLock
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context) :
+internal class ArSessionWrapper(private val applicationContext: Context, private val useGeospatial: Boolean) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
@@ -57,15 +57,17 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
         shouldInitializeDisplay = true
         newSession.resume()
         session = newSession
-        configureSession()
+        configureSession(useGeospatial)
     }
 
-    private fun configureSession() {
+    internal fun configureSession(useGeospatial: Boolean) {
        if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) return
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
-                geospatialMode = Config.GeospatialMode.ENABLED
+                if (useGeospatial) {
+                    geospatialMode = Config.GeospatialMode.ENABLED
+                }
                 // We only want to detect horizontal planes.
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
@@ -93,7 +95,7 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
             shouldInitializeDisplay = true
             newSession.resume()
             session = newSession
-            configureSession()
+            configureSession(useGeospatial)
         }
     }
 }
@@ -104,9 +106,9 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper {
+internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember { ArSessionWrapper(applicationContext) }
+    val arSessionWrapper = remember { ArSessionWrapper(applicationContext, useGeospatial) }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
         onDispose {
