@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -73,11 +74,19 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
+    private val worldScaleHeadingProvider : WorldScaleHeadingProvider
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
     val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
+    }
+
+    init {
+        val applicationContext = ArcGISEnvironment.applicationContext
+        require(applicationContext != null)
+
+        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext)
     }
 
     internal var hasSetOriginCamera by mutableStateOf(false)
@@ -94,18 +103,18 @@ internal class WorldTrackingCameraController(
     }
 
     /**
-     * Sets the origin position of the camera to the given location.
+     * Sets the origin position of the camera to the given location and heading.
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location) =
+    private fun updateCamera(location: Location, heading: Float) =
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
                 if (location.position.hasZ) location.position.z
                     ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                calibrationState.totalHeadingOffset,
+                heading + calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
             )
@@ -143,6 +152,7 @@ internal class WorldTrackingCameraController(
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
@@ -152,6 +162,7 @@ internal class WorldTrackingCameraController(
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
@@ -161,6 +172,7 @@ internal class WorldTrackingCameraController(
         super.onResume(owner)
         scope.launch {
             worldScaleNmeaLocationProvider.start()
+            worldScaleHeadingProvider.start()
             locationDataSource.start()
         }
         scope.launch {
@@ -183,7 +195,7 @@ internal class WorldTrackingCameraController(
                     )
                 }
                 .collect { location ->
-                    updateCamera(location)
+                    updateCamera(location, worldScaleHeadingProvider.headings.first())
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
