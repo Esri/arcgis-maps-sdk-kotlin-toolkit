@@ -35,7 +35,16 @@ internal class GeospatialTrackingCameraController(
                 if (earth.earthState != Earth.EarthState.ENABLED) return@let
                 val pose = earth.cameraGeospatialPose
                 val orientation = pose.eastUpSouthQuaternion
-                val projectedLocation = GeometryEngine.projectOrNull(Point(pose.longitude, pose.latitude, pose.altitude, SpatialReference(SpatialReference.wgs84().wkid, 115700 /*WGS84_VERTICAL*/)), SpatialReference(SpatialReference.wgs84().wkid, verticalWkid = 5773 /*EGM96*/)) ?: return@let
+                val projectedLocation = GeometryEngine.projectOrNull(
+                    Point(
+                        pose.longitude,
+                        pose.latitude,
+                        pose.altitude + calibrationState.totalElevationOffset,
+                        SpatialReference(SpatialReference.wgs84().wkid, 115700 /*WGS84_VERTICAL*/)
+                    ),
+                    SpatialReference(SpatialReference.wgs84().wkid, verticalWkid = 5773 /*EGM96*/)
+                ) ?: return@let
+
                 cameraController.setOriginCamera(
                     Camera(
                         projectedLocation,
