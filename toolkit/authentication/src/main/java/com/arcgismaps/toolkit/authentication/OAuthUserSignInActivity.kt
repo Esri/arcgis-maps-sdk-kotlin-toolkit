@@ -126,7 +126,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // if we enter onNewIntent, that means that we have redirected from the custom tab (or an
         // intermediary activity) with the response uri.

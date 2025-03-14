@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">האישור שסופק על ידי %1$s לא חתום על ידי רשות מהימנה.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">ביטול</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">מסוכן: הרשה חיבור</string>
-    <string name="username_password_login_message">היכנס אל %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">שם משתמש</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">סיסמה</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">כניסה</string>
+
 </resources>

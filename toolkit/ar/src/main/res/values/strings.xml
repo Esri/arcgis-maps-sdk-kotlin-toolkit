@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="camera_permission_not_granted">Camera permission not granted</string>
-    <string name="arcore_not_installed_message">ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s</string>
+    <string name="arcore_not_installed_message">ARCore must be installed to use this component. ARCore availability: %1$s</string>
+    <string name="location_data_source_failed_to_start">Location Data Source failed to start: %1$s</string>
+    <string name="location_permission_not_granted">Location permission not granted</string>
+    <string name="permissions_not_granted_message">"The following permissions are required, but not granted: %1$s"</string>
+    <string name="close_calibration">Close calibration</string>
+    <string name="heading_title">Heading</string>
+    <string name="decrease_heading">Decrease Heading</string>
+    <string name="increase_heading">Increase Heading</string>
+    <string name="reset_heading">Reset Heading</string>
+    <string name="heading_slider_description">Heading slider</string>
+    <string name="elevation_title">Elevation</string>
+    <string name="decrease_elevation">Decrease Elevation</string>
+    <string name="increase_elevation">Increase Elevation</string>
+    <string name="reset_elevation">Reset Elevation</string>
+    <string name="elevation_slider_description">Elevation slider</string>
 </resources>

@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s에서 제공된 인증서가 신뢰할 수 있는 기관에서 서명되지 않았습니다.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">취소</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">위험: 연결 허용</string>
-    <string name="username_password_login_message">%1$s에 로그인하세요.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">사용자 이름</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">비밀번호</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">로그인</string>
+
 </resources>

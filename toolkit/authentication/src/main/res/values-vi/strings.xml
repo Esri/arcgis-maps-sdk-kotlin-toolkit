@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Chứng chỉ do %1$s cung cấp không được ký bởi cơ quan đáng tin cậy.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">Hủy</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Nguy hiểm: Cho phép Kết nối</string>
-    <string name="username_password_login_message">Vui lòng đăng nhập vào %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Tên người dùng</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Mật khẩu</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Đăng nhập</string>
+
 </resources>

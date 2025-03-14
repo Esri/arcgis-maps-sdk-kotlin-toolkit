@@ -24,10 +24,10 @@ plugins {
 
 android {
     namespace = "com.esri.microappslib"
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 26
+        minSdk = libs.versions.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -49,10 +49,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
     }
+    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }

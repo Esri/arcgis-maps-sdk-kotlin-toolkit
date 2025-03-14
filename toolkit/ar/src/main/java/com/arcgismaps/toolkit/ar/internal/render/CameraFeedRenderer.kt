@@ -19,16 +19,17 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.view.MotionEvent
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
-import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
+import com.google.ar.core.exceptions.TextureNotSetException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -42,7 +43,7 @@ import java.nio.FloatBuffer
  */
 internal class CameraFeedRenderer(
     context: Context,
-    private val session: Session,
+    private val arSessionWrapper: ArSessionWrapper,
     private val assets: AssetManager,
     private val onFrame: (Frame, Int) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
@@ -59,9 +60,6 @@ internal class CameraFeedRenderer(
 
     // used to keep track of whether we have detected any planes and call [onFirstPlaneDetected] only once
     private var hasDetectedFirstPlane: Boolean = false
-
-    // must initialize texture names before drawing the background
-    private var hasSetTextureNames: Boolean = false
 
     // helps with setting viewport size after rotation
     private val displayRotationHelper = DisplayRotationHelper(context)
@@ -113,7 +111,7 @@ internal class CameraFeedRenderer(
             .setDepthWrite(false)
     }
 
-    private var lastTap: MotionEvent? = null
+    private var lastTapCoordinates: Offset? = null
 
 
     override fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -157,79 +155,90 @@ internal class CameraFeedRenderer(
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        // Texture names should only be set once on a GL thread unless they change. This is done during
-        // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
-        // initialized during the execution of onSurfaceCreated.
-        if (!hasSetTextureNames) {
-            session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
-            hasSetTextureNames = true
-        }
-
-        // Call [onFirstPlaneDetected] only once a plane has actually been detected
-        if (!hasDetectedFirstPlane) {
-            if (session.getAllTrackables(Plane::class.java).isNotEmpty()) {
-                hasDetectedFirstPlane = true
-                onFirstPlaneDetected()
-            }
-        }
-
-        // Notify ARCore session that the view size changed so that the perspective matrix and
-        // the video background can be properly adjusted.
-        displayRotationHelper.updateSessionIfNeeded(session)
-
-        // Obtain the current frame from ARSession. When the configuration is set to
-        // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-        // camera framerate.
-        val frame =
-            try {
-                session.update()
-            } catch (e: CameraNotAvailableException) {
-                logArMessage("Camera not available during onDrawFrame", e)
-                return
+        arSessionWrapper.withLock { session, shouldInitializeDisplay ->
+            // Texture names should only be set once on a GL thread unless they change. This is done during
+            // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
+            // initialized during the execution of onSurfaceCreated.
+            if (shouldInitializeDisplay) {
+                session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
             }
 
-        // updateDisplayGeometry must be called every frame to update the coordinates
-        // used to draw the background camera image. This coordinates with [displayRotationHelper.updateSessionIfNeeded]
-        // above, which tells the session the screen has changed, and then the frame will update our
-        // local property tex coordinates in this function
-        updateDisplayGeometry(frame)
+            // Notify ARCore session that the view size changed so that the perspective matrix and
+            // the video background can be properly adjusted.
+            displayRotationHelper.updateSessionIfNeeded(session, shouldInitializeDisplay)
 
-        // -- Draw background
-        if (frame.timestamp != 0L) {
-            // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
-            // drawing possible leftover data from previous sessions if the texture is reused.
-            drawBackground(surfaceDrawHandler)
-        }
-
-        handleTap(frame, onTapWithHitResult)
-
-        if (visualizePlanes) {
-            with(frame.camera) {
-                getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
-                planeRenderer.drawPlanes(
-                    surfaceDrawHandler,
-                    session.getAllTrackables(Plane::class.java),
-                    displayOrientedPose,
-                    projectionMatrix
-                )
+            // Call [onFirstPlaneDetected] only once a plane has actually been detected
+            if (!hasDetectedFirstPlane) {
+                if (!session.getAllTrackables(Plane::class.java).isEmpty()) {
+                    hasDetectedFirstPlane = true
+                    onFirstPlaneDetected()
+                }
             }
-        }
 
-        onFrame(
-            frame,
-            displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
-        )
+            // Obtain the current frame from ARSession. When the configuration is set to
+            // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
+            // camera framerate.
+            val frame =
+                try {
+                    session.update()
+                } catch (e: CameraNotAvailableException) {
+                    logArMessage("Camera not available during onDrawFrame", e)
+                    return@withLock
+                } catch (e: TextureNotSetException) {
+                    logArMessage("Texture names not set on the session", e)
+                    return@withLock
+                }
+
+            // updateDisplayGeometry must be called every frame to update the coordinates
+            // used to draw the background camera image. This coordinates with [displayRotationHelper.updateSessionIfNeeded]
+            // above, which tells the session the screen has changed, and then the frame will update our
+            // local property tex coordinates in this function
+            updateDisplayGeometry(frame)
+
+            // -- Draw background
+            if (frame.timestamp != 0L) {
+                // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
+                // drawing possible leftover data from previous sessions if the texture is reused.
+                drawBackground(surfaceDrawHandler)
+            }
+
+            handleTap(frame, onTapWithHitResult)
+
+            if (visualizePlanes) {
+                frame.camera.let { camera ->
+                    camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
+                    planeRenderer.drawPlanes(
+                        surfaceDrawHandler,
+                        session.getAllTrackables(Plane::class.java),
+                        camera.displayOrientedPose,
+                        projectionMatrix
+                    )
+                }
+            }
+
+            onFrame(
+                frame,
+                displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
+            )
+        }
     }
 
-    fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
-        val tap = lastTap ?: return
-        val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
-        onTap(hit)
-        lastTap = null
+    private fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
+        lastTapCoordinates?.let { tap ->
+            val hit = frame.hitTest(tap.x, tap.y).firstOrNull {
+                // sometimes ARCore will consider a hit if the hit point is just barely outside the
+                // polygon. For safety we check that the hit is within the polygon and within the extents
+                it.trackable is Plane && ((it.trackable as Plane).isPoseInPolygon(it.hitPose)) && ((it.trackable as Plane).isPoseInExtents(
+                    it.hitPose
+                ))
+            }
+            onTap(hit)
+            lastTapCoordinates = null
+        }
     }
 
-    fun onClick(it: MotionEvent) {
-        lastTap = it
+    fun onClick(offset: Offset) {
+        lastTapCoordinates = offset
     }
 
     /**
@@ -268,8 +277,6 @@ internal class CameraFeedRenderer(
 
     override fun onResume(owner: LifecycleOwner) {
         displayRotationHelper.onResume()
-        // not sure why we do this in onResume
-        hasSetTextureNames = false
     }
 
     override fun onPause(owner: LifecycleOwner) {

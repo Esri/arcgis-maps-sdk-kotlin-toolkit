@@ -15,16 +15,10 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certifikatet angivet af %1$s er ikke signeret af en pålidelig myndighed.</string>
-    <!-- This text is on a button that can fit 12 chars -->
     <string name="cancel">Annuller</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Fare: Tillad forbindelse</string>
-    <string name="username_password_login_message">Log ind på %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Brugernavn</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Adgangskode</string>
-    <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Log ind</string>
+
 </resources>

@@ -128,10 +128,12 @@ class FormTextFieldTests : FeatureFormTestRunner(
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
 
-        composeTestRule.onNode(
+        val supportingText = composeTestRule.onNode(
             hasContentDescription(supportingTextSemanticLabel),
             useUnmergedTree = true
-        ).assertDoesNotExist()
+        )
+        supportingText.assertIsDisplayed()
+        assertEquals("Maximum 256 characters", supportingText.getTextString())
     }
 
     /**
@@ -151,10 +153,12 @@ class FormTextFieldTests : FeatureFormTestRunner(
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
 
-        composeTestRule.onNode(
+        val supportingText = composeTestRule.onNode(
             hasContentDescription(supportingTextSemanticLabel),
             useUnmergedTree = true
-        ).assertDoesNotExist()
+        )
+        supportingText.assertIsDisplayed()
+        assertEquals("Maximum 256 characters", supportingText.getTextString())
 
         val charCountNode =
             composeTestRule.onNode(
@@ -191,13 +195,14 @@ class FormTextFieldTests : FeatureFormTestRunner(
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
 
+        outlinedTextField.performImeAction()
+        outlinedTextField.assertIsNotFocused()
+
+        // The helper text is not displayed when the field is unfocused
         composeTestRule.onNode(
             hasContentDescription(supportingTextSemanticLabel),
             useUnmergedTree = true
         ).assertDoesNotExist()
-
-        outlinedTextField.performImeAction()
-        outlinedTextField.assertIsNotFocused()
 
         val charCountNode =
             composeTestRule.onNode(

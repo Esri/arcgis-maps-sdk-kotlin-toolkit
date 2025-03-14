@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -28,8 +30,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.FeatureEditResult
+import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.geometry.GeometryType
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -38,6 +43,7 @@ import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
@@ -112,6 +118,10 @@ sealed class UIState {
         val featureCount: Int
     ) : UIState()
 
+    data class AddFeature(
+        val layerTemplates: List<LayerTemplates>
+    ) : UIState()
+
     /**
      * Indicates an error state with the given [error].
      */
@@ -122,6 +132,21 @@ sealed class UIState {
         val subTitle: String = ""
     ) : UIState()
 }
+
+data class LayerTemplates(
+    val layer: FeatureLayer,
+    val templates: List<TemplateRow>,
+    val defaultFeatureRow: DefaultFeatureRow?
+)
+
+data class TemplateRow(
+    val template: FeatureTemplate,
+    val bitmap: Bitmap?
+)
+
+data class DefaultFeatureRow(
+    val bitmap: Bitmap?
+)
 
 /**
  * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
@@ -331,6 +356,83 @@ class MapViewModel @Inject constructor(
             }
 
             else -> return
+        }
+    }
+
+    /**
+     * Fetches the feature templates for the layers in the map and sets the UI state to add a new
+     * feature.
+     */
+    suspend fun addNewFeature() {
+        val layers = map.operationalLayers.filterIsInstance<FeatureLayer>()
+        val layerTemplates = mutableListOf<LayerTemplates>()
+        layers.forEach { layer ->
+            val table = layer.featureTable as? ServiceFeatureTable
+            table?.load()?.onSuccess {
+                // check if the layer can add features and is a point layer
+                if (table.canAdd() && table.geometryType == GeometryType.Point) {
+                    // get the templates for the layer
+                    val templates = table.featureTypes.flatMap {
+                        it.templates
+                    }.map { template ->
+                        // create a feature with the template to get the symbol
+                        val bitmap = table.createFeature(template, Point(0.0, 0.0))
+                            .getSymbol(getApplication<Application>().resources)
+                        TemplateRow(template, bitmap)
+                    }
+                    // create a default feature row if there are no templates
+                    var defaultFeatureRow: DefaultFeatureRow? = null
+                    if (templates.isEmpty()) {
+                        val defaultFeature =
+                            table.createFeature(emptyMap(), Point(0.0, 0.0)) as ArcGISFeature
+                        // create a default feature row with the default feature symbol
+                        defaultFeatureRow =
+                            DefaultFeatureRow(defaultFeature.getSymbol(getApplication<Application>().resources))
+                    }
+                    layerTemplates.add(
+                        LayerTemplates(
+                            layer = layer,
+                            templates = templates,
+                            defaultFeatureRow = defaultFeatureRow
+                        )
+                    )
+                }
+            }
+        }
+        _uiState.value = UIState.AddFeature(layerTemplates)
+    }
+
+    /**
+     * Adds a new feature to the [layer] at the given [point] with the [template] if provided. If
+     * the template is null then a new default feature is crated.
+     */
+    suspend fun addFeature(template: FeatureTemplate?, layer: FeatureLayer, point: Point) {
+        val table = layer.featureTable as? ServiceFeatureTable ?: return
+        val location = proxy.screenToLocationOrNull(
+            ScreenCoordinate(point.x, point.y)
+        )
+        val feature = if (template != null) {
+            // create a feature with the template
+            table.createFeature(template, location)
+        } else {
+            // create a default feature
+            table.createFeature(emptyMap(), location) as ArcGISFeature
+        }
+        table.addFeature(feature).onSuccess {
+            // select the feature and open a FeatureForm for editing the feature
+            val featureForm = FeatureForm(feature)
+            if (location != null) {
+                // set the viewpoint to the feature location
+                proxy.setViewpointCenter(location)
+                // set the viewpoint scale if the layer has a min scale
+                layer.minScale?.let { scale ->
+                    proxy.setViewpointScale(scale)
+                }
+            }
+            layer.selectFeature(feature)
+            _uiState.value = UIState.Editing(featureForm)
+        }.onFailure {
+            Log.e("MapViewModel", "Failed to add feature", it)
         }
     }
 

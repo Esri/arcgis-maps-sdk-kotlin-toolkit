@@ -69,6 +69,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
+    }
 }
 
 dependencies {

@@ -33,6 +33,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.base.handleCharConstraints
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -45,13 +46,24 @@ internal class TextFieldProperties(
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
-    validationErrors : StateFlow<List<ValidationErrorState>>,
-    val fieldType: FieldType,
-    val domain: Domain?,
+    validationErrors: StateFlow<List<ValidationErrorState>>,
+    fieldType: FieldType,
+    domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties<String>(label, placeholder, description, value, validationErrors, required, editable, visible)
+) : FieldProperties<String>(
+    label,
+    placeholder,
+    description,
+    value,
+    validationErrors,
+    required,
+    editable,
+    visible,
+    fieldType,
+    domain
+)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -94,16 +106,6 @@ internal class FormTextFieldState(
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
 
-    /**
-     * The domain of the element's field.
-     */
-    val domain: Domain? = properties.domain
-
-    /**
-     * The FieldType of the element's field.
-     */
-    val fieldType: FieldType = properties.fieldType
-
     override fun typeConverter(input: String): Any? {
         if (input.isEmpty()) {
             return null
@@ -117,6 +119,16 @@ internal class FormTextFieldState(
             FieldType.Text -> input
             else -> null
         } ?: input
+    }
+
+    override fun calculateHelperText(): ValidationErrorState {
+        // If field type is text, handle character constraints
+        return if (fieldType == FieldType.Text) {
+            handleCharConstraints(minLength, maxLength, hasValueExpression)
+        } else {
+            // Otherwise, call the super class method which handles numeric constraints
+            super.calculateHelperText()
+        }
     }
 
     companion object {

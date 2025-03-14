@@ -18,17 +18,10 @@
 
 package com.arcgismaps.toolkit.ar
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,9 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -50,7 +40,6 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
@@ -71,15 +60,17 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
+import com.arcgismaps.toolkit.ar.internal.transformationMatrix
+import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Pose
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
-import kotlin.coroutines.resume
 
 /**
  * A scene view that provides an augmented reality table top experience.
@@ -178,7 +169,6 @@ public fun TableTopSceneView(
 ) {
     val initializationStatus = rememberTableTopSceneViewStatus()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
@@ -222,76 +212,60 @@ public fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            DisposableEffect(Unit) {
-                // We call this from inside DisposableEffect so that we invoke the callback in a side effect
-                initializationStatus.update(
-                    TableTopSceneViewStatus.DetectingPlanes,
-                    onInitializationStatusChanged
-                )
-                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                    arSessionWrapper.onDestroy(lifecycleOwner)
+            SideEffect {
+                // We need to check, otherwise during subsequent recompositions we could accidentally
+                // revert from `Initialized` back to `DetectingPlanes`.
+                if (initializationStatus.value is TableTopSceneViewStatus.Initializing) {
+                    initializationStatus.update(
+                        TableTopSceneViewStatus.DetectingPlanes,
+                        onInitializationStatusChanged
+
+                    )
                 }
             }
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-            session.value?.let { arSession ->
-                ArCameraFeed(
-                    session = arSession,
-                    onFrame = { frame, displayRotation ->
-                        arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.translation.let {
-                                TransformationMatrix.createWithQuaternionAndTranslation(
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    it[0].toDouble(),
-                                    it[1].toDouble(),
-                                    it[2].toDouble()
-                                )
-                            }
-                            val cameraPosition =
-                                anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
-                            cameraController.transformationMatrix = cameraPosition
-                            val imageIntrinsics = frame.camera.imageIntrinsics
-                            tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                                imageIntrinsics.focalLength[0],
-                                imageIntrinsics.focalLength[1],
-                                imageIntrinsics.principalPoint[0],
-                                imageIntrinsics.principalPoint[1],
-                                imageIntrinsics.imageDimensions[0].toFloat(),
-                                imageIntrinsics.imageDimensions[1].toFloat(),
-                                deviceOrientation = when (displayRotation) {
-                                    0 -> DeviceOrientation.Portrait
-                                    90 -> DeviceOrientation.LandscapeRight
-                                    180 -> DeviceOrientation.ReversePortrait
-                                    270 -> DeviceOrientation.LandscapeLeft
-                                    else -> DeviceOrientation.Portrait
-                                }
+            ArCameraFeed(
+                session = arSessionWrapper,
+                onFrame = { frame, displayRotation ->
+                    arCoreAnchor?.let { anchor ->
+                        val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                            TransformationMatrix.createWithQuaternionAndTranslation(
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                it[0].toDouble(),
+                                it[1].toDouble(),
+                                it[2].toDouble()
                             )
-                            tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
-                    },
-                    onTapWithHitResult = { hit ->
-                        hit?.let { hitResult ->
-                            if (arCoreAnchor == null) {
-                                arCoreAnchor = hitResult.createAnchor()
-                                // stop rendering planes
-                                visualizePlanes = false
-                            }
-                        }
-                    },
-                    onFirstPlaneDetected = {
-                        initializationStatus.update(
-                            TableTopSceneViewStatus.Initialized,
-                            onInitializationStatusChanged
+                        val cameraPosition =
+                            anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                        cameraController.transformationMatrix = cameraPosition
+                        tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                            frame.camera,
+                            displayRotation
                         )
-                    },
-                    visualizePlanes = visualizePlanes
-                )
-            }
+                        tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+                    }
+                },
+                onTapWithHitResult = { hit ->
+                    hit?.let { hitResult ->
+                        if (arCoreAnchor == null) {
+                            arCoreAnchor = hitResult.createAnchor()
+                            // stop rendering planes
+                            visualizePlanes = false
+                        }
+                    }
+                },
+                onFirstPlaneDetected = {
+                    initializationStatus.update(
+                        TableTopSceneViewStatus.Initialized,
+                        onInitializationStatusChanged
+                    )
+                },
+                visualizePlanes = visualizePlanes
+            )
         }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
             // Disable interaction, which is not supported in TableTop scenarios
@@ -344,80 +318,3 @@ public fun TableTopSceneView(
         }
     }
 }
-
-/**
- * Checks if the camera permission is granted and requests it if required.
- *
- * @since 200.6.0
- */
-@Composable
-private fun rememberCameraPermission(
-    requestCameraPermissionAutomatically: Boolean,
-    onNotGranted: () -> Unit
-): MutableState<Boolean> {
-    val cameraPermission = Manifest.permission.CAMERA
-    val context = LocalContext.current
-    val isGrantedState = remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                cameraPermission
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    if (!isGrantedState.value) {
-        if (requestCameraPermissionAutomatically) {
-            val requestPermissionLauncher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-                    isGrantedState.value = granted
-                    if (!granted) {
-                        onNotGranted()
-                    }
-                }
-            SideEffect {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        } else {
-            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
-            // after the composition completes, for example, invoking the onInitializationStatusChanged
-            // callback
-            SideEffect {
-                onNotGranted()
-            }
-        }
-    }
-    return isGrantedState
-}
-
-private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
-    suspendCancellableCoroutine { continuation ->
-        ArCoreApk.getInstance().checkAvailabilityAsync(context) {
-            continuation.resume(it)
-        }
-    }
-
-private fun MutableState<TableTopSceneViewStatus>.update(
-    newStatus: TableTopSceneViewStatus,
-    callback: ((TableTopSceneViewStatus) -> Unit)?
-) {
-    this.value = newStatus
-    callback?.invoke(newStatus)
-}
-
-/**
- * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
- *
- * @since 200.6.0
- */
-private val Pose.transformationMatrix: TransformationMatrix
-    get() {
-        return TransformationMatrix.createWithQuaternionAndTranslation(
-            rotationQuaternion[0].toDouble(),
-            rotationQuaternion[1].toDouble(),
-            rotationQuaternion[2].toDouble(),
-            rotationQuaternion[3].toDouble(),
-            translation[0].toDouble(),
-            translation[1].toDouble(),
-            translation[2].toDouble()
-        )
-    }

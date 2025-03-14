@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -41,14 +42,26 @@ internal class DateTimeFieldProperties(
     placeholder: String,
     description: String,
     value: StateFlow<Instant?>,
-    validationErrors : StateFlow<List<ValidationErrorState>>,
+    validationErrors: StateFlow<List<ValidationErrorState>>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
+    fieldType: FieldType,
     val minEpochMillis: Instant?,
     val maxEpochMillis: Instant?,
     val shouldShowTime: Boolean
-) : FieldProperties<Instant?>(label, placeholder, description, value, validationErrors, required, editable, visible)
+) : FieldProperties<Instant?>(
+    label,
+    placeholder,
+    description,
+    value,
+    validationErrors,
+    required,
+    editable,
+    visible,
+    fieldType,
+    null
+)
 
 /**
  * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
@@ -112,7 +125,8 @@ internal class DateTimeFieldState(
                         visible = field.isVisible,
                         minEpochMillis = input.min,
                         maxEpochMillis = input.max,
-                        shouldShowTime = input.includeTime
+                        shouldShowTime = input.includeTime,
+                        fieldType = field.fieldType
                     ),
                     initialValue = list[0] as Instant?,
                     hasValueExpression = field.hasValueExpression,
@@ -156,7 +170,8 @@ internal fun rememberDateTimeFieldState(
             visible = field.isVisible,
             minEpochMillis = minEpochMillis,
             maxEpochMillis = maxEpochMillis,
-            shouldShowTime = shouldShowTime
+            shouldShowTime = shouldShowTime,
+            fieldType = field.fieldType
         ),
         hasValueExpression = field.hasValueExpression,
         scope = scope,
