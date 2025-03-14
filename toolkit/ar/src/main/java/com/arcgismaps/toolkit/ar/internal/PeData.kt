@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
-import android.util.Log
 import com.arcgismaps.geometry.TransformationCatalog
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -22,7 +21,6 @@ internal object PeData {
         }
         return mutex.withLock {
             val destinationPath = File(context.getExternalFilesDir(null), PEDATA_ROOT_DIRECTORY).canonicalPath
-            Log.d("PeData", "Destination path: $destinationPath")
             val result = if (!File(destinationPath, PEDATA_FILE_NAME).exists()) {
                 copyDataToDestination(context, destinationPath)
             } else Result.success(Unit)
