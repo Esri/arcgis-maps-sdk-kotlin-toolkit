@@ -28,7 +28,7 @@ import com.arcgismaps.data.CodedValue
 /**
  * Changes the visual output of the placeholder and label properties of a TextField. Using this
  * transformation, the placeholder is always visible even if empty and puts the label above the
- * TextField as it's default position.
+ * TextField as its default position.
  */
 internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
     
