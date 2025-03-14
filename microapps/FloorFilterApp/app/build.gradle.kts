@@ -56,10 +56,6 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
-    lint {
-        // remove this disable when strings.xml lint error is fixed via localization
-        disable += "MissingTranslation"
-    }
 }
 
 dependencies {

@@ -77,14 +77,6 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        // remove these disables when strings.xml lint is fixed via localization
-        disable += "MissingTranslation"
-        disable += "MissingQuantity"
-        baseline = file("lint-baseline.xml")
-    }
 }
 
 apiValidation {
