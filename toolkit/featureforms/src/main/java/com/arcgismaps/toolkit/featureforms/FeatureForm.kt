@@ -156,7 +156,8 @@ public sealed class FeatureFormEditingEvent {
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after discarding the edits.
      */
-    public data class DiscardedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) : FeatureFormEditingEvent()
+    public data class DiscardedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
+        FeatureFormEditingEvent()
 
     /**
      * Indicates that the edits have been saved successfully on the [featureForm].
@@ -164,7 +165,8 @@ public sealed class FeatureFormEditingEvent {
      * @param featureForm The [FeatureForm] that was edited.
      * @param willNavigate Indicates if the form will navigate to another screen after saving the edits.
      */
-    public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) : FeatureFormEditingEvent()
+    public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
+        FeatureFormEditingEvent()
 }
 
 @Deprecated(
@@ -273,17 +275,16 @@ public fun FeatureForm(
             coroutineScope = scope
         )
     }
-    // Hide the action bar in the form since it is not supported via this API
-    CompositionLocalProvider(LocalActionBarVisibility provides false) {
-        FeatureForm(
-            featureFormState = state,
-            modifier = modifier,
-            onDismiss = null,
-            onBarcodeButtonClick = onBarcodeButtonClick,
-            colorScheme = colorScheme,
-            typography = typography,
-        )
-    }
+    FeatureForm(
+        featureFormState = state,
+        onDismiss = null,
+        modifier = modifier,
+        // Hide the action bar in the form since it is not supported via this API
+        showFormActions = false,
+        onBarcodeButtonClick = onBarcodeButtonClick,
+        colorScheme = colorScheme,
+        typography = typography,
+    )
 }
 
 /**
@@ -346,6 +347,8 @@ public fun FeatureForm(
  * to dismiss the Form. If you want to disable this functionality, simply pass in null and this
  * will hide the close button.
  * @param modifier the modifier to apply to this layout.
+ * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
+ * Default is true.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
@@ -364,6 +367,7 @@ public fun FeatureForm(
     featureFormState: FeatureFormState,
     onDismiss: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    showFormActions: Boolean = true,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
@@ -376,7 +380,6 @@ public fun FeatureForm(
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
-    val showActionBar = LocalActionBarVisibility.current
 
     // A function that provides the action to save edits on the form
     suspend fun saveForm(form: FeatureForm, willNavigate: Boolean): Result<Unit> {
@@ -485,7 +488,7 @@ public fun FeatureForm(
                         FeatureFormTitle(
                             title = title,
                             subTitle = featureForm.description,
-                            hasEdits = if (showActionBar) hasEdits else false,
+                            hasEdits = if (showFormActions) hasEdits else false,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -548,7 +551,7 @@ public fun FeatureForm(
                             title = filterResult?.filter?.title
                                 ?: stringResource(R.string.none_selected),
                             subTitle = title,
-                            hasEdits = if (showActionBar) hasEdits else false,
+                            hasEdits = if (showFormActions) hasEdits else false,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -613,7 +616,7 @@ public fun FeatureForm(
                         FeatureFormTitle(
                             title = group?.name ?: stringResource(R.string.none_selected),
                             subTitle = filter.filter.title,
-                            hasEdits = if (showActionBar) hasEdits else false,
+                            hasEdits = if (showFormActions) hasEdits else false,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -921,13 +924,6 @@ internal fun rememberNavController(vararg inputs: Any): NavHostController {
         createNavController(context)
     }
 }
-
-/**
- * A composition local that determines if the action bar is visible in the form. This is used to
- * internally hide the action bar in the form.
- */
-internal val LocalActionBarVisibility: ProvidableCompositionLocal<Boolean> =
-    staticCompositionLocalOf { true }
 
 /**
  * Navigation routes for the form.
