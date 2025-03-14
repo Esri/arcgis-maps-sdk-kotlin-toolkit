@@ -22,7 +22,10 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +59,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
+import com.arcgismaps.toolkit.ar.internal.PeData
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
@@ -64,6 +68,7 @@ import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -133,6 +138,17 @@ public fun WorldScaleSceneView(
     )
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
+
+    val pedataConfigured by rememberPeDataConfigured(
+        onFailed = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
+    // If PE data could not be configured, we can't position the scene camera accurately
+    if (!pedataConfigured) return@WorldScaleSceneView
 
     val arSessionWrapper =
         rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
@@ -234,4 +250,23 @@ public fun WorldScaleSceneView(
             }
         )
     }
+}
+
+@Composable
+private fun rememberPeDataConfigured(
+    onFailed: (Throwable) -> Unit
+): State<Boolean> {
+    val context = LocalContext.current
+    val peDataConfigured = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        launch(Dispatchers.IO) {
+            PeData.configure(context).onFailure {
+                onFailed(it)
+            }.onSuccess {
+                peDataConfigured.value = true
+            }
+        }
+    }
+    return peDataConfigured
 }
