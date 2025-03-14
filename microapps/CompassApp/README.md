@@ -9,4 +9,4 @@ This micro-app demonstrates the use of the `Compass` toolkit component which dis
 The application loads with the compass set to auto hide. Rotate the map to see the compass point to North. 
 To reset the orientation to North, tap on the compass icon.
 
-For more information on the `Compass` component and how it works, see it's [Readme](../../toolkit/compass/README.md).
+For more information on the `Compass` component and how it works, see its [Readme](../../toolkit/compass/README.md).

@@ -1,6 +1,6 @@
 # Compass
 The Compass displays the current viewpoint rotation of a MapView by displaying a compass icon that points north.
-The Compass supports resetting the rotation by tapping the icon, which resets the map to it's default 0 degree orientation.
+The Compass supports resetting the rotation by tapping the icon, which resets the map to its default 0 degree orientation.
 
 By default the Compass is set to auto hide, hence it will only appear when the map is rotated and is hidden when the current map orientation is 0 degrees. This behavior is configurable.
 
