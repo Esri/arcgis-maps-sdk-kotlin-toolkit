@@ -167,33 +167,6 @@ public sealed class FeatureFormEditingEvent {
     public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) : FeatureFormEditingEvent()
 }
 
-/**
- * A composition local that determines if the action bar is visible in the form. This is used to
- * internally hide the action bar in the form.
- */
-internal val LocalActionBarVisibility: ProvidableCompositionLocal<Boolean> =
-    staticCompositionLocalOf { true }
-
-@Serializable
-internal sealed class NavigationRoute {
-
-    @Serializable
-    data object FormView : NavigationRoute()
-
-    @Serializable
-    data class UNFilterView(
-        val stateId: Int,
-        val selectedFilterIndex: Int,
-    ) : NavigationRoute()
-
-    @Serializable
-    data class UNAssociationsView(
-        val stateId: Int,
-        val selectedFilterIndex: Int,
-        val selectedGroupIndex: Int
-    ) : NavigationRoute()
-}
-
 @Deprecated(
     message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
     level = DeprecationLevel.HIDDEN
@@ -947,6 +920,45 @@ internal fun rememberNavController(vararg inputs: Any): NavHostController {
     )) {
         createNavController(context)
     }
+}
+
+/**
+ * A composition local that determines if the action bar is visible in the form. This is used to
+ * internally hide the action bar in the form.
+ */
+internal val LocalActionBarVisibility: ProvidableCompositionLocal<Boolean> =
+    staticCompositionLocalOf { true }
+
+/**
+ * Navigation routes for the form.
+ */
+@Serializable
+internal sealed class NavigationRoute {
+
+    /**
+     * Represents the [FeatureForm] view.
+     */
+    @Serializable
+    data object FormView : NavigationRoute()
+
+    /**
+     * Represents a view for the [UtilityAssociationFilter].
+     */
+    @Serializable
+    data class UNFilterView(
+        val stateId: Int,
+        val selectedFilterIndex: Int,
+    ) : NavigationRoute()
+
+    /**
+     * Represents a view for the [UtilityAssociation]s.
+     */
+    @Serializable
+    data class UNAssociationsView(
+        val stateId: Int,
+        val selectedFilterIndex: Int,
+        val selectedGroupIndex: Int
+    ) : NavigationRoute()
 }
 
 private fun createNavController(context: Context): NavHostController {
