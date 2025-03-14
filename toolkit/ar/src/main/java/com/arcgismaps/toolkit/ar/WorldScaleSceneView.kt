@@ -174,53 +174,8 @@ public fun WorldScaleSceneView(
             onDoubleTap = onDoubleTap,
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,
-
-            sceneViewInteractionOptions = remember {
-                // Disable interaction, which is not supported in WorldScale scenarios
-                SceneViewInteractionOptions().apply {
-                    isEnabled = false
-                }
-            },
-            viewLabelProperties = viewLabelProperties,
-            selectionProperties = selectionProperties,
-            isAttributionBarVisible = isAttributionBarVisible,
-            onAttributionTextChanged = onAttributionTextChanged,
-            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = locationTracker.cameraController,
-            analysisOverlays = analysisOverlays,
-            imageOverlays = imageOverlays,
-            atmosphereEffect = AtmosphereEffect.None,
-            timeExtent = timeExtent,
-            onTimeExtentChanged = onTimeExtentChanged,
-            spaceEffect = SpaceEffect.Transparent,
-            sunTime = sunTime,
-            sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor,
-            onNavigationChanged = onNavigationChanged,
-            onSpatialReferenceChanged = onSpatialReferenceChanged,
-            onLayerViewStateChanged = onLayerViewStateChanged,
-            onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-            onRotate = onRotate,
-            onScale = onScale,
-            onUp = onUp,
-            onDown = onDown,
-            onSingleTapConfirmed = onSingleTapConfirmed,
-            onDoubleTap = onDoubleTap,
-            onLongPress = onLongPress,
-            onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
-            content = {
-                content?.let { content ->
-                    val worldScaleSceneViewScope = remember {
-                        WorldScaleSceneViewScope(
-                            sceneViewScope = this,
-                            calibrationState = calibrationState
-                        )
-                    }
-                    content.invoke(worldScaleSceneViewScope)
-                }
-            }
+            content = content
         )
         WorldScaleTrackingMode.GeoTracking -> TODO()
     }
