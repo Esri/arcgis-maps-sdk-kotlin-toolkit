@@ -60,7 +60,7 @@ import com.arcgismaps.toolkit.arworldscaleapp.R
 @Composable
 fun MainScreen() {
     val arcGISScene = remember {
-        val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
+        val basemap = Basemap(BasemapStyle.ArcGISStreets).apply {
             // Clear the base layer so we only see the street and building outlines and labels
             baseLayers.clear()
         }
@@ -75,11 +75,13 @@ fun MainScreen() {
             // is calculated with elevation
             baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
             baseSurface.backgroundGrid.isVisible = false
-            baseSurface.opacity = 0.3f
+            baseSurface.opacity = 0.5f
             // add the Esri 3D Buildings layer
-            operationalLayers.add(
-                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
-            )
+//            operationalLayers.add(
+//                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282").apply {
+//                    opacity = 0.5f
+//                }
+//            )
         }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
