@@ -257,13 +257,13 @@ private fun AssociationItem(
 }
 
 /**
- * Returns the target element of the association that is not the provided [ArcGISFeature].
+ * Returns the target [UtilityElement] of the association that equal to the provided [ArcGISFeature].
  */
 internal fun UtilityAssociation.getTargetElement(arcGISFeature: ArcGISFeature): UtilityElement {
     return if (arcGISFeature.globalId == this.fromElement.globalId) {
-        this.toElement
-    } else {
         this.fromElement
+    } else {
+        this.toElement
     }
 }
 

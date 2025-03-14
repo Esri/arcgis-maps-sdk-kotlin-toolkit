@@ -307,10 +307,11 @@ public fun FeatureForm(
  * - [TextFormElement]
  * - [UtilityAssociationsFormElement]
  *
- * If there are any edits on the current [FeatureForm] as indicated by [FeatureForm.hasEdits], an
- * action bar is displayed at the top of the form with save and discard buttons. The save button
- * will save the edits and the discard button will discard the edits. The save or discard actions
- * will trigger the [onEditingEvent] callback with the appropriate event.
+ * If there are any edits on the current [FeatureForm] as indicated by [FeatureForm.hasEdits] and
+ * the [showFormActions] is true, an action bar is displayed at the top of the form with save and
+ * discard buttons. The save button will save the edits using [FeatureForm.finishEditing] and the
+ * discard button will discard the edits using [FeatureForm.discardEdits]. The save or discard
+ * actions will also trigger the [onEditingEvent] callback with the appropriate event type.
  *
  * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
  * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
