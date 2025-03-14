@@ -22,7 +22,6 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.core.snap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -35,27 +34,20 @@ import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.data.ServiceFeatureTable
-import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormElement
-import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
-import com.arcgismaps.mapping.layers.SubtypeSublayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import com.arcgismaps.utilitynetworks.UtilityElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -124,14 +116,6 @@ data class Error(
     val details: String,
     val subTitle: String = ""
 )
-
-/**
- * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
- * the actual message string use [FeatureFormValidationException.getMessage] in the composition.
- */
-data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException) {
-    override fun toString(): String = "$fieldName: ${error.getMessage()}"
-}
 
 /**
  * Base class for context aware AndroidViewModel. This class must have only a single application
@@ -450,39 +434,6 @@ class MapViewModel @Inject constructor(
             )
         }
     }
-
-    /**
-     * Filters the validation errors in the [featureForm] to show only the errors for the editable
-     * fields and fields with value expressions.
-     */
-    private fun filterErrors(featureForm: FeatureForm): List<ErrorInfo> = buildList {
-        featureForm.validationErrors.value.forEach { entry ->
-            entry.value.forEach { error ->
-                featureForm.elements.getFieldFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value || formElement.hasValueExpression) {
-                        add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
- * null is returned.
- */
-fun List<FormElement>.getFieldFormElement(fieldName: String): FieldFormElement? {
-    for (element in this) {
-        when (element) {
-            is FieldFormElement -> if (element.fieldName == fieldName) return element
-            is GroupFormElement -> element.elements.getFieldFormElement(fieldName)
-                ?.let { return it }
-
-            else -> continue
-        }
-    }
-    return null
 }
 
 /**
@@ -512,17 +463,6 @@ fun List<IdentifyLayerResult>.getAllFeatures(): Map<String, List<ArcGISFeature>>
  */
 fun Map<String, List<ArcGISFeature>>.getFeatureCount(): Int {
     return values.sumOf { it.size }
-}
-
-/**
- * Returns the additional message if present or the message of the exception. If the exception is
- * a [FeatureFormValidationException.RequiredException] then the message is "Field is required".
- */
-fun FeatureFormValidationException.getMessage(): String {
-    return when (this) {
-        is FeatureFormValidationException.RequiredException -> "Field is required"
-        else -> message
-    }
 }
 
 /**
