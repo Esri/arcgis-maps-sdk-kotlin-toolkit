@@ -60,7 +60,8 @@ class PeDataTests {
     /**
      * Given a PE data file that is part of the ar library assets,
      * When [PeData.configure] is called,
-     * Then the PE data file should be copied to the external files directory.
+     * Then the PE data file should be copied to the external files directory and
+     * its path set on [TransformationCatalog.projectionEngineDirectory].
      *
      * When [PeData.configure] is called again,
      * Then the PE data file should not be copied again, but [PeData.configure] should return success.
