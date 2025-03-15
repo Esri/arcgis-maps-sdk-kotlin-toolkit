@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.geometry.TransformationCatalog
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
@@ -252,6 +253,12 @@ public fun WorldScaleSceneView(
     }
 }
 
+/**
+ * Deploys the PE data file to the device's external files directory and configures
+ * [TransformationCatalog.projectionEngineDirectory] with its path.
+ *
+ * @since 200.7.0
+ */
 @Composable
 private fun rememberPeDataConfigured(
     onFailed: (Throwable) -> Unit
