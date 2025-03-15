@@ -33,10 +33,10 @@ import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
 import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -73,11 +73,9 @@ internal class WorldTrackingCameraController(
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
     private val worldScaleHeadingProvider : WorldScaleHeadingProvider
-    private val locationDataSource = CustomLocationDataSource {
-        worldScaleNmeaLocationProvider
-    }
+    private val locationDataSource = SystemLocationDataSource()
+
     val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
     }
@@ -107,18 +105,21 @@ internal class WorldTrackingCameraController(
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location, heading: Float) =
-        cameraController.setOriginCamera(
-            Camera(
-                location.position.y,
-                location.position.x,
-                if (location.position.hasZ) location.position.z
-                    ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                heading + calibrationState.totalHeadingOffset,
-                90.0,
-                0.0
+    private fun updateCamera(location: Location, heading: Float) {
+        GeometryEngine.projectOrNull(location.position, CAMERA_SR)?.let { projectedLocation ->
+            cameraController.setOriginCamera(
+                Camera(
+                    projectedLocation.y,
+                    projectedLocation.x,
+                    if (projectedLocation.hasZ) projectedLocation.z
+                        ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
+                    heading + calibrationState.totalHeadingOffset,
+                    90.0,
+                    0.0
+                )
             )
-        )
+        }
+    }
 
     /**
      * Rotates the origin position of the camera by the given heading offset.
@@ -153,7 +154,6 @@ internal class WorldTrackingCameraController(
         scope.launch {
             locationDataSource.stop()
             worldScaleHeadingProvider.stop()
-            worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
         super.onDestroy(owner)
@@ -163,7 +163,6 @@ internal class WorldTrackingCameraController(
         scope.launch {
             locationDataSource.stop()
             worldScaleHeadingProvider.stop()
-            worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
     }
@@ -171,7 +170,6 @@ internal class WorldTrackingCameraController(
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         scope.launch {
-            worldScaleNmeaLocationProvider.start()
             worldScaleHeadingProvider.start()
             locationDataSource.start()
         }
@@ -200,9 +198,7 @@ internal class WorldTrackingCameraController(
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
                     onResetOriginCamera()
-                    if (!hasSetOriginCamera) {
-                        hasSetOriginCamera = true
-                    }
+                    hasSetOriginCamera = true
                 }
         }
         scope.launch {
@@ -215,6 +211,12 @@ internal class WorldTrackingCameraController(
                 updateCameraElevation(it)
             }
         }
+    }
+
+    companion object {
+        const val WKID_WGS84 = 4326
+        const val WKID_EGM96 = 5773
+        val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96)
     }
 }
 
@@ -282,16 +284,14 @@ internal fun shouldUpdateCamera(
 
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
-    if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
 
     if (!measureDistance) return true
 
-    val currentOriginCameraPosition =
-        GeometryEngine.projectOrNull(currentOriginCamera.location, SpatialReference(4326, 5773))
+    val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldTrackingCameraController.CAMERA_SR)
             ?: return false
     val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentOriginCameraPosition,
-        location.position,
+        currentOriginCamera.location,
+        projectedLocation,
         distanceUnit = LinearUnit.meters,
         azimuthUnit = null,
         curveType = GeodeticCurveType.Geodesic
