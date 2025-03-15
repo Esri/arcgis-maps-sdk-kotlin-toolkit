@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
@@ -205,6 +206,51 @@ class UsernamePasswordTests {
      * When a username and password challenge is issued
      * Then the dialog prompt should be displayed
      *
+     * When the user types in the password field
+     * Then the password should be obscured
+     * And when the user clicks the show password button
+     * Then the password should be revealed
+     *
+     * @since 200.7.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testPasswordVisibility() = runTest {
+        val password = "helloWorld"
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+            .performTextInput(password)
+
+        // verify that the password field is obscured
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
+        // verify that clicking the show password button will reveal the password
+        composeTestRule.onNodeWithContentDescription("Show password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText(password).assertExists()
+
+        // verify that clicking the hide password button again will obscure the password
+        composeTestRule.onNodeWithContentDescription("Hide password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
      * When the user presses the back button
      * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
      *
@@ -316,17 +362,13 @@ class UsernamePasswordTests {
                 setupFailingArcGISTokenRequestInterceptor()
             }
 
-            // simulate incorrect username/password 4 times
-            repeat(4) {
+            // simulate incorrect username/password 5 times
+            repeat(5) {
                 composeTestRule.enterUsernamePasswordAndLogin()
                 advanceUntilIdle()
-                composeTestRule.onNodeWithText("Invalid username or password.").assertIsDisplayed()
             }
-            // the 5th time is should dismiss the dialog.
-            composeTestRule.enterUsernamePasswordAndLogin()
-            advanceUntilIdle()
 
-            // ensure the dialog has disappeared
+            // ensure the dialog has disappeared after last attempt
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 

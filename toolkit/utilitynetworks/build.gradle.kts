@@ -94,7 +94,7 @@ apiValidation {
         "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$AddStartingPointScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",
