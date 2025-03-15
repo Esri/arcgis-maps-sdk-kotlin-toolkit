@@ -43,10 +43,16 @@ class PeDataTests {
         assertThat(PeData.configure(context).isSuccess).isTrue()
         assertThat(gridFile.exists()).isTrue()
         assertThat(gridFile.isFile).isTrue()
+
+        // call configure again, to check that it returns success also when PE data
+        // have already been configured
+        assertThat(PeData.configure(context).isSuccess).isTrue()
+        assertThat(gridFile.exists()).isTrue()
+        assertThat(gridFile.isFile).isTrue()
     }
 
     @Test
-    fun pEDataAlreadySet() = runTest {
+    fun configurePeDataPathAlreadySet() = runTest {
         assertThat(TransformationCatalog.projectionEngineDirectory).isEmpty()
         assertThat(gridFile.exists()).isFalse()
         val somePath = InstrumentationRegistry.getInstrumentation().context.getExternalFilesDir(null)?.canonicalPath
