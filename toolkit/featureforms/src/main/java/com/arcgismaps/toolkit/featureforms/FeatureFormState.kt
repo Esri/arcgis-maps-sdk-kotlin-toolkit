@@ -22,7 +22,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
-import androidx.navigation.NavController
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -94,8 +93,6 @@ public class FeatureFormState private constructor(
 
     private lateinit var coroutineScope: CoroutineScope
 
-    private var navController: NavController? = null
-
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
     private val _evaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
@@ -154,52 +151,35 @@ public class FeatureFormState private constructor(
     }
 
     /**
-     * Sets the [NavController] to use for navigation between different [FeatureForm]s. Set this
-     * value to null when the Composition is destroyed.
+     * Sets the [FeatureForm] associated with the provided [feature] to be the [activeFeatureForm]
+     * and adds the form to the stack.
+     *
+     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
-    internal fun setNavController(navController: NavController?) {
-        this.navController = navController
+    internal fun setActiveFeatureForm(feature: ArcGISFeature) {
+        val form = FeatureForm(feature)
+        val states = createStates(
+            form = form,
+            elements = form.elements,
+            scope = coroutineScope
+        )
+        store.addLast(FormStateData(form, states))
+        _activeFeatureForm.value = form
+        evaluateExpressions()
     }
 
     /**
-     * Navigates to the [FeatureForm] associated with the provided [feature].
-     */
-    internal fun navigateTo(feature : ArcGISFeature) {
-        navController?.let { controller ->
-            val form = FeatureForm(feature)
-            val states = createStates(
-                form = form,
-                elements = form.elements,
-                scope = coroutineScope
-            )
-            store.addLast(FormStateData(form, states))
-            _activeFeatureForm.value = form
-            controller.navigate(NavigationRoute.FormView)
-            evaluateExpressions()
-        }
-    }
-
-    /**
-     * Navigates back to the previous [FeatureForm] if there is one.
+     * Pops the current [FeatureForm] from the stack and sets the previous form as the [activeFeatureForm].
      */
     internal fun popBackStack(): Boolean {
-        return navController?.let { controller ->
-            if (controller.currentBackStackEntry == null || store.size <= 1) {
-                return false
-            }
+        return if (store.size <= 1) {
+            false
+        } else {
             store.removeLast()
-            controller.popBackStack()
             _activeFeatureForm.value = getActiveStateData().featureForm
             evaluateExpressions()
             true
-        } ?: false
-    }
-
-    /**
-     * Returns true if there is a back stack entry in the [NavController].
-     */
-    internal fun hasBackStack(): Boolean {
-        return navController?.previousBackStackEntry != null
+        }
     }
 
     /**
@@ -246,12 +226,12 @@ internal fun createStates(
     form: FeatureForm,
     elements: List<FormElement>,
     scope: CoroutineScope,
-    ignoreList : Set<Class<out FormElement>> = emptySet(),
+    ignoreList: Set<Class<out FormElement>> = emptySet(),
 ): FormStateCollection {
     val states = MutableFormStateCollection()
     // Filter out elements that are part of the ignore list.
-    val filteredElements = elements.filter {
-        element -> !ignoreList.contains(element::class.java)
+    val filteredElements = elements.filter { element ->
+        !ignoreList.contains(element::class.java)
     }
     filteredElements.forEach { element ->
         when (element) {

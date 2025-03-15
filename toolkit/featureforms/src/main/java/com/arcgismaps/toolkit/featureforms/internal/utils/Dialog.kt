@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import androidx.navigation.NavHostController
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
@@ -164,8 +165,8 @@ internal sealed class DialogType {
     data class BarcodeScanner(val stateId: Int) : DialogType()
 
     data class SaveFeatureDialog(
-        val onSave: suspend () -> Unit,
-        val onDiscard: () -> Unit
+        val onSave: suspend (NavHostController) -> Unit,
+        val onDiscard: (NavHostController) -> Unit
     ) : DialogType()
 
     data class ValidationErrorsDialog(
@@ -179,7 +180,7 @@ internal sealed class DialogType {
  * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog(states: FormStateCollection) {
+internal fun FeatureFormDialog(states: FormStateCollection, navHostController: NavHostController) {
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
@@ -369,12 +370,12 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onSave = {
                     dialogRequester.dismissDialog()
                     scope.launch {
-                        onSave()
+                        onSave(navHostController)
                     }
                 },
                 onDiscard = {
                     dialogRequester.dismissDialog()
-                    onDiscard()
+                    onDiscard(navHostController)
                 }
             )
         }

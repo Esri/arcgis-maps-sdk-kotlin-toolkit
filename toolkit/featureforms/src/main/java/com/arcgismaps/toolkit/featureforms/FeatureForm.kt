@@ -54,11 +54,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -66,7 +63,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -376,7 +372,6 @@ public fun FeatureForm(
 ) {
     val state by rememberUpdatedState(featureFormState)
     val navController = rememberNavController(state)
-    state.setNavController(navController)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
@@ -426,11 +421,9 @@ public fun FeatureForm(
             // Show a dialog to save or discard edits before dismissing the form, if there are edits
             val dialog = DialogType.SaveFeatureDialog(
                 onSave = {
-                    scope.launch {
-                        saveForm(form, false).onSuccess {
-                            // Dismiss the form after saving the edits
-                            onDismiss()
-                        }
+                    saveForm(form, false).onSuccess {
+                        // Dismiss the form after saving the edits
+                        onDismiss()
                     }
                 },
                 onDiscard = {
@@ -460,26 +453,42 @@ public fun FeatureForm(
                 val formData = remember(backStackEntry) { state.getActiveStateData() }
                 val featureForm = formData.featureForm
                 val states = formData.stateCollection
-                val hasBackStack = remember(featureForm) { state.hasBackStack() }
+                val hasBackStack = remember(featureForm, navController) {
+                    navController.previousBackStackEntry != null
+                }
                 val hasEdits by featureForm.hasEdits.collectAsState()
                 val onBackAction: () -> Unit = {
                     if (hasEdits) {
                         val dialog = DialogType.SaveFeatureDialog(
-                            onSave = {
-                                scope.launch {
-                                    saveForm(featureForm, hasBackStack).onSuccess {
-                                        state.popBackStack()
+                            onSave = { controller ->
+                                saveForm(featureForm, hasBackStack).onSuccess {
+                                    if (hasBackStack) {
+                                        if (state.popBackStack()) {
+                                            // pop the stack on the NavController after setting
+                                            // the active feature form on the state object
+                                            controller.popBackStack()
+                                        }
                                     }
                                 }
                             },
-                            onDiscard = {
+                            onDiscard = { controller ->
                                 discardForm(featureForm, hasBackStack)
-                                state.popBackStack()
+                                if (hasBackStack) {
+                                    if (state.popBackStack()) {
+                                        // pop the stack on the NavController after setting
+                                        // the active feature form on the state object
+                                        controller.popBackStack()
+                                    }
+                                }
                             },
                         )
                         dialogRequester.requestDialog(dialog)
                     } else {
-                        state.popBackStack()
+                        if (navController.currentBackStackEntry != null) {
+                            if (state.popBackStack()) {
+                                navController.popBackStack()
+                            }
+                        }
                     }
                 }
 
@@ -528,7 +537,7 @@ public fun FeatureForm(
                 BackHandler(hasBackStack) {
                     onBackAction()
                 }
-                FeatureFormDialog(states)
+                FeatureFormDialog(states, navController)
             }
 
             composable<NavigationRoute.UNFilterView> { backStackEntry ->
@@ -642,22 +651,28 @@ public fun FeatureForm(
                                 onItemClick = { info ->
                                     if (hasEdits) {
                                         val dialog = DialogType.SaveFeatureDialog(
-                                            onSave = {
-                                                saveForm(
-                                                    featureForm,
-                                                    true
-                                                ).onSuccess {
-                                                    state.navigateTo(info.associatedFeature)
+                                            onSave = { controller ->
+                                                saveForm(featureForm, true).onSuccess {
+                                                    state.setActiveFeatureForm(info.associatedFeature)
+                                                    // Navigate to the next form after setting
+                                                    // the active feature form on the state object
+                                                    controller.navigate(NavigationRoute.FormView)
                                                 }
                                             },
-                                            onDiscard = {
+                                            onDiscard = { controller ->
                                                 discardForm(featureForm, true)
-                                                state.navigateTo(info.associatedFeature)
+                                                state.setActiveFeatureForm(info.associatedFeature)
+                                                // Navigate to the next form after setting
+                                                // the active feature form on the state object
+                                                controller.navigate(NavigationRoute.FormView)
                                             },
                                         )
                                         dialogRequester.requestDialog(dialog)
                                     } else {
-                                        state.navigateTo(info.associatedFeature)
+                                        state.setActiveFeatureForm(info.associatedFeature)
+                                        // Navigate to the next form after setting
+                                        // the active feature form on the state object
+                                        navController.navigate(NavigationRoute.FormView)
                                     }
                                 },
                                 modifier = Modifier.padding(16.dp)
@@ -665,13 +680,8 @@ public fun FeatureForm(
                         }
                     }
                 )
-                FeatureFormDialog(states)
+                FeatureFormDialog(states, navController)
             }
-        }
-    }
-    DisposableEffect(state) {
-        onDispose {
-            state.setNavController(null)
         }
     }
 }

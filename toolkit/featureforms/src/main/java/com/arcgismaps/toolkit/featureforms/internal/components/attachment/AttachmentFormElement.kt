@@ -69,6 +69,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -171,6 +172,7 @@ private fun Carousel(
     var initialSize by remember(state) {
         mutableIntStateOf(attachments.size)
     }
+    val scope = rememberCoroutineScope()
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -181,7 +183,14 @@ private fun Carousel(
                 height = 4.dp,
                 offsetY = 5.dp,
                 autoHide = false
-            ),
+            )
+            .onGloballyPositioned {
+                // Scroll to the start of the list when a new attachment is added
+                if (attachments.size > initialSize && attachments.isNotEmpty()) {
+                    scope.launch { state.scrollToItem(0) }
+                }
+                initialSize = attachments.size
+            },
         state = state,
     ) {
         items(attachments, key = {
@@ -189,13 +198,6 @@ private fun Carousel(
         }) { attachment ->
             AttachmentTile(state = attachment, modifier = Modifier.padding(end = 15.dp))
         }
-    }
-    LaunchedEffect(attachments.size) {
-        // Scroll to the start of the list when a new attachment is added
-        if (attachments.size > initialSize) {
-            state.scrollToItem(0)
-        }
-        initialSize = attachments.size
     }
 }
 
