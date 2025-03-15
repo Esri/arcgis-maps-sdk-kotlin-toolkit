@@ -47,7 +47,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementS
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -150,7 +149,6 @@ internal class AttachmentElementState(
         state.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
         scope.launch {
-            delay(100)
             evaluateExpressions()
         }
         return Result.success(Unit)
