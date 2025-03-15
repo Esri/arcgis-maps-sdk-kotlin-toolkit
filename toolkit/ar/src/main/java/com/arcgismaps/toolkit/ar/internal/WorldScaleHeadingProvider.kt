@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import java.util.concurrent.Executor
 
 /**
- * Provides headings for [WorldScaleNmeaLocationProvider] using the Fused Orientation Provider API.
+ * Provides headings for [WorldTrackingCameraController] using the Fused Orientation Provider API.
  *
  * @param context the context the app is running in
  *
