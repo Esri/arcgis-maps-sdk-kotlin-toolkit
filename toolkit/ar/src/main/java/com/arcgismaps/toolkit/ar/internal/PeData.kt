@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
+import android.content.res.AssetManager
 import com.arcgismaps.geometry.TransformationCatalog
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -73,14 +74,14 @@ internal object PeData {
      * Copies the PE data file from the assets to [destinationPath].
      */
     private fun copyDataToDestination(context: Context, destinationPath: String): Result<Unit> = runCatching {
-        context.assets.use { assetManager ->
-            assetManager.open("pedata/$PEDATA_FILE_NAME").use { inputStream ->
+        context.assets?.let { assetManager ->
+            assetManager.open("pedata/$PEDATA_FILE_NAME", AssetManager.ACCESS_STREAMING).use { inputStream ->
                 val outFile = File(destinationPath, PEDATA_FILE_NAME)
                 outFile.parentFile?.mkdirs()
                 FileOutputStream(outFile).use { outputStream ->
                     inputStream.copyTo(outputStream)
                 }
             }
-        }
+        } ?: throw IllegalStateException("Failed to obtain AssetManager")
     }
 }
