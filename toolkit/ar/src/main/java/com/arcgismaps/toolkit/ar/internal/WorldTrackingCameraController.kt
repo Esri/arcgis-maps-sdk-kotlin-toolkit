@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.location.LocationManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -74,7 +75,7 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleHeadingProvider : WorldScaleHeadingProvider
-    private val locationDataSource = SystemLocationDataSource()
+    private val locationDataSource = SystemLocationDataSource(userProvider = LocationManager.GPS_PROVIDER)
 
     val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
