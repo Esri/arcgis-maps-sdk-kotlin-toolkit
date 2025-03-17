@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -118,12 +119,7 @@ internal fun UtilityAssociations(
     onItemClick: (UtilityAssociationResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val lazyListState = rememberSaveable(
-        inputs = arrayOf(),
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val lazyListState = rememberLazyListState()
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
