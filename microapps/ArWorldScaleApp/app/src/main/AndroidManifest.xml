@@ -59,7 +59,7 @@
         <meta-data android:name="com.google.ar.core" android:value="required" />
         <meta-data
             android:name="com.google.android.ar.API_KEY"
-            android:value="<Insert API Key>"/>
+            android:value="AIzaSyAywUB6fONMRJR0nZpBR0cQ5vPQwDZXpIw"/>
     </application>
 
 </manifest>
