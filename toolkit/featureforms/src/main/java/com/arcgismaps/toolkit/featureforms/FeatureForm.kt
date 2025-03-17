@@ -740,7 +740,7 @@ private fun FeatureFormTitle(
                     )
                 }
             }
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
@@ -748,6 +748,7 @@ private fun FeatureFormTitle(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (hasEdits) {
                         Spacer(Modifier.width(8.dp))
@@ -768,7 +769,6 @@ private fun FeatureFormTitle(
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
             if (onClose != null) {
                 IconButton(onClick = onClose) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
