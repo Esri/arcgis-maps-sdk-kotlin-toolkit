@@ -33,6 +33,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
@@ -81,6 +82,10 @@ internal class WorldTrackingCameraController(
         this.clippingDistance = clippingDistance
     }
 
+    // keep track of the current location of the camera separately since Camera does not preserve
+    // the vertical WKID of the location, which we need for calculating geodetic distances in shouldUpdateCamera()
+    private var currentCameraLocation: Point? = null
+
     init {
         val applicationContext = ArcGISEnvironment.applicationContext
         require(applicationContext != null)
@@ -108,6 +113,9 @@ internal class WorldTrackingCameraController(
      */
     private fun updateCamera(location: Location, heading: Float) {
         GeometryEngine.projectOrNull(location.position, CAMERA_SR)?.let { projectedLocation ->
+            // cache the location of the origin camera for later use
+            currentCameraLocation = projectedLocation
+
             cameraController.setOriginCamera(
                 Camera(
                     projectedLocation.y,
@@ -189,8 +197,7 @@ internal class WorldTrackingCameraController(
                 .filter { location ->
                     shouldUpdateCamera(
                         location,
-                        cameraController.originCamera.value,
-                        measureDistance = hasSetOriginCamera // only filter by distance if the origin camera has been set
+                        currentCameraLocation
                     )
                 }
                 .collect { location ->
@@ -216,8 +223,9 @@ internal class WorldTrackingCameraController(
 
     companion object {
         const val WKID_WGS84 = 4326
-        const val WKID_EGM96 = 5773
-        val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96)
+        const val WKID_WGS84_VERTICAL = 115700
+        const val WKID_EGM96_VERTICAL = 5773
+        val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
     }
 }
 
@@ -256,17 +264,18 @@ internal fun rememberWorldTrackingCameraController(
 }
 
 /**
- * Returns false if the location timestamp is older than 10 seconds,
+ * Evaluates a location to determine if the camera should be updated.
+ *
+ * Returns false if the location timestamp is older than a threshold,
  * if the horizontal or vertical accuracy is negative,
- * or if the distance between the location and the current camera is less than 2 meters.
+ * or if the distance between the location and the current camera is less than a threshold.
  * Otherwise, returns true.
  *
  * @since 200.7.0
  */
 internal fun shouldUpdateCamera(
     location: Location,
-    currentOriginCamera: Camera,
-    measureDistance: Boolean = true
+    currentCameraLocation: Point?
 ): Boolean {
     // filter out old locations
     if (Instant.now()
@@ -286,12 +295,14 @@ internal fun shouldUpdateCamera(
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
 
-    if (!measureDistance) return true
+    // if we don't have a location of the current camera, don't measure the distance
+    if (currentCameraLocation == null) return true
 
     val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldTrackingCameraController.CAMERA_SR)
             ?: return false
+
     val distance = GeometryEngine.distanceGeodeticOrNull(
-        currentOriginCamera.location,
+        currentCameraLocation,
         projectedLocation,
         distanceUnit = LinearUnit.meters,
         azimuthUnit = null,
