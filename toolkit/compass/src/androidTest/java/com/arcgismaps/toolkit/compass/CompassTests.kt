@@ -69,7 +69,7 @@ class CompassTests {
     /**
      * Given a [Compass]
      * When it is tapped
-     * Then it's onClick event is called
+     * Then its onClick event is called
      */
     @Test
     fun testCompassOnClick() {
