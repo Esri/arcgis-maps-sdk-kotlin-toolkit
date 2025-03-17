@@ -266,6 +266,9 @@ private fun rememberPeDataConfigured(
     val context = LocalContext.current
     val peDataConfigured = remember { mutableStateOf(false) }
 
+    // if PE data is already configured do nothing
+    if (peDataConfigured.value) return peDataConfigured
+
     LaunchedEffect(Unit) {
         launch(Dispatchers.IO) {
             PeData.configure(context).onFailure {
