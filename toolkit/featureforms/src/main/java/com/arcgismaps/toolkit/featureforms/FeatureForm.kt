@@ -95,6 +95,7 @@ import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
@@ -406,12 +407,18 @@ public fun FeatureForm(
     }
 
     // A function that provides the action to discard edits on the form
-    fun discardForm(form: FeatureForm, willNavigate: Boolean) {
-        form.discardEdits()
+    fun discardForm(willNavigate: Boolean) {
+        val formData = state.getActiveStateData()
+        formData.featureForm.discardEdits()
+        formData.stateCollection.forEach {
+            if (it.state is AttachmentElementState) {
+                (it.state as AttachmentElementState).refreshAttachments()
+            }
+        }
         // run expressions evaluation
         state.evaluateExpressions()
         // Send a discarded edits event
-        val event = FeatureFormEditingEvent.DiscardedEdits(form, willNavigate)
+        val event = FeatureFormEditingEvent.DiscardedEdits(formData.featureForm, willNavigate)
         onEditingEvent(event)
     }
 
@@ -427,7 +434,7 @@ public fun FeatureForm(
                     }
                 },
                 onDiscard = {
-                    discardForm(form, false)
+                    discardForm(false)
                     // Dismiss the form after discarding the edits
                     onDismiss()
                 },
@@ -472,7 +479,7 @@ public fun FeatureForm(
                                 }
                             },
                             onDiscard = { controller ->
-                                discardForm(featureForm, hasBackStack)
+                                discardForm(hasBackStack)
                                 if (hasBackStack) {
                                     if (state.popBackStack()) {
                                         // pop the stack on the NavController after setting
@@ -513,7 +520,7 @@ public fun FeatureForm(
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
                             },
-                            onDiscard = { discardForm(featureForm, false) }
+                            onDiscard = { discardForm(false) }
                         )
                         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
                             state.evaluatingExpressions
@@ -576,7 +583,7 @@ public fun FeatureForm(
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
                             },
-                            onDiscard = { discardForm(featureForm, false) }
+                            onDiscard = { discardForm(false) }
                         )
                     },
                     content = {
@@ -641,7 +648,7 @@ public fun FeatureForm(
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
                             },
-                            onDiscard = { discardForm(featureForm, false) }
+                            onDiscard = { discardForm(false) }
                         )
                     },
                     content = {
@@ -660,7 +667,7 @@ public fun FeatureForm(
                                                 }
                                             },
                                             onDiscard = { controller ->
-                                                discardForm(featureForm, true)
+                                                discardForm(true)
                                                 state.setActiveFeatureForm(info.associatedFeature)
                                                 // Navigate to the next form after setting
                                                 // the active feature form on the state object

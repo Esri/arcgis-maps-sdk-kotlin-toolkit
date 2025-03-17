@@ -90,12 +90,7 @@ internal class AttachmentElementState(
     val lazyListState = LazyListState()
 
     init {
-        scope.launch {
-            formElement.fetchAttachments().onSuccess {
-                // build a state list of attachments
-                buildAttachmentStates(formElement.attachments)
-            }
-        }
+        refreshAttachments()
     }
 
     /**
@@ -123,6 +118,15 @@ internal class AttachmentElementState(
                 state.loadWithParentScope()
             }
             attachments.add(state)
+        }
+    }
+
+    fun refreshAttachments() {
+        scope.launch {
+            formElement.fetchAttachments().onSuccess {
+                // build a state list of attachments
+                buildAttachmentStates(formElement.attachments)
+            }
         }
     }
 
