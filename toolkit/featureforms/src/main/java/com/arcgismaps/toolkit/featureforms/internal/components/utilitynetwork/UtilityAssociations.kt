@@ -60,7 +60,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  */
 @Composable
 internal fun UtilityAssociationFilter(
-    filterResult: UtilityAssociationsFilterResult,
+    groupResults: List<UtilityAssociationGroupResult>,
     onGroupClick: (Int) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
@@ -71,7 +71,7 @@ internal fun UtilityAssociationFilter(
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn(modifier = Modifier) {
-            filterResult.groupResults.forEachIndexed { index, group ->
+            groupResults.forEachIndexed { index, group ->
                 item {
                     ListItem(
                         headlineContent = {
@@ -90,7 +90,7 @@ internal fun UtilityAssociationFilter(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
                     )
-                    if (index < filterResult.groupResults.count() - 1) {
+                    if (index < groupResults.count() - 1) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.surfaceContainerHighest

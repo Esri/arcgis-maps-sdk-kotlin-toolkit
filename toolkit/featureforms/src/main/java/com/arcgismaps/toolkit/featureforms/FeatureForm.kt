@@ -582,7 +582,7 @@ public fun FeatureForm(
                     content = {
                         if (filterResult != null) {
                             UtilityAssociationFilter(
-                                filterResult = filterResult,
+                                groupResults = filterResult.groupResults,
                                 onGroupClick = { index ->
                                     val newRoute = NavigationRoute.UNAssociationsView(
                                         stateId = utilityAssociationsElementState.id,
