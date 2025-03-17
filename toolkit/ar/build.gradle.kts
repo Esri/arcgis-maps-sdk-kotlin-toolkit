@@ -74,6 +74,10 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
+
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+    }
 }
 
 dependencies {

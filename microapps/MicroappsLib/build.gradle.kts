@@ -56,6 +56,9 @@ android {
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+    }
 }
 
 dependencies {

@@ -77,6 +77,10 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
+
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+    }
 }
 
 apiValidation {
