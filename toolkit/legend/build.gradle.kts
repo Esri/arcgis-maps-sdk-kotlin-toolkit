@@ -23,6 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    id("kotlin-parcelize")
 }
 android {
     namespace = "com.arcgismaps.toolkit.legend"

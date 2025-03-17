@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.legend
 
 import android.graphics.Bitmap
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,17 +40,17 @@ import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 
-@Immutable
-private data class LegendInfoWrapper(
+@Parcelize
+private data class LegendItem(
     val name: String,
     val bitmap: Bitmap?
-)
+): Parcelable
 
 @Immutable
 private data class LayerRow (
     val layer: LayerContent,
     val isVisibleAtScale: (Double) -> Boolean,
-    val legendInfos: List<LegendInfoWrapper>
+    val legendInfos: List<LegendItem>
 )
 
 @Composable
@@ -104,7 +106,7 @@ private fun Legend(
 
 @Composable
 private fun LegendInfoRow(
-    legendInfo: LegendInfoWrapper,
+    legendInfo: LegendItem,
 ) {
     Row {
         legendInfo.bitmap?.let {
@@ -193,7 +195,7 @@ private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(
     } else {
         layerContent.fetchLegendInfos().onSuccess { legendInfos ->
             val legendInfosWithBitmap = legendInfos.map { legendInfo ->
-                LegendInfoWrapper(
+                LegendItem(
                     legendInfo.name,
                     legendInfo.symbol?.createSwatch(density)?.getOrNull()?.bitmap
                 )
