@@ -150,7 +150,7 @@
     <string name="save">Save</string>
     <string name="discard">Discard</string>
     <string name="none_selected">None Selected</string>
-    <string name="the_form_has_validation_errors">The Form Has Validation Errors</string>
+    <string name="the_form_has_validation_errors">The form has validation errors</string>
     <string name="the_form_has_edits">The form has edits</string>
     <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
