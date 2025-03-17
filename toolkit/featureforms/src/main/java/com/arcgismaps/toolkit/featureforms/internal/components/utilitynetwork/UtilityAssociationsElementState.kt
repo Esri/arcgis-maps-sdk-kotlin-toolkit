@@ -65,7 +65,9 @@ internal class UtilityAssociationsElementState(
         scope.launch {
             // fetch the associations filter results for the element
             element.fetchAssociationsFilterResults()
-            _filters.value = element.associationsFilterResults
+            _filters.value = element.associationsFilterResults.filter {
+                it.resultCount > 0
+            }
             _loading.value = false
         }
     }

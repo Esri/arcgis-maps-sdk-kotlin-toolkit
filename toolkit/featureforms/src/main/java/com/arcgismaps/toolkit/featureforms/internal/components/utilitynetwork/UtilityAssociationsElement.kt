@@ -127,14 +127,21 @@ private fun Filters(
     Surface(modifier = modifier) {
         Column {
             filterResults.forEachIndexed { i, filterResult ->
-                val enabled = filterResult.resultCount > 0
                 ListItem(
                     headlineContent = {
                         Text(text = filterResult.filter.title)
                     },
-                    modifier = Modifier.clickable(enabled = enabled) {
+                    modifier = Modifier.clickable {
                         onClick(i)
                     },
+                    supportingContent = if (filterResult.filter.description.isNotEmpty()) {
+                        {
+                            Text(
+                                text = filterResult.filter.description,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    } else null,
                     trailingContent = {
                         Row(
                             horizontalArrangement = Arrangement.Center,
