@@ -67,7 +67,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * The state object for a [FeatureForm] used by the [FeatureForm] composable. This class is
+ * The state object for a [FeatureForm] used by the FeatureForm composable. This class is
  * responsible for managing the state of the form and its elements. Hoist this state out of the
  * composition to ensure that the state is not lost during configuration changes.
  *
