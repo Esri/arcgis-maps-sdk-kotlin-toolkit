@@ -101,7 +101,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Associations
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
@@ -646,7 +646,7 @@ public fun FeatureForm(
                     },
                     content = {
                         if (group != null) {
-                            Associations(
+                            UtilityAssociations(
                                 groupResult = group,
                                 onItemClick = { info ->
                                     if (hasEdits) {

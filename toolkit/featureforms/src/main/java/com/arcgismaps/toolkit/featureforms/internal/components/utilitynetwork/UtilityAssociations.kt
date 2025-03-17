@@ -113,7 +113,7 @@ internal fun UtilityAssociationFilter(
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun Associations(
+internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
     onItemClick: (UtilityAssociationResult) -> Unit,
     modifier: Modifier = Modifier
