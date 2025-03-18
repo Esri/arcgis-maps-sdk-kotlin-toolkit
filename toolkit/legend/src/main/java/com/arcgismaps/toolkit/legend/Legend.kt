@@ -39,6 +39,8 @@ import androidx.compose.ui.res.stringResource
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
+import com.arcgismaps.toolkit.legend.theme.LegendDefaults
+import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -59,7 +61,8 @@ public fun Legend(
     operationalLayers: List<LayerContent>,
     basemap: Basemap?,
     currentScale: Double,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    typography: Typography = LegendDefaults.typography()
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
     var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
