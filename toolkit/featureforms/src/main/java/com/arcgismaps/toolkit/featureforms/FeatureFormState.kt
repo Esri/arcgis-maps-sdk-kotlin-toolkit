@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
  *
  * [FeatureForm.evaluateExpressions] is called automatically when navigating to a new [FeatureForm]
  * or when navigating back to a previous [FeatureForm]. When expressions are running, this in indicated
- * by the [evaluatingExpressions] property. Expressions are also run when this class is created so
+ * by the [isEvaluatingExpressions] property. Expressions are also run when this class is created so
  * you do not need to call [FeatureForm.evaluateExpressions] manually.
  *
  * @param featureForm the [FeatureForm] to create the state for.
@@ -95,7 +95,7 @@ public class FeatureFormState private constructor(
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
-    private val _evaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+    private val _isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
 
     /**
      * A navigation callback that is called when navigating to a new [FeatureForm]. This should
@@ -133,7 +133,7 @@ public class FeatureFormState private constructor(
      * snapshotFlow { evaluatingExpressions }
      * ```
      */
-    public val evaluatingExpressions: Boolean by _evaluatingExpressions
+    public val isEvaluatingExpressions: Boolean by _isEvaluatingExpressions
 
     public constructor(
         featureForm: FeatureForm,
@@ -211,7 +211,7 @@ public class FeatureFormState private constructor(
                 false
             } else {
                 store.removeLast()
-                _activeFeatureForm.value = getActiveStateData().featureForm
+                _activeFeatureForm.value = getActiveFormStateData().featureForm
                 // Navigate back to the form view after popping the current form.
                 navigate()
                 evaluateExpressions()
@@ -223,19 +223,19 @@ public class FeatureFormState private constructor(
     /**
      * Returns the [FormStateData] for the currently active [FeatureForm].
      */
-    internal fun getActiveStateData(): FormStateData {
+    internal fun getActiveFormStateData(): FormStateData {
         return store.last()
     }
 
     /**
-     * Evaluates expressions for the [activeFeatureForm] and sets the [evaluatingExpressions] to
+     * Evaluates expressions for the [activeFeatureForm] and sets the [isEvaluatingExpressions] to
      * true while the expressions are being evaluated.
      */
     internal fun evaluateExpressions() {
         coroutineScope.launch {
-            _evaluatingExpressions.value = true
+            _isEvaluatingExpressions.value = true
             activeFeatureForm.evaluateExpressions()
-            _evaluatingExpressions.value = false
+            _isEvaluatingExpressions.value = false
         }
     }
 }

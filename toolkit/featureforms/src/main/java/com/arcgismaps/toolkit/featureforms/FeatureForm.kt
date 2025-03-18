@@ -212,7 +212,7 @@ public fun FeatureForm(
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using a [FeatureForm] have been configured externally.
+ * layer using a [FeatureForm] that has been configured externally.
  *
  * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
  * - [AttachmentsFormElement]
@@ -274,9 +274,9 @@ public fun FeatureForm(
     }
     FeatureForm(
         featureFormState = state,
-        onDismiss = null,
         modifier = modifier,
-        // Hide the action bar in the form since it is not supported via this API
+        // Hide the close and action bar in the form since it is not supported via this API
+        showCloseIcon = false,
         showFormActions = false,
         onBarcodeButtonClick = onBarcodeButtonClick,
         colorScheme = colorScheme,
@@ -286,7 +286,7 @@ public fun FeatureForm(
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using a [FeatureForm] have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * layer using a [FeatureForm] that has been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
  * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
  * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
  *
@@ -309,6 +309,12 @@ public fun FeatureForm(
  * discard buttons. The save button will save the edits using [FeatureForm.finishEditing] and the
  * discard button will discard the edits using [FeatureForm.discardEdits]. The save or discard
  * actions will also trigger the [onEditingEvent] callback with the appropriate event type.
+ *
+ * The Form is visible as long as it is part of the composition hierarchy. In order to let the user
+ * dismiss the Form, the implementation of [onDismiss] should contain a way to remove the form from
+ * the composition hierarchy. If the form has edits when the close icon is clicked, the user will be
+ * prompted to save or discard the edits before the callback is invoked. The callback is also not
+ * invoked if there are validation errors in the form.
  *
  * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner based on MLKit
  * is provided. The scanner requires the [Manifest.permission.CAMERA] permission to be granted.
@@ -341,15 +347,15 @@ public fun FeatureForm(
  * color scheme will take precedence and will be merged with the text style, if one is provided.
  *
  * @param featureFormState the [FeatureFormState] object that contains the state of the form.
- * @param onDismiss A callback that is invoked when the close button is clicked. This can be used
- * to dismiss the Form. If you want to disable this functionality, simply pass in null and this
- * will hide the close button.
  * @param modifier the modifier to apply to this layout.
+ * @param showCloseIcon Indicates if the close icon should be displayed. If true, the [onDismiss]
+ * callback will be invoked when the close icon is clicked. Default is true.
  * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
  * Default is true.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
+ * @param onDismiss A callback that is invoked when the close icon is visible and is clicked.
  * @param onEditingEvent A callback that is invoked when an editing event occurs in the form. This
  * is triggered when the edits are saved or discarded using the save or discard buttons, respectively.
  * If the edit action is triggered by navigating to another form, the `willNavigate` parameter will
@@ -363,10 +369,11 @@ public fun FeatureForm(
 @Composable
 public fun FeatureForm(
     featureFormState: FeatureFormState,
-    onDismiss: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
@@ -423,24 +430,24 @@ public fun FeatureForm(
     }
 
     // A function  that provides the action to dismiss the form
-    fun dismissForm(form: FeatureForm, onDismiss: () -> Unit) {
+    fun dismissForm(form: FeatureForm, onDismiss: (() -> Unit)?) {
         if (form.hasEdits.value) {
             // Show a dialog to save or discard edits before dismissing the form, if there are edits
             val dialog = DialogType.SaveFeatureDialog(
                 onSave = {
                     saveForm(form, false).onSuccess {
                         // Dismiss the form after saving the edits
-                        onDismiss()
+                        onDismiss?.invoke()
                     }
                 },
                 onDiscard = {
                     discardForm(form, false)
                     // Dismiss the form after discarding the edits
-                    onDismiss()
+                    onDismiss?.invoke()
                 },
             )
             dialogRequester.requestDialog(dialog)
-        } else onDismiss()
+        } else onDismiss?.invoke()
     }
 
     FeatureFormTheme(
@@ -457,7 +464,7 @@ public fun FeatureForm(
             popExitTransition = { slideOutHorizontally { h -> h } }
         ) {
             composable<NavigationRoute.FormView> { backStackEntry ->
-                val formData = remember(backStackEntry) { state.getActiveStateData() }
+                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
                 val featureForm = formData.featureForm
                 val states = formData.stateCollection
                 val hasBackStack = remember(featureForm, navController) {
@@ -499,6 +506,7 @@ public fun FeatureForm(
                             title = title,
                             subTitle = featureForm.description,
                             hasEdits = if (showFormActions) hasEdits else false,
+                            showCloseIcon = showCloseIcon,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -506,9 +514,8 @@ public fun FeatureForm(
                                 )
                                 .fillMaxWidth(),
                             onBackPressed = if (hasBackStack) onBackAction else null,
-                            onClose = onDismiss?.let {
-                                // Show the close button only if the onDismiss callback is provided
-                                { dismissForm(featureForm, onDismiss) }
+                            onClose = {
+                                dismissForm(featureForm, onDismiss)
                             },
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
@@ -516,7 +523,7 @@ public fun FeatureForm(
                             onDiscard = { discardForm(featureForm, false) }
                         )
                         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-                            state.evaluatingExpressions
+                            state.isEvaluatingExpressions
                         }
                     },
                     content = {
@@ -544,7 +551,7 @@ public fun FeatureForm(
             composable<NavigationRoute.UNFilterView> { backStackEntry ->
                 val routeData = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
                 val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val formData = remember(backStackEntry) { state.getActiveStateData() }
+                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
                 val featureForm = formData.featureForm
                 val states = formData.stateCollection
                 // Get the selected UtilityAssociationsElementState from the state collection
@@ -563,6 +570,7 @@ public fun FeatureForm(
                                 ?: stringResource(R.string.none_selected),
                             subTitle = title,
                             hasEdits = if (showFormActions) hasEdits else false,
+                            showCloseIcon = showCloseIcon,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -570,9 +578,8 @@ public fun FeatureForm(
                                 )
                                 .fillMaxWidth(),
                             onBackPressed = navController::popBackStack,
-                            onClose = onDismiss?.let {
-                                // Show the close button only if the onDismiss callback is provided
-                                { dismissForm(featureForm, onDismiss) }
+                            onClose = {
+                                dismissForm(featureForm, onDismiss)
                             },
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
@@ -605,7 +612,7 @@ public fun FeatureForm(
             composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
                 val routeData = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
                 val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val formData = remember(backStackEntry) { state.getActiveStateData() }
+                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
                 val featureForm = formData.featureForm
                 val states = formData.stateCollection
                 // Get the selected UtilityAssociationsElementState from the state collection
@@ -628,6 +635,7 @@ public fun FeatureForm(
                             title = group?.name ?: stringResource(R.string.none_selected),
                             subTitle = filter.filter.title,
                             hasEdits = if (showFormActions) hasEdits else false,
+                            showCloseIcon = showCloseIcon,
                             modifier = Modifier
                                 .padding(
                                     vertical = 8.dp,
@@ -635,9 +643,9 @@ public fun FeatureForm(
                                 )
                                 .fillMaxWidth(),
                             onBackPressed = navController::popBackStack,
-                            onClose = onDismiss?.let {
+                            onClose =  {
                                 // Show the close button only if the onDismiss callback is provided
-                                { dismissForm(featureForm, onDismiss) }
+                                dismissForm(featureForm, onDismiss)
                             },
                             onSave = {
                                 scope.launch { saveForm(featureForm, false) }
@@ -722,8 +730,9 @@ private fun FeatureFormTitle(
     title: String,
     subTitle: String,
     hasEdits: Boolean,
+    showCloseIcon: Boolean,
     onBackPressed: (() -> Unit)?,
-    onClose: (() -> Unit)?,
+    onClose: () -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
@@ -770,7 +779,7 @@ private fun FeatureFormTitle(
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            if (onClose != null) {
+            if (showCloseIcon) {
                 IconButton(onClick = onClose) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
                 }
@@ -1032,6 +1041,7 @@ private fun FeatureFormTitlePreview() {
         title = "Feature Form",
         subTitle = "Edit feature attributes",
         hasEdits = true,
+        showCloseIcon = true,
         onBackPressed = null,
         onClose = {},
         onSave = {},
