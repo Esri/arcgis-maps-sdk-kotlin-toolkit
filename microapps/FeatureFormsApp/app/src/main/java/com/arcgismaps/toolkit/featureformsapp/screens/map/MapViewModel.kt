@@ -159,13 +159,13 @@ class MapViewModel @Inject constructor(
     val isBusy: State<Boolean>
         get() = _isBusy
 
-    private val _errors: MutableState<Error?> = mutableStateOf(null)
+    private val _error: MutableState<Error?> = mutableStateOf(null)
 
     /**
-     * Observe this state to get the current list of errors, if any.
+     * Observe this state to get the current error state, if any.
      */
-    val errors: State<Error?>
-        get() = _errors
+    val error: State<Error?>
+        get() = _error
 
     /**
      * A flow that emits the active feature form in the editing state, or null if not editing.
@@ -204,7 +204,7 @@ class MapViewModel @Inject constructor(
      * Clears the current errors.
      */
     fun clearErrors() {
-        _errors.value = null
+        _error.value = null
     }
 
     /**
@@ -392,7 +392,7 @@ class MapViewModel @Inject constructor(
      */
     private suspend fun applyEditsToService(featureForm: FeatureForm) {
         val serviceFeatureTable = featureForm.feature.featureTable as? ServiceFeatureTable ?: run {
-            _errors.value = Error(
+            _error.value = Error(
                 title = "Failed to sync edits with the service",
                 details = "Cannot save edits without a ServiceFeatureTable"
             )
@@ -428,7 +428,7 @@ class MapViewModel @Inject constructor(
         // if there are errors then set the UI state to error
         if (errors.isNotEmpty()) {
             val errorText = errors.joinToString(separator = "\n") { it.message ?: "Unknown error" }
-            _errors.value = Error(
+            _error.value = Error(
                 title = "Failed to sync edits with the service",
                 details = errorText
             )
@@ -484,9 +484,6 @@ val List<FeatureEditResult>.errors: List<Throwable>
 fun ArcGISMap.clearSelection() {
     operationalLayers.forEach { layer ->
         when (layer) {
-            is SubtypeFeatureLayer -> {
-                layer.clearSelection()
-            }
             is FeatureLayer -> {
                 layer.clearSelection()
             }

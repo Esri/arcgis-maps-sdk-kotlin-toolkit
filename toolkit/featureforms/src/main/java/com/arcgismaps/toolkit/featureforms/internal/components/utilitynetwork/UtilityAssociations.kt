@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,7 +61,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  */
 @Composable
 internal fun UtilityAssociationFilter(
-    filterResult: UtilityAssociationsFilterResult,
+    groupResults: List<UtilityAssociationGroupResult>,
     onGroupClick: (Int) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
@@ -71,7 +72,7 @@ internal fun UtilityAssociationFilter(
         shape = RoundedCornerShape(15.dp)
     ) {
         LazyColumn(modifier = Modifier) {
-            filterResult.groupResults.forEachIndexed { index, group ->
+            groupResults.forEachIndexed { index, group ->
                 item {
                     ListItem(
                         headlineContent = {
@@ -90,7 +91,7 @@ internal fun UtilityAssociationFilter(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
                     )
-                    if (index < filterResult.groupResults.count() - 1) {
+                    if (index < groupResults.count() - 1) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -113,17 +114,12 @@ internal fun UtilityAssociationFilter(
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun Associations(
+internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
     onItemClick: (UtilityAssociationResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val lazyListState = rememberSaveable(
-        inputs = arrayOf(),
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val lazyListState = rememberLazyListState()
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)

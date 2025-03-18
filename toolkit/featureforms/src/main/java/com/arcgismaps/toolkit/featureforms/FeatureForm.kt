@@ -54,6 +54,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -102,8 +103,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Associations
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -373,6 +374,12 @@ public fun FeatureForm(
 ) {
     val state by rememberUpdatedState(featureFormState)
     val navController = rememberNavController(state)
+    state.setNavigationCallback {
+        navController.navigate(it)
+    }
+    state.setNavigateBack {
+        navController.popBackStack()
+    }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
@@ -467,34 +474,27 @@ public fun FeatureForm(
                 val onBackAction: () -> Unit = {
                     if (hasEdits) {
                         val dialog = DialogType.SaveFeatureDialog(
-                            onSave = { controller ->
+                            onSave = {
                                 saveForm(featureForm, hasBackStack).onSuccess {
                                     if (hasBackStack) {
-                                        if (state.popBackStack()) {
-                                            // pop the stack on the NavController after setting
-                                            // the active feature form on the state object
-                                            controller.popBackStack()
-                                        }
+                                        // Navigate back to the previous form after saving the edits.
+                                        state.popBackStack()
                                     }
                                 }
                             },
-                            onDiscard = { controller ->
+                            onDiscard = {
                                 discardForm(hasBackStack)
                                 if (hasBackStack) {
-                                    if (state.popBackStack()) {
-                                        // pop the stack on the NavController after setting
-                                        // the active feature form on the state object
-                                        controller.popBackStack()
-                                    }
+                                    // Navigate back to the previous form after discarding the edits.
+                                    state.popBackStack()
                                 }
-                            },
+                            }
                         )
                         dialogRequester.requestDialog(dialog)
                     } else {
-                        if (navController.currentBackStackEntry != null) {
-                            if (state.popBackStack()) {
-                                navController.popBackStack()
-                            }
+                        if (hasBackStack) {
+                            // Navigate back to the previous form if there are no edits
+                            state.popBackStack()
                         }
                     }
                 }
@@ -535,6 +535,7 @@ public fun FeatureForm(
                                     stateId = stateId,
                                     selectedFilterIndex = index
                                 )
+                                // Navigate to the filter view
                                 navController.navigate(route)
                             }
                         )
@@ -544,7 +545,7 @@ public fun FeatureForm(
                 BackHandler(hasBackStack) {
                     onBackAction()
                 }
-                FeatureFormDialog(states, navController)
+                FeatureFormDialog(states)
             }
 
             composable<NavigationRoute.UNFilterView> { backStackEntry ->
@@ -589,7 +590,7 @@ public fun FeatureForm(
                     content = {
                         if (filterResult != null) {
                             UtilityAssociationFilter(
-                                filterResult = filterResult,
+                                groupResults = filterResult.groupResults,
                                 onGroupClick = { index ->
                                     val newRoute = NavigationRoute.UNAssociationsView(
                                         stateId = utilityAssociationsElementState.id,
@@ -653,33 +654,27 @@ public fun FeatureForm(
                     },
                     content = {
                         if (group != null) {
-                            Associations(
+                            UtilityAssociations(
                                 groupResult = group,
                                 onItemClick = { info ->
                                     if (hasEdits) {
                                         val dialog = DialogType.SaveFeatureDialog(
-                                            onSave = { controller ->
+                                            onSave = {
                                                 saveForm(featureForm, true).onSuccess {
-                                                    state.setActiveFeatureForm(info.associatedFeature)
-                                                    // Navigate to the next form after setting
-                                                    // the active feature form on the state object
-                                                    controller.navigate(NavigationRoute.FormView)
+                                                    // Navigate to the next form after saving the edits.
+                                                    state.navigateTo(info.associatedFeature)
                                                 }
                                             },
-                                            onDiscard = { controller ->
+                                            onDiscard = {
                                                 discardForm(true)
-                                                state.setActiveFeatureForm(info.associatedFeature)
-                                                // Navigate to the next form after setting
-                                                // the active feature form on the state object
-                                                controller.navigate(NavigationRoute.FormView)
+                                                // Navigate to the next form after discarding the edits.
+                                                state.navigateTo(info.associatedFeature)
                                             },
                                         )
                                         dialogRequester.requestDialog(dialog)
                                     } else {
-                                        state.setActiveFeatureForm(info.associatedFeature)
-                                        // Navigate to the next form after setting
-                                        // the active feature form on the state object
-                                        navController.navigate(NavigationRoute.FormView)
+                                        // Navigate to the next form if there are no edits.
+                                        state.navigateTo(info.associatedFeature)
                                     }
                                 },
                                 modifier = Modifier.padding(16.dp)
@@ -687,8 +682,14 @@ public fun FeatureForm(
                         }
                     }
                 )
-                FeatureFormDialog(states, navController)
+                FeatureFormDialog(states)
             }
+        }
+    }
+    DisposableEffect(state) {
+        onDispose {
+            state.setNavigationCallback(null)
+            state.setNavigateBack(null)
         }
     }
 }
