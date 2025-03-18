@@ -50,8 +50,8 @@ public object LegendDefaults {
      */
     @Composable
     public fun typography(
-        layerName: TextStyle = MaterialTheme.typography.headlineMedium,
-        layerTitle: TextStyle = MaterialTheme.typography.headlineLarge,
+        layerName: TextStyle = MaterialTheme.typography.titleLarge,
+        layerTitle: TextStyle = MaterialTheme.typography.titleMedium,
         ): Typography = Typography(
         layerName = layerName,
         layerTitle = layerTitle,

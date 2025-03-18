@@ -109,7 +109,7 @@ public fun Legend(
     }
 
     if (initialized) {
-        Legend(modifier, layerContentData, currentScale)
+        Legend(modifier, layerContentData, currentScale, typography)
     } else {
         CircularProgressIndicator()
     }
@@ -144,18 +144,19 @@ private fun Legend(
     modifier: Modifier,
     legendItems: List<LayerContentData>,
     currentScale: Double,
+    typography: Typography
     ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(legendItems) { index, item ->
             if (item.isVisible(currentScale)) {
                 if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
                     Row {
-                        Text(text = item.name)
+                        Text(text = item.name, style = typography.layerName)
                     }
                 }
                 if (item.legendItems.isNotEmpty()) {
                     item.legendItems.forEach { legendInfo ->
-                        LegendInfoRow(legendInfo)
+                        LegendInfoRow(legendInfo, typography)
                     }
                 }
             }
@@ -166,6 +167,7 @@ private fun Legend(
 @Composable
 private fun LegendInfoRow(
     legendInfo: LegendItem,
+    typography: Typography,
 ) {
     Row {
         legendInfo.bitmap?.let {
@@ -174,6 +176,6 @@ private fun LegendInfoRow(
                 contentDescription = stringResource(R.string.symbol_description)
             )
         }
-        Text(text = legendInfo.name)
+        Text(text = legendInfo.name, style = typography.layerTitle)
     }
 }
