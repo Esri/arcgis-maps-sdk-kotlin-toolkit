@@ -56,7 +56,6 @@ import java.time.Instant
  * This class should not be constructed directly. Instead, use the [rememberWorldTrackingCameraController] factory function.
  *
  * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
- * @see updateCamera to calibrate the camera using heading and elevation offsets.
  * @see rememberWorldTrackingCameraController
  *
  * @since 200.7.0
