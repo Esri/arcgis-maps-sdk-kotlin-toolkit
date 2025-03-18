@@ -98,6 +98,18 @@ public class FeatureFormState private constructor(
     private val _evaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
 
     /**
+     * A navigation callback that is called when navigating to a new [FeatureForm]. This should
+     * be set by the composition that uses the NavController to the correct [NavigationRoute].
+     */
+    private var navigateToRoute: ((NavigationRoute) -> Unit)? = null
+
+    /**
+     * A navigation callback that is called when navigating back to a previous [FeatureForm]. This
+     * should be set by the composition that uses the NavController to navigate back.
+     */
+    private var navigateBack: (() -> Boolean)? = null
+
+    /**
      * The currently active [FeatureForm]. This property is updated when navigating between forms.
      *
      * Note that this property is observable and if you use it in the composable function it will be
@@ -151,35 +163,59 @@ public class FeatureFormState private constructor(
     }
 
     /**
-     * Sets the [FeatureForm] associated with the provided [feature] to be the [activeFeatureForm]
-     * and adds the form to the stack.
+     * Sets the navigation callback to the provided [navigateToRoute] function. This function is
+     * called when navigating to a new [FeatureForm].
+     */
+    internal fun setNavigationCallback(navigateToRoute: (NavigationRoute) -> Unit) {
+        this.navigateToRoute = navigateToRoute
+    }
+
+    /**
+     * Sets the navigation callback to the provided [navigateBack] function. This function is
+     * called when navigating back to a previous [FeatureForm].
+     */
+    internal fun setNavigateBack(navigateBack: () -> Boolean) {
+        this.navigateBack = navigateBack
+    }
+
+    /**
+     * Sets the [FeatureForm] associated with the provided [feature] to be the [activeFeatureForm],
+     * adds the form to the stack and navigates to the new form.
      *
      * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
-    internal fun setActiveFeatureForm(feature: ArcGISFeature) {
-        val form = FeatureForm(feature)
-        val states = createStates(
-            form = form,
-            elements = form.elements,
-            scope = coroutineScope
-        )
-        store.addLast(FormStateData(form, states))
-        _activeFeatureForm.value = form
-        evaluateExpressions()
+    internal fun navigateTo(feature: ArcGISFeature) {
+        navigateToRoute?.let { navigate ->
+            val form = FeatureForm(feature)
+            val states = createStates(
+                form = form,
+                elements = form.elements,
+                scope = coroutineScope
+            )
+            store.addLast(FormStateData(form, states))
+            _activeFeatureForm.value = form
+            // Navigate to the form view after setting the active form.
+            navigate(NavigationRoute.FormView)
+            evaluateExpressions()
+        }
     }
 
     /**
      * Pops the current [FeatureForm] from the stack and sets the previous form as the [activeFeatureForm].
      */
     internal fun popBackStack(): Boolean {
-        return if (store.size <= 1) {
-            false
-        } else {
-            store.removeLast()
-            _activeFeatureForm.value = getActiveStateData().featureForm
-            evaluateExpressions()
-            true
-        }
+        navigateBack?.let { navigate ->
+            return if (store.size <= 1) {
+                false
+            } else {
+                store.removeLast()
+                _activeFeatureForm.value = getActiveStateData().featureForm
+                // Navigate back to the form view after popping the current form.
+                navigate()
+                evaluateExpressions()
+                true
+            }
+        } ?: return false
     }
 
     /**

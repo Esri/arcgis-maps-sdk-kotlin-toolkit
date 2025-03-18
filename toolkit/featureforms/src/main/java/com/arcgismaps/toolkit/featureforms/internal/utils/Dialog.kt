@@ -35,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
-import androidx.navigation.NavHostController
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
@@ -56,8 +55,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -165,8 +164,8 @@ internal sealed class DialogType {
     data class BarcodeScanner(val stateId: Int) : DialogType()
 
     data class SaveFeatureDialog(
-        val onSave: suspend (NavHostController) -> Unit,
-        val onDiscard: (NavHostController) -> Unit
+        val onSave: suspend () -> Unit,
+        val onDiscard: () -> Unit
     ) : DialogType()
 
     data class ValidationErrorsDialog(
@@ -180,7 +179,7 @@ internal sealed class DialogType {
  * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog(states: FormStateCollection, navHostController: NavHostController) {
+internal fun FeatureFormDialog(states: FormStateCollection) {
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
@@ -370,12 +369,12 @@ internal fun FeatureFormDialog(states: FormStateCollection, navHostController: N
                 onSave = {
                     dialogRequester.dismissDialog()
                     scope.launch {
-                        onSave(navHostController)
+                        onSave()
                     }
                 },
                 onDiscard = {
                     dialogRequester.dismissDialog()
-                    onDiscard(navHostController)
+                    onDiscard()
                 }
             )
         }
