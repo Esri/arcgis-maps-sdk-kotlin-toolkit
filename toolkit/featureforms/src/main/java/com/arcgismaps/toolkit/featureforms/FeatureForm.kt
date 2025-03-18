@@ -75,6 +75,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
@@ -784,7 +785,6 @@ private fun FeatureFormTitle(
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
             if (showCloseIcon) {
                 IconButton(onClick = onClose) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
@@ -1044,7 +1044,7 @@ private fun handleFormElementTapAction(
 @Composable
 private fun FeatureFormTitlePreview() {
     FeatureFormTitle(
-        title = "Feature Form",
+        title = "Structure Boundary",
         subTitle = "Edit feature attributes",
         hasEdits = true,
         showCloseIcon = true,
