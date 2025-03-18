@@ -66,6 +66,7 @@ internal class UtilityAssociationsElementState(
             // fetch the associations filter results for the element
             element.fetchAssociationsFilterResults()
             _filters.value = element.associationsFilterResults.filter {
+                // filter out the results that have no associations
                 it.resultCount > 0
             }
             _loading.value = false
