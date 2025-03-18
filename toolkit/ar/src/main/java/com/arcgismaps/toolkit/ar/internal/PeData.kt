@@ -20,7 +20,15 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.geometry.TransformationCatalog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
@@ -84,4 +92,32 @@ internal object PeData {
             }
         } ?: throw IllegalStateException("Failed to obtain AssetManager")
     }
+}
+
+/**
+ * Deploys the PE data file to the device's external files directory and configures
+ * [TransformationCatalog.projectionEngineDirectory] with its path.
+ *
+ * @since 200.7.0
+ */
+@Composable
+internal fun rememberPeDataConfigured(
+    onFailed: (Throwable) -> Unit
+): State<Boolean> {
+    val context = LocalContext.current
+    val peDataConfigured = remember { mutableStateOf(false) }
+
+    // if PE data is already configured do nothing
+    if (peDataConfigured.value) return peDataConfigured
+
+    LaunchedEffect(Unit) {
+        launch(Dispatchers.IO) {
+            PeData.configure(context).onFailure {
+                onFailed(it)
+            }.onSuccess {
+                peDataConfigured.value = true
+            }
+        }
+    }
+    return peDataConfigured
 }

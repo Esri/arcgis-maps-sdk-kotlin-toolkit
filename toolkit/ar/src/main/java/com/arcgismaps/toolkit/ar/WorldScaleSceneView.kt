@@ -22,10 +22,7 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.geometry.TransformationCatalog
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
@@ -60,16 +56,15 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
-import com.arcgismaps.toolkit.ar.internal.PeData
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberPeDataConfigured
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.rememberWorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -251,32 +246,4 @@ public fun WorldScaleSceneView(
             }
         )
     }
-}
-
-/**
- * Deploys the PE data file to the device's external files directory and configures
- * [TransformationCatalog.projectionEngineDirectory] with its path.
- *
- * @since 200.7.0
- */
-@Composable
-private fun rememberPeDataConfigured(
-    onFailed: (Throwable) -> Unit
-): State<Boolean> {
-    val context = LocalContext.current
-    val peDataConfigured = remember { mutableStateOf(false) }
-
-    // if PE data is already configured do nothing
-    if (peDataConfigured.value) return peDataConfigured
-
-    LaunchedEffect(Unit) {
-        launch(Dispatchers.IO) {
-            PeData.configure(context).onFailure {
-                onFailed(it)
-            }.onSuccess {
-                peDataConfigured.value = true
-            }
-        }
-    }
-    return peDataConfigured
 }
