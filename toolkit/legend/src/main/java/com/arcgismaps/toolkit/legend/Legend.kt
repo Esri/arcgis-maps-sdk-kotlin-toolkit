@@ -35,8 +35,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 import kotlinx.parcelize.Parcelize
@@ -56,27 +56,17 @@ private data class LayerContentData(
 
 @Composable
 public fun Legend(
-    geoModel: GeoModel,
+    operationalLayers: List<LayerContent>,
+    basemap: Basemap?,
     currentScale: Double,
     modifier: Modifier = Modifier
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    var operationalLayers by rememberSaveable(geoModel) { mutableStateOf(listOf<LayerContent>()) }
-    var basemap by rememberSaveable(geoModel) { mutableStateOf<Basemap?>(null) }
     var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
     val layerContentData = rememberSaveable(operationalLayers, basemap) { mutableListOf<LayerContentData>() }
 
-    if (layerContentData.isEmpty()) {
-        LaunchedEffect(geoModel) {
-            geoModel.load().onSuccess {
-                operationalLayers = geoModel.operationalLayers
-                basemap = geoModel.basemap.value
-            }
-        }
-    }
-
-    if (!initialized && operationalLayers.isNotEmpty() && basemap != null) {
-        LaunchedEffect(operationalLayers, basemap) {
+    if (!initialized) {
+        LaunchedEffect(Unit) {
             operationalLayers.filterIsInstance<Layer>().forEach {
                 it.load().onFailure { return@LaunchedEffect }
             }
@@ -178,7 +168,7 @@ private fun LegendInfoRow(
         legendInfo.bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),
-                contentDescription = null
+                contentDescription = stringResource(R.string.symbol_description)
             )
         }
         Text(text = legendInfo.name)

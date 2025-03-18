@@ -59,11 +59,3 @@ fun LegendApp() {
     }
 
 }
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        LegendApp()
-    }
-}
