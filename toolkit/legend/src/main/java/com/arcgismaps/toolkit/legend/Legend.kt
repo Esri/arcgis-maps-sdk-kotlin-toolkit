@@ -18,33 +18,86 @@
 
 package com.arcgismaps.toolkit.legend
 
+import android.graphics.Bitmap
+import android.os.Parcelable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.arcgismaps.mapping.GeoModel
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.arcgismaps.mapping.Basemap
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
+import kotlinx.parcelize.Parcelize
 
-internal typealias LayerRow = LayerContent
+@Parcelize
+private data class LegendItem(
+    val name: String,
+    val bitmap: Bitmap?
+): Parcelable
+
+@Parcelize
+private data class LayerContentData(
+    val name: String,
+    val legendItems: MutableList<LegendItem> = mutableListOf(),
+    val isVisible: (Double) -> Boolean
+) : Parcelable
 
 @Composable
 public fun Legend(
-    geoModel: GeoModel,
+    operationalLayers: List<LayerContent>,
+    basemap: Basemap?,
     currentScale: Double,
     modifier: Modifier = Modifier
 ) {
-    var legendItems by remember { mutableStateOf(emptyList<LayerRow>()) }
+    val density = LocalContext.current.resources.displayMetrics.density
+    var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
+    val layerContentData = rememberSaveable(operationalLayers, basemap) { mutableListOf<LayerContentData>() }
 
-    LaunchedEffect(geoModel) {
-        geoModel.load().onSuccess {
-            legendItems = getGeoModelLayersInOrder(geoModel)
+    if (!initialized) {
+        LaunchedEffect(Unit) {
+            operationalLayers.filterIsInstance<Layer>().forEach {
+                it.load().onFailure { return@LaunchedEffect }
+            }
+            basemap?.load()?.onFailure { return@LaunchedEffect }
+
+            basemap?.baseLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
+            basemap?.referenceLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
+
+            layerContentData.addAll(
+                operationalLayers.reversed().filter { it.isVisible && it.showInLegend }.flatMap {
+                    layerContentData(it, density)
+                }
+            )
+
+            basemap?.referenceLayers?.let { refLayers ->
+                layerContentData.addAll(0,
+                    refLayers.filter { it.isVisible && it.showInLegend }.flatMap {
+                        layerContentData(it, density)
+                    }
+                )
+            }
+
+            basemap?.baseLayers?.let { baseLayers ->
+                layerContentData.addAll(
+                    baseLayers.filter { it.isVisible && it.showInLegend }.flatMap {
+                        layerContentData(it, density)
+                    }
+                )
+            }
+
+            initialized = true
         }
     }
 
@@ -52,46 +105,72 @@ public fun Legend(
         return
     }
 
-    if (legendItems.isNotEmpty()) {
-        Legend(modifier, legendItems, currentScale)
+    if (initialized) {
+        Legend(modifier, layerContentData, currentScale)
+    } else {
+        CircularProgressIndicator()
+    }
+}
+
+private suspend fun layerContentData(
+    layerContent: LayerContent,
+    density: Float
+): List<LayerContentData> {
+    val data = LayerContentData(layerContent.name) { scale ->
+        layerContent.isVisibleAtScale(scale)
+    }
+    layerContent.fetchLegendInfos().onSuccess {
+        it.map { info ->
+            val bitmap = info.symbol?.createSwatch(density)?.getOrNull()?.bitmap
+            LegendItem(info.name, bitmap)
+        }.also { items ->
+            data.legendItems.addAll(items)
+        }
+    }
+    return if (layerContent.subLayerContents.value.isEmpty()) {
+        listOf(data)
+    } else {
+        listOf(data) + layerContent.subLayerContents.value.flatMap { sublayer ->
+            layerContentData(sublayer, density)
+        }
     }
 }
 
 @Composable
 private fun Legend(
     modifier: Modifier,
-    legendItems: List<LayerRow>,
+    legendItems: List<LayerContentData>,
     currentScale: Double,
     ) {
     LazyColumn(modifier = modifier) {
-        items(legendItems) { item ->
-            if (item.showLayer(currentScale)) {
-                Row {
-                    Text(text = item.name)
+        itemsIndexed(legendItems) { index, item ->
+            if (item.isVisible(currentScale)) {
+                if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
+                    Row {
+                        Text(text = item.name)
+                    }
+                }
+                if (item.legendItems.isNotEmpty()) {
+                    item.legendItems.forEach { legendInfo ->
+                        LegendInfoRow(legendInfo)
+                    }
                 }
             }
         }
     }
 }
 
-private fun LayerRow.showLayer(scale: Double): Boolean {
-    return this.isVisibleAtScale(scale)
-}
-
-private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerRow> {
-    var layerListToDisplayInLegend = mutableListOf<LayerRow>()
-
-    // add all operational layers
-    geoModel.operationalLayers.let { layerListToDisplayInLegend.addAll(it) }
-
-    val basemap = geoModel.basemap.value
-    basemap?.let { it ->
-        it.referenceLayers.let { layerListToDisplayInLegend.addAll(it) }
-        it.baseLayers.let { layerListToDisplayInLegend.addAll(0, it) }
+@Composable
+private fun LegendInfoRow(
+    legendInfo: LegendItem,
+) {
+    Row {
+        legendInfo.bitmap?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = stringResource(R.string.symbol_description)
+            )
+        }
+        Text(text = legendInfo.name)
     }
-
-    layerListToDisplayInLegend = layerListToDisplayInLegend.filter { it.isVisible && it.showInLegend }.toMutableList()
-
-    return layerListToDisplayInLegend.reversed()
 }
-

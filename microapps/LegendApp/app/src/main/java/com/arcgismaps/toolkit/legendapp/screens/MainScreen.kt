@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
@@ -46,29 +47,13 @@ import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.legend.Legend
 
-private val sanDiegoShortlist = "1966ef409a344d089b001df85332608f"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(
-                PortalItem(
-                    Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-                    sanDiegoShortlist
-                )
-            )
-        )
-    }
+fun MainScreen(viewModel: LegendViewModel = viewModel()) {
 
+    val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
+    val baseMap = viewModel.arcGISMap.basemap.collectAsState()
     var currentScale: Double by remember { mutableDoubleStateOf(Double.NaN) }
-
-    val loadState by arcGISMap.loadStatus.collectAsState()
-
-    LaunchedEffect(Unit) {
-        arcGISMap.load()
-    }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -92,7 +77,7 @@ fun MainScreen() {
                 label = "legend",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Legend(arcGISMap, currentScale)
+                Legend(viewModel.arcGISMap.operationalLayers, baseMap.value, currentScale)
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -104,7 +89,7 @@ fun MainScreen() {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            arcGISMap = arcGISMap,
+            arcGISMap = viewModel.arcGISMap,
             onViewpointChangedForCenterAndScale = {
                 currentScale = it.targetScale
             }
