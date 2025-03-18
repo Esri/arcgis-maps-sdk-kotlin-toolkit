@@ -73,12 +73,13 @@ internal fun UtilityAssociationsElement(
             Modifier.padding(top = 16.dp, end = 16.dp)
         )
         when {
+            // Show loading indicator when loading
             state.loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp)
                 )
             }
-
+            // If loaded and no filters found show no associations found text
             !state.loading && state.filters.isEmpty() -> {
                 Text(
                     text = stringResource(R.string.no_associations_found),
@@ -88,7 +89,7 @@ internal fun UtilityAssociationsElement(
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
-
+            // Show filters when loaded and filters found
             else -> {
                 Filters(
                     filterResults = state.filters,
