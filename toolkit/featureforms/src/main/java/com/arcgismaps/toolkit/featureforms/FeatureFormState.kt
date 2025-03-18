@@ -163,6 +163,21 @@ public class FeatureFormState private constructor(
     }
 
     /**
+     * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
+     * evaluates expressions.
+     */
+    public fun discardEdits() {
+        val formData = getActiveFormStateData()
+        formData.featureForm.discardEdits()
+        formData.stateCollection.forEach {
+            if (it.state is AttachmentElementState) {
+                (it.state as AttachmentElementState).refreshAttachments()
+            }
+        }
+        evaluateExpressions()
+    }
+
+    /**
      * Sets the navigation callback to the provided [navigateToRoute] function. This function is
      * called when navigating to a new [FeatureForm]. Set this to null when the composition is
      * disposed.

@@ -311,6 +311,9 @@ public fun FeatureForm(
  * discard button will discard the edits using [FeatureForm.discardEdits]. The save or discard
  * actions will also trigger the [onEditingEvent] callback with the appropriate event type.
  *
+ * If you are providing your own save and discard buttons, be sure to use the [FeatureFormState.discardEdits]
+ * to discard the edits. This will ensure the data and attachments in the form are updated correctly.
+ *
  * The Form is visible as long as it is part of the composition hierarchy. In order to let the user
  * dismiss the Form, the implementation of [onDismiss] should contain a way to remove the form from
  * the composition hierarchy. If the form has edits when the close icon is clicked, the user will be
@@ -422,17 +425,12 @@ public fun FeatureForm(
 
     // A function that provides the action to discard edits on the form
     fun discardForm(willNavigate: Boolean) {
-        val formData = state.getActiveStateData()
-        formData.featureForm.discardEdits()
-        formData.stateCollection.forEach {
-            if (it.state is AttachmentElementState) {
-                (it.state as AttachmentElementState).refreshAttachments()
-            }
-        }
-        // run expressions evaluation
-        state.evaluateExpressions()
+        state.discardEdits()
         // Send a discarded edits event
-        val event = FeatureFormEditingEvent.DiscardedEdits(formData.featureForm, willNavigate)
+        val event = FeatureFormEditingEvent.DiscardedEdits(
+            state.getActiveFormStateData().featureForm,
+            willNavigate
+        )
         onEditingEvent(event)
     }
 
