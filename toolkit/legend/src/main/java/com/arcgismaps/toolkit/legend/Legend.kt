@@ -93,7 +93,7 @@ public fun Legend(
 
             basemap?.referenceLayers?.let { refLayers ->
                 layerContentData.addAll(0,
-                    refLayers.reversed().filter { it.isVisible && it.showInLegend }.flatMap {
+                    refLayers.filter { it.isVisible && it.showInLegend }.flatMap {
                         layerContentData(it, density)
                     }
                 )
@@ -101,7 +101,7 @@ public fun Legend(
 
             basemap?.baseLayers?.let { baseLayers ->
                 layerContentData.addAll(
-                    baseLayers.reversed().filter { it.isVisible && it.showInLegend }.flatMap {
+                    baseLayers.filter { it.isVisible && it.showInLegend }.flatMap {
                         layerContentData(it, density)
                     }
                 )
@@ -184,101 +184,3 @@ private fun LegendInfoRow(
         Text(text = legendInfo.name)
     }
 }
-
-//private fun getGeoModelLayersInOrder(geoModel: GeoModel): List<LayerContent> {
-//    var layerListToDisplayInLegend = mutableListOf<LayerContent>()
-//
-//    // add all operational layers
-//    geoModel.operationalLayers.let { layerListToDisplayInLegend.addAll(it) }
-//
-//    val basemap = geoModel.basemap.value
-//    basemap?.let { it ->
-//        it.referenceLayers.let { layerListToDisplayInLegend.addAll(it) }
-//        it.baseLayers.let { layerListToDisplayInLegend.addAll(0, it) }
-//    }
-//
-//    layerListToDisplayInLegend = layerListToDisplayInLegend.filter { it.isVisible && it.showInLegend }.toMutableList()
-//
-//    return layerListToDisplayInLegend.reversed()
-//}
-//
-///**
-// * Loads all the layers and sublayers in the GeoModel.
-// * Returns a list of LayerRow objects in the onComplete lambda, which are the layers and sublayers of
-// * the GeoModel in order.
-// *
-// * @param density The density of the device.
-// * @param geoModelLayersInOrder The layers and sublayers to load.
-// * @param onComplete The callback to execute when the layers and sublayers are loaded.
-// */
-//private suspend fun loadAndGetAllLayerRows(
-//    density: Float,
-//    geoModelLayersInOrder: List<LayerContent>,
-//    onComplete: (List<LayerRow>) -> Unit
-//) {
-//    val layerRows = geoModelLayersInOrder.flatMap { layerContent ->
-//        loadLayerRow(density, layerContent)
-//    }
-//    onComplete(layerRows)
-//}
-//
-///**
-// * Loads the layer and its sublayers.
-// *
-// * @param density The density of the device.
-// * @param layerContent The layer to load.
-// * @return A list of LayerRow objects.
-// */
-//private suspend fun loadLayerRow(density: Float, layerContent: LayerContent): List<LayerRow> {
-//    return if (layerContent is Layer) {
-//        val result = layerContent.load()
-//        if (result.isSuccess) {
-//            fetchLayerRowsWithSublayersAndLegendInfos(density, layerContent)
-//        } else {
-//            emptyList()
-//        }
-//    } else {
-//        fetchLayerRowsWithSublayersAndLegendInfos(density, layerContent)
-//    }
-//}
-//
-///**
-// * Fetches the layer's sublayers and legend infos.
-// *
-// * @param density The density of the device.
-// * @param layerContent The layer to fetch the sublayers and legend infos from.
-// * @return A list of LayerRow objects.
-// */
-//private suspend fun fetchLayerRowsWithSublayersAndLegendInfos(
-//    density: Float,
-//    layerContent: LayerContent
-//): List<LayerRow> {
-//    val layerRows = mutableListOf<LayerRow>()
-//    if (layerContent.subLayerContents.value.isNotEmpty()) {
-//        layerContent.subLayerContents.value.forEach { subLayer ->
-//            layerRows.addAll(loadLayerRow(density, subLayer))
-//        }
-//    } else {
-//        layerContent.fetchLegendInfos().onSuccess { legendInfos ->
-//            val legendInfosWithBitmap = legendInfos.map { legendInfo ->
-//                LegendItem(
-//                    legendInfo.name,
-//                    legendInfo.symbol?.createSwatch(density)?.getOrNull()?.bitmap
-//                )
-//            }
-//
-//            layerRows.add(
-//                LayerRow(
-//                    layerContent,
-//                    { scale ->
-//                        layerContent.isVisibleAtScale(
-//                            scale
-//                        )
-//                    },
-//                    legendInfosWithBitmap
-//                )
-//            )
-//        }
-//    }
-//    return layerRows
-//}
