@@ -22,7 +22,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -33,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
@@ -54,7 +52,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
  * list of its groups as given by [UtilityAssociationsFilterResult.groupResults].
  *
- * @param filterResult The [UtilityAssociationsFilterResult] to display.
+ * @param groupResults The [UtilityAssociationsFilterResult] to display.
  * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
  * @param onBackPressed A callback that is called when the back button is pressed.
  * @param modifier The [Modifier] to apply to this layout.
