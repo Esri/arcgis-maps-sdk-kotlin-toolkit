@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
+import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 
@@ -91,6 +92,7 @@ fun MainScreen() {
         WorldScaleSceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
+            worldScaleTrackingMode = WorldScaleTrackingMode.Geospatial,
             onInitializationStatusChanged = {
                 initializationStatus = it
             },

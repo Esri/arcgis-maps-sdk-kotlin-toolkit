@@ -79,7 +79,6 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
         if (!locked) return
         try {
             block(session ?: return, shouldInitializeDisplay)
-            shouldInitializeDisplay = false
         } finally {
             mutex.unlock()
         }
@@ -107,7 +106,7 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean = false): ArSessionWrapper {
+internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
     val arSessionWrapper = remember { ArSessionWrapper(applicationContext, useGeospatial) }
     DisposableEffect(Unit) {

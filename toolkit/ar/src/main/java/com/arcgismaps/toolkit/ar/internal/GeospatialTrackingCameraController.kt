@@ -1,6 +1,10 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
+import android.view.Surface
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,51 +18,61 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
-import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.Earth
 import com.google.ar.core.Frame
 import com.google.ar.core.Pose
 import com.google.ar.core.TrackingState
-import com.google.ar.core.exceptions.NotTrackingException
 import kotlin.math.sqrt
 
 
 internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
     private val sessionWrapper: ArSessionWrapper,
-    private val context: Context
+    context: Context,
 ) : WorldScaleCameraController {
     override val cameraController = TransformationMatrixCameraController()
     override var hasSetOriginCamera: Boolean by mutableStateOf(false)
         private set
+
+    private val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        context.display
+    } else {
+        (context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay
+    }
 
     override fun updateCamera(frame: Frame) {
         sessionWrapper.withLock { session, _ ->
             session.earth?.let { earth ->
                 if (earth.trackingState != TrackingState.TRACKING) return@let
                 if (earth.earthState != Earth.EarthState.ENABLED) return@let
-                val geospatialPose = earth.cameraGeospatialPose
-                val orientation = geospatialPose.eastUpSouthQuaternion
-                val projectedLocation = GeometryEngine.projectOrNull(
-                    Point(
-                        geospatialPose.longitude,
-                        geospatialPose.latitude,
-                        geospatialPose.altitude + calibrationState.totalElevationOffset,
-                        SpatialReference(SpatialReference.wgs84().wkid, 115700 /*WGS84_VERTICAL*/)
-                    ),
-                    SpatialReference(SpatialReference.wgs84().wkid, verticalWkid = 5773 /*EGM96*/)
-                ) ?: return@let
-
-                cameraController.setOriginCamera(
-                    Camera(
-                        projectedLocation,
-                        0.0,
-                        90.0,
-                        0.0
-                    )
-                )
 
                 try {
+                    val geospatialPose = earth.cameraGeospatialPose
+                    val orientation = geospatialPose.eastUpSouthQuaternion
+                    val projectedLocation = GeometryEngine.projectOrNull(
+                        Point(
+                            geospatialPose.longitude,
+                            geospatialPose.latitude,
+                            geospatialPose.altitude + calibrationState.totalElevationOffset,
+                            SpatialReference(
+                                SpatialReference.wgs84().wkid,
+                                115700 /*WGS84_VERTICAL*/
+                            )
+                        ),
+                        SpatialReference(
+                            SpatialReference.wgs84().wkid,
+                            verticalWkid = 5773 /*EGM96*/
+                        )
+                    ) ?: return@let
+
+                    cameraController.setOriginCamera(
+                        Camera(
+                            projectedLocation,
+                            0.0,
+                            90.0,
+                            0.0
+                        )
+                    )
                     val original = earth.getPose(
                         geospatialPose.latitude,
                         geospatialPose.longitude,
@@ -69,8 +83,36 @@ internal class GeospatialTrackingCameraController(
                         orientation[3]
                     )
 
-                    val cameraPoseFix = Pose.makeRotation(0f, 0f, -sqrt(0.5).toFloat(), sqrt(0.5).toFloat())
-                    val physicalPose = original.compose(cameraPoseFix);
+                    val physicalPose = when (display?.rotation ?: 0) {
+                        Surface.ROTATION_90 -> original.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                -sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        )
+
+                        Surface.ROTATION_180 -> original.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(1.0).toFloat(),
+                                0f
+                            )
+                        )
+
+                        Surface.ROTATION_270 -> original.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        )
+
+                        else -> original
+                    }
 
                     hasSetOriginCamera = true
                     cameraController.transformationMatrix =
@@ -83,7 +125,8 @@ internal class GeospatialTrackingCameraController(
                             0.0,
                             0.0
                         )
-                } catch (e: NotTrackingException) {
+                } catch (e: Throwable) {
+                    Log.e("GeospatialTrackingCameraController", "Failed to update camera", e)
                     // Ignore
                 }
             }
@@ -98,5 +141,11 @@ internal fun rememberGeospatialTrackingCameraController(
 ): WorldScaleCameraController {
     sessionWrapper.onResume(LocalLifecycleOwner.current)
     val context = LocalContext.current
-    return remember { GeospatialTrackingCameraController(calibrationState, sessionWrapper, context) }
+    return remember {
+        GeospatialTrackingCameraController(
+            calibrationState,
+            sessionWrapper,
+            context
+        )
+    }
 }

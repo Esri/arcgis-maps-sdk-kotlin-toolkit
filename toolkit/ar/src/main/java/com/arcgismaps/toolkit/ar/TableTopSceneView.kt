@@ -213,6 +213,7 @@ public fun TableTopSceneView(
             val arSessionWrapper =
                 rememberArSessionWrapper(
                     applicationContext = context.applicationContext,
+                    false
                 )
             SideEffect {
                 // We need to check, otherwise during subsequent recompositions we could accidentally
