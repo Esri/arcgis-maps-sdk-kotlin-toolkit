@@ -164,17 +164,19 @@ public class FeatureFormState private constructor(
 
     /**
      * Sets the navigation callback to the provided [navigateToRoute] function. This function is
-     * called when navigating to a new [FeatureForm].
+     * called when navigating to a new [FeatureForm]. Set this to null when the composition is
+     * disposed.
      */
-    internal fun setNavigationCallback(navigateToRoute: (NavigationRoute) -> Unit) {
+    internal fun setNavigationCallback(navigateToRoute: ((NavigationRoute) -> Unit)?) {
         this.navigateToRoute = navigateToRoute
     }
 
     /**
      * Sets the navigation callback to the provided [navigateBack] function. This function is
-     * called when navigating back to a previous [FeatureForm].
+     * called when navigating back to a previous [FeatureForm]. Set this to null when the composition
+     * is disposed.
      */
-    internal fun setNavigateBack(navigateBack: () -> Boolean) {
+    internal fun setNavigateBack(navigateBack: (() -> Boolean)?) {
         this.navigateBack = navigateBack
     }
 

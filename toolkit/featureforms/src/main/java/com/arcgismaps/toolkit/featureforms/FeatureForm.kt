@@ -54,6 +54,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -676,6 +677,12 @@ public fun FeatureForm(
                 )
                 FeatureFormDialog(states)
             }
+        }
+    }
+    DisposableEffect(state) {
+        onDispose {
+            state.setNavigationCallback(null)
+            state.setNavigateBack(null)
         }
     }
 }
