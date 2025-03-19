@@ -99,7 +99,7 @@ internal class WorldTrackingCameraController(
             Camera(
                 location.position.y,
                 location.position.x,
-                if (location.position.hasZ) location.position.z
+                if (location.position.hasZ) location.position.z?.plus(calibrationState.totalElevationOffset)
                     ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
                 calibrationState.totalHeadingOffset,
                 90.0,

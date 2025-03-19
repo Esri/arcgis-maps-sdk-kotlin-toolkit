@@ -73,7 +73,7 @@ import java.time.Instant
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
-    worldScaleTrackingMode: WorldScaleTrackingMode = WorldScaleTrackingMode.Geospatial,
+    worldScaleTrackingMode: WorldScaleTrackingMode = remember { WorldScaleTrackingMode.Geospatial() },
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,

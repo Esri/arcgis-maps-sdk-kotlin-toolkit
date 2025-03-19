@@ -24,10 +24,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +54,6 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
@@ -58,6 +65,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISScene = remember {
@@ -87,88 +95,123 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
+    var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial()) }
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text("ArWorldScaleApp - ${trackingMode::class.java.simpleName}") },
+            actions = {
+                var actionsExpanded by remember { mutableStateOf(false) }
+                IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                    Icon(Icons.Default.MoreVert, "More")
+                }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        WorldScaleSceneView(
-            arcGISScene = arcGISScene,
-            modifier = Modifier.fillMaxSize(),
-            worldScaleTrackingMode = WorldScaleTrackingMode.Geospatial,
-            onInitializationStatusChanged = {
-                initializationStatus = it
-            },
-            worldScaleSceneViewProxy = proxy,
-            onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)?.let { point ->
-                    graphicsOverlays.first().graphics.add(
-                        Graphic(
-                            point,
-                            SimpleMarkerSceneSymbol(
-                                SimpleMarkerSceneSymbolStyle.Diamond,
-                                Color.green,
-                                height = 1.0,
-                                width = 1.0,
-                                depth = 1.0
+                DropdownMenu(
+                    expanded = actionsExpanded,
+                    onDismissRequest = { actionsExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("World Tracking") },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.World()
+                            actionsExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Geospatial Tracking") },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.Geospatial()
+                            actionsExpanded = false
+                        }
+                    )
+                }
+            }
+        )
+    }) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            WorldScaleSceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
+                worldScaleTrackingMode = trackingMode,
+                onInitializationStatusChanged = {
+                    initializationStatus = it
+                },
+                worldScaleSceneViewProxy = proxy,
+                onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                    proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                        ?.let { point ->
+                            graphicsOverlays.first().graphics.add(
+                                Graphic(
+                                    point,
+                                    SimpleMarkerSceneSymbol(
+                                        SimpleMarkerSceneSymbolStyle.Diamond,
+                                        Color.green,
+                                        height = 1.0,
+                                        width = 1.0,
+                                        depth = 1.0
+                                    )
+                                )
                             )
+                        }
+                },
+                graphicsOverlays = graphicsOverlays
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (displayCalibrationView) {
+                        CalibrationView(
+                            onDismiss = { displayCalibrationView = false },
+                            modifier = Modifier.align(Alignment.BottomCenter),
                         )
-                    )
-                }
-            },
-            graphicsOverlays = graphicsOverlays
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (displayCalibrationView) {
-                    CalibrationView(
-                        onDismiss = { displayCalibrationView = false },
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                    )
-                } else {
-                    FloatingActionButton(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(32.dp),
-                        onClick = { displayCalibrationView = true }) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_straighten_24),
-                            contentDescription = stringResource(R.string.calibration_view_button_description)
-                        )
-                    }
-                }
-            }
-        }
-
-        when (val status = initializationStatus) {
-            is WorldScaleSceneViewStatus.Initializing -> {
-                TextWithScrim(text = stringResource(R.string.ar_initializing))
-            }
-
-            is WorldScaleSceneViewStatus.Initialized -> {
-                val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                when (sceneLoadStatus) {
-                    is LoadStatus.Loading, LoadStatus.NotLoaded -> {
-                        // The scene may take a while to load, so show a progress indicator
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    is LoadStatus.FailedToLoad -> {
-                        TextWithScrim(
-                            text = stringResource(
-                                R.string.failed_to_load_scene,
-                                sceneLoadStatus.error
+                    } else {
+                        FloatingActionButton(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(32.dp),
+                            onClick = { displayCalibrationView = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_straighten_24),
+                                contentDescription = stringResource(R.string.calibration_view_button_description)
                             )
-                        )
+                        }
                     }
-
-                    else -> {}
                 }
             }
 
-            is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                TextWithScrim(
-                    text = stringResource(
-                        R.string.failed_to_initialize_overlay,
-                        status.error.message ?: status.error
+            when (val status = initializationStatus) {
+                is WorldScaleSceneViewStatus.Initializing -> {
+                    TextWithScrim(text = stringResource(R.string.ar_initializing))
+                }
+
+                is WorldScaleSceneViewStatus.Initialized -> {
+                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                    when (sceneLoadStatus) {
+                        is LoadStatus.Loading, LoadStatus.NotLoaded -> {
+                            // The scene may take a while to load, so show a progress indicator
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        else -> {}
+                    }
+                }
+
+                is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                    TextWithScrim(
+                        text = stringResource(
+                            R.string.failed_to_initialize_overlay,
+                            status.error.message ?: status.error
+                        )
                     )
-                )
+                }
             }
         }
     }

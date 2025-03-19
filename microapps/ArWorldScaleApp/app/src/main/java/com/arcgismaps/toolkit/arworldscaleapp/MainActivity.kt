@@ -100,11 +100,5 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArWorldScaleApp() {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("ArWorldScaleApp") }) }
-    ) {
-        Box(Modifier.padding(it)) {
-            MainScreen()
-        }
-    }
+    MainScreen()
 }
