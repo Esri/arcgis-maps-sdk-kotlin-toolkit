@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -56,12 +57,14 @@ import java.time.Instant
  * This class should not be constructed directly. Instead, use the [rememberWorldTrackingCameraController] factory function.
  *
  * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
+ * @see updateCamera to calibrate the camera using heading and elevation offsets.
  * @see rememberWorldTrackingCameraController
  *
  * @since 200.7.0
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
+    clippingDistance: Double?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) :
@@ -71,10 +74,20 @@ internal class WorldTrackingCameraController(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
+    private val worldScaleHeadingProvider : WorldScaleHeadingProvider
     private val locationDataSource = CustomLocationDataSource {
         worldScaleNmeaLocationProvider
     }
-    override val cameraController = TransformationMatrixCameraController()
+    override val cameraController = TransformationMatrixCameraController().apply {
+        this.clippingDistance = clippingDistance
+    }
+
+    init {
+        val applicationContext = ArcGISEnvironment.applicationContext
+        require(applicationContext != null)
+
+        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext)
+    }
 
     override var hasSetOriginCamera by mutableStateOf(false)
         private set
@@ -90,18 +103,18 @@ internal class WorldTrackingCameraController(
     }
 
     /**
-     * Sets the origin position of the camera to the given location.
+     * Sets the origin position of the camera to the given location and heading.
      *
      * @since 200.7.0
      */
-    private fun updateCamera(location: Location) =
+    private fun updateCamera(location: Location, heading: Float) =
         cameraController.setOriginCamera(
             Camera(
                 location.position.y,
                 location.position.x,
                 if (location.position.hasZ) location.position.z?.plus(calibrationState.totalElevationOffset)
                     ?: calibrationState.totalElevationOffset else calibrationState.totalElevationOffset,
-                calibrationState.totalHeadingOffset,
+                heading + calibrationState.totalHeadingOffset,
                 90.0,
                 0.0
             )
@@ -139,6 +152,7 @@ internal class WorldTrackingCameraController(
     override fun onDestroy(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
             scope.cancel()
         }
@@ -148,6 +162,7 @@ internal class WorldTrackingCameraController(
     override fun onPause(owner: LifecycleOwner) {
         scope.launch {
             locationDataSource.stop()
+            worldScaleHeadingProvider.stop()
             worldScaleNmeaLocationProvider.stop()
         }
         super.onPause(owner)
@@ -157,6 +172,7 @@ internal class WorldTrackingCameraController(
         super.onResume(owner)
         scope.launch {
             worldScaleNmeaLocationProvider.start()
+            worldScaleHeadingProvider.start()
             locationDataSource.start()
         }
         scope.launch {
@@ -179,7 +195,7 @@ internal class WorldTrackingCameraController(
                     )
                 }
                 .collect { location ->
-                    updateCamera(location)
+                    updateCamera(location, worldScaleHeadingProvider.headings.first())
                     // We have to do this or the error gets bigger and bigger.
                     cameraController.transformationMatrix =
                         TransformationMatrix.createIdentityMatrix()
@@ -212,6 +228,7 @@ internal class WorldTrackingCameraController(
 @Composable
 internal fun rememberWorldTrackingCameraController(
     calibrationState: CalibrationState,
+    clippingDistance: Double?,
     onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     onResetOriginCamera: () -> Unit
 ): WorldTrackingCameraController {
@@ -220,6 +237,7 @@ internal fun rememberWorldTrackingCameraController(
     val wrapper = remember {
         WorldTrackingCameraController(
             calibrationState,
+            clippingDistance,
             onLocationDataSourceFailedToStart,
             onResetOriginCamera
         )
@@ -259,6 +277,8 @@ internal fun shouldUpdateCamera(
         || location.verticalAccuracy.isNaN()
     ) return false
 
+    // filter out locations with a NaN z value
+    if (location.position.z?.isNaN() == true) return false
 
     // filter out locations with low accuracy
     if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false

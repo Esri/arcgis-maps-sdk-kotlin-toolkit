@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.ar
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.toolkit.ar.internal.shouldUpdateCamera
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -32,20 +33,34 @@ import java.time.Instant
 class LocationFilteringTests {
 
     /**
-     * Given a location passed to [shouldUpdateCamera]
-     * When the location is old or has bad or invalid accuracy,
-     * Then [shouldUpdateCamera] should return false.
+     * Given a location and a current camera,
+     * When the location is old, close to the camera, or inaccurate,
+     * Then the camera should not be updated
+     *
+     * When the location is recent and far away from the camera,
+     * Then the camera should be updated
      *
      * @since 200.7.0
      */
     @Test
     fun testLocationFilter() {
-        val nullIsland = Point(0.0, 0.0, SpatialReference.wgs84())
+        val nullIsland = Point(0.0, 0.0, SpatialReference(4326, 5773))
+        val farFarAway = Point(30.0, 30.0, SpatialReference(4326, 5773))
+
+        val cameraAtNullIsland = Camera(nullIsland, 0.0, 0.0, 0.0)
 
         val recentLocationAtNullIsland =
-            Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(50))
+            Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now())
+        assertThat(shouldUpdateCamera(recentLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+
         val oldLocationAtNullIsland =
             Location.create(nullIsland, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
+        assertThat(shouldUpdateCamera(oldLocationAtNullIsland, cameraAtNullIsland)).isFalse()
+
+        val oldLocationFarFarAway =
+            Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now().minusMillis(30000))
+        assertThat(shouldUpdateCamera(oldLocationFarFarAway, cameraAtNullIsland)).isFalse()
+
         val recentLocationWithNoAccuracy = Location.create(
             nullIsland,
             Double.NaN,
@@ -55,6 +70,7 @@ class LocationFilteringTests {
             false,
             Instant.now().minusMillis(50)
         )
+        assertThat(shouldUpdateCamera(recentLocationWithNoAccuracy, cameraAtNullIsland)).isFalse()
 
         val recentLocationWithBadAccuracy = Location.create(
             nullIsland,
@@ -65,11 +81,10 @@ class LocationFilteringTests {
             false,
             Instant.now().minusMillis(50)
         )
+        assertThat(shouldUpdateCamera(recentLocationWithBadAccuracy, cameraAtNullIsland)).isFalse()
 
-        assertThat(shouldUpdateCamera(oldLocationAtNullIsland)).isFalse()
-        assertThat(shouldUpdateCamera(recentLocationWithNoAccuracy)).isFalse()
-        assertThat(shouldUpdateCamera(recentLocationWithBadAccuracy)).isFalse()
-
-        assertThat(shouldUpdateCamera(recentLocationAtNullIsland)).isTrue()
+        val recentLocationFarFarAway =
+            Location.create(farFarAway, 1.0, 1.0, 0.0, 0.0, true, Instant.now())
+        assertThat(shouldUpdateCamera(recentLocationFarFarAway, cameraAtNullIsland)).isTrue()
     }
 }

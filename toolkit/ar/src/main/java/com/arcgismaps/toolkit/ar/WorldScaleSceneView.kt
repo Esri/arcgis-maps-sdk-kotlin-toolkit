@@ -74,6 +74,7 @@ public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
     worldScaleTrackingMode: WorldScaleTrackingMode = remember { WorldScaleTrackingMode.Geospatial() },
+    clippingDistance: Double? = null,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -149,6 +150,7 @@ public fun WorldScaleSceneView(
         )
         is WorldScaleTrackingMode.World -> rememberWorldTrackingCameraController(
             calibrationState = calibrationState,
+            clippingDistance = clippingDistance,
             onLocationDataSourceFailedToStart = {
                 initializationStatus.update(
                     WorldScaleSceneViewStatus.FailedToInitialize(it),
