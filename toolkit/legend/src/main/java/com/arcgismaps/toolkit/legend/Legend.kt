@@ -176,6 +176,6 @@ private fun LegendInfoRow(
                 contentDescription = stringResource(R.string.symbol_description)
             )
         }
-        Text(text = legendInfo.name, style = typography.layerTitle)
+        Text(text = legendInfo.name, style = typography.legendInfoName)
     }
 }

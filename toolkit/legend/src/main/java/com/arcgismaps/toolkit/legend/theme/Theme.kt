@@ -25,14 +25,14 @@ import androidx.compose.ui.text.TextStyle
  * Typography styling properties for the Legend composable.
  *
  * @param layerName The text style for the layer name.
- * @param layerTitle The text style for the layer title.
+ * @param legendInfoName The text style for the legend info name.
  *
  * @since 200.7.0
  */
 @Immutable
 public data class Typography internal constructor(
     val layerName : TextStyle,
-    val layerTitle: TextStyle,
+    val legendInfoName: TextStyle,
 )
 
 /**
@@ -46,15 +46,15 @@ public object LegendDefaults {
      * Creates default typography values for the Legend composable.
      *
      * @param layerName The text style for the layer name.
-     * @param layerTitle The text style for the layer title.
+     * @param legendInfoName The text style for the legend info name.
      */
     @Composable
     public fun typography(
-        layerName: TextStyle = MaterialTheme.typography.titleLarge,
-        layerTitle: TextStyle = MaterialTheme.typography.titleMedium,
+        layerName: TextStyle = MaterialTheme.typography.labelLarge,
+        legendInfoName: TextStyle = MaterialTheme.typography.bodyMedium,
         ): Typography = Typography(
         layerName = layerName,
-        layerTitle = layerTitle,
+        legendInfoName = legendInfoName,
     )
 }
 
