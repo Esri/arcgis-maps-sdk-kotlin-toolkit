@@ -59,6 +59,7 @@ public fun Legend(
     operationalLayers: List<LayerContent>,
     basemap: Basemap?,
     currentScale: Double,
+    reverseLayerOrder: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
@@ -75,27 +76,13 @@ public fun Legend(
             basemap?.baseLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
             basemap?.referenceLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
 
-            layerContentData.addAll(
-                operationalLayers.reversed().filter { it.isVisible && it.showInLegend }.flatMap {
-                    layerContentData(it, density)
-                }
-            )
-
-            basemap?.referenceLayers?.let { refLayers ->
-                layerContentData.addAll(0,
-                    refLayers.filter { it.isVisible && it.showInLegend }.flatMap {
-                        layerContentData(it, density)
-                    }
-                )
-            }
-
-            basemap?.baseLayers?.let { baseLayers ->
-                layerContentData.addAll(
-                    baseLayers.filter { it.isVisible && it.showInLegend }.flatMap {
-                        layerContentData(it, density)
-                    }
-                )
-            }
+            // Add the layers to the layer content data
+            // Add the operational layers first
+            addLayersToLayerContentData(operationalLayers, reverseLayerOrder, density, layerContentData)
+            // Add the basemap layers
+            addLayersToLayerContentData(basemap?.baseLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = reverseLayerOrder)
+            // Add the reference layers
+            addLayersToLayerContentData(basemap?.referenceLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = !reverseLayerOrder)
 
             initialized = true
         }
@@ -109,6 +96,26 @@ public fun Legend(
         Legend(modifier, layerContentData, currentScale)
     } else {
         CircularProgressIndicator()
+    }
+}
+
+private suspend fun addLayersToLayerContentData(
+    layers: List<LayerContent>?,
+    reverseLayerOrder: Boolean,
+    density: Float,
+    layerContentData: MutableList<LayerContentData>,
+    addAtIndexZero: Boolean = false
+) {
+    layers?.let { layerList ->
+        // The order of the layers is reversed to match the order in the legend
+        val orderedLayers = if (reverseLayerOrder) layerList.reversed() else layerList
+        val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
+        val newLayerContentData = filteredLayers.flatMap { layerContentData(it, density) }
+        if (addAtIndexZero) {
+            layerContentData.addAll(0, newLayerContentData)
+        } else {
+            layerContentData.addAll(newLayerContentData)
+        }
     }
 }
 
