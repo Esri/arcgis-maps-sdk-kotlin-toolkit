@@ -47,6 +47,7 @@ public object LegendDefaults {
      *
      * @param layerName The text style for the layer name.
      * @param legendInfoName The text style for the legend info name.
+     * @since 200.7.0
      */
     @Composable
     public fun typography(
