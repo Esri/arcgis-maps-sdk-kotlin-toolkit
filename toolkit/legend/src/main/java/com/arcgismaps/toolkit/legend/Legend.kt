@@ -59,6 +59,7 @@ public fun Legend(
     operationalLayers: List<LayerContent>,
     basemap: Basemap?,
     currentScale: Double,
+    respectScaleRange: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
@@ -106,7 +107,7 @@ public fun Legend(
     }
 
     if (initialized) {
-        Legend(modifier, layerContentData, currentScale)
+        Legend(modifier, layerContentData, currentScale, respectScaleRange)
     } else {
         CircularProgressIndicator()
     }
@@ -141,10 +142,11 @@ private fun Legend(
     modifier: Modifier,
     legendItems: List<LayerContentData>,
     currentScale: Double,
+    respectScaleRange: Boolean,
     ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(legendItems) { index, item ->
-            if (item.isVisible(currentScale)) {
+            if (!respectScaleRange || item.isVisible(currentScale)) {
                 if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
                     Row {
                         Text(text = item.name)
