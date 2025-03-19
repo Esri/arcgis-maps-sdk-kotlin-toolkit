@@ -108,7 +108,7 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
 ) {
     layers?.let { layerList ->
         // The order of the layers is reversed to match the order in the legend
-        val orderedLayers = if (reverseLayerOrder) layerList.reversed() else layerList
+        val orderedLayers = if (reverseLayerOrder) layerList else layerList.reversed()
         val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
         val layersAndSubLayersLayerContentData = filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
