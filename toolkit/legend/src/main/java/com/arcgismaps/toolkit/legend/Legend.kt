@@ -78,11 +78,11 @@ public fun Legend(
 
             // Add the layers to the layer content data
             // Add the operational layers first
-            addLayersToLayerContentData(operationalLayers, reverseLayerOrder, density, layerContentData)
+            addLayersAndSubLayersDataToLayerContentData(operationalLayers, reverseLayerOrder, density, layerContentData)
             // Add the basemap layers
-            addLayersToLayerContentData(basemap?.baseLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = reverseLayerOrder)
+            addLayersAndSubLayersDataToLayerContentData(basemap?.baseLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = reverseLayerOrder)
             // Add the reference layers
-            addLayersToLayerContentData(basemap?.referenceLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = !reverseLayerOrder)
+            addLayersAndSubLayersDataToLayerContentData(basemap?.referenceLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = !reverseLayerOrder)
 
             initialized = true
         }
@@ -99,7 +99,7 @@ public fun Legend(
     }
 }
 
-private suspend fun addLayersToLayerContentData(
+private suspend fun addLayersAndSubLayersDataToLayerContentData(
     layers: List<LayerContent>?,
     reverseLayerOrder: Boolean,
     density: Float,
@@ -110,16 +110,16 @@ private suspend fun addLayersToLayerContentData(
         // The order of the layers is reversed to match the order in the legend
         val orderedLayers = if (reverseLayerOrder) layerList.reversed() else layerList
         val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
-        val newLayerContentData = filteredLayers.flatMap { layerContentData(it, density) }
+        val layersAndSubLayersLayerContentData = filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
-            layerContentData.addAll(0, newLayerContentData)
+            layerContentData.addAll(0, layersAndSubLayersLayerContentData)
         } else {
-            layerContentData.addAll(newLayerContentData)
+            layerContentData.addAll(layersAndSubLayersLayerContentData)
         }
     }
 }
 
-private suspend fun layerContentData(
+private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
 ): List<LayerContentData> {
@@ -138,7 +138,7 @@ private suspend fun layerContentData(
         listOf(data)
     } else {
         listOf(data) + layerContent.subLayerContents.value.flatMap { sublayer ->
-            layerContentData(sublayer, density)
+            getLayerContentData(sublayer, density)
         }
     }
 }
