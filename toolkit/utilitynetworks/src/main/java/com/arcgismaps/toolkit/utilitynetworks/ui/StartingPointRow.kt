@@ -93,7 +93,7 @@ internal fun StartingPointRow(
 ) {
     val density = LocalDensity.current
     var deleteActive by rememberSaveable { mutableStateOf(false) }
-    val confirmValueChange: (DragAnchors) -> Boolean = { _ -> true }
+    val confirmValueChange: (DragAnchors) -> Boolean  = { _ -> true }
     val positionalThreshold: (Float) -> Float = { distance: Float -> distance * 0.9f }
     val velocityThreshold: () -> Float = { with(density) { 10000.dp.toPx() } }
     val spec: () -> AnimationSpec<Float> = {
@@ -139,14 +139,14 @@ internal fun StartingPointRow(
             bitmap = data.getDrawable(metrics.density).bitmap.asImageBitmap()
         }
         bitmap?.let {
-            Image(
-                bitmap = it,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(50.dp)
-                    .padding(15.dp),
-                contentDescription = stringResource(id = R.string.feature_icon),
-            )
+                Image(
+                    bitmap = it,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(50.dp)
+                        .padding(15.dp),
+                    contentDescription = stringResource(id = R.string.feature_icon),
+                )
         }
         Box(
             modifier = modifier
@@ -177,7 +177,7 @@ internal fun StartingPointRow(
             ReadOnlyTextField(
                 text = data.name,
                 modifier = Modifier
-                    .padding(start = 5.dp, end = 25.dp)
+                    .padding(start = 5.dp, end = 25.dp )
                     .height(65.dp)
             )
 

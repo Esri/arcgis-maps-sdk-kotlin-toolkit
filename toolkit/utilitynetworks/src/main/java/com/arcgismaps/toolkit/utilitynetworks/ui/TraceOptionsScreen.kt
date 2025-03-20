@@ -97,46 +97,48 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    var currentSelectedColor by remember { mutableStateOf(selectedColor) }
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            TraceConfigurations(
-                configurations,
-                selectedConfig,
-            ) { newConfig ->
-                onConfigSelected(newConfig)
+    Column {
+        var currentSelectedColor by remember { mutableStateOf(selectedColor) }
+
+        LazyColumn(
+            modifier = Modifier.weight(weight = 1f, fill = false),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                TraceConfigurations(
+                    configurations,
+                    selectedConfig,
+                ) { newConfig ->
+                    onConfigSelected(newConfig)
+                }
+            }
+            item {
+                StartingPoints(
+                    startingPoints,
+                    onAddStartingPointButtonClicked,
+                    onStartingPointRemoved,
+                    onStartingPointSelected,
+                )
+            }
+            item {
+                AdvancedOptions(
+                    onNameChange = onNameChange,
+                    onColorChanged = {
+                        currentSelectedColor = it
+                        onColorChanged(it)
+                    },
+                    defaultTraceName = defaultTraceName,
+                    selectedColor = currentSelectedColor,
+                    zoomToResult = zoomToResult,
+                    onZoomRequested = onZoomRequested
+                )
             }
         }
-        item {
-            StartingPoints(
-                startingPoints,
-                onAddStartingPointButtonClicked,
-                onStartingPointRemoved,
-                onStartingPointSelected,
-            )
-        }
-        item {
-            AdvancedOptions(
-                onNameChange = onNameChange,
-                onColorChanged = {
-                    currentSelectedColor = it
-                    onColorChanged(it)
-                },
-                defaultTraceName = defaultTraceName,
-                selectedColor = currentSelectedColor,
-                zoomToResult = zoomToResult,
-                onZoomRequested = onZoomRequested
-            )
-        }
-        item {
-            TraceButton(
-                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
-                onClicked = onTraceButtonClicked
-            )
-        }
+        TraceButton(
+            enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
+            onClicked = onTraceButtonClicked
+        )
     }
 }
 
@@ -148,8 +150,7 @@ private fun TraceConfigurations(
 ) {
     TraceConfigurations(
         configs = configs.map { it.name },
-        selectedConfigName = selectedConfig?.name
-            ?: LocalContext.current.getString(R.string.no_configuration_selected)
+        selectedConfigName = selectedConfig?.name ?: LocalContext.current.getString(R.string.no_configuration_selected)
     ) { index ->
         onTraceSelected(configs[index])
     }
@@ -162,13 +163,7 @@ private fun TraceConfigurations(
     onTraceSelected: (Int) -> Unit
 ) {
     val expandableCardState = rememberExpandableCardState(false)
-    var selectedConfigIndex by remember(selectedConfigName) {
-        mutableIntStateOf(
-            configs.indexOf(
-                selectedConfigName
-            )
-        )
-    }
+    var selectedConfigIndex by remember(selectedConfigName) { mutableIntStateOf(configs.indexOf(selectedConfigName)) }
     ExpandableCardWithLabel(
         expandableCardState = expandableCardState,
         labelText = stringResource(id = R.string.trace_configuration),
