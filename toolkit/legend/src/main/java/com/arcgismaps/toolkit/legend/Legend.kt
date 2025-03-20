@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,6 +58,7 @@ private data class LegendItem(
 @Parcelize
 private data class LayerContentData(
     val name: String,
+    val isLayer: Boolean,
     val legendItems: MutableList<LegendItem> = mutableListOf(),
     val isVisible: (Double) -> Boolean
 ) : Parcelable
@@ -133,8 +135,8 @@ private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
 ): List<LayerContentData> {
-    val data = LayerContentData(layerContent.name) { scale ->
-        layerContent.isVisibleAtScale(scale)
+    val data = LayerContentData(layerContent.name, layerContent is Layer) { scale ->
+    layerContent.isVisibleAtScale(scale)
     }
     layerContent.fetchLegendInfos().onSuccess {
         it.map { info ->
@@ -176,9 +178,17 @@ private fun Legend(
             itemsIndexed(legendItems) { index, item ->
                 if (!respectScaleRange || item.isVisible(currentScale)) {
                     if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
-                        Row {
-                            Text(text = item.name, style = typography.layerName)
+                        Row(
+                            modifier = Modifier.then(
+                                if (!item.isLayer) Modifier.padding(horizontal = 10.dp) else Modifier
+                            )
+                        ) {
+                            Text(
+                                text = item.name,
+                                style = if (item.isLayer) typography.layerName else typography.subLayerName
+                            )
                         }
+
                     }
                     if (item.legendItems.isNotEmpty()) {
                         item.legendItems.forEach { legendInfo ->

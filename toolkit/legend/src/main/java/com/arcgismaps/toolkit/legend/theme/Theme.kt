@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
  *
  * @param title The text style for the title.
  * @param layerName The text style for the layer name.
+ * @param subLayerName The text style for the sub layer name.
  * @param legendInfoName The text style for the legend info name.
  *
  * @since 200.7.0
@@ -33,7 +34,8 @@ import androidx.compose.ui.text.TextStyle
 @Immutable
 public data class Typography internal constructor(
     val title: TextStyle,
-    val layerName : TextStyle,
+    val layerName: TextStyle,
+    val subLayerName: TextStyle,
     val legendInfoName: TextStyle,
 )
 
@@ -49,6 +51,7 @@ public object LegendDefaults {
      *
      * @param title The text style for the title.
      * @param layerName The text style for the layer name.
+     * @param subLayerName The text style for the sub layer name.
      * @param legendInfoName The text style for the legend info name.
      * @since 200.7.0
      */
@@ -56,10 +59,12 @@ public object LegendDefaults {
     public fun typography(
         title: TextStyle = MaterialTheme.typography.titleMedium,
         layerName: TextStyle = MaterialTheme.typography.titleSmall,
+        subLayerName: TextStyle = MaterialTheme.typography.bodyMedium,
         legendInfoName: TextStyle = MaterialTheme.typography.bodyMedium,
         ): Typography = Typography(
         title = title,
         layerName = layerName,
+        subLayerName = subLayerName,
         legendInfoName = legendInfoName,
     )
 }
