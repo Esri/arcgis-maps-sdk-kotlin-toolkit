@@ -376,6 +376,7 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
+    // Just call through to the new MapView function that takes imageOverlays
     MapView(
         arcGISMap = arcGISMap,
         modifier = modifier,
@@ -384,7 +385,7 @@ public fun MapView(
         onVisibleAreaChanged = onVisibleAreaChanged,
         viewpointPersistence = viewpointPersistence,
         graphicsOverlays = graphicsOverlays,
-        imageOverlays = remember { emptyList() },
+        imageOverlays = remember { emptyList() }, // pass an empty list for imageOverlays
         locationDisplay = locationDisplay,
         geometryEditor = geometryEditor,
         mapViewProxy = mapViewProxy,
