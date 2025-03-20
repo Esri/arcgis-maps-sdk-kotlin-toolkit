@@ -21,9 +21,11 @@ package com.arcgismaps.toolkit.legend
 import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -107,7 +109,12 @@ public fun Legend(
     if (initialized) {
         Legend(modifier, layerContentData, currentScale, respectScaleRange, title, typography)
     } else {
-        CircularProgressIndicator()
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -180,7 +187,7 @@ private fun Legend(
                     if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
                         Row(
                             modifier = Modifier.then(
-                                if (!item.isLayer) Modifier.padding(horizontal = 10.dp) else Modifier
+                                if (item.isLayer) Modifier else Modifier.padding(horizontal = 10.dp)
                             )
                         ) {
                             Text(
@@ -192,7 +199,17 @@ private fun Legend(
                     }
                     if (item.legendItems.isNotEmpty()) {
                         item.legendItems.forEach { legendInfo ->
-                            LegendInfoRow(legendInfo, typography)
+                            LegendInfoRow(
+                                legendInfo = legendInfo,
+                                typography = typography,
+                                modifier = if (item.isLayer) Modifier.padding(
+                                    horizontal = 5.dp,
+                                    vertical = 2.dp
+                                ) else Modifier.padding(
+                                    horizontal = 15.dp,
+                                    vertical = 2.dp
+                                )
+                            )
                         }
                     }
                 }
@@ -205,8 +222,9 @@ private fun Legend(
 private fun LegendInfoRow(
     legendInfo: LegendItem,
     typography: Typography,
+    modifier: Modifier
 ) {
-    Row {
+    Row(modifier = modifier) {
         legendInfo.bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),
