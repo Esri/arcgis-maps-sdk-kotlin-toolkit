@@ -197,7 +197,7 @@ private suspend fun getLayerContentData(
     density: Float
 ): List<LayerContentData> {
     val data = LayerContentData(layerContent.name, layerContent is Layer) { scale ->
-    layerContent.isVisibleAtScale(scale)
+        layerContent.isVisibleAtScale(scale)
     }
     layerContent.fetchLegendInfos().onSuccess {
         it.map { info ->
