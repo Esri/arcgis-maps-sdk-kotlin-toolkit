@@ -33,7 +33,7 @@ import androidx.compose.ui.text.TextStyle
 @Immutable
 public data class Typography internal constructor(
     val title: TextStyle,
-    val layerName : TextStyle,
+    val layerName: TextStyle,
     val legendInfoName: TextStyle,
 )
 
