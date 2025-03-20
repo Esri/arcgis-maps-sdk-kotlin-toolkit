@@ -51,20 +51,74 @@ import com.arcgismaps.toolkit.legend.theme.LegendDefaults
 import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
-private data class LegendItem(
-    val name: String,
-    val bitmap: Bitmap?
-): Parcelable
-
-@Parcelize
-private data class LayerContentData(
-    val name: String,
-    val isLayer: Boolean,
-    val legendItems: MutableList<LegendItem> = mutableListOf(),
-    val isVisible: (Double) -> Boolean
-) : Parcelable
-
+/**
+ * A composable that displays a legend for the given operational layers and basemap.
+ * The legend will display the layer symbology and description so users can better
+ * understand what is being viewed in the GeoView. The component provides the option to show all
+ * layers or only those layers in the current scale range of the GeoView as well as the ability
+ * to reverse the order of items in the legend. The legend will display information from layers,
+ * sublayers and group layers.
+ *
+ * The required parameters are the operational layers, the basemap to display in the legend and
+ * the current scale of the GeoView. The currentScale can be obtained from the Composable MapView's
+ * onViewpointChangedForCenterAndScale callback.
+ *
+ * _Workflow example:_
+ *
+ *  ```
+ * fun MainScreen(viewModel: LegendViewModel = viewModel()) {
+ *
+ *     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
+ *     val baseMap = viewModel.arcGISMap.basemap.collectAsState()
+ *     var currentScale: Double by remember { mutableDoubleStateOf(Double.NaN) }
+ *     ...
+ *
+ *     // show composable MapView with a legend in the bottom sheet
+ *      BottomSheetScaffold(
+ *         sheetContent = {
+ *             AnimatedVisibility(
+ *                 visible = loadState is LoadStatus.Loaded,
+ *                 enter = slideInVertically { h -> h },
+ *                 exit = slideOutVertically { h -> h },
+ *                 label = "legend",
+ *                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
+ *             ) {
+ *                 Legend(
+ *                     operationalLayers = viewModel.arcGISMap.operationalLayers,
+ *                     basemap = baseMap.value,
+ *                     currentScale = currentScale,
+ *                     modifier = Modifier.fillMaxSize()
+ *                 )
+ *             }
+ *         },
+ *         modifier = Modifier.fillMaxSize(),
+ *         scaffoldState = scaffoldState,
+ *         sheetSwipeEnabled = true,
+ *         topBar = null
+ *     ) { padding ->
+ *         MapView(
+ *             modifier = Modifier
+ *                 .padding(padding)
+ *                 .fillMaxSize(),
+ *             arcGISMap = viewModel.arcGISMap,
+ *             onViewpointChangedForCenterAndScale = {
+ *                 currentScale = it.targetScale
+ *             }
+ *         )
+ *     }
+ *  ```
+ *
+ * @param operationalLayers The operational layers to display in the legend.
+ * @param basemap The basemap to display in the legend.
+ * @param currentScale The current scale of the GeoView.
+ * @param modifier Modifier to be applied to the legend.
+ * @param reverseLayerOrder Whether to reverse the order of the layers in the legend.
+ * @param respectScaleRange Whether to respect the scale range of the layers.
+ * @param title The title of the legend. Defaults to "Legend". Empty string will not display the title.
+ * @param typography The typography to use for the legend.
+ *
+ * @since 200.7.0
+ */
 @Composable
 public fun Legend(
     operationalLayers: List<LayerContent>,
@@ -187,7 +241,9 @@ private fun Legend(
                     if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
                         Row(
                             modifier = Modifier.then(
-                                if (item.isLayer) Modifier else Modifier.padding(horizontal = 10.dp)
+                                if (item.isLayer) Modifier.padding(horizontal = 5.dp) else Modifier.padding(
+                                    horizontal = 10.dp
+                                )
                             )
                         ) {
                             Text(
@@ -203,10 +259,10 @@ private fun Legend(
                                 legendInfo = legendInfo,
                                 typography = typography,
                                 modifier = if (item.isLayer) Modifier.padding(
-                                    horizontal = 5.dp,
+                                    horizontal = 10.dp,
                                     vertical = 2.dp
                                 ) else Modifier.padding(
-                                    horizontal = 15.dp,
+                                    horizontal = 20.dp,
                                     vertical = 2.dp
                                 )
                             )
@@ -234,3 +290,17 @@ private fun LegendInfoRow(
         Text(text = legendInfo.name, style = typography.legendInfoName)
     }
 }
+
+@Parcelize
+private data class LegendItem(
+    val name: String,
+    val bitmap: Bitmap?
+): Parcelable
+
+@Parcelize
+private data class LayerContentData(
+    val name: String,
+    val isLayer: Boolean,
+    val legendItems: MutableList<LegendItem> = mutableListOf(),
+    val isVisible: (Double) -> Boolean
+) : Parcelable

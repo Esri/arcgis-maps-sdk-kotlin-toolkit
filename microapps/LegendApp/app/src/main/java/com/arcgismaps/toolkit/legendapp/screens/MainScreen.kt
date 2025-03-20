@@ -34,16 +34,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.legend.Legend
 
@@ -77,7 +73,12 @@ fun MainScreen(viewModel: LegendViewModel = viewModel()) {
                 label = "legend",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Legend(viewModel.arcGISMap.operationalLayers, baseMap.value, currentScale, modifier = Modifier.fillMaxSize())
+                Legend(
+                    operationalLayers = viewModel.arcGISMap.operationalLayers,
+                    basemap = baseMap.value,
+                    currentScale = currentScale,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         },
         modifier = Modifier.fillMaxSize(),
