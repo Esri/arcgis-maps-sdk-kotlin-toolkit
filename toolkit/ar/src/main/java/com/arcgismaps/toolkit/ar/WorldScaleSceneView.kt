@@ -19,16 +19,22 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -56,12 +62,12 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
+import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
+import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.rememberGeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
-import com.arcgismaps.toolkit.ar.internal.rememberWorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
@@ -138,38 +144,53 @@ public fun WorldScaleSceneView(
     if (!allPermissionsGranted) return@WorldScaleSceneView
 
     val arSessionWrapper =
-        rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext, useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial)
+        rememberArSessionWrapper(
+            applicationContext = LocalContext.current.applicationContext,
+            useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial
+        )
 
-
-    val localLifecycleOwner = LocalLifecycleOwner.current
     val calibrationState = remember { CalibrationState() }
-    val locationTracker: WorldScaleCameraController = when (worldScaleTrackingMode) {
-        is WorldScaleTrackingMode.Geospatial -> rememberGeospatialTrackingCameraController(
-            calibrationState,
-            arSessionWrapper
-        )
-        is WorldScaleTrackingMode.World -> rememberWorldTrackingCameraController(
-            calibrationState = calibrationState,
-            clippingDistance = clippingDistance,
-            onLocationDataSourceFailedToStart = {
-                initializationStatus.update(
-                    WorldScaleSceneViewStatus.FailedToInitialize(it),
-                    onInitializationStatusChanged
-                )
-            },
-            onResetOriginCamera = {
-                localLifecycleOwner.lifecycleScope.launch {
-                    arSessionWrapper.resetSession()
-                }
+    val scope = rememberCoroutineScope()
+
+    val worldScaleCameraController: WorldScaleCameraController = rememberWorldScaleCameraController(
+        context = LocalContext.current,
+        worldScaleTrackingMode = worldScaleTrackingMode,
+        calibrationState = calibrationState,
+        clippingDistance = clippingDistance,
+        onUpdateInitializationStatus = {
+            initializationStatus.update(
+                it,
+                onInitializationStatusChanged
+            )
+        },
+        onResetOriginCamera = {
+            scope.launch {
+                arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial)
             }
-        )
+        }
+    )
+    // TODO
+    if (worldScaleCameraController is WorldTrackingCameraController) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(worldScaleCameraController) {
+            lifecycleOwner.lifecycle.addObserver(worldScaleCameraController as WorldTrackingCameraController)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(worldScaleCameraController as WorldTrackingCameraController)
+                (worldScaleCameraController as WorldTrackingCameraController).onDestroy(lifecycleOwner)
+            }
+        }
     }
+
+    // The camera controller will get used by the SceneView and the long-lived onFrame callback,
+    // so we need to make sure that those always use the most up-to-date camera controller.
+    val cameraController by rememberUpdatedState(worldScaleCameraController)
 
     Box(modifier = modifier) {
         ArCameraFeed(
             session = arSessionWrapper,
-            onFrame = { frame, displayRotation ->
-                locationTracker.updateCamera(frame)
+            onFrame = { frame, displayRotation, session ->
+                cameraController.updateCamera(frame, session)
+                if (!cameraController.hasSetOriginCamera) return@ArCameraFeed
                 worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                     frame.camera,
                     displayRotation
@@ -186,7 +207,7 @@ public fun WorldScaleSceneView(
             onInitializationStatusChanged
         )
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
-        if (!locationTracker.hasSetOriginCamera) return@WorldScaleSceneView
+        if (!cameraController.hasSetOriginCamera) return@WorldScaleSceneView
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -205,7 +226,7 @@ public fun WorldScaleSceneView(
             isAttributionBarVisible = isAttributionBarVisible,
             onAttributionTextChanged = onAttributionTextChanged,
             onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = locationTracker.cameraController,
+            cameraController = cameraController.cameraController,
             analysisOverlays = analysisOverlays,
             imageOverlays = imageOverlays,
             atmosphereEffect = AtmosphereEffect.None,
@@ -243,3 +264,36 @@ public fun WorldScaleSceneView(
         )
     }
 }
+
+@Composable
+internal fun rememberWorldScaleCameraController(
+    context: Context,
+    worldScaleTrackingMode: WorldScaleTrackingMode,
+    calibrationState: CalibrationState,
+    clippingDistance: Double?,
+    onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit,
+    onResetOriginCamera: () -> Unit
+): WorldScaleCameraController = remember(worldScaleTrackingMode) {
+    onUpdateInitializationStatus(WorldScaleSceneViewStatus.Initializing)
+    when (worldScaleTrackingMode) {
+        is WorldScaleTrackingMode.Geospatial -> {
+            GeospatialTrackingCameraController(
+                calibrationState = calibrationState,
+                context = context
+            )
+        }
+
+        is WorldScaleTrackingMode.World -> {
+            ArcGISEnvironment.applicationContext = context.applicationContext
+            WorldTrackingCameraController(
+                calibrationState = calibrationState,
+                clippingDistance = clippingDistance,
+                onLocationDataSourceFailedToStart = { it: Throwable ->
+                    onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
+                },
+                onResetOriginCamera = onResetOriginCamera
+            )
+        }
+    }
+}
+

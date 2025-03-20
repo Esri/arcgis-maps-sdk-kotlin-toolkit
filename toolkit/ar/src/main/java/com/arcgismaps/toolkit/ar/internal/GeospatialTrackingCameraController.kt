@@ -39,6 +39,7 @@ import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.google.ar.core.Earth
 import com.google.ar.core.Frame
 import com.google.ar.core.Pose
+import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import kotlin.math.sqrt
 
@@ -54,7 +55,6 @@ import kotlin.math.sqrt
  */
 internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val sessionWrapper: ArSessionWrapper,
     context: Context,
 ) : WorldScaleCameraController {
     override val cameraController = TransformationMatrixCameraController()
@@ -67,11 +67,12 @@ internal class GeospatialTrackingCameraController(
         (context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay
     }
 
-    override fun updateCamera(frame: Frame) {
-        sessionWrapper.withLock { session, _ ->
+    override fun updateCamera(frame: Frame, session: Session) {
+//        sessionWrapper.withLock { session, _ ->
             session.earth?.let { earth ->
                 if (earth.trackingState != TrackingState.TRACKING) return@let
                 if (earth.earthState != Earth.EarthState.ENABLED) return@let
+                // TODO: early exit if session is paused?
 
                 try {
                     val geospatialPose = earth.cameraGeospatialPose
@@ -159,7 +160,7 @@ internal class GeospatialTrackingCameraController(
             }
         }
     }
-}
+//}
 
 /**
  * Returns a [GeospatialTrackingCameraController].
@@ -170,14 +171,11 @@ internal class GeospatialTrackingCameraController(
 @Composable
 internal fun rememberGeospatialTrackingCameraController(
     calibrationState: CalibrationState,
-    sessionWrapper: ArSessionWrapper
 ): WorldScaleCameraController {
-    sessionWrapper.onResume(LocalLifecycleOwner.current)
     val context = LocalContext.current
     return remember {
         GeospatialTrackingCameraController(
             calibrationState,
-            sessionWrapper,
             context
         )
     }

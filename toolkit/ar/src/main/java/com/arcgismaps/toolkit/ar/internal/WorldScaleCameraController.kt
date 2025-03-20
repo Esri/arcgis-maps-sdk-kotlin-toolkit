@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.ar.internal
 
 import com.arcgismaps.mapping.view.CameraController
 import com.google.ar.core.Frame
+import com.google.ar.core.Session
 
 /**
  * Provides a common interface for classes that update the camera's position in world scale AR.
@@ -47,5 +48,5 @@ internal interface WorldScaleCameraController {
      *
      * @since 200.7.0
      */
-    fun updateCamera(frame: Frame)
+    fun updateCamera(frame: Frame, session: Session)
 }

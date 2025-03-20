@@ -37,10 +37,12 @@ import com.arcgismaps.location.CustomLocationDataSource
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.google.ar.core.Frame
+import com.google.ar.core.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -75,9 +77,7 @@ internal class WorldTrackingCameraController(
 
     private val worldScaleNmeaLocationProvider = WorldScaleNmeaLocationProvider(scope)
     private val worldScaleHeadingProvider : WorldScaleHeadingProvider
-    private val locationDataSource = CustomLocationDataSource {
-        worldScaleNmeaLocationProvider
-    }
+    private val locationDataSource = SystemLocationDataSource()
     override val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
     }
@@ -97,7 +97,7 @@ internal class WorldTrackingCameraController(
      *
      * @since 200.7.0
      */
-    override fun updateCamera(frame: Frame) {
+    override fun updateCamera(frame: Frame, session: Session) {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
         cameraController.transformationMatrix = cameraPosition
     }
@@ -281,8 +281,8 @@ internal fun shouldUpdateCamera(
     if (location.position.z?.isNaN() == true) return false
 
     // filter out locations with low accuracy
-    if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
-    if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
+//    if (location.horizontalAccuracy > WorldScaleParameters.HORIZONTAL_ACCURACY_THRESHOLD_METERS) return false
+//    if (location.verticalAccuracy > WorldScaleParameters.VERTICAL_ACCURACY_THRESHOLD_METERS) return false
 
     if (!measureDistance) return true
 

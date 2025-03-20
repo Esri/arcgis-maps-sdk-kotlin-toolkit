@@ -48,11 +48,10 @@ import com.google.ar.core.Session
  * @param visualizePlanes whether to visualize detected planes.
  * @since 200.6.0
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ArCameraFeed(
     session: ArSessionWrapper,
-    onFrame: (Frame, Int) -> Unit,
+    onFrame: (Frame, Int, Session) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit,
     visualizePlanes: Boolean = true

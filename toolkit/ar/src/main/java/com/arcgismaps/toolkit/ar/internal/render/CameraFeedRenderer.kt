@@ -45,7 +45,7 @@ internal class CameraFeedRenderer(
     context: Context,
     private val arSessionWrapper: ArSessionWrapper,
     private val assets: AssetManager,
-    private val onFrame: (Frame, Int) -> Unit,
+    private val onFrame: (Frame, Int, Session) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
     private val onFirstPlaneDetected: () -> Unit,
     var visualizePlanes: Boolean = true
@@ -158,6 +158,7 @@ internal class CameraFeedRenderer(
         var callbackFrame: Frame? = null
         var callbackCameraId: String? = null
         arSessionWrapper.withLock { session, shouldInitializeDisplay ->
+            if (session == null) return@withLock
             // Texture names should only be set once on a GL thread unless they change. This is done during
             // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
             // initialized during the execution of onSurfaceCreated.
@@ -220,13 +221,19 @@ internal class CameraFeedRenderer(
 
             callbackFrame = frame
             callbackCameraId = session.cameraConfig.cameraId
-        }
-        callbackFrame?.let {
+
             onFrame(
-                it,
-                displayRotationHelper.getCameraSensorToDisplayRotation(callbackCameraId ?: "")
+                frame,
+                displayRotationHelper.getCameraSensorToDisplayRotation(callbackCameraId ?: ""),
+                session
             )
         }
+//        callbackFrame?.let {
+//            onFrame(
+//                it,
+//                displayRotationHelper.getCameraSensorToDisplayRotation(callbackCameraId ?: "")
+//            )
+//        }
     }
 
     private fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {

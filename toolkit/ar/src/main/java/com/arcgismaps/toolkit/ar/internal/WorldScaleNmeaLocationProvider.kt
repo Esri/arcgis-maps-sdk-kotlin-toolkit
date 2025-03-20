@@ -113,9 +113,9 @@ internal class WorldScaleNmeaLocationProvider(scope: CoroutineScope) :
      * @since 200.7.0
      */
     internal suspend fun stop() {
+        locationManager.removeNmeaListener(this)
         systemLocationDataSource.stop()
         nmeaLocationDataSource.stop()
-        locationManager.removeNmeaListener(this)
     }
 
     override fun onNmeaMessage(message: String?, timestamp: Long) {

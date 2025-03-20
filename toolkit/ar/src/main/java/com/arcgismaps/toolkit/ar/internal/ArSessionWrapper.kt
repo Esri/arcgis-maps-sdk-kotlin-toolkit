@@ -18,49 +18,71 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context, private val useGeospatial: Boolean) :
+internal class ArSessionWrapper(private val applicationContext: Context, private val scope: CoroutineScope) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
 
-    private val mutex: Mutex = Mutex()
+    private val lock: Lock = ReentrantLock()
 
     private var shouldInitializeDisplay = true
 
+    private var useGeospatial = false
+
     override fun onDestroy(owner: LifecycleOwner) {
-        session?.close()
-        session = null
+        withLock { session, _ ->
+            this.session = null
+            scope.launch(Dispatchers.Unconfined) {
+                session?.close()
+                Log.d("ArSessionWrapper", "Session closed.")
+            }
+        }
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        session?.pause()
+        withLock { session, _ ->
+            session?.pause()
+        }
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val newSession = this.session ?: Session(applicationContext)
-        shouldInitializeDisplay = true
-        newSession.resume()
-        session = newSession
-        configureSession(useGeospatial)
+        withLock { session, _ ->
+            val newSession = session ?: Session(applicationContext)
+            shouldInitializeDisplay = true
+            newSession.resume()
+            this.session = newSession
+            configureSession(useGeospatial)
+        }
     }
 
     internal fun configureSession(useGeospatial: Boolean) {
+        // TODO:
        if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) return
         session?.configure(
             session?.config?.apply {
@@ -72,29 +94,30 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
         )
+        this.useGeospatial = useGeospatial
     }
 
-    internal fun withLock(block: (Session, shouldInitializeDisplay: Boolean) -> Unit) {
-        val locked = mutex.tryLock()
-        if (!locked) return
+    internal fun withLock(block: (Session?, shouldInitializeDisplay: Boolean) -> Unit) {
         try {
-            block(session ?: return, shouldInitializeDisplay)
+            lock.lock()
+            block(session, shouldInitializeDisplay)
         } finally {
-            mutex.unlock()
+            lock.unlock()
         }
     }
 
-    suspend fun resetSession() {
-        mutex.withLock {
+    suspend fun resetSession(useGeospatial: Boolean = false) {
+        withLock { session, _ ->
             session?.let {
                 it.pause()
                 it.close()
+//                it.setCameraTextureNames(intArrayOf(-1))
             }
-            session = null
+            this.session = null
             val newSession = Session(applicationContext)
             shouldInitializeDisplay = true
             newSession.resume()
-            session = newSession
+            this.session = newSession
             configureSession(useGeospatial)
         }
     }
@@ -106,9 +129,12 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean): ArSessionWrapper {
+internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean = false): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember { ArSessionWrapper(applicationContext, useGeospatial) }
+    val arSessionWrapper = remember{ ArSessionWrapper(applicationContext, lifecycleOwner.lifecycleScope) }
+    LaunchedEffect(useGeospatial) {
+        arSessionWrapper.resetSession(useGeospatial)
+    }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
         onDispose {
