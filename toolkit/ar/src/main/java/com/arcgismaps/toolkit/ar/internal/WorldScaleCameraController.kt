@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.arcgismaps.mapping.view.CameraController
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
@@ -27,7 +28,7 @@ import com.google.ar.core.Session
  *
  * @since 200.7.0
  */
-internal interface WorldScaleCameraController {
+internal interface WorldScaleCameraController : DefaultLifecycleObserver {
     /**
      * The [CameraController] that will be passed to a scene view.
      *

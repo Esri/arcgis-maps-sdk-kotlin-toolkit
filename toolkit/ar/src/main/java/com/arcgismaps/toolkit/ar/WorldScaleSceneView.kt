@@ -169,15 +169,12 @@ public fun WorldScaleSceneView(
             }
         }
     )
-    // TODO
-    if (worldScaleCameraController is WorldTrackingCameraController) {
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(worldScaleCameraController) {
-            lifecycleOwner.lifecycle.addObserver(worldScaleCameraController as WorldTrackingCameraController)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(worldScaleCameraController as WorldTrackingCameraController)
-                (worldScaleCameraController as WorldTrackingCameraController).onDestroy(lifecycleOwner)
-            }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(worldScaleCameraController) {
+        lifecycleOwner.lifecycle.addObserver(worldScaleCameraController)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(worldScaleCameraController)
+            (worldScaleCameraController).onDestroy(lifecycleOwner)
         }
     }
 

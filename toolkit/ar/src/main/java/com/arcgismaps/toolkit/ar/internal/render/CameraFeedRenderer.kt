@@ -155,8 +155,6 @@ internal class CameraFeedRenderer(
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        var callbackFrame: Frame? = null
-        var callbackCameraId: String? = null
         arSessionWrapper.withLock { session, shouldInitializeDisplay ->
             if (session == null) return@withLock
             // Texture names should only be set once on a GL thread unless they change. This is done during
@@ -219,21 +217,12 @@ internal class CameraFeedRenderer(
                 }
             }
 
-            callbackFrame = frame
-            callbackCameraId = session.cameraConfig.cameraId
-
             onFrame(
                 frame,
-                displayRotationHelper.getCameraSensorToDisplayRotation(callbackCameraId ?: ""),
+                displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId),
                 session
             )
         }
-//        callbackFrame?.let {
-//            onFrame(
-//                it,
-//                displayRotationHelper.getCameraSensorToDisplayRotation(callbackCameraId ?: "")
-//            )
-//        }
     }
 
     private fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {

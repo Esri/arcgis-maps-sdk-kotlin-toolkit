@@ -60,7 +60,6 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
             this.session = null
             scope.launch(Dispatchers.Unconfined) {
                 session?.close()
-                Log.d("ArSessionWrapper", "Session closed.")
             }
         }
     }
@@ -111,7 +110,6 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
             session?.let {
                 it.pause()
                 it.close()
-//                it.setCameraTextureNames(intArrayOf(-1))
             }
             this.session = null
             val newSession = Session(applicationContext)

@@ -29,7 +29,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -41,6 +42,7 @@ import com.google.ar.core.Frame
 import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
+import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
 /**
@@ -68,99 +70,140 @@ internal class GeospatialTrackingCameraController(
     }
 
     override fun updateCamera(frame: Frame, session: Session) {
-//        sessionWrapper.withLock { session, _ ->
-            session.earth?.let { earth ->
-                if (earth.trackingState != TrackingState.TRACKING) return@let
-                if (earth.earthState != Earth.EarthState.ENABLED) return@let
-                // TODO: early exit if session is paused?
+        session.earth?.let { earth ->
+            if (earth.trackingState != TrackingState.TRACKING) return@let
+            if (earth.earthState != Earth.EarthState.ENABLED) return@let
 
-                try {
-                    val geospatialPose = earth.cameraGeospatialPose
-                    val orientation = geospatialPose.eastUpSouthQuaternion
-                    val projectedLocation = GeometryEngine.projectOrNull(
-                        Point(
-                            geospatialPose.longitude,
-                            geospatialPose.latitude,
-                            geospatialPose.altitude + calibrationState.totalElevationOffset,
-                            SpatialReference(
-                                SpatialReference.wgs84().wkid,
-                                115700 /*WGS84_VERTICAL*/
-                            )
-                        ),
+            try {
+                val geospatialPose = earth.cameraGeospatialPose
+                val orientation = geospatialPose.eastUpSouthQuaternion
+                val projectedLocation = GeometryEngine.projectOrNull(
+                    Point(
+                        geospatialPose.longitude,
+                        geospatialPose.latitude,
+                        geospatialPose.altitude + calibrationState.totalElevationOffset,
                         SpatialReference(
                             SpatialReference.wgs84().wkid,
-                            verticalWkid = 5773 /*EGM96*/
+                            115700 /*WGS84_VERTICAL*/
                         )
-                    ) ?: return@let
+                    ),
+                    SpatialReference(
+                        SpatialReference.wgs84().wkid,
+                        verticalWkid = 5773 /*EGM96*/
+                    )
+                ) ?: return@let
 
-                    cameraController.setOriginCamera(
-                        Camera(
-                            projectedLocation,
-                            0.0,
-                            90.0,
-                            0.0
+                cameraController.setOriginCamera(
+                    Camera(
+                        projectedLocation,
+                        calibrationState.totalHeadingOffset,
+                        90.0,
+                        0.0
+                    )
+                )
+                val original = earth.getPose(
+                    geospatialPose.latitude,
+                    geospatialPose.longitude,
+                    geospatialPose.altitude,
+                    orientation[0],
+                    orientation[1],
+                    orientation[2],
+                    orientation[3]
+                )
+
+                val physicalPose = when (display?.rotation ?: 0) {
+                    Surface.ROTATION_90 -> original.compose(
+                        Pose.makeRotation(
+                            0f,
+                            0f,
+                            -sqrt(0.5).toFloat(),
+                            sqrt(0.5).toFloat()
                         )
                     )
-                    val original = earth.getPose(
-                        geospatialPose.latitude,
-                        geospatialPose.longitude,
-                        geospatialPose.altitude,
-                        orientation[0],
-                        orientation[1],
-                        orientation[2],
-                        orientation[3]
+
+                    Surface.ROTATION_180 -> original.compose(
+                        Pose.makeRotation(
+                            0f,
+                            0f,
+                            sqrt(1.0).toFloat(),
+                            0f
+                        )
                     )
 
-                    val physicalPose = when (display?.rotation ?: 0) {
-                        Surface.ROTATION_90 -> original.compose(
-                            Pose.makeRotation(
-                                0f,
-                                0f,
-                                -sqrt(0.5).toFloat(),
-                                sqrt(0.5).toFloat()
-                            )
+                    Surface.ROTATION_270 -> original.compose(
+                        Pose.makeRotation(
+                            0f,
+                            0f,
+                            sqrt(0.5).toFloat(),
+                            sqrt(0.5).toFloat()
                         )
+                    )
 
-                        Surface.ROTATION_180 -> original.compose(
-                            Pose.makeRotation(
-                                0f,
-                                0f,
-                                sqrt(1.0).toFloat(),
-                                0f
-                            )
-                        )
-
-                        Surface.ROTATION_270 -> original.compose(
-                            Pose.makeRotation(
-                                0f,
-                                0f,
-                                sqrt(0.5).toFloat(),
-                                sqrt(0.5).toFloat()
-                            )
-                        )
-
-                        else -> original
-                    }
-
-                    hasSetOriginCamera = true
-                    cameraController.transformationMatrix =
-                        TransformationMatrix.createWithQuaternionAndTranslation(
-                            physicalPose.qx().toDouble(),
-                            physicalPose.qy().toDouble(),
-                            physicalPose.qz().toDouble(),
-                            physicalPose.qw().toDouble(),
-                            0.0,
-                            0.0,
-                            0.0
-                        )
-                } catch (e: Throwable) {
-                    Log.e("GeospatialTrackingCameraController", "Failed to update camera", e)
-                    // Ignore
+                    else -> original
                 }
+
+                hasSetOriginCamera = true
+                cameraController.transformationMatrix =
+                    TransformationMatrix.createWithQuaternionAndTranslation(
+                        physicalPose.qx().toDouble(),
+                        physicalPose.qy().toDouble(),
+                        physicalPose.qz().toDouble(),
+                        physicalPose.qw().toDouble(),
+                        0.0,
+                        0.0,
+                        0.0
+                    )
+            } catch (e: Throwable) {
+                Log.e("GeospatialTrackingCameraController", "Failed to update camera", e)
+                // Ignore
             }
         }
     }
-//}
+
+
+    /**
+     * Rotates the origin position of the camera by the given heading offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraHeading(headingOffset: Double) {
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .rotateAround(
+                    targetPoint = cameraController.originCamera.value.location,
+                    deltaHeading = headingOffset,
+                    deltaPitch = 0.0,
+                    deltaRoll = 0.0
+                )
+        )
+    }
+
+    /**
+     * Elevates the origin position of the camera by the given elevation offset.
+     *
+     * @since 200.7.0
+     */
+    private fun updateCameraElevation(elevationOffset: Double) {
+        cameraController.setOriginCamera(
+            cameraController.originCamera.value
+                .elevate(elevationOffset)
+        )
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        owner.lifecycleScope.launch {
+            calibrationState.headingDeltas.collect {
+                updateCameraHeading(-it)
+            }
+        }
+        owner.lifecycleScope.launch {
+            calibrationState.elevationDeltas.collect {
+                updateCameraElevation(it)
+            }
+        }
+        super.onResume(owner)
+    }
+}
 
 /**
  * Returns a [GeospatialTrackingCameraController].

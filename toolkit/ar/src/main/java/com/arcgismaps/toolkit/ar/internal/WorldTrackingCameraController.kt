@@ -69,8 +69,7 @@ internal class WorldTrackingCameraController(
     clippingDistance: Double?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
-) :
-    WorldScaleCameraController, DefaultLifecycleObserver {
+) : WorldScaleCameraController {
 
     // This coroutine scope is tied to the lifecycle of this [LocationDataSourceWrapper]
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
