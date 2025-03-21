@@ -29,9 +29,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -39,13 +43,18 @@ import androidx.compose.ui.res.stringResource
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 private data class LegendItem(
     val name: String,
     val bitmap: Bitmap?
-): Parcelable
+) : Parcelable
 
 @Parcelize
 private data class LayerContentData(
@@ -59,15 +68,22 @@ public fun Legend(
     operationalLayers: List<LayerContent>,
     basemap: Basemap?,
     currentScale: Double,
+    modifier: Modifier = Modifier,
     reverseLayerOrder: Boolean = false,
-    respectScaleRange: Boolean = true,
-    modifier: Modifier = Modifier
+    respectScaleRange: Boolean = true
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
-    val layerContentData = rememberSaveable(operationalLayers, basemap) { mutableListOf<LayerContentData>() }
+    var initialized: Boolean by rememberSaveable(
+        operationalLayers,
+        basemap
+    ) { mutableStateOf(false) }
+    val layerContentData =
+        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
+            mutableStateListOf<LayerContentData>()
+        }
 
     if (!initialized) {
+        // initialize legend content once
         LaunchedEffect(Unit) {
             operationalLayers.filterIsInstance<Layer>().forEach {
                 it.load().onFailure { return@LaunchedEffect }
@@ -76,28 +92,132 @@ public fun Legend(
 
             basemap?.baseLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
             basemap?.referenceLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
-
-            // Add the layers to the layer content data
-            // Add the operational layers first
-            addLayersAndSubLayersDataToLayerContentData(operationalLayers, reverseLayerOrder, density, layerContentData)
-            // Add the basemap layers
-            addLayersAndSubLayersDataToLayerContentData(basemap?.baseLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = reverseLayerOrder)
-            // Add the reference layers
-            addLayersAndSubLayersDataToLayerContentData(basemap?.referenceLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = !reverseLayerOrder)
-
+            legendContent(
+                layerContentData,
+                operationalLayers,
+                basemap?.baseLayers ?: emptyList(),
+                basemap?.referenceLayers ?: emptyList(),
+                reverseLayerOrder,
+                density
+            )
             initialized = true
+        }
+    } else {
+        // establish the sublayerContents observation after initialization and after a config change.
+        LaunchedEffect(Unit) {
+            val sublayerContent = operationalLayers.map {
+                it.subLayerContents
+            } + (basemap?.baseLayers?.map {
+                it.subLayerContents
+            } ?: emptyList()) + (basemap?.referenceLayers?.map {
+                it.subLayerContents
+            } ?: emptyList())
+
+            // drop the first values -- the initial sublayer contents are already in the Legend.
+            val dropList = sublayerContent.map {
+                it.drop(1)
+            }
+            val sublayerChangedFlow: Flow<List<LayerContent>> =
+                merge(*dropList.toTypedArray()).shareIn(this, SharingStarted.Lazily)
+
+            sublayerChangedFlow
+                .collect {
+                    legendContent(
+                        layerContentData,
+                        operationalLayers,
+                        basemap?.baseLayers ?: emptyList(),
+                        basemap?.referenceLayers ?: emptyList(),
+                        reverseLayerOrder,
+                        density
+                    )
+                }
         }
     }
 
-    if (currentScale == 0.0 || currentScale.isNaN()) {
-        return
-    }
-
-    if (initialized) {
+    val validScale = (currentScale != 0.0 && !currentScale.isNaN())
+    if (validScale && initialized) {
         Legend(modifier, layerContentData, currentScale, respectScaleRange)
     } else {
         CircularProgressIndicator()
     }
+}
+
+
+@Composable
+private fun Legend(
+    modifier: Modifier,
+    legendItems: List<LayerContentData>,
+    currentScale: Double,
+    respectScaleRange: Boolean,
+) {
+    LazyColumn(modifier = modifier) {
+
+        itemsIndexed(legendItems) { index, item ->
+            if (!respectScaleRange || item.isVisible(currentScale)) {
+                if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
+                    Row {
+                        Text(text = item.name)
+                    }
+                }
+                if (item.legendItems.isNotEmpty()) {
+                    item.legendItems.forEach { legendInfo ->
+                        LegendInfoRow(legendInfo)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendInfoRow(
+    legendInfo: LegendItem,
+) {
+    Row {
+        legendInfo.bitmap?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = stringResource(R.string.symbol_description)
+            )
+        }
+        Text(text = legendInfo.name)
+    }
+}
+
+private suspend fun legendContent(
+    layerContentData: MutableList<LayerContentData>,
+    layers: List<LayerContent>,
+    baseLayers: List<LayerContent>,
+    referenceLayers: List<LayerContent>,
+    reverseOrder: Boolean,
+    density: Float
+) {
+    println("sublayer legendContent call")
+    layerContentData.clear()
+    // Add the layers to the layer content data
+    // Add the operational layers first
+    addLayersAndSubLayersDataToLayerContentData(
+        layers,
+        reverseOrder,
+        density,
+        layerContentData
+    )
+    // Add the basemap layers
+    addLayersAndSubLayersDataToLayerContentData(
+        baseLayers,
+        reverseOrder,
+        density,
+        layerContentData,
+        addAtIndexZero = reverseOrder
+    )
+    // Add the reference layers
+    addLayersAndSubLayersDataToLayerContentData(
+        referenceLayers,
+        reverseOrder,
+        density,
+        layerContentData,
+        addAtIndexZero = !reverseOrder
+    )
 }
 
 private suspend fun addLayersAndSubLayersDataToLayerContentData(
@@ -111,7 +231,8 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
         // The order of the layers is reversed to match the order in the legend
         val orderedLayers = if (reverseLayerOrder) layerList else layerList.reversed()
         val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
-        val layersAndSubLayersLayerContentData = filteredLayers.flatMap { getLayerContentData(it, density) }
+        val layersAndSubLayersLayerContentData =
+            filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
             layerContentData.addAll(0, layersAndSubLayersLayerContentData)
         } else {
@@ -144,42 +265,13 @@ private suspend fun getLayerContentData(
     }
 }
 
-@Composable
-private fun Legend(
-    modifier: Modifier,
-    legendItems: List<LayerContentData>,
-    currentScale: Double,
-    respectScaleRange: Boolean,
-    ) {
-    LazyColumn(modifier = modifier) {
-        itemsIndexed(legendItems) { index, item ->
-            if (!respectScaleRange || item.isVisible(currentScale)) {
-                if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
-                    Row {
-                        Text(text = item.name)
-                    }
-                }
-                if (item.legendItems.isNotEmpty()) {
-                    item.legendItems.forEach { legendInfo ->
-                        LegendInfoRow(legendInfo)
-                    }
-                }
-            }
+private fun <T : Parcelable> snapshotStateListSaver(): Saver<SnapshotStateList<T>, Any> = listSaver(
+    {
+        it.toList()
+    },
+    {
+        mutableStateListOf<T>().apply {
+            addAll(it)
         }
     }
-}
-
-@Composable
-private fun LegendInfoRow(
-    legendInfo: LegendItem,
-) {
-    Row {
-        legendInfo.bitmap?.let {
-            Image(
-                bitmap = it.asImageBitmap(),
-                contentDescription = stringResource(R.string.symbol_description)
-            )
-        }
-        Text(text = legendInfo.name)
-    }
-}
+)
