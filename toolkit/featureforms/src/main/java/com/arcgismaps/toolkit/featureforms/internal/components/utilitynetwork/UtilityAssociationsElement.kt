@@ -57,7 +57,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 @Composable
 internal fun UtilityAssociationsElement(
     state: UtilityAssociationsElementState,
-    onItemClick: (Int) -> Unit,
+    onItemClick: (UtilityAssociationsFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -147,7 +147,7 @@ private fun ElementHeader(
 @Composable
 private fun Filters(
     filterResults: List<UtilityAssociationsFilterResult>,
-    onClick: (Int) -> Unit,
+    onClick: (UtilityAssociationsFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier) {
@@ -158,7 +158,7 @@ private fun Filters(
                         Text(text = filterResult.filter.title)
                     },
                     modifier = Modifier.clickable {
-                        onClick(i)
+                        onClick(filterResult)
                     },
                     supportingContent = if (filterResult.filter.description.isNotEmpty()) {
                         {

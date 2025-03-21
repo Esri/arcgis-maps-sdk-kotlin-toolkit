@@ -20,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,6 +62,13 @@ internal class UtilityAssociationsElementState(
     val filters: List<UtilityAssociationsFilterResult>
         get() = _filters.value
 
+
+    var selectedFilterResult : UtilityAssociationsFilterResult? = null
+        private set
+
+    var selectedGroupResult : UtilityAssociationGroupResult? = null
+        private set
+
     init {
         scope.launch {
             // fetch the associations filter results for the element
@@ -71,5 +79,13 @@ internal class UtilityAssociationsElementState(
             }
             _loading.value = false
         }
+    }
+
+    fun setSelectedFilterResult(filterResult: UtilityAssociationsFilterResult) {
+        selectedFilterResult = filterResult
+    }
+
+    fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult) {
+        selectedGroupResult = groupResult
     }
 }

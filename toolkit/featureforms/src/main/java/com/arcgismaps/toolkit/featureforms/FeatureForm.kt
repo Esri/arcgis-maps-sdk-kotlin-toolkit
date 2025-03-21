@@ -20,15 +20,16 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import androidx.activity.compose.BackHandler
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,9 +39,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -49,15 +47,11 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,24 +63,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -97,26 +82,18 @@ import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
-import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
-import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
+import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
+import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.arcgismaps.utilitynetworks.UtilityAssociation
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 /**
@@ -378,7 +355,7 @@ public fun FeatureForm(
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onDismiss: (() -> Unit)? = null,
+    onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
@@ -391,7 +368,7 @@ public fun FeatureForm(
     state.setNavigateBack {
         navController.popBackStack()
     }
-    val scope = rememberCoroutineScope()
+    rememberCoroutineScope()
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
@@ -435,264 +412,56 @@ public fun FeatureForm(
         onEditingEvent(event)
     }
 
-    // A function  that provides the action to dismiss the form
-    fun dismissForm(form: FeatureForm, onDismiss: (() -> Unit)?) {
-        if (form.hasEdits.value) {
-            // Show a dialog to save or discard edits before dismissing the form, if there are edits
-            val dialog = DialogType.SaveFeatureDialog(
-                onSave = {
-                    saveForm(form, false).onSuccess {
-                        // Dismiss the form after saving the edits
-                        onDismiss?.invoke()
-                    }
-                },
-                onDiscard = {
-                    discardForm(false)
-                    // Dismiss the form after discarding the edits
-                    onDismiss?.invoke()
-                },
+    FeatureFormLayout(
+        topBar = {
+            val backStackEntry by navController.currentBackStackEntryAsState()
+            val hasBackStack = remember(backStackEntry) {
+                navController.previousBackStackEntry != null
+            }
+            Log.e("TAG", "FeatureForm: ${backStackEntry?.destination?.route}")
+            Log.e(
+                "TAG",
+                "FeatureForm: ${state.getActiveFormStateData().featureForm.feature.objectId}",
             )
-            dialogRequester.requestDialog(dialog)
-        } else onDismiss?.invoke()
-    }
-
-    FeatureFormTheme(
+            backStackEntry?.let { entry ->
+                ContentAwareTopBar(
+                    backStackEntry = entry,
+                    state = state,
+                    onSaveForm = ::saveForm,
+                    onDiscardForm = ::discardForm,
+                    onNavigateBack = {
+                        state.popBackStack(entry)
+                    },
+                    onDismissRequest = onDismiss,
+                    hasBackStack = hasBackStack,
+                    showFormActions = showFormActions,
+                    showCloseIcon = showCloseIcon,
+                    modifier = Modifier
+                        .padding(
+                            vertical = 8.dp,
+                            horizontal = if (hasBackStack) 8.dp else 16.dp
+                        )
+                        .fillMaxWidth(),
+                )
+            }
+        },
+        content = {
+            FeatureFormNavHost(
+                navController = navController,
+                state = state,
+                showFormActions = showFormActions,
+                showCloseIcon = showCloseIcon,
+                onSaveForm = ::saveForm,
+                onDiscardForm = ::discardForm,
+                onDismiss = onDismiss,
+                onBarcodeButtonClick = onBarcodeButtonClick,
+                modifier = modifier
+            )
+        },
+        modifier = modifier,
         colorScheme = colorScheme,
         typography = typography
-    ) {
-        NavHost(
-            navController,
-            startDestination = NavigationRoute.FormView,
-            modifier = modifier,
-            enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = { slideOutHorizontally { h -> h } }
-        ) {
-            composable<NavigationRoute.FormView> { backStackEntry ->
-                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-                val featureForm = formData.featureForm
-                val states = formData.stateCollection
-                val hasBackStack = remember(featureForm, navController) {
-                    navController.previousBackStackEntry != null
-                }
-                val hasEdits by featureForm.hasEdits.collectAsState()
-                val onBackAction: () -> Unit = {
-                    if (hasEdits) {
-                        val dialog = DialogType.SaveFeatureDialog(
-                            onSave = {
-                                saveForm(featureForm, hasBackStack).onSuccess {
-                                    if (hasBackStack) {
-                                        // Navigate back to the previous form after saving the edits.
-                                        state.popBackStack()
-                                    }
-                                }
-                            },
-                            onDiscard = {
-                                discardForm(hasBackStack)
-                                if (hasBackStack) {
-                                    // Navigate back to the previous form after discarding the edits.
-                                    state.popBackStack()
-                                }
-                            }
-                        )
-                        dialogRequester.requestDialog(dialog)
-                    } else {
-                        if (hasBackStack) {
-                            // Navigate back to the previous form if there are no edits
-                            state.popBackStack()
-                        }
-                    }
-                }
-
-                FeatureFormLayout(
-                    title = {
-                        val title by featureForm.title.collectAsState()
-                        FeatureFormTitle(
-                            title = title,
-                            subTitle = featureForm.description,
-                            hasEdits = if (showFormActions) hasEdits else false,
-                            showCloseIcon = showCloseIcon,
-                            modifier = Modifier
-                                .padding(
-                                    vertical = 8.dp,
-                                    horizontal = if (hasBackStack) 8.dp else 16.dp
-                                )
-                                .fillMaxWidth(),
-                            onBackPressed = if (hasBackStack) onBackAction else null,
-                            onClose = {
-                                dismissForm(featureForm, onDismiss)
-                            },
-                            onSave = {
-                                scope.launch { saveForm(featureForm, false) }
-                            },
-                            onDiscard = { discardForm(false) }
-                        )
-                        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-                            state.isEvaluatingExpressions
-                        }
-                    },
-                    content = {
-                        FormContent(
-                            formStateData = formData,
-                            onBarcodeButtonClick = onBarcodeButtonClick,
-                            onUtilityAssociationFilterClick = { stateId, index ->
-                                val route = NavigationRoute.UNFilterView(
-                                    stateId = stateId,
-                                    selectedFilterIndex = index
-                                )
-                                // Navigate to the filter view
-                                navController.navigate(route)
-                            }
-                        )
-                    }
-                )
-                // only enable back navigation if there is a previous route
-                BackHandler(hasBackStack) {
-                    onBackAction()
-                }
-                FeatureFormDialog(states)
-            }
-
-            composable<NavigationRoute.UNFilterView> { backStackEntry ->
-                val routeData = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-                val featureForm = formData.featureForm
-                val states = formData.stateCollection
-                // Get the selected UtilityAssociationsElementState from the state collection
-                val utilityAssociationsElementState = states[routeData.stateId]
-                    as? UtilityAssociationsElementState ?: return@composable
-                // Get the selected filter from the UtilityAssociationsElementState
-                val filterResult = remember(utilityAssociationsElementState.filters) {
-                    utilityAssociationsElementState.filters.getOrNull(route.selectedFilterIndex)
-                }
-                val hasEdits by featureForm.hasEdits.collectAsState()
-                FeatureFormLayout(
-                    title = {
-                        val title by featureForm.title.collectAsState()
-                        FeatureFormTitle(
-                            title = filterResult?.filter?.title
-                                ?: stringResource(R.string.none_selected),
-                            subTitle = title,
-                            hasEdits = if (showFormActions) hasEdits else false,
-                            showCloseIcon = showCloseIcon,
-                            modifier = Modifier
-                                .padding(
-                                    vertical = 8.dp,
-                                    horizontal = 8.dp
-                                )
-                                .fillMaxWidth(),
-                            onBackPressed = navController::popBackStack,
-                            onClose = {
-                                dismissForm(featureForm, onDismiss)
-                            },
-                            onSave = {
-                                scope.launch { saveForm(featureForm, false) }
-                            },
-                            onDiscard = { discardForm(false) }
-                        )
-                    },
-                    content = {
-                        if (filterResult != null) {
-                            UtilityAssociationFilter(
-                                groupResults = filterResult.groupResults,
-                                onGroupClick = { index ->
-                                    val newRoute = NavigationRoute.UNAssociationsView(
-                                        stateId = utilityAssociationsElementState.id,
-                                        selectedFilterIndex = route.selectedFilterIndex,
-                                        selectedGroupIndex = index
-                                    )
-                                    navController.navigate(newRoute)
-                                },
-                                onBackPressed = navController::popBackStack,
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .wrapContentSize()
-                            )
-                        }
-                    }
-                )
-            }
-
-            composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
-                val routeData = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-                val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-                val featureForm = formData.featureForm
-                val states = formData.stateCollection
-                // Get the selected UtilityAssociationsElementState from the state collection
-                val utilityAssociationsElementState = states[routeData.stateId] as?
-                    UtilityAssociationsElementState ?: return@composable
-                // Get the selected filter from the UtilityAssociationsElementState
-                val filter = remember(utilityAssociationsElementState.filters) {
-                    utilityAssociationsElementState.filters.getOrNull(route.selectedFilterIndex)
-                }
-                // Guard against null filter.
-                if (filter == null) return@composable
-                // Get the selected group from the filter
-                val group = remember(utilityAssociationsElementState.filters) {
-                    filter.groupResults.getOrNull(route.selectedGroupIndex)
-                }
-                val hasEdits by featureForm.hasEdits.collectAsState()
-                FeatureFormLayout(
-                    title = {
-                        FeatureFormTitle(
-                            title = group?.name ?: stringResource(R.string.none_selected),
-                            subTitle = filter.filter.title,
-                            hasEdits = if (showFormActions) hasEdits else false,
-                            showCloseIcon = showCloseIcon,
-                            modifier = Modifier
-                                .padding(
-                                    vertical = 8.dp,
-                                    horizontal = 8.dp
-                                )
-                                .fillMaxWidth(),
-                            onBackPressed = navController::popBackStack,
-                            onClose =  {
-                                // Show the close button only if the onDismiss callback is provided
-                                dismissForm(featureForm, onDismiss)
-                            },
-                            onSave = {
-                                scope.launch { saveForm(featureForm, false) }
-                            },
-                            onDiscard = { discardForm(false) }
-                        )
-                    },
-                    content = {
-                        if (group != null) {
-                            UtilityAssociations(
-                                groupResult = group,
-                                onItemClick = { info ->
-                                    if (hasEdits) {
-                                        val dialog = DialogType.SaveFeatureDialog(
-                                            onSave = {
-                                                saveForm(featureForm, true).onSuccess {
-                                                    // Navigate to the next form after saving the edits.
-                                                    state.navigateTo(info.associatedFeature)
-                                                }
-                                            },
-                                            onDiscard = {
-                                                discardForm(true)
-                                                // Navigate to the next form after discarding the edits.
-                                                state.navigateTo(info.associatedFeature)
-                                            },
-                                        )
-                                        dialogRequester.requestDialog(dialog)
-                                    } else {
-                                        // Navigate to the next form if there are no edits.
-                                        state.navigateTo(info.associatedFeature)
-                                    }
-                                },
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                )
-                FeatureFormDialog(states)
-            }
-        }
-    }
+    )
     DisposableEffect(state) {
         onDispose {
             state.setNavigationCallback(null)
@@ -702,241 +471,24 @@ public fun FeatureForm(
 }
 
 @Composable
-private fun FeatureFormLayout(
-    title: @Composable () -> Unit,
+internal fun FeatureFormLayout(
+    topBar: @Composable () -> Unit,
     content: @Composable () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        title()
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        content()
-    }
-}
-
-/**
- * Represents the title bar of the form.
- *
- * @param title The title to display.
- * @param subTitle The subtitle to display.
- * @param hasEdits Indicates if the form has unsaved edits. An unsaved edits indicator is displayed
- * along with the save and discard buttons if this is true.
- * @param onBackPressed The callback to invoke when the back button is clicked. If null, the back
- * button is not displayed.
- * @param onClose The callback to invoke when the close button is clicked. If null, the close button
- * is not displayed.
- * @param onSave The callback to invoke when the save button is clicked.
- * @param onDiscard The callback to invoke when the discard button is clicked.
- * @param modifier The [Modifier] to apply to this layout.
- */
-@Composable
-private fun FeatureFormTitle(
-    title: String,
-    subTitle: String,
-    hasEdits: Boolean,
-    showCloseIcon: Boolean,
-    onBackPressed: (() -> Unit)?,
-    onClose: () -> Unit,
-    onSave: () -> Unit,
-    onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
+    colorScheme: FeatureFormColorScheme,
+    typography: FeatureFormTypography
 ) {
-    Column(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
+    FeatureFormTheme(
+        colorScheme = colorScheme,
+        typography = typography
+    ) {
+        Column(
+            modifier = modifier.fillMaxSize()
         ) {
-            if (onBackPressed != null) {
-                IconButton(onClick = onBackPressed) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Navigate back"
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    if (hasEdits) {
-                        Spacer(Modifier.width(8.dp))
-                        Canvas(modifier = Modifier.size(10.dp)) {
-                            drawCircle(color = Color(0xFFB3261E))
-                        }
-                    }
-                }
-                if (subTitle.isNotEmpty()) {
-                    Text(
-                        text = subTitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                } else if (hasEdits) {
-                    Text(
-                        text = "Unsaved Changes",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-            if (showCloseIcon) {
-                IconButton(onClick = onClose) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
-                }
-            }
+            topBar()
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+            content()
         }
-        AnimatedVisibility(visible = hasEdits) {
-            Row(
-                modifier = Modifier.padding(top = 12.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(onClick = onSave) {
-                    Text(
-                        text = stringResource(R.string.save),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                FilledTonalButton(onClick = onDiscard) {
-                    Text(
-                        text = stringResource(R.string.discard),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FormContent(
-    formStateData: FormStateData,
-    modifier: Modifier = Modifier,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityAssociationFilterClick: (Int, Int) -> Unit,
-) {
-    val density = LocalDensity.current
-    val view = LocalView.current
-    val lazyListState = rememberSaveable(
-        inputs = arrayOf(formStateData),
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
-    // form content
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .semantics { contentDescription = "lazy column" },
-        state = lazyListState
-    ) {
-        formStateData.stateCollection.forEach { entry ->
-            item {
-                when (entry.formElement) {
-                    is FieldFormElement -> {
-                        FieldElement(
-                            state = entry.getState<BaseFieldState<*>>(),
-                            // set the onClick callback for the field element only if provided
-                            onClick = handleFieldFormElementTapAction(
-                                fieldFormElement = entry.formElement as FieldFormElement,
-                                barcodeTapAction = onBarcodeButtonClick
-                            ),
-                        )
-                    }
-
-                    is GroupFormElement -> {
-                        GroupElement(
-                            state = entry.getState(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp),
-                            // set the onClick callback for the group element only if provided
-                            onFormElementClick = handleFormElementTapAction(
-                                barcodeTapAction = onBarcodeButtonClick
-                            )
-                        )
-                    }
-
-                    is TextFormElement -> {
-                        TextFormElement(
-                            state = entry.getState(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp)
-                        )
-                    }
-
-                    is AttachmentsFormElement -> {
-                        AttachmentFormElement(
-                            state = entry.getState(),
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp)
-                        )
-                    }
-
-                    is UtilityAssociationsFormElement -> {
-                        val state = entry.getState<UtilityAssociationsElementState>()
-                        UtilityAssociationsElement(
-                            state = state,
-                            onItemClick = { index ->
-                                onUtilityAssociationFilterClick(state.id, index)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 15.dp,
-                                    end = 15.dp,
-                                    top = 10.dp,
-                                    bottom = 20.dp
-                                )
-                        )
-                    }
-
-                    else -> {
-                        // other form elements are not created
-                    }
-                }
-            }
-        }
-    }
-    LaunchedEffect(Unit) {
-        formStateData.featureForm.hasEdits.collect {
-            if (it) {
-                val insets = ViewCompat.getRootWindowInsets(view) ?: return@collect
-                val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-                with(density) {
-                    if (imeVisible) {
-                        lazyListState.animateScrollBy(60.dp.toPx())
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    val alpha by animateFloatAsState(
-        if (evaluationProvider()) 1f else 0f,
-        label = "evaluation loading alpha"
-    )
-    Surface(
-        modifier = modifier.graphicsLayer {
-            this.alpha = alpha
-        }
-    ) {
-        LinearProgressIndicator(modifier)
     }
 }
 
@@ -944,10 +496,11 @@ internal fun InitializingExpressions(
 internal fun rememberNavController(vararg inputs: Any): NavHostController {
     val context = LocalContext.current
     rememberNavController()
-    return rememberSaveable(inputs = inputs, saver = Saver(
-        save = { it.saveState() },
-        restore = { createNavController(context).apply { restoreState(it) } }
-    )) {
+    return rememberSaveable(
+        inputs = inputs, saver = Saver(
+            save = { it.saveState() },
+            restore = { createNavController(context).apply { restoreState(it) } }
+        )) {
         createNavController(context)
     }
 }
@@ -969,8 +522,7 @@ internal sealed class NavigationRoute {
      */
     @Serializable
     data class UNFilterView(
-        val stateId: Int,
-        val selectedFilterIndex: Int,
+        val stateId: Int
     ) : NavigationRoute()
 
     /**
@@ -978,9 +530,7 @@ internal sealed class NavigationRoute {
      */
     @Serializable
     data class UNAssociationsView(
-        val stateId: Int,
-        val selectedFilterIndex: Int,
-        val selectedGroupIndex: Int
+        val stateId: Int
     ) : NavigationRoute()
 }
 
@@ -989,69 +539,4 @@ private fun createNavController(context: Context): NavHostController {
         navigatorProvider.addNavigator(ComposeNavigator())
         navigatorProvider.addNavigator(DialogNavigator())
     }
-}
-
-/**
- * Handles the tap action for a [FormElement] based on the  input type and the provided tap
- * actions.
- *
- * This will potentially handle taps for any input types that provide custom tap actions.
- *
- * @param fieldFormElement the [FieldFormElement] to handle the tap action for.
- * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
- * with a [BarcodeScannerFormInput] is tapped.
- */
-private fun handleFieldFormElementTapAction(
-    fieldFormElement: FieldFormElement,
-    barcodeTapAction: ((FieldFormElement) -> Unit)?
-): (() -> Unit)? {
-    return when (fieldFormElement.input) {
-        is BarcodeScannerFormInput -> {
-            barcodeTapAction?.let {
-                { it(fieldFormElement) }
-            }
-        }
-
-        else -> null
-    }
-}
-
-/**
- * Handles the tap action for a [FormElement] based on the provided tap actions.
- *
- * This will potentially handle taps for any form element types that provide custom tap actions.
- *
- * @param barcodeTapAction the action to perform when the barcode accessory of a [FieldFormElement]
- * with a [BarcodeScannerFormInput] is tapped.
- */
-private fun handleFormElementTapAction(
-    barcodeTapAction: ((FieldFormElement) -> Unit)?
-): ((FormElement) -> Unit)? {
-    return when {
-        barcodeTapAction != null -> {
-            { formElement ->
-                if (formElement is FieldFormElement) {
-                    handleFieldFormElementTapAction(formElement, barcodeTapAction)?.invoke()
-                }
-            }
-        }
-
-        else -> null
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FeatureFormTitlePreview() {
-    FeatureFormTitle(
-        title = "Structure Boundary",
-        subTitle = "Edit feature attributes",
-        hasEdits = true,
-        showCloseIcon = true,
-        onBackPressed = null,
-        onClose = {},
-        onSave = {},
-        onDiscard = {},
-        modifier = Modifier.padding(8.dp)
-    )
 }

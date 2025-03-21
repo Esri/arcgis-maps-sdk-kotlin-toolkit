@@ -1,0 +1,300 @@
+/*
+ * Copyright 2025 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.arcgismaps.toolkit.featureforms.internal.screens
+
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.toRoute
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.NavigationRoute
+import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
+import kotlinx.coroutines.flow.collectLatest
+
+@Composable
+internal fun ContentAwareTopBar(
+    backStackEntry: NavBackStackEntry,
+    state: FeatureFormState,
+    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onDiscardForm: (Boolean) -> Unit,
+    onNavigateBack: () -> Unit,
+    onDismissRequest: () -> Unit,
+    hasBackStack : Boolean,
+    showFormActions: Boolean,
+    showCloseIcon: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+    val hasEdits by formData.featureForm.hasEdits.collectAsState()
+    val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
+        val destination = entry.destination
+        when {
+            destination.hasRoute<NavigationRoute.FormView>()  -> {
+                if (hasEdits) {
+                    // show discard edits dialog
+                } else {
+                    if (hasBackStack && entry.lifecycleIsResumed()) {
+                        state.popBackStack(backStackEntry)
+                    }
+                }
+            }
+
+            destination.hasRoute<NavigationRoute.UNFilterView>()
+                || destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+                if (hasBackStack && entry.lifecycleIsResumed()) {
+                    onNavigateBack()
+                }
+            }
+        }
+    }
+    val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
+    Log.e("TAG", "ContentAwareTopBar: $title,${formData.featureForm.feature.objectId}", )
+    FeatureFormTitle(
+        title = title,
+        subTitle = subTitle,
+        hasEdits = hasEdits,
+        showCloseIcon = showCloseIcon,
+        showBackIcon = hasBackStack,
+        onBackPressed = {
+            onBackAction(backStackEntry)
+        },
+        onClose = {
+            if (hasEdits) {
+                // show discard edits dialog
+            } else {
+                // close the form
+            }
+        },
+        onSave = {
+
+        },
+        onDiscard = {
+
+        },
+        modifier = modifier
+    )
+}
+
+
+@Composable
+private fun getTopBarTitleAndSubtitle(
+    backStackEntry: NavBackStackEntry,
+    formData: FormStateData,
+): Pair<String, String> {
+    var formTitle by remember(backStackEntry, formData) {
+        mutableStateOf(formData.featureForm.title.value)
+    }
+
+    LaunchedEffect(backStackEntry, formData) {
+        formData.featureForm.title.collectLatest {
+            formTitle = it
+        }
+    }
+
+    val defaultTitle = stringResource(R.string.none_selected)
+    return when {
+        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            Pair(
+                formTitle,
+                formData.featureForm.description
+            )
+        }
+
+        backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() -> {
+            var title = defaultTitle
+            val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
+            (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
+                state.selectedFilterResult?.filter?.let { filter ->
+                    title = filter.title
+                }
+            }
+            Pair(title, formTitle)
+        }
+
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+            var title = defaultTitle
+            var subTitle = defaultTitle
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
+            (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
+                state.selectedGroupResult?.let { group ->
+                    title = group.name
+                }
+                state.selectedFilterResult?.filter?.let { filter ->
+                    subTitle = filter.title
+                }
+            }
+            Pair(title, subTitle)
+        }
+
+        else -> {
+            Pair(defaultTitle, defaultTitle)
+        }
+    }
+}
+
+/**
+ * Represents the title bar of the form.
+ *
+ * @param title The title to display.
+ * @param subTitle The subtitle to display.
+ * @param hasEdits Indicates if the form has unsaved edits. An unsaved edits indicator is displayed
+ * along with the save and discard buttons if this is true.
+ * @param showCloseIcon Indicates if the close icon should be displayed.
+ * @param showBackIcon Indicates if the back icon should be displayed.
+ * @param onBackPressed The callback to invoke when the back button is clicked.
+ * @param onClose The callback to invoke when the close button is clicked. If null, the close button
+ * is not displayed.
+ * @param onSave The callback to invoke when the save button is clicked.
+ * @param onDiscard The callback to invoke when the discard button is clicked.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
+@Composable
+private fun FeatureFormTitle(
+    title: String,
+    subTitle: String,
+    hasEdits: Boolean,
+    showCloseIcon: Boolean,
+    showBackIcon : Boolean,
+    onBackPressed: (() -> Unit),
+    onClose: () -> Unit,
+    onSave: () -> Unit,
+    onDiscard: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            if (showBackIcon) {
+                IconButton(onClick = onBackPressed) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Navigate back"
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (hasEdits) {
+                        Spacer(Modifier.width(8.dp))
+                        Canvas(modifier = Modifier.size(10.dp)) {
+                            drawCircle(color = Color(0xFFB3261E))
+                        }
+                    }
+                }
+                if (subTitle.isNotEmpty()) {
+                    Text(
+                        text = subTitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                } else if (hasEdits) {
+                    Text(
+                        text = "Unsaved Changes",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            if (showCloseIcon) {
+                IconButton(onClick = onClose) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
+                }
+            }
+        }
+        AnimatedVisibility(visible = hasEdits) {
+            Row(
+                modifier = Modifier.padding(top = 12.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = onSave) {
+                    Text(
+                        text = stringResource(R.string.save),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                FilledTonalButton(onClick = onDiscard) {
+                    Text(
+                        text = stringResource(R.string.discard),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FeatureFormTitlePreview() {
+    FeatureFormTitle(
+        title = "Structure Boundary",
+        subTitle = "Edit feature attributes",
+        hasEdits = true,
+        showCloseIcon = true,
+        showBackIcon = false,
+        onBackPressed = {},
+        onClose = {},
+        onSave = {},
+        onDiscard = {},
+        modifier = Modifier.padding(8.dp)
+    )
+}

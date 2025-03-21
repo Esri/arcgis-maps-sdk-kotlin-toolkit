@@ -56,7 +56,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -162,11 +161,6 @@ internal sealed class DialogType {
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
-
-    data class SaveFeatureDialog(
-        val onSave: suspend () -> Unit,
-        val onDiscard: () -> Unit
-    ) : DialogType()
 
     data class ValidationErrorsDialog(
         val onDismiss: () -> Unit,
@@ -355,26 +349,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 },
                 onDismiss = {
                     dialogRequester.dismissDialog()
-                }
-            )
-        }
-
-        is DialogType.SaveFeatureDialog -> {
-            val onSave = (dialogType as DialogType.SaveFeatureDialog).onSave
-            val onDiscard = (dialogType as DialogType.SaveFeatureDialog).onDiscard
-            SaveEditsDialog(
-                onDismissRequest = {
-                    dialogRequester.dismissDialog()
-                },
-                onSave = {
-                    dialogRequester.dismissDialog()
-                    scope.launch {
-                        onSave()
-                    }
-                },
-                onDiscard = {
-                    dialogRequester.dismissDialog()
-                    onDiscard()
                 }
             )
         }

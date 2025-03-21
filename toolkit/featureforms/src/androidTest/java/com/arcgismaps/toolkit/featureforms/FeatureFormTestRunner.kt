@@ -21,6 +21,11 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
@@ -40,7 +45,10 @@ import org.junit.Before
  */
 open class FeatureFormTestRunner(
     private val uri: String,
-    private val objectId: Long
+    private val objectId: Long,
+    private val user: String = BuildConfig.webMapUser,
+    private val password: String = BuildConfig.webMapPassword,
+    private val layerName: String = ""
 ) {
     /**
      * The feature form for the feature with the given [objectId].
@@ -55,13 +63,19 @@ open class FeatureFormTestRunner(
         // Set the authentication challenge handler
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             FeatureFormsTestChallengeHandler(
-                BuildConfig.webMapUser, BuildConfig.webMapPassword
+                user, password
             )
+        ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
+            NetworkAuthenticationChallengeHandler {
+                NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+            }
         // Load the map
         val map = ArcGISMap(uri = uri)
         map.assertIsLoaded()
         // Load the feature layer
-        val featureLayer = map.operationalLayers.first() as? FeatureLayer
+        val featureLayer = (map.operationalLayers.firstOrNull {
+            it.name == layerName
+        } ?: map.operationalLayers.firstOrNull()) as? FeatureLayer
         assertThat(featureLayer).isNotNull()
         featureLayer!!.assertIsLoaded()
         // Query the feature

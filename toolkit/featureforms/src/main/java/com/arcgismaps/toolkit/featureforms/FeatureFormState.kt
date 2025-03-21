@@ -16,12 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.util.Log
+import androidx.annotation.MainThread
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -61,6 +65,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.screens.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
@@ -196,47 +201,82 @@ public class FeatureFormState private constructor(
     }
 
     /**
-     * Sets the [FeatureForm] associated with the provided [feature] to be the [activeFeatureForm],
-     * adds the form to the stack and navigates to the new form.
-     *
-     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
+     * Updates the [activeFeatureForm] to the current form on top of the stack and evaluates any
+     * expressions that are part of the [activeFeatureForm] . This should be called after navigating
+     * to a new form or popping the current form from the stack.
      */
-    internal fun navigateTo(feature: ArcGISFeature) {
-        navigateToRoute?.let { navigate ->
-            val form = FeatureForm(feature)
-            val states = createStates(
-                form = form,
-                elements = form.elements,
-                scope = coroutineScope
-            )
-            store.addLast(FormStateData(form, states))
-            _activeFeatureForm.value = form
-            // Navigate to the form view after setting the active form.
-            navigate(NavigationRoute.FormView)
+    internal fun updateActiveFeatureForm() {
+        if (_activeFeatureForm.value != getActiveFormStateData().featureForm) {
+            _activeFeatureForm.value = getActiveFormStateData().featureForm
             evaluateExpressions()
         }
     }
 
     /**
-     * Pops the current [FeatureForm] from the stack and sets the previous form as the [activeFeatureForm].
+     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete.
+     *
+     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
-    internal fun popBackStack(): Boolean {
-        navigateBack?.let { navigate ->
-            return if (store.size <= 1) {
-                false
-            } else {
-                store.removeLast()
-                _activeFeatureForm.value = getActiveFormStateData().featureForm
-                // Navigate back to the form view after popping the current form.
-                navigate()
-                evaluateExpressions()
-                true
-            }
-        } ?: return false
+    @MainThread
+    internal fun navigateTo(feature: ArcGISFeature, backStackEntry: NavBackStackEntry): Boolean {
+        val navigate = navigateToRoute ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+        val form = FeatureForm(feature)
+        val states = createStates(
+            form = form,
+            elements = form.elements,
+            scope = coroutineScope
+        )
+        store.addLast(FormStateData(form, states))
+        // Navigate to the form view after setting the active form.
+        navigate(NavigationRoute.FormView)
+        return true
     }
 
     /**
-     * Returns the [FormStateData] for the currently active [FeatureForm].
+     * Pops the current [FeatureForm] from the stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete.
+     *
+     * @return true if the navigation was successful, false otherwise.
+     */
+    @MainThread
+    internal fun popBackStack(backStackEntry: NavBackStackEntry): Boolean {
+        val navigate = navigateBack ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+        // Check the current destination and pop the stack accordingly.
+        return when {
+            backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+                if (store.size <= 1) {
+                    false
+                } else {
+                    val sz = store.count()
+                    val rm = store.removeLast()
+                    Log.e(
+                        "TAG",
+                        "popBackStack: removed $rm, before: $sz, now: ${store.count()}",
+                    )
+                    // Navigate back to the form view after popping the current form.
+                    navigate()
+                }
+            }
+
+            backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() ||
+                backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+                // Navigate back to the previous view.
+                navigate()
+            }
+
+            else -> false
+        }
+    }
+
+    /**
+     * Returns the [FormStateData] that is currently on top of the stack.
      */
     internal fun getActiveFormStateData(): FormStateData {
         return store.last()

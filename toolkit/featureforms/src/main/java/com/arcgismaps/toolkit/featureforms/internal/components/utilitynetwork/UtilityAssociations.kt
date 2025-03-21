@@ -19,8 +19,10 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +44,6 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
-import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
@@ -60,7 +61,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 @Composable
 internal fun UtilityAssociationFilter(
     groupResults: List<UtilityAssociationGroupResult>,
-    onGroupClick: (Int) -> Unit,
+    onGroupClick: (UtilityAssociationGroupResult) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -83,7 +84,7 @@ internal fun UtilityAssociationFilter(
                             )
                         },
                         modifier = Modifier.clickable {
-                            onGroupClick(index)
+                            onGroupClick(group)
                         },
                         colors = ListItemDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -114,7 +115,7 @@ internal fun UtilityAssociationFilter(
 @Composable
 internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
-    onItemClick: (UtilityAssociationResult) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -132,7 +133,7 @@ internal fun UtilityAssociations(
                         association = info.association,
                         associatedFeature = info.associatedFeature,
                         onClick = {
-                            onItemClick(info)
+                            onItemClick(index)
                         }
                     )
                     Surface(
