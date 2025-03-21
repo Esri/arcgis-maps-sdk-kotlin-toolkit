@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -239,10 +240,15 @@ private fun Legend(
             itemsIndexed(legendItems) { index, item ->
                 if (!respectScaleRange || item.isVisible(currentScale)) {
                     if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
+                        if (item.isLayer && index < legendItems.size - 1) {
+                            HorizontalDivider(modifier = Modifier.padding(top = 6.dp))
+                        }
                         Row(
                             modifier = Modifier.then(
-                                if (item.isLayer) Modifier.padding(horizontal = 5.dp) else Modifier.padding(
-                                    horizontal = 10.dp
+                                if (item.isLayer) Modifier.padding(
+                                    start = 8.dp, top = 8.dp
+                                ) else Modifier.padding(
+                                    start = 16.dp, top = 8.dp
                                 )
                             )
                         ) {
@@ -251,7 +257,6 @@ private fun Legend(
                                 style = if (item.isLayer) typography.layerName else typography.subLayerName
                             )
                         }
-
                     }
                     if (item.legendItems.isNotEmpty()) {
                         item.legendItems.forEach { legendInfo ->
@@ -259,11 +264,11 @@ private fun Legend(
                                 legendInfo = legendInfo,
                                 typography = typography,
                                 modifier = if (item.isLayer) Modifier.padding(
-                                    horizontal = 10.dp,
-                                    vertical = 2.dp
+                                    start = 16.dp,
+                                    top = 8.dp
                                 ) else Modifier.padding(
-                                    horizontal = 20.dp,
-                                    vertical = 2.dp
+                                    start = 24.dp,
+                                    top = 8.dp
                                 )
                             )
                         }
@@ -287,6 +292,7 @@ private fun LegendInfoRow(
                 contentDescription = stringResource(R.string.symbol_description)
             )
         }
+        Spacer(modifier = Modifier.padding(start = 8.dp))
         Text(text = legendInfo.name, style = typography.legendInfoName)
     }
 }
