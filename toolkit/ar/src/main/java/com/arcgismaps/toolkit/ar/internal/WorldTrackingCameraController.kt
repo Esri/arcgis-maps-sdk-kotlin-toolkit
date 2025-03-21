@@ -110,7 +110,7 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCamera(location: Location, heading: Float) {
-        GeometryEngine.projectOrNull(location.position, WorldScaleParameters.CAMERA_SR)?.let { projectedLocation ->
+        GeometryEngine.projectOrNull(location.position, WorldScaleParameters.SR_CAMERA)?.let { projectedLocation ->
             // cache the location of the origin camera for later use
             currentCameraLocation = projectedLocation
 
@@ -289,7 +289,7 @@ internal fun shouldUpdateCamera(
     // if we don't have a location of the current camera, don't measure the distance
     if (currentCameraLocation == null) return true
 
-    val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldScaleParameters.CAMERA_SR)
+    val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldScaleParameters.SR_CAMERA)
             ?: return false
 
     val distance = GeometryEngine.distanceGeodeticOrNull(

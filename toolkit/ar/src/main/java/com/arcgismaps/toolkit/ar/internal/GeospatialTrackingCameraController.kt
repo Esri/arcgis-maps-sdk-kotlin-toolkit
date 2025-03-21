@@ -82,15 +82,9 @@ internal class GeospatialTrackingCameraController(
                         geospatialPose.longitude,
                         geospatialPose.latitude,
                         geospatialPose.altitude + calibrationState.totalElevationOffset,
-                        SpatialReference(
-                            SpatialReference.wgs84().wkid,
-                            115700 /*WGS84_VERTICAL*/
-                        )
+                        WorldScaleParameters.SR_WGS84_WGS_VERTICAL
                     ),
-                    SpatialReference(
-                        SpatialReference.wgs84().wkid,
-                        verticalWkid = 5773 /*EGM96*/
-                    )
+                    WorldScaleParameters.SR_CAMERA
                 ) ?: return@let
 
                 cameraController.setOriginCamera(
@@ -101,7 +95,10 @@ internal class GeospatialTrackingCameraController(
                         0.0
                     )
                 )
-                val earthPose = earth.getPose(
+
+                // get a pose relative to local coordinates so we can rotate it based on the
+                // display orientation
+                val localPose = earth.getPose(
                     geospatialPose.latitude,
                     geospatialPose.longitude,
                     geospatialPose.altitude,
@@ -111,44 +108,57 @@ internal class GeospatialTrackingCameraController(
                     orientation[3]
                 )
 
-                val displayOrientedPose = when (display?.rotation ?: 0) {
-                    Surface.ROTATION_90 -> earthPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            -sqrt(0.5).toFloat(),
-                            sqrt(0.5).toFloat()
-                        )
-                    )
+                // rotate the local pose based on the display orientation,
+                // then convert it back to a geospatial pose
+                val displayOrientedGeospatialOrientation = when (display?.rotation ?: 0) {
+                    Surface.ROTATION_90 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                -sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
 
-                    Surface.ROTATION_180 -> earthPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            sqrt(1.0).toFloat(),
-                            0f
-                        )
-                    )
+                    Surface.ROTATION_180 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(1.0).toFloat(),
+                                0f
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
 
-                    Surface.ROTATION_270 -> earthPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            sqrt(0.5).toFloat(),
-                            sqrt(0.5).toFloat()
-                        )
-                    )
-
-                    else -> earthPose
+                    Surface.ROTATION_270 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
+                    else -> {
+                        // in normal portrait we don't need to adjust for display orientation
+                        orientation
+                    }
                 }
 
                 hasSetOriginCamera = true
                 cameraController.transformationMatrix =
                     TransformationMatrix.createWithQuaternionAndTranslation(
-                        displayOrientedPose.qx().toDouble(),
-                        displayOrientedPose.qy().toDouble(),
-                        displayOrientedPose.qz().toDouble(),
-                        displayOrientedPose.qw().toDouble(),
+                        displayOrientedGeospatialOrientation[0].toDouble(),
+                        displayOrientedGeospatialOrientation[1].toDouble(),
+                        displayOrientedGeospatialOrientation[2].toDouble(),
+                        displayOrientedGeospatialOrientation[3].toDouble(),
                         0.0,
                         0.0,
                         0.0

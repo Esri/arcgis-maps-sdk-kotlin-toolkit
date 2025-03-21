@@ -239,5 +239,6 @@ internal data object WorldScaleParameters {
     const val WKID_WGS84 = 4326
     const val WKID_WGS84_VERTICAL = 115700
     const val WKID_EGM96_VERTICAL = 5773
-    val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
+    val SR_WGS84_WGS_VERTICAL = SpatialReference(WKID_WGS84, WKID_WGS84_VERTICAL)
+    val SR_CAMERA = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
 }
