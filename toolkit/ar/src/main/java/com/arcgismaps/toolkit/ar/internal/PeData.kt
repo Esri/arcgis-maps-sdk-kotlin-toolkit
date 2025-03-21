@@ -52,7 +52,7 @@ internal object PeData {
      * [TransformationCatalog.projectionEngineDirectory] at the time of calling this function.
      * This function is thread-safe.
      *
-     * @param context The context to access the assets and external file directory.
+     * @param context The context used to access the assets and external file directory.
      * @return A [Result] indicating the success or failure of the operation.
      *
      * @since 200.7.0
