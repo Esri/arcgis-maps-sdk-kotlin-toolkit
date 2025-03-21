@@ -26,14 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.GeodeticCurveType
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.LinearUnit
-import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.location.Location
 import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.location.LocationDataSourceStatus
@@ -42,6 +41,7 @@ import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.google.ar.core.Frame
+import com.google.ar.core.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -76,7 +76,7 @@ internal class WorldTrackingCameraController(
     private val worldScaleHeadingProvider : WorldScaleHeadingProvider
     private val locationDataSource = SystemLocationDataSource(userProvider = LocationManager.GPS_PROVIDER)
 
-    val cameraController = TransformationMatrixCameraController().apply {
+    override val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
     }
 
@@ -110,7 +110,7 @@ internal class WorldTrackingCameraController(
      * @since 200.7.0
      */
     private fun updateCamera(location: Location, heading: Float) {
-        GeometryEngine.projectOrNull(location.position, CAMERA_SR)?.let { projectedLocation ->
+        GeometryEngine.projectOrNull(location.position, WorldScaleParameters.CAMERA_SR)?.let { projectedLocation ->
             // cache the location of the origin camera for later use
             currentCameraLocation = projectedLocation
 
@@ -218,13 +218,6 @@ internal class WorldTrackingCameraController(
             }
         }
     }
-
-    companion object {
-        const val WKID_WGS84 = 4326
-        const val WKID_WGS84_VERTICAL = 115700
-        const val WKID_EGM96_VERTICAL = 5773
-        val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
-    }
 }
 
 /**
@@ -296,7 +289,7 @@ internal fun shouldUpdateCamera(
     // if we don't have a location of the current camera, don't measure the distance
     if (currentCameraLocation == null) return true
 
-    val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldTrackingCameraController.CAMERA_SR)
+    val projectedLocation = GeometryEngine.projectOrNull(location.position, WorldScaleParameters.CAMERA_SR)
             ?: return false
 
     val distance = GeometryEngine.distanceGeodeticOrNull(

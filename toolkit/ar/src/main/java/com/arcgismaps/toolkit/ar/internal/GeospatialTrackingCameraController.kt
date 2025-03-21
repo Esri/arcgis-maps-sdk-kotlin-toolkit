@@ -101,7 +101,7 @@ internal class GeospatialTrackingCameraController(
                         0.0
                     )
                 )
-                val original = earth.getPose(
+                val earthPose = earth.getPose(
                     geospatialPose.latitude,
                     geospatialPose.longitude,
                     geospatialPose.altitude,
@@ -111,8 +111,8 @@ internal class GeospatialTrackingCameraController(
                     orientation[3]
                 )
 
-                val physicalPose = when (display?.rotation ?: 0) {
-                    Surface.ROTATION_90 -> original.compose(
+                val displayOrientedPose = when (display?.rotation ?: 0) {
+                    Surface.ROTATION_90 -> earthPose.compose(
                         Pose.makeRotation(
                             0f,
                             0f,
@@ -121,7 +121,7 @@ internal class GeospatialTrackingCameraController(
                         )
                     )
 
-                    Surface.ROTATION_180 -> original.compose(
+                    Surface.ROTATION_180 -> earthPose.compose(
                         Pose.makeRotation(
                             0f,
                             0f,
@@ -130,7 +130,7 @@ internal class GeospatialTrackingCameraController(
                         )
                     )
 
-                    Surface.ROTATION_270 -> original.compose(
+                    Surface.ROTATION_270 -> earthPose.compose(
                         Pose.makeRotation(
                             0f,
                             0f,
@@ -139,16 +139,16 @@ internal class GeospatialTrackingCameraController(
                         )
                     )
 
-                    else -> original
+                    else -> earthPose
                 }
 
                 hasSetOriginCamera = true
                 cameraController.transformationMatrix =
                     TransformationMatrix.createWithQuaternionAndTranslation(
-                        physicalPose.qx().toDouble(),
-                        physicalPose.qy().toDouble(),
-                        physicalPose.qz().toDouble(),
-                        physicalPose.qw().toDouble(),
+                        displayOrientedPose.qx().toDouble(),
+                        displayOrientedPose.qy().toDouble(),
+                        displayOrientedPose.qz().toDouble(),
+                        displayOrientedPose.qw().toDouble(),
                         0.0,
                         0.0,
                         0.0

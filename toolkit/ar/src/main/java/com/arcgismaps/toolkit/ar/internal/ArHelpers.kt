@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.toolkit.ar.R
@@ -234,4 +235,9 @@ internal data object WorldScaleParameters {
     const val VERTICAL_ACCURACY_THRESHOLD_METERS = 4.0
     const val LOCATION_AGE_THRESHOLD_MS = 10000.0
     const val ANGLE_ACCURACY_DEGREES = 20.0
+
+    const val WKID_WGS84 = 4326
+    const val WKID_WGS84_VERTICAL = 115700
+    const val WKID_EGM96_VERTICAL = 5773
+    val CAMERA_SR = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
 }
