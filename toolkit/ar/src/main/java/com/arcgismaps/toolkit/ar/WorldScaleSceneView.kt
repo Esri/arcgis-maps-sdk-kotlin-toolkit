@@ -58,6 +58,7 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberPeDataConfigured
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.rememberWorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
@@ -133,6 +134,17 @@ public fun WorldScaleSceneView(
     )
     // If we don't have permission for camera or location, we can't display anything
     if (!allPermissionsGranted) return@WorldScaleSceneView
+
+    val pedataConfigured by rememberPeDataConfigured(
+        onFailed = {
+            initializationStatus.update(
+                WorldScaleSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
+    // If PE data could not be configured, we can't position the scene camera accurately
+    if (!pedataConfigured) return@WorldScaleSceneView
 
     val arSessionWrapper =
         rememberArSessionWrapper(applicationContext = LocalContext.current.applicationContext)
