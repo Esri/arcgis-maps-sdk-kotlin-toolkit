@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.internal.screens
+package com.arcgismaps.toolkit.featureforms.internal.navigation
 
 import android.util.Log
 import androidx.compose.animation.fadeIn
@@ -22,8 +22,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,12 +37,12 @@ import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
+import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 internal fun FeatureFormNavHost(
@@ -53,8 +51,8 @@ internal fun FeatureFormNavHost(
     showFormActions: Boolean,
     showCloseIcon: Boolean,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-    onDiscardForm: (Boolean) -> Unit,
-    onDismiss: (() -> Unit)?,
+    onDiscardForm: suspend (Boolean) -> Unit,
+    onDismiss: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -69,49 +67,15 @@ internal fun FeatureFormNavHost(
     ) {
         composable<NavigationRoute.FormView> { backStackEntry ->
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            val hasBackStack = remember(formData, navController) {
-                navController.previousBackStackEntry != null
-            }
             FeatureFormScreen(
                 formStateData = formData,
-                hasBackStack = hasBackStack,
-                isEvaluatingExpressions = state.isEvaluatingExpressions,
-                onClose = {
-                    onDismiss?.invoke()
-                },
-                onSave = { willNavigate ->
-                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
-                        withContext(Dispatchers.Main) {
-                            if (willNavigate && hasBackStack && backStackEntry.lifecycleIsResumed()) {
-                                // Navigate back to the previous form after saving the edits.
-                                state.popBackStack(backStackEntry)
-                            }
-                        }
-                    }
-                },
-                onDiscard = { willNavigate ->
-                    onDiscardForm(willNavigate)
-                    if (willNavigate && hasBackStack && backStackEntry.lifecycleIsResumed()) {
-                        // Navigate back to the previous form after discarding the edits.
-                        state.popBackStack(backStackEntry)
-                    }
-                },
-                onNavigateBack = {
-                    // Navigate back to the previous form
-                    Log.e(
-                        "TAG",
-                        "FeatureFormNavHost: back : ${state.popBackStack(backStackEntry)} "
-                    )
-                },
                 onBarcodeButtonClick = onBarcodeButtonClick,
                 onUtilityFilterSelected = { state ->
                     val route = NavigationRoute.UNFilterView(
                         stateId = state.id
                     )
                     // Navigate to the filter view
-                    if (backStackEntry.lifecycleIsResumed()) {
-                        navController.navigate(route)
-                    }
+                    navController.navigateSafely(backStackEntry, route)
                 }
             )
             LaunchedEffect(formData) {
@@ -136,26 +100,12 @@ internal fun FeatureFormNavHost(
                 ?: return@composable
             UNAssociationsFilterScreen(
                 filterResult = filterResult,
-                onClose = {
-                    onDismiss?.invoke()
-                },
-                onSave = {
-                    onSaveForm(featureForm, false)
-                },
-                onDiscard = {
-                    onDiscardForm(false)
-                },
-                onNavigateBack = {
-                    state.popBackStack(backStackEntry)
-                },
                 onGroupSelected = { groupResult ->
                     utilityAssociationsElementState.setSelectedGroupResult(groupResult)
                     val newRoute = NavigationRoute.UNAssociationsView(
                         stateId = utilityAssociationsElementState.id
                     )
-                    if (backStackEntry.lifecycleIsResumed()) {
-                        navController.navigate(newRoute)
-                    }
+                    navController.navigateSafely(backStackEntry, newRoute)
                 },
                 modifier = Modifier.fillMaxSize()
             )
@@ -188,7 +138,7 @@ internal fun FeatureFormNavHost(
                 showCloseIcon = showCloseIcon,
                 hasEdits = hasEdits,
                 onClose = {
-                    onDismiss?.invoke()
+                    onDismiss()
                 },
                 onSave = { willNavigate ->
                     onSaveForm(featureForm, willNavigate)
@@ -226,3 +176,11 @@ internal fun FeatureFormNavHost(
  */
 internal fun NavBackStackEntry.lifecycleIsResumed() =
     this.lifecycle.currentState == Lifecycle.State.RESUMED
+
+
+internal fun <T: Any> NavHostController.navigateSafely(backStackEntry: NavBackStackEntry, route: T) : Boolean {
+    return if (backStackEntry.lifecycleIsResumed()) {
+        this.navigate(route)
+        true
+    } else false
+}

@@ -16,26 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
@@ -54,32 +44,17 @@ import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
-import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the feature form screen.
  *
  * @param formStateData The form state data.
- * @param showFormActions A boolean value that indicates whether to show the form actions.
- * @param showCloseIcon A boolean value that indicates whether to show the close icon.
- * @param hasBackStack A boolean value that indicates whether there is a back stack.
- * @param isEvaluatingExpressions A boolean value that indicates whether the expressions are being evaluated.
- * @param onClose The callback to be invoked when the close icon is clicked. This is only invoked
- * when there are no edits in the form. If there are edits, this callback is invoked after a successful
- * save or discard operation.
- * @param onSave The callback to be invoked when the save button is clicked. The parameter indicates
- * whether this action should be followed by a back navigation. The callback should return a [Result] that
- * indicates the success or failure of the save operation.
- * @param onDiscard The callback to be invoked when the discard button is clicked. The parameter indicates
- * whether this action should be followed by a back navigation.
- * @param onNavigateBack The callback to be invoked when the back navigation is requested.
  * @param onBarcodeButtonClick The callback to be invoked when the barcode button is clicked.
  * @param onUtilityFilterSelected The callback to be invoked when the utility filter is selected.
  * @param modifier The modifier to be applied to the layout.
@@ -87,120 +62,17 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun FeatureFormScreen(
     formStateData: FormStateData,
-    hasBackStack: Boolean,
-    isEvaluatingExpressions: Boolean,
-    onClose: () -> Unit,
-    onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: (Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (UtilityAssociationsElementState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val featureForm = formStateData.featureForm
-    val states = formStateData.stateCollection
-    val hasEdits by featureForm.hasEdits.collectAsState()
-    var showDiscardEditsDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var pendingCloseAction by rememberSaveable {
-        mutableStateOf(false)
-    }
-    val scope = rememberCoroutineScope()
-    val onBackAction: () -> Unit = {
-        if (hasEdits) {
-            showDiscardEditsDialog = true
-        } else {
-            if (hasBackStack) {
-                // Navigate back to the previous form if there are no edits
-                onNavigateBack()
-            }
-        }
-    }
-
-//    FeatureFormLayout(
-//        modifier = modifier,
-//        title = {
-//            val title by featureForm.title.collectAsState()
-//            FeatureFormTitle(
-//                title = title,
-//                subTitle = featureForm.description,
-//                hasEdits = if (showFormActions) hasEdits else false,
-//                showCloseIcon = showCloseIcon,
-//                modifier = Modifier
-//                    .padding(
-//                        vertical = 8.dp,
-//                        horizontal = if (hasBackStack) 8.dp else 16.dp
-//                    )
-//                    .fillMaxWidth(),
-//                onBackPressed = if (hasBackStack) onBackAction else null,
-//                onClose = {
-//                    if (hasEdits) {
-//                        pendingCloseAction = true
-//                        showDiscardEditsDialog = true
-//                    } else {
-//                        onClose()
-//                    }
-//                },
-//                onSave = {
-//                    scope.launch {
-//                        onSave(false)
-//                    }
-//                },
-//                onDiscard = {
-//                    onDiscard(false)
-//                }
-//            )
-//            InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-//                isEvaluatingExpressions
-//            }
-//        },
-//        content = {
-//
-//        }
-//    )
     FormContent(
         formStateData = formStateData,
         onBarcodeButtonClick = onBarcodeButtonClick,
         onUtilityAssociationFilterClick = onUtilityFilterSelected,
         modifier = modifier
     )
-    if (showDiscardEditsDialog) {
-        SaveEditsDialog(
-            onDismissRequest = {
-                showDiscardEditsDialog = false
-                pendingCloseAction = false
-            },
-            onSave = {
-                scope.launch {
-                    val willNavigate = !pendingCloseAction
-                    onSave(willNavigate).onSuccess {
-                        // Run the pending close action if there is one
-                        if (pendingCloseAction) {
-                            onClose()
-                            pendingCloseAction = false
-                        }
-                    }
-                }
-                showDiscardEditsDialog = false
-            },
-            onDiscard = {
-                val willNavigate = !pendingCloseAction
-                onDiscard(willNavigate)
-                // Run the pending close action if there is one
-                if (pendingCloseAction) {
-                    onClose()
-                    pendingCloseAction = false
-                }
-                showDiscardEditsDialog = false
-            }
-        )
-    }
-    // only enable back navigation if there is a previous route
-    BackHandler(hasBackStack) {
-        onBackAction()
-    }
-    FeatureFormDialog(states)
+    FeatureFormDialog(formStateData.stateCollection)
 }
 
 @Composable
@@ -308,24 +180,6 @@ private fun FormContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    val alpha by animateFloatAsState(
-        if (evaluationProvider()) 1f else 0f,
-        label = "evaluation loading alpha"
-    )
-    Surface(
-        modifier = modifier.graphicsLayer {
-            this.alpha = alpha
-        }
-    ) {
-        LinearProgressIndicator(modifier)
     }
 }
 

@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -65,10 +66,14 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.screens.lifecycleIsResumed
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -100,8 +105,6 @@ public class FeatureFormState private constructor(
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
 
-    private val _isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
-
     /**
      * A navigation callback that is called when navigating to a new [FeatureForm]. This should
      * be set by the composition that uses the NavController to the correct [NavigationRoute].
@@ -127,19 +130,6 @@ public class FeatureFormState private constructor(
      */
     public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
-    /**
-     * Indicates if the [activeFeatureForm] is currently evaluating expressions.
-     *
-     * Note that this property is observable and if you use it in the composable function it will be
-     * recomposed on every change.
-     *
-     * To observe changes to this property outside a restartable function, use [snapshotFlow]:
-     * ```
-     * snapshotFlow { evaluatingExpressions }
-     * ```
-     */
-    public val isEvaluatingExpressions: Boolean by _isEvaluatingExpressions
-
     public constructor(
         featureForm: FeatureForm,
         coroutineScope: CoroutineScope
@@ -151,9 +141,12 @@ public class FeatureFormState private constructor(
             elements = this.featureForm.elements,
             scope = coroutineScope
         )
+        val formStateData = FormStateData(this.featureForm, states)
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, states))
-        evaluateExpressions()
+        store.addLast(formStateData)
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            formStateData.evaluateExpressions()
+        }
     }
 
     internal constructor(
@@ -163,15 +156,18 @@ public class FeatureFormState private constructor(
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, stateCollection))
-        evaluateExpressions()
+        val formStateData = FormStateData(this.featureForm, stateCollection)
+        store.addLast(formStateData)
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            formStateData.evaluateExpressions()
+        }
     }
 
     /**
      * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
      * evaluates expressions.
      */
-    public fun discardEdits() {
+    public suspend fun discardEdits() :  Result<List<FormExpressionEvaluationError>> {
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
         formData.stateCollection.forEach {
@@ -179,7 +175,7 @@ public class FeatureFormState private constructor(
                 (it.state as AttachmentElementState).refreshAttachments()
             }
         }
-        evaluateExpressions()
+        return formData.evaluateExpressions()
     }
 
     /**
@@ -201,14 +197,17 @@ public class FeatureFormState private constructor(
     }
 
     /**
-     * Updates the [activeFeatureForm] to the current form on top of the stack and evaluates any
-     * expressions that are part of the [activeFeatureForm] . This should be called after navigating
-     * to a new form or popping the current form from the stack.
+     * Updates the [activeFeatureForm] to the current form on top of the stack. This should be
+     * called after navigating to a new form or popping the current form from the stack.
+     *
      */
-    internal fun updateActiveFeatureForm() {
-        if (_activeFeatureForm.value != getActiveFormStateData().featureForm) {
-            _activeFeatureForm.value = getActiveFormStateData().featureForm
-            evaluateExpressions()
+    internal suspend fun updateActiveFeatureForm() {
+        val formStateData = getActiveFormStateData()
+        if (_activeFeatureForm.value != formStateData.featureForm) {
+            _activeFeatureForm.value = formStateData.featureForm
+            if (formStateData.initialEvaluation.value.not()) {
+                formStateData.evaluateExpressions()
+            }
         }
     }
 
@@ -281,30 +280,50 @@ public class FeatureFormState private constructor(
     internal fun getActiveFormStateData(): FormStateData {
         return store.last()
     }
-
-    /**
-     * Evaluates expressions for the [activeFeatureForm] and sets the [isEvaluatingExpressions] to
-     * true while the expressions are being evaluated.
-     */
-    internal fun evaluateExpressions() {
-        coroutineScope.launch {
-            _isEvaluatingExpressions.value = true
-            activeFeatureForm.evaluateExpressions()
-            _isEvaluatingExpressions.value = false
-        }
-    }
 }
 
 /**
  * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
  *
- * This class is also [Immutable] and enables composition optimizations.
+ * This class is also [Stable] and enables composition optimizations.
+ *
+ * @param featureForm the [FeatureForm] to create the state for.
+ * @param stateCollection the [FormStateCollection] created for the [featureForm].
  */
-@Immutable
+@Stable
 internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
-)
+) {
+    /**
+     * Indicates if the expressions for the [featureForm] have been evaluated at least once.
+     */
+    var initialEvaluation : MutableState<Boolean> = mutableStateOf(false)
+        private set
+
+    /**
+     * Indicates if the expressions for the [featureForm] are currently being evaluated.
+     */
+    var isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+        private set
+
+    /**
+     * Evaluates the expressions for the [featureForm] and returns the result. After a successful
+     * evaluation, the [initialEvaluation] is set to true. While this function is running, the
+     * [isEvaluatingExpressions] will be true.
+     */
+    suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
+        try {
+            isEvaluatingExpressions.value = true
+            return featureForm.evaluateExpressions().also {
+                // Set the initial evaluation to true after the first successful evaluation.
+                initialEvaluation.value = true
+            }
+        } finally {
+            isEvaluatingExpressions.value = false
+        }
+    }
+}
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the

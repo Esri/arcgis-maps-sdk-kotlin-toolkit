@@ -16,13 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,7 +59,6 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 internal fun UtilityAssociationFilter(
     groupResults: List<UtilityAssociationGroupResult>,
     onGroupClick: (UtilityAssociationGroupResult) -> Unit,
-    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // show the list of layers
@@ -102,7 +98,6 @@ internal fun UtilityAssociationFilter(
             }
         }
     }
-    BackHandler(onBack = onBackPressed)
 }
 
 /**

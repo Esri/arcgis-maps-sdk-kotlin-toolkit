@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,8 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.toolkit.featureforms.FeatureFormLayout
-import com.arcgismaps.toolkit.featureforms.FeatureFormTitle
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
@@ -65,7 +62,7 @@ internal fun UNAssociationsScreen(
     hasEdits: Boolean,
     onClose: () -> Unit,
     onSave: suspend (Boolean) -> Result<Unit>,
-    onDiscard: (Boolean) -> Unit,
+    onDiscard: suspend (Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateTo: (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier
@@ -163,7 +160,9 @@ internal fun UNAssociationsScreen(
             },
             onDiscard = {
                 val willNavigate = !pendingCloseAction
-                onDiscard(willNavigate)
+                scope.launch {
+                    onDiscard(willNavigate)
+                }
                 // If this action is followed by a close action, close the form.
                 if (pendingCloseAction) {
                     onClose()

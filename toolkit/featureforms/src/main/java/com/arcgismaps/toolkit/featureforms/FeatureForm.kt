@@ -21,51 +21,30 @@ package com.arcgismaps.toolkit.featureforms
 import android.Manifest
 import android.content.Context
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
@@ -86,7 +65,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElem
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
-import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormNavHost
+import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
@@ -362,8 +341,8 @@ public fun FeatureForm(
 ) {
     val state by rememberUpdatedState(featureFormState)
     val navController = rememberNavController(state)
-    state.setNavigationCallback {
-        navController.navigate(it)
+    state.setNavigationCallback { route ->
+        navController.navigate(route)
     }
     state.setNavigateBack {
         navController.popBackStack()
@@ -402,7 +381,7 @@ public fun FeatureForm(
     }
 
     // A function that provides the action to discard edits on the form
-    fun discardForm(willNavigate: Boolean) {
+    suspend fun discardForm(willNavigate: Boolean) {
         state.discardEdits()
         // Send a discarded edits event
         val event = FeatureFormEditingEvent.DiscardedEdits(
@@ -415,14 +394,10 @@ public fun FeatureForm(
     FeatureFormLayout(
         topBar = {
             val backStackEntry by navController.currentBackStackEntryAsState()
+            // Track if there is a back stack entry
             val hasBackStack = remember(backStackEntry) {
                 navController.previousBackStackEntry != null
             }
-            Log.e("TAG", "FeatureForm: ${backStackEntry?.destination?.route}")
-            Log.e(
-                "TAG",
-                "FeatureForm: ${state.getActiveFormStateData().featureForm.feature.objectId}",
-            )
             backStackEntry?.let { entry ->
                 ContentAwareTopBar(
                     backStackEntry = entry,
@@ -472,8 +447,8 @@ public fun FeatureForm(
 
 @Composable
 internal fun FeatureFormLayout(
-    topBar: @Composable () -> Unit,
-    content: @Composable () -> Unit,
+    topBar: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
     typography: FeatureFormTypography
@@ -503,35 +478,6 @@ internal fun rememberNavController(vararg inputs: Any): NavHostController {
         )) {
         createNavController(context)
     }
-}
-
-/**
- * Navigation routes for the form.
- */
-@Serializable
-internal sealed class NavigationRoute {
-
-    /**
-     * Represents the [FeatureForm] view.
-     */
-    @Serializable
-    data object FormView : NavigationRoute()
-
-    /**
-     * Represents a view for the [UtilityAssociationFilter].
-     */
-    @Serializable
-    data class UNFilterView(
-        val stateId: Int
-    ) : NavigationRoute()
-
-    /**
-     * Represents a view for the [UtilityAssociation]s.
-     */
-    @Serializable
-    data class UNAssociationsView(
-        val stateId: Int
-    ) : NavigationRoute()
 }
 
 private fun createNavController(context: Context): NavHostController {

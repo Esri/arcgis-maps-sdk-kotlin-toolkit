@@ -16,13 +16,15 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,7 +35,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,10 +45,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,35 +61,44 @@ import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.FormStateData
-import com.arcgismaps.toolkit.featureforms.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun ContentAwareTopBar(
     backStackEntry: NavBackStackEntry,
     state: FeatureFormState,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-    onDiscardForm: (Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
-    onDismissRequest: () -> Unit,
-    hasBackStack : Boolean,
+    hasBackStack: Boolean,
     showFormActions: Boolean,
     showCloseIcon: Boolean,
+    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onDiscardForm: suspend (Boolean) -> Unit,
+    onNavigateBack: () -> Unit,
+    onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+    val scope = rememberCoroutineScope()
     val hasEdits by formData.featureForm.hasEdits.collectAsState()
-    val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
-        val destination = entry.destination
+    var pendingNavigationAction by rememberSaveable(
+        stateSaver = NavigationAction.NavigationActionSaver
+    ) {
+        mutableStateOf(NavigationAction.None)
+    }
+    val onBackAction = {
+        val destination = backStackEntry.destination
         when {
-            destination.hasRoute<NavigationRoute.FormView>()  -> {
+            destination.hasRoute<NavigationRoute.FormView>() -> {
                 if (hasEdits) {
-                    // show discard edits dialog
+                    // Set the pending navigation action to navigate back
+                    pendingNavigationAction = NavigationAction.NavigateBack
                 } else {
-                    if (hasBackStack && entry.lifecycleIsResumed()) {
+                    if (hasBackStack) {
                         state.popBackStack(backStackEntry)
                     }
                 }
@@ -90,38 +106,96 @@ internal fun ContentAwareTopBar(
 
             destination.hasRoute<NavigationRoute.UNFilterView>()
                 || destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
-                if (hasBackStack && entry.lifecycleIsResumed()) {
+                if (hasBackStack) {
                     onNavigateBack()
                 }
             }
         }
     }
+    val onCloseAction = {
+        if (hasEdits) {
+            // Set the pending navigation action to dismiss the form
+            pendingNavigationAction = NavigationAction.Dismiss
+        } else {
+            // close the form
+            onDismissRequest()
+        }
+    }
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
-    Log.e("TAG", "ContentAwareTopBar: $title,${formData.featureForm.feature.objectId}", )
-    FeatureFormTitle(
-        title = title,
-        subTitle = subTitle,
-        hasEdits = hasEdits,
-        showCloseIcon = showCloseIcon,
-        showBackIcon = hasBackStack,
-        onBackPressed = {
-            onBackAction(backStackEntry)
-        },
-        onClose = {
-            if (hasEdits) {
-                // show discard edits dialog
-            } else {
-                // close the form
-            }
-        },
-        onSave = {
+    Column {
+        FeatureFormTitle(
+            title = title,
+            subTitle = subTitle,
+            hasEdits = if (showFormActions) hasEdits else false,
+            showCloseIcon = showCloseIcon,
+            showBackIcon = hasBackStack,
+            onBackPressed = onBackAction,
+            onClose = onCloseAction,
+            onSave = {
+                scope.launch {
+                    onSaveForm(formData.featureForm, false)
+                }
+            },
+            onDiscard = {
+                scope.launch {
+                    onDiscardForm(false)
+                }
+            },
+            modifier = modifier
+        )
+        if (pendingNavigationAction != NavigationAction.None) {
+            SaveEditsDialog(
+                onDismissRequest = {
+                    pendingNavigationAction = NavigationAction.None
+                },
+                onSave = {
+                    scope.launch {
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                            when (pendingNavigationAction) {
+                                is NavigationAction.NavigateBack -> {
+                                    state.popBackStack(backStackEntry)
+                                }
 
-        },
-        onDiscard = {
+                                is NavigationAction.Dismiss -> {
+                                    onDismissRequest()
+                                }
 
-        },
-        modifier = modifier
-    )
+                                else -> {}
+                            }
+                        }
+                        pendingNavigationAction = NavigationAction.None
+                    }
+                },
+                onDiscard = {
+                    scope.launch {
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onDiscardForm(willNavigate)
+                        when (pendingNavigationAction) {
+                            is NavigationAction.NavigateBack -> {
+                                state.popBackStack(backStackEntry)
+                            }
+
+                            is NavigationAction.Dismiss -> {
+                                onDismissRequest()
+                            }
+
+                            else -> {}
+                        }
+                        pendingNavigationAction = NavigationAction.None
+                    }
+                }
+            )
+        }
+        InitializingExpressions(
+            modifier = Modifier.fillMaxWidth(),
+            evaluationProvider = { formData.isEvaluatingExpressions.value }
+        )
+    }
+    // only enable back navigation if there is a previous route
+    BackHandler(hasBackStack) {
+        onBackAction()
+    }
 }
 
 
@@ -203,8 +277,8 @@ private fun FeatureFormTitle(
     subTitle: String,
     hasEdits: Boolean,
     showCloseIcon: Boolean,
-    showBackIcon : Boolean,
-    onBackPressed: (() -> Unit),
+    showBackIcon: Boolean,
+    onBackPressed: () -> Unit,
     onClose: () -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
@@ -279,6 +353,25 @@ private fun FeatureFormTitle(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun InitializingExpressions(
+    modifier: Modifier = Modifier,
+    evaluationProvider: () -> Boolean
+) {
+    val alpha by animateFloatAsState(
+        if (evaluationProvider()) 1f else 0f,
+        label = "evaluation loading alpha"
+    )
+    Surface(
+        modifier = modifier.graphicsLayer {
+            this.alpha = alpha
+        }
+    ) {
+        LinearProgressIndicator(modifier)
     }
 }
 
