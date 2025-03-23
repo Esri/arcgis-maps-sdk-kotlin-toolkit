@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
+import android.view.Surface
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,14 +33,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.google.ar.core.Earth
 import com.google.ar.core.Frame
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import kotlinx.coroutines.launch
+import kotlin.math.sqrt
 
 /**
  * Wraps a [TransformationMatrixCameraController] and uses Google's Geospatial API to update the camera's position.
@@ -69,43 +74,99 @@ internal class GeospatialTrackingCameraController(
             if (earth.trackingState != TrackingState.TRACKING) return@let
             if (earth.earthState != Earth.EarthState.ENABLED) return@let
 
-            val geospatialPose = earth.cameraGeospatialPose
+            try {
+                val geospatialPose = earth.cameraGeospatialPose
+                val orientation = geospatialPose.eastUpSouthQuaternion
+                val projectedLocation = GeometryEngine.projectOrNull(
+                    Point(
+                        geospatialPose.longitude,
+                        geospatialPose.latitude,
+                        geospatialPose.altitude + calibrationState.totalElevationOffset,
+                        WorldScaleParameters.SR_WGS84_WGS_VERTICAL
+                    ),
+                    WorldScaleParameters.SR_CAMERA
+                ) ?: return@let
 
-            // project the geospatial pose to the camera's coordinate system
-            val projectedLocation = GeometryEngine.projectOrNull(
-                Point(
-                    geospatialPose.longitude,
+                cameraController.setOriginCamera(
+                    Camera(
+                        projectedLocation,
+                        calibrationState.totalHeadingOffset,
+                        90.0,
+                        0.0
+                    )
+                )
+
+                // get a pose relative to local coordinates so we can rotate it based on the
+                // display orientation
+                val localPose = earth.getPose(
                     geospatialPose.latitude,
-                    geospatialPose.altitude + calibrationState.totalElevationOffset,
-                    WorldScaleParameters.SR_WGS84_WGS_VERTICAL
-                ),
-                WorldScaleParameters.SR_CAMERA
-            ) ?: return@let
-
-            // set the origin camera for lat, lon and altitude (projectedLocation)
-            cameraController.setOriginCamera(
-                Camera(
-                    projectedLocation,
-                    calibrationState.totalHeadingOffset,
-                    90.0,
-                    0.0
-                )
-            )
-
-            // set the transformation matrix for orienting the scene camera
-            val displayOrientedPose = frame.camera.displayOrientedPose
-            cameraController.transformationMatrix =
-                TransformationMatrix.createWithQuaternionAndTranslation(
-                    displayOrientedPose.qx().toDouble(),
-                    displayOrientedPose.qy().toDouble(),
-                    displayOrientedPose.qz().toDouble(),
-                    displayOrientedPose.qw().toDouble(),
-                    0.0,
-                    0.0,
-                    0.0
+                    geospatialPose.longitude,
+                    geospatialPose.altitude,
+                    orientation[0],
+                    orientation[1],
+                    orientation[2],
+                    orientation[3]
                 )
 
-            hasSetOriginCamera = true
+                // rotate the local pose based on the display orientation,
+                // then convert it back to a geospatial pose
+                val displayOrientedGeospatialOrientation = when (display?.rotation ?: 0) {
+                    Surface.ROTATION_90 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                -sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
+
+                    Surface.ROTATION_180 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(1.0).toFloat(),
+                                0f
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
+
+                    Surface.ROTATION_270 ->
+                        localPose.compose(
+                            Pose.makeRotation(
+                                0f,
+                                0f,
+                                sqrt(0.5).toFloat(),
+                                sqrt(0.5).toFloat()
+                            )
+                        ).let {
+                            earth.getGeospatialPose(it).eastUpSouthQuaternion
+                        }
+                    else -> {
+                        // in normal portrait we don't need to adjust for display orientation
+                        orientation
+                    }
+                }
+
+                hasSetOriginCamera = true
+                cameraController.transformationMatrix =
+                    TransformationMatrix.createWithQuaternionAndTranslation(
+                        displayOrientedGeospatialOrientation[0].toDouble(),
+                        displayOrientedGeospatialOrientation[1].toDouble(),
+                        displayOrientedGeospatialOrientation[2].toDouble(),
+                        displayOrientedGeospatialOrientation[3].toDouble(),
+                        0.0,
+                        0.0,
+                        0.0
+                    )
+            } catch (e: Throwable) {
+                Log.e("GeospatialTrackingCameraController", "Failed to update camera", e)
+                // Ignore
+            }
         }
     }
 
