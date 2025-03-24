@@ -24,9 +24,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -191,6 +188,10 @@ public fun WorldScaleSceneView(
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(worldScaleCameraController) {
         lifecycleOwner.lifecycle.addObserver(worldScaleCameraController)
+        initializationStatus.update(
+            WorldScaleSceneViewStatus.Initializing,
+            onInitializationStatusChanged
+        )
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(worldScaleCameraController)
             (worldScaleCameraController).onDestroy(lifecycleOwner)
@@ -199,14 +200,14 @@ public fun WorldScaleSceneView(
 
     // The camera controller will get used by the SceneView and the long-lived onFrame callback,
     // so we need to make sure that those always use the most up-to-date camera controller.
-    val cameraController by rememberUpdatedState(worldScaleCameraController)
+    val updatedCameraController by rememberUpdatedState(worldScaleCameraController)
 
     Box(modifier = modifier) {
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
-                cameraController.updateCamera(frame, session)
-                if (!cameraController.hasSetOriginCamera) return@ArCameraFeed
+                updatedCameraController.updateCamera(frame, session)
+                if (!updatedCameraController.hasSetOriginCamera) return@ArCameraFeed
                 worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
                     frame.camera,
                     displayRotation
@@ -217,13 +218,13 @@ public fun WorldScaleSceneView(
             onFirstPlaneDetected = { },
             visualizePlanes = false
         )
-        // Once the session is created, we can say we're initialized
+        // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
+        if (!updatedCameraController.hasSetOriginCamera) return@WorldScaleSceneView
+        // Once the origin camera is set, we can say we're initialized
         initializationStatus.update(
             WorldScaleSceneViewStatus.Initialized,
             onInitializationStatusChanged
         )
-        // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
-        if (!cameraController.hasSetOriginCamera) return@WorldScaleSceneView
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -242,7 +243,7 @@ public fun WorldScaleSceneView(
             isAttributionBarVisible = isAttributionBarVisible,
             onAttributionTextChanged = onAttributionTextChanged,
             onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = cameraController.cameraController,
+            cameraController = updatedCameraController.cameraController,
             analysisOverlays = analysisOverlays,
             imageOverlays = imageOverlays,
             atmosphereEffect = AtmosphereEffect.None,
@@ -290,7 +291,6 @@ internal fun rememberWorldScaleCameraController(
     onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit,
     onResetOriginCamera: () -> Unit
 ): WorldScaleCameraController = remember(worldScaleTrackingMode) {
-    onUpdateInitializationStatus(WorldScaleSceneViewStatus.Initializing)
     when (worldScaleTrackingMode) {
         is WorldScaleTrackingMode.Geospatial -> {
             GeospatialTrackingCameraController(
