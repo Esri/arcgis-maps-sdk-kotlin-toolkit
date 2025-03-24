@@ -21,15 +21,19 @@ package com.arcgismaps.toolkit.legend
 import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,19 +55,71 @@ import com.arcgismaps.toolkit.legend.theme.LegendDefaults
 import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
-private data class LegendItem(
-    val name: String,
-    val bitmap: Bitmap?
-): Parcelable
-
-@Parcelize
-private data class LayerContentData(
-    val name: String,
-    val legendItems: MutableList<LegendItem> = mutableListOf(),
-    val isVisible: (Double) -> Boolean
-) : Parcelable
-
+/**
+ * A composable that displays a legend for the given operational layers and basemap.
+ * The legend will display the layer symbology and description so users can better
+ * understand what is being viewed in the GeoView. The component provides the option to show all
+ * layers or only those layers in the current scale range of the GeoView as well as the ability
+ * to reverse the order of items in the legend. The legend will display information from layers,
+ * sublayers and group layers.
+ *
+ * The required parameters are the operational layers, the basemap to display in the legend and
+ * the current scale of the GeoView. The currentScale can be obtained from the Composable MapView's
+ * onViewpointChangedForCenterAndScale callback.
+ *
+ * _Workflow example:_
+ *
+ *  ```
+ * fun MainScreen(viewModel: LegendViewModel = viewModel()) {
+ *
+ *     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
+ *     val basemap = viewModel.arcGISMap.basemap.collectAsState()
+ *     var currentScale: Double by remember { mutableDoubleStateOf(Double.NaN) }
+ *     ...
+ *
+ *     // show composable MapView with a legend in the bottom sheet
+ *      BottomSheetScaffold(
+ *         sheetContent = {
+ *             AnimatedVisibility(
+ *                 visible = loadState is LoadStatus.Loaded,
+ *                 ...
+ *             ) {
+ *                 Legend(
+ *                     operationalLayers = viewModel.arcGISMap.operationalLayers,
+ *                     basemap = basemap.value,
+ *                     currentScale = currentScale,
+ *                     modifier = Modifier.fillMaxSize()
+ *                 )
+ *             }
+ *         },
+ *         modifier = Modifier.fillMaxSize(),
+ *         scaffoldState = scaffoldState,
+ *         sheetSwipeEnabled = true,
+ *         topBar = null
+ *     ) { padding ->
+ *         MapView(
+ *             modifier = Modifier
+ *                 .padding(padding)
+ *                 .fillMaxSize(),
+ *             arcGISMap = viewModel.arcGISMap,
+ *             onViewpointChangedForCenterAndScale = {
+ *                 currentScale = it.targetScale
+ *             }
+ *         )
+ *     }
+ *  ```
+ *
+ * @param operationalLayers The operational layers to display in the legend.
+ * @param basemap The basemap to display in the legend.
+ * @param currentScale The current scale of the GeoView.
+ * @param modifier Modifier to be applied to the legend.
+ * @param reverseLayerOrder Whether to reverse the order of the layers in the legend.
+ * @param respectScaleRange Whether to respect the scale range of the layers.
+ * @param title The title of the legend. Defaults to "Legend". Empty string will not display the title.
+ * @param typography The typography to use for the legend.
+ *
+ * @since 200.7.0
+ */
 @Composable
 public fun Legend(
     operationalLayers: List<LayerContent>,
@@ -127,7 +183,12 @@ public fun Legend(
     if (initialized) {
         Legend(modifier, layerContentData, currentScale, respectScaleRange, title, typography)
     } else {
-        CircularProgressIndicator()
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 
     if (showErrorDialog) {
@@ -168,7 +229,7 @@ private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
 ): List<LayerContentData> {
-    val data = LayerContentData(layerContent.name) { scale ->
+    val data = LayerContentData(layerContent.name, layerContent is Layer) { scale ->
         layerContent.isVisibleAtScale(scale)
     }
     layerContent.fetchLegendInfos().onSuccess {
@@ -211,13 +272,37 @@ private fun Legend(
             itemsIndexed(legendItems) { index, item ->
                 if (!respectScaleRange || item.isVisible(currentScale)) {
                     if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
-                        Row {
-                            Text(text = item.name, style = typography.layerName)
+                        if (item.isLayer && index < legendItems.size - 1) {
+                            HorizontalDivider(modifier = Modifier.padding(top = 6.dp))
+                        }
+                        Row(
+                            modifier = Modifier.then(
+                                if (item.isLayer) Modifier.padding(
+                                    start = 8.dp, top = 8.dp
+                                ) else Modifier.padding(
+                                    start = 16.dp, top = 8.dp
+                                )
+                            )
+                        ) {
+                            Text(
+                                text = item.name,
+                                style = if (item.isLayer) typography.layerName else typography.subLayerName
+                            )
                         }
                     }
                     if (item.legendItems.isNotEmpty()) {
                         item.legendItems.forEach { legendInfo ->
-                            LegendInfoRow(legendInfo, typography)
+                            LegendInfoRow(
+                                legendInfo = legendInfo,
+                                typography = typography,
+                                modifier = if (item.isLayer) Modifier.padding(
+                                    start = 16.dp,
+                                    top = 8.dp
+                                ) else Modifier.padding(
+                                    start = 24.dp,
+                                    top = 8.dp
+                                )
+                            )
                         }
                     }
                 }
@@ -230,14 +315,30 @@ private fun Legend(
 private fun LegendInfoRow(
     legendInfo: LegendItem,
     typography: Typography,
+    modifier: Modifier
 ) {
-    Row {
+    Row(modifier = modifier) {
         legendInfo.bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),
                 contentDescription = stringResource(R.string.symbol_description)
             )
         }
+        Spacer(modifier = Modifier.padding(start = 8.dp))
         Text(text = legendInfo.name, style = typography.legendInfoName)
     }
 }
+
+@Parcelize
+private data class LegendItem(
+    val name: String,
+    val bitmap: Bitmap?
+): Parcelable
+
+@Parcelize
+private data class LayerContentData(
+    val name: String,
+    val isLayer: Boolean,
+    val legendItems: MutableList<LegendItem> = mutableListOf(),
+    val isVisible: (Double) -> Boolean
+) : Parcelable
