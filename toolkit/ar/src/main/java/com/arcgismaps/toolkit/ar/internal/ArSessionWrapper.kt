@@ -66,14 +66,13 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        // TODO: clean this up
         withLock { session, _ ->
-            val sessionExists = session != null
-            val newSession = session ?: Session(applicationContext)
+            val newSession = session ?: Session(applicationContext).also {
+                this.session = it
+                configureSession(wasSetToUseGeospatial)
+            }
             shouldInitializeDisplay = true
             newSession.resume()
-            this.session = newSession
-            if (!sessionExists) configureSession(wasSetToUseGeospatial)
         }
     }
 
