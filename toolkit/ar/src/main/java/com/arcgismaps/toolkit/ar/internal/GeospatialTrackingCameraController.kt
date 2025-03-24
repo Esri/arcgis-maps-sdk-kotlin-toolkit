@@ -22,12 +22,9 @@ import android.content.Context
 import android.os.Build
 import android.view.Surface
 import android.view.WindowManager
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.Camera
@@ -44,10 +41,7 @@ import kotlin.math.sqrt
 /**
  * Wraps a [TransformationMatrixCameraController] and uses Google's Geospatial API to update the camera's position.
  *
- * This class should not be constructed directly. Instead, use the [rememberGeospatialTrackingCameraController] factory function.
- *
  * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
- * @see rememberGeospatialTrackingCameraController
  *
  * @since 200.7.0
  */
@@ -166,24 +160,5 @@ internal class GeospatialTrackingCameraController(
                     0.0
                 )
         }
-    }
-}
-
-/**
- * Returns a [GeospatialTrackingCameraController].
- *
- * @see GeospatialTrackingCameraController
- * @since 200.7.0
- */
-@Composable
-internal fun rememberGeospatialTrackingCameraController(
-    calibrationState: CalibrationState,
-): WorldScaleCameraController {
-    val context = LocalContext.current
-    return remember {
-        GeospatialTrackingCameraController(
-            calibrationState,
-            context
-        )
     }
 }
