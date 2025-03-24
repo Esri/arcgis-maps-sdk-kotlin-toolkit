@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Valitse palvelu</string>
     <string name="floor_filter_no_results">Tuloksia ei löytynyt.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModelissa ei ole kerroksen huomioivaa aineistoa</string>
+    <string name="an_error_has_occurred">Tapahtui virhe</string>
     <string name="not_available">Ei käytettävissä</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Paikka – %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Tyhjennä haku</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Sulje</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Kutista</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Palaa paikkavalitsimeen</string>
 </resources>

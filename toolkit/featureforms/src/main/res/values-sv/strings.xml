@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Ange %1$d tecken</item>
         <item quantity="one">Ange %1$d tecken</item>
+        <item quantity="two">Ange %1$d tecken</item>
+        <item quantity="few">Ange %1$d tecken</item>
+        <item quantity="many">Ange %1$d tecken</item>
         <item quantity="other">Ange %1$d tecken</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Värdet måste ha %1$d tecken</item>
         <item quantity="one">Värdet måste ha %1$d tecken</item>
+        <item quantity="two">Värdet måste ha %1$d tecken</item>
+        <item quantity="few">Värdet måste ha %1$d tecken</item>
+        <item quantity="many">Värdet måste ha %1$d tecken</item>
         <item quantity="other">Värdet måste ha %1$d tecken</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Ange %1$d till %2$d tecken</string>
-    <string name="value_must_be_from_to_characters">Värdet måste vara %1$d till %2$d tecken</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximum %1$d tecken</item>
         <item quantity="one">Maximum %1$d tecken</item>
+        <item quantity="two">Maximum %1$d tecken</item>
+        <item quantity="few">Maximum %1$d tecken</item>
+        <item quantity="many">Maximum %1$d tecken</item>
         <item quantity="other">Maximum %1$d tecken</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Ange %1$d till %2$d tecken</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Värdet måste vara %1$d till %2$d tecken</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximum %1$d tecken</string>
     <string name="no_value">Inget värde</string>
     <string name="enter_value">Ange värde</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Klart</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Sök</string>
     <string name="numeric_range_helper_text">Ange ett värde mellan %1$s och %2$s</string>
     <string name="value_must_be_from_to">Värdet måste vara från %1$s till %2$s</string>
     <string name="less_than_min_value">Mindre än minimivärdet %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Timme</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d timmar</string>
     <string name="ff_time_picker_hour_selection">Välj timme</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'klocka</string>
     <string name="ff_time_picker_hour_text_field">för timme</string>
     <string name="ff_time_picker_minute">Minut</string>
     <string name="ff_time_picker_minute_selection">Välj minuter</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minuter</string>
     <string name="ff_time_picker_minute_text_field">för minuter</string>
     <string name="ff_time_picker_period_toggle_description">Välj FM eller EM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Tomma filer kan inte laddas ner</string>
     <string name="attachment_deleted">%1s har tagits bort</string>
     <string name="attachment_size_limit_exceeded">Bilagor större än %1$s kan inte hämtas</string>
+    <string name="barcode_tooltip">Rikta kameran mot en streckkod</string>
+    <string name="barcode_permission_denied">Kamerabehörighet krävs för att skanna streckkoder. Aktivera kamerabehörigheter i enhetsinställningarna.</string>
+    <string name="unsupported_value">Värde stöds inte</string>
+    <string name="tap_to_scan">Tryck för att skanna</string>
+    <string name="unable_to_open_the_camera">Det gick inte att öppna kameran</string>
+    <string name="value_must_be_a_guid">Värdet måste vara ett giltigt GUID</string>
 </resources>

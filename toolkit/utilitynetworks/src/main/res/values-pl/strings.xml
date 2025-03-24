@@ -28,4 +28,36 @@
     <string name="feature_results">Wyniki dotyczące obiektów</string>
     <string name="function_results">Wyniki funkcji</string>
     <string name="clear_all_results">Wyczyść wszystkie wyniki</string>
+    <string name="delete">Usuń</string>
+    <string name="not_available">Niedostępne</string>
+    <string name="zoom_to">Powiększ do</string>
+    <string name="zoom_in">Powiększ</string>
+    <string name="fraction_along_edge">Ułamek wzdłuż krawędzi</string>
+    <string name="attributes">Atrybuty</string>
+    <string name="terminal_configuration">Konfiguracja terminala</string>
+    <string name="an_error_has_occurred">Wystąpił błąd</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Anuluj</string>
+    <string name="clear_all_results_confirmation">Wszystkie wyniki trasowania zostaną utracone.</string>
+    <string name="object_id">ID obiektu: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nie znaleziono sieci infrastruktury.</string>
+    <string name="no_trace_configurations_found">Nie znaleziono żadnych konfiguracji trasowania.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Za mało punktów startowych. Ustaw co najmniej 1 lokalizację początkową.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Za mało punktów startowych. Ustaw co najmniej 2 lokalizacje początkowe.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Nie można utworzyć elementu infrastruktury z aplikacji ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Istnieje już co najmniej jeden punkt startowy.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Nie można utworzyć szkicu z symbolu funkcji.</string>
+    <string name="no_configuration_selected">Nie wybrano konfiguracji</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Komponent trasowania</string>
+    <string name="more_options">Więcej opcji</string>
+    <string name="go_back">Wstecz</string>
+    <string name="edit_terminal_configuration">Edytuj konfigurację terminala</string>
+    <string name="selected">Wybrane</string>
+    <string name="feature_icon">Ikona funkcji</string>
+    <string name="zoom_to_result_description">Włącz lub wyłącz powiększenie do wyniku</string>
+    <string name="select_previous_result">Wybierz poprzedni wynik</string>
+    <string name="select_next_result">Wybierz następny wynik</string>
+    <string name="error">Błąd</string>
 </resources>
