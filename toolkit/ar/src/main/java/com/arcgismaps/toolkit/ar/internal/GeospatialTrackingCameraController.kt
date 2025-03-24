@@ -29,11 +29,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
@@ -42,7 +39,6 @@ import com.google.ar.core.Frame
 import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
-import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
 /**
@@ -146,6 +142,7 @@ internal class GeospatialTrackingCameraController(
                         ).let {
                             earth.getGeospatialPose(it).eastUpSouthQuaternion
                         }
+
                     else -> {
                         // in normal portrait we don't need to adjust for display orientation
                         orientation
@@ -166,52 +163,9 @@ internal class GeospatialTrackingCameraController(
             } catch (e: Throwable) {
                 Log.e("GeospatialTrackingCameraController", "Failed to update camera", e)
                 // Ignore
+                // TODO: clean this up to just the not tracking exception
             }
         }
-    }
-
-
-    /**
-     * Rotates the origin position of the camera by the given heading offset.
-     *
-     * @since 200.7.0
-     */
-    private fun updateCameraHeading(headingOffset: Double) {
-        cameraController.setOriginCamera(
-            cameraController.originCamera.value
-                .rotateAround(
-                    targetPoint = cameraController.originCamera.value.location,
-                    deltaHeading = headingOffset,
-                    deltaPitch = 0.0,
-                    deltaRoll = 0.0
-                )
-        )
-    }
-
-    /**
-     * Elevates the origin position of the camera by the given elevation offset.
-     *
-     * @since 200.7.0
-     */
-    private fun updateCameraElevation(elevationOffset: Double) {
-        cameraController.setOriginCamera(
-            cameraController.originCamera.value
-                .elevate(elevationOffset)
-        )
-    }
-
-    override fun onResume(owner: LifecycleOwner) {
-        owner.lifecycleScope.launch {
-            calibrationState.headingDeltas.collect {
-                updateCameraHeading(-it)
-            }
-        }
-        owner.lifecycleScope.launch {
-            calibrationState.elevationDeltas.collect {
-                updateCameraElevation(it)
-            }
-        }
-        super.onResume(owner)
     }
 }
 
