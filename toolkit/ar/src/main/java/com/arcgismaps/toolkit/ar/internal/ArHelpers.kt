@@ -232,9 +232,7 @@ internal fun rememberPermissionsGranted(
 internal data object WorldScaleParameters {
     const val LOCATION_DISTANCE_THRESHOLD_METERS = 10.0
     const val HORIZONTAL_ACCURACY_THRESHOLD_METERS = 6.0
-    const val VERTICAL_ACCURACY_THRESHOLD_METERS = 4.0
     const val LOCATION_AGE_THRESHOLD_MS = 10000.0
-    const val ANGLE_ACCURACY_DEGREES = 20.0
 
     const val WKID_WGS84 = 4326
     const val WKID_WGS84_VERTICAL = 115700
