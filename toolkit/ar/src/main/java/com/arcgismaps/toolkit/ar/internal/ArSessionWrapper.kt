@@ -39,7 +39,7 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context, private val scope: CoroutineScope, useGeospatial: Boolean) :
+internal class ArSessionWrapper(private val applicationContext: Context, private val scope: CoroutineScope, private val onError: (Throwable) -> Unit, useGeospatial: Boolean) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
@@ -77,13 +77,15 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
         }
     }
 
-    internal fun configureSession(useGeospatial: Boolean) {
-        // TODO: add a callback if geospatial not supported and useGeospatial is true
-       if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) return
+    private fun configureSession(useGeospatial: Boolean) {
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                 if (useGeospatial) {
+                    if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) {
+                        onError(IllegalStateException("Geospatial mode is not supported on this device."))
+                        return
+                    }
                     geospatialMode = Config.GeospatialMode.ENABLED
                 }
                 // We only want to detect horizontal planes.
@@ -124,9 +126,9 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean = false): ArSessionWrapper {
+internal fun rememberArSessionWrapper(applicationContext: Context, onError: (Throwable) -> Unit = {}, useGeospatial: Boolean = false): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember { ArSessionWrapper(applicationContext, lifecycleOwner.lifecycleScope, useGeospatial) }
+    val arSessionWrapper = remember { ArSessionWrapper(applicationContext, lifecycleOwner.lifecycleScope, onError, useGeospatial) }
     LaunchedEffect(useGeospatial) {
         arSessionWrapper.resetSession(useGeospatial)
     }

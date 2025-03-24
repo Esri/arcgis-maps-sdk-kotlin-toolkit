@@ -159,6 +159,12 @@ public fun WorldScaleSceneView(
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = LocalContext.current.applicationContext,
+            onError = {
+                initializationStatus.update(
+                    WorldScaleSceneViewStatus.FailedToInitialize(it),
+                    onInitializationStatusChanged
+                )
+            },
             useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial
         )
 
