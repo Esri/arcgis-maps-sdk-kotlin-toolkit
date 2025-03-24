@@ -39,7 +39,12 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context, private val scope: CoroutineScope, private val onError: (Throwable) -> Unit, useGeospatial: Boolean) :
+internal class ArSessionWrapper(
+    private val applicationContext: Context,
+    private val scope: CoroutineScope,
+    private val onError: (Throwable) -> Unit,
+    useGeospatial: Boolean
+) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
@@ -125,9 +130,20 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context, onError: (Throwable) -> Unit = {}, useGeospatial: Boolean = false): ArSessionWrapper {
+internal fun rememberArSessionWrapper(
+    applicationContext: Context,
+    onError: (Throwable) -> Unit = {},
+    useGeospatial: Boolean = false
+): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember { ArSessionWrapper(applicationContext, lifecycleOwner.lifecycleScope, onError, useGeospatial) }
+    val arSessionWrapper = remember {
+        ArSessionWrapper(
+            applicationContext,
+            lifecycleOwner.lifecycleScope,
+            onError,
+            useGeospatial
+        )
+    }
     LaunchedEffect(useGeospatial) {
         arSessionWrapper.resetSession(useGeospatial)
     }
