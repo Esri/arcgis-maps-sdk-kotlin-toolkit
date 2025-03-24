@@ -236,6 +236,9 @@ public class FeatureFormState private constructor(
      * Based on the current destination given by the [backStackEntry], this function navigates back
      * to the previous view and pops the current [FeatureForm] from the stack (if required).
      *
+     * Note that this will pop the current form from the stack even if there are edits. Check if
+     * there are edits before calling this function.
+     *
      * [updateActiveFeatureForm] must be called after this to update the [activeFeatureForm], preferably
      * after the navigation is complete.
      *

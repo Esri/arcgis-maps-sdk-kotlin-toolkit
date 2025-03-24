@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,91 +29,64 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
-import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.launch
 
 /**
- * Composable function that displays the given [groupResult] and its associations.
+ * Screen that displays the selected group of associations.
  *
- * @param groupResult The group result.
- * @param subTitle The subtitle to display.
- * @param showFormActions A boolean value that indicates whether to show the form actions.
- * @param showCloseIcon A boolean value that indicates whether to show the close icon.
- * @param hasEdits A boolean value that indicates whether there are edits.
- * @param onClose The callback to be invoked when the close icon is clicked. This is only invoked
- * when there are no edits in the form. If there are edits, this callback is invoked after a successful
- * save or discard operation.
+ * @param formStateData The form state data.
+ * @param route The [NavigationRoute.UNAssociationsView] route data of this screen.
  * @param onSave The callback to be invoked when the save button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation. The callback should
  * return a [Result] that indicates the success or failure of the save operation.
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
- * @param onNavigateBack The callback to be invoked when the back navigation is requested.
  * @param onNavigateTo The callback to be invoked when the user selects an association to navigate to.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
 internal fun UNAssociationsScreen(
-    groupResult: UtilityAssociationGroupResult,
-    subTitle: String,
-    showFormActions: Boolean,
-    showCloseIcon: Boolean,
-    hasEdits: Boolean,
-    onClose: () -> Unit,
-    onSave: suspend (Boolean) -> Result<Unit>,
+    formStateData: FormStateData,
+    route : NavigationRoute.UNAssociationsView,
+    onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
     onNavigateTo: (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val featureForm = formStateData.featureForm
+    val states = formStateData.stateCollection
+    // Get the selected UtilityAssociationsElementState from the state collection
+    val utilityAssociationsElementState = states[route.stateId] as?
+        UtilityAssociationsElementState ?: return
+    // Get the selected filter from the UtilityAssociationsElementState
+    val filterResult = utilityAssociationsElementState.selectedFilterResult
+    // Get the selected group from the filter
+    val groupResult = utilityAssociationsElementState.selectedGroupResult
+    if (filterResult == null || groupResult == null) {
+        // guard against null values
+        return
+    }
+    val hasEdits by featureForm.hasEdits.collectAsState()
     val scope = rememberCoroutineScope()
-    var showDiscardEditsDialog by rememberSaveable {
-        mutableStateOf(false)
+    var pendingNavigationAction: NavigationAction by rememberSaveable {
+        mutableStateOf(NavigationAction.None)
     }
-    var pendingCloseAction by rememberSaveable {
-        mutableStateOf(false)
+    val onNavigationAction: (NavigationAction) -> Unit = { action ->
+        if (action is NavigationAction.NavigateToAssociation) {
+            val selectedIndex = action.index
+            groupResult.associationResults.getOrNull(selectedIndex)?.associatedFeature?.let { feature ->
+                onNavigateTo(feature)
+            }
+        }
     }
-    var selectedAssociationIndex by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-//    FeatureFormLayout(
-//        modifier = modifier,
-//        title = {
-//            FeatureFormTitle(
-//                title = groupResult.name,
-//                subTitle = subTitle,
-//                hasEdits = if (showFormActions) hasEdits else false,
-//                showCloseIcon = showCloseIcon,
-//                modifier = Modifier
-//                    .padding(
-//                        vertical = 8.dp,
-//                        horizontal = 8.dp
-//                    )
-//                    .fillMaxWidth(),
-//                onBackPressed = onNavigateBack,
-//                onClose = {
-//                    if (hasEdits) {
-//                        pendingCloseAction = true
-//                        showDiscardEditsDialog = true
-//                    } else {
-//                        onClose()
-//                    }
-//                },
-//                onSave = {
-//                    scope.launch {
-//                        onSave(false)
-//                    }
-//                },
-//                onDiscard = {
-//                    onDiscard(false)
-//                }
-//            )
-//        },
-//        content = {
-//        }
-//    )
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top
@@ -121,8 +95,7 @@ internal fun UNAssociationsScreen(
             groupResult = groupResult,
             onItemClick = { index ->
                 if (hasEdits) {
-                    selectedAssociationIndex = index
-                    showDiscardEditsDialog = true
+                    pendingNavigationAction = NavigationAction.NavigateToAssociation(index)
                 } else {
                     val feature = groupResult.associationResults[index].associatedFeature
                     // Navigate to the next form if there are no edits.
@@ -132,51 +105,27 @@ internal fun UNAssociationsScreen(
             modifier = Modifier.padding(16.dp)
         )
     }
-    if (showDiscardEditsDialog) {
+    if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {
-                showDiscardEditsDialog = false
-                pendingCloseAction = false
+                pendingNavigationAction = NavigationAction.None
             },
             onSave = {
                 scope.launch {
-                    val willNavigate = !pendingCloseAction
-                    onSave(willNavigate).onSuccess {
-                        // If this action is followed by a close action, close the form.
-                        if (pendingCloseAction) {
-                            onClose()
-                            pendingCloseAction = false
-                        } else {
-                            // If this action is followed by a forward navigation, navigate to the next form.
-                            selectedAssociationIndex?.let { index ->
-                                groupResult.associationResults.getOrNull(index)?.associatedFeature?.let { feature ->
-                                    onNavigateTo(feature)
-                                }
-                            }
-                        }
+                    onSave(featureForm, true).onSuccess {
+                        onNavigationAction(pendingNavigationAction)
                     }
+                    pendingNavigationAction = NavigationAction.None
                 }
-                showDiscardEditsDialog = false
             },
             onDiscard = {
-                val willNavigate = !pendingCloseAction
                 scope.launch {
-                    onDiscard(willNavigate)
+                    onDiscard(true)
+                    onNavigationAction(pendingNavigationAction)
+                    pendingNavigationAction = NavigationAction.None
                 }
-                // If this action is followed by a close action, close the form.
-                if (pendingCloseAction) {
-                    onClose()
-                    pendingCloseAction = false
-                } else {
-                    // If this action is followed by a forward navigation, navigate to the next form.
-                    selectedAssociationIndex?.let { index ->
-                        groupResult.associationResults.getOrNull(index)?.associatedFeature?.let { feature ->
-                            onNavigateTo(feature)
-                        }
-                    }
-                }
-                showDiscardEditsDialog = false
             }
         )
     }
+    FeatureFormDialog(states)
 }

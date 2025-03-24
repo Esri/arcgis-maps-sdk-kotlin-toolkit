@@ -84,9 +84,7 @@ internal fun ContentAwareTopBar(
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     val scope = rememberCoroutineScope()
     val hasEdits by formData.featureForm.hasEdits.collectAsState()
-    var pendingNavigationAction by rememberSaveable(
-        stateSaver = NavigationAction.NavigationActionSaver
-    ) {
+    var pendingNavigationAction: NavigationAction by rememberSaveable {
         mutableStateOf(NavigationAction.None)
     }
     val onNavigationAction: (NavigationAction, Boolean) -> Unit = { action, formHasEdits ->
@@ -106,6 +104,19 @@ internal fun ContentAwareTopBar(
             }
         }
     }
+    val onBackAction : (NavBackStackEntry) -> Unit = { entry ->
+        when {
+            entry.destination.hasRoute<NavigationRoute.FormView>() -> {
+                // Run the navigation action if the current view is the form view
+                onNavigationAction(NavigationAction.NavigateBack, hasEdits)
+            }
+
+            else -> {
+                // Pop the back stack if the current view is not the form view
+                state.popBackStack(backStackEntry)
+            }
+        }
+    }
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
     Column {
         FeatureFormTitle(
@@ -115,7 +126,7 @@ internal fun ContentAwareTopBar(
             showCloseIcon = showCloseIcon,
             showBackIcon = hasBackStack,
             onBackPressed = {
-                onNavigationAction(NavigationAction.NavigateBack, hasEdits)
+                onBackAction(backStackEntry)
             },
             onClose = {
                 onNavigationAction(NavigationAction.Dismiss, hasEdits)
@@ -167,7 +178,7 @@ internal fun ContentAwareTopBar(
     }
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
-        onNavigationAction(NavigationAction.NavigateBack, hasEdits)
+        onBackAction(backStackEntry)
     }
 }
 

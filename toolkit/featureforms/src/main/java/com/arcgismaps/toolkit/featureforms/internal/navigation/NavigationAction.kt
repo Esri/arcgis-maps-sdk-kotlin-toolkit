@@ -16,50 +16,38 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 /**
  * Indicates the action to take when navigating.
  */
-internal sealed class NavigationAction(val value: Int) {
+@Parcelize
+internal sealed class NavigationAction(val value: Int) : Parcelable {
 
     /**
      * Indicates no action.
      */
+    @Parcelize
     data object None : NavigationAction(0)
 
     /**
      * Indicates an action to navigate back.
      */
+    @Parcelize
     data object NavigateBack : NavigationAction(1)
 
     /**
      * Indicates an action to dismiss the form.
      */
+    @Parcelize
     data object Dismiss : NavigationAction(2)
 
     /**
      * Indicates an action to navigate to an associated feature.
+     *
+     * @param index The index of the association to navigate to.
      */
-    data object NavigateToAssociation : NavigationAction(3)
-
-    /**
-     * A [Saver] for [NavigationAction].
-     */
-    object NavigationActionSaver : Saver<NavigationAction, Int> {
-        override fun restore(value: Int): NavigationAction {
-            return when (value) {
-                0 -> None
-                1 -> NavigateBack
-                2 -> Dismiss
-                3 -> NavigateToAssociation
-                else -> throw IllegalArgumentException("Unknown value: $value")
-            }
-        }
-
-        override fun SaverScope.save(value: NavigationAction): Int {
-            return value.value
-        }
-    }
+    @Parcelize
+    data class NavigateToAssociation(val index : Int) : NavigationAction(3)
 }

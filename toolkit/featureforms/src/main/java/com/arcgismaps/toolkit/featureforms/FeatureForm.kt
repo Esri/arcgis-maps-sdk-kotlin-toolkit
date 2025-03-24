@@ -20,21 +20,16 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,7 +37,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -62,10 +56,8 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
-import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
@@ -73,7 +65,6 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.arcgismaps.utilitynetworks.UtilityAssociation
-import kotlinx.serialization.Serializable
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -345,7 +336,7 @@ public fun FeatureForm(
         navController.navigate(route)
     }
     state.setNavigateBack {
-        navController.popBackStack()
+        navController.navigateUp()
     }
     rememberCoroutineScope()
     val context = LocalContext.current
@@ -421,11 +412,8 @@ public fun FeatureForm(
             FeatureFormNavHost(
                 navController = navController,
                 state = state,
-                showFormActions = showFormActions,
-                showCloseIcon = showCloseIcon,
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
-                onDismiss = onDismiss,
                 onBarcodeButtonClick = onBarcodeButtonClick,
                 modifier = modifier
             )

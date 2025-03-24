@@ -16,11 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import kotlinx.serialization.Serializable
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import kotlinx.serialization.Serializable
 
 /**
  * Navigation routes for the form.

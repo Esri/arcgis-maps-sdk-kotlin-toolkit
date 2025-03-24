@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import android.util.Log
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -24,8 +23,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
@@ -37,22 +34,16 @@ import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 
 @Composable
 internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: FeatureFormState,
-    showFormActions: Boolean,
-    showCloseIcon: Boolean,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
-    onDismiss: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -79,7 +70,6 @@ internal fun FeatureFormNavHost(
                 }
             )
             LaunchedEffect(formData) {
-                Log.e("TAG", "FormView: ${formData.featureForm.feature.objectId}")
                 // Update the active feature form if we navigate back to this screen from another form.
                 state.updateActiveFeatureForm()
             }
@@ -88,83 +78,35 @@ internal fun FeatureFormNavHost(
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            val featureForm = formData.featureForm
-            val states = formData.stateCollection
-            // Get the selected UtilityAssociationsElementState from the state collection
-            val utilityAssociationsElementState = states[route.stateId]
-                // guard against null value
-                as? UtilityAssociationsElementState ?: return@composable
-            // Get the selected filter from the UtilityAssociationsElementState
-            val filterResult = utilityAssociationsElementState.selectedFilterResult
-            // guard against null value
-                ?: return@composable
             UNAssociationsFilterScreen(
-                filterResult = filterResult,
-                onGroupSelected = { groupResult ->
-                    utilityAssociationsElementState.setSelectedGroupResult(groupResult)
-                    val newRoute = NavigationRoute.UNAssociationsView(
-                        stateId = utilityAssociationsElementState.id
-                    )
+                formStateData = formData,
+                route = route,
+                onGroupSelected = { stateId ->
+                    val newRoute = NavigationRoute.UNAssociationsView(stateId = stateId)
                     navController.navigateSafely(backStackEntry, newRoute)
                 },
                 modifier = Modifier.fillMaxSize()
             )
-            LaunchedEffect(featureForm) {
-                Log.e("TAG", "FeatureFormNavHost: FiltersView")
-            }
         }
 
         composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            val featureForm = formData.featureForm
-            val states = formData.stateCollection
-            // Get the selected UtilityAssociationsElementState from the state collection
-            val utilityAssociationsElementState = states[route.stateId] as?
-                UtilityAssociationsElementState ?: return@composable
-            // Get the selected filter from the UtilityAssociationsElementState
-            val filterResult = utilityAssociationsElementState.selectedFilterResult
-            // Get the selected group from the filter
-            val groupResult = utilityAssociationsElementState.selectedGroupResult
-            if (filterResult == null || groupResult == null) {
-                // guard against null values
-                return@composable
-            }
-            val hasEdits by featureForm.hasEdits.collectAsState()
             UNAssociationsScreen(
-                groupResult = groupResult,
-                subTitle = filterResult.filter.title,
-                showFormActions = showFormActions,
-                showCloseIcon = showCloseIcon,
-                hasEdits = hasEdits,
-                onClose = {
-                    onDismiss()
-                },
-                onSave = { willNavigate ->
-                    onSaveForm(featureForm, willNavigate)
-                },
-                onDiscard = { willNavigate ->
-                    onDiscardForm(willNavigate)
-                },
-                onNavigateBack = {
-                    state.popBackStack(backStackEntry)
-                },
+                formStateData = formData,
+                route = route,
+                onSave = onSaveForm,
+                onDiscard = onDiscardForm,
                 onNavigateTo = { feature ->
                     state.navigateTo(feature, backStackEntry)
                 },
                 modifier = Modifier.fillMaxSize()
             )
-            FeatureFormDialog(states)
-            LaunchedEffect(featureForm) {
-                Log.e("TAG", "Associations: ${featureForm.feature.objectId}")
-                // Update the active feature form if we navigate back to this screen from another form.
+            LaunchedEffect(formData) {
+                // Update the active feature form when we navigate back to this screen from another
+                // form.
                 state.updateActiveFeatureForm()
             }
-        }
-    }
-    LaunchedEffect(navController) {
-        navController.currentBackStackEntryFlow.collect {
-            Log.e("TAG", "FeatureFormNavHost: ${it.destination.route}")
         }
     }
 }
@@ -177,8 +119,13 @@ internal fun FeatureFormNavHost(
 internal fun NavBackStackEntry.lifecycleIsResumed() =
     this.lifecycle.currentState == Lifecycle.State.RESUMED
 
-
-internal fun <T: Any> NavHostController.navigateSafely(backStackEntry: NavBackStackEntry, route: T) : Boolean {
+/**
+ * Navigate to the given route only if the lifecycle of the [backStackEntry] is resumed.
+ */
+internal fun <T : Any> NavHostController.navigateSafely(
+    backStackEntry: NavBackStackEntry,
+    route: T
+): Boolean {
     return if (backStackEntry.lifecycleIsResumed()) {
         this.navigate(route)
         true
