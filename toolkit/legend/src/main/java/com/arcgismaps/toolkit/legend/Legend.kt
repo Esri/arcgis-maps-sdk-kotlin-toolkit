@@ -70,7 +70,7 @@ import kotlinx.parcelize.Parcelize
  * fun MainScreen(viewModel: LegendViewModel = viewModel()) {
  *
  *     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
- *     val baseMap = viewModel.arcGISMap.basemap.collectAsState()
+ *     val basemap = viewModel.arcGISMap.basemap.collectAsState()
  *     var currentScale: Double by remember { mutableDoubleStateOf(Double.NaN) }
  *     ...
  *
@@ -79,14 +79,11 @@ import kotlinx.parcelize.Parcelize
  *         sheetContent = {
  *             AnimatedVisibility(
  *                 visible = loadState is LoadStatus.Loaded,
- *                 enter = slideInVertically { h -> h },
- *                 exit = slideOutVertically { h -> h },
- *                 label = "legend",
- *                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
+ *                 ...
  *             ) {
  *                 Legend(
  *                     operationalLayers = viewModel.arcGISMap.operationalLayers,
- *                     basemap = baseMap.value,
+ *                     basemap = basemap.value,
  *                     currentScale = currentScale,
  *                     modifier = Modifier.fillMaxSize()
  *                 )
