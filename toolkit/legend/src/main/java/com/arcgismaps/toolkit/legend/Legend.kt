@@ -24,12 +24,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -69,16 +72,35 @@ public fun Legend(
     val density = LocalContext.current.resources.displayMetrics.density
     var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
     val layerContentData = rememberSaveable(operationalLayers, basemap) { mutableListOf<LayerContentData>() }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     if (!initialized) {
         LaunchedEffect(Unit) {
             operationalLayers.filterIsInstance<Layer>().forEach {
-                it.load().onFailure { return@LaunchedEffect }
+                it.load().onFailure { error ->
+                    errorMessage = error.message ?: "Unknown error"
+                    showErrorDialog = true
+                }
             }
-            basemap?.load()?.onFailure { return@LaunchedEffect }
 
-            basemap?.baseLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
-            basemap?.referenceLayers?.forEach { it.load().onFailure { return@LaunchedEffect } }
+            basemap?.load()?.onFailure { error ->
+                errorMessage = error.message ?: "Unknown error"
+                showErrorDialog = true
+            }
+
+            basemap?.baseLayers?.forEach {
+                it.load().onFailure { error ->
+                    errorMessage = error.message ?: "Unknown error"
+                    showErrorDialog = true
+                }
+            }
+            basemap?.referenceLayers?.forEach {
+                it.load().onFailure { error ->
+                    errorMessage = error.message ?: "Unknown error"
+                    showErrorDialog = true
+                }
+            }
 
             // Add the layers to the layer content data
             // Add the operational layers first
@@ -100,6 +122,19 @@ public fun Legend(
         Legend(modifier, layerContentData, currentScale, respectScaleRange, typography)
     } else {
         CircularProgressIndicator()
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text(text = stringResource(R.string.error)) },
+            text = { Text(text = errorMessage) },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
