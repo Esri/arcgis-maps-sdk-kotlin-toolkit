@@ -78,7 +78,6 @@ internal fun ContentAwareTopBar(
     showCloseIcon: Boolean,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -90,35 +89,21 @@ internal fun ContentAwareTopBar(
     ) {
         mutableStateOf(NavigationAction.None)
     }
-    val onBackAction = {
-        val destination = backStackEntry.destination
-        when {
-            destination.hasRoute<NavigationRoute.FormView>() -> {
-                if (hasEdits) {
-                    // Set the pending navigation action to navigate back
-                    pendingNavigationAction = NavigationAction.NavigateBack
-                } else {
-                    if (hasBackStack) {
-                        state.popBackStack(backStackEntry)
-                    }
-                }
-            }
-
-            destination.hasRoute<NavigationRoute.UNFilterView>()
-                || destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
-                if (hasBackStack) {
-                    onNavigateBack()
-                }
-            }
-        }
-    }
-    val onCloseAction = {
-        if (hasEdits) {
-            // Set the pending navigation action to dismiss the form
-            pendingNavigationAction = NavigationAction.Dismiss
+    val onNavigationAction: (NavigationAction, Boolean) -> Unit = { action, formHasEdits ->
+        if (formHasEdits) {
+            pendingNavigationAction = action
         } else {
-            // close the form
-            onDismissRequest()
+            when (action) {
+                is NavigationAction.NavigateBack -> {
+                    state.popBackStack(backStackEntry)
+                }
+
+                is NavigationAction.Dismiss -> {
+                    onDismissRequest()
+                }
+
+                else -> {}
+            }
         }
     }
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
@@ -129,8 +114,12 @@ internal fun ContentAwareTopBar(
             hasEdits = if (showFormActions) hasEdits else false,
             showCloseIcon = showCloseIcon,
             showBackIcon = hasBackStack,
-            onBackPressed = onBackAction,
-            onClose = onCloseAction,
+            onBackPressed = {
+                onNavigationAction(NavigationAction.NavigateBack, hasEdits)
+            },
+            onClose = {
+                onNavigationAction(NavigationAction.Dismiss, hasEdits)
+            },
             onSave = {
                 scope.launch {
                     onSaveForm(formData.featureForm, false)
@@ -143,58 +132,42 @@ internal fun ContentAwareTopBar(
             },
             modifier = modifier
         )
-        if (pendingNavigationAction != NavigationAction.None) {
-            SaveEditsDialog(
-                onDismissRequest = {
-                    pendingNavigationAction = NavigationAction.None
-                },
-                onSave = {
-                    scope.launch {
-                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                        onSaveForm(formData.featureForm, willNavigate).onSuccess {
-                            when (pendingNavigationAction) {
-                                is NavigationAction.NavigateBack -> {
-                                    state.popBackStack(backStackEntry)
-                                }
-
-                                is NavigationAction.Dismiss -> {
-                                    onDismissRequest()
-                                }
-
-                                else -> {}
-                            }
-                        }
-                        pendingNavigationAction = NavigationAction.None
-                    }
-                },
-                onDiscard = {
-                    scope.launch {
-                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                        onDiscardForm(willNavigate)
-                        when (pendingNavigationAction) {
-                            is NavigationAction.NavigateBack -> {
-                                state.popBackStack(backStackEntry)
-                            }
-
-                            is NavigationAction.Dismiss -> {
-                                onDismissRequest()
-                            }
-
-                            else -> {}
-                        }
-                        pendingNavigationAction = NavigationAction.None
-                    }
-                }
-            )
-        }
         InitializingExpressions(
             modifier = Modifier.fillMaxWidth(),
             evaluationProvider = { formData.isEvaluatingExpressions.value }
         )
     }
+    if (pendingNavigationAction != NavigationAction.None) {
+        SaveEditsDialog(
+            onDismissRequest = {
+                pendingNavigationAction = NavigationAction.None
+            },
+            onSave = {
+                scope.launch {
+                    // Check if the pending action is to navigate back, since NavigateToAssociation
+                    // is not triggered by the top bar
+                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                        onNavigationAction(pendingNavigationAction, false)
+                    }
+                    pendingNavigationAction = NavigationAction.None
+                }
+            },
+            onDiscard = {
+                scope.launch {
+                    // Check if the pending action is to navigate back, since NavigateToAssociation
+                    // is not triggered by the top bar
+                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                    onDiscardForm(willNavigate)
+                    onNavigationAction(pendingNavigationAction, false)
+                    pendingNavigationAction = NavigationAction.None
+                }
+            }
+        )
+    }
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
-        onBackAction()
+        onNavigationAction(NavigationAction.NavigateBack, hasEdits)
     }
 }
 

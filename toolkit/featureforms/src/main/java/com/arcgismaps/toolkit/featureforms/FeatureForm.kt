@@ -404,9 +404,6 @@ public fun FeatureForm(
                     state = state,
                     onSaveForm = ::saveForm,
                     onDiscardForm = ::discardForm,
-                    onNavigateBack = {
-                        state.popBackStack(entry)
-                    },
                     onDismissRequest = onDismiss,
                     hasBackStack = hasBackStack,
                     showFormActions = showFormActions,

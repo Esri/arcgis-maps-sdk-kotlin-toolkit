@@ -16,9 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import androidx.annotation.MainThread
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -66,14 +64,12 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.objectId
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -220,7 +216,7 @@ public class FeatureFormState private constructor(
      */
     @MainThread
     internal fun navigateTo(feature: ArcGISFeature, backStackEntry: NavBackStackEntry): Boolean {
-        val navigate = navigateToRoute ?: return false
+        val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
         val form = FeatureForm(feature)
@@ -229,16 +225,19 @@ public class FeatureFormState private constructor(
             elements = form.elements,
             scope = coroutineScope
         )
+        // Add the new form to the stack.
         store.addLast(FormStateData(form, states))
-        // Navigate to the form view after setting the active form.
-        navigate(NavigationRoute.FormView)
+        // Navigate to the form view.
+        navigateTo(NavigationRoute.FormView)
         return true
     }
 
     /**
-     * Pops the current [FeatureForm] from the stack and navigates to it. [updateActiveFeatureForm]
-     * must be called after this to update the [activeFeatureForm], preferably after the navigation
-     * is complete.
+     * Based on the current destination given by the [backStackEntry], this function navigates back
+     * to the previous view and pops the current [FeatureForm] from the stack (if required).
+     *
+     * [updateActiveFeatureForm] must be called after this to update the [activeFeatureForm], preferably
+     * after the navigation is complete.
      *
      * @return true if the navigation was successful, false otherwise.
      */
@@ -250,15 +249,12 @@ public class FeatureFormState private constructor(
         // Check the current destination and pop the stack accordingly.
         return when {
             backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+                // Check if the stack has more than one form.
                 if (store.size <= 1) {
                     false
                 } else {
-                    val sz = store.count()
-                    val rm = store.removeLast()
-                    Log.e(
-                        "TAG",
-                        "popBackStack: removed $rm, before: $sz, now: ${store.count()}",
-                    )
+                    // Remove the current form from the stack.
+                    store.removeLast()
                     // Navigate back to the form view after popping the current form.
                     navigate()
                 }
@@ -315,7 +311,7 @@ internal data class FormStateData(
     suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
         try {
             isEvaluatingExpressions.value = true
-            return featureForm.evaluateExpressions().also {
+            return featureForm.evaluateExpressions().onSuccess {
                 // Set the initial evaluation to true after the first successful evaluation.
                 initialEvaluation.value = true
             }
