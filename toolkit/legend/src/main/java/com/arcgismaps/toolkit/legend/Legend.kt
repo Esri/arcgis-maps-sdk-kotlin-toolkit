@@ -43,6 +43,8 @@ import androidx.compose.ui.res.stringResource
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
+import com.arcgismaps.toolkit.legend.theme.LegendDefaults
+import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.drop
@@ -70,7 +72,8 @@ public fun Legend(
     currentScale: Double,
     modifier: Modifier = Modifier,
     reverseLayerOrder: Boolean = false,
-    respectScaleRange: Boolean = true
+    respectScaleRange: Boolean = true,
+    typography: Typography = LegendDefaults.typography()
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
     var initialized: Boolean by rememberSaveable(
@@ -136,7 +139,7 @@ public fun Legend(
 
     val validScale = (currentScale != 0.0 && !currentScale.isNaN())
     if (validScale && initialized) {
-        Legend(modifier, layerContentData, currentScale, respectScaleRange)
+        Legend(modifier, layerContentData, currentScale, respectScaleRange, typography)
     } else {
         CircularProgressIndicator()
     }
@@ -149,19 +152,19 @@ private fun Legend(
     legendItems: List<LayerContentData>,
     currentScale: Double,
     respectScaleRange: Boolean,
+    typography: Typography
 ) {
     LazyColumn(modifier = modifier) {
-
         itemsIndexed(legendItems) { index, item ->
             if (!respectScaleRange || item.isVisible(currentScale)) {
                 if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
                     Row {
-                        Text(text = item.name)
+                        Text(text = item.name, style = typography.layerName)
                     }
                 }
                 if (item.legendItems.isNotEmpty()) {
                     item.legendItems.forEach { legendInfo ->
-                        LegendInfoRow(legendInfo)
+                        LegendInfoRow(legendInfo, typography)
                     }
                 }
             }
@@ -172,6 +175,7 @@ private fun Legend(
 @Composable
 private fun LegendInfoRow(
     legendInfo: LegendItem,
+    typography: Typography,
 ) {
     Row {
         legendInfo.bitmap?.let {
@@ -180,7 +184,7 @@ private fun LegendInfoRow(
                 contentDescription = stringResource(R.string.symbol_description)
             )
         }
-        Text(text = legendInfo.name)
+        Text(text = legendInfo.name, style = typography.legendInfoName)
     }
 }
 
@@ -192,7 +196,6 @@ private suspend fun legendContent(
     reverseOrder: Boolean,
     density: Float
 ) {
-    println("sublayer legendContent call")
     layerContentData.clear()
     // Add the layers to the layer content data
     // Add the operational layers first
