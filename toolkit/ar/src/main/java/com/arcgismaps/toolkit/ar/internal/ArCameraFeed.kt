@@ -20,18 +20,19 @@ package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.toolkit.ar.internal.render.CameraFeedRenderer
 import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler
 import com.google.ar.core.Frame
@@ -88,9 +89,10 @@ internal fun ArCameraFeed(
 
     AndroidView(factory = { surfaceViewWrapper.glSurfaceView }, modifier = Modifier
         .fillMaxSize()
-        .pointerInteropFilter {
-            cameraFeedRenderer.onClick(it)
-            true
+        .pointerInput(Unit) {
+            detectTapGestures { offset ->
+                cameraFeedRenderer.onClick(offset)
+            }
         })
 }
 
