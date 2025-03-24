@@ -111,8 +111,12 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
-
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator"
     )
     
     ignoredClasses.addAll(composableSingletons)

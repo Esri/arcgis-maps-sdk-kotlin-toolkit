@@ -338,7 +338,6 @@ public fun FeatureForm(
     state.setNavigateBack {
         navController.navigateUp()
     }
-    rememberCoroutineScope()
     val context = LocalContext.current
     val dialogRequester = LocalDialogRequester.current
     val focusManager = LocalFocusManager.current
