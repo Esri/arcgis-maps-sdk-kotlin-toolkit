@@ -21,7 +21,10 @@ package com.arcgismaps.toolkit.legend
 import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,10 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
@@ -61,9 +66,10 @@ public fun Legend(
     operationalLayers: List<LayerContent>,
     basemap: Basemap?,
     currentScale: Double,
+    modifier: Modifier = Modifier,
     reverseLayerOrder: Boolean = false,
     respectScaleRange: Boolean = true,
-    modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.title),
     typography: Typography = LegendDefaults.typography()
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
@@ -97,7 +103,7 @@ public fun Legend(
     }
 
     if (initialized) {
-        Legend(modifier, layerContentData, currentScale, respectScaleRange, typography)
+        Legend(modifier, layerContentData, currentScale, respectScaleRange, title, typography)
     } else {
         CircularProgressIndicator()
     }
@@ -153,19 +159,31 @@ private fun Legend(
     legendItems: List<LayerContentData>,
     currentScale: Double,
     respectScaleRange: Boolean,
+    title: String,
     typography: Typography
     ) {
-    LazyColumn(modifier = modifier) {
-        itemsIndexed(legendItems) { index, item ->
-            if (!respectScaleRange || item.isVisible(currentScale)) {
-                if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
-                    Row {
-                        Text(text = item.name, style = typography.layerName)
+    Column(modifier = modifier) {
+        if (title.isNotEmpty()) {
+            Text(
+                text = title,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                style = typography.title
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        LazyColumn {
+            itemsIndexed(legendItems) { index, item ->
+                if (!respectScaleRange || item.isVisible(currentScale)) {
+                    if (index == legendItems.size - 1 || item.name != legendItems[index + 1].name) {
+                        Row {
+                            Text(text = item.name, style = typography.layerName)
+                        }
                     }
-                }
-                if (item.legendItems.isNotEmpty()) {
-                    item.legendItems.forEach { legendInfo ->
-                        LegendInfoRow(legendInfo, typography)
+                    if (item.legendItems.isNotEmpty()) {
+                        item.legendItems.forEach { legendInfo ->
+                            LegendInfoRow(legendInfo, typography)
+                        }
                     }
                 }
             }

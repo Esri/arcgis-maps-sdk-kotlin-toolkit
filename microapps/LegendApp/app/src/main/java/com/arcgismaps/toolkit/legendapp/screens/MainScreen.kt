@@ -77,7 +77,7 @@ fun MainScreen(viewModel: LegendViewModel = viewModel()) {
                 label = "legend",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Legend(viewModel.arcGISMap.operationalLayers, baseMap.value, currentScale)
+                Legend(viewModel.arcGISMap.operationalLayers, baseMap.value, currentScale, modifier = Modifier.fillMaxSize())
             }
         },
         modifier = Modifier.fillMaxSize(),
