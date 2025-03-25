@@ -99,7 +99,7 @@ fun MainScreen() {
     var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial()) }
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text("ArWorldScaleApp - ${trackingMode::class.java.simpleName}") },
+            title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
             actions = {
                 var actionsExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
