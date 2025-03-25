@@ -38,10 +38,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -53,6 +57,11 @@ import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
 import com.arcgismaps.toolkit.legend.theme.LegendDefaults
 import com.arcgismaps.toolkit.legend.theme.Typography
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -133,12 +142,16 @@ public fun Legend(
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
     var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
-    val layerContentData = rememberSaveable(operationalLayers, basemap) { mutableListOf<LayerContentData>() }
+    val layerContentData =
+        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
+            mutableStateListOf<LayerContentData>()
+        }
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
     if (!initialized) {
         LaunchedEffect(Unit) {
+            // initialize legend content once
             operationalLayers.filterIsInstance<Layer>().forEach {
                 it.load().onFailure { error ->
                     errorMessage = error.message ?: "Unknown error"
@@ -163,24 +176,54 @@ public fun Legend(
                     showErrorDialog = true
                 }
             }
-
-            // Add the layers to the layer content data
-            // Add the operational layers first
-            addLayersAndSubLayersDataToLayerContentData(operationalLayers, reverseLayerOrder, density, layerContentData)
-            // Add the basemap layers
-            addLayersAndSubLayersDataToLayerContentData(basemap?.baseLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = reverseLayerOrder)
-            // Add the reference layers
-            addLayersAndSubLayersDataToLayerContentData(basemap?.referenceLayers, reverseLayerOrder, density, layerContentData, addAtIndexZero = !reverseLayerOrder)
-
+            legendContent(
+                layerContentData,
+                operationalLayers,
+                basemap?.baseLayers ?: emptyList(),
+                basemap?.referenceLayers ?: emptyList(),
+                reverseLayerOrder,
+                density
+            )
             initialized = true
+        }
+    } else {
+        // Get the operational layers' and basemaps' sublayer contents or, if there are none,
+        // the basemaps' reference layers sublayer contents. If no sublayer content is available
+        // just get an empty list
+        LaunchedEffect(Unit) {
+            // Establish the sublayerContents observation after initialization and after a config change.
+            val sublayerContent = operationalLayers.map {
+                it.subLayerContents
+            } + (basemap?.baseLayers?.map {
+                it.subLayerContents
+            } ?: emptyList()) + (basemap?.referenceLayers?.map {
+                it.subLayerContents
+            } ?: emptyList())
+
+            // Drop the first values -- the initial sublayer contents are already in the Legend.
+            val dropList = sublayerContent.map {
+                it.drop(1)
+            }
+            val sublayerChangedFlow: Flow<List<LayerContent>> =
+                merge(*dropList.toTypedArray()).shareIn(this, SharingStarted.Lazily)
+
+            sublayerChangedFlow
+                .collect {
+                    legendContent(
+                        layerContentData,
+                        operationalLayers,
+                        basemap?.baseLayers ?: emptyList(),
+                        basemap?.referenceLayers ?: emptyList(),
+                        reverseLayerOrder,
+                        density
+                    )
+                }
         }
     }
 
-    if (currentScale == 0.0 || currentScale.isNaN()) {
-        return
-    }
 
-    if (initialized) {
+    val validScale = (currentScale != 0.0 && !currentScale.isNaN())
+    if (validScale && initialized) {
         Legend(modifier, layerContentData, currentScale, respectScaleRange, title, typography)
     } else {
         Box(
@@ -205,6 +248,66 @@ public fun Legend(
     }
 }
 
+/**
+ * Provides the row data for LayerContent and their sublayer content.
+ *
+ * @param layerContentData the output list. It is a SnapshotStateList which when altered will cause recomposition.
+ * @param layers the operational layers of the map
+ * @param baseLayers the baseLayers of the Basemap
+ * @param referenceLayers the referenceLayers of the Basemap
+ * @param reverseOrder build the list in reverse order when true
+ * @param density the screen metrics used to create symbol swatches for the Symbols returned by
+ * LayerContent.fetchLegendInfos()
+ *
+ * @since 200.7.0
+ */
+private suspend fun legendContent(
+    layerContentData: MutableList<LayerContentData>,
+    layers: List<LayerContent>,
+    baseLayers: List<LayerContent>,
+    referenceLayers: List<LayerContent>,
+    reverseOrder: Boolean,
+    density: Float
+) {
+    layerContentData.clear()
+    // Add the layers to the layer content data
+    // Add the operational layers first
+    addLayersAndSubLayersDataToLayerContentData(
+        layers,
+        reverseOrder,
+        density,
+        layerContentData
+    )
+    // Add the basemap layers
+    addLayersAndSubLayersDataToLayerContentData(
+        baseLayers,
+        reverseOrder,
+        density,
+        layerContentData,
+        addAtIndexZero = reverseOrder
+    )
+    // Add the reference layers
+    addLayersAndSubLayersDataToLayerContentData(
+        referenceLayers,
+        reverseOrder,
+        density,
+        layerContentData,
+        addAtIndexZero = !reverseOrder
+    )
+}
+
+/**
+ * Provides LayerContentData for a list of LayerContent. Descends recursively into any sublayer content
+ *
+ * @param layers the LayerContents to evaluate
+ * @param reverseLayerOrder build the LegendContent in reverse order when trye
+ * @param density the screen metrics to use to create bitmaps from Symbol swatches
+ * @param layerContentData the output list of LayerContentData
+ * @param addAtIndexZero used in reverse ordering to build the overall list for operational, base,
+ * and reference layers
+ *
+ * @since 200.7.0
+ */
 private suspend fun addLayersAndSubLayersDataToLayerContentData(
     layers: List<LayerContent>?,
     reverseLayerOrder: Boolean,
@@ -216,7 +319,8 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
         // The order of the layers is reversed to match the order in the legend
         val orderedLayers = if (reverseLayerOrder) layerList else layerList.reversed()
         val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
-        val layersAndSubLayersLayerContentData = filteredLayers.flatMap { getLayerContentData(it, density) }
+        val layersAndSubLayersLayerContentData =
+            filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
             layerContentData.addAll(0, layersAndSubLayersLayerContentData)
         } else {
@@ -225,6 +329,15 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
     }
 }
 
+/**
+ * Gets the LayerContentData for a single LayerContent. Descends recursively into any sublayerContents
+ *
+ * @param layerContent the LayerContent to evaluate
+ * @param density the screen metrics density to use to create bitmaps from Symbol swatches
+ * @return a list of LayerContentData representing the LayerContent in addition to any
+ * LayerContent.sublayerContents
+ * @since 200.7.0
+ */
 private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
@@ -257,7 +370,7 @@ private fun Legend(
     respectScaleRange: Boolean,
     title: String,
     typography: Typography
-    ) {
+) {
     Column(modifier = modifier) {
         if (title.isNotEmpty()) {
             Text(
@@ -342,3 +455,20 @@ private data class LayerContentData(
     val legendItems: MutableList<LegendItem> = mutableListOf(),
     val isVisible: (Double) -> Boolean
 ) : Parcelable
+
+
+/**
+ * Preserves a SnapshotStateList across compositions
+ *
+ * @since 200.7.0
+ */
+private fun <T : Parcelable> snapshotStateListSaver(): Saver<SnapshotStateList<T>, Any> = listSaver(
+    {
+        it.toList()
+    },
+    {
+        mutableStateListOf<T>().apply {
+            addAll(it)
+        }
+    }
+)
