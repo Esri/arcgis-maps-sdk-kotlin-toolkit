@@ -106,8 +106,11 @@ public fun Legend(
             initialized = true
         }
     } else {
-        // establish the sublayerContents observation after initialization and after a config change.
+        // Get the operational layers' and basemaps' sublayer contents or, if there are none,
+        // the basemaps' reference layers sublayer contents. If no sublayer content is available
+        // just get an empty list
         LaunchedEffect(Unit) {
+            // Establish the sublayerContents observation after initialization and after a config change.
             val sublayerContent = operationalLayers.map {
                 it.subLayerContents
             } + (basemap?.baseLayers?.map {
@@ -116,7 +119,7 @@ public fun Legend(
                 it.subLayerContents
             } ?: emptyList())
 
-            // drop the first values -- the initial sublayer contents are already in the Legend.
+            // Drop the first values -- the initial sublayer contents are already in the Legend.
             val dropList = sublayerContent.map {
                 it.drop(1)
             }
@@ -188,6 +191,19 @@ private fun LegendInfoRow(
     }
 }
 
+/**
+ * Provides the row data for LayerContent and their sublayer content.
+ *
+ * @param layerContentData the output list. It is a SnapshotStateList which when altered will cause recomposition.
+ * @param layers the operational layers of the map
+ * @param baseLayers the baseLayers of the Basemap
+ * @param referenceLayers the referenceLayers of the Basemap
+ * @param reverseOrder build the list in reverse order when true
+ * @param density the screen metrics used to create symbol swatches for the Symbols returned by
+ * LayerContent.fetchLegendInfos()
+ *
+ * @since 200.7.0
+ */
 private suspend fun legendContent(
     layerContentData: MutableList<LayerContentData>,
     layers: List<LayerContent>,
@@ -223,6 +239,18 @@ private suspend fun legendContent(
     )
 }
 
+/**
+ * Provides LayerContentData for a list of LayerContent. Descends recursively into any sublayer content
+ *
+ * @param layers the LayerContents to evaluate
+ * @param reverseLayerOrder build the LegendContent in reverse order when trye
+ * @param density the screen metrics to use to create bitmaps from Symbol swatches
+ * @param layerContentData the output list of LayerContentData
+ * @param addAtIndexZero used in reverse ordering to build the overall list for operational, base,
+ * and reference layers
+ *
+ * @since 200.7.0
+ */
 private suspend fun addLayersAndSubLayersDataToLayerContentData(
     layers: List<LayerContent>?,
     reverseLayerOrder: Boolean,
@@ -244,6 +272,15 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
     }
 }
 
+/**
+ * Gets the LayerContentData for a single LayerContent. Descends recursively into any sublayerContents
+ *
+ * @param layerContent the LayerContent to evaluate
+ * @param density the screen metrics density to use to create bitmaps from Symbol swatches
+ * @return a list of LayerContentData representing the LayerContent in addition to any
+ * LayerContent.sublayerContents
+ * @since 200.7.0
+ */
 private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
@@ -268,6 +305,11 @@ private suspend fun getLayerContentData(
     }
 }
 
+/**
+ * Preserves a SnapshotStateList across compositions
+ *
+ * @since 200.7.0
+ */
 private fun <T : Parcelable> snapshotStateListSaver(): Saver<SnapshotStateList<T>, Any> = listSaver(
     {
         it.toList()
