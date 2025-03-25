@@ -22,19 +22,35 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
@@ -80,80 +96,103 @@ fun MainScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        TableTopSceneView(
-            arcGISScene = arcGISScene,
-            arcGISSceneAnchor = arcGISSceneAnchor,
-            translationFactor = 400.0,
-            modifier = Modifier.fillMaxSize(),
-            clippingDistance = 400.0,
-            tableTopSceneViewProxy = tableTopSceneViewProxy,
-            onInitializationStatusChanged = {
-                initializationStatus = it
-            },
-            onSingleTapConfirmed = { tap ->
-                arcGISSceneLayer.clearSelection()
-                coroutineScope.launch {
-                    identifiedBuilding = arcGISSceneLayer.identifyBuilding(
-                        tap.screenCoordinate,
-                        tableTopSceneViewProxy
-                    )
-                    identifiedBuilding?.let { identifiedBuilding ->
-                        arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
-                    }
-                }
-            }
-        ) {
-            identifiedBuilding?.let {
-                Callout(it.location) {
-                    Text("Building ID: ${it.feature.attributes["OBJECTID"]}")
-                }
-            }
+        var showPrivacyInfo by rememberSaveable { mutableStateOf(true) }
+        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(false) }
+        if (showPrivacyInfo) {
+            PrivacyInfoDialog(
+                onShowPrivacyInfoChanged = { showPrivacyInfo = it },
+                onAcceptedPrivacyInfoChanged = { acceptedPrivacyInfo = it }
+            )
         }
-    }
-
-    // Show an overlay with instructions or progress indicator based on the initialization status
-    when (val status = initializationStatus) {
-        is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
-        is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
-        is TableTopSceneViewStatus.Initialized -> {
-            val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-            when (sceneLoadStatus) {
-                is LoadStatus.NotLoaded -> {
-                    // Tell the user to tap the screen if the scene has not started loading
-                    TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
+        if (!acceptedPrivacyInfo) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Privacy Info not accepted")
+                Button(
+                    onClick = { showPrivacyInfo = true }
+                ) {
+                    Text("Show Privacy Info")
                 }
+            }
+        } else {
+            TableTopSceneView(
+                arcGISScene = arcGISScene,
+                arcGISSceneAnchor = arcGISSceneAnchor,
+                translationFactor = 400.0,
+                modifier = Modifier.fillMaxSize(),
+                clippingDistance = 400.0,
+                tableTopSceneViewProxy = tableTopSceneViewProxy,
+                onInitializationStatusChanged = {
+                    initializationStatus = it
+                },
+                onSingleTapConfirmed = { tap ->
+                    arcGISSceneLayer.clearSelection()
+                    coroutineScope.launch {
+                        identifiedBuilding = arcGISSceneLayer.identifyBuilding(
+                            tap.screenCoordinate,
+                            tableTopSceneViewProxy
+                        )
+                        identifiedBuilding?.let { identifiedBuilding ->
+                            arcGISSceneLayer.selectFeature(identifiedBuilding.feature)
+                        }
+                    }
+                }
+            ) {
+                identifiedBuilding?.let {
+                    Callout(it.location) {
+                        Text("Building ID: ${it.feature.attributes["OBJECTID"]}")
+                    }
+                }
+            }
 
-                is LoadStatus.Loading -> {
-                    // The scene may take a while to load, so show a progress indicator
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
+            // Show an overlay with instructions or progress indicator based on the initialization status
+            when (val status = initializationStatus) {
+                is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
+                is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
+                is TableTopSceneViewStatus.Initialized -> {
+                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                    when (sceneLoadStatus) {
+                        is LoadStatus.NotLoaded -> {
+                            // Tell the user to tap the screen if the scene has not started loading
+                            TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
+                        }
+
+                        is LoadStatus.Loading -> {
+                            // The scene may take a while to load, so show a progress indicator
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        LoadStatus.Loaded -> {} // Do nothing
                     }
                 }
 
-                is LoadStatus.FailedToLoad -> {
+                is TableTopSceneViewStatus.FailedToInitialize -> {
                     TextWithScrim(
                         text = stringResource(
-                            R.string.failed_to_load_scene,
-                            sceneLoadStatus.error
+                            R.string.failed_to_initialize_overlay,
+                            status.error.message ?: status.error
                         )
                     )
                 }
-
-                LoadStatus.Loaded -> {} // Do nothing
             }
-        }
-
-        is TableTopSceneViewStatus.FailedToInitialize -> {
-            TextWithScrim(
-                text = stringResource(
-                    R.string.failed_to_initialize_overlay,
-                    status.error.message ?: status.error
-                )
-            )
         }
     }
 }
@@ -202,3 +241,74 @@ private suspend fun ArcGISSceneLayer.identifyBuilding(
  * @since 200.6.0
  */
 private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: Point)
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun PrivacyInfoDialog(
+    onShowPrivacyInfoChanged: (Boolean) -> Unit,
+    onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
+) {
+    BasicAlertDialog(
+        onDismissRequest = {
+            onShowPrivacyInfoChanged(false)
+        }
+    ) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                LegalTextArCore()
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(
+                        onClick = {
+                            onAcceptedPrivacyInfoChanged(false)
+                            onShowPrivacyInfoChanged(false)
+                        }) {
+                        Text("Decline")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            onAcceptedPrivacyInfoChanged(true)
+                            onShowPrivacyInfoChanged(false)
+                        }
+                    ) {
+                        Text("Accept")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LegalTextArCore() {
+    val textLinkStyle =
+        TextLinkStyles(style = SpanStyle(color = Color.Blue))
+    Text(
+        text = buildAnnotatedString {
+            append("This application runs on ")
+            withLink(
+                LinkAnnotation.Url(
+                    "https://play.google.com/store/apps/details?id=com.google.ar.core",
+                    textLinkStyle
+                )
+            ) {
+                append("Google Play Services for AR")
+            }
+            append("  (ARCore), which is provided by Google and governed by the ")
+            withLink(
+                LinkAnnotation.Url(
+                    "https://policies.google.com/privacy",
+                    textLinkStyle
+                )
+            ) {
+                append("Google Privacy Policy.")
+            }
+        }
+    )
+}
