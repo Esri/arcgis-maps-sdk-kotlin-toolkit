@@ -29,8 +29,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -41,9 +39,8 @@ import java.util.concurrent.locks.ReentrantLock
  */
 internal class ArSessionWrapper(
     private val applicationContext: Context,
-    private val scope: CoroutineScope,
     private val onError: (Throwable) -> Unit,
-    useGeospatial: Boolean
+    private var useGeospatial: Boolean
 ) :
     DefaultLifecycleObserver {
 
@@ -53,14 +50,10 @@ internal class ArSessionWrapper(
 
     private var shouldInitializeDisplay = true
 
-    private var wasSetToUseGeospatial = useGeospatial
-
     override fun onDestroy(owner: LifecycleOwner) {
         withLock { session, _ ->
             this.session = null
-            scope.launch(Dispatchers.Unconfined) {
-                session?.close()
-            }
+            session?.close()
         }
     }
 
@@ -74,7 +67,7 @@ internal class ArSessionWrapper(
         withLock { session, _ ->
             val newSession = session ?: Session(applicationContext).also {
                 this.session = it
-                configureSession(wasSetToUseGeospatial)
+                configureSession(useGeospatial)
             }
             shouldInitializeDisplay = true
             newSession.resume()
@@ -96,7 +89,7 @@ internal class ArSessionWrapper(
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
         )
-        this.wasSetToUseGeospatial = useGeospatial
+        this.useGeospatial = useGeospatial
     }
 
     internal fun withLock(block: (Session?, shouldInitializeDisplay: Boolean) -> Unit) {
@@ -139,7 +132,6 @@ internal fun rememberArSessionWrapper(
     val arSessionWrapper = remember {
         ArSessionWrapper(
             applicationContext,
-            lifecycleOwner.lifecycleScope,
             onError,
             useGeospatial
         )
