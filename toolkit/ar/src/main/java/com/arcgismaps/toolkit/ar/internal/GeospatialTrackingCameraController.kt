@@ -41,7 +41,7 @@ import kotlin.math.sqrt
 /**
  * Wraps a [TransformationMatrixCameraController] and uses Google's Geospatial API to update the camera's position.
  *
- * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
+ * @see updateCamera to update the camera using the [Earth.getCameraGeospatialPose].
  *
  * @since 200.7.0
  */
@@ -65,7 +65,9 @@ internal class GeospatialTrackingCameraController(
             if (earth.earthState != Earth.EarthState.ENABLED) return@let
 
             val geospatialPose = earth.cameraGeospatialPose
-            val orientation = geospatialPose.eastUpSouthQuaternion
+            val geospatialOrientation = geospatialPose.eastUpSouthQuaternion
+            // The scene camera is expected to be positioned based on orthometric height but the geospatial pose
+            // gives us ellipsoidal heights. We need to project vertically to get a correct height for the scene camera.
             val projectedLocation = GeometryEngine.projectOrNull(
                 Point(
                     geospatialPose.longitude,
@@ -76,6 +78,7 @@ internal class GeospatialTrackingCameraController(
                 WorldScaleParameters.SR_CAMERA
             ) ?: return@let
 
+            // set the origin camera based on lat, lon and altitude of the geospatial pose
             cameraController.setOriginCamera(
                 Camera(
                     projectedLocation,
@@ -92,10 +95,10 @@ internal class GeospatialTrackingCameraController(
                     geospatialPose.latitude,
                     geospatialPose.longitude,
                     geospatialPose.altitude,
-                    orientation[0],
-                    orientation[1],
-                    orientation[2],
-                    orientation[3]
+                    geospatialOrientation[0],
+                    geospatialOrientation[1],
+                    geospatialOrientation[2],
+                    geospatialOrientation[3]
                 )
             } catch (e: NotTrackingException) {
                 // Even though we check for tracking state above, sometimes it can still be not tracking
@@ -107,44 +110,23 @@ internal class GeospatialTrackingCameraController(
             // then convert it back to a geospatial pose
             val displayOrientedGeospatialOrientation = when (display?.rotation ?: 0) {
                 Surface.ROTATION_90 ->
-                    localPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            -sqrt(0.5).toFloat(),
-                            sqrt(0.5).toFloat()
-                        )
-                    ).let {
+                    localPose.compose(POSE_ROTATION_90).let {
                         earth.getGeospatialPose(it).eastUpSouthQuaternion
                     }
 
                 Surface.ROTATION_180 ->
-                    localPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            sqrt(1.0).toFloat(),
-                            0f
-                        )
-                    ).let {
+                    localPose.compose(POSE_ROTATION_180).let {
                         earth.getGeospatialPose(it).eastUpSouthQuaternion
                     }
 
                 Surface.ROTATION_270 ->
-                    localPose.compose(
-                        Pose.makeRotation(
-                            0f,
-                            0f,
-                            sqrt(0.5).toFloat(),
-                            sqrt(0.5).toFloat()
-                        )
-                    ).let {
+                    localPose.compose(POSE_ROTATION_270).let {
                         earth.getGeospatialPose(it).eastUpSouthQuaternion
                     }
 
                 else -> {
                     // in normal portrait we don't need to adjust for display orientation
-                    orientation
+                    geospatialOrientation
                 }
             }
 
@@ -160,5 +142,28 @@ internal class GeospatialTrackingCameraController(
                     0.0
                 )
         }
+    }
+
+    companion object {
+        private val POSE_ROTATION_90 = Pose.makeRotation(
+            0f,
+            0f,
+            -sqrt(0.5).toFloat(),
+            sqrt(0.5).toFloat()
+        )
+
+        private val POSE_ROTATION_180 = Pose.makeRotation(
+            0f,
+            0f,
+            sqrt(1.0).toFloat(),
+            0f
+        )
+
+        private val POSE_ROTATION_270 = Pose.makeRotation(
+            0f,
+            0f,
+            sqrt(0.5).toFloat(),
+            sqrt(0.5).toFloat()
+        )
     }
 }
