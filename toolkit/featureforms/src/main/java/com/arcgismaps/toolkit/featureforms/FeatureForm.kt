@@ -278,7 +278,7 @@ private fun FeatureForm(
                 // validate any fields that are within a group
                 if (entry.formElement is GroupFormElement) {
                     entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                        (childEntry.state as? BaseFieldState<*>)?.forceValidation()
                     }
                 }
             }
