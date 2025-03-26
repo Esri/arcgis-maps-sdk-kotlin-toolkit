@@ -78,18 +78,9 @@ internal class GeospatialTrackingCameraController(
                 WorldScaleParameters.SR_CAMERA
             ) ?: return@let
 
-            // set the origin camera based on lat, lon and altitude of the geospatial pose
-            cameraController.setOriginCamera(
-                Camera(
-                    projectedLocation,
-                    calibrationState.totalHeadingOffset,
-                    90.0,
-                    0.0
-                )
-            )
 
-            // get a pose relative to local coordinates so we can rotate it based on the
-            // display orientation
+            // get a pose relative to local coordinates so we can rotate the orientation relative
+            // to the device orientation
             val localPose = try {
                 earth.getPose(
                     geospatialPose.latitude,
@@ -105,6 +96,16 @@ internal class GeospatialTrackingCameraController(
                 // when we try to get the pose.
                 return@let
             }
+
+            // set the origin camera based on lat, lon and altitude of the geospatial pose
+            cameraController.setOriginCamera(
+                Camera(
+                    projectedLocation,
+                    calibrationState.totalHeadingOffset,
+                    90.0,
+                    0.0
+                )
+            )
 
             // rotate the local pose based on the display orientation,
             // then convert it back to a geospatial pose
