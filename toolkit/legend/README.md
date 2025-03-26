@@ -20,7 +20,7 @@ To see Legend in action, check out the [Legend microapp](../../microapps/LegendA
 
 ## Get Started
 
-The `Legend` can be rendered within a composition by simply calling the `Legend` composable function. The Legend should be displayed in a container.
+The `Legend` can be rendered within a composition by simply calling the `Legend` composable function. The `Legend` should be displayed in a container.
 
  ```kotlin
  @Composable
