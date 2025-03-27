@@ -37,6 +37,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -182,7 +183,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If ARCore is not installed, we can't display anything
-    if (!arCoreInstalled) return@WorldScaleSceneView
+    if (!arCoreInstalled) return
 
     val allPermissionsGranted by rememberPermissionsGranted(
         permissionsToRequest = listOf(
@@ -198,7 +199,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If we don't have permission for camera or location, we can't display anything
-    if (!allPermissionsGranted) return@WorldScaleSceneView
+    if (!allPermissionsGranted) return
 
     val pedataConfigured by rememberPeDataConfigured(
         onFailed = {
@@ -209,7 +210,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If PE data could not be configured, we can't position the scene camera accurately
-    if (!pedataConfigured) return@WorldScaleSceneView
+    if (!pedataConfigured) return
 
     val arSessionWrapper =
         rememberArSessionWrapper(
