@@ -279,6 +279,7 @@ internal fun rememberWorldScaleCameraController(
             is WorldScaleTrackingMode.Geospatial -> {
                 GeospatialTrackingCameraController(
                     calibrationState = calibrationState,
+                    clippingDistance = clippingDistance,
                     context = context
                 )
             }

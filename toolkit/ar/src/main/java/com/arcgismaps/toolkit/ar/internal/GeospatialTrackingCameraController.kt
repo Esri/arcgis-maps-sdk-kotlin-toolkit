@@ -47,9 +47,12 @@ import kotlin.math.sqrt
  */
 internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
+    clippingDistance: Double?,
     context: Context,
 ) : WorldScaleCameraController {
-    override val cameraController = TransformationMatrixCameraController()
+    override val cameraController = TransformationMatrixCameraController().apply {
+        this.clippingDistance = clippingDistance
+    }
     override var hasSetOriginCamera: Boolean by mutableStateOf(false)
         private set
 
