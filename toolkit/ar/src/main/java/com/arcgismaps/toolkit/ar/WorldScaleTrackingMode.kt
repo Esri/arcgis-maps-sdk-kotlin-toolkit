@@ -40,7 +40,7 @@ public sealed class WorldScaleTrackingMode {
     /**
      * The camera is controlled using a combination of GPS for device location and ARCore for device
      * orientation. Tracking accuracy depends on the accuracy of the GPS signal. Manual calibration
-     * of the scene view's heading and elevation may be required using the
+     * of the scene view's camera heading and elevation may be required using
      * [WorldScaleSceneViewScope.CalibrationView].
      *
      * @since 200.7.0
