@@ -32,6 +32,13 @@ secrets {
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
+
+    // Lint crashes on the latest Android studio
+    // (Bug with Android Studio Meerkat | 2024.3.1)
+    // TODO: Remove this when Android Studio lint checker is fixed
+    lint {
+        disable.add("SuspiciousModifierThen")
+    }
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -76,14 +83,6 @@ android {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
-    }
-
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        // remove these disables when strings.xml lint is fixed via localization
-        disable += "MissingTranslation"
-        disable += "MissingQuantity"
-        baseline = file("lint-baseline.xml")
     }
 }
 

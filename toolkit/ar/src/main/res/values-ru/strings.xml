@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Права на использование камеры не предоставлены</string>
+    <string name="arcore_not_installed_message">Для использования TableTopSceneView необходимо установить ARCore. Доступность ARCore: %1$s</string>
+</resources>

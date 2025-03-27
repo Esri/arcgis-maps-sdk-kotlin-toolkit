@@ -28,4 +28,36 @@
     <string name="feature_results">Kết quả Đối tượng</string>
     <string name="function_results">Kết quả Hàm</string>
     <string name="clear_all_results">Xóa tất cả các kết quả</string>
+    <string name="delete">Xóa</string>
+    <string name="not_available">Không khả dụng</string>
+    <string name="zoom_to">Phóng tới</string>
+    <string name="zoom_in">Thu nhỏ</string>
+    <string name="fraction_along_edge">Phân số Dọc theo Cạnh</string>
+    <string name="attributes">Thuộc tính</string>
+    <string name="terminal_configuration">Cấu hình Thiết bị đầu cuối</string>
+    <string name="an_error_has_occurred">Đã xảy ra lỗi</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy bỏ</string>
+    <string name="clear_all_results_confirmation">Tất cả kết quả truy dấu sẽ bị mất.</string>
+    <string name="object_id">ID Đối tượng: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Không tìm thấy Mạng lưới Tiện ích.</string>
+    <string name="no_trace_configurations_found">Không tìm thấy cấu hình truy dấu.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Chưa đủ điểm bắt đầu. Vui lòng đặt ít nhất 1 vị trí bắt đầu.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Chưa đủ điểm bắt đầu. Vui lòng đặt ít nhất 2 vị trí bắt đầu.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Không thể tạo phần tử tiện ích từ ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Một hoặc nhiều điểm bắt đầu đã tồn tại.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Không thể tạo điểm có thể vẽ từ ký hiệu đối tượng.</string>
+    <string name="no_configuration_selected">Không có Cấu hình nào được Chọn</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Thành phần truy dấu</string>
+    <string name="more_options">Các tùy chọn khác</string>
+    <string name="go_back">Quay lại</string>
+    <string name="edit_terminal_configuration">Chỉnh sửa cấu hình thiết bị đầu cuối</string>
+    <string name="selected">Đã chọn</string>
+    <string name="feature_icon">Biểu tượng đối tượng</string>
+    <string name="zoom_to_result_description">Bật hoặc tắt thu phóng đến kết quả</string>
+    <string name="select_previous_result">Chọn kết quả trước đó</string>
+    <string name="select_next_result">Chọn kết quả tiếp theo</string>
+    <string name="error">Lỗi</string>
 </resources>

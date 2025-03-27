@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Izvēlieties infrastruktūras objektu</string>
     <string name="floor_filter_no_results">Rezultāti nav atrasti.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel nav stāvu iespējotu datu</string>
+    <string name="an_error_has_occurred">Radās kļūda</string>
     <string name="not_available">Nav pieejami</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Vieta — %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Notīrīt meklēšanas gadījumu</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Aizvērt</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Sakļaut</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Doties atpakaļ uz vietu atlasītāju</string>
 </resources>

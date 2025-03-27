@@ -28,6 +28,13 @@ pluginManagement {
 val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
     .run { this == "true" }
 
+val localProperties = java.util.Properties().apply {
+    val localPropertiesFile = file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
 // The version of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
@@ -39,12 +46,12 @@ val sdkVersionNumber: String =
 
 // The build number of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in gradle.properties.
+// take the one defined in local.properties.
 // CI builds pass -PbuildNumber=${BUILDNUM}
 val sdkBuildNumber: String =
     providers.gradleProperty("buildNumber").orNull
-        ?: providers.gradleProperty("sdkBuildNumber").orNull
-        ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
+        ?: localProperties.getProperty("sdkBuildNumber")
+        ?: ""
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -163,3 +170,7 @@ include(":legend")
 project(":legend").projectDir = File(rootDir, "toolkit/legend")
 include(":legend-app")
 project(":legend-app").projectDir = File(rootDir, "microapps/LegendApp/app")
+include(":basemapgallery-app")
+project(":basemapgallery-app").projectDir = File(rootDir, "microapps/BasemapGalleryApp/app")
+include(":basemapgallery")
+project(":basemapgallery").projectDir = File(rootDir, "toolkit/basemapgallery")

@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">不受信任的主机</string>
+    <string name="server_trust_message">%1$s 的服务器证书不受信任。 连接操作可能会使您的数据面临风险。 是否要继续？</string>
     <string name="cancel">取消</string>
+    <string name="allow_connection">允许连接</string>
+    <string name="username_password_login_title">需要验证</string>
+    <string name="username_password_login_message">您需要登录才能访问 %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">用户名</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">密码</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">登录</string>
 </resources>

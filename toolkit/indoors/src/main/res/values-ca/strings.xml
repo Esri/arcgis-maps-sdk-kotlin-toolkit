@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Seleccioneu una instal·lació</string>
     <string name="floor_filter_no_results">No s\'ha trobat cap resultat.</string>
+    <string name="geomodel_has_no_floor_aware_data">El geomodel no té dades que tinguin en compte les plantes</string>
+    <string name="an_error_has_occurred">Hi ha hagut un error</string>
     <string name="not_available">No està disponible</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Lloc: %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Esborra la cerca</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Tanca</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Redueix</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Torna al selector de llocs</string>
 </resources>

@@ -28,4 +28,36 @@
     <string name="feature_results">Vektoros elem eredményei</string>
     <string name="function_results">Funkció eredményei</string>
     <string name="clear_all_results">Összes eredmény törlése</string>
+    <string name="delete">Törlés</string>
+    <string name="not_available">Nem áll rendelkezésre</string>
+    <string name="zoom_to">Nagyítás erre</string>
+    <string name="zoom_in">Nagyítás</string>
+    <string name="fraction_along_edge">Részarány az él mentén</string>
+    <string name="attributes">Attribútumok</string>
+    <string name="terminal_configuration">Terminál konfigurálása</string>
+    <string name="an_error_has_occurred">Hiba történt.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Mégse</string>
+    <string name="clear_all_results_confirmation">Minden nyomkövetési eredmény elveszik.</string>
+    <string name="object_id">Objektumazonosító: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nem található Utility Network.</string>
+    <string name="no_trace_configurations_found">Nem található nyomkövetési konfiguráció.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Nincs elegendő kiindulási pont. Kérjük, állítson be legalább 1 kezdőpontot.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Nincs elegendő kiindulási pont. Kérjük, állítson be legalább 2 kezdőpontot.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">A közüzemelem nem hozható létre az ArcGISFeature-ből.</string>
+    <string name="one_or_more_starting_points_already_exists">Már létezik egy vagy több kiindulási pont.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Nem lehetett létrehozni rajzolhatót a vektoroselem-szimbólumból.</string>
+    <string name="no_configuration_selected">Nincs kiválasztva konfiguráció</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Komponens nyomkövetése</string>
+    <string name="more_options">További lehetőségek</string>
+    <string name="go_back">Vissza</string>
+    <string name="edit_terminal_configuration">Terminál konfigurálásának szerkesztése</string>
+    <string name="selected">Kijelölve</string>
+    <string name="feature_icon">Vektoroselem-ikon</string>
+    <string name="zoom_to_result_description">Eredményre való nagyítás engedélyezése vagy letiltása</string>
+    <string name="select_previous_result">Előző eredmény kiválasztása</string>
+    <string name="select_next_result">Következő eredmény kiválasztása</string>
+    <string name="error">Hiba</string>
 </resources>
