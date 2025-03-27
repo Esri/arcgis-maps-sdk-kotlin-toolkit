@@ -211,7 +211,9 @@ public fun TableTopSceneView(
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
-                rememberArSessionWrapper(applicationContext = context.applicationContext)
+                rememberArSessionWrapper(
+                    applicationContext = context.applicationContext
+                )
             SideEffect {
                 // We need to check, otherwise during subsequent recompositions we could accidentally
                 // revert from `Initialized` back to `DetectingPlanes`.
@@ -226,7 +228,7 @@ public fun TableTopSceneView(
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
             ArCameraFeed(
                 session = arSessionWrapper,
-                onFrame = { frame, displayRotation ->
+                onFrame = { frame, displayRotation, session ->
                     arCoreAnchor?.let { anchor ->
                         val anchorPosition = identityMatrix - anchor.pose.translation.let {
                             TransformationMatrix.createWithQuaternionAndTranslation(

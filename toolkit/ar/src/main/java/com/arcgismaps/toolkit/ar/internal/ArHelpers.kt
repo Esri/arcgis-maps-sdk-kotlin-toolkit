@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.toolkit.ar.R
@@ -231,6 +232,11 @@ internal fun rememberPermissionsGranted(
 internal data object WorldScaleParameters {
     const val LOCATION_DISTANCE_THRESHOLD_METERS = 10.0
     const val HORIZONTAL_ACCURACY_THRESHOLD_METERS = 6.0
-    const val VERTICAL_ACCURACY_THRESHOLD_METERS = 4.0
     const val LOCATION_AGE_THRESHOLD_MS = 10000.0
+
+    const val WKID_WGS84 = 4326
+    const val WKID_WGS84_VERTICAL = 115700
+    const val WKID_EGM96_VERTICAL = 5773
+    val SR_WGS84_WGS_VERTICAL = SpatialReference(WKID_WGS84, WKID_WGS84_VERTICAL)
+    val SR_CAMERA = SpatialReference(WKID_WGS84, WKID_EGM96_VERTICAL)
 }

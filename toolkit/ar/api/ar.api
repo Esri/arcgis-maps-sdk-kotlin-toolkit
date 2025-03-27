@@ -116,7 +116,7 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography
 }
 
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewKt {
-	public static final fun WorldScaleSceneView-TS8M3HQ (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final fun WorldScaleSceneView--aEHHIo (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/ar/WorldScaleTrackingMode;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
 }
 
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy {
@@ -180,5 +180,19 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$Initializ
 
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatusKt {
 	public static final fun rememberWorldScaleSceneViewStatus (Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/MutableState;
+}
+
+public abstract class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$Geospatial : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$World : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+	public fun <init> ()V
 }
 

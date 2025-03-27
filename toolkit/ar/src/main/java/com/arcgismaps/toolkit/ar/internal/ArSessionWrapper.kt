@@ -20,79 +20,97 @@ package com.arcgismaps.toolkit.ar.internal
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context) :
+internal class ArSessionWrapper(
+    private val applicationContext: Context,
+    private val onError: (Throwable) -> Unit,
+    private var useGeospatial: Boolean
+) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
 
-    private val mutex: Mutex = Mutex()
+    private val lock: Lock = ReentrantLock()
 
     private var shouldInitializeDisplay = true
 
     override fun onDestroy(owner: LifecycleOwner) {
-        session?.close()
-        session = null
+        withLock { session, _ ->
+            this.session = null
+            session?.close()
+        }
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        session?.pause()
+        withLock { session, _ ->
+            session?.pause()
+        }
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val newSession = this.session ?: Session(applicationContext)
-        configureSession()
-        shouldInitializeDisplay = true
-        newSession.resume()
-        session = newSession
+        withLock { session, _ ->
+            val newSession = session ?: Session(applicationContext).also {
+                this.session = it
+                configureSession(useGeospatial)
+            }
+            shouldInitializeDisplay = true
+            newSession.resume()
+        }
     }
 
-    private fun configureSession() {
+    private fun configureSession(useGeospatial: Boolean) {
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
-
+                if (useGeospatial) {
+                    if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) {
+                        onError(IllegalStateException("Geospatial mode is not supported on this device."))
+                        return
+                    }
+                    geospatialMode = Config.GeospatialMode.ENABLED
+                }
                 // We only want to detect horizontal planes.
                 setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
             }
         )
+        this.useGeospatial = useGeospatial
     }
 
-    internal fun withLock(block: (Session, shouldInitializeDisplay: Boolean) -> Unit) {
-        val locked = mutex.tryLock()
-        if (!locked) return
+    internal fun withLock(block: (Session?, shouldInitializeDisplay: Boolean) -> Unit) {
         try {
-            block(session ?: return, shouldInitializeDisplay)
+            lock.lock()
+            block(session, shouldInitializeDisplay)
         } finally {
-            mutex.unlock()
+            lock.unlock()
         }
     }
 
-    suspend fun resetSession() {
-        mutex.withLock {
+    fun resetSession(useGeospatial: Boolean = false) {
+        withLock { session, _ ->
             session?.let {
                 it.pause()
                 it.close()
             }
-            session = null
+            this.session = null
             val newSession = Session(applicationContext)
-            configureSession()
             shouldInitializeDisplay = true
             newSession.resume()
-            session = newSession
+            this.session = newSession
+            configureSession(useGeospatial)
         }
     }
 }
@@ -103,9 +121,22 @@ internal class ArSessionWrapper(private val applicationContext: Context) :
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper {
+internal fun rememberArSessionWrapper(
+    applicationContext: Context,
+    onError: (Throwable) -> Unit = {},
+    useGeospatial: Boolean = false
+): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember { ArSessionWrapper(applicationContext) }
+    val arSessionWrapper = remember {
+        ArSessionWrapper(
+            applicationContext,
+            onError,
+            useGeospatial
+        )
+    }
+    LaunchedEffect(useGeospatial) {
+        arSessionWrapper.resetSession(useGeospatial)
+    }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
         onDispose {

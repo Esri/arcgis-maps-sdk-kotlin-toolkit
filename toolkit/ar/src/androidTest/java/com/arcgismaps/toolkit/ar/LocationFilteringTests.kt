@@ -22,7 +22,7 @@ import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.Location
-import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
+import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
 import com.arcgismaps.toolkit.ar.internal.shouldUpdateCamera
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -50,15 +50,15 @@ class LocationFilteringTests {
             0.0,
             0.0,
             SpatialReference(
-                WorldTrackingCameraController.WKID_WGS84,
-                WorldTrackingCameraController.WKID_WGS84_VERTICAL
+                WorldScaleParameters.WKID_WGS84,
+                WorldScaleParameters.WKID_WGS84_VERTICAL
             )
         )
         val nullIslandEGM96Vertical = GeometryEngine.projectOrNull(
             nullIslandWgs84,
             SpatialReference(
-                WorldTrackingCameraController.WKID_WGS84,
-                WorldTrackingCameraController.WKID_EGM96_VERTICAL
+                WorldScaleParameters.WKID_WGS84,
+                WorldScaleParameters.WKID_EGM96_VERTICAL
             )
         )
         val farFarAwayWgs84 = Point(
@@ -66,8 +66,8 @@ class LocationFilteringTests {
             30.0,
             0.0,
             SpatialReference(
-                WorldTrackingCameraController.WKID_WGS84,
-                WorldTrackingCameraController.WKID_WGS84_VERTICAL
+                WorldScaleParameters.WKID_WGS84,
+                WorldScaleParameters.WKID_WGS84_VERTICAL
             )
         )
 
