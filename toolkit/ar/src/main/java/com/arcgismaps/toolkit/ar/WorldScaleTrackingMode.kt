@@ -19,7 +19,8 @@
 package com.arcgismaps.toolkit.ar
 
 /**
- * Used to determine how to control the camera in a [WorldScaleSceneView].
+ * Defines how the position and orientation of a device are determined and how the
+ * [WorldScaleSceneView]'s camera is synchronized with that position and orientation.
  *
  * @since 200.7.0
  */
