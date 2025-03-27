@@ -23,14 +23,26 @@ package com.arcgismaps.toolkit.ar
  *
  * @since 200.7.0
  */
-public sealed class WorldScaleTrackingMode {
+public sealed class WorldScaleTrackingMode private constructor(private val name: String) {
     /**
      * The camera will be controlled using [Google's Geospatial API](https://developers.google.com/ar/develop/geospatial).
      */
-    public class Geospatial : WorldScaleTrackingMode()
+    public class Geospatial : WorldScaleTrackingMode("Geospatial")
 
     /**
      * The camera will be controlled using a location data source and the device sensors.
      */
-    public class World : WorldScaleTrackingMode()
+    public class World : WorldScaleTrackingMode("World")
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is WorldScaleTrackingMode && other.name == name
+    }
+
+    override fun toString(): String {
+        return name
+    }
 }
