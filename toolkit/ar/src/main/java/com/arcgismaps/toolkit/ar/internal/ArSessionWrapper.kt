@@ -25,10 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
