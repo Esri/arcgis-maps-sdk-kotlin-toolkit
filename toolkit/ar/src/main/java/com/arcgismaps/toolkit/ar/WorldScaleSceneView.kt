@@ -265,6 +265,19 @@ public fun WorldScaleSceneView(
     }
 }
 
+/**
+ * Creates and remembers the updated state of a [WorldScaleCameraController].
+ *
+ * @param context The context used to create the camera controller.
+ * @param worldScaleTrackingMode The tracking mode used by the camera controller. If this parameter
+ * changes, the camera controller will be recreated.
+ * @param calibrationState The calibration state used by the camera controller.
+ * @param clippingDistance The clipping distance used by the camera controller.
+ * @param onUpdateInitializationStatus The callback used to update the initialization status of the [WorldScaleSceneView]
+ * @param onResetOriginCamera Called when the [WorldTrackingCameraController]'s origin camera is set
+ *
+ * @since 200.7.0
+ */
 @Composable
 internal fun rememberWorldScaleCameraController(
     context: Context,
