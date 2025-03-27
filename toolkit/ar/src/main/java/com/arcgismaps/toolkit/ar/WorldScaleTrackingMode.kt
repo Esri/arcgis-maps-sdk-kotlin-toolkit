@@ -25,7 +25,7 @@ package com.arcgismaps.toolkit.ar
  */
 public sealed class WorldScaleTrackingMode {
     /**
-     * The camera will be controlled using Google's Geospatial API.
+     * The camera will be controlled using [Google's Geospatial API](https://developers.google.com/ar/develop/geospatial).
      */
     public class Geospatial : WorldScaleTrackingMode()
 

@@ -86,9 +86,7 @@ fun MainScreen() {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
             initialViewpoint = Viewpoint(
-                latitude = 39.8,
-                longitude = -98.6,
-                scale = 10e7
+                latitude = 39.8, longitude = -98.6, scale = 10e7
             )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
@@ -101,45 +99,33 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial()) }
+    var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World()) }
     Scaffold(topBar = {
-        TopAppBar(
-            title = { Text("ArWorldScaleApp - ${trackingMode::class.java.simpleName}") },
+        TopAppBar(title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
             actions = {
                 var actionsExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
                     Icon(Icons.Default.MoreVert, "More")
                 }
 
-                DropdownMenu(
-                    expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("World Tracking") },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.World()
-                            actionsExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Geospatial Tracking") },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.Geospatial()
-                            actionsExpanded = false
-                        }
-                    )
+                DropdownMenu(expanded = actionsExpanded,
+                    onDismissRequest = { actionsExpanded = false }) {
+                    DropdownMenuItem(text = { Text("World Tracking") }, onClick = {
+                        trackingMode = WorldScaleTrackingMode.World()
+                        actionsExpanded = false
+                    })
+                    DropdownMenuItem(text = { Text("Geospatial Tracking") }, onClick = {
+                        trackingMode = WorldScaleTrackingMode.Geospatial()
+                        actionsExpanded = false
+                    })
                 }
-            }
-        )
+            })
     }) {
         var showPrivacyInfo by rememberSaveable { mutableStateOf(true) }
         var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(false) }
         if (showPrivacyInfo) {
-            PrivacyInfoDialog(
-                onShowPrivacyInfoChanged = { showPrivacyInfo = it },
-                onAcceptedPrivacyInfoChanged = { acceptedPrivacyInfo = it }
-            )
+            PrivacyInfoDialog(onShowPrivacyInfoChanged = { showPrivacyInfo = it },
+                onAcceptedPrivacyInfoChanged = { acceptedPrivacyInfo = it })
         }
         if (!acceptedPrivacyInfo) {
             Column(
@@ -148,9 +134,7 @@ fun MainScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("Privacy Info not accepted")
-                Button(
-                    onClick = { showPrivacyInfo = true }
-                ) {
+                Button(onClick = { showPrivacyInfo = true }) {
                     Text("Show Privacy Info")
                 }
             }
@@ -171,8 +155,7 @@ fun MainScreen() {
                             ?.let { point ->
                                 graphicsOverlays.first().graphics.add(
                                     Graphic(
-                                        point,
-                                        SimpleMarkerSceneSymbol(
+                                        point, SimpleMarkerSceneSymbol(
                                             SimpleMarkerSceneSymbolStyle.Diamond,
                                             Color.green,
                                             height = 1.0,
@@ -192,10 +175,9 @@ fun MainScreen() {
                                 modifier = Modifier.align(Alignment.BottomCenter),
                             )
                         } else {
-                            FloatingActionButton(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(32.dp),
+                            FloatingActionButton(modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(32.dp),
                                 onClick = { displayCalibrationView = true }) {
                                 Icon(
                                     painter = painterResource(R.drawable.baseline_straighten_24),
@@ -223,8 +205,7 @@ fun MainScreen() {
                             is LoadStatus.FailedToLoad -> {
                                 TextWithScrim(
                                     text = stringResource(
-                                        R.string.failed_to_load_scene,
-                                        sceneLoadStatus.error
+                                        R.string.failed_to_load_scene, sceneLoadStatus.error
                                     )
                                 )
                             }
@@ -250,14 +231,11 @@ fun MainScreen() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PrivacyInfoDialog(
-    onShowPrivacyInfoChanged: (Boolean) -> Unit,
-    onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
+    onShowPrivacyInfoChanged: (Boolean) -> Unit, onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
 ) {
-    BasicAlertDialog(
-        onDismissRequest = {
-            onShowPrivacyInfoChanged(false)
-        }
-    ) {
+    BasicAlertDialog(onDismissRequest = {
+        onShowPrivacyInfoChanged(false)
+    }) {
         Card {
             Column(
                 modifier = Modifier.padding(16.dp)
@@ -269,20 +247,17 @@ private fun PrivacyInfoDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TextButton(
-                        onClick = {
-                            onAcceptedPrivacyInfoChanged(false)
-                            onShowPrivacyInfoChanged(false)
-                        }) {
+                    TextButton(onClick = {
+                        onAcceptedPrivacyInfoChanged(false)
+                        onShowPrivacyInfoChanged(false)
+                    }) {
                         Text("Decline")
                     }
 
-                    TextButton(
-                        onClick = {
-                            onAcceptedPrivacyInfoChanged(true)
-                            onShowPrivacyInfoChanged(false)
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        onAcceptedPrivacyInfoChanged(true)
+                        onShowPrivacyInfoChanged(false)
+                    }) {
                         Text("Accept")
                     }
                 }
@@ -313,44 +288,39 @@ fun TextWithScrim(text: String) {
 fun LegalTextArCore() {
     val textLinkStyle =
         TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
-    Text(
-        text = buildAnnotatedString {
-            append("This application runs on ")
-            withLink(
-                LinkAnnotation.Url(
-                    "https://play.google.com/store/apps/details?id=com.google.ar.core",
-                    textLinkStyle
-                )
-            ) {
-                append("Google Play Services for AR")
-            }
-            append("  (ARCore), which is provided by Google and governed by the ")
-            withLink(
-                LinkAnnotation.Url(
-                    "https://policies.google.com/privacy",
-                    textLinkStyle
-                )
-            ) {
-                append("Google Privacy Policy.")
-            }
+    Text(text = buildAnnotatedString {
+        append("This application runs on ")
+        withLink(
+            LinkAnnotation.Url(
+                "https://play.google.com/store/apps/details?id=com.google.ar.core",
+                textLinkStyle
+            )
+        ) {
+            append("Google Play Services for AR")
         }
-    )
+        append("  (ARCore), which is provided by Google and governed by the ")
+        withLink(
+            LinkAnnotation.Url(
+                "https://policies.google.com/privacy", textLinkStyle
+            )
+        ) {
+            append("Google Privacy Policy.")
+        }
+    })
 }
 
 @Composable
 fun LegalTextGeospatial() {
-    Text(
-        text = buildAnnotatedString {
-            append("To power this session, Google will process sensor data (e.g., camera and location).")
-            appendLine()
-            withLink(
-                LinkAnnotation.Url(
-                    "https://support.google.com/ar?p=how-google-play-services-for-ar-handles-your-data",
-                    TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
-                )
-            ) {
-                append("Learn more")
-            }
+    Text(text = buildAnnotatedString {
+        append("To power this session, Google will process sensor data (e.g., camera and location).")
+        appendLine()
+        withLink(
+            LinkAnnotation.Url(
+                "https://support.google.com/ar?p=how-google-play-services-for-ar-handles-your-data",
+                TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
+            )
+        ) {
+            append("Learn more")
         }
-    )
+    })
 }
