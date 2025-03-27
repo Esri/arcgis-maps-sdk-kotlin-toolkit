@@ -260,7 +260,6 @@ private fun FeatureForm(
         form = featureForm,
         states = states,
         modifier = modifier,
-        onExpressionsEvaluated = { },
         onBarcodeButtonClick = onBarcodeButtonClick
     )
     FeatureFormDialog(states)
@@ -299,7 +298,6 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
-    onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
@@ -387,7 +385,6 @@ private fun FeatureFormBody(
         // ensure expressions are evaluated
         form.evaluateExpressions()
         initialEvaluation = true
-        onExpressionsEvaluated()
     }
 }
 
