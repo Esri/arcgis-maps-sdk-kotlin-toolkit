@@ -26,12 +26,24 @@ package com.arcgismaps.toolkit.ar
  */
 public sealed class WorldScaleTrackingMode {
     /**
-     * The camera will be controlled using [Google's Geospatial API](https://developers.google.com/ar/develop/geospatial).
+     * The camera is controlled using [Google's ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial).
+     * This mode uses a combination of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
+     * and GPS to determine the position and orientation of the device.
+     *
+     * This mode requires [authorization with the ARCore service or an ARCore API key](https://developers.google.com/ar/develop/authorization?platform=android).
+     * Usage is constrained by [Google's API usage quota](https://developers.google.com/ar/develop/java/geospatial/api-usage-quota).
+     *
+     * @since 200.7.0
      */
     public class Geospatial : WorldScaleTrackingMode()
 
     /**
-     * The camera will be controlled using a location data source and the device sensors.
+     * The camera is controlled using a combination of GPS for device location and ARCore for device
+     * orientation. Tracking accuracy depends on the accuracy of the GPS signal. Manual calibration
+     * of the scene view's heading and elevation may be required using the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     *
+     * @since 200.7.0
      */
     public class World : WorldScaleTrackingMode()
 }
