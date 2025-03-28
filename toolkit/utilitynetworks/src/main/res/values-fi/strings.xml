@@ -28,4 +28,36 @@
     <string name="feature_results">Kohteen tulokset</string>
     <string name="function_results">Funktion tulokset</string>
     <string name="clear_all_results">Tyhjennä kaikki tulokset</string>
+    <string name="delete">Poista</string>
+    <string name="not_available">Ei käytettävissä</string>
+    <string name="zoom_to">Tarkenna kohteeseen</string>
+    <string name="zoom_in">Tarkenna</string>
+    <string name="fraction_along_edge">Osuus reunaa pitkin</string>
+    <string name="attributes">Ominaisuustiedot</string>
+    <string name="terminal_configuration">Terminaalin konfiguraatio</string>
+    <string name="an_error_has_occurred">Tapahtui virhe</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Peruuta</string>
+    <string name="clear_all_results_confirmation">Kaikki jäljitystulokset menetetään.</string>
+    <string name="object_id">Objektin tunnus: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Utility Networkia ei löydy.</string>
+    <string name="no_trace_configurations_found">Jäljityskonfiguraatioita ei löydy.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Ei riittävästi aloituspisteitä. Määritä vähintään yksi aloitussijainti.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Ei riittävästi aloituspisteitä. Määritä vähintään kaksi aloitussijaintia.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Julkisen palvelun elementtiä ei voitu luoda ArcGISFeaturesta.</string>
+    <string name="one_or_more_starting_points_already_exists">Vähintään yksi aloituspiste on jo luotu.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Piirrettävää kohdetta ei voitu luoda kohdesymbolista.</string>
+    <string name="no_configuration_selected">Konfiguraatiota ei valittu</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Jäljityskomponentti</string>
+    <string name="more_options">Lisää asetuksia</string>
+    <string name="go_back">Siirry takaisin</string>
+    <string name="edit_terminal_configuration">Muokkaa terminaalin konfiguraatiota</string>
+    <string name="selected">Valittu</string>
+    <string name="feature_icon">Kohdekuvake</string>
+    <string name="zoom_to_result_description">Ota käyttöön tai poista käytöstä Tarkenna tulokseen</string>
+    <string name="select_previous_result">Valitse edellinen tulos</string>
+    <string name="select_next_result">Valitse seuraava tulos</string>
+    <string name="error">Virhe</string>
 </resources>

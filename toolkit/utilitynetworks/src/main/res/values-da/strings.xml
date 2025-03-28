@@ -28,4 +28,36 @@
     <string name="feature_results">Objektresultater</string>
     <string name="function_results">Funktionsresultater</string>
     <string name="clear_all_results">Ryd alle resultater</string>
+    <string name="delete">Slet</string>
+    <string name="not_available">Ikke tilgængelig</string>
+    <string name="zoom_to">Zoom til</string>
+    <string name="zoom_in">Zoom ind</string>
+    <string name="fraction_along_edge">Fraktion langs kanten</string>
+    <string name="attributes">Atributter</string>
+    <string name="terminal_configuration">Konfiguration af terminal</string>
+    <string name="an_error_has_occurred">Der er opstået en fejl</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuller</string>
+    <string name="clear_all_results_confirmation">Alle sporingsresultater vil gå tabt.</string>
+    <string name="object_id">Objekt-id: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Intet forsyningsnetværk fundet.</string>
+    <string name="no_trace_configurations_found">Der blev ikke fundet nogen sporingskonfigurationer.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Ikke nok startpunkter. Indstil mindst 1 startposition.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Ikke nok startpunkter. Indstil mindst 2 startpositioner.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Kunne ikke oprette forsyningselement fra ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Der findes allerede et eller flere startpunkter.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Kunne ikke oprette tegning fra objektsymbol.</string>
+    <string name="no_configuration_selected">Ingen konfiguration valgt</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Sporingskomponent</string>
+    <string name="more_options">Flere indstillinger</string>
+    <string name="go_back">Gå tilbage</string>
+    <string name="edit_terminal_configuration">Redigér konfiguration af terminal</string>
+    <string name="selected">Valgt</string>
+    <string name="feature_icon">Objektikon</string>
+    <string name="zoom_to_result_description">Aktivér eller deaktivér zoom til resultat</string>
+    <string name="select_previous_result">Vælg forrige resultat</string>
+    <string name="select_next_result">Vælg næste resultat</string>
+    <string name="error">Fejl</string>
 </resources>

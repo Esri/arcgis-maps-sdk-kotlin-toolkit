@@ -28,4 +28,36 @@
     <string name="feature_results">Geoobjektresultat</string>
     <string name="function_results">Funktionsresultat</string>
     <string name="clear_all_results">Rensa alla resultat</string>
+    <string name="delete">Ta bort</string>
+    <string name="not_available">Inte tillgänglig</string>
+    <string name="zoom_to">Zooma till</string>
+    <string name="zoom_in">Zooma in</string>
+    <string name="fraction_along_edge">Bråkdel längs kant</string>
+    <string name="attributes">Attribut</string>
+    <string name="terminal_configuration">Terminalkonfiguration</string>
+    <string name="an_error_has_occurred">Ett fel har inträffat</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Avbryt</string>
+    <string name="clear_all_results_confirmation">Alla spårningsresultat går förlorade.</string>
+    <string name="object_id">Objekt-ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Inget infrastruktursnätverk hittades.</string>
+    <string name="no_trace_configurations_found">Inga spårningskonfigurationer hittades.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Inte tillräckligt med startpunkter. Välj minst 1 startplats.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Inte tillräckligt med startpunkter. Välj minst 2 startplatser.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Det gick inte att skapa verktygselement från ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">En eller flera startpunkter finns redan.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Det gick inte att skapa ritbart objekt från geoobjektsymbol.</string>
+    <string name="no_configuration_selected">Ingen konfiguration har valts</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Spåra komponent</string>
+    <string name="more_options">Fler alternativ</string>
+    <string name="go_back">Gå tillbaka</string>
+    <string name="edit_terminal_configuration">Redigera terminalkonfiguration</string>
+    <string name="selected">Valt</string>
+    <string name="feature_icon">Geoobjektikon</string>
+    <string name="zoom_to_result_description">Aktivera eller inaktivera Zooma till resultat</string>
+    <string name="select_previous_result">Välj föregående resultat</string>
+    <string name="select_next_result">Välj nästa resultat</string>
+    <string name="error">Fel</string>
 </resources>

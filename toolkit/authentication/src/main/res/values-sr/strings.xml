@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Nepouzdan host</string>
+    <string name="server_trust_message">Sertifikat servera za %1$s nije pouzdan. Povezivanje može da kompromituje vaše podatke. Želite li da nastavite?</string>
     <string name="cancel">Otkaži</string>
+    <string name="allow_connection">Dozvoli konekciju</string>
+    <string name="username_password_login_title">Potvrda identiteta je obavezna</string>
+    <string name="username_password_login_message">Potrebno je da se prijavite da biste pristupili %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Korisničko ime</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Lozinka</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Prijavi me</string>
 </resources>

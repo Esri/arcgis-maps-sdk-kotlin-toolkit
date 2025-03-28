@@ -79,10 +79,6 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        disable += "MissingTranslation"
-    }
 }
 
 apiValidation {
@@ -94,7 +90,7 @@ apiValidation {
         "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$AddStartingPointScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",

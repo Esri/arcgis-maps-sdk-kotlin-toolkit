@@ -28,4 +28,36 @@
     <string name="feature_results">Feature-Ergebnisse</string>
     <string name="function_results">Funktionsergebnisse</string>
     <string name="clear_all_results">Alle Ergebnisse löschen</string>
+    <string name="delete">Löschen</string>
+    <string name="not_available">Nicht verfügbar</string>
+    <string name="zoom_to">Zoomen auf</string>
+    <string name="zoom_in">Vergrößern</string>
+    <string name="fraction_along_edge">Bruch entlang der Kante</string>
+    <string name="attributes">Attribute</string>
+    <string name="terminal_configuration">Anschlusspunktkonfiguration</string>
+    <string name="an_error_has_occurred">Ein Fehler ist aufgetreten.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="clear_all_results_confirmation">Alle Verfolgungsergebnisse gehen verloren.</string>
+    <string name="object_id">Objekt-ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Kein Versorgungsnetz gefunden.</string>
+    <string name="no_trace_configurations_found">Keine Verfolgungskonfigurationen gefunden.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Nicht genügend Startpunkte. Legen Sie mindestens 1 Startposition fest.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Nicht genügend Startpunkte. Legen Sie mindestens 2 Startpositionen fest.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Aus dem ArcGISFeature konnte kein Versorgungsnetzelement erstellt werden.</string>
+    <string name="one_or_more_starting_points_already_exists">Mindestens ein Startpunkt ist bereits vorhanden.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Aus dem Feature-Symbol konnte kein zeichenbares Objekt erstellt werden.</string>
+    <string name="no_configuration_selected">Keine Konfiguration ausgewählt.</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Verfolgungskomponente</string>
+    <string name="more_options">Weitere Optionen</string>
+    <string name="go_back">Zurück</string>
+    <string name="edit_terminal_configuration">Anschlusspunktkonfiguration bearbeiten</string>
+    <string name="selected">Ausgewählt</string>
+    <string name="feature_icon">Feature-Symbol</string>
+    <string name="zoom_to_result_description">"Auf Ergebnis zoomen" aktivieren oder deaktivieren</string>
+    <string name="select_previous_result">Vorheriges Ergebnis auswählen</string>
+    <string name="select_next_result">Nächstes Ergebnis auswählen</string>
+    <string name="error">Fehler</string>
 </resources>
