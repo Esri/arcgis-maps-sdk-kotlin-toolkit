@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Angi %1$d tegn</item>
         <item quantity="one">Angi %1$d tegn</item>
+        <item quantity="two">Skriv inn %1$d tegn</item>
+        <item quantity="few">Skriv inn %1$d tegn</item>
+        <item quantity="many">Skriv inn %1$d tegn</item>
         <item quantity="other">Skriv inn %1$d tegn</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Verdien må være %1$d tegn</item>
         <item quantity="one">Verdien må være %1$d tegn</item>
+        <item quantity="two">Verdien må være %1$d tegn</item>
+        <item quantity="few">Verdien må være %1$d tegn</item>
+        <item quantity="many">Verdien må være %1$d tegn</item>
         <item quantity="other">Verdien må være %1$d tegn</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Skriv inn fra %1$d til %2$d tegn</string>
-    <string name="value_must_be_from_to_characters">Verdien må være mellom %1$d og %2$d tegn</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksimum %1$d tegn</item>
         <item quantity="one">Maksimum %1$d tegn</item>
+        <item quantity="two">Maksimum %1$d tegn</item>
+        <item quantity="few">Maksimum %1$d tegn</item>
+        <item quantity="many">Maksimum %1$d tegn</item>
         <item quantity="other">Maksimum %1$d tegn</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Skriv inn fra %1$d til %2$d tegn</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Verdien må være mellom %1$d og %2$d tegn</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimum %1$d tegn</string>
     <string name="no_value">Ingen verdi</string>
     <string name="enter_value">Angi verdi</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Ferdig</string>
     <string name="filter">Filtrer %1$s</string>
+    <string name="search">Søk</string>
     <string name="numeric_range_helper_text">Angi verdi fra %1$s til %2$s</string>
     <string name="value_must_be_from_to">Verdien må være mellom %1$s og %2$s</string>
     <string name="less_than_min_value">Mindre enn minimumsverdi %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Time</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d timer</string>
     <string name="ff_time_picker_hour_selection">Velg time</string>
     <string name="ff_time_picker_hour_suffix">Klokken %1$d</string>
     <string name="ff_time_picker_hour_text_field">for time</string>
     <string name="ff_time_picker_minute">Minutt</string>
     <string name="ff_time_picker_minute_selection">Velg minutter</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minutter</string>
     <string name="ff_time_picker_minute_text_field">for minutter</string>
     <string name="ff_time_picker_period_toggle_description">Velg AM eller PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Tomme filer kan ikke lastes ned</string>
     <string name="attachment_deleted">%1s ble slettet</string>
     <string name="attachment_size_limit_exceeded">Vedlegg som er større enn %1$s, kan ikke lastes ned</string>
+    <string name="barcode_tooltip">Vend kameraet ditt mot en strekkode</string>
+    <string name="barcode_permission_denied">Kameratillatelse kreves for å skanne strekkoder. Aktiver kameratillatelse i enhetens innstillinger.</string>
+    <string name="unsupported_value">Verdien støttes ikke</string>
+    <string name="tap_to_scan">Trykk for å skanne</string>
+    <string name="unable_to_open_the_camera">Kan ikke åpne kameraet</string>
+    <string name="value_must_be_a_guid">Verdien må være en gyldig GUID</string>
 </resources>

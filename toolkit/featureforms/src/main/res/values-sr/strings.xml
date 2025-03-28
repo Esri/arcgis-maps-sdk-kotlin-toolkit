@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Unesite %1$d znak</item>
         <item quantity="one">Unesite %1$d znak</item>
+        <item quantity="two">Unesite %1$d karaktera</item>
+        <item quantity="few">Unesite %1$d karaktera</item>
+        <item quantity="many">Unesite %1$d karaktera</item>
         <item quantity="other">Unesite %1$d karaktera</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Vrednost mora biti %1$d znak</item>
         <item quantity="one">Vrednost mora biti %1$d znak</item>
+        <item quantity="two">Vrednost mora biti %1$d znakova</item>
+        <item quantity="few">Vrednost mora biti %1$d znakova</item>
+        <item quantity="many">Vrednost mora biti %1$d znakova</item>
         <item quantity="other">Vrednost mora biti %1$d znakova</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Unesite %1$d do %2$d karaktera</string>
-    <string name="value_must_be_from_to_characters">Vrednost mora biti %1$d do %2$d karaktera</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksimalni %1$d znak</item>
         <item quantity="one">Maksimalni %1$d znak</item>
+        <item quantity="two">Maksimalno %1$d znakova</item>
+        <item quantity="few">Maksimalno %1$d znakova</item>
+        <item quantity="many">Maksimalno %1$d znakova</item>
         <item quantity="other">Maksimalno %1$d znakova</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Unesite %1$d do %2$d karaktera</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Vrednost mora biti %1$d do %2$d karaktera</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimalno %1$d znakova</string>
     <string name="no_value">Nema vrednosti</string>
     <string name="enter_value">Unesite vrednost</string>
@@ -39,6 +60,7 @@
     <string name="ok">U REDU</string>
     <string name="done">Završeno</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Pretraži</string>
     <string name="numeric_range_helper_text">Unesite vrednost od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Vrednost mora biti od %1$s do %2$s</string>
     <string name="less_than_min_value">Manje od minimalne vrednosti %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Prepodne</string>
     <string name="ff_time_picker_hour">Čas</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d sati</string>
     <string name="ff_time_picker_hour_selection">Izaberite čas</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'sat</string>
     <string name="ff_time_picker_hour_text_field">za sat</string>
     <string name="ff_time_picker_minute">Minut</string>
     <string name="ff_time_picker_minute_selection">Izaberite minute</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minuta</string>
     <string name="ff_time_picker_minute_text_field">za minuta</string>
     <string name="ff_time_picker_period_toggle_description">Izaberite prepodne ili popodne</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Prazne datoteke ne mogu da se preuzimaju</string>
     <string name="attachment_deleted">%1s je uspešno izbrisano</string>
     <string name="attachment_size_limit_exceeded">Prilozi veći od %1$s ne mogu da se preuzimaju</string>
+    <string name="barcode_tooltip">Usmerite kameru prema bar-kodu</string>
+    <string name="barcode_permission_denied">Za skeniranje bar-kodova su potrebne dozvole za kameru. Omogućite dozvole za kameru u postavkama svog uređaja.</string>
+    <string name="unsupported_value">Nepodržana vrednost</string>
+    <string name="tap_to_scan">Dodirnite za skeniranje</string>
+    <string name="unable_to_open_the_camera">Nije moguće otvoriti kameru</string>
+    <string name="value_must_be_a_guid">Vrednost mora da bude važeći GUID</string>
 </resources>

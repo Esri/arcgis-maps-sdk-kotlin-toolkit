@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Выбрать помещение</string>
     <string name="floor_filter_no_results">Ничего не найдено.</string>
+    <string name="geomodel_has_no_floor_aware_data">У GeoModel нет данных с поддержкой этажей</string>
+    <string name="an_error_has_occurred">Произошла ошибка</string>
     <string name="not_available">Не доступно</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Площадка - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Очистить поиск</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Закрыть</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Свернуть</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Вернуться к выбору площадки</string>
 </resources>

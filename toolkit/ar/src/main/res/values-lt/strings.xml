@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Leidimas naudoti kamerą nesuteiktas</string>
+    <string name="arcore_not_installed_message">Norint naudoti TableTopSceneView turi būti įdiegtas ARCore. ARCore prieinamumas: %1$s</string>
+</resources>

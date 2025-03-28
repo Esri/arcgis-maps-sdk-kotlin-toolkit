@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">%1$d 文字を入力します</item>
         <item quantity="one">%1$d 文字を入力します</item>
+        <item quantity="two">%1$d 文字を入力します</item>
+        <item quantity="few">%1$d 文字を入力します</item>
+        <item quantity="many">%1$d 文字を入力します</item>
         <item quantity="other">%1$d 文字を入力します</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">値は %1$d 文字である必要があります</item>
         <item quantity="one">値は %1$d 文字である必要があります</item>
+        <item quantity="two">値は %1$d 文字である必要があります</item>
+        <item quantity="few">値は %1$d 文字である必要があります</item>
+        <item quantity="many">値は %1$d 文字である必要があります</item>
         <item quantity="other">値は %1$d 文字である必要があります</item>
     </plurals>
-    <string name="enter_min_to_max_chars">%1$d ～ %2$d 文字で入力してください</string>
-    <string name="value_must_be_from_to_characters">値は %1$d ～ %2$d 文字である必要があります</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">最大 %1$d 文字</item>
         <item quantity="one">最大 %1$d 文字</item>
+        <item quantity="two">最大 %1$d 文字</item>
+        <item quantity="few">最大 %1$d 文字</item>
+        <item quantity="many">最大 %1$d 文字</item>
         <item quantity="other">最大 %1$d 文字</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">%1$d ～ %2$d 文字で入力してください</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">値は %1$d ～ %2$d 文字である必要があります</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">最大 %1$d 文字</string>
     <string name="no_value">値なし</string>
     <string name="enter_value">値を入力</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">終了</string>
     <string name="filter">フィルター %1$s</string>
+    <string name="search">検索</string>
     <string name="numeric_range_helper_text">%1$s ～ %2$s の値を入力してください</string>
     <string name="value_must_be_from_to">値は %1$s ～ %2$s である必要があります</string>
     <string name="less_than_min_value">最小値 %1$s 未満です</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">時間</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d 時間</string>
     <string name="ff_time_picker_hour_selection">時の選択</string>
     <string name="ff_time_picker_hour_suffix">%1$d 時</string>
     <string name="ff_time_picker_hour_text_field">時</string>
     <string name="ff_time_picker_minute">分</string>
     <string name="ff_time_picker_minute_selection">分の選択</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d 分</string>
     <string name="ff_time_picker_minute_text_field">分</string>
     <string name="ff_time_picker_period_toggle_description">AM/PM の選択</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">空のファイルはダウンロードできません</string>
     <string name="attachment_deleted">%1s が正常に削除されました</string>
     <string name="attachment_size_limit_exceeded">%1$s より大きいアタッチメント ファイルは、ダウンロードできません</string>
+    <string name="barcode_tooltip">カメラをバーコードに向ける</string>
+    <string name="barcode_permission_denied">バーコードをスキャンするには、カメラの権限が必要です。 デバイス設定でカメラの権限を有効にしてください。</string>
+    <string name="unsupported_value">サポートされていない値</string>
+    <string name="tap_to_scan">タップしてスキャン</string>
+    <string name="unable_to_open_the_camera">カメラを開けません</string>
+    <string name="value_must_be_a_guid">値は有効な GUID である必要があります</string>
 </resources>
