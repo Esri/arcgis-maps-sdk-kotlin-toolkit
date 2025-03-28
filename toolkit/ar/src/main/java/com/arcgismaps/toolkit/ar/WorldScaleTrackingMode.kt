@@ -43,6 +43,6 @@ public sealed class WorldScaleTrackingMode private constructor(public val name: 
     }
 
     override fun toString(): String {
-        return name
+        return "WorldScaleTrackingMode.$name"
     }
 }
