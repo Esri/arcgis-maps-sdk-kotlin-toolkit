@@ -24,22 +24,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 
 /**
- * Object holding the default theming for the [WorldScaleCalibrationView].
+ * Object holding the default theming for the [WorldScaleSceneViewScope.CalibrationView].
  *
  * @since 200.7.0
  */
 public object WorldScaleCalibrationViewDefaults {
 
     /**
-     * Default color scheme for the [WorldScaleCalibrationView].
+     * Default color scheme for the [WorldScaleSceneViewScope.CalibrationView].
      *
-     * @param backgroundColor The background color of the [WorldScaleCalibrationView].
-     * @param containerColor The color of the containers of the [WorldScaleCalibrationView], such as
-     * the area for heading controls as well as elevation controls.
-     * @param buttonContainerColor The color of the container for the buttons in the [WorldScaleCalibrationView].
-     * @param buttonContentColor The color of the content of the buttons in the [WorldScaleCalibrationView].
-     * @param sliderTrackColor The color of the track of the sliders in the [WorldScaleCalibrationView].
-     * @param sliderThumbColor The color of the thumb of the sliders in the [WorldScaleCalibrationView].
+     * @param backgroundColor The background color of the [WorldScaleSceneViewScope.CalibrationView].
+     * @param containerColor The color of the containers of the
+     * [WorldScaleSceneViewScope.CalibrationView], such as the area for heading controls as well as
+     * elevation controls.
+     * @param buttonContainerColor The color of the container for the buttons in the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     * @param buttonContentColor The color of the content of the buttons in the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     * @param sliderTrackColor The color of the track of the sliders in the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     * @param sliderThumbColor The color of the thumb of the sliders in the
+     * [WorldScaleSceneViewScope.CalibrationView].
      *
      * @since 200.7.0
      */
@@ -63,11 +68,14 @@ public object WorldScaleCalibrationViewDefaults {
     }
 
     /**
-     * Default typography scheme for the [WorldScaleCalibrationView]
+     * Default typography scheme for the [WorldScaleSceneViewScope.CalibrationView]
      *
-     * @param titleTextStyle The text style for the title of the [WorldScaleCalibrationView].
-     * @param subtitleTextStyle The text style for any subtitles of the [WorldScaleCalibrationView].
-     * @param bodyTextStyle The text style for any body text of the [WorldScaleCalibrationView].
+     * @param titleTextStyle The text style for the title of the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     * @param subtitleTextStyle The text style for any subtitles of the
+     * [WorldScaleSceneViewScope.CalibrationView].
+     * @param bodyTextStyle The text style for any body text of the
+     * [WorldScaleSceneViewScope.CalibrationView].
      *
      * @since 200.7.0
      */
