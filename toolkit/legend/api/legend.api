@@ -1,0 +1,43 @@
+public final class com/arcgismaps/toolkit/legend/LayerContentData$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/legend/LayerContentData;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/legend/LayerContentData;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/legend/LegendItem$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/legend/LegendItem;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/legend/LegendItem;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/legend/LegendKt {
+	public static final fun Legend (Ljava/util/List;Lcom/arcgismaps/mapping/Basemap;DLandroidx/compose/ui/Modifier;ZZLjava/lang/String;Lcom/arcgismaps/toolkit/legend/theme/Typography;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/legend/theme/LegendDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/legend/theme/LegendDefaults;
+	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/legend/theme/Typography;
+}
+
+public final class com/arcgismaps/toolkit/legend/theme/Typography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/legend/theme/Typography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/legend/theme/Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/legend/theme/Typography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLayerName ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getLegendInfoName ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSubLayerName ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getTitle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
