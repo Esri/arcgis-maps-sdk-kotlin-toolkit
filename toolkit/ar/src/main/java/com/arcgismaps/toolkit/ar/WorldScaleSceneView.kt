@@ -87,7 +87,7 @@ import java.time.Instant
  * the scene view's camera.
  * @param clippingDistance the clipping distance in meters around the scene view's camera. A null value
  * means that no data will be clipped.
- * @param onInitializationStatusChanged a callback that is invoked when the initialization status
+ * @param onInitializationStatusChanged lambda invoked when the initialization status
  * of this WorldScaleSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
  * viewpoint type of [ViewpointType.CenterAndScale]
