@@ -93,7 +93,7 @@ import java.time.Instant
  * viewpoint type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
  * viewpoint type of [ViewpointType.BoundingGeometry]
- * @param graphicsOverlays graphics overlays used by this WorldScaleSceneView
+ * @param graphicsOverlays graphics overlays used by the WorldScaleSceneView
  * @param worldScaleSceneViewProxy the [WorldScaleSceneViewProxy] to associate with the
  * WorldScaleSceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the WorldScaleSceneView
