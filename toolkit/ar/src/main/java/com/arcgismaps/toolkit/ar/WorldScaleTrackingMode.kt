@@ -38,7 +38,7 @@ public sealed class WorldScaleTrackingMode {
     public class Geospatial : WorldScaleTrackingMode()
 
     /**
-     * The camera is controlled using a combination of GPS for device location and ARCore for device
+     * The camera is controlled using a combination of GPS for device location, and the device sensors and ARCore for device
      * orientation. Tracking accuracy depends on the accuracy of the GPS signal. Manual calibration
      * of the scene view's camera heading and elevation may be required using
      * [WorldScaleSceneViewScope.CalibrationView].
