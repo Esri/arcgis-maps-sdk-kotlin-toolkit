@@ -85,7 +85,7 @@ import java.time.Instant
  * @param worldScaleTrackingMode the type of tracking configuration used by the WorldScaleSceneView.
  * This determines how the position and orientation of the device is obtained and synchronized with
  * the scene view's camera.
- * @param clippingDistance the clipping distance in meters around the scene view's camera. A null
+ * @param clippingDistance the clipping distance in meters around the scene view's camera. A null value
  * means that no data will be clipped.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status
  * of this WorldScaleSceneView changes.
