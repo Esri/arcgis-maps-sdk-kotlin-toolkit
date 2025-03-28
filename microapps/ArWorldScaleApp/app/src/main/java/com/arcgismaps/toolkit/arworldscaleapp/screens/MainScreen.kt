@@ -112,7 +112,7 @@ fun MainScreen() {
             }
         )
     ) {
-        mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial())
+        mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World())
     }
     Scaffold(topBar = {
         TopAppBar(
