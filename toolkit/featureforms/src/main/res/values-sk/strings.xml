@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Zadajte %1$d znak</item>
         <item quantity="one">Zadajte %1$d znak</item>
+        <item quantity="two">Zadajte %1$d znakov</item>
+        <item quantity="few">Zadajte %1$d znakov</item>
+        <item quantity="many">Zadajte %1$d znakov</item>
         <item quantity="other">Zadajte %1$d znakov</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Hodnota musí mať %1$d znak</item>
         <item quantity="one">Hodnota musí mať %1$d znak</item>
+        <item quantity="two">Hodnota musí mať %1$d znakov</item>
+        <item quantity="few">Hodnota musí mať %1$d znakov</item>
+        <item quantity="many">Hodnota musí mať %1$d znakov</item>
         <item quantity="other">Hodnota musí mať %1$d znakov</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Zadajte %1$d až %2$d znakov</string>
-    <string name="value_must_be_from_to_characters">Hodnota musí byť od %1$d do %2$d znakov</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximálne %1$d znakov</item>
         <item quantity="one">Maximálne %1$d znakov</item>
+        <item quantity="two">Maximálne %1$d znakov</item>
+        <item quantity="few">Maximálne %1$d znakov</item>
+        <item quantity="many">Maximálne %1$d znakov</item>
         <item quantity="other">Maximálne %1$d znakov</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Zadajte %1$d až %2$d znakov</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Hodnota musí byť od %1$d do %2$d znakov</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximálne %1$d znakov</string>
     <string name="no_value">Žiadna hodnota</string>
     <string name="enter_value">Zadajte hodnotu</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Hotovo</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Vyhľadať</string>
     <string name="numeric_range_helper_text">Zadajte hodnotu od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Hodnota musí byť od %1$s do %2$s</string>
     <string name="less_than_min_value">Menej ako minimálna hodnota %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Dopoludnia</string>
     <string name="ff_time_picker_hour">Hodina</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d hodín</string>
     <string name="ff_time_picker_hour_selection">Vybrať hodinu</string>
     <string name="ff_time_picker_hour_suffix">%1$d hodiny/hodín</string>
     <string name="ff_time_picker_hour_text_field">na hodinu</string>
     <string name="ff_time_picker_minute">Minúta</string>
     <string name="ff_time_picker_minute_selection">Vybrať minúty</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minút</string>
     <string name="ff_time_picker_minute_text_field">na minúty</string>
     <string name="ff_time_picker_period_toggle_description">Vybrať dopoludnie alebo popoludnie</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Prázdne súbory nie je možné stiahnuť</string>
     <string name="attachment_deleted">%1s bolo úspešne odstránené</string>
     <string name="attachment_size_limit_exceeded">Prílohy väčšie ako %1$s nie je možné stiahnuť</string>
+    <string name="barcode_tooltip">Namierte kameru na čiarový kód</string>
+    <string name="barcode_permission_denied">Na skenovanie čiarových kódov je potrebné povoliť prístup ku kamere. V nastaveniach vášho zariadenia povoľte prístup ku kamere.</string>
+    <string name="unsupported_value">Nepodporovaná hodnota</string>
+    <string name="tap_to_scan">Ťuknutím naskenujte</string>
+    <string name="unable_to_open_the_camera">Kameru nie je možné otvoriť</string>
+    <string name="value_must_be_a_guid">Hodnota musí byť platný GUID</string>
 </resources>

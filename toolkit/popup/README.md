@@ -70,7 +70,7 @@ MapView(
 
 #### Rendering the composable Popup function
 
-A `Popup` can be rendered within a composition by simply calling the `Popup` composable with a [Popup object](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.popup/-popup/index.html). The Popup should be displayed in a container. It's visibility and the container are external and should be controlled by the calling Composable.
+A `Popup` can be rendered within a composition by simply calling the `Popup` composable with a [Popup object](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.popup/-popup/index.html). The Popup should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin  
 @Composable  

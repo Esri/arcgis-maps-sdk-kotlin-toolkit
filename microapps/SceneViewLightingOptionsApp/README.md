@@ -14,5 +14,5 @@ The application starts with a `SceneView` displaying a scene. Use the overflow m
 - Atmosphere Effect: allows you to choose how the scene's atmosphere is rendered.
 - Space Effect: allows you to choose how outer space is displayed in the scene.
 
-For more information on the composable `SceneView` component and how it works, see it's [Readme](../../toolkit/geoview-compose/README.md).
+For more information on the composable `SceneView` component and how it works, see its [Readme](../../toolkit/geoview-compose/README.md).
 

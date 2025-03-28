@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">选择设施点</string>
     <string name="floor_filter_no_results">未找到任何结果。</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel 没有任何楼层感知型数据</string>
+    <string name="an_error_has_occurred">发生错误</string>
     <string name="not_available">不可用</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">场所 - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">清除搜索</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">关闭</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">折叠</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">返回至场所选择器</string>
 </resources>

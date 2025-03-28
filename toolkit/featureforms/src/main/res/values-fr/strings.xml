@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Saisir %1$d caractère</item>
         <item quantity="one">Saisir %1$d caractère</item>
+        <item quantity="two">Saisir %1$d caractères</item>
+        <item quantity="few">Saisir %1$d caractères</item>
+        <item quantity="many">Saisir %1$d caractères</item>
         <item quantity="other">Saisir %1$d caractères</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">La valeur doit comporter %1$d caractère</item>
         <item quantity="one">La valeur doit comporter %1$d caractère</item>
+        <item quantity="two">La valeur doit comporter %1$d caractères</item>
+        <item quantity="few">La valeur doit comporter %1$d caractères</item>
+        <item quantity="many">La valeur doit comporter %1$d caractères</item>
         <item quantity="other">La valeur doit comporter %1$d caractères</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Saisir %1$d à %2$d caractères</string>
-    <string name="value_must_be_from_to_characters">La valeur doit comporter entre %1$d et %2$d caractères</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">%1$d caractère au maximum</item>
         <item quantity="one">%1$d caractère au maximum</item>
+        <item quantity="two">%1$d caractères au maximum</item>
+        <item quantity="few">%1$d caractères au maximum</item>
+        <item quantity="many">%1$d caractères au maximum</item>
         <item quantity="other">%1$d caractères au maximum</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Saisir %1$d à %2$d caractères</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">La valeur doit comporter entre %1$d et %2$d caractères</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">%1$d caractères au maximum</string>
     <string name="no_value">Aucune valeur</string>
     <string name="enter_value">Saisir une valeur</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Terminé</string>
     <string name="filter">Filtrer %1$s</string>
+    <string name="search">Rechercher</string>
     <string name="numeric_range_helper_text">Saisir une valeur comprise entre %1$s et %2$s</string>
     <string name="value_must_be_from_to">La valeur doit être comprise entre %1$s et %2$s</string>
     <string name="less_than_min_value">Inférieure à la valeur minimale %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Heure</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d heure(s)</string>
     <string name="ff_time_picker_hour_selection">Sélectionner une heure</string>
     <string name="ff_time_picker_hour_suffix">%1$d heure(s)</string>
     <string name="ff_time_picker_hour_text_field">pour l’heure</string>
     <string name="ff_time_picker_minute">Minute</string>
     <string name="ff_time_picker_minute_selection">Sélectionner des minutes</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minute(s)</string>
     <string name="ff_time_picker_minute_text_field">pour les minutes</string>
     <string name="ff_time_picker_period_toggle_description">Sélectionner AM ou PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Il n’est pas possible de télécharger des fichiers vides</string>
     <string name="attachment_deleted">%1s a été supprimé</string>
     <string name="attachment_size_limit_exceeded">Impossible de télécharger les pièces jointes d’une taille supérieure à %1$s</string>
+    <string name="barcode_tooltip">Diriger l’appareil photo vers un code-barres</string>
+    <string name="barcode_permission_denied">Des autorisations d’accès à l’appareil photo sont requises pour scanner des codes-barres. Activez les autorisations d’accès à l’appareil photo dans les paramètres de votre appareil.</string>
+    <string name="unsupported_value">Valeur non prise en charge</string>
+    <string name="tap_to_scan">Appuyer pour scanner</string>
+    <string name="unable_to_open_the_camera">Impossible d’ouvrir l’appareil photo</string>
+    <string name="value_must_be_a_guid">La valeur doit être un GUID valide</string>
 </resources>

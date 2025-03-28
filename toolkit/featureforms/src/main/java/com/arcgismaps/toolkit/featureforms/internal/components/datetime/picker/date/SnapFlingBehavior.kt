@@ -57,7 +57,7 @@ import kotlin.math.sign
  * @param snapAnimationSpec an [AnimationSpec] that is used for the snap animation
  * @param density the current display [Density]
  */
-// TODO(b/264687693): Replace with the framework's rememberSnapFlingBehavior ones it's stable.
+// TODO(b/264687693): Replace with the framework's rememberSnapFlingBehavior once it's stable.
 internal class SnapFlingBehavior(
     private val lazyListState: LazyListState,
     private val decayAnimationSpec: DecayAnimationSpec<Float>,

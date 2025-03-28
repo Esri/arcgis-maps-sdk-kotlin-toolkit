@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Wprowadź %1$d znak</item>
         <item quantity="one">Wprowadź %1$d znak</item>
+        <item quantity="two">Wprowadź następującą liczbę znaków: %1$d</item>
+        <item quantity="few">Wprowadź następującą liczbę znaków: %1$d</item>
+        <item quantity="many">Wprowadź następującą liczbę znaków: %1$d</item>
         <item quantity="other">Wprowadź następującą liczbę znaków: %1$d</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Wartość musi zawierać %1$d znak</item>
         <item quantity="one">Wartość musi zawierać %1$d znak</item>
+        <item quantity="two">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
+        <item quantity="few">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
+        <item quantity="many">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
         <item quantity="other">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Wprowadź od %1$d do %2$d znaków</string>
-    <string name="value_must_be_from_to_characters">Wartość musi zawierać od %1$d do %2$d znaków</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksymalna liczba znaków: %1$d</item>
         <item quantity="one">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="two">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="few">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="many">Maksymalna liczba znaków: %1$d</item>
         <item quantity="other">Maksymalna liczba znaków: %1$d</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Wprowadź od %1$d do %2$d znaków</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Wartość musi zawierać od %1$d do %2$d znaków</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksymalna liczba znaków: %1$d</string>
     <string name="no_value">Brak wartości</string>
     <string name="enter_value">Wprowadź wartość</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Wykonano</string>
     <string name="filter">Filtruj %1$s</string>
+    <string name="search">Szukaj</string>
     <string name="numeric_range_helper_text">Wprowadź wartość od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Wartość pola musi być z zakresu od %1$s do %2$s</string>
     <string name="less_than_min_value">Wartość mniejsza niż minimalna %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">przed południem</string>
     <string name="ff_time_picker_hour">Godzina</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d godz.</string>
     <string name="ff_time_picker_hour_selection">Wybierz godzinę</string>
     <string name="ff_time_picker_hour_suffix">%1$d</string>
     <string name="ff_time_picker_hour_text_field">dla godziny</string>
     <string name="ff_time_picker_minute">Minuta</string>
     <string name="ff_time_picker_minute_selection">Wybierz minuty</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d min</string>
     <string name="ff_time_picker_minute_text_field">dla minut</string>
     <string name="ff_time_picker_period_toggle_description">Wybierz Rano lub Po południu</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Nie można pobrać pustych plików</string>
     <string name="attachment_deleted">Pomyślnie usunięto %1s</string>
     <string name="attachment_size_limit_exceeded">Nie można pobierać załączników większych niż %1$s</string>
+    <string name="barcode_tooltip">Skieruj kamerę na kod kreskowy</string>
+    <string name="barcode_permission_denied">Do skanowania kodów kreskowych wymagane są uprawnienia kamery. Włącz uprawnienia kamery w ustawieniach urządzenia.</string>
+    <string name="unsupported_value">Nieobsługiwana wartość</string>
+    <string name="tap_to_scan">Naciśnij, aby zeskanować</string>
+    <string name="unable_to_open_the_camera">Nie można otworzyć kamery</string>
+    <string name="value_must_be_a_guid">Wartość musi być prawidłowym identyfikatorem GUID</string>
 </resources>
