@@ -24,7 +24,7 @@ package com.arcgismaps.toolkit.ar
  *
  * @since 200.7.0
  */
-public sealed class WorldScaleTrackingMode {
+public sealed class WorldScaleTrackingMode private constructor(public val name: String) {
     /**
      * The camera is controlled using [Google's ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial).
      * This mode uses a combination of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
@@ -35,7 +35,7 @@ public sealed class WorldScaleTrackingMode {
      *
      * @since 200.7.0
      */
-    public class Geospatial : WorldScaleTrackingMode()
+    public class Geospatial : WorldScaleTrackingMode("Geospatial")
 
     /**
      * The camera is controlled using a combination of GPS for device location, and the device sensors and ARCore for device
@@ -45,5 +45,17 @@ public sealed class WorldScaleTrackingMode {
      *
      * @since 200.7.0
      */
-    public class World : WorldScaleTrackingMode()
+    public class World : WorldScaleTrackingMode("World")
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is WorldScaleTrackingMode && other.name == name
+    }
+
+    override fun toString(): String {
+        return "WorldScaleTrackingMode.$name"
+    }
 }

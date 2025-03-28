@@ -184,6 +184,11 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatusKt {
 
 public abstract class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
 	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$Geospatial : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
