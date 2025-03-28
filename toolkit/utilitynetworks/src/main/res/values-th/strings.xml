@@ -28,4 +28,36 @@
     <string name="feature_results">ผลลัพธ์ฟีเจอร์</string>
     <string name="function_results">ผลลัพธ์ฟังก์ชัน</string>
     <string name="clear_all_results">ล้างผลลัพธ์ทั้งหมด</string>
+    <string name="delete">ลบ</string>
+    <string name="not_available">ไม่สามารถ</string>
+    <string name="zoom_to">ซูมเข้าไปยัง</string>
+    <string name="zoom_in">ขยายภาพ</string>
+    <string name="fraction_along_edge">เศษส่วนตามแนวขอบ</string>
+    <string name="attributes">ข้อมูลคุณลักษณะ</string>
+    <string name="terminal_configuration">การกำหนดค่าเทอร์มินัล</string>
+    <string name="an_error_has_occurred">เกิดข้อผิดพลาดขึ้น</string>
+    <string name="ok">ตกลง</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="clear_all_results_confirmation">ผลการติดตามทั้งหมดจะสูญหายไป</string>
+    <string name="object_id">ID วัตถุ: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">ไม่พบ Utility Network</string>
+    <string name="no_trace_configurations_found">ไม่พบการกำหนดค่าการติดตาม</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">จุดเริ่มต้นไม่เพียงพอ โปรดตั้งค่าอย่างน้อย 1 ตำแหน่งเริ่มต้น</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">จุดเริ่มต้นไม่เพียงพอ โปรดตั้งค่าอย่างน้อย 2 ตำแหน่งเริ่มต้น</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">ไม่สามารถสร้างองค์ประกอบยูทิลิตีจาก ArcGISFeature ได้</string>
+    <string name="one_or_more_starting_points_already_exists">มีอย่างน้อยหนึ่งจุดเริ่มต้นอยู่แล้ว</string>
+    <string name="could_not_create_drawable_from_feature_symbol">ไม่สามารถสร้างรายการที่วาดได้จากสัญลักษณ์ฟีเจอร์</string>
+    <string name="no_configuration_selected">ไม่ได้เลือกการกำหนดค่า</string>
+<!--Content Descriptions-->
+    <string name="trace_component">องค์ประกอบการติดตาม</string>
+    <string name="more_options">ตัวเลือกอื่นๆ</string>
+    <string name="go_back">ย้อนกลับ</string>
+    <string name="edit_terminal_configuration">แก้ไขการกำหนดค่าเทอร์มินัล</string>
+    <string name="selected">ที่เลือก</string>
+    <string name="feature_icon">ไอคอนฟีเจอร์</string>
+    <string name="zoom_to_result_description">เปิดใช้งานหรือปิดใช้งานการซูมไปยังผลลัพธ์</string>
+    <string name="select_previous_result">เลือกผลลัพธ์ก่อนหน้า</string>
+    <string name="select_next_result">เลือกผลลัพธ์ถัดไป</string>
+    <string name="error">ข้อผิดพลาด</string>
 </resources>

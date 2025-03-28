@@ -34,10 +34,10 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -204,8 +204,7 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-            }
-        )
+            })
 
         val sceneViewScope = remember { SceneViewScope(sceneView) }
         val isSceneViewReady = sceneView.rememberIsReady()

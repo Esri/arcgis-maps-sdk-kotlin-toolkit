@@ -28,4 +28,36 @@
     <string name="feature_results">Resultaten pbject</string>
     <string name="function_results">Resultaten functie</string>
     <string name="clear_all_results">Alle resultaten wissen</string>
+    <string name="delete">Verwijderen</string>
+    <string name="not_available">Niet beschikbaar</string>
+    <string name="zoom_to">Inzoomen op</string>
+    <string name="zoom_in">Inzoomen</string>
+    <string name="fraction_along_edge">Fractie langs rand</string>
+    <string name="attributes">Attributen</string>
+    <string name="terminal_configuration">Configuratie terminal</string>
+    <string name="an_error_has_occurred">Er is een fout opgetreden</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuleren</string>
+    <string name="clear_all_results_confirmation">Alle traceringsresultaten zullen verloren gaan.</string>
+    <string name="object_id">Object-id: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Kan geen Utility Network vinden.</string>
+    <string name="no_trace_configurations_found">Kan geen traceringsconfiguraties vinden.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Er zijn niet genoeg startpunten. Stel minstens 1 startlocatie in.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Er zijn niet genoeg startpunten. Stel minstens 2 startlocaties in.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Kan geen nutsvoorzieningen-element maken vanuit ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Er bestaan al een of meer startpunten.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Kan geen tekenbaar item maken van objectsymbool.</string>
+    <string name="no_configuration_selected">Er is geen configuratie geselecteerd</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Traceringscomponent</string>
+    <string name="more_options">Meer opties</string>
+    <string name="go_back">Ga terug</string>
+    <string name="edit_terminal_configuration">Configuratie terminal bewerken</string>
+    <string name="selected">Geselecteerd</string>
+    <string name="feature_icon">Objectpictogram</string>
+    <string name="zoom_to_result_description">Inzoomen op resultaten in- of uitschakelen</string>
+    <string name="select_previous_result">Vorig resultaat selecteren</string>
+    <string name="select_next_result">Volgend resultaat selecteren</string>
+    <string name="error">Fout</string>
 </resources>

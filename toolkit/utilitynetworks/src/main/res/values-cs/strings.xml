@@ -28,4 +28,36 @@
     <string name="feature_results">Výsledky prvků</string>
     <string name="function_results">Výsledky funkce</string>
     <string name="clear_all_results">Vymazat všechny výsledky</string>
+    <string name="delete">Odstranit</string>
+    <string name="not_available">Není k dispozici</string>
+    <string name="zoom_to">Přiblížit na</string>
+    <string name="zoom_in">Přiblížit</string>
+    <string name="fraction_along_edge">Zlomek podél hrany</string>
+    <string name="attributes">Atributy</string>
+    <string name="terminal_configuration">Konfigurace terminálu</string>
+    <string name="an_error_has_occurred">Došlo k chybě</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Storno</string>
+    <string name="clear_all_results_confirmation">Všechny výsledky trasování budou ztraceny.</string>
+    <string name="object_id">ID objektu: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nebyla nalezena žádná inženýrská síť.</string>
+    <string name="no_trace_configurations_found">Nebyly nalezeny žádné konfigurace trasování.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Není dostatek výchozích bodů. Nastavte alespoň 1 výchozí umístění.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Není dostatek výchozích bodů. Nastavte alespoň 2 výchozí umístění.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Vytvoření prvku inženýrské sítě z ArcGISFeature se nezdařilo.</string>
+    <string name="one_or_more_starting_points_already_exists">Jeden nebo více výchozích bodů již existuje.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Vytvoření kreslitelné položky ze symbolu prvku se nezdařilo.</string>
+    <string name="no_configuration_selected">Není vybrána žádná konfigurace</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Komponenta trasování</string>
+    <string name="more_options">Více možností</string>
+    <string name="go_back">Přejít zpět</string>
+    <string name="edit_terminal_configuration">Upravit konfiguraci terminálu</string>
+    <string name="selected">Vybrána</string>
+    <string name="feature_icon">Ikona prvku</string>
+    <string name="zoom_to_result_description">Povolit nebo zakázat přiblížení na výsledek</string>
+    <string name="select_previous_result">Vybrat předchozí výsledek</string>
+    <string name="select_next_result">Vybrat další výsledek</string>
+    <string name="error">Chyba</string>
 </resources>

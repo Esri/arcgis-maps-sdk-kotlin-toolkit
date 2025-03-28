@@ -28,4 +28,36 @@
     <string name="feature_results">フィーチャ結果</string>
     <string name="function_results">関数の結果</string>
     <string name="clear_all_results">結果をすべて消去</string>
+    <string name="delete">削除</string>
+    <string name="not_available">利用できません</string>
+    <string name="zoom_to">ズーム</string>
+    <string name="zoom_in">拡大</string>
+    <string name="fraction_along_edge">エッジに沿った部分</string>
+    <string name="attributes">属性</string>
+    <string name="terminal_configuration">ターミナル構成</string>
+    <string name="an_error_has_occurred">エラーが発生しました</string>
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="clear_all_results_confirmation">すべてのトレース結果が失われます。</string>
+    <string name="object_id">Object ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">ユーティリティ ネットワークが見つかりませんでした。</string>
+    <string name="no_trace_configurations_found">トレース構成が見つかりませんでした。</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">始点が不足しています。 少なくとも 1 つの開始位置を設定してください。</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">始点が不足しています。 少なくとも 2 つの開始位置を設定してください。</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">ArcGISFeature からユーティリティ エレメントを作成できませんでした。</string>
+    <string name="one_or_more_starting_points_already_exists">1 つまたは複数の始点がすでに存在します。</string>
+    <string name="could_not_create_drawable_from_feature_symbol">フィーチャ シンボルから描画可能なリソースを作成できませんでした。</string>
+    <string name="no_configuration_selected">構成が選択されていません</string>
+<!--Content Descriptions-->
+    <string name="trace_component">トレース コンポーネント</string>
+    <string name="more_options">その他のオプション</string>
+    <string name="go_back">戻る</string>
+    <string name="edit_terminal_configuration">ターミナル構成の編集</string>
+    <string name="selected">選択済み</string>
+    <string name="feature_icon">フィーチャ アイコン</string>
+    <string name="zoom_to_result_description">ズーム結果の有効化または無効化</string>
+    <string name="select_previous_result">前の結果を選択</string>
+    <string name="select_next_result">次の結果を選択</string>
+    <string name="error">エラー</string>
 </resources>
