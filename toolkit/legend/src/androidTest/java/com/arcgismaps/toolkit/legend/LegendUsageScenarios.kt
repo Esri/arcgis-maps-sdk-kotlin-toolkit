@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Esri
+ * Copyright 2025 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,13 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.view.DrawStatus
-import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 /**
- * Composable Scenarios for the [TraceToolTests]
+ * Composable Scenarios for the [LegendTests]
  *
  * @since 200.6.0
  */
@@ -78,13 +74,7 @@ class LegendUsageScenarios {
             Column {
                 MapView(
                     arcGISMap = arcGISMap,
-                    modifier = Modifier
-                        .fillMaxSize(),
-//                    onDrawStatusChanged = { drawStatus ->
-//                        if (drawStatus == DrawStatus.Completed) {
-//                            onDrawStatusCompleted()
-//                        }
-//                    }
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

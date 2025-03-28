@@ -96,7 +96,6 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.monitor)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
