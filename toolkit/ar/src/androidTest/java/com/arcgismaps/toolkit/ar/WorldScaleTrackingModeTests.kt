@@ -35,6 +35,10 @@ class WorldScaleTrackingModeTests {
      * When they are compared,
      * Then they should be equal.
      *
+     * Given an instance of [WorldScaleTrackingMode.World] and an instance of [WorldScaleTrackingMode.Geospatial],
+     * When they are compared,
+     * Then they should not be equal.
+     *
      * @since 200.7.0
      */
     @Test
@@ -47,17 +51,16 @@ class WorldScaleTrackingModeTests {
 
         assertThat(worldMode1).isEqualTo(worldMode2)
         assertThat(worldMode1.hashCode()).isEqualTo(worldMode2.hashCode())
+        assertThat(worldMode1.toString()).isEqualTo("WorldScaleTrackingMode.World")
+        assertThat(worldMode2.toString()).isEqualTo(worldMode1.toString())
 
         assertThat(geospatialMode1).isEqualTo(geospatialMode2)
         assertThat(geospatialMode1.hashCode()).isEqualTo(geospatialMode2.hashCode())
+        assertThat(geospatialMode1.toString()).isEqualTo("WorldScaleTrackingMode.Geospatial")
+        assertThat(geospatialMode2.toString()).isEqualTo(geospatialMode1.toString())
 
         assertThat(worldMode1).isNotEqualTo(geospatialMode1)
         assertThat(worldMode1.hashCode()).isNotEqualTo(geospatialMode1.hashCode())
-
-        assertThat(worldMode1.toString()).isEqualTo("World")
-        assertThat(worldMode2.toString()).isEqualTo(worldMode1.toString())
-
-        assertThat(geospatialMode1.toString()).isEqualTo("Geospatial")
-        assertThat(geospatialMode2.toString()).isEqualTo(geospatialMode1.toString())
+        assertThat(worldMode1.toString()).isNotEqualTo(geospatialMode1.toString())
     }
 }
