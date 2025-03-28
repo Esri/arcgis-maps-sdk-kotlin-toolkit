@@ -40,6 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +98,22 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial()) }
+    var trackingMode by rememberSaveable(
+        saver = Saver(
+            save = {
+                it.value.name
+            },
+            restore = {
+                val mode = when (it) {
+                    "Geospatial" -> WorldScaleTrackingMode.Geospatial()
+                    else -> WorldScaleTrackingMode.World()
+                }
+                mutableStateOf(mode)
+            }
+        )
+    ) {
+        mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.Geospatial())
+    }
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
