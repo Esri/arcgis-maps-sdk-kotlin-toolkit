@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.legend
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.platform.app.InstrumentationRegistry
@@ -70,7 +71,7 @@ class LegendTests {
      */
     @Test
     fun testLegendColumn() {
-        val column = composeTestRule.onNodeWithContentDescription(context.getString(R.string.legend_component))
-        column.assertExists("the base column of the Legend composable does not exist")
+        val legend = composeTestRule.onNodeWithContentDescription(context.getString(R.string.legend_component))
+        legend.assertIsDisplayed()
     }
 }
