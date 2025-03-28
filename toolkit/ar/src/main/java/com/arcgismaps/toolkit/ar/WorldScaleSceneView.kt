@@ -78,7 +78,7 @@ import java.time.Instant
  * A scene view that provides a world-scale augmented reality experience.
  *
  * Note: You must follow [Google's user privacy requirements for ARCore](https://developers.google.com/ar/develop/privacy-requirements)
- * when using this WorldScaleSceneView in your application.
+ * when using WorldScaleSceneView in your application.
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this WorldScaleSceneView.
  * @param modifier Modifier to be applied to the WorldScaleSceneView.
