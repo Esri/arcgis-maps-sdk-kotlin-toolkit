@@ -51,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
@@ -371,7 +373,9 @@ private fun Legend(
     title: String,
     typography: Typography
 ) {
-    Column(modifier = modifier) {
+    val localContext = LocalContext.current
+    Column(modifier = modifier
+        .semantics { contentDescription = localContext.getString(R.string.legend_component) }) {
         if (title.isNotEmpty()) {
             Text(
                 text = title,

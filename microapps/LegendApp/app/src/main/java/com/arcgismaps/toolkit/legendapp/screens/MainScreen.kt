@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.legendapp.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -93,6 +94,7 @@ fun MainScreen(viewModel: LegendViewModel = viewModel()) {
             arcGISMap = viewModel.arcGISMap,
             onViewpointChangedForCenterAndScale = {
                 // does not emit after rotation.
+                Log.d("MainScreen **", "onViewpointChangedForCenterAndScale: ${it.targetScale}")
                 currentScale = it.targetScale
             }
         )
