@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.artabletopapp.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -67,6 +69,8 @@ import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlinx.coroutines.launch
+
+private const val ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
 @Composable
 fun MainScreen() {
@@ -96,12 +100,16 @@ fun MainScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        var showPrivacyInfo by rememberSaveable { mutableStateOf(true) }
-        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(false) }
+        val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(ACCEPTED_PRIVACY_INFO, false)) }
+        var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
                 onShowPrivacyInfoChanged = { showPrivacyInfo = it },
-                onAcceptedPrivacyInfoChanged = { acceptedPrivacyInfo = it }
+                onAcceptedPrivacyInfoChanged = {
+                    sharedPreferences.edit().putBoolean(ACCEPTED_PRIVACY_INFO, it).apply()
+                    acceptedPrivacyInfo = it
+                }
             )
         }
         if (!acceptedPrivacyInfo) {

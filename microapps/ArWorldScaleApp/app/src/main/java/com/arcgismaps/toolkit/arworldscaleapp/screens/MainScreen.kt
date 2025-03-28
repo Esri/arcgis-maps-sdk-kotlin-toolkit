@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
@@ -79,6 +81,8 @@ import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 
+private const val ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -100,6 +104,9 @@ fun MainScreen() {
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World()) }
+    val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+    var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(ACCEPTED_PRIVACY_INFO, false)) }
+    var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     Scaffold(topBar = {
         TopAppBar(title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
             actions = {
@@ -118,14 +125,19 @@ fun MainScreen() {
                         trackingMode = WorldScaleTrackingMode.Geospatial()
                         actionsExpanded = false
                     })
+                    DropdownMenuItem(text = { Text("Show Privacy Info") }, onClick = {
+                        showPrivacyInfo = true
+                        actionsExpanded = false
+                    })
                 }
             })
     }) {
-        var showPrivacyInfo by rememberSaveable { mutableStateOf(true) }
-        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(false) }
         if (showPrivacyInfo) {
             PrivacyInfoDialog(onShowPrivacyInfoChanged = { showPrivacyInfo = it },
-                onAcceptedPrivacyInfoChanged = { acceptedPrivacyInfo = it })
+                onAcceptedPrivacyInfoChanged = {
+                    sharedPreferences.edit().putBoolean(ACCEPTED_PRIVACY_INFO, it).apply()
+                    acceptedPrivacyInfo = it
+                })
         }
         if (!acceptedPrivacyInfo) {
             Column(
