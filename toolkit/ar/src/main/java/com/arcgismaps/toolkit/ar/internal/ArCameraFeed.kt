@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -48,11 +47,10 @@ import com.google.ar.core.Session
  * @param visualizePlanes whether to visualize detected planes.
  * @since 200.6.0
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ArCameraFeed(
-    session: Session,
-    onFrame: (Frame, Int) -> Unit,
+    session: ArSessionWrapper,
+    onFrame: (Frame, Int, Session) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit,
     visualizePlanes: Boolean = true
