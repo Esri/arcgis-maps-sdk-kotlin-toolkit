@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Permisiunea camerei nu a fost acordată</string>
+    <string name="arcore_not_installed_message">ARTCore trebuie să fie instalat pentru a utiliza TableTopSceneView. Disponibilitatea ARCore: %1$s</string>
+</resources>

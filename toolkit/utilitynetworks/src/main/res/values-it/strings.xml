@@ -28,4 +28,36 @@
     <string name="feature_results">Risultati feature</string>
     <string name="function_results">Risultati funzione</string>
     <string name="clear_all_results">Elimina tutti i risultati</string>
+    <string name="delete">Elimina</string>
+    <string name="not_available">Non disponibile</string>
+    <string name="zoom_to">Zoom a</string>
+    <string name="zoom_in">Zoom avanti</string>
+    <string name="fraction_along_edge">Frazione lungo bordo</string>
+    <string name="attributes">Attributi</string>
+    <string name="terminal_configuration">Configurazione terminale</string>
+    <string name="an_error_has_occurred">Si è verificato un errore</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annulla</string>
+    <string name="clear_all_results_confirmation">Tutti i risultati di traccia andranno persi.</string>
+    <string name="object_id">ID oggetto: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nessuna Utility Network trovata.</string>
+    <string name="no_trace_configurations_found">Nessuna configurazione di traccia trovata.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Punti di partenza insufficienti. Impostare almeno 1 posizione di partenza.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Punti di partenza insufficienti. Impostare almeno 2 posizioni di partenza.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Impossibile creare elemento di utilità da ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Uno o più punti di partenza esistono già.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Impossibile creare elemento disegnabile dal simbolo feature.</string>
+    <string name="no_configuration_selected">Nessuna configurazione selezionata</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Traccia componente</string>
+    <string name="more_options">Altre opzioni</string>
+    <string name="go_back">Indietro</string>
+    <string name="edit_terminal_configuration">Modifica configurazione terminale</string>
+    <string name="selected">Selezionato</string>
+    <string name="feature_icon">Icona feature</string>
+    <string name="zoom_to_result_description">Abilita o disabilita zoom a risultato</string>
+    <string name="select_previous_result">Seleziona risultato precedente</string>
+    <string name="select_next_result">Seleziona risultato successivo</string>
+    <string name="error">Errore</string>
 </resources>

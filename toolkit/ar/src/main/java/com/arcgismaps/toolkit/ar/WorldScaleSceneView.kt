@@ -37,6 +37,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -73,6 +74,68 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import java.time.Instant
 
+/**
+ * A scene view that provides a world-scale augmented reality experience.
+ *
+ * Note: You must follow [Google's user privacy requirements for ARCore](https://developers.google.com/ar/develop/privacy-requirements)
+ * when using WorldScaleSceneView in your application.
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this WorldScaleSceneView.
+ * @param modifier Modifier to be applied to the WorldScaleSceneView.
+ * @param worldScaleTrackingMode the type of tracking configuration used by the WorldScaleSceneView.
+ * Determines how the position and orientation of the device is obtained and synchronized with
+ * the scene view's camera.
+ * @param clippingDistance the clipping distance in meters around the scene view's camera. A null value
+ * means that no data will be clipped.
+ * @param onInitializationStatusChanged lambda invoked when the initialization status
+ * of this WorldScaleSceneView changes.
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.CenterAndScale].
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.BoundingGeometry].
+ * @param graphicsOverlays graphics overlays used by the WorldScaleSceneView.
+ * @param worldScaleSceneViewProxy the [WorldScaleSceneViewProxy] to associate with the
+ * WorldScaleSceneView.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the WorldScaleSceneView.
+ * @param selectionProperties the [SelectionProperties] used by the WorldScaleSceneView.
+ * @param isAttributionBarVisible true if attribution bar is visible in the WorldScaleSceneView,
+ * false otherwise.
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the
+ * WorldScaleSceneView has changed.
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size
+ * changes.
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the
+ * WorldScaleSceneView.
+ * @param imageOverlays image overlays for displaying images in the WorldScaleSceneView.
+ * @param timeExtent the [TimeExtent] used by the WorldScaleSceneView.
+ * @param onTimeExtentChanged lambda invoked when the WorldScaleSceneView's [TimeExtent] is changed.
+ * @param sunTime the position of the sun in the WorldScaleSceneView based on a specific date and
+ * time.
+ * @param sunLighting the type of ambient sunlight and shadows in the WorldScaleSceneView.
+ * @param ambientLightColor the color of the WorldScaleSceneView's ambient light.
+ * @param onNavigationChanged lambda invoked when the navigation status of the WorldScaleSceneView
+ * has changed.
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the
+ * WorldScaleSceneView has changed.
+ * @param onLayerViewStateChanged lambda invoked when the WorldScaleSceneView's layer view state is
+ * changed.
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the
+ * WorldScaleSceneView.
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the
+ * WorldScaleSceneView has changed.
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the WorldScaleSceneView.
+ * @param onScale lambda invoked when a user performs a pinch gesture on the WorldScaleSceneView.
+ * @param onUp lambda invoked when the user removes all their pointers from the WorldScaleSceneView.
+ * @param onDown lambda invoked when the user first presses on the WorldScaleSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the WorldScaleSceneView.
+ * @param onDoubleTap lambda invoked the user double taps on the WorldScaleSceneView.
+ * @param onLongPress lambda invoked when a user holds a pointer on the WorldScaleSceneView.
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
+ * @param onPan lambda invoked when a user drags a pointer or pointers across WorldScaleSceneView.
+ * @param content the content of the WorldScaleSceneView.
+ *
+ * @since 200.7.0
+ */
 @Composable
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
@@ -123,7 +186,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If ARCore is not installed, we can't display anything
-    if (!arCoreInstalled) return@WorldScaleSceneView
+    if (!arCoreInstalled) return
 
     val allPermissionsGranted by rememberPermissionsGranted(
         permissionsToRequest = listOf(
@@ -139,7 +202,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If we don't have permission for camera or location, we can't display anything
-    if (!allPermissionsGranted) return@WorldScaleSceneView
+    if (!allPermissionsGranted) return
 
     val pedataConfigured by rememberPeDataConfigured(
         onFailed = {
@@ -150,7 +213,7 @@ public fun WorldScaleSceneView(
         }
     )
     // If PE data could not be configured, we can't position the scene camera accurately
-    if (!pedataConfigured) return@WorldScaleSceneView
+    if (!pedataConfigured) return
 
     val arSessionWrapper =
         rememberArSessionWrapper(

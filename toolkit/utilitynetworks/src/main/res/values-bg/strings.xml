@@ -28,4 +28,36 @@
     <string name="feature_results">Резултати на обект</string>
     <string name="function_results">Резултати от функция</string>
     <string name="clear_all_results">Изчистване на всички резултати</string>
+    <string name="delete">Изтриване</string>
+    <string name="not_available">Не е налично</string>
+    <string name="zoom_to">Приближаване</string>
+    <string name="zoom_in">Приближаване</string>
+    <string name="fraction_along_edge">Фракция на ръба</string>
+    <string name="attributes">Атрибути</string>
+    <string name="terminal_configuration">Конфигурация на терминал</string>
+    <string name="an_error_has_occurred">Възникна грешка</string>
+    <string name="ok">Добре</string>
+    <string name="cancel">Отказ</string>
+    <string name="clear_all_results_confirmation">Всички резултати за проследяване ще бъдат загубени.</string>
+    <string name="object_id">ИД на обект: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Не е намерена комунална мрежа.</string>
+    <string name="no_trace_configurations_found">Не са намерени конфигурации за проследяване.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Няма достатъчно начални точки. Задайте поне 1 начално местоположение.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Няма достатъчно начални точки. Задайте поне 2 начални местоположения.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Не може да създаде комунален елемент от ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Една или повече начални точки вече съществуват.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Не може да създаде рисуваем елемент от функционалния слой.</string>
+    <string name="no_configuration_selected">Не е избрана конфигурация.</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Компонент за проследяване</string>
+    <string name="more_options">Още опции</string>
+    <string name="go_back">Назад</string>
+    <string name="edit_terminal_configuration">Редактиране на конфигурация на терминал</string>
+    <string name="selected">Избрани</string>
+    <string name="feature_icon">Икона на обект</string>
+    <string name="zoom_to_result_description">Активиране/деактивиране на приближаване към резултатите</string>
+    <string name="select_previous_result">Изберете предишния резултат</string>
+    <string name="select_next_result">Изберете следващия резултат</string>
+    <string name="error">Грешка</string>
 </resources>

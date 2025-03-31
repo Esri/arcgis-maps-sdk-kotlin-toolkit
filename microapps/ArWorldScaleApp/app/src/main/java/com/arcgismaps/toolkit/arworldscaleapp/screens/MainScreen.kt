@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,6 +71,7 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
@@ -90,47 +92,79 @@ fun MainScreen() {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
             initialViewpoint = Viewpoint(
-                latitude = 39.8, longitude = -98.6, scale = 10e7
+                latitude = 39.8,
+                longitude = -98.6,
+                scale = 10e7
             )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
             // is calculated with elevation
             baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
             baseSurface.backgroundGrid.isVisible = false
+            baseSurface.opacity = 0.3f
+            // add the Esri 3D Buildings layer
+            operationalLayers.add(
+                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
+            )
         }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by remember { mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World()) }
+    var trackingMode by rememberSaveable(
+        saver = Saver(
+            save = {
+                it.value.name
+            },
+            restore = {
+                val mode = when (it) {
+                    "Geospatial" -> WorldScaleTrackingMode.Geospatial()
+                    else -> WorldScaleTrackingMode.World()
+                }
+                mutableStateOf(mode)
+            }
+        )
+    ) {
+        mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World())
+    }
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
     var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(ACCEPTED_PRIVACY_INFO, false)) }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     Scaffold(topBar = {
-        TopAppBar(title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
+        TopAppBar(
+            title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
             actions = {
                 var actionsExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
                     Icon(Icons.Default.MoreVert, "More")
                 }
 
-                DropdownMenu(expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false }) {
-                    DropdownMenuItem(text = { Text("World Tracking") }, onClick = {
-                        trackingMode = WorldScaleTrackingMode.World()
-                        actionsExpanded = false
-                    })
-                    DropdownMenuItem(text = { Text("Geospatial Tracking") }, onClick = {
-                        trackingMode = WorldScaleTrackingMode.Geospatial()
-                        actionsExpanded = false
-                    })
+                DropdownMenu(
+                    expanded = actionsExpanded,
+                    onDismissRequest = { actionsExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("World Tracking") },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.World()
+                            actionsExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Geospatial Tracking") },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.Geospatial()
+                            actionsExpanded = false
+                        }
+                    )
                     DropdownMenuItem(text = { Text("Show Privacy Info") }, onClick = {
                         showPrivacyInfo = true
                         actionsExpanded = false
                     })
                 }
-            })
+            }
+        )
     }) {
         if (showPrivacyInfo) {
             PrivacyInfoDialog(onShowPrivacyInfoChanged = { showPrivacyInfo = it },
@@ -151,132 +185,134 @@ fun MainScreen() {
                 }
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                WorldScaleSceneView(
-                    arcGISScene = arcGISScene,
-                    modifier = Modifier
-                        .padding(it)
-                        .fillMaxSize(),
-                    worldScaleTrackingMode = trackingMode,
-                    onInitializationStatusChanged = {
-                        initializationStatus = it
-                    },
-                    worldScaleSceneViewProxy = proxy,
-                    onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                        proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
-                            ?.let { point ->
-                                graphicsOverlays.first().graphics.add(
-                                    Graphic(
-                                        point, SimpleMarkerSceneSymbol(
-                                            SimpleMarkerSceneSymbolStyle.Diamond,
-                                            Color.green,
-                                            height = 1.0,
-                                            width = 1.0,
-                                            depth = 1.0
-                                        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            WorldScaleSceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
+                worldScaleTrackingMode = trackingMode,
+                onInitializationStatusChanged = {
+                    initializationStatus = it
+                },
+                worldScaleSceneViewProxy = proxy,
+                onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                    proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                        ?.let { point ->
+                            graphicsOverlays.first().graphics.add(
+                                Graphic(
+                                    point,
+                                    SimpleMarkerSceneSymbol(
+                                        SimpleMarkerSceneSymbolStyle.Diamond,
+                                        Color.green,
+                                        height = 1.0,
+                                        width = 1.0,
+                                        depth = 1.0
                                     )
                                 )
-                            }
-                    },
-                    graphicsOverlays = graphicsOverlays
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (displayCalibrationView) {
-                            CalibrationView(
-                                onDismiss = { displayCalibrationView = false },
-                                modifier = Modifier.align(Alignment.BottomCenter),
                             )
-                        } else {
-                            FloatingActionButton(modifier = Modifier
+                        }
+                },
+                graphicsOverlays = graphicsOverlays
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (displayCalibrationView) {
+                        CalibrationView(
+                            onDismiss = { displayCalibrationView = false },
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                        )
+                    } else {
+                        FloatingActionButton(
+                            modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(32.dp),
-                                onClick = { displayCalibrationView = true }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.baseline_straighten_24),
-                                    contentDescription = stringResource(R.string.calibration_view_button_description)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                when (val status = initializationStatus) {
-                    is WorldScaleSceneViewStatus.Initializing -> {
-                        TextWithScrim(text = stringResource(R.string.ar_initializing))
-                    }
-
-                    is WorldScaleSceneViewStatus.Initialized -> {
-                        val sceneLoadStatus =
-                            arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                        when (sceneLoadStatus) {
-                            is LoadStatus.Loading, LoadStatus.NotLoaded -> {
-                                // The scene may take a while to load, so show a progress indicator
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-
-                            is LoadStatus.FailedToLoad -> {
-                                TextWithScrim(
-                                    text = stringResource(
-                                        R.string.failed_to_load_scene, sceneLoadStatus.error
-                                    )
-                                )
-                            }
-
-                            else -> {}
-                        }
-                    }
-
-                    is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                        TextWithScrim(
-                            text = stringResource(
-                                R.string.failed_to_initialize_overlay,
-                                status.error.message ?: status.error
+                            onClick = { displayCalibrationView = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_straighten_24),
+                                contentDescription = stringResource(R.string.calibration_view_button_description)
                             )
+                        }
+                    }
+                }
+            }
+
+            when (val status = initializationStatus) {
+                is WorldScaleSceneViewStatus.Initializing -> {
+                    TextWithScrim(text = stringResource(R.string.ar_initializing))
+                }
+
+                is WorldScaleSceneViewStatus.Initialized -> {
+                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                    when (sceneLoadStatus) {
+                        is LoadStatus.Loading, LoadStatus.NotLoaded -> {
+                            // The scene may take a while to load, so show a progress indicator
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        else -> {}
+                    }
+                }
+
+                is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                    TextWithScrim(
+                        text = stringResource(
+                            R.string.failed_to_initialize_overlay,
+                            status.error.message ?: status.error
                         )
-                    }
+                    )
+                }
                 }
             }
         }
     }
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun PrivacyInfoDialog(
-    onShowPrivacyInfoChanged: (Boolean) -> Unit, onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
-) {
-    BasicAlertDialog(onDismissRequest = {
-        onShowPrivacyInfoChanged(false)
-    }) {
-        Card {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                LegalTextArCore()
-                Spacer(Modifier.height(16.dp))
-                LegalTextGeospatial()
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+    @Composable
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun PrivacyInfoDialog(
+        onShowPrivacyInfoChanged: (Boolean) -> Unit, onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
+    ) {
+        BasicAlertDialog(onDismissRequest = {
+            onShowPrivacyInfoChanged(false)
+        }) {
+            Card {
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    TextButton(onClick = {
-                        onAcceptedPrivacyInfoChanged(false)
-                        onShowPrivacyInfoChanged(false)
-                    }) {
-                        Text("Decline")
-                    }
+                    LegalTextArCore()
+                    Spacer(Modifier.height(16.dp))
+                    LegalTextGeospatial()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = {
+                            onAcceptedPrivacyInfoChanged(false)
+                            onShowPrivacyInfoChanged(false)
+                        }) {
+                            Text("Decline")
+                        }
 
-                    TextButton(onClick = {
-                        onAcceptedPrivacyInfoChanged(true)
-                        onShowPrivacyInfoChanged(false)
-                    }) {
-                        Text("Accept")
+                        TextButton(onClick = {
+                            onAcceptedPrivacyInfoChanged(true)
+                            onShowPrivacyInfoChanged(false)
+                        }) {
+                            Text("Accept")
+                        }
                     }
                 }
             }
         }
     }
-}
 
 /**
  * Displays the provided [text] on top of a half-transparent gray background.

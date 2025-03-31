@@ -56,7 +56,7 @@ To display an ArcGISMap containing a UtilityNetwork, create a new `TraceState` o
 
 #### Rendering the composable Trace function
 
-The `Trace tool` can be rendered within a composition by simply calling the `Trace` composable function). The Trace should be displayed in a container. It's visibility and the container are external and should be controlled by the calling Composable.
+The `Trace tool` can be rendered within a composition by simply calling the `Trace` composable function). The Trace should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin
 import com.arcgismaps.toolkit.utilitynetworks.TraceState

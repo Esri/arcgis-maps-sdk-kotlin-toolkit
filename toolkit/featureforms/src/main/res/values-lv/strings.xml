@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Ievadīt %1$d rakstzīmi</item>
         <item quantity="one">Ievadīt %1$d rakstzīmi</item>
+        <item quantity="two">Ievadiet %1$d rakstzīmes</item>
+        <item quantity="few">Ievadiet %1$d rakstzīmes</item>
+        <item quantity="many">Ievadiet %1$d rakstzīmes</item>
         <item quantity="other">Ievadiet %1$d rakstzīmes</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Vērtībai ir jābūt %1$d rakstzīmei</item>
         <item quantity="one">Vērtībai ir jābūt %1$d rakstzīmei</item>
+        <item quantity="two">Vērtībai ir jābūt %1$d rakstzīmēm</item>
+        <item quantity="few">Vērtībai ir jābūt %1$d rakstzīmēm</item>
+        <item quantity="many">Vērtībai ir jābūt %1$d rakstzīmēm</item>
         <item quantity="other">Vērtībai ir jābūt %1$d rakstzīmēm</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Ievadiet %1$d līdz %2$d rakstzīmēm</string>
-    <string name="value_must_be_from_to_characters">Vērtībai ir jābūt no %1$d līdz %2$d rakstzīmēm</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Ne vairāk kā %1$d rakstzīme</item>
         <item quantity="one">Ne vairāk kā %1$d rakstzīme</item>
+        <item quantity="two">Ne vairāk kā %1$d rakstzīmes</item>
+        <item quantity="few">Ne vairāk kā %1$d rakstzīmes</item>
+        <item quantity="many">Ne vairāk kā %1$d rakstzīmes</item>
         <item quantity="other">Ne vairāk kā %1$d rakstzīmes</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Ievadiet %1$d līdz %2$d rakstzīmēm</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Vērtībai ir jābūt no %1$d līdz %2$d rakstzīmēm</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Ne vairāk kā %1$d rakstzīmes</string>
     <string name="no_value">Nav vērtības</string>
     <string name="enter_value">Ievadiet vērtību</string>
@@ -39,6 +60,7 @@
     <string name="ok">Labi</string>
     <string name="done">Pabeigts</string>
     <string name="filter">Filtrēt %1$s</string>
+    <string name="search">Meklēt</string>
     <string name="numeric_range_helper_text">Ievadiet vērtību no %1$s līdz %2$s</string>
     <string name="value_must_be_from_to">Vērtībai ir jābūt no %1$s līdz %2$s</string>
     <string name="less_than_min_value">Mazāk par minimālo vērtību %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Stunda</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d stundas</string>
     <string name="ff_time_picker_hour_selection">Atlasīt stundu</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'pulkstenis</string>
     <string name="ff_time_picker_hour_text_field">stundai</string>
     <string name="ff_time_picker_minute">Minūte</string>
     <string name="ff_time_picker_minute_selection">Atlasīt minūtes</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minūtes</string>
     <string name="ff_time_picker_minute_text_field">minūtēm</string>
     <string name="ff_time_picker_period_toggle_description">Atlasīt AM vai PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Tukšu failu lejupielāde nav iespējama</string>
     <string name="attachment_deleted">%1s ir veiksmīgi dzēsts</string>
     <string name="attachment_size_limit_exceeded">Pielikumus, kuru izmērs pārsniedz %1$s, lejupielādēt nav iespējams</string>
+    <string name="barcode_tooltip">Pavērsiet kameru uz svītrkodu</string>
+    <string name="barcode_permission_denied">Lai skenētu svītrkodus, ir nepieciešamas kameras atļaujas. Lūdzu, iespējojiet kameras atļaujas savas ierīces iestatījumos.</string>
+    <string name="unsupported_value">Neatbalstīta vērtība</string>
+    <string name="tap_to_scan">Pieskarties, lai skenētu</string>
+    <string name="unable_to_open_the_camera">Nevar atvērt kameru</string>
+    <string name="value_must_be_a_guid">Vērtībai ir jābūt derīgam GUID</string>
 </resources>
