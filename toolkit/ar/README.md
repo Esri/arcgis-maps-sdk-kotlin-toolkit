@@ -145,3 +145,134 @@ TableTopSceneView(
 ### Behaviour
 
 To see it in action, check out the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp).
+
+## WorldScaleSceneView
+
+The `WorldScaleSceneView` composable function renders `ArcGISScene` content overlaid on the camera feed to scale, so real-world features like streets and buildings line up with the scene content.
+
+The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses the device's GPS to position the scene content; and `Geospatial`, which uses the [ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial) to position the scene content with high accuracy in areas with Google StreetView data.
+
+![Screenshot](worldscale-screenshot.png)
+
+### Features
+
+- A composable function that displays a camera feed overlayed by a [SceneView](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/geoview-compose/src/main/java/com/arcgismaps/toolkit/geoviewcompose/SceneView.kt).
+- Uses the device's location (with either GPS in `WorldScaleTrackingMode.World()` or Google's visual positioning service in `WorldScaleTrackingMode.Geospatial()`) to position the scene camera so that the scene overlays the real-world features in the camera feed.
+- Provides parameters to configure and interact with the `SceneView`, such as specifying an `ArcGISScene`, graphics overlays, lighting etc.
+- A `WorldScaleSceneViewProxy` can be passed to the `WorldScaleSceneView` composable function to perform operations such as identify.
+- A `WorldScaleSceneViewScope` provided as the receiver by the `WorldScaleSceneView`'s `content` lambda can be used to display a callout or to display a `CalibrationView()`, which lets the end user adjust the heading and elevation of the scene to more precisely match the real-world features.
+
+### Prerequisites
+
+`WorldScaleSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `WorldScaleSceneView`. For an example, see how it is done in the micro app's [MainActivity](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/microapps/ArWorldScaleApp/app/src/main/java/com/arcgismaps/toolkit/arworldscaleapp/MainActivity.kt).
+Note - the `WorldScaleSceneView` checks for availability of ARCore when it enters the composition. If ARCore is not supported by the device or not installed, the `WorldScaleSceneView` will fail to initialize with `WorldScaleSceneViewStatus.FailedToInitialize`.
+
+If using `WorldScaleTrackingMode.Geospatial()`, the developer must configure their app to use keyless or API key authentication with Google Cloud Console. More information on how to set this up is available [here](https://developers.google.com/ar/develop/authorization?platform=android).
+
+`WorldScaleSceneView` deploys projection engine data to the device to correctly position the scene in the EGM96 vertical coordinate system. If the `TransformationCatalog.projectionEngineDirectory` is already set by the developer prior to the first time `WorldScaleSceneView` enters the composition, then this projection engine data will not be deployed. In this case, the developer should ensure that an EGM96 grid file is present in the projection engine directory in order for the scene to be placed correctly.
+
+Note that apps using ARCore must comply with ARCore's user privacy requirements. See [this page](https://developers.google.com/ar/develop/privacy-requirements) for more information.
+
+### Usage
+
+The `WorldScaleSceneView` requires camera and location permissions, which are requested by default when the `WorldScaleSceneView` enters composition. The following settings need to be specified in the `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+<!-- Limits app visibility in the Google Play Store to ARCore supported devices
+    (https://developers.google.com/ar/devices). -->
+<uses-feature android:name="android.hardware.camera.ar" />
+<uses-feature
+    android:name="android.hardware.camera"
+    android:required="true" />
+```
+
+If ARCore is not optional for your application to function (as is the case with the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp)), you also need to add the following to your `AndroidManifest.xml`:
+
+```xml
+<!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
+    to be installed, as the app does not include any non-AR features. -->
+<meta-data android:name="com.google.ar.core" android:value="required" />
+```
+
+When using `WorldScaleTrackingMode.Geospatial()`, a Google Cloud project configured for using the Geospatial API is required. More information on how to set this up is available [here](https://developers.google.com/ar/develop/authorization?platform=android).
+
+Configure an `ArcGISScene` with the data you want to render in the world scale scene:
+
+```kotlin
+
+@Composable
+fun MainScreen() {
+    ...
+    val arcGISScene = remember {
+        val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
+        ArcGISScene(basemap).apply {
+            initialViewpoint = Viewpoint(
+                latitude = 39.8,
+                longitude = -98.6,
+                scale = 10e7
+            )
+            // an elevation source is required for the scene to be placed at the correct elevation
+            // if not used, the scene may appear far below the device position because the device position
+            // is calculated with elevation
+            baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
+            baseSurface.backgroundGrid.isVisible = false
+        }
+    }
+    ...
+}
+```
+
+Pass an `onInitializationStatusChanged` callback to the `WorldScaleSceneView` composable function to get notified about initialization status changes.
+
+```kotlin
+WorldScaleSceneView(
+    arcGISScene = arcGISScene,
+    modifier = Modifier.fillMaxSize(),
+    onInitializationStatusChanged = { status ->
+       updateStatus(status)
+    },
+    ...
+)
+```
+
+Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` events and place a `Graphic` on the base surface at that location:
+
+```kotlin
+val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
+WorldScaleSceneView(
+    arcGISScene = arcGISScene,
+    modifier = Modifier.fillMaxSize(),
+    onInitializationStatusChanged = { status ->
+       updateStatus(status)
+    },
+	worldScaleSceneViewProxy = proxy,
+    onSingleTapConfirmed = { singleTapConfirmedEvent ->
+		proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+			?.let { point ->
+				graphicsOverlays.first().graphics.add(
+					Graphic(
+						point,
+						SimpleMarkerSceneSymbol(
+							SimpleMarkerSceneSymbolStyle.Diamond,
+							Color.green,
+							height = 1.0,
+							width = 1.0,
+							depth = 1.0
+						)
+					)
+				)
+			}
+	},
+	graphicsOverlays = graphicsOverlays
+    ...
+)
+```
+
+### Behaviour
+
+To see it in action, check out the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArWorldScaleApp).
+
