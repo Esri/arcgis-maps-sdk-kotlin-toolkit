@@ -204,17 +204,7 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-            },
-            onRelease = {
-                // Sometimes when a SceneView exits and reenters a composition very quickly, the cleanup
-                // has not completed fully before these properties are set again. This can cause a crash
-                // because the old Sceneview already owns the labeling and selectionProperties that we
-                // are trying to set on the new SceneView. This is a temporary fix to make sure this
-                // doesn't happen.
-                it.labeling = ViewLabelProperties()
-                it.selectionProperties = SelectionProperties()
-            }
-        )
+            })
 
         val sceneViewScope = remember { SceneViewScope(sceneView) }
         val isSceneViewReady = sceneView.rememberIsReady()
