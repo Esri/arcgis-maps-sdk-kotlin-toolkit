@@ -35,7 +35,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 /**
  * Composable Scenarios for the [LegendTests]
  *
- * @since 200.6.0
+ * @since 200.7.0
  */
 class LegendUsageScenarios {
 
