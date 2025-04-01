@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.legend
 
+import LegendViewModel
 import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.compose.foundation.Image
@@ -52,6 +53,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.LayerContent
@@ -142,10 +144,12 @@ public fun Legend(
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
     var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
-    val layerContentData =
-        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
-            mutableStateListOf<LayerContentData>()
-        }
+//    val layerContentData =
+//        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
+//            mutableStateListOf<LayerContentData>()
+//        }
+    val legendViewModel: LegendViewModel = viewModel()
+
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -177,7 +181,7 @@ public fun Legend(
                 }
             }
             legendContent(
-                layerContentData,
+                legendViewModel.layerContentData,
                 operationalLayers,
                 basemap?.baseLayers ?: emptyList(),
                 basemap?.referenceLayers ?: emptyList(),
@@ -210,7 +214,7 @@ public fun Legend(
             sublayerChangedFlow
                 .collect {
                     legendContent(
-                        layerContentData,
+                        legendViewModel.layerContentData,
                         operationalLayers,
                         basemap?.baseLayers ?: emptyList(),
                         basemap?.referenceLayers ?: emptyList(),
@@ -224,7 +228,7 @@ public fun Legend(
 
     val validScale = (currentScale != 0.0 && !currentScale.isNaN())
     if (validScale && initialized) {
-        Legend(modifier, layerContentData, currentScale, respectScaleRange, title, typography)
+        Legend(modifier, legendViewModel.layerContentData, currentScale, respectScaleRange, title, typography)
     } else {
         Box(
             modifier = modifier.fillMaxSize(),
@@ -442,19 +446,18 @@ private fun LegendInfoRow(
     }
 }
 
-@Parcelize
-private data class LegendItem(
+
+public data class LegendItem(
     val name: String,
     val bitmap: Bitmap?
-): Parcelable
+)
 
-@Parcelize
-private data class LayerContentData(
+public data class LayerContentData(
     val name: String,
     val isLayer: Boolean,
     val legendItems: MutableList<LegendItem> = mutableListOf(),
     val isVisible: (Double) -> Boolean
-) : Parcelable
+)
 
 
 /**
