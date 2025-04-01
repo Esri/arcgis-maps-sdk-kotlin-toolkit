@@ -356,7 +356,10 @@ internal fun rememberWorldScaleCameraController(
                 GeospatialTrackingCameraController(
                     calibrationState = calibrationState,
                     clippingDistance = clippingDistance,
-                    context = context
+                    context = context,
+                    onError = {
+                        onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
+                    }
                 )
             }
 
