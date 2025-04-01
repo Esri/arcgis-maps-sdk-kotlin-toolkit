@@ -65,9 +65,7 @@ fun MainScreen() {
                 ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
             )
             baseSurface = Surface().apply {
-                elevationSources.add(
-                    ElevationSource.fromTerrain3dService()
-                )
+                opacity = 0f
             }
         }
     }
