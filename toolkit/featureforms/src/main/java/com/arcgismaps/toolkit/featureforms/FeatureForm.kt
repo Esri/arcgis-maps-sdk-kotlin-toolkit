@@ -245,24 +245,21 @@ private fun FeatureForm(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
 ) {
     val featureForm = stateData.featureForm
-    // hold the list of form elements in a mutable state to make them observable
-    val formElements = remember(featureForm) {
-        mutableStateOf(featureForm.elements)
+    // Hold the list of form elements.
+    val formElements: List<FormElement> = remember(featureForm) {
+        // Add the default attachments element, if present.
+        featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
     }
     val scope = rememberCoroutineScope()
     val states = rememberStates(
         form = featureForm,
-        elements = formElements.value,
+        elements = formElements,
         scope = scope
     )
     FeatureFormBody(
         form = featureForm,
         states = states,
         modifier = modifier,
-        onExpressionsEvaluated = {
-            // expressions evaluated, load attachments
-            formElements.value = featureForm.elements
-        },
         onBarcodeButtonClick = onBarcodeButtonClick
     )
     FeatureFormDialog(states)
@@ -278,7 +275,7 @@ private fun FeatureForm(
                 // validate any fields that are within a group
                 if (entry.formElement is GroupFormElement) {
                     entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
-                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                        (childEntry.state as? BaseFieldState<*>)?.forceValidation()
                     }
                 }
             }
@@ -301,7 +298,6 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier,
-    onExpressionsEvaluated: () -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
@@ -389,7 +385,6 @@ private fun FeatureFormBody(
         // ensure expressions are evaluated
         form.evaluateExpressions()
         initialEvaluation = true
-        onExpressionsEvaluated()
     }
 }
 
@@ -478,6 +473,12 @@ internal fun rememberStates(
     val states = MutableFormStateCollection()
     elements.forEach { element ->
         when (element) {
+
+            is AttachmentsFormElement -> {
+                val state = rememberAttachmentElementState(form, element)
+                states.add(element, state)
+            }
+
             is FieldFormElement -> {
                 val state = rememberFieldState(element, form, scope)
                 if (state != null) {
@@ -507,9 +508,6 @@ internal fun rememberStates(
             else -> {}
         }
     }
-    // The Toolkit currently only supports AttachmentsFormElements via the
-    // default attachments element. Once AttachmentsFormElements can be authored
-    // the switch case above should have a case added for AttachmentsFormElement.
     if (form.defaultAttachmentsElement != null) {
         val state = rememberAttachmentElementState(form, form.defaultAttachmentsElement!!)
         states.add(form.defaultAttachmentsElement!!, state)

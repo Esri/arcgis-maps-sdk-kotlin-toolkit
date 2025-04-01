@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -53,7 +54,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementS
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -83,9 +83,16 @@ internal class AttachmentElementState(
     isVisible = formElement.isVisible
 ) {
     /**
-     * The attachments associated with the form element.
+     * Backing mutable state for the [attachments] property.
      */
-    var attachments = mutableStateListOf<FormAttachmentState>()
+    private val _attachments = mutableStateListOf<FormAttachmentState>()
+
+    /**
+     * The attachments associated with the form element. This list is observable and will update
+     * the UI when attachments are added or removed.
+     */
+    val attachments : List<FormAttachmentState>
+        get() = _attachments
 
     /**
      * Indicates whether the attachment form element is editable.
@@ -111,7 +118,7 @@ internal class AttachmentElementState(
      *  to produce the [attachments] list.
      */
     private fun buildAttachmentStates(list: List<FormAttachment>) {
-        attachments.clear()
+        _attachments.clear()
         list.asReversed().forEach { formAttachment ->
             // create a new state
             val state = FormAttachmentState(
@@ -131,7 +138,7 @@ internal class AttachmentElementState(
             if (formAttachment.loadStatus.value is LoadStatus.Loaded || formAttachment.isLocal) {
                 state.loadWithParentScope()
             }
-            attachments.add(state)
+            _attachments.add(state)
         }
     }
 
@@ -153,14 +160,16 @@ internal class AttachmentElementState(
             scope = scope,
             formAttachment = formAttachment
         )
-        // add the new state to the beginning of the list
-        attachments.add(0, state)
+        // add the new state to the beginning of the list and scroll to the new attachment in
+        // one atomic operation
+        Snapshot.withMutableSnapshot {
+            _attachments.add(0, state)
+            lazyListState.requestScrollToItem(0)
+        }
         // load the new attachment
         state.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
         scope.launch {
-            delay(100)
-            lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
         return Result.success(Unit)
@@ -172,7 +181,7 @@ internal class AttachmentElementState(
     fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
         // delete the state object
-        attachments.removeIf { state ->
+        _attachments.removeIf { state ->
             state.formAttachment == formAttachment
         }
         scope.launch { evaluateExpressions() }
