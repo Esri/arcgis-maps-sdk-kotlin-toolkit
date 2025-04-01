@@ -251,6 +251,11 @@ private suspend fun ArcGISSceneLayer.identifyBuilding(
  */
 private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: Point)
 
+/**
+ * An alert dialog that asks the user to accept or deny [ARCore's privacy requirements](https://developers.google.com/ar/develop/privacy-requirements).
+ *
+ * @since 200.7.0
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PrivacyInfoDialog(
@@ -294,6 +299,11 @@ private fun PrivacyInfoDialog(
     }
 }
 
+/**
+ * Displays the required privacy information for use of ARCore
+ *
+ * @since 200.7.0
+ */
 @Composable
 fun LegalTextArCore() {
     val textLinkStyle =

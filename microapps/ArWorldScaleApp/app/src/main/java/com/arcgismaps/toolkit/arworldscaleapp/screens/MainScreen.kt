@@ -284,6 +284,11 @@ fun MainScreen() {
     }
 }
 
+/**
+ * An alert dialog that asks the user to accept or deny [ARCore's privacy requirements](https://developers.google.com/ar/develop/privacy-requirements).
+ *
+ * @since 200.7.0
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PrivacyInfoDialog(
@@ -340,6 +345,11 @@ fun TextWithScrim(text: String) {
     }
 }
 
+/**
+ * Displays the required privacy information for use of ARCore
+ *
+ * @since 200.7.0
+ */
 @Composable
 fun LegalTextArCore() {
     val textLinkStyle =
@@ -365,6 +375,11 @@ fun LegalTextArCore() {
     })
 }
 
+/**
+ * Displays the required privacy information for use of the Geospatial API
+ *
+ * @since 200.7.0
+ */
 @Composable
 fun LegalTextGeospatial() {
     Text(text = buildAnnotatedString {
