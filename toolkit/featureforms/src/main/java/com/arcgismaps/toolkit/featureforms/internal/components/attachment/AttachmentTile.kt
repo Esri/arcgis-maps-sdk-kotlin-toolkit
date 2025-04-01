@@ -84,7 +84,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -323,15 +322,15 @@ private fun LoadedView(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .height(20.dp)
-                    .background(MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.7f)),
-                verticalArrangement = Arrangement.Center
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Title(
                     text = title,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 5.dp),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
                 )
             }
         } else {
@@ -408,7 +407,6 @@ private fun Title(
         text = text,
         color = color,
         style = style,
-        textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         modifier = modifier.padding(horizontal = 1.dp)
@@ -420,7 +418,7 @@ private fun Size(
     size: Long,
     modifier: Modifier = Modifier,
     color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
-    textStyle: TextStyle = MaterialTheme.typography.bodySmall
+    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileSupportingTextStyle
 ) {
     val context = LocalContext.current
     val fileSize = Formatter.formatFileSize(context, size)

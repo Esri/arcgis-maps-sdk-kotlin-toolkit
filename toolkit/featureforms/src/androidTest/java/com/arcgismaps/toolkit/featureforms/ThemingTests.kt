@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.content.Context
+import android.text.format.Formatter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -29,10 +31,12 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,8 +44,15 @@ class ThemingTests : FeatureFormTestRunner(
     uri = "https://www.arcgis.com/home/item.html?id=9c7ee7cd979c434896684bf507cca75d",
     objectId = 1
 ) {
+    private lateinit var context: Context
+
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        context = InstrumentationRegistry.getInstrumentation().context
+    }
 
     /**
      * Given a FeatureForm with a custom color scheme and typography for editable fields
@@ -293,8 +304,11 @@ class ThemingTests : FeatureFormTestRunner(
                         fontWeight = FontWeight.ExtraBold
                     ),
                     tileTextStyle = TextStyle(
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.ExtraBold
                     ),
+                    tileSupportingTextStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 )
             )
             FeatureForm(
@@ -318,10 +332,20 @@ class ThemingTests : FeatureFormTestRunner(
                 color = Color.Red
             )
         )
+        val attachment = attachmentsElement.attachments.first()
         // get the first attachment tile
-        val tile = attachmentsField.onChildWithText(attachmentsElement.attachments.first().name)
+        val tile = attachmentsField.onChildWithText(attachment.name)
         tile.assertIsDisplayed()
         tile.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Green
+            )
+        )
+        val fileSize = Formatter.formatFileSize(context, attachment.size)
+        val size = attachmentsField.onChildWithText(fileSize)
+        size.assertIsDisplayed()
+        size.assertTextStyle(
             TextStyle(
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Green

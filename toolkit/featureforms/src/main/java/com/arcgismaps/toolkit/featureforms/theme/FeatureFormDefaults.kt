@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
 /**
@@ -408,12 +409,16 @@ public object FeatureFormDefaults {
     public fun attachmentsElementTypography(
         labelStyle: TextStyle = MaterialTheme.typography.titleLarge,
         supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-        tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall
+        tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
+            textAlign = TextAlign.Center
+        ),
+        tileSupportingTextStyle: TextStyle = MaterialTheme.typography.bodySmall
     ): AttachmentsElementTypography {
         return AttachmentsElementTypography(
             labelStyle = labelStyle,
             supportingTextStyle = supportingTextStyle,
-            tileTextStyle = tileTextStyle
+            tileTextStyle = tileTextStyle,
+            tileSupportingTextStyle = tileSupportingTextStyle
         )
     }
 }
