@@ -114,6 +114,7 @@ internal object DefaultThemeTokens {
             containerColor = ColorTokens.Surface,
             tileTextColor = Color.Unspecified,
             tileBorderColor = ColorTokens.Outline,
+            tileContainerColor = Color.Unspecified,
             scrollBarColor = ColorTokens.OnSurface,
         )
     )

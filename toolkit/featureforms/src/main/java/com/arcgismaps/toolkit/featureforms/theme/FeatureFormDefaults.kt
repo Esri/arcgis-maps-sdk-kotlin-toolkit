@@ -273,6 +273,7 @@ public object FeatureFormDefaults {
         containerColor: Color = Color.Unspecified,
         tileTextColor: Color = MaterialTheme.colorScheme.onSurface,
         tileBorderColor: Color = MaterialTheme.colorScheme.outline,
+        tileContainerColor: Color = Color.Unspecified,
         scrollBarColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     ): AttachmentsElementColors {
         return AttachmentsElementColors(
@@ -282,6 +283,7 @@ public object FeatureFormDefaults {
             containerColor = containerColor,
             tileTextColor = tileTextColor,
             tileBorderColor = tileBorderColor,
+            tileContainerColor = tileContainerColor,
             scrollBarColor = scrollBarColor
         )
     }
@@ -404,7 +406,7 @@ public object FeatureFormDefaults {
      */
     @Composable
     public fun attachmentsElementTypography(
-        labelStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+        labelStyle: TextStyle = MaterialTheme.typography.titleLarge,
         supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
         tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall
     ): AttachmentsElementTypography {

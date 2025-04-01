@@ -304,10 +304,16 @@ public data class RadioButtonFieldColors(
 public data class AttachmentsElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
+    @Deprecated("outlineColor is deprecated since the element is no longer outlined")
     public val outlineColor: Color,
     public val containerColor: Color,
     public val tileTextColor: Color,
+    @Deprecated(
+        message = "tileBorderColor is deprecated since the tile is no longer outlined",
+        replaceWith = ReplaceWith("tileContainerColor")
+    )
     public val tileBorderColor: Color,
+    public val tileContainerColor: Color,
     public val scrollBarColor: Color,
 )
 

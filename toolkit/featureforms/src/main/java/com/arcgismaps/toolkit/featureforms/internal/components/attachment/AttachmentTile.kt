@@ -21,15 +21,14 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.text.format.Formatter
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,11 +41,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -62,11 +63,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -117,48 +118,31 @@ internal fun AttachmentTile(
     val dialogRequester = LocalDialogRequester.current
     val context = LocalContext.current
     val colors = LocalColorScheme.current.attachmentsElementColors
-    Surface(
+    Card(
         onClick = {},
         modifier = modifier
-            .width(92.dp)
-            .height(75.dp)
-            .clip(shape = RoundedCornerShape(8.dp))
-            .border(
-                border = BorderStroke(0.5.dp, colors.tileBorderColor),
-                shape = RoundedCornerShape(8.dp)
-            ),
+            .width(AttachmentFormElementDefaults.tileWidth)
+            .height(AttachmentFormElementDefaults.tileHeight),
+        colors = CardDefaults.cardColors(
+            containerColor = colors.tileContainerColor
+        ),
+        shape = AttachmentFormElementDefaults.tileShape,
         interactionSource = interactionSource
     ) {
         Box(modifier = Modifier) {
             when (loadStatus) {
                 LoadStatus.Loaded -> LoadedView(
                     title = state.name,
+                    size = state.size,
                     type = state.type,
                     thumbnail = thumbnail
                 )
 
-                LoadStatus.Loading -> DefaultView(
+                else -> DefaultView(
                     title = state.name,
                     size = state.size,
                     type = state.type,
-                    isLoading = true,
-                    isError = false
-                )
-
-                LoadStatus.NotLoaded -> DefaultView(
-                    title = state.name,
-                    size = state.size,
-                    type = state.type,
-                    isLoading = false,
-                    isError = false
-                )
-
-                is LoadStatus.FailedToLoad -> DefaultView(
-                    title = state.name,
-                    size = state.size,
-                    type = state.type,
-                    isLoading = false,
-                    isError = true
+                    loadStatus = loadStatus
                 )
             }
             DropdownMenu(
@@ -203,7 +187,11 @@ internal fun AttachmentTile(
                     onClick = {
                         showContextMenu = false
                         state.deleteAttachment()
-                        Toast.makeText(context, context.getString(R.string.attachment_deleted, state.name), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.attachment_deleted, state.name),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     })
             }
         }
@@ -261,18 +249,18 @@ internal fun AttachmentTile(
         state.loadStatus.collectLatest {
             // show an error toast if the attachment failed to load
             if (it is LoadStatus.FailedToLoad) {
-                val message = when(it.error) {
+                val message = when (it.error) {
                     is AttachmentSizeLimitExceededException -> {
                         val limit = (it.error as AttachmentSizeLimitExceededException).limit
                         val limitFormatted = Formatter.formatFileSize(context, limit)
                         context.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
                     }
 
-                    is EmptyAttachmentException ->{
+                    is EmptyAttachmentException -> {
                         context.getString(R.string.download_empty_file)
                     }
 
-                    else ->{
+                    else -> {
                         it.error.localizedMessage
                     }
                 }
@@ -283,16 +271,46 @@ internal fun AttachmentTile(
 }
 
 @Composable
+private fun IconView(
+    title: String,
+    size: Long,
+    hasLoaded: Boolean,
+    modifier: Modifier = Modifier,
+    icon: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        icon()
+        Spacer(modifier = Modifier.height(4.dp))
+        Title(text = title, modifier = Modifier)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Size(size = size)
+            if (!hasLoaded) {
+                Icon(
+                    imageVector = Icons.Outlined.FileDownload,
+                    contentDescription = "Download",
+                    modifier = Modifier.size(11.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun LoadedView(
     title: String,
+    size: Long,
     type: FormAttachmentType,
     thumbnail: Bitmap?,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (thumbnail != null) {
             AsyncImage(
                 model = thumbnail,
@@ -300,31 +318,37 @@ private fun LoadedView(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-        } else {
-            Icon(
-                imageVector = type.getIcon(),
-                contentDescription = "Thumbnail",
+            Column(
                 modifier = Modifier
-                    .padding(top = 10.dp, bottom = 25.dp)
-                    .fillMaxSize(0.8f)
-                    .align(Alignment.Center)
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(20.dp)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Title(
-                text = title,
-                modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    .height(20.dp)
+                    .background(MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.7f)),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Title(
+                    text = title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+            }
+        } else {
+            IconView(
+                title = title,
+                size = size,
+                hasLoaded = true,
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(horizontal = 5.dp),
-            )
+            ) {
+                Icon(
+                    imageVector = type.getIcon(),
+                    contentDescription = "Placeholder",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -334,48 +358,42 @@ private fun DefaultView(
     title: String,
     size: Long,
     type: FormAttachmentType,
-    isLoading: Boolean,
-    isError: Boolean,
+    loadStatus: LoadStatus,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    IconView(
+        title = title,
+        size = size,
+        hasLoaded = loadStatus is LoadStatus.Loaded,
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Size(size = size)
-            Icon(
-                imageVector = Icons.Outlined.ArrowDownward,
-                contentDescription = "Download",
-                modifier = Modifier.size(11.dp)
-            )
+        when (loadStatus) {
+            is LoadStatus.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            }
+
+            is LoadStatus.FailedToLoad -> {
+                Image(
+                    imageVector = Icons.Outlined.ErrorOutline,
+                    contentDescription = "Error",
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error)
+                )
+            }
+
+            else -> {
+                Icon(
+                    imageVector = type.getIcon(),
+                    contentDescription = "Placeholder",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                strokeWidth = 2.dp
-            )
-        } else if (isError) {
-            Image(
-                imageVector = Icons.Outlined.ErrorOutline,
-                contentDescription = "Error",
-                modifier = Modifier.size(20.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error)
-            )
-        } else {
-            Icon(
-                imageVector = type.getIcon(),
-                contentDescription = "Placeholder",
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Title(text = title, modifier = Modifier)
     }
 }
 
@@ -402,7 +420,7 @@ private fun Size(
     size: Long,
     modifier: Modifier = Modifier,
     color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
-    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
+    textStyle: TextStyle = MaterialTheme.typography.bodySmall
 ) {
     val context = LocalContext.current
     val fileSize = Formatter.formatFileSize(context, size)
@@ -494,5 +512,22 @@ private fun RenameAttachmentDialogPreview() {
         name = "Photo 1.jpg",
         onRename = {},
         onDismissRequest = {}
+    )
+}
+
+@Preview
+@Composable
+private fun AttachmentTilePreview() {
+    AttachmentTile(
+        FormAttachmentState(
+            "Photo 1.jpg",
+            2024,
+            "image/jpeg",
+            FormAttachmentType.Image,
+            1,
+            {},
+            "",
+            scope = rememberCoroutineScope()
+        )
     )
 }
