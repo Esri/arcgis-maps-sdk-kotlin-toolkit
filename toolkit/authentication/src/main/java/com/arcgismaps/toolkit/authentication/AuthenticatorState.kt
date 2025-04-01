@@ -57,7 +57,8 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
 
     /**
      * The [OAuthUserConfiguration] to use for any sign ins. If null, OAuth will not be used for any
-     * [ArcGISAuthenticationChallenge].
+     * [ArcGISAuthenticationChallenge]. If the OAuth configuration is invalid, the Authenticator will not launch an OAuth
+     * browser page and will prompt for for username and password instead.
      *
      * @since 200.2.0
      */

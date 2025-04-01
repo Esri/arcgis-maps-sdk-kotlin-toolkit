@@ -63,6 +63,8 @@ You will also need to declare the `OAuthUserSignInActivity` in your app's manife
 </activity>
 ```
 
+**Note**: If the OAuth configuration is invalid, the Authenticator will not launch an OAuth browser page and will prompt for for username and password instead.
+
 ### Intercepting Challenges
 
 `AuthenticatorState` acts as the `NetworkAuthenticationChallengeHandler` and `ArcGISAuthenticationChallengeHandler` for your app by default. When you create it, you can choose not to set it as the default challenge handler if you wish:
