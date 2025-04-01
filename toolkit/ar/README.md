@@ -6,6 +6,13 @@ The Augmented Reality (AR) toolkit module allows quick and easy integration of A
 
 View the API Reference for the AR module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.ar/index.html).
 
+The AR toolkit module provides two composable functions to render `ArcGISScene` content in AR:
+
+| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         |
+|-----------------------------------------------------------------|---------------------------------------------------------------------|
+| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 |
+| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. |
+
 ## TableTopSceneView
 
 The `TableTopSceneView` composable function renders `ArcGISScene` content anchored to a physical surface, as if it were a 3D-printed model.
@@ -14,7 +21,7 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
 
 ### Features
 
-- A composable function that displays a camera feed overlayed by a [SceneView](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/geoview-compose/src/main/java/com/arcgismaps/toolkit/geoviewcompose/SceneView.kt).
+- A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
 - Detects physical horizontal surfaces in the camera feed, which a user can select by tapping on the screen. The tap location determines where the scene data is anchored on the detected surface.
 - Provides parameters specific to table top scenarios to configure the placement and visualization of scene data:
     - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
@@ -156,8 +163,10 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses
 
 ### Features
 
-- A composable function that displays a camera feed overlayed by a [SceneView](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/geoview-compose/src/main/java/com/arcgismaps/toolkit/geoviewcompose/SceneView.kt).
-- Uses the device's location (with either GPS in `WorldScaleTrackingMode.World()` or Google's visual positioning service in `WorldScaleTrackingMode.Geospatial()`) to position the scene camera so that the scene overlays the real-world features in the camera feed.
+- A composable function [WorldScaleSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
+- Uses the device's location depending on the [WorldScaleTrackingMode](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleTrackingMode.kt) to position the scene camera so that the scene overlays the real-world features in the camera feed:
+  - using GPS in `WorldScaleTrackingMode.World`
+  - using Google's visual positioning service in `WorldScaleTrackingMode.Geospatial` 
 - Provides parameters to configure and interact with the `SceneView`, such as specifying an `ArcGISScene`, graphics overlays, lighting etc.
 - A `WorldScaleSceneViewProxy` can be passed to the `WorldScaleSceneView` composable function to perform operations such as identify.
 - A `WorldScaleSceneViewScope` provided as the receiver by the `WorldScaleSceneView`'s `content` lambda can be used to display a callout or to display a `CalibrationView()`, which lets the end user adjust the heading and elevation of the scene to more precisely match the real-world features.
@@ -167,7 +176,7 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses
 `WorldScaleSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `WorldScaleSceneView`. For an example, see how it is done in the micro app's [MainActivity](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/microapps/ArWorldScaleApp/app/src/main/java/com/arcgismaps/toolkit/arworldscaleapp/MainActivity.kt).
 Note - the `WorldScaleSceneView` checks for availability of ARCore when it enters the composition. If ARCore is not supported by the device or not installed, the `WorldScaleSceneView` will fail to initialize with `WorldScaleSceneViewStatus.FailedToInitialize`.
 
-If using `WorldScaleTrackingMode.Geospatial()`, the developer must configure their app to use keyless or API key authentication with Google Cloud Console. More information on how to set this up is available [here](https://developers.google.com/ar/develop/authorization?platform=android).
+If using `WorldScaleTrackingMode.Geospatial`, the developer must configure their app to use keyless or API key [authentication with Google Cloud Console](https://developers.google.com/ar/develop/authorization?platform=android).
 
 `WorldScaleSceneView` deploys projection engine data to the device to correctly position the scene in the EGM96 vertical coordinate system. If the `TransformationCatalog.projectionEngineDirectory` is already set by the developer prior to the first time `WorldScaleSceneView` enters the composition, then this projection engine data will not be deployed. In this case, the developer should ensure that an EGM96 grid file is present in the projection engine directory in order for the scene to be placed correctly.
 
@@ -198,7 +207,9 @@ If ARCore is not optional for your application to function (as is the case with 
 <meta-data android:name="com.google.ar.core" android:value="required" />
 ```
 
-When using `WorldScaleTrackingMode.Geospatial()`, a Google Cloud project configured for using the Geospatial API is required. More information on how to set this up is available [here](https://developers.google.com/ar/develop/authorization?platform=android).
+When using `WorldScaleTrackingMode.Geospatial`, a Google Cloud project configured for using the Geospatial API is required. There are two possible types to authenticate your application with the ARCore service:
+1. [Keyless authentication](https://developers.google.com/ar/develop/authorization?platform=android#keyless-android)
+2. [API key based authentication](https://developers.google.com/ar/develop/authorization?platform=android#api-key-android). An example of this is used in the [WorldScale micro app](<link to relevant micro app readme section here>).
 
 Configure an `ArcGISScene` with the data you want to render in the world scale scene:
 
