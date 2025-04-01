@@ -70,7 +70,7 @@ import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlinx.coroutines.launch
 
-private const val ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
+private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
 @Composable
 fun MainScreen() {
@@ -101,13 +101,14 @@ fun MainScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(ACCEPTED_PRIVACY_INFO, false)) }
+        var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(
+            KEY_PREF_ACCEPTED_PRIVACY_INFO, false)) }
         var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
                 onShowPrivacyInfoChanged = { showPrivacyInfo = it },
                 onAcceptedPrivacyInfoChanged = {
-                    sharedPreferences.edit().putBoolean(ACCEPTED_PRIVACY_INFO, it).apply()
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, it).apply()
                     acceptedPrivacyInfo = it
                 }
             )

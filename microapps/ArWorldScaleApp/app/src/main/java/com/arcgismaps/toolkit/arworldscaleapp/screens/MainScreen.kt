@@ -83,7 +83,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 
-private const val ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
+private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +132,7 @@ fun MainScreen() {
     var acceptedPrivacyInfo by rememberSaveable {
         mutableStateOf(
             sharedPreferences.getBoolean(
-                ACCEPTED_PRIVACY_INFO,
+                KEY_PREF_ACCEPTED_PRIVACY_INFO,
                 false
             )
         )
@@ -176,7 +176,7 @@ fun MainScreen() {
         if (showPrivacyInfo) {
             PrivacyInfoDialog(onShowPrivacyInfoChanged = { showPrivacyInfo = it },
                 onAcceptedPrivacyInfoChanged = {
-                    sharedPreferences.edit().putBoolean(ACCEPTED_PRIVACY_INFO, it).apply()
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, it).apply()
                     acceptedPrivacyInfo = it
                 })
         }
