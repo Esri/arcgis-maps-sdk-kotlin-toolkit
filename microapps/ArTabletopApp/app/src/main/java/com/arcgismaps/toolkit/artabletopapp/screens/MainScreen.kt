@@ -106,10 +106,11 @@ fun MainScreen() {
         var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
-                onShowPrivacyInfoChanged = { showPrivacyInfo = it },
-                onAcceptedPrivacyInfoChanged = {
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, it).apply()
-                    acceptedPrivacyInfo = it
+                acceptedPrivacyInfo,
+                onUserResponse = { accepted ->
+                    acceptedPrivacyInfo = accepted
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    showPrivacyInfo = false
                 }
             )
         }
@@ -259,12 +260,12 @@ private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PrivacyInfoDialog(
-    onShowPrivacyInfoChanged: (Boolean) -> Unit,
-    onAcceptedPrivacyInfoChanged: (Boolean) -> Unit
+    hasCurrentlyAccepted: Boolean,
+    onUserResponse: (accepted: Boolean) -> Unit
 ) {
     BasicAlertDialog(
         onDismissRequest = {
-            onShowPrivacyInfoChanged(false)
+            onUserResponse(hasCurrentlyAccepted)
         }
     ) {
         Card {
@@ -279,16 +280,14 @@ private fun PrivacyInfoDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            onAcceptedPrivacyInfoChanged(false)
-                            onShowPrivacyInfoChanged(false)
+                            onUserResponse(false)
                         }) {
                         Text("Decline")
                     }
 
                     TextButton(
                         onClick = {
-                            onAcceptedPrivacyInfoChanged(true)
-                            onShowPrivacyInfoChanged(false)
+                            onUserResponse(true)
                         }
                     ) {
                         Text("Accept")
