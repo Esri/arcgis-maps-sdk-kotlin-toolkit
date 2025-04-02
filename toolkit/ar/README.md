@@ -256,23 +256,22 @@ WorldScaleSceneView(
     },
     worldScaleSceneViewProxy = proxy,
     onSingleTapConfirmed = { singleTapConfirmedEvent ->
-		proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
-			?.let { point ->
-				graphicsOverlays.first().graphics.add(
-					Graphic(
-						point,
-						SimpleMarkerSceneSymbol(
-							SimpleMarkerSceneSymbolStyle.Diamond,
-							Color.green,
-							height = 1.0,
-							width = 1.0,
-							depth = 1.0
-						)
-					)
-				)
-			}
-	},
-	graphicsOverlays = graphicsOverlays
+        proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+            ?.let { point -> graphicsOverlays.first().graphics.add(
+                    Graphic(
+                        point,
+                        SimpleMarkerSceneSymbol(
+                            SimpleMarkerSceneSymbolStyle.Diamond,
+                            Color.green,
+                            height = 1.0,
+                            width = 1.0,
+                            depth = 1.0
+                        )
+                    )
+                )
+            }
+    },
+    graphicsOverlays = graphicsOverlays
     ...
 )
 ```
