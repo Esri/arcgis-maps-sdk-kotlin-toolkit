@@ -320,7 +320,7 @@ private fun PrivacyInfoDialog(
  * @since 200.6.0
  */
 @Composable
-fun TextWithScrim(text: String) {
+private fun TextWithScrim(text: String) {
     Column(
         modifier = Modifier
             .background(androidx.compose.ui.graphics.Color.Gray.copy(alpha = 0.5f))
@@ -338,7 +338,7 @@ fun TextWithScrim(text: String) {
  * @since 200.7.0
  */
 @Composable
-fun LegalTextArCore() {
+private fun LegalTextArCore() {
     val textLinkStyle =
         TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
     Text(text = buildAnnotatedString {
@@ -367,7 +367,7 @@ fun LegalTextArCore() {
  * @since 200.7.0
  */
 @Composable
-fun LegalTextGeospatial() {
+private fun LegalTextGeospatial() {
     Text(text = buildAnnotatedString {
         append("To power this session, Google will process sensor data (e.g., camera and location).")
         appendLine()

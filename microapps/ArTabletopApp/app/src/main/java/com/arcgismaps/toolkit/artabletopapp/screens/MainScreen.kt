@@ -304,7 +304,7 @@ private fun PrivacyInfoDialog(
  * @since 200.7.0
  */
 @Composable
-fun LegalTextArCore() {
+private fun LegalTextArCore() {
     val textLinkStyle =
         TextLinkStyles(style = SpanStyle(color = Color.Blue))
     Text(
