@@ -31,7 +31,7 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
 
 ### Prerequisites
 
-`TableTopSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `TableTopSceneView`. For an example see how it is done in the micro app's [MainActivity](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/microapps/ArTabletopApp/app/src/main/java/com/arcgismaps/toolkit/artabletopapp/MainActivity.kt).
+`TableTopSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `TableTopSceneView`. For an example see how it is done in the micro app's [MainActivity](../../microapps/ArTabletopApp/app/src/main/java/com/arcgismaps/toolkit/artabletopapp/MainActivity.kt).
 Note - the `TableTopSceneView` checks for availability of ARCore when it enters the composition. If ARCore is not supported by the device or not installed, the `TableTopSceneView` will fail to initialize with `TableTopSceneViewStatus.FailedToInitialize`.
 
 ### Usage
@@ -49,7 +49,7 @@ The `TableTopSceneView` requires camera permissions, which are requested by defa
     android:required="true" />
 ```
 
-If ARCore is not optional for your application to function (as is the case with the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp)), you also need to add the following to your `AndroidManifest.xml`:
+If ARCore is not optional for your application to function (as is the case with the [microapp](../../microapps/ArTabletopApp)), you also need to add the following to your `AndroidManifest.xml`:
 
 ```xml
 <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
@@ -155,7 +155,9 @@ To see it in action, check out the [microapp](https://github.com/Esri/arcgis-map
 
 The `WorldScaleSceneView` composable function renders `ArcGISScene` content overlaid on the camera feed to scale, so real-world features like streets and buildings line up with the scene content.
 
-The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses the device's GPS to position the scene content; and `Geospatial`, which uses the [ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial) to position the scene content with high accuracy in areas with Google StreetView data.
+The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: 
+- `World`, which uses the device's GPS to position the scene content
+- `Geospatial`, which uses the [ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial) to position the scene content with high accuracy in areas with Google StreetView data.
 
 
 ### Features
@@ -170,7 +172,7 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses
 
 ### Prerequisites
 
-`WorldScaleSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `WorldScaleSceneView`. For an example, see how it is done in the micro app's [MainActivity](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/microapps/ArWorldScaleApp/app/src/main/java/com/arcgismaps/toolkit/arworldscaleapp/MainActivity.kt).
+`WorldScaleSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported device that has installed Google Play Services for AR. An application must call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed) before using the `WorldScaleSceneView`. For an example, see how it is done in the micro app's [MainActivity](../../microapps/ArWorldScaleApp/app/src/main/java/com/arcgismaps/toolkit/arworldscaleapp/MainActivity.kt).
 Note - the `WorldScaleSceneView` checks for availability of ARCore when it enters the composition. If ARCore is not supported by the device or not installed, the `WorldScaleSceneView` will fail to initialize with `WorldScaleSceneViewStatus.FailedToInitialize`.
 
 If using `WorldScaleTrackingMode.Geospatial`, the developer must configure their app to use keyless or API key [authentication with Google Cloud Console](https://developers.google.com/ar/develop/authorization?platform=android).
@@ -196,7 +198,7 @@ The `WorldScaleSceneView` requires camera and location permissions, which are re
     android:required="true" />
 ```
 
-If ARCore is not optional for your application to function (as is the case with the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArTabletopApp)), you also need to add the following to your `AndroidManifest.xml`:
+If ARCore is not optional for your application to function (as is the case with the [microapp](../../microapps/ArWorldScaleApp)), you also need to add the following to your `AndroidManifest.xml`:
 
 ```xml
 <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
@@ -206,7 +208,7 @@ If ARCore is not optional for your application to function (as is the case with 
 
 When using `WorldScaleTrackingMode.Geospatial`, a Google Cloud project configured for using the Geospatial API is required. There are two possible types to authenticate your application with the ARCore service:
 1. [Keyless authentication](https://developers.google.com/ar/develop/authorization?platform=android#keyless-android)
-2. [API key based authentication](https://developers.google.com/ar/develop/authorization?platform=android#api-key-android). An example of this is used in the [WorldScale micro app](<link to relevant micro app readme section here>).
+2. [API key based authentication](https://developers.google.com/ar/develop/authorization?platform=android#api-key-android). An example of this is used in the [WorldScale micro app](../../microapps/ArWorldScaleApp/app/src/main/AndroidManifest.xml).
 
 Configure an `ArcGISScene` with the data you want to render in the world scale scene:
 
@@ -252,7 +254,7 @@ WorldScaleSceneView(
     onInitializationStatusChanged = { status ->
        updateStatus(status)
     },
-	worldScaleSceneViewProxy = proxy,
+    worldScaleSceneViewProxy = proxy,
     onSingleTapConfirmed = { singleTapConfirmedEvent ->
 		proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
 			?.let { point ->
