@@ -41,7 +41,6 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
