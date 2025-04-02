@@ -58,6 +58,7 @@ import com.arcgismaps.mapping.layers.LayerContent
 import com.arcgismaps.toolkit.legend.theme.LegendDefaults
 import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.merge
@@ -219,8 +220,30 @@ public fun Legend(
                     )
                 }
         }
-    }
 
+        // observe any changes to Layer's visibility and rebuild the legend if anything changes.
+        LaunchedEffect(Unit) {
+            val visibilityChanges: List<SharedFlow<Boolean>> =
+                operationalLayers.filterIsInstance<Layer>().map {
+                    it.visibilityChanged
+                } + (basemap?.baseLayers?.map {
+                    it.visibilityChanged
+                } ?: emptyList()) + (basemap?.referenceLayers?.map {
+                    it.visibilityChanged
+                } ?: emptyList())
+
+            merge(*visibilityChanges.toTypedArray()).shareIn(this, SharingStarted.Lazily).collect {
+                legendContent(
+                    layerContentData,
+                    operationalLayers,
+                    basemap?.baseLayers ?: emptyList(),
+                    basemap?.referenceLayers ?: emptyList(),
+                    reverseLayerOrder,
+                    density
+                )
+            }
+        }
+    }
 
     val validScale = (currentScale != 0.0 && !currentScale.isNaN())
     if (validScale && initialized) {
@@ -318,7 +341,9 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
     layers?.let { layerList ->
         // The order of the layers is reversed to match the order in the legend
         val orderedLayers = if (reverseLayerOrder) layerList else layerList.reversed()
-        val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
+        val filteredLayers = orderedLayers.filter {
+            it.isVisible && it.showInLegend
+        }
         val layersAndSubLayersLayerContentData =
             filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
