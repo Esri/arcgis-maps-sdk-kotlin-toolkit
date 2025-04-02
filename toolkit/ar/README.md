@@ -17,8 +17,6 @@ The AR toolkit module provides two composable functions to render `ArcGISScene` 
 
 The `TableTopSceneView` composable function renders `ArcGISScene` content anchored to a physical surface, as if it were a 3D-printed model.
 
-![Screenshot](screenshot.png)
-
 ### Features
 
 - A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
@@ -159,7 +157,6 @@ The `WorldScaleSceneView` composable function renders `ArcGISScene` content over
 
 The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses the device's GPS to position the scene content; and `Geospatial`, which uses the [ARCore Geospatial API](https://developers.google.com/ar/develop/geospatial) to position the scene content with high accuracy in areas with Google StreetView data.
 
-![Screenshot](worldscale-screenshot.png)
 
 ### Features
 
@@ -169,7 +166,7 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s: `World`, which uses
   - using Google's visual positioning service in `WorldScaleTrackingMode.Geospatial` 
 - Provides parameters to configure and interact with the `SceneView`, such as specifying an `ArcGISScene`, graphics overlays, lighting etc.
 - A `WorldScaleSceneViewProxy` can be passed to the `WorldScaleSceneView` composable function to perform operations such as identify.
-- A `WorldScaleSceneViewScope` provided as the receiver by the `WorldScaleSceneView`'s `content` lambda can be used to display a callout or to display a `CalibrationView()`, which lets the end user adjust the heading and elevation of the scene to more precisely match the real-world features.
+- A `WorldScaleSceneViewScope` provided as the receiver by the `WorldScaleSceneView`'s `content` lambda can be used to display a callout or to display a `CalibrationView`, which lets the end user adjust the heading and elevation of the scene to more precisely match the real-world features.
 
 ### Prerequisites
 
