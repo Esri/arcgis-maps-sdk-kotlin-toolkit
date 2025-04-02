@@ -221,11 +221,6 @@ fun MainScreen() {
     val arcGISScene = remember {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
-            initialViewpoint = Viewpoint(
-                latitude = 39.8,
-                longitude = -98.6,
-                scale = 10e7
-            )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
             // is calculated with elevation

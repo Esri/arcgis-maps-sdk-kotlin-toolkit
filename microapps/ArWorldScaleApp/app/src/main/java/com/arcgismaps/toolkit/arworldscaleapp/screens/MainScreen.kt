@@ -55,7 +55,6 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
@@ -77,11 +76,6 @@ fun MainScreen() {
             baseLayers.clear()
         }
         ArcGISScene(basemap).apply {
-            initialViewpoint = Viewpoint(
-                latitude = 39.8,
-                longitude = -98.6,
-                scale = 10e7
-            )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
             // is calculated with elevation
