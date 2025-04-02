@@ -282,7 +282,7 @@ private fun PrivacyInfoDialog(
                         onClick = {
                             onUserResponse(false)
                         }) {
-                        Text("Decline")
+                        Text(stringResource(R.string.decline))
                     }
 
                     TextButton(
@@ -290,7 +290,7 @@ private fun PrivacyInfoDialog(
                             onUserResponse(true)
                         }
                     ) {
-                        Text("Accept")
+                        Text(stringResource(R.string.accept))
                     }
                 }
             }

@@ -26,4 +26,6 @@
     <string name="initializing_overlay">Setting up AR...</string>
     <string name="failed_to_initialize_overlay">Failed to initialize: %1$s</string>
     <string name="failed_to_load_scene">Failed to load scene: %1$s</string>
+    <string name="decline">Decline</string>
+    <string name="accept">Accept</string>
 </resources>
