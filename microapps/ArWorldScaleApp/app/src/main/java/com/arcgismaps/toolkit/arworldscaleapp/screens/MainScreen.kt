@@ -92,7 +92,9 @@ fun MainScreen() {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
             initialViewpoint = Viewpoint(
-                latitude = 39.8, longitude = -98.6, scale = 10e7
+                latitude = 39.8,
+                longitude = -98.6,
+                scale = 10e7
             )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
@@ -110,67 +112,77 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by rememberSaveable(saver = Saver(save = {
-        it.value.name
-    }, restore = {
-        val mode = when (it) {
-            "Geospatial" -> WorldScaleTrackingMode.Geospatial()
-            else -> WorldScaleTrackingMode.World()
-        }
-        mutableStateOf(mode)
-    })) {
+    var trackingMode by rememberSaveable(
+        saver = Saver(
+            save = {
+                it.value.name
+            },
+            restore = {
+                val mode = when (it) {
+                    "Geospatial" -> WorldScaleTrackingMode.Geospatial()
+                    else -> WorldScaleTrackingMode.World()
+                }
+                mutableStateOf(mode)
+            }
+        )
+    ) {
         mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World())
     }
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
     var acceptedPrivacyInfo by rememberSaveable {
         mutableStateOf(
             sharedPreferences.getBoolean(
-                KEY_PREF_ACCEPTED_PRIVACY_INFO, false
+                KEY_PREF_ACCEPTED_PRIVACY_INFO,
+                false
             )
         )
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     Scaffold(topBar = {
-        TopAppBar(title = {
-            Text(
-                stringResource(
-                    R.string.top_bar_title, trackingMode::class.java.simpleName
+        TopAppBar(
+            title = {
+                Text(
+                    stringResource(
+                        R.string.top_bar_title, trackingMode::class.java.simpleName
+                    )
                 )
-            )
-        }, actions = {
-            var actionsExpanded by remember { mutableStateOf(false) }
-            IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
-                Icon(Icons.Default.MoreVert, "More")
-            }
+            },
+            actions = {
+                var actionsExpanded by remember { mutableStateOf(false) }
+                IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                    Icon(Icons.Default.MoreVert, "More")
+                }
 
-            DropdownMenu(expanded = actionsExpanded,
-                onDismissRequest = { actionsExpanded = false }) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
-                    onClick = {
-                        trackingMode = WorldScaleTrackingMode.World()
-                        actionsExpanded = false
-                    })
-                DropdownMenuItem(text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
-                    onClick = {
-                        trackingMode = WorldScaleTrackingMode.Geospatial()
-                        actionsExpanded = false
-                    })
-                DropdownMenuItem(text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
-                    onClick = {
-                        showPrivacyInfo = true
-                        actionsExpanded = false
-                    })
+                DropdownMenu(expanded = actionsExpanded,
+                    onDismissRequest = { actionsExpanded = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.World()
+                            actionsExpanded = false
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
+                        onClick = {
+                            trackingMode = WorldScaleTrackingMode.Geospatial()
+                            actionsExpanded = false
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        onClick = {
+                            showPrivacyInfo = true
+                            actionsExpanded = false
+                        })
+                }
             }
-        })
+        )
     }) {
         if (showPrivacyInfo) {
-            PrivacyInfoDialog(hasCurrentlyAccepted = acceptedPrivacyInfo,
+            PrivacyInfoDialog(
+                hasCurrentlyAccepted = acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
-                        .apply()
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
                     showPrivacyInfo = false
-                })
+                }
+            )
         }
         if (!acceptedPrivacyInfo) {
             Column(
@@ -200,7 +212,8 @@ fun MainScreen() {
                             ?.let { point ->
                                 graphicsOverlays.first().graphics.add(
                                     Graphic(
-                                        point, SimpleMarkerSceneSymbol(
+                                        point,
+                                        SimpleMarkerSceneSymbol(
                                             SimpleMarkerSceneSymbolStyle.Diamond,
                                             Color.green,
                                             height = 1.0,
@@ -220,9 +233,10 @@ fun MainScreen() {
                                 modifier = Modifier.align(Alignment.BottomCenter),
                             )
                         } else {
-                            FloatingActionButton(modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(32.dp),
+                            FloatingActionButton(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(32.dp),
                                 onClick = { displayCalibrationView = true }) {
                                 Icon(
                                     painter = painterResource(R.drawable.baseline_straighten_24),
@@ -250,7 +264,8 @@ fun MainScreen() {
                             is LoadStatus.FailedToLoad -> {
                                 TextWithScrim(
                                     text = stringResource(
-                                        R.string.failed_to_load_scene, sceneLoadStatus.error
+                                        R.string.failed_to_load_scene,
+                                        sceneLoadStatus.error
                                     )
                                 )
                             }
@@ -280,7 +295,8 @@ fun MainScreen() {
  */
 @Composable
 private fun PrivacyInfoDialog(
-    hasCurrentlyAccepted: Boolean, onUserResponse: (accepted: Boolean) -> Unit
+    hasCurrentlyAccepted: Boolean,
+    onUserResponse: (accepted: Boolean) -> Unit
 ) {
     Dialog (onDismissRequest = {
         onUserResponse(hasCurrentlyAccepted)
@@ -344,7 +360,8 @@ private fun LegalTextArCore() {
         append("This application runs on ")
         withLink(
             LinkAnnotation.Url(
-                "https://play.google.com/store/apps/details?id=com.google.ar.core", textLinkStyle
+                "https://play.google.com/store/apps/details?id=com.google.ar.core",
+                textLinkStyle
             )
         ) {
             append("Google Play Services for AR")
@@ -352,7 +369,8 @@ private fun LegalTextArCore() {
         append("  (ARCore), which is provided by Google and governed by the ")
         withLink(
             LinkAnnotation.Url(
-                "https://policies.google.com/privacy", textLinkStyle
+                "https://policies.google.com/privacy",
+                textLinkStyle
             )
         ) {
             append("Google Privacy Policy.")
