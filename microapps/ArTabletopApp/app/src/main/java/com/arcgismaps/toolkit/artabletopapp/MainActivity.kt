@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -94,7 +93,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ArTabletopApp() {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("ArTabletopApp") }) }
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.top_bar_title)) }) }
     ) {
         Box(Modifier.padding(it)) {
             MainScreen()

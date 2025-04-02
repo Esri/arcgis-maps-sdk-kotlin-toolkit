@@ -30,4 +30,5 @@
     <string name="accept">Accept</string>
     <string name="privacy_info_not_accepted">Privacy Info not accepted</string>
     <string name="show_privacy_info">Show Privacy Info</string>
+    <string name="top_bar_title">AR Table Top</string>
 </resources>
