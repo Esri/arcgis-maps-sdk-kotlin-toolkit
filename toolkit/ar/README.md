@@ -279,5 +279,5 @@ WorldScaleSceneView(
 
 ### Behaviour
 
-To see it in action, check out the [microapp](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/ArWorldScaleApp).
+To see it in action, check out the [microapp](../../microapps/ArWorldScaleApp).
 
