@@ -29,11 +29,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,6 +52,7 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
@@ -258,12 +257,11 @@ private data class IdentifiedBuilding(val feature: ArcGISFeature, val location: 
  * @since 200.7.0
  */
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun PrivacyInfoDialog(
     hasCurrentlyAccepted: Boolean,
     onUserResponse: (accepted: Boolean) -> Unit
 ) {
-    BasicAlertDialog(
+    Dialog(
         onDismissRequest = {
             onUserResponse(hasCurrentlyAccepted)
         }
