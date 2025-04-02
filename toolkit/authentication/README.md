@@ -63,7 +63,7 @@ You will also need to declare the `OAuthUserSignInActivity` in your app's manife
 </activity>
 ```
 
-**Note**: If the OAuth configuration is invalid, the Authenticator will not launch an OAuth browser page and will prompt for for username and password instead.
+**Note**: If the OAuth configuration is invalid, the Authenticator will not launch an OAuth browser page and will prompt for a username and password instead.
 
 ### Intercepting Challenges
 
