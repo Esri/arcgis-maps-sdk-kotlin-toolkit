@@ -120,11 +120,11 @@ fun MainScreen() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Privacy Info not accepted")
+                Text(stringResource(R.string.privacy_info_not_accepted))
                 Button(
                     onClick = { showPrivacyInfo = true }
                 ) {
-                    Text("Show Privacy Info")
+                    Text(stringResource(R.string.show_privacy_info))
                 }
             }
         } else {
