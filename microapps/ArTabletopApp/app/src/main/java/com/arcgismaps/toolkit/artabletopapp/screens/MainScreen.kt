@@ -59,9 +59,8 @@ fun MainScreen() {
     val arcGISScene = remember {
         ArcGISScene().apply {
             operationalLayers.add(arcGISSceneLayer)
-            baseSurface = Surface().apply {
-                opacity = 0f
-            }
+            // for the purpose of this sample, we want the base surface to be fully transparent
+            baseSurface.opacity = 0f
         }
     }
     val arcGISSceneAnchor = remember {
