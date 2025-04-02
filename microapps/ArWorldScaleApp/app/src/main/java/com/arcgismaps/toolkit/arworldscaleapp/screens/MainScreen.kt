@@ -153,23 +153,31 @@ fun MainScreen() {
                     Icon(Icons.Default.MoreVert, "More")
                 }
 
-                DropdownMenu(expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false }) {
-                    DropdownMenuItem(text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
+                DropdownMenu(
+                    expanded = actionsExpanded,
+                    onDismissRequest = { actionsExpanded = false })
+                {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
                         onClick = {
                             trackingMode = WorldScaleTrackingMode.World()
                             actionsExpanded = false
-                        })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
                         onClick = {
                             trackingMode = WorldScaleTrackingMode.Geospatial()
                             actionsExpanded = false
-                        })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
                         onClick = {
                             showPrivacyInfo = true
                             actionsExpanded = false
-                        })
+                        }
+                    )
                 }
             }
         )
