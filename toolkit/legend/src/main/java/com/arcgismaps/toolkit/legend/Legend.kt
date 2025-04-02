@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.legend
 
 import android.graphics.Bitmap
-import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,11 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -62,7 +57,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.parcelize.Parcelize
 
 /**
  * A composable that displays a legend for the given operational layers and basemap.
@@ -141,9 +135,9 @@ public fun Legend(
     typography: Typography = LegendDefaults.typography()
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
+    var initialized: Boolean by remember(operationalLayers, basemap) { mutableStateOf(false) }
     val layerContentData =
-        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
+        remember(operationalLayers, basemap) {
             mutableStateListOf<LayerContentData>()
         }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -442,33 +436,14 @@ private fun LegendInfoRow(
     }
 }
 
-@Parcelize
 private data class LegendItem(
     val name: String,
     val bitmap: Bitmap?
-): Parcelable
+)
 
-@Parcelize
 private data class LayerContentData(
     val name: String,
     val isLayer: Boolean,
     val legendItems: MutableList<LegendItem> = mutableListOf(),
     val isVisible: (Double) -> Boolean
-) : Parcelable
-
-
-/**
- * Preserves a SnapshotStateList across compositions
- *
- * @since 200.7.0
- */
-private fun <T : Parcelable> snapshotStateListSaver(): Saver<SnapshotStateList<T>, Any> = listSaver(
-    {
-        it.toList()
-    },
-    {
-        mutableStateListOf<T>().apply {
-            addAll(it)
-        }
-    }
 )
