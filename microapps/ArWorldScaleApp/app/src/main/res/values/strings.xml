@@ -23,4 +23,12 @@
     <string name="ar_initializing">Setting up AR…</string>
     <string name="failed_to_load_scene">Failed to load scene: %1$s</string>
     <string name="failed_to_initialize_overlay">Failed to initialize: %1$s</string>
+    <string name="top_bar_title">AR World Scale - %1$s</string>
+    <string name="world_tracking_dropdown_item">World Tracking</string>
+    <string name="geospatial_tracking_dropdown_item">Geospatial Tracking</string>
+    <string name="privacy_info_dropdown_item">Privacy Info</string>
+    <string name="privacy_info_not_accepted">Privacy Info not accepted</string>
+    <string name="show_privacy_info">Show Privacy Info</string>
+    <string name="decline">Decline</string>
+    <string name="accept">Accept</string>
 </resources>
