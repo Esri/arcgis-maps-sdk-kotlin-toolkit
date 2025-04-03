@@ -41,8 +41,6 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.ElevationSource
-import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.TableTopSceneView
@@ -60,12 +58,8 @@ fun MainScreen() {
     val arcGISScene = remember {
         ArcGISScene().apply {
             operationalLayers.add(arcGISSceneLayer)
-            baseSurface = Surface().apply {
-                elevationSources.add(
-                    ElevationSource.fromTerrain3dService()
-                )
-                opacity = 0f
-            }
+            // for the purpose of this sample, we want the base surface to be fully transparent
+            baseSurface.opacity = 0f
         }
     }
     val arcGISSceneAnchor = remember {

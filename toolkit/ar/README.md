@@ -57,7 +57,7 @@ If ARCore is not optional for your application to function (as is the case with 
 <meta-data android:name="com.google.ar.core" android:value="required" />
 ```
 
-Configure an `ArcGISScene` with the data you want to render in the table top scene:
+Configure an `ArcGISScene` with the data and base surface required for your table top use case:
 
 ```kotlin
 
@@ -69,11 +69,7 @@ fun MainScreen() {
             operationalLayers.add(
                 ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
             )
-            baseSurface = Surface().apply {
-                elevationSources.add(
-                    ElevationSource.fromTerrain3dService()
-                )
-            }
+            baseSurface.opacity = 0f
         }
     }
     ...
