@@ -52,8 +52,8 @@ fun MainScreen(viewModel: LegendViewModel = viewModel()) {
                 .padding(padding)
                 .fillMaxSize(),
             arcGISMap = viewModel.arcGISMap,
-            onViewpointChangedForCenterAndScale = {
-                currentScale = it.targetScale
+            onMapScaleChanged = { scale ->
+                currentScale = scale
             }
         )
     }

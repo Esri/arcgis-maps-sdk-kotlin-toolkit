@@ -109,8 +109,8 @@ import kotlinx.coroutines.flow.shareIn
  *                 .padding(padding)
  *                 .fillMaxSize(),
  *             arcGISMap = viewModel.arcGISMap,
- *             onViewpointChangedForCenterAndScale = {
- *                 currentScale = it.targetScale
+ *             onMapScaleChanged = { scale ->
+ *                 currentScale = scale
  *             }
  *         )
  *     }
