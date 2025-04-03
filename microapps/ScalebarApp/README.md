@@ -2,7 +2,7 @@
 
 This micro-app demonstrates the use of the `Scalebar` toolkit component that visualizes an accurate distance that a user can use to visually gauge distances on a MapView.
 
-![Screenshot](../../toolkit/Scalebar/screenshot.jpg)
+![Screenshot](../../toolkit/Scalebar/screenshot.png)
 
 ## Usage
 
