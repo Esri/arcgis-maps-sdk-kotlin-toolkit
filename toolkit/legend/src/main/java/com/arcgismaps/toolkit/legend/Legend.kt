@@ -60,6 +60,7 @@ import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.shareIn
@@ -209,7 +210,7 @@ public fun Legend(
                 merge(*dropList.toTypedArray()).shareIn(this, SharingStarted.Lazily)
 
             sublayerChangedFlow
-                .collect {
+                .collectLatest {
                     legendContent(
                         layerContentData,
                         operationalLayers,
@@ -232,16 +233,17 @@ public fun Legend(
                     it.visibilityChanged
                 } ?: emptyList())
 
-            merge(*visibilityChanges.toTypedArray()).shareIn(this, SharingStarted.Lazily).collect {
-                legendContent(
-                    layerContentData,
-                    operationalLayers,
-                    basemap?.baseLayers ?: emptyList(),
-                    basemap?.referenceLayers ?: emptyList(),
-                    reverseLayerOrder,
-                    density
-                )
-            }
+            merge(*visibilityChanges.toTypedArray()).shareIn(this, SharingStarted.Lazily)
+                .collectLatest {
+                    legendContent(
+                        layerContentData,
+                        operationalLayers,
+                        basemap?.baseLayers ?: emptyList(),
+                        basemap?.referenceLayers ?: emptyList(),
+                        reverseLayerOrder,
+                        density
+                    )
+                }
         }
     }
 
@@ -367,9 +369,11 @@ private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
 ): List<LayerContentData> {
-    val data = LayerContentData(layerContent.name, layerContent is Layer) { scale ->
-        layerContent.isVisibleAtScale(scale)
-    }
+    val data = if(layerContent.isVisible) {
+        LayerContentData(layerContent.name, layerContent is Layer) { scale ->
+            layerContent.isVisibleAtScale(scale)
+        }
+    } else { return emptyList() }
     layerContent.fetchLegendInfos().onSuccess {
         it.map { info ->
             val bitmap = info.symbol?.createSwatch(density)?.getOrNull()?.bitmap
