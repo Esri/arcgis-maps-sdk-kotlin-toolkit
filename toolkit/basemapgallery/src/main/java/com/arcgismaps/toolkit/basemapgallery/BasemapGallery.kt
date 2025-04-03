@@ -122,7 +122,6 @@ public fun BasemapGallery(
                     modifier = Modifier
                         .padding(8.dp)
                         .clickable {
-                            //selection = basemapGalleryItem
                             selection = index
                             onItemClick(basemapGalleryItem)
                         },
