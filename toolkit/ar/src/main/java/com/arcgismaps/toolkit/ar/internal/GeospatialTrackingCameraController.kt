@@ -68,43 +68,46 @@ internal class GeospatialTrackingCameraController(
 
     override fun updateCamera(frame: Frame, session: Session) {
         session.earth?.let { earth ->
-            when (earth.earthState) {
-                EarthState.ENABLED -> {}
-                EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
-                    onError(
-                        IllegalStateException(
-                            "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
+            if (!hasSetOriginCamera && earth.earthState != lastEarthState) {
+                lastEarthState = earth.earthState
+                when (earth.earthState) {
+                    EarthState.ENABLED -> {}
+                    EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
+                        onError(
+                            IllegalStateException(
+                                "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
+                            )
                         )
-                    )
-                }
+                    }
 
-                EarthState.ERROR_NOT_AUTHORIZED -> {
-                    onError(
-                        IllegalStateException(
-                            """
+                    EarthState.ERROR_NOT_AUTHORIZED -> {
+                        onError(
+                            IllegalStateException(
+                                """
                                 The Google Cloud authorization provided by the application is not valid.
                                 - The associated Google Cloud project may not have enabled the ARCore API.
                                 - When using API key authentication, this will happen if the API key in the manifest is invalid or unauthorized. It may also fail if the API key is restricted to a set of apps not including the current one.
                                 - When using keyless authentication, this may happen when no OAuth client has been created, or when the signing key and package name combination does not match the values used in the Google Cloud project. It may also fail if Google Play Services isn't installed, is too old, or is malfunctioning for some reason (e. g. killed due to memory pressure).
                                     """.trimIndent()
+                            )
                         )
-                    )
-                }
+                    }
 
-                EarthState.ERROR_RESOURCE_EXHAUSTED -> {
-                    onError(
-                        IllegalStateException(
-                            "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
+                    EarthState.ERROR_RESOURCE_EXHAUSTED -> {
+                        onError(
+                            IllegalStateException(
+                                "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
+                            )
                         )
-                    )
-                }
+                    }
 
-                EarthState.ERROR_APK_VERSION_TOO_OLD -> {
-                    onError(
-                        IllegalStateException(
-                            "The ARCore APK is older than the current supported version."
+                    EarthState.ERROR_APK_VERSION_TOO_OLD -> {
+                        onError(
+                            IllegalStateException(
+                                "The ARCore APK is older than the current supported version."
+                            )
                         )
-                    )
+                    }
                 }
             }
             if (earth.trackingState != TrackingState.TRACKING) return@let
