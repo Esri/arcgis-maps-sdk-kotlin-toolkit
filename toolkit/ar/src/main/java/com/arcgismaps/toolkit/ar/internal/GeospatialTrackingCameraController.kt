@@ -69,6 +69,11 @@ internal class GeospatialTrackingCameraController(
     override fun updateCamera(frame: Frame, session: Session) {
         session.earth?.let { earth ->
             if (!hasSetOriginCamera && earth.earthState != lastEarthState) {
+                // This code will check the earth state for any initialization errors
+                // We don't want to call onError after the WorldScaleSceneView is initialized,
+                // so we do this before we set the origin camera the first time, which will trigger
+                // the change to Initialized. Therefore this code should only run while WorldScaleSceneView
+                // is initializing.
                 lastEarthState = earth.earthState
                 when (earth.earthState) {
                     EarthState.ENABLED -> {}
