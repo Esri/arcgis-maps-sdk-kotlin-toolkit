@@ -85,7 +85,7 @@ import kotlinx.coroutines.launch
  * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
  * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
- * @param imageOverlays image overlays for displaying images in the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -605,7 +605,7 @@ private fun ViewpointHandler(
     }
 
     LaunchedEffect(Unit) {
-        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
+        // if there is a persisted viewpoint, restore it when the MapView enters the composition
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
