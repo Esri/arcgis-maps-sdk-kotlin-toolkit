@@ -366,7 +366,8 @@ private fun TextWithScrim(text: String) {
     Column(
         modifier = Modifier
             .background(androidx.compose.ui.graphics.Color.Gray.copy(alpha = 0.5f))
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
