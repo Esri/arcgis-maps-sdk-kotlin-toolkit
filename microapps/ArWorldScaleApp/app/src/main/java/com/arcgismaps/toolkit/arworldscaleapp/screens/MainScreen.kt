@@ -167,6 +167,7 @@ fun MainScreen() {
                             text = { Text("${trackingMode::class.java.simpleName} tracking") },
                             onClick = {
                                 selectedTrackingMode = trackingMode
+                                actionsExpanded = false
                             },
                             contentPadding = PaddingValues(end = 12.dp),
                             leadingIcon = {
@@ -174,6 +175,7 @@ fun MainScreen() {
                                     selected = selectedTrackingMode == trackingMode,
                                     onClick = {
                                         selectedTrackingMode = trackingMode
+                                        actionsExpanded = false
                                     }
                                 )
                             }
@@ -227,6 +229,7 @@ fun MainScreen() {
                         .padding(it)
                         .fillMaxSize(),
                     worldScaleTrackingMode = selectedTrackingMode,
+                    clippingDistance = 100.0,
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
