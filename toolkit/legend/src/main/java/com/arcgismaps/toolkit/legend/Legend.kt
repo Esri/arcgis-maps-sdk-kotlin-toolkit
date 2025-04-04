@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.legend
 
 import android.graphics.Bitmap
-import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,16 +40,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.layers.Layer
@@ -58,11 +55,12 @@ import com.arcgismaps.mapping.layers.LayerContent
 import com.arcgismaps.toolkit.legend.theme.LegendDefaults
 import com.arcgismaps.toolkit.legend.theme.Typography
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.parcelize.Parcelize
 
 /**
  * A composable that displays a legend for the given operational layers and basemap.
@@ -111,8 +109,8 @@ import kotlinx.parcelize.Parcelize
  *                 .padding(padding)
  *                 .fillMaxSize(),
  *             arcGISMap = viewModel.arcGISMap,
- *             onViewpointChangedForCenterAndScale = {
- *                 currentScale = it.targetScale
+ *             onMapScaleChanged = { scale ->
+ *                 currentScale = scale
  *             }
  *         )
  *     }
@@ -141,9 +139,9 @@ public fun Legend(
     typography: Typography = LegendDefaults.typography()
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    var initialized: Boolean by rememberSaveable(operationalLayers, basemap) { mutableStateOf(false) }
+    var initialized: Boolean by remember(operationalLayers, basemap) { mutableStateOf(false) }
     val layerContentData =
-        rememberSaveable(operationalLayers, basemap, saver = snapshotStateListSaver()) {
+        remember(operationalLayers, basemap) {
             mutableStateListOf<LayerContentData>()
         }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -208,7 +206,31 @@ public fun Legend(
                 merge(*dropList.toTypedArray()).shareIn(this, SharingStarted.Lazily)
 
             sublayerChangedFlow
-                .collect {
+                .collectLatest {
+                    legendContent(
+                        layerContentData,
+                        operationalLayers,
+                        basemap?.baseLayers ?: emptyList(),
+                        basemap?.referenceLayers ?: emptyList(),
+                        reverseLayerOrder,
+                        density
+                    )
+                }
+        }
+
+        // observe any changes to Layer's visibility and rebuild the legend if anything changes.
+        LaunchedEffect(Unit) {
+            val visibilityChanges: List<SharedFlow<Boolean>> =
+                operationalLayers.filterIsInstance<Layer>().map {
+                    it.visibilityChanged
+                } + (basemap?.baseLayers?.map {
+                    it.visibilityChanged
+                } ?: emptyList()) + (basemap?.referenceLayers?.map {
+                    it.visibilityChanged
+                } ?: emptyList())
+
+            merge(*visibilityChanges.toTypedArray()).shareIn(this, SharingStarted.Lazily)
+                .collectLatest {
                     legendContent(
                         layerContentData,
                         operationalLayers,
@@ -220,7 +242,6 @@ public fun Legend(
                 }
         }
     }
-
 
     val validScale = (currentScale != 0.0 && !currentScale.isNaN())
     if (validScale && initialized) {
@@ -318,7 +339,9 @@ private suspend fun addLayersAndSubLayersDataToLayerContentData(
     layers?.let { layerList ->
         // The order of the layers is reversed to match the order in the legend
         val orderedLayers = if (reverseLayerOrder) layerList else layerList.reversed()
-        val filteredLayers = orderedLayers.filter { it.isVisible && it.showInLegend }
+        val filteredLayers = orderedLayers.filter {
+            it.isVisible && it.showInLegend
+        }
         val layersAndSubLayersLayerContentData =
             filteredLayers.flatMap { getLayerContentData(it, density) }
         if (addAtIndexZero) {
@@ -342,9 +365,11 @@ private suspend fun getLayerContentData(
     layerContent: LayerContent,
     density: Float
 ): List<LayerContentData> {
-    val data = LayerContentData(layerContent.name, layerContent is Layer) { scale ->
-        layerContent.isVisibleAtScale(scale)
-    }
+    val data = if(layerContent.isVisible) {
+        LayerContentData(layerContent.name, layerContent is Layer) { scale ->
+            layerContent.isVisibleAtScale(scale)
+        }
+    } else { return emptyList() }
     layerContent.fetchLegendInfos().onSuccess {
         it.map { info ->
             val bitmap = info.symbol?.createSwatch(density)?.getOrNull()?.bitmap
@@ -371,7 +396,9 @@ private fun Legend(
     title: String,
     typography: Typography
 ) {
-    Column(modifier = modifier) {
+    val localContext = LocalContext.current
+    Column(modifier = modifier
+        .semantics { contentDescription = localContext.getString(R.string.legend_component) }) {
         if (title.isNotEmpty()) {
             Text(
                 text = title,
@@ -442,33 +469,14 @@ private fun LegendInfoRow(
     }
 }
 
-@Parcelize
 private data class LegendItem(
     val name: String,
     val bitmap: Bitmap?
-): Parcelable
+)
 
-@Parcelize
 private data class LayerContentData(
     val name: String,
     val isLayer: Boolean,
     val legendItems: MutableList<LegendItem> = mutableListOf(),
     val isVisible: (Double) -> Boolean
-) : Parcelable
-
-
-/**
- * Preserves a SnapshotStateList across compositions
- *
- * @since 200.7.0
- */
-private fun <T : Parcelable> snapshotStateListSaver(): Saver<SnapshotStateList<T>, Any> = listSaver(
-    {
-        it.toList()
-    },
-    {
-        mutableStateListOf<T>().apply {
-            addAll(it)
-        }
-    }
 )

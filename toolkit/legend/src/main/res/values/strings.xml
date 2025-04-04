@@ -18,4 +18,5 @@
     <string name="title">Legend</string>
     <string name="symbol_description">symbol of a legend item</string>
     <string name="error">Error</string>
+    <string name="legend_component">Legend component</string>
 </resources>

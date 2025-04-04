@@ -91,9 +91,8 @@ fun MainScreen(viewModel: LegendViewModel = viewModel()) {
                 .padding(padding)
                 .fillMaxSize(),
             arcGISMap = viewModel.arcGISMap,
-            onViewpointChangedForCenterAndScale = {
-                // does not emit after rotation.
-                currentScale = it.targetScale
+            onMapScaleChanged = {
+                currentScale = it
             }
         )
     }

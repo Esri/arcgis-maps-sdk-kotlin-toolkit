@@ -23,7 +23,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("kotlin-parcelize")
 }
 android {
     namespace = "com.arcgismaps.toolkit.legend"
@@ -90,6 +89,7 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

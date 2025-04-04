@@ -18,15 +18,22 @@
 
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,9 +56,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.Color
 import com.arcgismaps.LoadStatus
@@ -58,7 +73,6 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
@@ -73,21 +87,15 @@ import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 
+private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val treeSymbol = rememberTreeSymbol()
     val arcGISScene = remember {
-        val basemap = Basemap(BasemapStyle.ArcGISHumanGeography).apply {
-            // Clear the base layer so we only see the street and building outlines and labels
-            baseLayers.clear()
-        }
+        val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
-            initialViewpoint = Viewpoint(
-                latitude = 39.8,
-                longitude = -98.6,
-                scale = 10e7
-            )
             // an elevation source is required for the scene to be placed at the correct elevation
             // if not used, the scene may appear far below the device position because the device position
             // is calculated with elevation
@@ -120,9 +128,25 @@ fun MainScreen() {
     ) {
         mutableStateOf<WorldScaleTrackingMode>(WorldScaleTrackingMode.World())
     }
+    val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+    var acceptedPrivacyInfo by rememberSaveable {
+        mutableStateOf(
+            sharedPreferences.getBoolean(
+                KEY_PREF_ACCEPTED_PRIVACY_INFO,
+                false
+            )
+        )
+    }
+    var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text("AR World Scale - ${trackingMode::class.java.simpleName}") },
+            title = {
+                Text(
+                    stringResource(
+                        R.string.top_bar_title, trackingMode::class.java.simpleName
+                    )
+                )
+            },
             actions = {
                 var actionsExpanded by remember { mutableStateOf(false) }
                 IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
@@ -131,19 +155,26 @@ fun MainScreen() {
 
                 DropdownMenu(
                     expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false }
-                ) {
+                    onDismissRequest = { actionsExpanded = false })
+                {
                     DropdownMenuItem(
-                        text = { Text("World Tracking") },
+                        text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
                         onClick = {
                             trackingMode = WorldScaleTrackingMode.World()
                             actionsExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Geospatial Tracking") },
+                        text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
                         onClick = {
                             trackingMode = WorldScaleTrackingMode.Geospatial()
+                            actionsExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        onClick = {
+                            showPrivacyInfo = true
                             actionsExpanded = false
                         }
                     )
@@ -151,84 +182,149 @@ fun MainScreen() {
             }
         )
     }) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            WorldScaleSceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize(),
-                worldScaleTrackingMode = trackingMode,
-                onInitializationStatusChanged = {
-                    initializationStatus = it
-                },
-                worldScaleSceneViewProxy = proxy,
-                onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                    proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
-                        ?.let { point ->
-                            graphicsOverlays.first().graphics.add(
-                                Graphic(
-                                    point,
-                                    treeSymbol.value
-                                )
-                            )
-                        }
-                },
-                graphicsOverlays = graphicsOverlays
+        if (showPrivacyInfo) {
+            PrivacyInfoDialog(
+                hasCurrentlyAccepted = acceptedPrivacyInfo,
+                onUserResponse = { accepted ->
+                    acceptedPrivacyInfo = accepted
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    showPrivacyInfo = false
+                }
+            )
+        }
+        if (!acceptedPrivacyInfo) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (displayCalibrationView) {
-                        CalibrationView(
-                            onDismiss = { displayCalibrationView = false },
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                        )
-                    } else {
-                        FloatingActionButton(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(32.dp),
-                            onClick = { displayCalibrationView = true }) {
-                            Icon(
-                                painter = painterResource(R.drawable.baseline_straighten_24),
-                                contentDescription = stringResource(R.string.calibration_view_button_description)
+                Text(stringResource(R.string.privacy_info_not_accepted))
+                Button(onClick = { showPrivacyInfo = true }) {
+                    Text(stringResource(R.string.show_privacy_info))
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                WorldScaleSceneView(
+                    arcGISScene = arcGISScene,
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize(),
+                    worldScaleTrackingMode = trackingMode,
+                    onInitializationStatusChanged = {
+                        initializationStatus = it
+                    },
+                    worldScaleSceneViewProxy = proxy,
+                    onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                        proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                            ?.let { point ->
+                                graphicsOverlays.first().graphics.add(
+                                    Graphic(
+                                        point,
+                                        treeSymbol.value
+                                    )
+                                )
+                            }
+                    },
+                    graphicsOverlays = graphicsOverlays
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (displayCalibrationView) {
+                            CalibrationView(
+                                onDismiss = { displayCalibrationView = false },
+                                modifier = Modifier.align(Alignment.BottomCenter),
                             )
+                        } else {
+                            FloatingActionButton(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(32.dp),
+                                onClick = { displayCalibrationView = true }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_straighten_24),
+                                    contentDescription = stringResource(R.string.calibration_view_button_description)
+                                )
+                            }
                         }
+                    }
+                }
+
+                when (val status = initializationStatus) {
+                    is WorldScaleSceneViewStatus.Initializing -> {
+                        TextWithScrim(text = stringResource(R.string.ar_initializing))
+                    }
+
+                    is WorldScaleSceneViewStatus.Initialized -> {
+                        val sceneLoadStatus =
+                            arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                        when (sceneLoadStatus) {
+                            is LoadStatus.Loading, LoadStatus.NotLoaded -> {
+                                // The scene may take a while to load, so show a progress indicator
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+
+                            is LoadStatus.FailedToLoad -> {
+                                TextWithScrim(
+                                    text = stringResource(
+                                        R.string.failed_to_load_scene,
+                                        sceneLoadStatus.error
+                                    )
+                                )
+                            }
+
+                            else -> {}
+                        }
+                    }
+
+                    is WorldScaleSceneViewStatus.FailedToInitialize -> {
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_initialize_overlay,
+                                status.error.message ?: status.error
+                            )
+                        )
                     }
                 }
             }
+        }
+    }
+}
 
-            when (val status = initializationStatus) {
-                is WorldScaleSceneViewStatus.Initializing -> {
-                    TextWithScrim(text = stringResource(R.string.ar_initializing))
-                }
-
-                is WorldScaleSceneViewStatus.Initialized -> {
-                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                    when (sceneLoadStatus) {
-                        is LoadStatus.Loading, LoadStatus.NotLoaded -> {
-                            // The scene may take a while to load, so show a progress indicator
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        else -> {}
+/**
+ * An alert dialog that asks the user to accept or deny [ARCore's privacy requirements](https://developers.google.com/ar/develop/privacy-requirements).
+ *
+ * @since 200.7.0
+ */
+@Composable
+private fun PrivacyInfoDialog(
+    hasCurrentlyAccepted: Boolean,
+    onUserResponse: (accepted: Boolean) -> Unit
+) {
+    Dialog (onDismissRequest = {
+        onUserResponse(hasCurrentlyAccepted)
+    }) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                LegalTextArCore()
+                Spacer(Modifier.height(16.dp))
+                LegalTextGeospatial()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(onClick = {
+                        onUserResponse(false)
+                    }) {
+                        Text(stringResource(R.string.decline))
                     }
-                }
 
-                is WorldScaleSceneViewStatus.FailedToInitialize -> {
-                    TextWithScrim(
-                        text = stringResource(
-                            R.string.failed_to_initialize_overlay,
-                            status.error.message ?: status.error
-                        )
-                    )
+                    TextButton(onClick = {
+                        onUserResponse(true)
+                    }) {
+                        Text(stringResource(R.string.accept))
+                    }
                 }
             }
         }
@@ -241,7 +337,7 @@ fun MainScreen() {
  * @since 200.6.0
  */
 @Composable
-fun TextWithScrim(text: String) {
+private fun TextWithScrim(text: String) {
     Column(
         modifier = Modifier
             .background(androidx.compose.ui.graphics.Color.Gray.copy(alpha = 0.5f))
@@ -281,4 +377,56 @@ fun rememberTreeSymbol(): State<Symbol> {
         }
     }
     return treeSymbol
+}
+
+/**
+ * Displays the required privacy information for use of ARCore
+ *
+ * @since 200.7.0
+ */
+@Composable
+private fun LegalTextArCore() {
+    val textLinkStyle =
+        TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
+    Text(text = buildAnnotatedString {
+        append("This application runs on ")
+        withLink(
+            LinkAnnotation.Url(
+                "https://play.google.com/store/apps/details?id=com.google.ar.core",
+                textLinkStyle
+            )
+        ) {
+            append("Google Play Services for AR")
+        }
+        append("  (ARCore), which is provided by Google and governed by the ")
+        withLink(
+            LinkAnnotation.Url(
+                "https://policies.google.com/privacy",
+                textLinkStyle
+            )
+        ) {
+            append("Google Privacy Policy.")
+        }
+    })
+}
+
+/**
+ * Displays the required privacy information for use of the Geospatial API
+ *
+ * @since 200.7.0
+ */
+@Composable
+private fun LegalTextGeospatial() {
+    Text(text = buildAnnotatedString {
+        append("To power this session, Google will process sensor data (e.g., camera and location).")
+        appendLine()
+        withLink(
+            LinkAnnotation.Url(
+                "https://support.google.com/ar?p=how-google-play-services-for-ar-handles-your-data",
+                TextLinkStyles(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue))
+            )
+        ) {
+            append("Learn more")
+        }
+    })
 }
