@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -180,6 +181,14 @@ fun MainScreen() {
                     }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Info,
+                                contentDescription = stringResource(R.string.privacy_info_dropdown_item)
+                            )
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
                         onClick = {
                             showPrivacyInfo = true
                             actionsExpanded = false
