@@ -266,9 +266,9 @@ fun rememberTreeSymbol(): State<Symbol> {
         SimpleMarkerSceneSymbol(
             SimpleMarkerSceneSymbolStyle.Cylinder,
             Color.green,
-            height = 2.0,
-            width = 1.0,
-            depth = 1.0
+            height = 1.7910805414617064,
+            width = 0.8883103942871093,
+            depth = 0.909887924194336
         )
     ) }
     LaunchedEffect(Unit) {
