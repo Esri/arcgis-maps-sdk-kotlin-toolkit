@@ -253,6 +253,13 @@ fun TextWithScrim(text: String) {
     }
 }
 
+/**
+ * Creates and remembers a [Symbol] for a tree.
+ *
+ * Note the symbol is pulled from an online style, and a simple cylinder is used as a fallback.
+ *
+ * @since 200.7.0
+ */
 @Composable
 fun rememberTreeSymbol(): State<Symbol> {
     val treeSymbol = remember { mutableStateOf<Symbol>(
