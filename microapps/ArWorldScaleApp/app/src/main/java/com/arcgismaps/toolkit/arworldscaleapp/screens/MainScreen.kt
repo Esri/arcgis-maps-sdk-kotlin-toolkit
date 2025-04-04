@@ -265,8 +265,8 @@ fun rememberTreeSymbol(): State<Symbol> {
         )
     ) }
     LaunchedEffect(Unit) {
-        with(SymbolStyle.createWithStyleNameAndPortal("EsriLowPolyVegetationStyle")) {
-            getSymbol(listOf("Arbutus")).onSuccess {
+        with(SymbolStyle.createWithStyleNameAndPortal("EsriRealisticStreetSceneStyle")) {
+            getSymbol(listOf("Planter_Tapered")).onSuccess {
                 treeSymbol.value = it
             }.onFailure { error ->
                 Log.e("MainScreen", "Failed to initialize symbol: $error")
