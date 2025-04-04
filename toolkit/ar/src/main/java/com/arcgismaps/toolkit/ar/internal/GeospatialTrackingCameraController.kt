@@ -219,4 +219,3 @@ internal class GeospatialTrackingCameraController(
         )
     }
 }
-
