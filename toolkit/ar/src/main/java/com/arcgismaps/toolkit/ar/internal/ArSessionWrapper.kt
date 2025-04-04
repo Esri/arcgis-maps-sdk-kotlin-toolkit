@@ -26,7 +26,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
-import com.google.ar.core.Earth.EarthState
 import com.google.ar.core.Session
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -78,6 +77,10 @@ internal class ArSessionWrapper(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                 if (useGeospatial) {
+                    if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) {
+                        onError(IllegalStateException("Geospatial mode is not supported on this device."))
+                        return
+                    }
                     geospatialMode = Config.GeospatialMode.ENABLED
                 }
                 // We only want to detect horizontal planes.
