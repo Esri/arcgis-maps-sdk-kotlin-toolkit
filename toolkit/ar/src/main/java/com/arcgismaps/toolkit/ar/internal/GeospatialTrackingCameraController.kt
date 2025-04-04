@@ -30,6 +30,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
+import com.arcgismaps.toolkit.ar.ArCoreAuthorizationException
 import com.google.ar.core.Earth
 import com.google.ar.core.Earth.EarthState
 import com.google.ar.core.Frame
@@ -83,14 +84,7 @@ internal class GeospatialTrackingCameraController(
                     }
 
                     EarthState.ERROR_NOT_AUTHORIZED -> {
-                        error = IllegalStateException(
-                            """
-                                The Google Cloud authorization provided by the application is not valid.
-                                - The associated Google Cloud project may not have enabled the ARCore API.
-                                - When using API key authentication, this will happen if the API key in the manifest is invalid or unauthorized. It may also fail if the API key is restricted to a set of apps not including the current one.
-                                - When using keyless authentication, this may happen when no OAuth client has been created, or when the signing key and package name combination does not match the values used in the Google Cloud project. It may also fail if Google Play Services isn't installed, is too old, or is malfunctioning for some reason (e. g. killed due to memory pressure).
-                                    """.trimIndent()
-                        ).also(onError)
+                        error = ArCoreAuthorizationException().also(onError)
                     }
 
                     EarthState.ERROR_RESOURCE_EXHAUSTED -> {
@@ -214,3 +208,4 @@ internal class GeospatialTrackingCameraController(
         )
     }
 }
+
