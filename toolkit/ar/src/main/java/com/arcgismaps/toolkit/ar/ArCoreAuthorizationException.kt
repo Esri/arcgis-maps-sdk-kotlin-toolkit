@@ -24,6 +24,8 @@ package com.arcgismaps.toolkit.ar
  * - The associated Google Cloud project may not have enabled the ARCore API.
  * - When using API key authentication, this will happen if the API key in the manifest is invalid or unauthorized. It may also fail if the API key is restricted to a set of apps not including the current one.
  * - When using keyless authentication, this may happen when no OAuth client has been created, or when the signing key and package name combination does not match the values used in the Google Cloud project. It may also fail if Google Play Services isn't installed, is too old, or is malfunctioning for some reason (e. g. killed due to memory pressure).
+ 
+For more information about ARCore authorization see [Use the ARCore API on Google Cloud](https://developers.google.com/ar/develop/authorization?platform=android).
  *
  * @since 200.7.0
  */
