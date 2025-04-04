@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -153,19 +154,20 @@ fun MainScreen() {
                     expanded = actionsExpanded,
                     onDismissRequest = { actionsExpanded = false }
                 ) {
-                    val trackingModeLabels = remember {
-                        mapOf(
-                            WorldScaleTrackingMode.World() to "World tracking",
-                            WorldScaleTrackingMode.Geospatial() to "Geospatial"
+                    val trackingModes = remember {
+                        listOf(
+                            WorldScaleTrackingMode.World(),
+                            WorldScaleTrackingMode.Geospatial()
                         )
                     }
 
-                    trackingModeLabels.keys.forEach { trackingMode ->
+                    trackingModes.forEach { trackingMode ->
                         DropdownMenuItem(
-                            text = { Text(trackingModeLabels[trackingMode]!!) },
+                            text = { Text("${trackingMode::class.java.simpleName} tracking") },
                             onClick = {
                                 selectedTrackingMode = trackingMode
                             },
+                            contentPadding = PaddingValues(end = 12.dp),
                             leadingIcon = {
                                 RadioButton(
                                     selected = selectedTrackingMode == trackingMode,
