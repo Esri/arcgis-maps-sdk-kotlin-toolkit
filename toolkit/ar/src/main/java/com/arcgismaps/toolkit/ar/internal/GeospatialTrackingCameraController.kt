@@ -75,30 +75,7 @@ internal class GeospatialTrackingCameraController(
                 // so we do this before we set the origin camera the first time, which will trigger
                 // the change to Initialized. Therefore this code should only run while WorldScaleSceneView
                 // is initializing.
-                when (earth.earthState) {
-                    EarthState.ENABLED -> {}
-                    EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
-                        error = IllegalStateException(
-                            "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
-                        ).also(onError)
-                    }
-
-                    EarthState.ERROR_NOT_AUTHORIZED -> {
-                        error = ArCoreAuthorizationException().also(onError)
-                    }
-
-                    EarthState.ERROR_RESOURCE_EXHAUSTED -> {
-                        error = IllegalStateException(
-                            "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
-                        ).also(onError)
-                    }
-
-                    EarthState.ERROR_APK_VERSION_TOO_OLD -> {
-                        error = IllegalStateException(
-                            "The ARCore APK is older than the current supported version."
-                        ).also(onError)
-                    }
-                }
+                checkForEarthStateErrors(earth)
             }
             if (error != null) return@let
             if (earth.trackingState != TrackingState.TRACKING) return@let
@@ -182,6 +159,40 @@ internal class GeospatialTrackingCameraController(
                     0.0,
                     0.0
                 )
+        }
+    }
+
+    /**
+     * Checks the [EarthState] of the [Earth] object and sets the [error] if there is an error.
+     *
+     * This should be called after the [Earth] object is created and before the camera is set.
+     *
+     * @since 200.7.0
+     */
+    private fun checkForEarthStateErrors(earth: Earth) {
+        when (earth.earthState) {
+            EarthState.ENABLED -> {}
+            EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
+                error = IllegalStateException(
+                    "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
+                ).also(onError)
+            }
+
+            EarthState.ERROR_NOT_AUTHORIZED -> {
+                error = ArCoreAuthorizationException().also(onError)
+            }
+
+            EarthState.ERROR_RESOURCE_EXHAUSTED -> {
+                error = IllegalStateException(
+                    "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
+                ).also(onError)
+            }
+
+            EarthState.ERROR_APK_VERSION_TOO_OLD -> {
+                error = IllegalStateException(
+                    "The ARCore APK is older than the current supported version."
+                ).also(onError)
+            }
         }
     }
 
