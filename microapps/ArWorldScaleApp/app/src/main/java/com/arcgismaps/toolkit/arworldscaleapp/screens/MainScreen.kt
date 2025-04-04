@@ -25,11 +25,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -40,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -95,10 +98,11 @@ fun MainScreen() {
             // is calculated with elevation
             baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
             baseSurface.backgroundGrid.isVisible = false
-            baseSurface.opacity = 0.3f
             // add the Esri 3D Buildings layer
             operationalLayers.add(
-                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
+                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282").apply {
+                    this.opacity = 0.5f
+                }
             )
         }
     }
@@ -106,7 +110,7 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by rememberSaveable(
+    var selectedTrackingMode by rememberSaveable(
         saver = Saver(
             save = {
                 it.value.name
@@ -137,7 +141,7 @@ fun MainScreen() {
             title = {
                 Text(
                     stringResource(
-                        R.string.top_bar_title, trackingMode::class.java.simpleName
+                        R.string.top_bar_title, selectedTrackingMode::class.java.simpleName
                     )
                 )
             },
@@ -149,24 +153,44 @@ fun MainScreen() {
 
                 DropdownMenu(
                     expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false })
-                {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.World()
-                            actionsExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.Geospatial()
-                            actionsExpanded = false
-                        }
-                    )
+                    onDismissRequest = { actionsExpanded = false }
+                ) {
+                    val trackingModes = remember {
+                        listOf(
+                            WorldScaleTrackingMode.World(),
+                            WorldScaleTrackingMode.Geospatial()
+                        )
+                    }
+
+                    trackingModes.forEach { trackingMode ->
+                        DropdownMenuItem(
+                            text = { Text("${trackingMode::class.java.simpleName} tracking") },
+                            onClick = {
+                                selectedTrackingMode = trackingMode
+                                actionsExpanded = false
+                            },
+                            contentPadding = PaddingValues(end = 12.dp),
+                            leadingIcon = {
+                                RadioButton(
+                                    selected = selectedTrackingMode == trackingMode,
+                                    onClick = {
+                                        selectedTrackingMode = trackingMode
+                                        actionsExpanded = false
+                                    }
+                                )
+                            }
+                        )
+                    }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Info,
+                                contentDescription = stringResource(R.string.privacy_info_dropdown_item)
+                            )
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
                         onClick = {
                             showPrivacyInfo = true
                             actionsExpanded = false
@@ -204,7 +228,8 @@ fun MainScreen() {
                     modifier = Modifier
                         .padding(it)
                         .fillMaxSize(),
-                    worldScaleTrackingMode = trackingMode,
+                    worldScaleTrackingMode = selectedTrackingMode,
+                    clippingDistance = 100.0,
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
