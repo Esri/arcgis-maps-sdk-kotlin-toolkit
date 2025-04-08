@@ -40,6 +40,8 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
@@ -157,6 +159,16 @@ internal sealed class DialogType {
         val stateId: Int,
         val formAttachment: FormAttachment,
         val name: String,
+    ) : DialogType()
+
+    data class DeleteAttachmentDialog(
+        val stateId: Int,
+        val formAttachment: FormAttachment,
+    ) : DialogType()
+
+    data class AttachmentErrorDialog(
+        val title: String,
+        val description: String,
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
@@ -326,6 +338,38 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) {
                 dialogRequester.dismissDialog()
             }
+        }
+
+        is DialogType.DeleteAttachmentDialog -> {
+            val stateId = (dialogType as DialogType.DeleteAttachmentDialog).stateId
+            val formAttachment = (dialogType as DialogType.DeleteAttachmentDialog).formAttachment
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            DeleteAttachmentDialog(
+                attachmentName = formAttachment.name,
+                onDelete = {
+                    state.deleteAttachment(formAttachment)
+                    dialogRequester.dismissDialog()
+                },
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                }
+            )
+        }
+
+        is DialogType.AttachmentErrorDialog -> {
+            val title = (dialogType as DialogType.AttachmentErrorDialog).title
+            val description = (dialogType as DialogType.AttachmentErrorDialog).description
+            AttachmentErrorDialog(
+                errorTitle = title,
+                errorMessage = description,
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                }
+            )
         }
 
         is DialogType.BarcodeScanner -> {

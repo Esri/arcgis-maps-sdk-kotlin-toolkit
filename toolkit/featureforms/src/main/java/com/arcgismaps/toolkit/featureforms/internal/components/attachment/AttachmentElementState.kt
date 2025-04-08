@@ -323,6 +323,8 @@ internal class FormAttachmentState(
      */
     private val thumbnailSize = Size(368, 300)
 
+    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
+
     /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
      * created this attachment. Usually, this is the [AttachmentElementState] that created this
@@ -332,6 +334,10 @@ internal class FormAttachmentState(
         scope.launch {
             load()
         }
+    }
+
+    fun setOnLoadErrorCallback(callback: ((Throwable) -> Unit)?) {
+        onLoadErrorCallback = callback
     }
 
     /**
@@ -362,6 +368,7 @@ internal class FormAttachmentState(
             } else {
                 val error = result.exceptionOrNull() ?: Exception("Failed to load attachment")
                 _loadStatus.value = LoadStatus.FailedToLoad(error)
+                onLoadErrorCallback?.invoke(error)
             }
         }
         return result

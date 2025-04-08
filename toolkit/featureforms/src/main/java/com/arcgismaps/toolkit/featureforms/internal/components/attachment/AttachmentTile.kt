@@ -37,15 +37,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,42 +50,30 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
@@ -113,10 +97,10 @@ internal fun AttachmentTile(
     val thumbnail by state.thumbnail
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
-    var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val context = LocalContext.current
     val colors = LocalColorScheme.current.attachmentsElementColors
+    var showContextMenu by remember { mutableStateOf(false) }
     Card(
         onClick = {},
         modifier = modifier
@@ -177,7 +161,6 @@ internal fun AttachmentTile(
                             imageVector = Icons.Outlined.Delete,
                             contentDescription = null
                         )
-
                     },
                     colors = MenuDefaults.itemColors(
                         textColor = MaterialTheme.colorScheme.error,
@@ -185,12 +168,12 @@ internal fun AttachmentTile(
                     ),
                     onClick = {
                         showContextMenu = false
-                        state.deleteAttachment()
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.attachment_deleted, state.name),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        dialogRequester.requestDialog(
+                            DialogType.DeleteAttachmentDialog(
+                                stateId = state.elementStateId,
+                                formAttachment = state.formAttachment!!,
+                            )
+                        )
                     })
             }
         }
@@ -244,27 +227,41 @@ internal fun AttachmentTile(
             }
         }
     }
-    LaunchedEffect(Unit) {
-        state.loadStatus.collectLatest {
-            // show an error toast if the attachment failed to load
-            if (it is LoadStatus.FailedToLoad) {
-                val message = when (it.error) {
-                    is AttachmentSizeLimitExceededException -> {
-                        val limit = (it.error as AttachmentSizeLimitExceededException).limit
-                        val limitFormatted = Formatter.formatFileSize(context, limit)
+    DisposableEffect(state) {
+        state.setOnLoadErrorCallback { error ->
+            val (title, description) = when (error) {
+                is AttachmentSizeLimitExceededException -> {
+                    val limit = error.limit
+                    val limitFormatted = Formatter.formatFileSize(context, limit)
+                    Pair(
+                        context.getString(R.string.file_size_exceeds_limit),
                         context.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
-                    }
-
-                    is EmptyAttachmentException -> {
-                        context.getString(R.string.download_empty_file)
-                    }
-
-                    else -> {
-                        it.error.localizedMessage
-                    }
+                    )
                 }
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+
+                is EmptyAttachmentException -> {
+                    Pair(
+                        context.getString(R.string.unsupported_file_type),
+                        context.getString(R.string.download_empty_file)
+                    )
+                }
+
+                else -> {
+                    Pair(
+                        "",
+                        error.localizedMessage ?: context.getString(R.string.download_failed)
+                    )
+                }
             }
+            dialogRequester.requestDialog(
+                DialogType.AttachmentErrorDialog(
+                    title = title,
+                    description = description,
+                )
+            )
+        }
+        onDispose {
+            state.setOnLoadErrorCallback(null)
         }
     }
 }
@@ -273,7 +270,7 @@ internal fun AttachmentTile(
 private fun IconView(
     title: String,
     size: Long,
-    hasLoaded: Boolean,
+    showDownloadIcon: Boolean,
     modifier: Modifier = Modifier,
     icon: @Composable ColumnScope.() -> Unit,
 ) {
@@ -290,7 +287,7 @@ private fun IconView(
             horizontalArrangement = Arrangement.Center
         ) {
             Size(size = size)
-            if (!hasLoaded) {
+            if (showDownloadIcon) {
                 Icon(
                     imageVector = Icons.Outlined.FileDownload,
                     contentDescription = "Download",
@@ -337,7 +334,7 @@ private fun LoadedView(
             IconView(
                 title = title,
                 size = size,
-                hasLoaded = true,
+                showDownloadIcon = false,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 5.dp),
@@ -363,7 +360,7 @@ private fun DefaultView(
     IconView(
         title = title,
         size = size,
-        hasLoaded = loadStatus is LoadStatus.Loaded,
+        showDownloadIcon = loadStatus is LoadStatus.NotLoaded,
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 5.dp),
