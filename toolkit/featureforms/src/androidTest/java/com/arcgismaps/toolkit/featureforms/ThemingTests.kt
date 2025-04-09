@@ -26,9 +26,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.test.platform.app.InstrumentationRegistry
@@ -328,10 +328,11 @@ class ThemingTests : FeatureFormTestRunner(
             attachmentsElement!!.attachments.isNotEmpty()
         }
         val attachmentToTest = attachmentsElement!!.attachments.first()
-        // scroll until the attachments are visible
-        lazyColumn.performScrollToNode(hasText(attachmentToTest.name))
+        // scroll until the attachment element is visible
+        lazyColumn.performScrollToNode(hasText(attachmentsElement.label))
         val attachmentsField = composeTestRule.onNodeWithText(attachmentsElement.label)
-        attachmentsField.printToLog("label")
+        // bring the entire attachment tile into view
+        attachmentsField.performScrollTo()
         attachmentsField.assertIsDisplayed()
         attachmentsField.assertTextStyle(
             TextStyle(
