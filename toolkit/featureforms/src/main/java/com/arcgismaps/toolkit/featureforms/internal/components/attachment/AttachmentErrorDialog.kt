@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
@@ -51,5 +52,15 @@ internal fun AttachmentErrorDialog(
                 Text(text = stringResource(R.string.ok))
             }
         }
+    )
+}
+
+@Preview
+@Composable
+private fun AttachmentErrorDialogPreview() {
+    AttachmentErrorDialog(
+        errorTitle = "Error",
+        errorMessage = "An error occurred while processing the attachment.",
+        onDismissRequest = {}
     )
 }

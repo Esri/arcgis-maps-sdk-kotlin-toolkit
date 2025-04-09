@@ -229,6 +229,7 @@ internal fun AttachmentTile(
     }
     DisposableEffect(state) {
         state.setOnLoadErrorCallback { error ->
+            // Get the appropriate error message
             val (title, description) = when (error) {
                 is AttachmentSizeLimitExceededException -> {
                     val limit = error.limit

@@ -323,6 +323,9 @@ internal class FormAttachmentState(
      */
     private val thumbnailSize = Size(368, 300)
 
+    /**
+     * A callback that is invoked when the attachment fails to load.
+     */
     private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
 
     /**
@@ -336,6 +339,10 @@ internal class FormAttachmentState(
         }
     }
 
+    /**
+     * Sets a callback that is invoked when the attachment fails to load. This is useful for
+     * handling any errors in the UI.
+     */
     fun setOnLoadErrorCallback(callback: ((Throwable) -> Unit)?) {
         onLoadErrorCallback = callback
     }
