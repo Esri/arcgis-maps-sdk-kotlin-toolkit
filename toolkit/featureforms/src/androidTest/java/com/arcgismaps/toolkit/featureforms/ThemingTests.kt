@@ -321,8 +321,15 @@ class ThemingTests : FeatureFormTestRunner(
         assertThat(attachmentsElement).isNotNull()
         // find the scrollable container
         val lazyColumn = composeTestRule.onNodeWithContentDescription("lazy column")
-        lazyColumn.performScrollToNode(hasText(attachmentsElement!!.label))
-        // scroll until the attachments element is visible
+        composeTestRule.waitUntil(
+            timeoutMillis = 2_000
+        ) {
+            // wait until the attachments are loaded
+            attachmentsElement!!.attachments.isNotEmpty()
+        }
+        val attachmentToTest = attachmentsElement!!.attachments.first()
+        // scroll until the attachments are visible
+        lazyColumn.performScrollToNode(hasText(attachmentToTest.name))
         val attachmentsField = composeTestRule.onNodeWithText(attachmentsElement.label)
         attachmentsField.printToLog("label")
         attachmentsField.assertIsDisplayed()
@@ -332,9 +339,8 @@ class ThemingTests : FeatureFormTestRunner(
                 color = Color.Red
             )
         )
-        val attachment = attachmentsElement.attachments.first()
         // get the first attachment tile
-        val tile = attachmentsField.onChildWithText(attachment.name)
+        val tile = attachmentsField.onChildWithText(attachmentToTest.name)
         tile.assertIsDisplayed()
         tile.assertTextStyle(
             TextStyle(
@@ -342,7 +348,7 @@ class ThemingTests : FeatureFormTestRunner(
                 color = Color.Green
             )
         )
-        val fileSize = Formatter.formatFileSize(context, attachment.size)
+        val fileSize = Formatter.formatFileSize(context, attachmentToTest.size)
         val size = attachmentsField.onChildWithText(fileSize)
         size.assertIsDisplayed()
         size.assertTextStyle(
