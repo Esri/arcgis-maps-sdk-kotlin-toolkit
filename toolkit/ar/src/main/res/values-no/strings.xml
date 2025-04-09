@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Kameratillatelse ikke gitt</string>
+    <string name="arcore_not_installed_message">ARCore må være installert for å bruke TableTopSceneView. ARCore-tilgjengelighet: %1$s</string>
+</resources>

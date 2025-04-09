@@ -28,4 +28,36 @@
     <string name="feature_results">Resultados de entidad</string>
     <string name="function_results">Resultados de la función</string>
     <string name="clear_all_results">Borrar todos los resultados</string>
+    <string name="delete">Eliminar</string>
+    <string name="not_available">No disponible</string>
+    <string name="zoom_to">Acercar a</string>
+    <string name="zoom_in">Acercar</string>
+    <string name="fraction_along_edge">Fracción a lo largo del borde</string>
+    <string name="attributes">Atributos</string>
+    <string name="terminal_configuration">Configuración de terminal</string>
+    <string name="an_error_has_occurred">Se ha producido un error</string>
+    <string name="ok">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="clear_all_results_confirmation">Se perderán todos los resultados del trazado.</string>
+    <string name="object_id">Id. de objeto: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">No se ha encontrado Utility Network.</string>
+    <string name="no_trace_configurations_found">No se han encontrado configuraciones de trazado.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">No hay suficientes puntos de partida. Establezca al menos 1 ubicación de partida.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">No hay suficientes puntos de partida. Establezca al menos 2 ubicaciones de partida.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">No se pudo crear un elemento de utilidad a partir de ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Ya existen uno o más puntos de partida.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">No se pudo crear el objeto dibujable a partir del símbolo de la entidad.</string>
+    <string name="no_configuration_selected">No se ha seleccionado ninguna configuración</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Componente de trazado</string>
+    <string name="more_options">Más opciones</string>
+    <string name="go_back">Atrás</string>
+    <string name="edit_terminal_configuration">Editar configuración de terminal</string>
+    <string name="selected">Seleccionado</string>
+    <string name="feature_icon">Icono de la entidad</string>
+    <string name="zoom_to_result_description">Activar o desactivar el zoom al resultado</string>
+    <string name="select_previous_result">Seleccionar resultado anterior</string>
+    <string name="select_next_result">Seleccionar resultado siguiente</string>
+    <string name="error">Error</string>
 </resources>

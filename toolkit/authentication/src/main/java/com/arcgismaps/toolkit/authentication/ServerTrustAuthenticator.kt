@@ -38,6 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -119,11 +122,29 @@ private fun ServerTrustAuthenticatorImpl(
     Column(
         modifier = modifier
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.server_trust_message, hostname),
+            text = stringResource(id = R.string.server_trust_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Start
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = buildAnnotatedString {
+                val string = stringResource(
+                    id = R.string.server_trust_message,
+                    hostname
+                )
+                val startIdx = string.indexOf(hostname)
+                val endIdx = startIdx + hostname.length
+                append(string)
+                addStyle(
+                    style = SpanStyle(fontWeight = FontWeight.Bold),
+                    start = startIdx,
+                    end = endIdx
+                )
+            },
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start,
         )
@@ -144,15 +165,14 @@ private fun ServerTrustAuthenticatorImpl(
             TextButton(onClick = { onConfirm() }) {
                 Text(
                     text = stringResource(id = R.string.allow_connection),
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.End
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
     }
 }
 
-@Preview
+@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 @Composable
 private fun ServerTrustAuthenticatorImplPreview() {
     ServerTrustAuthenticatorImpl(

@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Selectați un punct de servicii</string>
     <string name="floor_filter_no_results">Nu a fost găsit niciun rezultat.</string>
+    <string name="geomodel_has_no_floor_aware_data">Modelul geografic nu conține date care țin seama de etaj</string>
+    <string name="an_error_has_occurred">A apărut o eroare</string>
     <string name="not_available">Indisponibil</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Amplasament - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Golire căutare</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Închidere</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Restrângere</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Reveniți la selectorul de amplasament</string>
 </resources>

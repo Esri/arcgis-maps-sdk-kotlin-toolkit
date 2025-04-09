@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">الشهادة المقدمة من %1$s غير موقعة من قبل مرجع مصدق موثوق.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">مضيف غير موثوق به</string>
+    <string name="server_trust_message">شهادة الخادم لـ %1$s غير موثوقة. قد يؤدي الاتصال إلى تعريض بياناتك للخطر. هل تريد المتابعة؟</string>
     <string name="cancel">إلغاء الأمر</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">خطير: السماح بالاتصال</string>
-    <string name="username_password_login_message">الرجاء تسجيل الدخول إلى %1$s</string>
+    <string name="allow_connection">السماح بالاتصال</string>
+    <string name="username_password_login_title">المصادقة مطلوبة</string>
+    <string name="username_password_login_message">يتعين عليك تسجيل الدخول للوصول إلى %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">اسم المستخدم</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">كلمة المرور</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">تسجيل الدخول</string>
+    <string name="sign_in">تسجيل الدخول</string>
 </resources>

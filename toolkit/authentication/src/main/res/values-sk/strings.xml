@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certifikát poskytnutý %1$s nie je podpísaný dôveryhodnou autoritou.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Nedôveryhodný hostiteľ</string>
+    <string name="server_trust_message">Certifikát servera pre %1$s nie je dôveryhodný. Pripojenie by mohlo ohroziť vaše dáta. Chcete pokračovať?</string>
     <string name="cancel">Zrušiť</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Nebezpečné: Povoliť pripojenie</string>
-    <string name="username_password_login_message">Prihláste sa prosím do %1$s</string>
+    <string name="allow_connection">Povoliť pripojenie</string>
+    <string name="username_password_login_title">Vyžaduje sa overenie</string>
+    <string name="username_password_login_message">Pre prístup k %1$s sa musíte prihlásiť</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Používateľské meno</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Heslo</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Prihlásenie</string>
+    <string name="sign_in">Prihlásiť sa</string>
 </resources>

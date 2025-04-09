@@ -184,7 +184,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 initialValue = state.value.value.data,
                 values = state.codedValues,
                 label = state.label,
-                description = state.description,
                 isRequired = state.isRequired.collectAsState().value,
                 noValueOption = state.showNoValueOption,
                 keyboardType = if (state.fieldType.isNumeric) {

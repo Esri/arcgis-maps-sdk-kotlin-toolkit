@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Сертификат, предоставленный %1$s, не подписан доверенным органом.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Ненадежный хост</string>
+    <string name="server_trust_message">Сертификат сервера для %1$s ненадежен. Подключение может поставить под угрозу ваши данные. Хотите продолжить?</string>
     <string name="cancel">Отмена</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Опасно: Разрешить подключение</string>
-    <string name="username_password_login_message">Войдите в %1$s</string>
+    <string name="allow_connection">Разрешить подключение</string>
+    <string name="username_password_login_title">Требуется аутентификация</string>
+    <string name="username_password_login_message">Вам необходимо войти для доступа к %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Имя пользователя</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Пароль</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Авторизоваться</string>
+    <string name="sign_in">Войти</string>
 </resources>

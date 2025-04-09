@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">El certificado proporcionado por %1$s no está firmado por una autoridad de confianza.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Host no fiable</string>
+    <string name="server_trust_message">El certificado de servidor para %1$s no es fiable. La conexión podría poner en peligro sus datos. ¿Desea continuar?</string>
     <string name="cancel">Cancelar</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Peligroso: Permitir la conexión</string>
-    <string name="username_password_login_message">Inicie sesión en %1$s</string>
+    <string name="allow_connection">Permitir la conexión</string>
+    <string name="username_password_login_title">Autenticación requerida</string>
+    <string name="username_password_login_message">Debe iniciar sesión para acceder a %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nombre de usuario</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Contraseña</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Inicio de sesión</string>
+    <string name="sign_in">Iniciar sesión</string>
 </resources>

@@ -46,7 +46,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
     }
@@ -55,7 +54,9 @@ android {
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
@@ -63,13 +64,11 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
+    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
-    }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
     }
 }
 

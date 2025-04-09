@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certifikatet som tillhandahålls av %1$s är inte signerat av en betrodd utfärdare.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Otillförlitlig värd</string>
+    <string name="server_trust_message">Servercertifikatet för %1$s är inte tillförlitligt. Anslutning kan påverka dina data. Vill du fortsätta?</string>
     <string name="cancel">Avbryt</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Farligt: Tillåt anslutning</string>
-    <string name="username_password_login_message">Logga in på %1$s</string>
+    <string name="allow_connection">Tillåt anslutning</string>
+    <string name="username_password_login_title">Autentisering krävs</string>
+    <string name="username_password_login_message">Du måste logga in för att få åtkomst till %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Användarnamn</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Lösenord</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Inloggning</string>
+    <string name="sign_in">Logga in</string>
 </resources>

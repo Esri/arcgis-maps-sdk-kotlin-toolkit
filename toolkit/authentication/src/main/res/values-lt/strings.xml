@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s pateiktas sertifikatas nepasirašytas patikimos institucijos.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Nepatikimas pagrindinis kompiuteris</string>
+    <string name="server_trust_message">%1$s serverio sertifikatas yra nepatikimas. Prisijungę galite pakenkti savo duomenims. Norite tęsti?</string>
     <string name="cancel">Atšaukti</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Pavojinga: leisti prisijungti</string>
-    <string name="username_password_login_message">Prisijunkite prie %1$s</string>
+    <string name="allow_connection">Leisti prisijungti</string>
+    <string name="username_password_login_title">Reikalingas autentifikavimas</string>
+    <string name="username_password_login_message">Turite prisijungti, jei norite pasiekti %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Naudotojo vardas</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Slaptažodis</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Prisijungti</string>
+    <string name="sign_in">Prisijunkite</string>
 </resources>

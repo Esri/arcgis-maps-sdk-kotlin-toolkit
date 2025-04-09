@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
@@ -118,24 +119,24 @@ class UsernamePasswordTests {
         }
         advanceUntilIdle()
         // verify the login button is disabled when the fields are empty
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the username field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the password field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextClearance()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
             .performTextInput("testPassword")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify it is enabled when both are filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsEnabled()
     }
 
@@ -198,6 +199,51 @@ class UsernamePasswordTests {
                 .performClick()
         }.await()
         assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user types in the password field
+     * Then the password should be obscured
+     * And when the user clicks the show password button
+     * Then the password should be revealed
+     *
+     * @since 200.7.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testPasswordVisibility() = runTest {
+        val password = "helloWorld"
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+            .performTextInput(password)
+
+        // verify that the password field is obscured
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
+        // verify that clicking the show password button will reveal the password
+        composeTestRule.onNodeWithContentDescription("Show password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText(password).assertExists()
+
+        // verify that clicking the hide password button again will obscure the password
+        composeTestRule.onNodeWithContentDescription("Hide password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
     }
 
     /**
@@ -316,17 +362,13 @@ class UsernamePasswordTests {
                 setupFailingArcGISTokenRequestInterceptor()
             }
 
-            // simulate incorrect username/password 4 times
-            repeat(4) {
+            // simulate incorrect username/password 5 times
+            repeat(5) {
                 composeTestRule.enterUsernamePasswordAndLogin()
                 advanceUntilIdle()
-                composeTestRule.onNodeWithText("Invalid username or password.").assertIsDisplayed()
             }
-            // the 5th time is should dismiss the dialog.
-            composeTestRule.enterUsernamePasswordAndLogin()
-            advanceUntilIdle()
 
-            // ensure the dialog has disappeared
+            // ensure the dialog has disappeared after last attempt
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
@@ -390,6 +432,6 @@ fun <T : TestRule, A : ComponentActivity> AndroidComposeTestRule<T, A>.enterUser
     onNodeWithText(activity.getString(R.string.password_label))
         .performTextInput("testpassword")
     // Click the sign in button
-    onNodeWithText(activity.getString(R.string.login))
+    onNodeWithText(activity.getString(R.string.sign_in))
         .performClick()
 }

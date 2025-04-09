@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Nhập %1$d ký tự</item>
         <item quantity="one">Nhập %1$d ký tự</item>
+        <item quantity="two">Nhập %1$d ký tự</item>
+        <item quantity="few">Nhập %1$d ký tự</item>
+        <item quantity="many">Nhập %1$d ký tự</item>
         <item quantity="other">Nhập %1$d ký tự</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Giá trị phải chứa %1$d ký tự</item>
         <item quantity="one">Giá trị phải chứa %1$d ký tự</item>
+        <item quantity="two">Giá trị phải chứa %1$d ký tự</item>
+        <item quantity="few">Giá trị phải chứa %1$d ký tự</item>
+        <item quantity="many">Giá trị phải chứa %1$d ký tự</item>
         <item quantity="other">Giá trị phải chứa %1$d ký tự</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Nhập %1$d đến %2$d ký tự</string>
-    <string name="value_must_be_from_to_characters">Giá trị phải từ %1$d đến %2$d ký tự</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Giới hạn tối đa %1$d ký tự</item>
         <item quantity="one">Giới hạn tối đa %1$d ký tự</item>
+        <item quantity="two">Giới hạn tối đa %1$d ký tự</item>
+        <item quantity="few">Giới hạn tối đa %1$d ký tự</item>
+        <item quantity="many">Giới hạn tối đa %1$d ký tự</item>
         <item quantity="other">Giới hạn tối đa %1$d ký tự</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Nhập %1$d đến %2$d ký tự</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Giá trị phải từ %1$d đến %2$d ký tự</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Giới hạn tối đa %1$d ký tự</string>
     <string name="no_value">Không có giá trị</string>
     <string name="enter_value">Nhập Giá trị</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Hoàn tất</string>
     <string name="filter">Bộ lọc %1$s</string>
+    <string name="search">Tìm kiếm</string>
     <string name="numeric_range_helper_text">Nhập giá trị trong khoảng từ %1$s đến %2$s</string>
     <string name="value_must_be_from_to">Giá trị phải từ %1$s đến %2$s</string>
     <string name="less_than_min_value">Dưới giá trị tối thiểu %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">SA</string>
     <string name="ff_time_picker_hour">Giờ</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d giờ</string>
     <string name="ff_time_picker_hour_selection">Chọn giờ</string>
     <string name="ff_time_picker_hour_suffix">%1$d giờ</string>
     <string name="ff_time_picker_hour_text_field">cho giờ</string>
     <string name="ff_time_picker_minute">Phút</string>
     <string name="ff_time_picker_minute_selection">Chọn phút</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d phút</string>
     <string name="ff_time_picker_minute_text_field">cho phút</string>
     <string name="ff_time_picker_period_toggle_description">Chọn SA hoặc CH</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Không thể tải xuống tệp rỗng</string>
     <string name="attachment_deleted">Đã xóa thành công %1s</string>
     <string name="attachment_size_limit_exceeded">Không thể tải xuống tệp đính kèm lớn hơn %1$s</string>
+    <string name="barcode_tooltip">Hướng máy ảnh của bạn vào mã vạch</string>
+    <string name="barcode_permission_denied">Cần quyền truy cập máy ảnh để quét mã vạch. Vui lòng bật quyền truy cập máy ảnh trong mục thiết lập của thiết bị.</string>
+    <string name="unsupported_value">Giá trị Không được hỗ trợ</string>
+    <string name="tap_to_scan">Nhấn để quét</string>
+    <string name="unable_to_open_the_camera">Không thể mở máy ảnh</string>
+    <string name="value_must_be_a_guid">Giá trị phải là GUID hợp lệ</string>
 </resources>

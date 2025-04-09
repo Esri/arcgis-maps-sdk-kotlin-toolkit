@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s által megadott tanúsítványt nem megbízható hatóság írta alá.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Nem megbízható gazdagép</string>
+    <string name="server_trust_message">A(z) %1$s szervertanúsítványa nem megbízható. A kapcsolódás veszélyeztetheti az adatokat. Folytatja?</string>
     <string name="cancel">Mégse</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Veszélyes: Engedélyezze a kapcsolatot</string>
-    <string name="username_password_login_message">Kérjük, jelentkezzen be: %1$s</string>
+    <string name="allow_connection">Kapcsolat engedélyezése</string>
+    <string name="username_password_login_title">Hitelesítés szükséges</string>
+    <string name="username_password_login_message">A(z) %1$s eléréséhez be kell jelentkeznie</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Felhasználónév</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Jelszó</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Bejelentkezés</string>
+    <string name="sign_in">Bejelentkezés</string>
 </resources>

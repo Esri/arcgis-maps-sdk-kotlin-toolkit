@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Сертификатът, предоставен от %1$s не е подписан от доверен орган.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Ненадежден хост</string>
+    <string name="server_trust_message">Сертификатът на сървъра за %1$s не е доверен. Свързването може да компрометира Вашите данни. Искате ли да продължите?</string>
     <string name="cancel">Отказ</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Опасно: Разрешете свързване</string>
-    <string name="username_password_login_message">Моля, влезте в %1$s</string>
+    <string name="allow_connection">Разрешете свързването</string>
+    <string name="username_password_login_title">Изисква се автентикация</string>
+    <string name="username_password_login_message">Трябва да се впишете, за да получите достъп до %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Потребителско име</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Парола</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Вписване</string>
+    <string name="sign_in">Вписване</string>
 </resources>

@@ -28,4 +28,36 @@
     <string name="feature_results">Resultats d\'entitats</string>
     <string name="function_results">Resultats de la funció</string>
     <string name="clear_all_results">Esborra tots els resultats</string>
+    <string name="delete">Suprimeix</string>
+    <string name="not_available">No està disponible</string>
+    <string name="zoom_to">Aplica el zoom a</string>
+    <string name="zoom_in">Apropa</string>
+    <string name="fraction_along_edge">Fracció al llarg de la vora</string>
+    <string name="attributes">Atributs</string>
+    <string name="terminal_configuration">Configuració del terminal</string>
+    <string name="an_error_has_occurred">Hi ha hagut un error</string>
+    <string name="ok">D\'acord</string>
+    <string name="cancel">Cancel·la</string>
+    <string name="clear_all_results_confirmation">Es perdran tots els resultats del traçat.</string>
+    <string name="object_id">ID d\'objecte: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">No s\'ha trobat cap xarxa de serveis.</string>
+    <string name="no_trace_configurations_found">No s\'ha trobat cap configuració de traçat.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">No hi ha prou punts d\'inici. Definiu almenys 1 ubicació d\'inici.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">No hi ha prou punts d\'inici. Definiu almenys 2 ubicacions d\'inici.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">No s\'ha pogut crear un element de servei a partir de l\'ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Ja hi ha un o diversos punts d\'inici.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">No s\'ha pogut crear un dibuixable a partir del símbol d\'entitat.</string>
+    <string name="no_configuration_selected">No s\'ha seleccionat cap configuració</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Component del traçat</string>
+    <string name="more_options">Més opcions</string>
+    <string name="go_back">Enrere</string>
+    <string name="edit_terminal_configuration">Edita la configuració del terminal</string>
+    <string name="selected">Seleccionat</string>
+    <string name="feature_icon">Icona de l\'entitat</string>
+    <string name="zoom_to_result_description">Habiliteu o deshabiliteu el zoom al resultat</string>
+    <string name="select_previous_result">Selecciona el resultat anterior</string>
+    <string name="select_next_result">Selecciona el resultat següent</string>
+    <string name="error">Error</string>
 </resources>

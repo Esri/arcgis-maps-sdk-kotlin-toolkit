@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Kameras atļauja nav piešķirta</string>
+    <string name="arcore_not_installed_message">Ir jāinstalē ARCore, lai varētu izmantot TableTopSceneView. ARCore pieejamība: %1$s</string>
+</resources>

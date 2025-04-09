@@ -15,4 +15,4 @@ Once you have signed in, you can access the web maps that are shared with your a
 
 If you'd rather use an ArcGIS Enterprise account, click the `Sign in with ArcGIS Enterprise` button in the app. This will open a dialog prompting for an Enterprise URL followed by another dialog to enter your credentials.
 
-For more information on the `FeatureForm` component and how it works, see it's [Readme](../../toolkit/featureforms/README.md).
+For more information on the `FeatureForm` component and how it works, see its [Readme](../../toolkit/featureforms/README.md).

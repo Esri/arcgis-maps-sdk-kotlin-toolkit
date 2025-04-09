@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">تحديد مرفق</string>
     <string name="floor_filter_no_results">لم يتم العثور على نتائج.</string>
+    <string name="geomodel_has_no_floor_aware_data">لا يحتوي GeoModel على أي بيانات مرتبطة بالأرضية</string>
+    <string name="an_error_has_occurred">حدث خطأ غير متوقع</string>
     <string name="not_available">غير متاح</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">الموقع - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">مسح البحث</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">إغلاق</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">طي</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">العودة إلى محدد الموقع</string>
 </resources>

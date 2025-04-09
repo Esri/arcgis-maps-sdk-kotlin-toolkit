@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Επιλέξτε εγκατάσταση</string>
     <string name="floor_filter_no_results">Δεν βρέθηκαν αποτελέσματα.</string>
+    <string name="geomodel_has_no_floor_aware_data">Το GeoModel δεν διαθέτει δεδομένα με επίγνωση ορόφου</string>
+    <string name="an_error_has_occurred">Παρουσιάστηκε σφάλμα</string>
     <string name="not_available">Μη διαθέσιμο</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Ιστότοπος - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Εκκαθάριση αναζήτησης</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Κλείσιμο</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Σύμπτυξη</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Επιστροφή στον επιλογέα ιστότοπου</string>
 </resources>

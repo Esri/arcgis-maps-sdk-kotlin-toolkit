@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Сертифікат, наданий %1$s, не підписаний довіреним центром.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Недовірений хост</string>
+    <string name="server_trust_message">Сертифікат сервера для %1$s не є довіреним. У разі підключення ваші дані може бути розкрито. Бажаєте продовжити?</string>
     <string name="cancel">Скасувати</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Небезпечно: дозволити підключення</string>
-    <string name="username_password_login_message">Увійдіть в %1$s</string>
+    <string name="allow_connection">Дозволити підключення</string>
+    <string name="username_password_login_title">Потрібна аутентифікація</string>
+    <string name="username_password_login_message">Для доступу до %1$s потрібно виконати вхід у систему</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Ім\'я користувача</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Пароль</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Увійти в систему</string>
+    <string name="sign_in">Увійти в систему</string>
 </resources>

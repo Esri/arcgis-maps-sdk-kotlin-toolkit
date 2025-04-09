@@ -15,16 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s 提供的憑證未經信任的機構簽署。</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">不受信任的主機</string>
+    <string name="server_trust_message">不信任 %1$s 的伺服器憑證。 連線可能會危及您的資料。 是否要繼續?</string>
     <string name="cancel">取消</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">危險: 允許連線</string>
-    <string name="username_password_login_message">請登入到 %1$s</string>
+    <string name="allow_connection">允許連線</string>
+    <string name="username_password_login_title">需要驗證</string>
+    <string name="username_password_login_message">您需要登入才能存取 %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">使用者名稱</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">密碼</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">登入</string>
+    <string name="sign_in">登入</string>
 </resources>
