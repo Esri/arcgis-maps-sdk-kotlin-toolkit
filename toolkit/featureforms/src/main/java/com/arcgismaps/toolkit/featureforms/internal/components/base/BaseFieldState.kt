@@ -233,9 +233,7 @@ internal abstract class BaseFieldState<T>(
     private fun filterErrors(errors: List<ValidationErrorState>): ValidationErrorState =
         when {
             // if there are no errors
-            hasNoErrors(errors) -> ValidationErrorState.NoError
-            // if the field has a value expression
-            hasValueExpression -> errors.first()
+            errors.isEmpty() -> ValidationErrorState.NoError
             // if the field was focused and is focused
             isFocused.value -> handleFocusedErrors(errors)
             // if the field was focused but is not currently focused
@@ -281,13 +279,6 @@ internal abstract class BaseFieldState<T>(
             else -> ValidationErrorState.NoError
         }
     }
-}
-
-/**
- * Returns true if the field should not show any errors.
- */
-private fun BaseFieldState<*>.hasNoErrors(errors: List<ValidationErrorState>): Boolean {
-    return errors.isEmpty() || !(hasValueExpression || isEditable.value)
 }
 
 /**

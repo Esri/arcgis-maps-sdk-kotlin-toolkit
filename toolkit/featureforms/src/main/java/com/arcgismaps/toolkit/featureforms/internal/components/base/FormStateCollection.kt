@@ -21,7 +21,7 @@ import com.arcgismaps.mapping.featureforms.FormElement
 
 /**
  * An iterable collection that provides a [FormElement] and its [FormElementState] as a
- * [FormStateCollection.Entry].
+ * [FormStateCollection.Entry]. This does not allow for duplicate entries.
  */
 @Immutable
 internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
@@ -45,11 +45,14 @@ internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
+        override fun equals(other: Any?): Boolean
+        override fun hashCode(): Int
     }
 }
 
 /**
- * A mutable [FormStateCollection].
+ * A Mutable iterable collection that provides a [FormElement] and its [FormElementState] as a
+ * [FormStateCollection.Entry]. This does not allow for duplicate entries.
  */
 internal interface MutableFormStateCollection : FormStateCollection {
 
@@ -58,8 +61,9 @@ internal interface MutableFormStateCollection : FormStateCollection {
      *
      * @param formElement the [FormElement] to add.
      * @param state the [FormElementState] to add.
+     * @return true if the entry was added, false otherwise.
      */
-    fun add(formElement: FormElement, state: FormElementState)
+    fun add(formElement: FormElement, state: FormElementState) : Boolean
 }
 
 /**
@@ -73,14 +77,14 @@ internal fun MutableFormStateCollection(): MutableFormStateCollection =
  */
 private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
-    private val entries: MutableSet<FormStateCollection.Entry> = mutableSetOf()
+    private val entries: LinkedHashSet<FormStateCollection.Entry> = linkedSetOf()
 
     override fun iterator(): Iterator<FormStateCollection.Entry> {
         return entries.iterator()
     }
 
-    override fun add(formElement: FormElement, state: FormElementState) {
-        entries.add(EntryImpl(formElement, state))
+    override fun add(formElement: FormElement, state: FormElementState) : Boolean {
+        return entries.add(EntryImpl(formElement, state))
     }
 
     override operator fun get(formElement: FormElement): FormElementState? =
@@ -112,7 +116,19 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
     class EntryImpl(
         override val formElement: FormElement,
         override val state: FormElementState
-    ) : FormStateCollection.Entry
+    ) : FormStateCollection.Entry {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || javaClass != other.javaClass) return false
+
+            other as EntryImpl
+
+            return formElement == other.formElement
+        }
+
+        override fun hashCode(): Int = formElement.hashCode()
+
+    }
 }
 
 /**
