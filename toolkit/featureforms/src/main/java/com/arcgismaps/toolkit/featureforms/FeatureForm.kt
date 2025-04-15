@@ -254,10 +254,15 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val scope = rememberCoroutineScope()
+    // Hold the list of form elements.
+    val formElements: List<FormElement> = remember(featureForm) {
+        // Add the default attachments element, if present.
+        featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
+    }
     val states = remember(featureForm) {
         createStates(
             form = featureForm,
-            elements = featureForm.elements,
+            elements = formElements,
             // Ignore the UtilityAssociationsFormElement as it is not supported with this API
             ignoreList = setOf(
                 UtilityAssociationsFormElement::class.java

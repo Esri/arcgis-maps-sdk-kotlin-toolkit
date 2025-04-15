@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
@@ -140,10 +141,12 @@ public class FeatureFormState private constructor(
         coroutineScope: CoroutineScope
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
+        val formElements: List<FormElement> =
+            featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
         // create state objects for all the supported element types that are part of the provided FeatureForm
         val states = createStates(
             form = this.featureForm,
-            elements = this.featureForm.elements,
+            elements = formElements,
             scope = coroutineScope
         )
         // Add the provided state collection to the store.
@@ -189,9 +192,10 @@ public class FeatureFormState private constructor(
     internal fun navigateTo(feature: ArcGISFeature) {
         navigateToRoute?.let { navigate ->
             val form = FeatureForm(feature)
+            val formElements = form.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
             val states = createStates(
                 form = form,
-                elements = form.elements,
+                elements = formElements,
                 scope = coroutineScope
             )
             store.addLast(FormStateData(form, states))
@@ -273,6 +277,17 @@ internal fun createStates(
     }
     filteredElements.forEach { element ->
         when (element) {
+
+            is AttachmentsFormElement -> {
+                val state = AttachmentElementState(
+                    formElement = form.defaultAttachmentsElement!!,
+                    scope = scope,
+                    id = form.defaultAttachmentsElement!!.hashCode(),
+                    evaluateExpressions = form::evaluateExpressions
+                )
+                states.add(element, state)
+            }
+
             is FieldFormElement -> {
                 val state = createFieldState(element, form, scope)
                 if (state != null) {
@@ -320,18 +335,6 @@ internal fun createStates(
 
             else -> {}
         }
-    }
-    // The Toolkit currently only supports AttachmentsFormElements via the
-    // default attachments element. Once AttachmentsFormElements can be authored
-    // the switch case above should have a case added for AttachmentsFormElement.
-    if (form.defaultAttachmentsElement != null) {
-        val state = AttachmentElementState(
-            formElement = form.defaultAttachmentsElement!!,
-            scope = scope,
-            id = form.defaultAttachmentsElement!!.hashCode(),
-            evaluateExpressions = form::evaluateExpressions
-        )
-        states.add(form.defaultAttachmentsElement!!, state)
     }
     return states
 }
