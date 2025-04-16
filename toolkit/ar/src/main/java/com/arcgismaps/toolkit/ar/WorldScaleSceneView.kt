@@ -26,13 +26,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -56,6 +60,7 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -63,15 +68,19 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
+import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPeDataConfigured
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
+import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Plane
+import com.google.ar.core.Point
 import java.time.Instant
 
 /**
@@ -248,10 +257,38 @@ public fun WorldScaleSceneView(
         }
     )
 
+    var lastSingleTapConfirmedEvent: SingleTapConfirmedEvent? by remember { mutableStateOf(null) }
+    val rememberedSingleTapConfirmedEvent = rememberUpdatedState(lastSingleTapConfirmedEvent)
+    val rememberedOnSingleTapConfirmed = rememberUpdatedState(onSingleTapConfirmed)
+
     Box(modifier = modifier) {
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
+                rememberedOnSingleTapConfirmed.value?.let { singleTapConfirmedCallback ->
+                    rememberedSingleTapConfirmedEvent.value?.let { singleTapConfirmedEvent ->
+                        val hitResult = frame.hitTest(singleTapConfirmedEvent.screenCoordinate.x.toFloat(), singleTapConfirmedEvent.screenCoordinate.y.toFloat())
+                        val hit = hitResult.firstOrNull {
+                            when (it.trackable) {
+                                is Plane, is Point -> true
+                                else -> false
+                            }
+                        }
+                        if (hit == null) {
+                            singleTapConfirmedCallback(singleTapConfirmedEvent)
+                            return@ArCameraFeed
+                        }
+
+                        // hit is not null, so we can get the map point
+                        // first get the point relative to camera
+
+                        val hitPoseTM = hit.hitPose.transformationMatrix
+                        val origin = (worldScaleCameraController.cameraController as TransformationMatrixCameraController).originCamera.value.transformationMatrix
+                        val mapPoint = GeometryEngine.projectOrNull(Camera(origin + hitPoseTM).location, WorldScaleParameters.SR_CAMERA)
+                        singleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
+                    }
+                    lastSingleTapConfirmedEvent = null
+                }
                 worldScaleCameraController.updateCamera(frame, session)
                 if (!worldScaleCameraController.hasSetOriginCamera) return@ArCameraFeed
                 worldScaleSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
@@ -308,7 +345,9 @@ public fun WorldScaleSceneView(
             onScale = onScale,
             onUp = onUp,
             onDown = onDown,
-            onSingleTapConfirmed = onSingleTapConfirmed,
+            onSingleTapConfirmed = {
+                lastSingleTapConfirmedEvent = it
+            },
             onDoubleTap = onDoubleTap,
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,

@@ -241,7 +241,7 @@ fun MainScreen() {
                     },
                     worldScaleSceneViewProxy = proxy,
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                        proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                        singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
                                 graphicsOverlays.first().graphics.add(
                                     Graphic(
