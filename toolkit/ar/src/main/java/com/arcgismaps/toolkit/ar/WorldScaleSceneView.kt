@@ -32,7 +32,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
@@ -79,6 +78,7 @@ import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Config.PlaneFindingMode
 import com.google.ar.core.Plane
 import com.google.ar.core.Point
 import java.time.Instant
@@ -224,6 +224,15 @@ public fun WorldScaleSceneView(
     // If PE data could not be configured, we can't position the scene camera accurately
     if (!pedataConfigured) return
 
+    val rememberedOnSingleTapConfirmed = rememberUpdatedState(onSingleTapConfirmed)
+
+    val planeFindingMode = rememberUpdatedState(
+        if (rememberedOnSingleTapConfirmed.value != null) {
+            PlaneFindingMode.HORIZONTAL_AND_VERTICAL
+        } else {
+            PlaneFindingMode.DISABLED
+        }
+    )
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = LocalContext.current.applicationContext,
@@ -233,7 +242,8 @@ public fun WorldScaleSceneView(
                     onInitializationStatusChanged
                 )
             },
-            useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial
+            useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial,
+            planeFindingMode = planeFindingMode.value
         )
 
     val calibrationState = remember { CalibrationState() }
@@ -253,13 +263,12 @@ public fun WorldScaleSceneView(
             // onResetOriginCamera is only called in WorldTracking mode. We need to reset the AR
             // session in WorldTracking Mode when the origin camera is reset, because AR tracking
             // will need to start from scratch.
-            arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial)
+            arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial, planeFindingMode.value)
         }
     )
 
     var lastSingleTapConfirmedEvent: SingleTapConfirmedEvent? by remember { mutableStateOf(null) }
     val rememberedSingleTapConfirmedEvent = rememberUpdatedState(lastSingleTapConfirmedEvent)
-    val rememberedOnSingleTapConfirmed = rememberUpdatedState(onSingleTapConfirmed)
 
     Box(modifier = modifier) {
         ArCameraFeed(
