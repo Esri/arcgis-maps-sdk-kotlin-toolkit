@@ -49,7 +49,7 @@ buildscript {
     // set them as project properties
     val artifactoryUrl: String? = project.findProperty("artifactoryUrl") as String?
         ?: localProperties.getProperty("artifactoryUrl")
-        ?: ""
+        ?: "https://esri.jfrog.io/artifactory/arcgis"
     val artifactoryUsername: String? = project.findProperty("artifactoryUsername") as String?
         ?: localProperties.getProperty("artifactoryUsername")
         ?: ""
@@ -57,11 +57,9 @@ buildscript {
         ?: localProperties.getProperty("artifactoryPassword")
         ?: ""
 
-    if (artifactoryUrl != "") {
-        project.extra.set("artifactoryUrl", artifactoryUrl)
-        project.extra.set("artifactoryUsername", artifactoryUsername)
-        project.extra.set("artifactoryPassword", artifactoryPassword)
-    }
+    project.extra.set("artifactoryUrl", artifactoryUrl)
+    project.extra.set("artifactoryUsername", artifactoryUsername)
+    project.extra.set("artifactoryPassword", artifactoryPassword)
 
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }
