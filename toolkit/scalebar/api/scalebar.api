@@ -1,0 +1,74 @@
+public final class com/arcgismaps/toolkit/scalebar/ScalebarKt {
+	public static final fun Scalebar-TCCHP28 (FDLcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/SpatialReference;Landroidx/compose/ui/Modifier;JDZLcom/arcgismaps/toolkit/scalebar/ScalebarStyle;Lcom/arcgismaps/UnitSystem;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class com/arcgismaps/toolkit/scalebar/ScalebarStyle : java/lang/Enum {
+	public static final field AlternatingBar Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static final field Bar Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static final field DualUnitLine Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static final field GraduatedLine Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static final field Line Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+	public static fun values ()[Lcom/arcgismaps/toolkit/scalebar/ScalebarStyle;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/LabelTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun copy-tNS2XkQ (JJJJJJ)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
+	public static synthetic fun copy-tNS2XkQ$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;JJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternateFillColor-0d7_KjU ()J
+	public final fun getFillColor-0d7_KjU ()J
+	public final fun getLineColor-0d7_KjU ()J
+	public final fun getShadowColor-0d7_KjU ()J
+	public final fun getTextColor-0d7_KjU ()J
+	public final fun getTextShadowColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public final fun setAlternateFillColor-8_81llA (J)V
+	public final fun setFillColor-8_81llA (J)V
+	public final fun setLineColor-8_81llA (J)V
+	public final fun setShadowColor-8_81llA (J)V
+	public final fun setTextColor-8_81llA (J)V
+	public final fun setTextShadowColor-8_81llA (J)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarDefaults;
+	public final fun colors-5tl4gsc (JJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarColors;
+	public final fun shapes (FFLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/scalebar/theme/LabelTypography;
+}
+
+public final class com/arcgismaps/toolkit/scalebar/theme/ScalebarShapes {
+	public static final field $stable I
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun copy (FF)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;FFILjava/lang/Object;)Lcom/arcgismaps/toolkit/scalebar/theme/ScalebarShapes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBarCornerRadius ()F
+	public final fun getTextShadowBlurRadius ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

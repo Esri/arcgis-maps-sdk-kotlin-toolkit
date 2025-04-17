@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">输入 %1$d 个字符</item>
         <item quantity="one">输入 %1$d 个字符</item>
+        <item quantity="two">输入 %1$d 个字符</item>
+        <item quantity="few">输入 %1$d 个字符</item>
+        <item quantity="many">输入 %1$d 个字符</item>
         <item quantity="other">输入 %1$d 个字符</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">值必须为 %1$d 个字符</item>
         <item quantity="one">值必须为 %1$d 个字符</item>
+        <item quantity="two">值必须为 %1$d 个字符</item>
+        <item quantity="few">值必须为 %1$d 个字符</item>
+        <item quantity="many">值必须为 %1$d 个字符</item>
         <item quantity="other">值必须为 %1$d 个字符</item>
     </plurals>
-    <string name="enter_min_to_max_chars">输入 %1$d，最多 %2$d 个字符</string>
-    <string name="value_must_be_from_to_characters">值必须为 %1$d 到 %2$d 个字符</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">最多 %1$d 个字符</item>
         <item quantity="one">最多 %1$d 个字符</item>
+        <item quantity="two">最多 %1$d 个字符</item>
+        <item quantity="few">最多 %1$d 个字符</item>
+        <item quantity="many">最多 %1$d 个字符</item>
         <item quantity="other">最多 %1$d 个字符</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">输入 %1$d，最多 %2$d 个字符</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">值必须为 %1$d 到 %2$d 个字符</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">最多 %1$d 个字符</string>
     <string name="no_value">无值</string>
     <string name="enter_value">输入值</string>
@@ -39,6 +60,7 @@
     <string name="ok">确定</string>
     <string name="done">完成</string>
     <string name="filter">过滤 %1$s</string>
+    <string name="search">搜索</string>
     <string name="numeric_range_helper_text">输入介于 %1$s 和 %2$s 之间的值</string>
     <string name="value_must_be_from_to">值必须介于 %1$s 和 %2$s 之间</string>
     <string name="less_than_min_value">低于最小值 %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">小时</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d 小时</string>
     <string name="ff_time_picker_hour_selection">选择小时</string>
     <string name="ff_time_picker_hour_suffix">%1$d 点</string>
     <string name="ff_time_picker_hour_text_field">小时</string>
     <string name="ff_time_picker_minute">分钟</string>
     <string name="ff_time_picker_minute_selection">选择分钟</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d 分钟</string>
     <string name="ff_time_picker_minute_text_field">分钟</string>
     <string name="ff_time_picker_period_toggle_description">选择上午或下午</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">无法下载空文件</string>
     <string name="attachment_deleted">已成功删除 %1s</string>
     <string name="attachment_size_limit_exceeded">无法下载大于 %1$s 的附件</string>
+    <string name="barcode_tooltip">将相机对准条形码</string>
+    <string name="barcode_permission_denied">扫描条形码需要相机权限。 请在设备设置中启用相机权限。</string>
+    <string name="unsupported_value">不受支持的值</string>
+    <string name="tap_to_scan">点击扫描</string>
+    <string name="unable_to_open_the_camera">无法打开相机</string>
+    <string name="value_must_be_a_guid">值必须为有效 GUID</string>
 </resources>

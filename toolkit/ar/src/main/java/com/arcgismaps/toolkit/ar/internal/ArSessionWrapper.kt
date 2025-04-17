@@ -18,24 +18,15 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -44,7 +35,11 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @since 200.6.0
  */
-internal class ArSessionWrapper(private val applicationContext: Context, private val scope: CoroutineScope) :
+internal class ArSessionWrapper(
+    private val applicationContext: Context,
+    private val onError: (Throwable) -> Unit,
+    private var useGeospatial: Boolean
+) :
     DefaultLifecycleObserver {
 
     private var session: Session? = null
@@ -53,14 +48,10 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
 
     private var shouldInitializeDisplay = true
 
-    private var useGeospatial = false
-
     override fun onDestroy(owner: LifecycleOwner) {
         withLock { session, _ ->
             this.session = null
-            scope.launch(Dispatchers.Unconfined) {
-                session?.close()
-            }
+            session?.close()
         }
     }
 
@@ -72,21 +63,24 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
 
     override fun onResume(owner: LifecycleOwner) {
         withLock { session, _ ->
-            val newSession = session ?: Session(applicationContext)
+            val newSession = session ?: Session(applicationContext).also {
+                this.session = it
+                configureSession(useGeospatial)
+            }
             shouldInitializeDisplay = true
             newSession.resume()
-            this.session = newSession
-            configureSession(useGeospatial)
         }
     }
 
-    internal fun configureSession(useGeospatial: Boolean) {
-        // TODO:
-       if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) return
+    private fun configureSession(useGeospatial: Boolean) {
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                 if (useGeospatial) {
+                    if (session?.isGeospatialModeSupported(Config.GeospatialMode.ENABLED) == false) {
+                        onError(IllegalStateException("Geospatial mode is not supported on this device."))
+                        return
+                    }
                     geospatialMode = Config.GeospatialMode.ENABLED
                 }
                 // We only want to detect horizontal planes.
@@ -105,7 +99,7 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
         }
     }
 
-    suspend fun resetSession(useGeospatial: Boolean = false) {
+    fun resetSession(useGeospatial: Boolean = false) {
         withLock { session, _ ->
             session?.let {
                 it.pause()
@@ -127,9 +121,19 @@ internal class ArSessionWrapper(private val applicationContext: Context, private
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context, useGeospatial: Boolean = false): ArSessionWrapper {
+internal fun rememberArSessionWrapper(
+    applicationContext: Context,
+    onError: (Throwable) -> Unit = {},
+    useGeospatial: Boolean = false
+): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val arSessionWrapper = remember{ ArSessionWrapper(applicationContext, lifecycleOwner.lifecycleScope) }
+    val arSessionWrapper = remember {
+        ArSessionWrapper(
+            applicationContext,
+            onError,
+            useGeospatial
+        )
+    }
     LaunchedEffect(useGeospatial) {
         arSessionWrapper.resetSession(useGeospatial)
     }

@@ -76,8 +76,7 @@ public class WorldScaleSceneViewScope internal constructor(
 ) {
 
     /**
-     * Displays a calibration view used to adjust the heading/altitude of the scene displayed
-     * in the [WorldScaleSceneView].
+     * Displays a calibration view used to adjust the heading/elevation of the scene view's camera.
      *
      * @param onDismiss lambda invoked when the close button of the calibration view is clicked
      * @param modifier Modifier to be applied to the composable calibration view

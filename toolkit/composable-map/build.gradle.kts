@@ -64,9 +64,6 @@ android {
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-    }
 }
 
 //https://youtrack.jetbrains.com/issue/KTIJ-21063

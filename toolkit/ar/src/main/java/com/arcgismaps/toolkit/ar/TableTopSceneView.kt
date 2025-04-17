@@ -75,7 +75,10 @@ import java.time.Instant
 /**
  * A scene view that provides an augmented reality table top experience.
  *
- * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
+ * Note: You must follow [Google's user privacy requirements for ARCore](https://developers.google.com/ar/develop/privacy-requirements)
+ * when using TableTopSceneView in your application.
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView.
  * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] used to anchor the scene with a physical surface.
  * @param translationFactor determines how many meters the scene view translates as the device moves.
  * A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`.
@@ -83,46 +86,46 @@ import java.time.Instant
  * table top width. The virtual content width is determined by the [clippingDistance] in meters around the [arcGISSceneAnchor].
  * For example, in order to setup a table top scene where scene data should be displayed within a 400 meter radius around
  * the [arcGISSceneAnchor] and be placed on a table top that is 1 meter wide: `translation factor = 400 meter / 1 meter`.
- * @param modifier Modifier to be applied to the TableTopSceneView
- * @param clippingDistance the clipping distance in meters around the [arcGISSceneAnchor]. A null means that no data will be clipped.
+ * @param modifier Modifier to be applied to the TableTopSceneView.
+ * @param clippingDistance the clipping distance in meters around the [arcGISSceneAnchor]. A null value means that no data will be clipped.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
  * If set to `true`, the camera permission will be requested automatically when the composable is
  * first displayed. The default value is `true`. Set to false if your application takes care of requesting camera permissions before
  * displaying the TableTopSceneView.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
- * type of [ViewpointType.CenterAndScale]
+ * type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
- * type of [ViewpointType.BoundingGeometry]
- * @param graphicsOverlays graphics overlays used by this TableTopSceneView
- * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView
- * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView
- * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView
- * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise
- * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed
- * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
- * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView
- * @param imageOverlays image overlays for displaying images in the TableTopSceneView
- * @param timeExtent the [TimeExtent] used by the TableTopSceneView
- * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed
- * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time
- * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView
- * @param ambientLightColor the color of the TableTopSceneView's ambient light
- * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed
- * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed
- * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed
- * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView
- * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed
- * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView
- * @param onScale lambda invoked when a user performs a pinch gesture on the TableTopSceneView
- * @param onUp lambda invoked when the user removes all their pointers from the TableTopSceneView
- * @param onDown lambda invoked when the user first presses on the TableTopSceneView
- * @param onSingleTapConfirmed lambda invoked when the user taps once on the TableTopSceneView
- * @param onDoubleTap lambda invoked the user double taps on the TableTopSceneView
- * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView
- * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView
- * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView
- * @param content the content of the TableTopSceneView
+ * type of [ViewpointType.BoundingGeometry].
+ * @param graphicsOverlays graphics overlays used by this TableTopSceneView.
+ * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView.
+ * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView.
+ * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise.
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed.
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes.
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView.
+ * @param imageOverlays image overlays for displaying images in the TableTopSceneView.
+ * @param timeExtent the [TimeExtent] used by the TableTopSceneView.
+ * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed.
+ * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time.
+ * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView.
+ * @param ambientLightColor the color of the TableTopSceneView's ambient light.
+ * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed.
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed.
+ * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed.
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView.
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed.
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView.
+ * @param onScale lambda invoked when a user performs a pinch gesture on the TableTopSceneView.
+ * @param onUp lambda invoked when the user removes all their pointers from the TableTopSceneView.
+ * @param onDown lambda invoked when the user first presses on the TableTopSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the TableTopSceneView.
+ * @param onDoubleTap lambda invoked the user double taps on the TableTopSceneView.
+ * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView.
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView.
+ * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView.
+ * @param content the content of the TableTopSceneView.
  *
  * @since 200.6.0
  */

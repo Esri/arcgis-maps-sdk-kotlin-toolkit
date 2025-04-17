@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Mitteusaldusväärne host</string>
+    <string name="server_trust_message">%1$s serveri sertifikaati ei saa usaldada. Ühenduse loomine võib teie andmeid rikkuda Kas soovite jätkata?</string>
     <string name="cancel">Tühista</string>
+    <string name="allow_connection">Luba ühendus</string>
+    <string name="username_password_login_title">Autentimine on nõutav</string>
+    <string name="username_password_login_message">Üksusele %1$s juurdepääsemiseks peate sisse logima</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kasutajanimi</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parool</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Logi sisse</string>
 </resources>

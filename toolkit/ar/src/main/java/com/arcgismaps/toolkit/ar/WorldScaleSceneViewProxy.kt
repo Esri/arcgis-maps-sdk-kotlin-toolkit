@@ -48,9 +48,7 @@ import kotlin.coroutines.resume
  * @since 200.7.0
  */
 @Stable
-public class WorldScaleSceneViewProxy internal constructor(
-    internal val sceneViewProxy: SceneViewProxy
-) {
+public class WorldScaleSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
 
     public constructor() : this(SceneViewProxy())
 

@@ -45,7 +45,7 @@ internal interface WorldScaleCameraController : DefaultLifecycleObserver {
     val hasSetOriginCamera: Boolean
 
     /**
-     * Updates the camera's position using the orientation of the [Frame.getCamera].
+     * Called every frame to update the camera's position.
      *
      * @since 200.7.0
      */

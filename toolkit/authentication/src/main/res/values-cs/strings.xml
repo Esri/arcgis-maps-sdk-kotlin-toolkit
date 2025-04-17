@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Nedůvěryhodný hostitel</string>
+    <string name="server_trust_message">Certifikát serveru %1$s není důvěryhodný. Připojení by mohlo ohrozit vaše data. Chcete pokračovat?</string>
     <string name="cancel">Storno</string>
+    <string name="allow_connection">Povolit připojení</string>
+    <string name="username_password_login_title">Požadováno ověření</string>
+    <string name="username_password_login_message">Pro přístup k %1$s je nutné se přihlásit</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Uživatelské jméno</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Heslo</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Přihlásit se</string>
 </resources>
