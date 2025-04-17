@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -59,7 +58,6 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
-import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -67,14 +65,12 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
-import com.arcgismaps.toolkit.ar.internal.WorldScaleParameters
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPeDataConfigured
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
-import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
@@ -136,7 +132,10 @@ import java.time.Instant
  * @param onScale lambda invoked when a user performs a pinch gesture on the WorldScaleSceneView.
  * @param onUp lambda invoked when the user removes all their pointers from the WorldScaleSceneView.
  * @param onDown lambda invoked when the user first presses on the WorldScaleSceneView.
- * @param onSingleTapConfirmed lambda invoked when the user taps once on the WorldScaleSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the WorldScaleSceneView. The
+ * [SingleTapConfirmedEvent.mapPoint] passed to this lambda is calculated by performing a hit test against
+ * detected planes in the camera feed. If no planes are detected at the tapped point, the mapPoint
+ * will be null.
  * @param onDoubleTap lambda invoked the user double taps on the WorldScaleSceneView.
  * @param onLongPress lambda invoked when a user holds a pointer on the WorldScaleSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
@@ -263,7 +262,10 @@ public fun WorldScaleSceneView(
             // onResetOriginCamera is only called in WorldTracking mode. We need to reset the AR
             // session in WorldTracking Mode when the origin camera is reset, because AR tracking
             // will need to start from scratch.
-            arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial, planeFindingMode.value)
+            arSessionWrapper.resetSession(
+                worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial,
+                planeFindingMode.value
+            )
         }
     )
 
@@ -276,7 +278,10 @@ public fun WorldScaleSceneView(
             onFrame = { frame, displayRotation, session ->
                 rememberedOnSingleTapConfirmed.value?.let { singleTapConfirmedCallback ->
                     rememberedSingleTapConfirmedEvent.value?.let { singleTapConfirmedEvent ->
-                        val hitResult = frame.hitTest(singleTapConfirmedEvent.screenCoordinate.x.toFloat(), singleTapConfirmedEvent.screenCoordinate.y.toFloat())
+                        val hitResult = frame.hitTest(
+                            singleTapConfirmedEvent.screenCoordinate.x.toFloat(),
+                            singleTapConfirmedEvent.screenCoordinate.y.toFloat()
+                        )
                         val hit = hitResult.firstOrNull {
                             when (it.trackable) {
                                 is Plane, is Point -> true
@@ -291,9 +296,8 @@ public fun WorldScaleSceneView(
                         // hit is not null, so we can get the map point
                         // first get the point relative to camera
 
-                        val hitPoseTM = hit.hitPose.transformationMatrix
-                        val origin = (worldScaleCameraController.cameraController as TransformationMatrixCameraController).originCamera.value.transformationMatrix
-                        val mapPoint = GeometryEngine.projectOrNull(Camera(origin + hitPoseTM).location, WorldScaleParameters.SR_CAMERA)
+                        val mapPoint =
+                            worldScaleCameraController.getPointFromPose(hit.hitPose, session)
                         singleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
                     }
                     lastSingleTapConfirmedEvent = null

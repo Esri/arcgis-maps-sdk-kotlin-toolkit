@@ -35,6 +35,7 @@ import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.google.ar.core.Frame
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,6 +95,17 @@ internal class WorldTrackingCameraController(
     override fun updateCamera(frame: Frame, session: Session) {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
         cameraController.transformationMatrix = cameraPosition
+    }
+
+    /**
+     * Converts an ARCore [Pose] to a global [Point] using the Pose's offset from the origin camera.
+     *
+     * @since 200.8.0
+     */
+    override fun getPointFromPose(pose: Pose, session: Session): Point? {
+        val hitPoseTM = pose.transformationMatrix
+        val origin = cameraController.originCamera.value.transformationMatrix
+        return GeometryEngine.projectOrNull(Camera(origin + hitPoseTM).location, WorldScaleParameters.SR_CAMERA)
     }
 
     /**
