@@ -71,7 +71,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     public val isWrapAroundEnabled: Boolean?
         get() = sceneViewProxy.isWrapAroundEnabled
 
-    public suspend fun checkVpsAvailabilityAsync(latitude: Double, longitude: Double): Result<WorldScaleVpsAvailability> =
+    public suspend fun checkVpsAvailability(latitude: Double, longitude: Double): Result<WorldScaleVpsAvailability> =
         _session?.let { session ->
             suspendCancellableCoroutine { continuation ->
                 continuation.invokeOnCancellation {

@@ -5,7 +5,7 @@ package com.arcgismaps.toolkit.ar
  * [Virtual Positioning Service](https://developers.google.com/ar/develop/java/geospatial/check-vps-availability)
  * at a specific location.
  *
- * @see WorldScaleSceneViewProxy.checkVpsAvailabilityAsync
+ * @see WorldScaleSceneViewProxy.checkVpsAvailability
  * @since 200.7.0
  */
 public sealed class WorldScaleVpsAvailability {
