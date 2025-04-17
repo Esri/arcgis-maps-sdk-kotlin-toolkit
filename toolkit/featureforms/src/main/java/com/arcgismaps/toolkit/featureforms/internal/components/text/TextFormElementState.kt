@@ -16,11 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormTextFormat
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
@@ -48,42 +43,4 @@ internal class TextFormElementState(
     label = label,
     description = description,
     isVisible = isVisible
-) {
-    companion object {
-        fun Saver(
-            formElement: TextFormElement,
-        ): Saver<TextFormElementState, Any> = listSaver(
-            save = {
-                listOf(it.id)
-            },
-            restore = {
-                TextFormElementState(
-                    id = it[0],
-                    label = formElement.label,
-                    description = formElement.description,
-                    isVisible = formElement.isVisible,
-                    text = formElement.text,
-                    format = formElement.format
-                )
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberTextFormElementState(
-    element: TextFormElement,
-    featureForm: FeatureForm
-): TextFormElementState = rememberSaveable(
-    inputs = arrayOf(featureForm),
-    saver = TextFormElementState.Saver(element)
-) {
-    TextFormElementState(
-        id = element.hashCode(),
-        label = element.label,
-        description = element.description,
-        isVisible = element.isVisible,
-        text = element.text,
-        format = element.format
-    )
-}
+)

@@ -54,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,10 +69,11 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -167,6 +169,10 @@ private fun Carousel(
     attachments: List<FormAttachmentState>,
     scrollBarColor: Color,
 ) {
+    var initialSize by remember(state) {
+        mutableIntStateOf(attachments.size)
+    }
+    val scope = rememberCoroutineScope()
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,7 +183,14 @@ private fun Carousel(
                 height = 4.dp,
                 offsetY = 5.dp,
                 autoHide = false
-            ),
+            )
+            .onGloballyPositioned {
+                // Scroll to the start of the list when a new attachment is added
+                if (attachments.size > initialSize && attachments.isNotEmpty()) {
+                    scope.launch { state.scrollToItem(0) }
+                }
+                initialSize = attachments.size
+            },
         state = state,
     ) {
         items(attachments, key = {
@@ -576,7 +589,6 @@ private fun AttachmentFormElementPreview() {
                 FormAttachmentType.Image,
                 1,
                 {},
-                "",
                 scope = rememberCoroutineScope()
             )
         ),

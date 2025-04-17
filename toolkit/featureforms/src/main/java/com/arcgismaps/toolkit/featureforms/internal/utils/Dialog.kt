@@ -55,6 +55,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -160,6 +162,17 @@ internal sealed class DialogType {
     ) : DialogType()
 
     data class BarcodeScanner(val stateId: Int) : DialogType()
+
+    data class SaveFeatureDialog(
+        val onSave: suspend () -> Unit,
+        val onDiscard: () -> Unit
+    ) : DialogType()
+
+    data class ValidationErrorsDialog(
+        val onDismiss: () -> Unit,
+        val title: String,
+        val body: String
+    ) : DialogType()
 }
 
 /**
@@ -346,6 +359,40 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             )
         }
 
+        is DialogType.SaveFeatureDialog -> {
+            val onSave = (dialogType as DialogType.SaveFeatureDialog).onSave
+            val onDiscard = (dialogType as DialogType.SaveFeatureDialog).onDiscard
+            SaveEditsDialog(
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                },
+                onSave = {
+                    dialogRequester.dismissDialog()
+                    scope.launch {
+                        onSave()
+                    }
+                },
+                onDiscard = {
+                    dialogRequester.dismissDialog()
+                    onDiscard()
+                }
+            )
+        }
+
+        is DialogType.ValidationErrorsDialog -> {
+            val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
+            val title = (dialogType as DialogType.ValidationErrorsDialog).title
+            val body = (dialogType as DialogType.ValidationErrorsDialog).body
+            ErrorDialog(
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                    onDismiss()
+                },
+                title = title,
+                body = body
+            )
+        }
+
         else -> {
             // clear focus from the originating tapped field
             if (dialogType == null) {
@@ -381,7 +428,7 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     try {
         val windowSizeClass = WindowSizeClass.compute(width / density, height / density)
         return windowSizeClass
-    } catch (ex : IllegalArgumentException) {
+    } catch (ex: IllegalArgumentException) {
         // if the calculation has thrown an exception due to width or height being negative (like
         // in a preview), then use a default size of 400x900dp which indicates a compact size
         // representing 99.96% of phones in portrait

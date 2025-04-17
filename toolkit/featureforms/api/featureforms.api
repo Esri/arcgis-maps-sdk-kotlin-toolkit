@@ -1,7 +1,56 @@
+public final class com/arcgismaps/toolkit/featureforms/ComposableSingletons$FeatureFormKt {
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/ComposableSingletons$FeatureFormKt;
+	public fun <init> ()V
+	public final fun getLambda-1$featureforms_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$featureforms_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$featureforms_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-4$featureforms_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public abstract class com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$DiscardedEdits : com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Z)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/FeatureForm;
+	public final fun component2 ()Z
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Z)Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$DiscardedEdits;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$DiscardedEdits;Lcom/arcgismaps/mapping/featureforms/FeatureForm;ZILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$DiscardedEdits;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFeatureForm ()Lcom/arcgismaps/mapping/featureforms/FeatureForm;
+	public final fun getWillNavigate ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$SavedEdits : com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Z)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/FeatureForm;
+	public final fun component2 ()Z
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Z)Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$SavedEdits;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$SavedEdits;Lcom/arcgismaps/mapping/featureforms/FeatureForm;ZILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$SavedEdits;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFeatureForm ()Lcom/arcgismaps/mapping/featureforms/FeatureForm;
+	public final fun getWillNavigate ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormKt {
 	public static final synthetic fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Landroidx/compose/runtime/Composer;II)V
 	public static final synthetic fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
 	public static final fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FeatureForm (Lcom/arcgismaps/toolkit/featureforms/FeatureFormState;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getActiveFeatureForm ()Lcom/arcgismaps/mapping/featureforms/FeatureForm;
+	public final fun isEvaluatingExpressions ()Z
 }
 
 public abstract class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility {
