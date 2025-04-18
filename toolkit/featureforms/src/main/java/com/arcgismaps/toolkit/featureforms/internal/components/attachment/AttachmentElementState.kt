@@ -275,6 +275,11 @@ internal class FormAttachmentState(
     private val thumbnailSize = Size(368, 300)
 
     /**
+     * A callback that is invoked when the attachment fails to load.
+     */
+    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
+
+    /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
      * created this attachment. Usually, this is the [AttachmentElementState] that created this
      * within the CoroutineScope of the root Feature Form composable.
@@ -283,6 +288,14 @@ internal class FormAttachmentState(
         scope.launch {
             load()
         }
+    }
+
+    /**
+     * Sets a callback that is invoked when the attachment fails to load. This is useful for
+     * handling any errors in the UI.
+     */
+    fun setOnLoadErrorCallback(callback: ((Throwable) -> Unit)?) {
+        onLoadErrorCallback = callback
     }
 
     /**
@@ -313,6 +326,7 @@ internal class FormAttachmentState(
             } else {
                 val error = result.exceptionOrNull() ?: Exception("Failed to load attachment")
                 _loadStatus.value = LoadStatus.FailedToLoad(error)
+                onLoadErrorCallback?.invoke(error)
             }
         }
         return result

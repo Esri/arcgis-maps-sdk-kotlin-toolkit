@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.content.Context
+import android.text.format.Formatter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -24,15 +26,17 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,8 +44,15 @@ class ThemingTests : FeatureFormTestRunner(
     uri = "https://www.arcgis.com/home/item.html?id=9c7ee7cd979c434896684bf507cca75d",
     objectId = 1
 ) {
+    private lateinit var context: Context
+
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        context = InstrumentationRegistry.getInstrumentation().context
+    }
 
     /**
      * Given a FeatureForm with a custom color scheme and typography for editable fields
@@ -293,8 +304,11 @@ class ThemingTests : FeatureFormTestRunner(
                         fontWeight = FontWeight.ExtraBold
                     ),
                     tileTextStyle = TextStyle(
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.ExtraBold
                     ),
+                    tileSupportingTextStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 )
             )
             FeatureForm(
@@ -307,10 +321,18 @@ class ThemingTests : FeatureFormTestRunner(
         assertThat(attachmentsElement).isNotNull()
         // find the scrollable container
         val lazyColumn = composeTestRule.onNodeWithContentDescription("lazy column")
-        lazyColumn.performScrollToNode(hasText(attachmentsElement!!.label))
-        // scroll until the attachments element is visible
+        composeTestRule.waitUntil(
+            timeoutMillis = 2_000
+        ) {
+            // wait until the attachments are loaded
+            attachmentsElement!!.attachments.isNotEmpty()
+        }
+        val attachmentToTest = attachmentsElement!!.attachments.first()
+        // scroll until the attachment element is visible
+        lazyColumn.performScrollToNode(hasText(attachmentsElement.label))
         val attachmentsField = composeTestRule.onNodeWithText(attachmentsElement.label)
-        attachmentsField.printToLog("label")
+        // bring the entire attachment tile into view
+        attachmentsField.performScrollTo()
         attachmentsField.assertIsDisplayed()
         attachmentsField.assertTextStyle(
             TextStyle(
@@ -319,9 +341,18 @@ class ThemingTests : FeatureFormTestRunner(
             )
         )
         // get the first attachment tile
-        val tile = attachmentsField.onChildWithText(attachmentsElement.attachments.first().name)
+        val tile = attachmentsField.onChildWithText(attachmentToTest.name)
         tile.assertIsDisplayed()
         tile.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Green
+            )
+        )
+        val fileSize = Formatter.formatFileSize(context, attachmentToTest.size)
+        val size = attachmentsField.onChildWithText(fileSize)
+        size.assertIsDisplayed()
+        size.assertTextStyle(
             TextStyle(
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Green

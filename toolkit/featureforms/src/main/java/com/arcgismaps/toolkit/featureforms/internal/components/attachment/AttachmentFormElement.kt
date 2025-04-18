@@ -22,7 +22,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,20 +34,18 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -92,6 +89,7 @@ import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
+import androidx.core.net.toUri
 
 @Composable
 internal fun AttachmentFormElement(
@@ -127,18 +125,14 @@ internal fun AttachmentFormElement(
     colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
-    Card(
+    Surface (
         modifier = modifier.semantics(mergeDescendants = true) {},
-        shape = RoundedCornerShape(5.dp),
-        border = BorderStroke(1.dp, colors.outlineColor),
-        colors = CardDefaults.cardColors(
-            containerColor = colors.containerColor
-        )
+        color = colors.containerColor
     ) {
-        Column(
-            modifier = Modifier.padding(15.dp)
-        ) {
-            Row {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Header(
                     title = label,
                     description = description,
@@ -175,6 +169,7 @@ private fun Carousel(
     val scope = rememberCoroutineScope()
     LazyRow(
         modifier = Modifier
+            .padding(bottom = 5.dp)
             .fillMaxWidth()
             .horizontalScrollbar(
                 state = state,
@@ -193,10 +188,8 @@ private fun Carousel(
             },
         state = state,
     ) {
-        items(attachments, key = {
-            it.formAttachment.hashCode()
-        }) { attachment ->
-            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 15.dp))
+        items(attachments) { attachment ->
+            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 8.dp))
         }
     }
 }
@@ -278,9 +271,6 @@ private fun AddAttachment(
                         }
                     }
                 )
-            }
-            if (captureOptions.hasVideoCapture()) {
-                // TODO: Add video capture
             }
             if (captureOptions.hasMediaCapture()) {
                 DropdownMenuItem(
@@ -381,7 +371,7 @@ internal fun ImageCapture(
     val capturedImageUri = rememberSaveable(
         saver = listSaver(
             save = { listOf(it.toString()) },
-            restore = { Uri.parse(it.first()) }
+            restore = { it.first().toUri() }
         )
     ) {
         val timeStamp = Instant.now().toEpochMilli()
@@ -575,23 +565,24 @@ internal fun Modifier.horizontalScrollbar(
 @Preview
 @Composable
 private fun AttachmentFormElementPreview() {
+    val list = listOf(
+        FormAttachmentState(
+            "Photo 1.jpg",
+            2024,
+            "image/jpeg",
+            FormAttachmentType.Image,
+            1,
+            {},
+            scope = rememberCoroutineScope()
+        )
+    )
     AttachmentFormElement(
         label = "Attachments",
         description = "Add attachments",
         editable = true,
         captureOptions = CaptureOptions.Any,
         stateId = 1,
-        attachments = listOf(
-            FormAttachmentState(
-                "Photo 1.jpg",
-                2024,
-                "image/jpeg",
-                FormAttachmentType.Image,
-                1,
-                {},
-                scope = rememberCoroutineScope()
-            )
-        ),
+        attachments = list + list + list + list,
         lazyListState = LazyListState(),
         hasCameraPermission = true,
     )
