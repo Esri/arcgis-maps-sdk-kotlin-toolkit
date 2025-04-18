@@ -152,4 +152,20 @@
     <string name="download_failed">Unable to download this file.</string>
     <string name="file_size_exceeds_limit">File Size Exceeds Limit</string>
     <string name="unsupported_file_type">Unsupported File Type</string>
+    <string name="save">Save</string>
+    <string name="discard">Discard</string>
+    <string name="none_selected">None Selected</string>
+    <string name="the_form_has_validation_errors">The form has validation errors</string>
+    <string name="the_form_has_edits">The form has edits</string>
+    <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
+    <string name="terminal">Terminal : %1$s</string>
+    <string name="containment_visible">Containment Visible : %1$s</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
+        <item quantity="one">You have %1$d error that must be fixed before saving.</item>
+        <item quantity="two">You have %1$d errors that must be fixed before saving</item>
+        <item quantity="few">You have %1$d errors that must be fixed before saving</item>
+        <item quantity="many">You have %1$d errors that must be fixed before saving</item>
+        <item quantity="other">You have %1$d errors that must be fixed before saving</item>
+    </plurals>
 </resources>

@@ -16,25 +16,15 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
-import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal class SwitchFieldProperties(
     label: String,
@@ -114,91 +104,4 @@ internal class SwitchFieldState(
      */
     val fallback: Boolean = properties.fallback
 
-    companion object {
-        fun Saver(
-            formElement: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope,
-            noValueString: String
-        ): Saver<SwitchFieldState, Any> = listSaver(
-            save = {
-                listOf(
-                    it.value.value.data,
-                    it.fallback
-                )
-            },
-            restore = { list ->
-                val input = formElement.input as SwitchFormInput
-                SwitchFieldState(
-                    id = formElement.hashCode(),
-                    properties = SwitchFieldProperties(
-                        label = formElement.label,
-                        placeholder = formElement.hint,
-                        description = formElement.description,
-                        value = formElement.value,
-                        validationErrors = formElement.mapValidationErrors(scope),
-                        editable = formElement.isEditable,
-                        required = formElement.isRequired,
-                        visible = formElement.isVisible,
-                        fieldType = formElement.fieldType,
-                        onValue = input.onValue,
-                        offValue = input.offValue,
-                        fallback = list[1] as Boolean,
-                        showNoValueOption = if (form.fieldIsNullable(formElement))
-                            FormInputNoValueOption.Show
-                        else
-                            FormInputNoValueOption.Hide,
-                        noValueLabel = noValueString
-                    ),
-                    initialValue = list[0],
-                    hasValueExpression = formElement.hasValueExpression,
-                    scope = scope,
-                    updateValue = formElement::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberSwitchFieldState(
-    field: FieldFormElement,
-    form: FeatureForm,
-    scope: CoroutineScope,
-    noValueString: String
-): SwitchFieldState = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = SwitchFieldState.Saver(field, form, scope, noValueString)
-) {
-    val input = field.input as SwitchFormInput
-    val initialValue = field.formattedValue
-    val fallback = initialValue.isEmpty()
-        || (field.value.value != input.onValue.code && field.value.value != input.offValue.code)
-    SwitchFieldState(
-        id = field.hashCode(),
-        properties = SwitchFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.value,
-            validationErrors = field.mapValidationErrors(scope),
-            editable = field.isEditable,
-            required = field.isRequired,
-            visible = field.isVisible,
-            fieldType = field.fieldType,
-            onValue = input.onValue,
-            offValue = input.offValue,
-            fallback = fallback,
-            showNoValueOption = if (form.fieldIsNullable(field))
-                FormInputNoValueOption.Show
-            else
-                FormInputNoValueOption.Hide,
-            noValueLabel = noValueString
-        ),
-        hasValueExpression = field.hasValueExpression,
-        scope = scope,
-        updateValue = field::updateValue,
-        evaluateExpressions = form::evaluateExpressions
-    )
 }

@@ -36,18 +36,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
@@ -74,8 +68,7 @@ internal class AttachmentElementState(
     id: Int,
     private val formElement: AttachmentsFormElement,
     private val scope: CoroutineScope,
-    private val evaluateExpressions: suspend () -> Unit,
-    private val filesDir: String
+    private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
     id = id,
     label = formElement.label,
@@ -128,7 +121,6 @@ internal class AttachmentElementState(
                 type = formAttachment.type,
                 elementStateId = id,
                 deleteAttachment = { deleteAttachment(formAttachment) },
-                filesDir = filesDir,
                 scope = scope,
                 formAttachment = formAttachment
             )
@@ -156,7 +148,6 @@ internal class AttachmentElementState(
             type = formAttachment.type,
             elementStateId = id,
             deleteAttachment = { deleteAttachment(formAttachment) },
-            filesDir = filesDir,
             scope = scope,
             formAttachment = formAttachment
         )
@@ -205,44 +196,6 @@ internal class AttachmentElementState(
         context,
         Manifest.permission.CAMERA
     ) == PackageManager.PERMISSION_GRANTED
-
-    companion object {
-        fun Saver(
-            attachmentFormElement: AttachmentsFormElement,
-            scope: CoroutineScope,
-            evaluateExpressions: suspend () -> Unit,
-            filesDir: String
-        ): Saver<AttachmentElementState, Any> = listSaver(
-            save = {
-                buildList<Int> {
-                    // save the index of the first visible item
-                    add(it.lazyListState.firstVisibleItemIndex)
-                    add(it.lazyListState.firstVisibleItemScrollOffset)
-                }
-            },
-            restore = { savedList ->
-                AttachmentElementState(
-                    id = attachmentFormElement.hashCode(),
-                    formElement = attachmentFormElement,
-                    scope = scope,
-                    evaluateExpressions = evaluateExpressions,
-                    filesDir = filesDir
-                ).also {
-                    scope.launch {
-                        if (savedList.count() == 2) {
-                            // scroll to the last visible item
-                            val firstVisibleItemIndex = savedList[0]
-                            val firstVisibleItemScrollOffset = savedList[1]
-                            it.lazyListState.scrollToItem(
-                                firstVisibleItemIndex,
-                                firstVisibleItemScrollOffset
-                            )
-                        }
-                    }
-                }
-            }
-        )
-    }
 }
 
 /**
@@ -254,7 +207,6 @@ internal class AttachmentElementState(
  * @param type The type of the attachment.
  * @param elementStateId The ID of the [AttachmentElementState] that created this attachment.
  * @param deleteAttachment A function to delete the attachment.
- * @param filesDir The directory where the attachments are stored.
  * @param scope The coroutine scope used to launch coroutines.
  * @param formAttachment The [FormAttachment] that this state represents.
  */
@@ -266,7 +218,6 @@ internal class FormAttachmentState(
     val type: FormAttachmentType,
     val elementStateId: Int,
     val deleteAttachment: () -> Unit,
-    private val filesDir: String,
     private val scope: CoroutineScope,
     val formAttachment: FormAttachment? = null
 ) : Loadable {
@@ -487,32 +438,6 @@ internal sealed class CaptureOptions {
             Video -> listOf("video/*")
             Unknown -> emptyList()
         }
-    }
-}
-
-@Composable
-internal fun rememberAttachmentElementState(
-    form: FeatureForm,
-    attachmentFormElement: AttachmentsFormElement
-): AttachmentElementState {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    return rememberSaveable(
-        inputs = arrayOf(form),
-        saver = AttachmentElementState.Saver(
-            attachmentFormElement,
-            scope,
-            form::evaluateExpressions,
-            context.cacheDir.absolutePath
-        )
-    ) {
-        AttachmentElementState(
-            formElement = attachmentFormElement,
-            scope = scope,
-            id = attachmentFormElement.hashCode(),
-            evaluateExpressions = form::evaluateExpressions,
-            filesDir = context.cacheDir.absolutePath
-        )
     }
 }
 

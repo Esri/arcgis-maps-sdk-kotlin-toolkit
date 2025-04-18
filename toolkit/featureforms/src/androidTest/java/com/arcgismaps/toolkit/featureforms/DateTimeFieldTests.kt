@@ -26,7 +26,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.performTextClearance
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -99,7 +98,7 @@ class DateTimeFieldTests : FeatureFormTestRunner(
         }
         dateTimeField.assertIsDisplayed()
         val helper = dateTimeField.onChildWithContentDescription("supporting text")
-        val helperMatcher = hasText("Date Entry is Required")
+        val helperMatcher = hasText("Required")
         assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
             "expected helper text: Date Entry is Required"
 
