@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">カメラの権限が付与されていません</string>
+    <string name="arcore_not_installed_message">TableTopSceneView を使用するには ARCore をインストールする必要があります。 ARCore の利用可否: %1$s</string>
+</resources>

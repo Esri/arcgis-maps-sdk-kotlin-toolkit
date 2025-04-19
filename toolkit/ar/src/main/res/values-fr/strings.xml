@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Autorisation d’accès à l’appareil photo non accordée</string>
+    <string name="arcore_not_installed_message">ARCore doit être installé pour que TableTopSceneView puisse être utilisé. Disponibilité d’ARCore : %1$s</string>
+</resources>

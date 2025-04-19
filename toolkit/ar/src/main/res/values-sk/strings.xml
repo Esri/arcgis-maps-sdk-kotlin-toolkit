@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Povolenia kamery neboli udelené</string>
+    <string name="arcore_not_installed_message">Ak chcete používať TableTopSceneView, musí byť nainštalovaný ARCore. Dostupnosť ARCore: %1$s</string>
+</resources>

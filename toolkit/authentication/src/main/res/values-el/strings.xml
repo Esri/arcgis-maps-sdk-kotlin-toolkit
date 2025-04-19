@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Μη αξιόπιστος κεντρικός υπολογιστής</string>
+    <string name="server_trust_message">Τοιστοποιητικό διακομιστή για το %1$s δεν είναι αξιόπιστο. Η σύνδεση θα μπορούσε να θέσει σε κίνδυνο τα δεδομένα σας. Θέλετε οπωσδήποτε να προχωρήσετε;</string>
     <string name="cancel">Ακύρωση</string>
+    <string name="allow_connection">Επιτρέψτε τη σύνδεση</string>
+    <string name="username_password_login_title">Απαιτείται εξουσιοδότηση</string>
+    <string name="username_password_login_message">Χρειάζεται να πραγματοποιήσετε είσοδο για να αποκτήσετε πρόσβαση στο %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Όνομα χρήστη</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Κωδικός πρόσβασης</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Είσοδος</string>
 </resources>

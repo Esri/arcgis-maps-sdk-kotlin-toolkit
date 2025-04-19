@@ -16,7 +16,7 @@ The app showcases how the Trace tool allows you to select a named trace configur
 |:--:|
 |![Trace Configurations](screenshots/traceconfigs.png)|
 
-The user can add startpoints by tapping on the `Add new starting point` button and can view it's properties. 
+The user can add startpoints by tapping on the `Add new starting point` button and can view its properties. 
 
 |Starting Point Properties|
 |:--:|
@@ -35,4 +35,4 @@ The Trace tool shows the feature and function results in the UI and draws the ge
 |![Trace Results](screenshots/traceresults.png)|
 
 
-For more information on the composable `Trace` component and how it works, see it's [Readme](../../toolkit/utilitynetworks/README.md).
+For more information on the composable `Trace` component and how it works, see its [Readme](../../toolkit/utilitynetworks/README.md).

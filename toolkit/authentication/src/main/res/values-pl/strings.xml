@@ -15,10 +15,16 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <string name="server_trust_title">Niezaufany host</string>
+    <string name="server_trust_message">Certyfikat serwera %1$s nie jest zaufany. Połączenie może narazić na szwank dane użytkownika. Czy chcesz kontynuować?</string>
     <string name="cancel">Anuluj</string>
+    <string name="allow_connection">Zezwól na połączenie</string>
+    <string name="username_password_login_title">Wymagane uwierzytelnienie</string>
+    <string name="username_password_login_message">Musisz się zalogować, aby uzyskać dostęp do %1$s</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nazwa użytkownika</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Hasło</string>
-
+    <!-- This text is on a button that can fit 24 chars -->
+    <string name="sign_in">Zaloguj się</string>
 </resources>
