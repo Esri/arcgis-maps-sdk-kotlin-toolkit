@@ -46,8 +46,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
