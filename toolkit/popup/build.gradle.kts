@@ -68,6 +68,12 @@ android {
         enabled = false
     }
 
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
+
 }
 
 apiValidation {
