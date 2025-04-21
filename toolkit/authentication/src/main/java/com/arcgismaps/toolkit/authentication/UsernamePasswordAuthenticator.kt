@@ -276,6 +276,7 @@ private fun UsernamePasswordAuthenticatorImplPreview() {
 
 @Preview
 @Composable
+@Suppress("DEPRECATION")
 private fun UsernamePasswordAuthenticatorPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticator(
