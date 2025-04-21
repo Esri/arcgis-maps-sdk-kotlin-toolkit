@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
  *
  * @since 200.6.0
  */
-@ExposedCopyVisibility
 public sealed class TableTopSceneViewStatus private constructor() {
 
     /**
@@ -63,6 +62,7 @@ public sealed class TableTopSceneViewStatus private constructor() {
      * @param error The error that caused the failure.
      * @since 200.6.0
      */
+    @ExposedCopyVisibility
     public data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
 }
 
