@@ -273,13 +273,12 @@ fun SelectFeatureDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 50.dp)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(15.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .wrapContentHeight()
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
@@ -297,7 +296,7 @@ fun SelectFeatureDialog(
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .wrapContentHeight()
                         .verticalScrollbar(lazyListState),
                     state = lazyListState
                 ) {
