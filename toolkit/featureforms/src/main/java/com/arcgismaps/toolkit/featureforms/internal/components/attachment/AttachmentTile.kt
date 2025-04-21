@@ -440,7 +440,6 @@ private fun AttachmentTilePreview() {
             FormAttachmentType.Image,
             1,
             {},
-            "",
             scope = rememberCoroutineScope()
         )
     )
