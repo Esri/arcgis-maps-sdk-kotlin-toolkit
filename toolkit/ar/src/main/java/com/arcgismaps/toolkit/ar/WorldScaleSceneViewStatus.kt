@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
  *
  * @since 200.7.0
  */
+@ExposedCopyVisibility
 public sealed class WorldScaleSceneViewStatus private constructor() {
 
     /**
