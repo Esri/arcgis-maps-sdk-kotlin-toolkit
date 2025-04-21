@@ -49,6 +49,8 @@ public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$DetectingPl
 public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize : com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
 	public static final field $stable I
 	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
@@ -83,6 +85,8 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorSchem
 	public final fun component4-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
+	public final fun copy-tNS2XkQ (JJJJJJ)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;
+	public static synthetic fun copy-tNS2XkQ$default (Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;JJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackgroundColor-0d7_KjU ()J
 	public final fun getButtonContainerColor-0d7_KjU ()J
@@ -106,6 +110,8 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography
 	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBodyTextStyle ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getSubtitleTextStyle ()Landroidx/compose/ui/text/TextStyle;
@@ -153,6 +159,8 @@ public abstract class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize : com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
 	public static final field $stable I
 	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
