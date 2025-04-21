@@ -14,8 +14,6 @@ public final class com/arcgismaps/toolkit/legend/theme/Typography {
 	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/legend/theme/Typography;
-	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/legend/theme/Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/legend/theme/Typography;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getLayerName ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getLegendInfoName ()Landroidx/compose/ui/text/TextStyle;

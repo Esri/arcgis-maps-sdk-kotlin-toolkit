@@ -141,8 +141,6 @@ public final class com/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors {
 	public static final field $stable I
 	public final fun component1-0d7_KjU ()J
 	public final fun component2-0d7_KjU ()J
-	public final fun copy--OWjLjI (JJ)Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;
-	public static synthetic fun copy--OWjLjI$default (Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;JJILjava/lang/Object;)Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackgroundColor-0d7_KjU ()J
 	public final fun getBorderColor-0d7_KjU ()J
@@ -164,8 +162,6 @@ public final class com/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes {
 	public final fun component3-D9Ej5fM ()F
 	public final fun component4 ()Landroidx/compose/foundation/layout/PaddingValues;
 	public final fun component5-MYxV2XQ ()J
-	public final fun copy-S84Tz1Y (FJFLandroidx/compose/foundation/layout/PaddingValues;J)Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;
-	public static synthetic fun copy-S84Tz1Y$default (Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;FJFLandroidx/compose/foundation/layout/PaddingValues;JILjava/lang/Object;)Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorderWidth-D9Ej5fM ()F
 	public final fun getCalloutContentPadding ()Landroidx/compose/foundation/layout/PaddingValues;
