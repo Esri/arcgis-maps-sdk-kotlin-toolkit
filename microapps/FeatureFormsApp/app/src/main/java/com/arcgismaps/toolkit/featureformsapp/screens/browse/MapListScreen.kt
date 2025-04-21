@@ -27,12 +27,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -55,6 +58,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -104,82 +108,93 @@ fun MapListScreen(
     var showSignOutProgress by rememberSaveable {
         mutableStateOf(false)
     }
-    Box(modifier = modifier.fillMaxSize()) {
-        AppSearchBar(
-            uiState.searchText,
-            isLoading = uiState.isLoading,
-            username = mapListViewModel.getUsername(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            onQueryChange = mapListViewModel::filterPortalItems,
-            onRefresh = mapListViewModel::refresh,
-            onSignOut = {
-                showSignOutProgress = true
-                mapListViewModel.signOut()
-            }
-        )
-        // use a cross fade animation to show a loading indicator when the data is loading
-        // and transition to the list of portalItems once loaded
-        Crossfade(
-            targetState = uiState.isLoading,
-            modifier = Modifier.padding(top = 88.dp),
-            label = "list fade"
-        ) { state ->
-            when (state) {
-                true -> Box(modifier = modifier.fillMaxSize()) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    Text(
-                        text = "Loading...",
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+    Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing
+    ) { innerPadding ->
+        Box(
+            modifier = modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            AppSearchBar(
+                uiState.searchText,
+                isLoading = uiState.isLoading,
+                username = mapListViewModel.getUsername(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                onQueryChange = mapListViewModel::filterPortalItems,
+                onRefresh = mapListViewModel::refresh,
+                onSignOut = {
+                    showSignOutProgress = true
+                    mapListViewModel.signOut()
                 }
+            )
+            // use a cross fade animation to show a loading indicator when the data is loading
+            // and transition to the list of portalItems once loaded
+            Crossfade(
+                targetState = uiState.isLoading,
+                modifier = Modifier.padding(top = 70.dp),
+                label = "list fade"
+            ) { state ->
+                when (state) {
+                    true -> Box(modifier = modifier.fillMaxSize()) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "Loading...",
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
 
-                false -> if (uiState.data.isNotEmpty()) {
-                    val itemThumbnailPlaceholder = painterResource(id = R.drawable.ic_default_map)
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        items(
-                            uiState.data
-                        ) { item ->
-                            MapListItem(
-                                title = item.title,
-                                lastModified = item.modified?.format("MMM dd yyyy")
-                                    ?: "",
-                                shareType = item.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnail = item.thumbnail,
-                                placeholder = itemThumbnailPlaceholder,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            ) {
-                                onItemClick(item.itemId)
+                    false -> if (uiState.data.isNotEmpty()) {
+                        val itemThumbnailPlaceholder =
+                            painterResource(id = R.drawable.ic_default_map)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            items(
+                                uiState.data
+                            ) { item ->
+                                MapListItem(
+                                    title = item.title,
+                                    lastModified = item.modified?.format("MMM dd yyyy")
+                                        ?: "",
+                                    shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                                    thumbnail = item.thumbnail,
+                                    placeholder = itemThumbnailPlaceholder,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                ) {
+                                    onItemClick(item.itemId)
+                                }
                             }
                         }
-                    }
-                } else if (!uiState.isLoading) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Nothing to show.")
+                    } else if (!uiState.isLoading) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "Nothing to show.")
+                        }
                     }
                 }
             }
         }
+        AnimatedLoading(
+            visibilityProvider = {
+                showSignOutProgress
+            },
+            modifier = Modifier.fillMaxSize(),
+            statusText = if (mapListViewModel.getUsername()
+                    .isEmpty()
+            ) "Loading.." else "Signing out.."
+        )
     }
-    AnimatedLoading(
-        visibilityProvider = {
-            showSignOutProgress
-        },
-        modifier = Modifier.fillMaxSize(),
-        statusText = if (mapListViewModel.getUsername().isEmpty()) "Loading.." else "Signing out.."
-    )
 }
 
 /**
@@ -255,7 +270,7 @@ fun MapListItemThumbnail(
         AsyncImage(
             imageLoader = imageLoader,
             modifier = modifier,
-            contentScale =contentScale
+            contentScale = contentScale
         )
     } ?: Image(
         painter = placeholder,
