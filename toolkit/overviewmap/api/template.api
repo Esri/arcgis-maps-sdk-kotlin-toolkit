@@ -1,0 +1,8 @@
+public abstract interface class com/arcgismaps/toolkit/overviewmap/OverviewMapInterface {
+	public abstract fun getSomeProperty ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/arcgismaps/toolkit/overviewmap/OverviewMapKt {
+	public static final fun OverviewMap (Lcom/arcgismaps/toolkit/overviewmap/OverviewMapInterface;Landroidx/compose/runtime/Composer;I)V
+}
+

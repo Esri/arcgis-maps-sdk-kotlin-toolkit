@@ -28,74 +28,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.Color
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.ViewpointType
-import com.arcgismaps.mapping.symbology.SimpleFillSymbol
-import com.arcgismaps.mapping.symbology.SimpleLineSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
-import com.arcgismaps.mapping.symbology.Symbol
-import com.arcgismaps.mapping.view.Graphic
-import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import com.arcgismaps.toolkit.geoviewcompose.SceneView
-
-@Composable
-fun OverviewMapForMapView(
-    viewpoint: Viewpoint?,
-    visibleArea: Polygon?,
-    symbol: Symbol = remember {
-        SimpleFillSymbol(
-            outline = SimpleLineSymbol(color = Color.red),
-            color = Color.transparent
-        )
-    },
-    scaleFactor: Double = 25.0,
-    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-    modifier: Modifier = Modifier
-) {
-    OverviewMapImpl(
-        viewpoint = viewpoint,
-        visibleArea = visibleArea,
-        scaleFactor = scaleFactor,
-        fillSymbol = symbol,
-        map = map,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun OverviewMapForSceneView(
-    viewpoint: Viewpoint?,
-    scaleFactor: Double = 25.0,
-    symbol: Symbol = remember {
-        SimpleMarkerSymbol(
-            style = SimpleMarkerSymbolStyle.Cross,
-            color = Color.red
-        )
-    },
-    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-    modifier: Modifier = Modifier
-) {
-    OverviewMapImpl(
-        viewpoint = viewpoint,
-        scaleFactor = scaleFactor,
-        markerSymbol = symbol,
-        map = map,
-        modifier = modifier
-    )
-}
+import com.arcgismaps.toolkit.overviewmap.OverviewMapForMapView
+import com.arcgismaps.toolkit.overviewmapapp.OverviewMapApp
 
 //@Composable
-//fun OverviewMap(
+//fun OverviewMapForMapView(
 //    viewpoint: Viewpoint?,
 //    visibleArea: Polygon?,
 //    symbol: Symbol = remember {
@@ -106,65 +48,20 @@ fun OverviewMapForSceneView(
 //    },
 //    scaleFactor: Double = 25.0,
 //    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-//    modifier: Modifier = Modifier,
+//    modifier: Modifier = Modifier
 //) {
 //    OverviewMapImpl(
 //        viewpoint = viewpoint,
 //        visibleArea = visibleArea,
 //        scaleFactor = scaleFactor,
-//        map = map,
 //        fillSymbol = symbol,
-//        markerSymbol = null,
-//        modifier = modifier,
+//        map = map,
+//        modifier = modifier
 //    )
-////    val proxy = remember {
-////        MapViewProxy()
-////    }
-////
-////    val graphic = remember {
-////        Graphic().apply {
-////            symbol = SimpleFillSymbol(
-////                outline = SimpleLineSymbol(color = Color.red),
-////                color = Color.transparent
-////            )
-////        }
-////    }
-////
-////    val graphicsOverlay = remember {
-////        GraphicsOverlay(listOf(graphic))
-////    }
-////
-////    val graphicsOverlays = remember {
-////        listOf(graphicsOverlay)
-////    }
-////
-////    viewpoint?.let {
-////        if (it.viewpointType == ViewpointType.CenterAndScale) {
-////            val scaledViewpoint =
-////                Viewpoint(
-////                    center = it.targetGeometry as Point,
-////                    scale = it.targetScale * scaleFactor
-////                )
-////            proxy.setViewpoint(scaledViewpoint)
-////        }
-////    }
-////
-////    visibleArea?.let {
-////        graphic.geometry = it
-////    }
-////
-////    MapView(
-////        modifier = modifier,
-////        arcGISMap = map,
-////        mapViewProxy = proxy,
-////        graphicsOverlays = graphicsOverlays,
-////        isAttributionBarVisible = false,
-////        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = false)
-////    )
 //}
-
+//
 //@Composable
-//fun OverviewMap(
+//fun OverviewMapForSceneView(
 //    viewpoint: Viewpoint?,
 //    scaleFactor: Double = 25.0,
 //    symbol: Symbol = remember {
@@ -174,119 +71,70 @@ fun OverviewMapForSceneView(
 //        )
 //    },
 //    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-//    modifier: Modifier = Modifier,
+//    modifier: Modifier = Modifier
 //) {
 //    OverviewMapImpl(
 //        viewpoint = viewpoint,
-//        visibleArea = null,
 //        scaleFactor = scaleFactor,
-//        map = map,
-//        fillSymbol = null,
 //        markerSymbol = symbol,
+//        map = map,
 //        modifier = modifier
 //    )
-////    val proxy = remember {
-////        MapViewProxy()
-////    }
-////
-////    val graphic = remember {
-////        Graphic().apply {
-////            symbol = SimpleMarkerSymbol(style = SimpleMarkerSymbolStyle.Cross, color = Color.red)
-////        }
-////    }
-////
-////    val graphicsOverlay = remember {
-////        GraphicsOverlay(listOf(graphic))
-////    }
-////
-////    val graphicsOverlays = remember {
-////        listOf(graphicsOverlay)
-////    }
-////
-////    MapView(
-////        modifier = modifier,
-////        arcGISMap = map,
-////        mapViewProxy = proxy,
-////        graphicsOverlays = graphicsOverlays,
-////        isAttributionBarVisible = false,
-////        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = false)
-////    )
-////
-////    viewpoint?.let {
-////        if (it.viewpointType == ViewpointType.CenterAndScale) {
-////            val scaledViewpoint = Viewpoint(
-////                center = it.targetGeometry as Point,
-////                scale = it.targetScale * scaleFactor
-////            )
-////
-////            proxy.setViewpoint(scaledViewpoint)
-////            graphic.geometry = it.targetGeometry
-////        }
-////    }
-////
-////    MapView(
-////        modifier = modifier,
-////        arcGISMap = map,
-////        mapViewProxy = proxy,
-////        graphicsOverlays = graphicsOverlays,
-////        isAttributionBarVisible = false,
-////        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = false)
-////    )
 //}
-
-@Composable
-private fun OverviewMapImpl(
-    viewpoint: Viewpoint?,
-    map: ArcGISMap,
-    visibleArea: Polygon? = null,
-    markerSymbol: Symbol? = null,
-    fillSymbol: Symbol? = null,
-    scaleFactor: Double = 25.0,
-    modifier: Modifier = Modifier,
-) {
-    val proxy = remember {
-        MapViewProxy()
-    }
-
-    val graphic = remember {
-        Graphic()
-    }
-
-    val graphicsOverlay = remember {
-        GraphicsOverlay(listOf(graphic))
-    }
-
-    val graphicsOverlays = remember {
-        listOf(graphicsOverlay)
-    }
-
-    viewpoint?.let {
-        if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
-            proxy.setViewpoint(
-                Viewpoint(
-                    center = it.targetGeometry as Point,
-                    scale = it.targetScale * scaleFactor
-                )
-            )
-            if (visibleArea == null) {
-                graphic.geometry = it.targetGeometry
-                graphic.symbol = markerSymbol
-            } else {
-                graphic.geometry = visibleArea
-                graphic.symbol = fillSymbol
-            }
-        }
-    }
-
-    MapView(
-        modifier = modifier,
-        arcGISMap = map,
-        mapViewProxy = proxy,
-        graphicsOverlays = graphicsOverlays,
-        isAttributionBarVisible = false,
-        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = false)
-    )
-}
+//
+//@Composable
+//private fun OverviewMapImpl(
+//    viewpoint: Viewpoint?,
+//    map: ArcGISMap,
+//    visibleArea: Polygon? = null,
+//    markerSymbol: Symbol? = null,
+//    fillSymbol: Symbol? = null,
+//    scaleFactor: Double = 25.0,
+//    modifier: Modifier = Modifier,
+//) {
+//    val proxy = remember {
+//        MapViewProxy()
+//    }
+//
+//    val graphic = remember {
+//        Graphic()
+//    }
+//
+//    val graphicsOverlay = remember {
+//        GraphicsOverlay(listOf(graphic))
+//    }
+//
+//    val graphicsOverlays = remember {
+//        listOf(graphicsOverlay)
+//    }
+//
+//    viewpoint?.let {
+//        if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
+//            proxy.setViewpoint(
+//                Viewpoint(
+//                    center = it.targetGeometry as Point,
+//                    scale = it.targetScale * scaleFactor
+//                )
+//            )
+//            if (visibleArea == null) {
+//                graphic.geometry = it.targetGeometry
+//                graphic.symbol = markerSymbol
+//            } else {
+//                graphic.geometry = visibleArea
+//                graphic.symbol = fillSymbol
+//            }
+//        }
+//    }
+//
+//    MapView(
+//        modifier = modifier,
+//        arcGISMap = map,
+//        mapViewProxy = proxy,
+//        graphicsOverlays = graphicsOverlays,
+//        isAttributionBarVisible = false,
+//        mapViewInteractionOptions = MapViewInteractionOptions(isEnabled = false)
+//    )
+//}
 
 @Composable
 fun MainScreen() {

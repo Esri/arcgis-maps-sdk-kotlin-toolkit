@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
-                OverviewMapAppApp()
+                OverviewMapApp()
             }
         }
     }
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OverviewMapAppApp() {
+fun OverviewMapApp() {
     Scaffold(
         topBar = { TopAppBar(title = { Text("OverviewMap App") }) }
     ) {
@@ -64,6 +64,6 @@ fun OverviewMapAppApp() {
 @Composable
 fun AppPreview() {
     MicroAppTheme {
-        OverviewMapAppApp()
+        OverviewMapApp()
     }
 }

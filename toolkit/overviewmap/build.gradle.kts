@@ -16,39 +16,28 @@
  *
  */
 
+
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.binary.compatibility.validator) apply true
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("artifact-deploy")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
-
-secrets {
-    // this file doesn't contain secrets, it just provides defaults which can be committed into git.
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
 android {
-    namespace = "com.arcgismaps.toolkit.overviewmapapp"
+    namespace = "com.arcgismaps.toolkit.overviewmap"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.overviewmapapp"
         minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
 
-        testInstrumentationRunner ="androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
     compileOptions {
@@ -58,38 +47,41 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
     buildFeatures {
         compose = true
-        buildConfig = true
     }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
+    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
+    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        if ("Test" !in name) {
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
-    // Avoids an empty test report showing up in the CI integration test report.
-    // Remove this if tests will be added.
-    tasks.withType<Test> {
-        enabled = false
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    @Suppress("UnstableApiUsage")
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
     }
 }
 
 dependencies {
-    implementation(project(":overviewmap"))
     implementation(project(":geoview-compose"))
-    implementation(project(":microapps-lib"))
-    implementation(arcgis.mapsSdk)
+    api(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }
