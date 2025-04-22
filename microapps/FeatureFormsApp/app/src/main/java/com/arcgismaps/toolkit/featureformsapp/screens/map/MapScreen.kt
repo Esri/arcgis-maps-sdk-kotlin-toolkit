@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -164,7 +165,17 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     .padding(padding)
                     .fillMaxSize(),
                 onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
-            )
+            ) {
+                val identifyTaskLocation by mapViewModel.identifyTaskLocation
+                identifyTaskLocation?.let { mapPoint ->
+                    Callout(location = mapPoint) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(15.dp),
+                            strokeWidth = 3.dp
+                        )
+                    }
+                }
+            }
             AnimatedVisibility(
                 visible = uiState is UIState.NotEditing,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -195,7 +206,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     state = rememberedForm,
                     onDismiss = {
-                       mapViewModel.setDefaultState()
+                        mapViewModel.setDefaultState()
                     },
                     onEditingEvent = { event ->
                         if (event is FeatureFormEditingEvent.SavedEdits) {
@@ -227,21 +238,22 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     paddingValues = padding
                 )
             }
+            AnimatedVisibility(
+                visible = uiState is UIState.SelectFeature,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(durationMillis = 10)),
+            ) {
+                val rememberedState = remember(this) {
+                    uiState as UIState.SelectFeature
+                }
+                SelectFeatureDialog(
+                    state = rememberedState,
+                    onSelectFeature = mapViewModel::selectFeature,
+                    onDismissRequest = mapViewModel::setDefaultState
+                )
+            }
         }
     }
-    when (uiState) {
-        // show pick a feature dialog if the layer is a sublayer
-        is UIState.SelectFeature -> {
-            SelectFeatureDialog(
-                state = uiState as UIState.SelectFeature,
-                onSelectFeature = mapViewModel::selectFeature,
-                onDismissRequest = mapViewModel::setDefaultState
-            )
-        }
-
-        else -> {}
-    }
-
     if (isBusy) {
         ProgressDialog()
     }
