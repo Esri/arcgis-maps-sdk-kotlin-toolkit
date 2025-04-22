@@ -188,18 +188,20 @@ class MapViewModel @Inject constructor(
                 // clear any features selected on the map
                 map.clearSelection()
                 // if there is an active feature form then select the feature
-                featureForm?.let {
-                    it.selectFeature()
-                    it.feature.geometry?.let { geometry ->
+                if (featureForm != null) {
+                    featureForm.selectFeature()
+                    featureForm.feature.geometry?.let { geometry ->
                         // set the viewpoint to the feature geometry
                         proxy.setViewpointAnimated(
                             viewpoint = Viewpoint(
                                 geometry
                             )
-                        )
-                        // zoom in to the feature
-                        map.maxScale?.let { scale ->
-                            proxy.setViewpointScale(scale)
+                        ).onSuccess {
+                            map.referenceScale
+                            // zoom in to the feature
+                            //map.maxScale?.let { scale ->
+                                proxy.setViewpointScale(map.referenceScale)
+                            //}
                         }
                     }
                 }

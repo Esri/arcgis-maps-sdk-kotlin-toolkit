@@ -84,13 +84,12 @@ import kotlinx.coroutines.launch
  * is updated when navigating from one form to another.
  *
  * [FeatureForm.evaluateExpressions] is called automatically when navigating to a new [FeatureForm]
- * or when navigating back to a previous [FeatureForm]. When expressions are running, this in indicated
- * by the [isEvaluatingExpressions] property. Expressions are also run when this class is created so
- * you do not need to call [FeatureForm.evaluateExpressions] manually.
+ * or when navigating back to a previous [FeatureForm]. Expressions are also run when this class is
+ * created so you do not need to call [FeatureForm.evaluateExpressions] manually.
  *
  * @param featureForm the [FeatureForm] to create the state for.
  *
- * @since 200.7.0
+ * @since 200.8.0
  */
 @Stable
 public class FeatureFormState private constructor(
