@@ -35,8 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,20 +112,20 @@ public fun BasemapGallery(
     onItemClick: (BasemapGalleryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selection: BasemapGalleryItem? by remember { mutableStateOf(null) }
+    var selection by rememberSaveable { mutableIntStateOf(-1) }
 
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 128.dp)) {
-        basemapGalleryItems.forEach { basemapGalleryItem ->
+        basemapGalleryItems.forEachIndexed { index, basemapGalleryItem ->
             item {
                 BasemapGalleryItem(
                     basemapGalleryItem,
                     modifier = Modifier
                         .padding(8.dp)
                         .clickable {
-                            selection = basemapGalleryItem
+                            selection = index
                             onItemClick(basemapGalleryItem)
                         },
-                    selection === basemapGalleryItem
+                    index == selection
                 )
             }
         }

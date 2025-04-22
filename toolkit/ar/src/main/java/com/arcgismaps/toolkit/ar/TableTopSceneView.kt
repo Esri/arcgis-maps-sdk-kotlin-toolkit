@@ -18,17 +18,10 @@
 
 package com.arcgismaps.toolkit.ar
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,9 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -50,7 +40,6 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
@@ -71,20 +60,25 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
+import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
+import com.arcgismaps.toolkit.ar.internal.transformationMatrix
+import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Pose
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
-import kotlin.coroutines.resume
 
 /**
  * A scene view that provides an augmented reality table top experience.
  *
- * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
+ * Note: You must follow [Google's user privacy requirements for ARCore](https://developers.google.com/ar/develop/privacy-requirements)
+ * when using TableTopSceneView in your application.
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView.
  * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] used to anchor the scene with a physical surface.
  * @param translationFactor determines how many meters the scene view translates as the device moves.
  * A useful formula for determining this value is `translation factor = virtual content width / desired physical content width`.
@@ -92,46 +86,46 @@ import kotlin.coroutines.resume
  * table top width. The virtual content width is determined by the [clippingDistance] in meters around the [arcGISSceneAnchor].
  * For example, in order to setup a table top scene where scene data should be displayed within a 400 meter radius around
  * the [arcGISSceneAnchor] and be placed on a table top that is 1 meter wide: `translation factor = 400 meter / 1 meter`.
- * @param modifier Modifier to be applied to the TableTopSceneView
- * @param clippingDistance the clipping distance in meters around the [arcGISSceneAnchor]. A null means that no data will be clipped.
+ * @param modifier Modifier to be applied to the TableTopSceneView.
+ * @param clippingDistance the clipping distance in meters around the [arcGISSceneAnchor]. A null value means that no data will be clipped.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
  * If set to `true`, the camera permission will be requested automatically when the composable is
  * first displayed. The default value is `true`. Set to false if your application takes care of requesting camera permissions before
  * displaying the TableTopSceneView.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
- * type of [ViewpointType.CenterAndScale]
+ * type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
- * type of [ViewpointType.BoundingGeometry]
- * @param graphicsOverlays graphics overlays used by this TableTopSceneView
- * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView
- * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView
- * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView
- * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise
- * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed
- * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
- * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView
- * @param imageOverlays image overlays for displaying images in the TableTopSceneView
- * @param timeExtent the [TimeExtent] used by the TableTopSceneView
- * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed
- * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time
- * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView
- * @param ambientLightColor the color of the TableTopSceneView's ambient light
- * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed
- * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed
- * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed
- * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView
- * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed
- * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView
- * @param onScale lambda invoked when a user performs a pinch gesture on the TableTopSceneView
- * @param onUp lambda invoked when the user removes all their pointers from the TableTopSceneView
- * @param onDown lambda invoked when the user first presses on the TableTopSceneView
- * @param onSingleTapConfirmed lambda invoked when the user taps once on the TableTopSceneView
- * @param onDoubleTap lambda invoked the user double taps on the TableTopSceneView
- * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView
- * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView
- * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView
- * @param content the content of the TableTopSceneView
+ * type of [ViewpointType.BoundingGeometry].
+ * @param graphicsOverlays graphics overlays used by this TableTopSceneView.
+ * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView.
+ * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView.
+ * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise.
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed.
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes.
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView.
+ * @param imageOverlays image overlays for displaying images in the TableTopSceneView.
+ * @param timeExtent the [TimeExtent] used by the TableTopSceneView.
+ * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed.
+ * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time.
+ * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView.
+ * @param ambientLightColor the color of the TableTopSceneView's ambient light.
+ * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed.
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed.
+ * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed.
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView.
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed.
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView.
+ * @param onScale lambda invoked when a user performs a pinch gesture on the TableTopSceneView.
+ * @param onUp lambda invoked when the user removes all their pointers from the TableTopSceneView.
+ * @param onDown lambda invoked when the user first presses on the TableTopSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the TableTopSceneView.
+ * @param onDoubleTap lambda invoked the user double taps on the TableTopSceneView.
+ * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView.
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView.
+ * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView.
+ * @param content the content of the TableTopSceneView.
  *
  * @since 200.6.0
  */
@@ -178,7 +172,6 @@ public fun TableTopSceneView(
 ) {
     val initializationStatus = rememberTableTopSceneViewStatus()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
@@ -221,68 +214,63 @@ public fun TableTopSceneView(
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
-                rememberArSessionWrapper(applicationContext = context.applicationContext)
-            DisposableEffect(Unit) {
-                // We call this from inside DisposableEffect so that we invoke the callback in a side effect
-                initializationStatus.update(
-                    TableTopSceneViewStatus.DetectingPlanes,
-                    onInitializationStatusChanged
+                rememberArSessionWrapper(
+                    applicationContext = context.applicationContext
                 )
-                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                    arSessionWrapper.onDestroy(lifecycleOwner)
+            SideEffect {
+                // We need to check, otherwise during subsequent recompositions we could accidentally
+                // revert from `Initialized` back to `DetectingPlanes`.
+                if (initializationStatus.value is TableTopSceneViewStatus.Initializing) {
+                    initializationStatus.update(
+                        TableTopSceneViewStatus.DetectingPlanes,
+                        onInitializationStatusChanged
+
+                    )
                 }
             }
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-            val session = arSessionWrapper.session.collectAsStateWithLifecycle()
-            session.value?.let { arSession ->
-                ArCameraFeed(
-                    session = arSession,
-                    onFrame = { frame, displayRotation ->
-                        arCoreAnchor?.let { anchor ->
-                            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
-                            val cameraPosition =
-                                anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
-                            cameraController.transformationMatrix = cameraPosition
-                            val imageIntrinsics = frame.camera.imageIntrinsics
-                            tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                                imageIntrinsics.focalLength[0],
-                                imageIntrinsics.focalLength[1],
-                                imageIntrinsics.principalPoint[0],
-                                imageIntrinsics.principalPoint[1],
-                                imageIntrinsics.imageDimensions[0].toFloat(),
-                                imageIntrinsics.imageDimensions[1].toFloat(),
-                                deviceOrientation = when (displayRotation) {
-                                    0 -> DeviceOrientation.LandscapeLeft
-                                    90 -> DeviceOrientation.Portrait
-                                    180 -> DeviceOrientation.LandscapeRight
-                                    270 -> DeviceOrientation.ReversePortrait
-                                    else -> DeviceOrientation.Portrait
-                                }
+            ArCameraFeed(
+                session = arSessionWrapper,
+                onFrame = { frame, displayRotation, session ->
+                    arCoreAnchor?.let { anchor ->
+                        val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                            TransformationMatrix.createWithQuaternionAndTranslation(
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                it[0].toDouble(),
+                                it[1].toDouble(),
+                                it[2].toDouble()
                             )
-                            tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                         }
-                    },
-                    onTapWithHitResult = { hit ->
-                        hit?.let { hitResult ->
-                            if (arCoreAnchor == null) {
-                                // use `extractTranslation` to ignore any rotation
-                                arCoreAnchor = hitResult.trackable.createAnchor(hitResult.hitPose.extractTranslation())
-                                // stop rendering planes
-                                visualizePlanes = false
-                            }
-                        }
-                    },
-                    onFirstPlaneDetected = {
-                        initializationStatus.update(
-                            TableTopSceneViewStatus.Initialized,
-                            onInitializationStatusChanged
+                        val cameraPosition =
+                            anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                        cameraController.transformationMatrix = cameraPosition
+                        tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                            frame.camera,
+                            displayRotation
                         )
-                    },
-                    visualizePlanes = visualizePlanes
-                )
-            }
+                        tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+                    }
+                },
+                onTapWithHitResult = { hit ->
+                    hit?.let { hitResult ->
+                        if (arCoreAnchor == null) {
+                            arCoreAnchor = hitResult.createAnchor()
+                            // stop rendering planes
+                            visualizePlanes = false
+                        }
+                    }
+                },
+                onFirstPlaneDetected = {
+                    initializationStatus.update(
+                        TableTopSceneViewStatus.Initialized,
+                        onInitializationStatusChanged
+                    )
+                },
+                visualizePlanes = visualizePlanes
+            )
         }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
             // Disable interaction, which is not supported in TableTop scenarios
@@ -335,77 +323,3 @@ public fun TableTopSceneView(
         }
     }
 }
-
-/**
- * Checks if the camera permission is granted and requests it if required.
- *
- * @since 200.6.0
- */
-@Composable
-private fun rememberCameraPermission(
-    requestCameraPermissionAutomatically: Boolean,
-    onNotGranted: () -> Unit
-): MutableState<Boolean> {
-    val cameraPermission = Manifest.permission.CAMERA
-    val context = LocalContext.current
-    val isGrantedState = remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                cameraPermission
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    if (!isGrantedState.value) {
-        if (requestCameraPermissionAutomatically) {
-            val requestPermissionLauncher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-                    isGrantedState.value = granted
-                    if (!granted) {
-                        onNotGranted()
-                    }
-                }
-            SideEffect {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        } else {
-            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
-            // after the composition completes, for example, invoking the onInitializationStatusChanged
-            // callback
-            SideEffect {
-                onNotGranted()
-            }
-        }
-    }
-    return isGrantedState
-}
-
-private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
-    suspendCancellableCoroutine { continuation ->
-        ArCoreApk.getInstance().checkAvailabilityAsync(context) {
-            continuation.resume(it)
-        }
-    }
-
-private fun MutableState<TableTopSceneViewStatus>.update(
-    newStatus: TableTopSceneViewStatus,
-    callback: ((TableTopSceneViewStatus) -> Unit)?
-) {
-    this.value = newStatus
-    callback?.invoke(newStatus)
-}
-
-/**
- * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
- *
- * @since 200.6.0
- */
-private val Pose.transformationMatrix: TransformationMatrix
-    get() = TransformationMatrix.createWithQuaternionAndTranslation(
-        qx().toDouble(),
-        qy().toDouble(),
-        qz().toDouble(),
-        qw().toDouble(),
-        tx().toDouble(),
-        ty().toDouble(),
-        tz().toDouble())

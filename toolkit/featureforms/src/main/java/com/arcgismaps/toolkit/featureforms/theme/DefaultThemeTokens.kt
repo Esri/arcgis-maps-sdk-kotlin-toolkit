@@ -116,6 +116,7 @@ internal object DefaultThemeTokens {
             containerColor = ColorTokens.Surface,
             tileTextColor = Color.Unspecified,
             tileBorderColor = ColorTokens.Outline,
+            tileContainerColor = Color.Unspecified,
             scrollBarColor = ColorTokens.OnSurface,
         )
     )
@@ -147,7 +148,8 @@ internal object DefaultThemeTokens {
         attachmentsElementTypography = AttachmentsElementTypography(
             labelStyle = TypographyTokens.bodyMedium,
             supportingTextStyle = TypographyTokens.bodySmall,
-            tileTextStyle = TypographyTokens.bodySmall
+            tileTextStyle = TypographyTokens.bodySmall,
+            tileSupportingTextStyle = TypographyTokens.bodySmall,
         )
     )
 }

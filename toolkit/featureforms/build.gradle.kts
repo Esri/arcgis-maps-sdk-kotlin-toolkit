@@ -34,6 +34,13 @@ secrets {
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
+
+    // Lint crashes on the latest Android studio
+    // (Bug with Android Studio Meerkat | 2024.3.1)
+    // TODO: Remove this when Android Studio lint checker is fixed
+    lint {
+        disable.add("SuspiciousModifierThen")
+    }
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -79,14 +86,6 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        // remove these disables when strings.xml lint is fixed via localization
-        disable += "MissingTranslation"
-        disable += "MissingQuantity"
-        baseline = file("lint-baseline.xml")
-    }
 }
 
 apiValidation {
@@ -105,6 +104,9 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentErrorDialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$DeleteAttachmentDialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$RenameAttachmentDialogKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
@@ -116,7 +118,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
-        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator"
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
     )
     
     ignoredClasses.addAll(composableSingletons)

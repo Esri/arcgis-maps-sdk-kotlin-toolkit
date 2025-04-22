@@ -36,6 +36,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
@@ -75,9 +76,16 @@ internal class AttachmentElementState(
     isVisible = formElement.isVisible
 ) {
     /**
-     * The attachments associated with the form element.
+     * Backing mutable state for the [attachments] property.
      */
-    var attachments = mutableStateListOf<FormAttachmentState>()
+    private val _attachments = mutableStateListOf<FormAttachmentState>()
+
+    /**
+     * The attachments associated with the form element. This list is observable and will update
+     * the UI when attachments are added or removed.
+     */
+    val attachments : List<FormAttachmentState>
+        get() = _attachments
 
     /**
      * Indicates whether the attachment form element is editable.
@@ -98,7 +106,7 @@ internal class AttachmentElementState(
      *  to produce the [attachments] list.
      */
     private fun buildAttachmentStates(list: List<FormAttachment>) {
-        attachments.clear()
+        _attachments.clear()
         list.asReversed().forEach { formAttachment ->
             // create a new state
             val state = FormAttachmentState(
@@ -117,7 +125,7 @@ internal class AttachmentElementState(
             if (formAttachment.loadStatus.value is LoadStatus.Loaded || formAttachment.isLocal) {
                 state.loadWithParentScope()
             }
-            attachments.add(state)
+            _attachments.add(state)
         }
     }
 
@@ -147,8 +155,12 @@ internal class AttachmentElementState(
             scope = scope,
             formAttachment = formAttachment
         )
-        // add the new state to the beginning of the list
-        attachments.add(0, state)
+        // add the new state to the beginning of the list and scroll to the new attachment in
+        // one atomic operation
+        Snapshot.withMutableSnapshot {
+            _attachments.add(0, state)
+            lazyListState.requestScrollToItem(0)
+        }
         // load the new attachment
         state.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
@@ -164,7 +176,7 @@ internal class AttachmentElementState(
     fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
         // delete the state object
-        attachments.removeIf { state ->
+        _attachments.removeIf { state ->
             state.formAttachment == formAttachment
         }
         scope.launch { evaluateExpressions() }
@@ -267,6 +279,11 @@ internal class FormAttachmentState(
     private val thumbnailSize = Size(368, 300)
 
     /**
+     * A callback that is invoked when the attachment fails to load.
+     */
+    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
+
+    /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
      * created this attachment. Usually, this is the [AttachmentElementState] that created this
      * within the CoroutineScope of the root Feature Form composable.
@@ -275,6 +292,14 @@ internal class FormAttachmentState(
         scope.launch {
             load()
         }
+    }
+
+    /**
+     * Sets a callback that is invoked when the attachment fails to load. This is useful for
+     * handling any errors in the UI.
+     */
+    fun setOnLoadErrorCallback(callback: ((Throwable) -> Unit)?) {
+        onLoadErrorCallback = callback
     }
 
     /**
@@ -305,6 +330,7 @@ internal class FormAttachmentState(
             } else {
                 val error = result.exceptionOrNull() ?: Exception("Failed to load attachment")
                 _loadStatus.value = LoadStatus.FailedToLoad(error)
+                onLoadErrorCallback?.invoke(error)
             }
         }
         return result

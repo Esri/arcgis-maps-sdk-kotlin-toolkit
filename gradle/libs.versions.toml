@@ -1,16 +1,16 @@
 [versions]
-activityCompose = "1.9.3"
+activityCompose = "1.10.1"
 androidGradlePlugin = "8.7.3"
 androidXBrowser = "1.8.0"
 coilBOM = "2.5.0"
-composeBOM = "2025.03.00"
-androidxCamera = "1.4.1"
+composeBOM = "2025.04.00"
+androidxCamera = "1.4.2"
 androidxComposeCompiler = "1.5.12"
-androidxCore = "1.15.0"
+androidxCore = "1.16.0"
 androidxEspresso = "3.6.1"
 androidxHiltNavigationCompose = "1.2.0"
 androidxLifecycle = "2.8.7"
-androidxMaterialIcons = "1.7.5"
+androidxMaterialIcons = "1.7.8"
 androidxTestExt = "1.2.1"
 androidXTestRunner = "1.6.2"
 androidXTestRules = "1.6.1"
@@ -19,22 +19,23 @@ binaryCompatibilityValidator = "0.17.0"
 compileSdk = "35"
 compose-navigation = "2.8.9"
 commonMark = "0.22.0"
-dokka = "1.9.20"
+dokka = "2.0.0"
 hilt = "2.55"
 hiltExt = "1.2.0"
 junit = "4.13.2"
-kotlin = "2.1.0"
-ksp = "2.1.0-1.0.29"
-media3Exoplayer = "1.5.0"
-minSdk = "26"
+kotlin = "2.1.20"
+ksp = "2.1.20-1.0.32"
+media3Exoplayer = "1.6.1"
+minSdk = "28"
 mlkitBarcodeScanning = "17.3.0"
 kotlinxCoroutinesTest = "1.8.0"
 kotlinxSerializationJson = "1.8.0"
-mockkAndroid = "1.13.12"
-room = "2.6.1"
+mockkAndroid = "1.14.0"
+room = "2.7.0"
 truth = "1.4.4"
 uiautomator = "2.3.0"
-arcore = "1.47.0"
+arcore = "1.48.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -93,6 +94,7 @@ room-ext = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

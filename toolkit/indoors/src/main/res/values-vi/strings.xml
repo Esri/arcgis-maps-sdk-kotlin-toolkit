@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Chọn một cơ sở</string>
     <string name="floor_filter_no_results">Không tìm thấy kết quả nào.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel không có dữ liệu nhận biết tầng</string>
+    <string name="an_error_has_occurred">Đã xảy ra lỗi</string>
     <string name="not_available">Không khả dụng</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Khu vực - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Xóa tìm kiếm</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Đóng</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Thu gọn</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Quay lại công cụ lựa chọn khu vực</string>
 </resources>

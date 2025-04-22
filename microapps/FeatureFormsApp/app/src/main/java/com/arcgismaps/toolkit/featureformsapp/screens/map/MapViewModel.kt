@@ -502,7 +502,6 @@ fun ArcGISMap.clearSelection() {
             is FeatureLayer -> {
                 layer.clearSelection()
             }
-
             else -> {}
         }
     }

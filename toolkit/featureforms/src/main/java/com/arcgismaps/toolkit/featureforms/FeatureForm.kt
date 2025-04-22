@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
@@ -203,10 +204,15 @@ public fun FeatureForm(
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
     val scope = rememberCoroutineScope()
+    // Hold the list of form elements.
+    val formElements: List<FormElement> = remember(featureForm) {
+        // Add the default attachments element, if present.
+        featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
+    }
     val states = remember(featureForm) {
         createStates(
             form = featureForm,
-            elements = featureForm.elements,
+            elements = formElements,
             // Ignore the UtilityAssociationsFormElement as it is not supported with this API
             ignoreList = setOf(
                 UtilityAssociationsFormElement::class.java
@@ -316,7 +322,7 @@ public fun FeatureForm(
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
- * @since 200.7.0
+ * @since 200.8.0
  */
 @Composable
 public fun FeatureForm(

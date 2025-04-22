@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Dovoljenje za kamero ni odobreno</string>
+    <string name="arcore_not_installed_message">ARCore mora biti nameščen za uporabo TableTopSceneView. Razpoložljivost ARCore: %1$s</string>
+</resources>

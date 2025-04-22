@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Guid
 import com.arcgismaps.data.ArcGISFeature
@@ -188,7 +189,7 @@ private fun AssociationItem(
     }
     val trailingText = when {
         terminal != null -> {
-            "Terminal : ${terminal.name}"
+            stringResource(R.string.terminal, terminal.name)
         }
 
         fractionAlongEdge != null -> {
@@ -197,7 +198,7 @@ private fun AssociationItem(
 
         association.associationType is UtilityAssociationType.Containment &&
             associatedFeature.globalId == association.toElement.globalId -> {
-            "Containment Visible : ${association.isContainmentVisible}"
+            stringResource(R.string.containment_visible, association.isContainmentVisible)
         }
 
         else -> ""

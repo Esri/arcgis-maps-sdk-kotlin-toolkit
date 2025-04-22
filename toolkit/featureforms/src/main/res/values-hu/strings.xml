@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Adjon meg %1$d karaktert</item>
         <item quantity="one">Adjon meg %1$d karaktert</item>
+        <item quantity="two">Adjon meg %1$d karaktert</item>
+        <item quantity="few">Adjon meg %1$d karaktert</item>
+        <item quantity="many">Adjon meg %1$d karaktert</item>
         <item quantity="other">Adjon meg %1$d karaktert</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Az értéknek %1$d karakternek kell lennie</item>
         <item quantity="one">Az értéknek %1$d karakternek kell lennie</item>
+        <item quantity="two">Az értéknek %1$d karakternek kell lennie</item>
+        <item quantity="few">Az értéknek %1$d karakternek kell lennie</item>
+        <item quantity="many">Az értéknek %1$d karakternek kell lennie</item>
         <item quantity="other">Az értéknek %1$d karakternek kell lennie</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Adjon meg %1$d–%2$d karaktert</string>
-    <string name="value_must_be_from_to_characters">Az értéknek %1$d–%2$d karakter között kell lennie</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximum %1$d karakter</item>
         <item quantity="one">Maximum %1$d karakter</item>
+        <item quantity="two">Maximum %1$d karakter</item>
+        <item quantity="few">Maximum %1$d karakter</item>
+        <item quantity="many">Maximum %1$d karakter</item>
         <item quantity="other">Maximum %1$d karakter</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Adjon meg %1$d–%2$d karaktert</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Az értéknek %1$d–%2$d karakter között kell lennie</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximum %1$d karakter</string>
     <string name="no_value">Nincs érték</string>
     <string name="enter_value">Adja meg az értéket</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Kész</string>
     <string name="filter">Szűrő %1$s</string>
+    <string name="search">Keresés</string>
     <string name="numeric_range_helper_text">Adjon meg egy %1$s és %2$s közötti értéket</string>
     <string name="value_must_be_from_to">Az értéknek %1$s és %2$s között kell lennie</string>
     <string name="less_than_min_value">Kisebb, mint a minimális %1$s érték</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">DE</string>
     <string name="ff_time_picker_hour">Óra</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d óra</string>
     <string name="ff_time_picker_hour_selection">Óra kiválasztása</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'óra</string>
     <string name="ff_time_picker_hour_text_field">órához</string>
     <string name="ff_time_picker_minute">Perc</string>
     <string name="ff_time_picker_minute_selection">Perc kiválasztása</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d perc</string>
     <string name="ff_time_picker_minute_text_field">perchez</string>
     <string name="ff_time_picker_period_toggle_description">DE/DU kiválasztása</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Az üres fájlok nem tölthetők le</string>
     <string name="attachment_deleted">A(z) %1s törlése megtörtént</string>
     <string name="attachment_size_limit_exceeded">A(z) %1$s méretnél nagyobb csatolmányok nem tölthetők le</string>
+    <string name="barcode_tooltip">Fordítsa a kamerát egy vonalkód felé</string>
+    <string name="barcode_permission_denied">Vonalkódok beolvasásához kameraengedélyek szükségesek Engedélyezze a kameraengedélyeket az eszköz beállításaiban.</string>
+    <string name="unsupported_value">Nem támogatott érték</string>
+    <string name="tap_to_scan">Koppintson a beolvasáshoz</string>
+    <string name="unable_to_open_the_camera">Nem sikerült megnyitni a kamerát</string>
+    <string name="value_must_be_a_guid">Az értéknek érvényes GUID-nak kell lennie</string>
 </resources>
