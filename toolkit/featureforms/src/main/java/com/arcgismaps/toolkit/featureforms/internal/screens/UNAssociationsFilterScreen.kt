@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
@@ -30,7 +31,7 @@ import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 
 /**
- * Screen that displays the selected filter for the utility associations.
+ * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
  *
  * @param formStateData The form state data.
  * @param route The [NavigationRoute.UNFilterView] route data of this screen.
@@ -52,11 +53,11 @@ internal fun UNAssociationsFilterScreen(
     // Get the selected filter from the UtilityAssociationsElementState
     val filterResult = utilityAssociationsElementState.selectedFilterResult
     // guard against null value
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top
-    ) {
-        if (filterResult != null) {
+    if (filterResult != null) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.Top
+        ) {
             UtilityAssociationFilter(
                 groupResults = filterResult.groupResults,
                 onGroupClick = { groupResult ->

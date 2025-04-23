@@ -69,6 +69,22 @@ import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * A dynamic action bar that adapts its content based on the current navigation state.
+ *
+ * @param backStackEntry The [NavBackStackEntry] representing the current navigation state.
+ * @param state The [FeatureFormState] that holds the current form state data.
+ * @param hasBackStack Indicates if there is a previous route in the navigation stack.
+ * @param showFormActions Indicates if the form actions (save, discard) should be shown.
+ * @param showCloseIcon Indicates if the close icon should be displayed.
+ * @param onSaveForm The callback to invoke when the save button is clicked. It takes the current
+ * [FeatureForm] and a boolean indicating if the save is followed by a navigation action.
+ * @param onDiscardForm The callback to invoke when the discard button is clicked. It takes a boolean
+ * indicating if the discard is followed by a navigation action.
+ * @param onDismissRequest The callback to invoke when the close button is clicked. If the form has
+ * unsaved edits, this in invoked after the save or discard action is completed.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 internal fun ContentAwareTopBar(
     backStackEntry: NavBackStackEntry,
@@ -84,13 +100,17 @@ internal fun ContentAwareTopBar(
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     val scope = rememberCoroutineScope()
     val hasEdits by formData.featureForm.hasEdits.collectAsState()
+    // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
         mutableStateOf(NavigationAction.None)
     }
+    // Callback to handle navigation actions based on the form's edit state
     val onNavigationAction: (NavigationAction, Boolean) -> Unit = { action, formHasEdits ->
         if (formHasEdits) {
+            // If the form has edits, store the pending action
             pendingNavigationAction = action
         } else {
+            // Otherwise, execute the action immediately
             when (action) {
                 is NavigationAction.NavigateBack -> {
                     state.popBackStack(backStackEntry)
@@ -117,6 +137,7 @@ internal fun ContentAwareTopBar(
             }
         }
     }
+    // Get the title and subtitle for the top bar based on the current navigation state
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
     Column {
         FeatureFormTitle(
@@ -151,6 +172,7 @@ internal fun ContentAwareTopBar(
     if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {
+                // Clear the pending action when the dialog is dismissed
                 pendingNavigationAction = NavigationAction.None
             },
             onSave = {
@@ -159,6 +181,7 @@ internal fun ContentAwareTopBar(
                     // is not triggered by the top bar
                     val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
                     onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                        // Execute the pending navigation action after saving
                         onNavigationAction(pendingNavigationAction, false)
                     }
                     pendingNavigationAction = NavigationAction.None

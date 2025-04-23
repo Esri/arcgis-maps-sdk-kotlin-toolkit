@@ -62,10 +62,17 @@ internal class UtilityAssociationsElementState(
     val filters: List<UtilityAssociationsFilterResult>
         get() = _filters.value
 
-
+    /**
+     * The selected [UtilityAssociationsFilterResult] to display. Use [setSelectedFilterResult] to
+     * set this value.
+     */
     var selectedFilterResult : UtilityAssociationsFilterResult? = null
         private set
 
+    /**
+     * The selected [UtilityAssociationGroupResult] to display. Use [setSelectedGroupResult] to
+     * set this value.
+     */
     var selectedGroupResult : UtilityAssociationGroupResult? = null
         private set
 
@@ -81,10 +88,16 @@ internal class UtilityAssociationsElementState(
         }
     }
 
+    /**
+     * Sets the selected [UtilityAssociationsFilterResult] to display.
+     */
     fun setSelectedFilterResult(filterResult: UtilityAssociationsFilterResult) {
         selectedFilterResult = filterResult
     }
 
+    /**
+     * Sets the selected [UtilityAssociationGroupResult] to display.
+     */
     fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult) {
         selectedGroupResult = groupResult
     }

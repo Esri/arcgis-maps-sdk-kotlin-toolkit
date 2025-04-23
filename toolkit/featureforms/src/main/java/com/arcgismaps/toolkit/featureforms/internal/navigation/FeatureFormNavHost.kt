@@ -62,11 +62,9 @@ internal fun FeatureFormNavHost(
                 formStateData = formData,
                 onBarcodeButtonClick = onBarcodeButtonClick,
                 onUtilityFilterSelected = { state ->
-                    val route = NavigationRoute.UNFilterView(
-                        stateId = state.id
-                    )
+                    val newRoute = NavigationRoute.UNFilterView(stateId = state.id)
                     // Navigate to the filter view
-                    navController.navigateSafely(backStackEntry, route)
+                    navController.navigateSafely(backStackEntry, newRoute)
                 }
             )
             LaunchedEffect(formData) {
@@ -98,7 +96,8 @@ internal fun FeatureFormNavHost(
                 onSave = onSaveForm,
                 onDiscard = onDiscardForm,
                 onNavigateTo = { feature ->
-                    state.navigateTo(feature, backStackEntry)
+                    // Request the state to navigate to the feature.
+                    state.navigateTo(backStackEntry, feature)
                 },
                 modifier = Modifier.fillMaxSize()
             )

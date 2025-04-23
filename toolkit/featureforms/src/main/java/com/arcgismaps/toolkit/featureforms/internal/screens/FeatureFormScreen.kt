@@ -56,7 +56,7 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
  *
  * @param formStateData The form state data.
  * @param onBarcodeButtonClick The callback to be invoked when the barcode button is clicked.
- * @param onUtilityFilterSelected The callback to be invoked when the utility filter is selected.
+ * @param onUtilityFilterSelected The callback to be invoked when a utility filter is selected.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
@@ -147,6 +147,7 @@ private fun FormContent(
                         UtilityAssociationsElement(
                             state = state,
                             onItemClick = { selected ->
+                                // Set the selected filter result in the state
                                 state.setSelectedFilterResult(selected)
                                 onUtilityAssociationFilterClick(state)
                             },
@@ -169,8 +170,10 @@ private fun FormContent(
         }
     }
     LaunchedEffect(Unit) {
-        formStateData.featureForm.hasEdits.collect {
-            if (it) {
+        formStateData.featureForm.hasEdits.collect { hasEdits ->
+            // If there are edits and the keyboard is visible, scroll the list up to avoid
+            // the keyboard covering the input field.
+            if (hasEdits) {
                 val insets = ViewCompat.getRootWindowInsets(view) ?: return@collect
                 val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
                 with(density) {

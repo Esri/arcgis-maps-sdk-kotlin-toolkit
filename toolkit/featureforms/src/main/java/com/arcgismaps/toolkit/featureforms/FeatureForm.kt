@@ -284,13 +284,6 @@ public fun FeatureForm(
  * For adding any attachments, camera permissions are required. If the permissions are not granted,
  * then the specific functionality is disabled in the form.
  *
- * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
- * currently supported. A default attachments editing support is provided using the
- * [FeatureForm.defaultAttachmentsElement] property.
- *
- * If any [UtilityAssociationsFormElement] are present in the [FeatureForm.elements] collection,
- * the Form supports navigation between the associated [ArcGISFeature]s and their [FeatureForm]
- *
  * If any [UtilityAssociationsFormElement] is part of the [FeatureForm.elements] collection, the
  * Form will display [UtilityAssociation]s that are associated with the selected feature and allow
  * the user to navigate to the associated feature on the other end of the association. The Android
@@ -356,7 +349,7 @@ public fun FeatureForm(
         return if (errorCount == 0) {
             // Finish editing the form if there are no validation errors
             form.finishEditing().onSuccess {
-                // Send a saved edits event
+                // Send a saved edits event if the save was successful
                 val event = FeatureFormEditingEvent.SavedEdits(form, willNavigate)
                 onEditingEvent(event)
             }
@@ -420,7 +413,7 @@ public fun FeatureForm(
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
-                modifier = modifier
+                modifier = Modifier.fillMaxSize()
             )
         },
         modifier = modifier,
@@ -429,6 +422,7 @@ public fun FeatureForm(
     )
     DisposableEffect(state) {
         onDispose {
+            // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
             state.setNavigateBack(null)
         }
@@ -447,9 +441,7 @@ internal fun FeatureFormLayout(
         colorScheme = colorScheme,
         typography = typography
     ) {
-        Column(
-            modifier = modifier.fillMaxSize()
-        ) {
+        Column(modifier = modifier) {
             topBar()
             HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
             content()

@@ -53,7 +53,6 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  *
  * @param groupResults The [UtilityAssociationsFilterResult] to display.
  * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
- * @param onBackPressed A callback that is called when the back button is pressed.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
