@@ -1,0 +1,11 @@
+public final class com/arcgismaps/toolkit/offline/ComposableSingletons$OfflineMapAreasKt {
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/ComposableSingletons$OfflineMapAreasKt;
+	public fun <init> ()V
+	public final fun getLambda$1192551279$offline_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$83429162$offline_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
+	public static final fun OfflineMapAreas (Landroidx/compose/runtime/Composer;I)V
+}
+
