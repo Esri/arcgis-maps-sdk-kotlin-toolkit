@@ -38,11 +38,30 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
+import com.arcgismaps.mapping.view.GeoView
 
+/**
+ * OverviewMap is a small, secondary [MapView] which shows a representation of the main [GeoView]'s
+ * current [Viewpoint].
+ *
+ * Choose this overload if your main view is a [MapView]. If a non-default symbol is provided the
+ * symbol must be suitable for a polygon geometry such as a [SimpleFillSymbol].
+ *
+ * @param viewpoint the viewpoint of the main view
+ * @param visibleArea the visible area of the main view
+ * @param modifier the modifier to apply
+ * @param symbol the symbol to apply. Must be suitable for a polygon geometry.
+ * @param scaleFactor the factor to multiply the main view's scale by. The OverviewMap will
+ * display at the product of mainGeoViewScale * scaleFactor.
+ *
+ * @since 200.8.0
+ */
 @Composable
-public fun OverviewMapForMapView(
+public fun OverviewMap(
     viewpoint: Viewpoint?,
     visibleArea: Polygon?,
+    modifier: Modifier = Modifier,
     symbol: Symbol = remember {
         SimpleFillSymbol(
             outline = SimpleLineSymbol(color = Color.red),
@@ -50,50 +69,78 @@ public fun OverviewMapForMapView(
         )
     },
     scaleFactor: Double = 25.0,
-    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-    modifier: Modifier = Modifier
+    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }
 ) {
     OverviewMapImpl(
         viewpoint = viewpoint,
-        visibleArea = visibleArea,
-        scaleFactor = scaleFactor,
-        fillSymbol = symbol,
         map = map,
-        modifier = modifier
+        modifier = modifier,
+        visibleArea = visibleArea,
+        symbol = symbol,
+        scaleFactor = scaleFactor,
     )
 }
 
+/**
+ * OverviewMap is a small, secondary [MapView] which shows a representation of the main [GeoView]'s
+ * current [Viewpoint].
+ *
+ * Choose this overload if your main view is a [SceneView]. If a non-default symbol is provided the
+ * symbol must be suitable for a point geometry such as a [SimpleMarkerSymbol].
+ *
+ * @param viewpoint the viewpoint of the main view
+ * @param modifier the modifier to apply
+ * @param symbol the symbol to apply. Must be suitable for a point geometry.
+ * @param scaleFactor the factor to multiply the main view's scale by. The OverviewMap will
+ * display at the product of mainGeoViewScale * scaleFactor.
+ *
+ * @since 200.8.0
+ */
 @Composable
-public fun OverviewMapForSceneView(
+public fun OverviewMap(
     viewpoint: Viewpoint?,
+    modifier: Modifier = Modifier,
     scaleFactor: Double = 25.0,
     symbol: Symbol = remember {
         SimpleMarkerSymbol(
             style = SimpleMarkerSymbolStyle.Cross,
-            color = Color.red
+            color = Color.red,
+            size = 20.0f
         )
     },
-    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-    modifier: Modifier = Modifier
+    map: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }
 ) {
     OverviewMapImpl(
         viewpoint = viewpoint,
-        scaleFactor = scaleFactor,
-        markerSymbol = symbol,
         map = map,
-        modifier = modifier
+        modifier = modifier,
+        symbol = symbol,
+        scaleFactor = scaleFactor,
     )
 }
 
+/**
+ * Internal implementation of the OverViewMap.
+ *
+ * @param viewpoint the viewpoint of the main view this overview map is for
+ * @param map the map to display
+ * @param modifier the modifier to apply
+ * @param visibleArea the visible area. The visible area is only applicable when the main view is
+ * a [MapView] and should be null for a [SceneView].
+ * @param symbol the symbol used to visualize the main view's viewpoint. When the main view is a
+ * [MapView] the symbol should be suitable for a polygon geometry, and when the main view is a
+ * [SceneView] the symbol should be suitable for a point geometry.
+ * @param scaleFactor the scale factor applied to the viewpoint
+ * @since 200.8.0
+ */
 @Composable
 private fun OverviewMapImpl(
     viewpoint: Viewpoint?,
     map: ArcGISMap,
-    visibleArea: Polygon? = null,
-    markerSymbol: Symbol? = null,
-    fillSymbol: Symbol? = null,
-    scaleFactor: Double = 25.0,
     modifier: Modifier = Modifier,
+    visibleArea: Polygon? = null,
+    symbol: Symbol? = null,
+    scaleFactor: Double = 25.0,
 ) {
     val proxy = remember {
         MapViewProxy()
@@ -121,11 +168,10 @@ private fun OverviewMapImpl(
             )
             if (visibleArea == null) {
                 graphic.geometry = it.targetGeometry
-                graphic.symbol = markerSymbol
             } else {
                 graphic.geometry = visibleArea
-                graphic.symbol = fillSymbol
             }
+            graphic.symbol = symbol
         }
     }
 
