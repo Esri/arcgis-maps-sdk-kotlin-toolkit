@@ -33,6 +33,7 @@ import java.util.concurrent.Executor
  * Provides headings for [WorldTrackingCameraController] using the Fused Orientation Provider API.
  *
  * @param context the context the app is running in
+ * @param onError called when an error occurs while requesting orientation updates
  *
  * @since 200.7.0
  */
