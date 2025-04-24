@@ -18,23 +18,26 @@
 
 package com.arcgismaps.toolkit.overviewmapapp.screens
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.overviewmap.OverviewMapForMapView
-import com.arcgismaps.toolkit.overviewmapapp.OverviewMapApp
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
+import com.arcgismaps.toolkit.overviewmap.OverviewMap
 
 //@Composable
 //fun OverviewMapForMapView(
@@ -138,49 +141,73 @@ import com.arcgismaps.toolkit.overviewmapapp.OverviewMapApp
 
 @Composable
 fun MainScreen() {
-    val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
-    val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
+//    val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
+//    val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
 
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISLightGray).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
-                )
-            }
-        )
-    }
+//    val arcGISMap by remember {
+//        mutableStateOf(
+//            ArcGISMap(BasemapStyle.ArcGISLightGray).apply {
+//                initialViewpoint = Viewpoint(
+//                    latitude = 39.8,
+//                    longitude = -98.6,
+//                    scale = 10e7
+//                )
+//            }
+//        )
+//    }
 
-//    SceneView(
-//        modifier = Modifier.fillMaxSize(),
-//        arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISDarkGray) },
-//        onViewpointChangedForCenterAndScale = {
-//            viewpoint.value = it
-//        },
-//    )
 
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
-        onViewpointChangedForCenterAndScale = {
-            viewpoint.value = it
-        },
-        onVisibleAreaChanged = {
-            visibleArea.value = it
+    Column {
+        Box(modifier = Modifier.weight(0.5f)) {
+            val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
+
+            SceneView(
+                modifier = Modifier.fillMaxSize(),
+                arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISLightGray).apply {
+                        initialViewpoint = Viewpoint(
+                            latitude = 39.8,
+                            longitude = -98.6,
+                            scale = 10e7
+                        )
+                    }
+                },
+                onViewpointChangedForCenterAndScale = {
+                    viewpoint.value = it
+                },
+            )
+            OverviewMap(
+                viewpoint = viewpoint.value,
+                modifier = Modifier.size(250.dp, 200.dp).padding(20.dp).align(Alignment.TopEnd)
+            )
         }
-    )
 
-//    OverviewMapForSceneView(
-//        viewpoint = viewpoint.value,
-//        symbol = remember { SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Diamond, Color.red, 30.0f) },
-//        modifier = Modifier.padding(20.dp).size(250.dp, 200.dp),
-//    )
+        Box(modifier = Modifier.weight(0.5f)) {
+            val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
+            val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
 
-    OverviewMapForMapView(
-        viewpoint = viewpoint.value,
-        visibleArea = visibleArea.value,
-        modifier = Modifier.size(250.dp, 200.dp).padding(20.dp)
-    )
+            MapView(
+                modifier = Modifier.fillMaxSize(),
+                arcGISMap = remember {
+                    ArcGISMap(BasemapStyle.ArcGISLightGray).apply {
+                        initialViewpoint = Viewpoint(
+                            latitude = 39.8,
+                            longitude = -98.6,
+                            scale = 10e7
+                        )
+                    }
+                },
+                onViewpointChangedForCenterAndScale = {
+                    viewpoint.value = it
+                },
+                onVisibleAreaChanged = {
+                    visibleArea.value = it
+                }
+            )
+            OverviewMap(
+                viewpoint = viewpoint.value,
+                visibleArea = visibleArea.value,
+                modifier = Modifier.size(250.dp, 200.dp).padding(20.dp).align(Alignment.TopEnd)
+            )
+        }
+    }
 }
