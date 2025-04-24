@@ -358,7 +358,6 @@ internal const val MillisecondsIn24Hours = 86400000L
 /**
  * A [CalendarModel] implementation for API >= 26.
  */
-@RequiresApi(Build.VERSION_CODES.O)
 internal class CalendarModelImpl : CalendarModel {
 
     override val today
@@ -378,7 +377,7 @@ internal class CalendarModelImpl : CalendarModel {
     override val weekdayNames: List<Pair<String, String>> =
         // This will start with Monday as the first day, according to ISO-8601.
         with(Locale.getDefault()) {
-            DayOfWeek.values().map {
+            DayOfWeek.entries.map {
                 it.getDisplayName(
                     TextStyle.FULL,
                     /* locale = */ this
