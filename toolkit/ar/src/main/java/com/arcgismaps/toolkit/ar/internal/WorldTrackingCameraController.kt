@@ -57,7 +57,7 @@ import java.time.Instant
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
     clippingDistance: Double?,
-    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    private val onInitializationError: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) : WorldScaleCameraController {
 
@@ -80,7 +80,7 @@ internal class WorldTrackingCameraController(
         val applicationContext = ArcGISEnvironment.applicationContext
         require(applicationContext != null)
 
-        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext)
+        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext, onInitializationError)
     }
 
     override var hasSetOriginCamera by mutableStateOf(false)
@@ -177,7 +177,7 @@ internal class WorldTrackingCameraController(
             locationDataSource.status.filterIsInstance<LocationDataSourceStatus.FailedToStart>()
                 .collect {
                     locationDataSource.error.value?.let { error ->
-                        onLocationDataSourceFailedToStart(
+                        onInitializationError(
                             error
                         )
                     }
