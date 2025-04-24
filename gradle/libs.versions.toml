@@ -1,9 +1,9 @@
 [versions]
 activityCompose = "1.10.1"
-androidGradlePlugin = "8.7.3"
+androidGradlePlugin = "8.9.2"
 androidXBrowser = "1.8.0"
 coilBOM = "2.5.0"
-composeBOM = "2025.04.00"
+composeBOM = "2025.04.01"
 androidxCamera = "1.4.2"
 androidxComposeCompiler = "1.5.12"
 androidxCore = "1.16.0"
