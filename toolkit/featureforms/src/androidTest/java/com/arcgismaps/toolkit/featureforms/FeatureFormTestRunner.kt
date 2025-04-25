@@ -42,6 +42,10 @@ import org.junit.Before
  *
  * @param uri The URI of the web map.
  * @param objectId The ID of the feature.
+ * @param user The username for authentication. Defaults to [BuildConfig.webMapUser].
+ * @param password The password for authentication. Defaults to [BuildConfig.webMapPassword].
+ * @param layerName The name of the feature layer. Defaults to an empty string, which means the first
+ * layer will be used.
  */
 open class FeatureFormTestRunner(
     private val uri: String,
@@ -72,6 +76,9 @@ open class FeatureFormTestRunner(
         // Load the map
         val map = ArcGISMap(uri = uri)
         map.assertIsLoaded()
+        map.utilityNetworks.forEach {
+            it.assertIsLoaded()
+        }
         // Load the feature layer
         val featureLayer = (map.operationalLayers.firstOrNull {
             it.name == layerName

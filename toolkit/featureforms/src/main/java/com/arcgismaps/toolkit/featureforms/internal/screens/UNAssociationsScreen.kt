@@ -76,10 +76,12 @@ internal fun UNAssociationsScreen(
     }
     val hasEdits by featureForm.hasEdits.collectAsState()
     val scope = rememberCoroutineScope()
+    // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
         mutableStateOf(NavigationAction.None)
     }
-    val onNavigationAction: (NavigationAction) -> Unit = { action ->
+    // Handler for navigating to a selected associated feature
+    val navigateToAssociation: (NavigationAction) -> Unit = { action ->
         if (action is NavigationAction.NavigateToAssociation) {
             val selectedIndex = action.index
             groupResult.associationResults.getOrNull(selectedIndex)?.associatedFeature?.let { feature ->
@@ -108,12 +110,14 @@ internal fun UNAssociationsScreen(
     if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {
+                // Clear the pending navigation action when the dialog is dismissed
                 pendingNavigationAction = NavigationAction.None
             },
             onSave = {
                 scope.launch {
                     onSave(featureForm, true).onSuccess {
-                        onNavigationAction(pendingNavigationAction)
+                        // If the save is successful, navigate to the association
+                        navigateToAssociation(pendingNavigationAction)
                     }
                     pendingNavigationAction = NavigationAction.None
                 }
@@ -121,7 +125,8 @@ internal fun UNAssociationsScreen(
             onDiscard = {
                 scope.launch {
                     onDiscard(true)
-                    onNavigationAction(pendingNavigationAction)
+                    // Navigate to the association after discarding changes
+                    navigateToAssociation(pendingNavigationAction)
                     pendingNavigationAction = NavigationAction.None
                 }
             }

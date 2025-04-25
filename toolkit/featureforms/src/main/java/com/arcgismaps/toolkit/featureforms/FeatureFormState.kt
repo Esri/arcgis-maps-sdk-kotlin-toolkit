@@ -201,6 +201,7 @@ public class FeatureFormState private constructor(
      */
     internal suspend fun updateActiveFeatureForm() {
         val formStateData = getActiveFormStateData()
+        // Check if the active feature form is different from the current form.
         if (_activeFeatureForm.value != formStateData.featureForm) {
             _activeFeatureForm.value = formStateData.featureForm
             if (formStateData.initialEvaluation.value.not()) {
@@ -214,10 +215,11 @@ public class FeatureFormState private constructor(
      * must be called after this to update the [activeFeatureForm], preferably after the navigation
      * is complete.
      *
+     * @param backStackEntry the [NavBackStackEntry] of the current destination.
      * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
     @MainThread
-    internal fun navigateTo(feature: ArcGISFeature, backStackEntry: NavBackStackEntry): Boolean {
+    internal fun navigateTo(backStackEntry: NavBackStackEntry, feature: ArcGISFeature, ): Boolean {
         val navigateTo = navigateToRoute ?: return false
         // Check if the backStackEntry is in the resumed state.
         if (backStackEntry.lifecycleIsResumed().not()) return false
