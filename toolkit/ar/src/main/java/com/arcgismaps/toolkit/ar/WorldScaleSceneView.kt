@@ -223,10 +223,10 @@ public fun WorldScaleSceneView(
     // If PE data could not be configured, we can't position the scene camera accurately
     if (!pedataConfigured) return
 
-    val rememberedOnSingleTapConfirmed = rememberUpdatedState(onSingleTapConfirmed)
+    val rememberedOnSingleTapConfirmedCallback = rememberUpdatedState(onSingleTapConfirmed)
 
     val planeFindingMode = rememberUpdatedState(
-        if (rememberedOnSingleTapConfirmed.value != null) {
+        if (rememberedOnSingleTapConfirmedCallback.value != null) {
             PlaneFindingMode.HORIZONTAL_AND_VERTICAL
         } else {
             PlaneFindingMode.DISABLED
@@ -276,7 +276,9 @@ public fun WorldScaleSceneView(
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
-                rememberedOnSingleTapConfirmed.value?.let { singleTapConfirmedCallback ->
+                // if the user-provided lambda callback is not null
+                rememberedOnSingleTapConfirmedCallback.value?.let { singleTapConfirmedCallback ->
+                    // if the last single tap confirmed event from the scene view is not null
                     rememberedSingleTapConfirmedEvent.value?.let { singleTapConfirmedEvent ->
                         val hitResult = frame.hitTest(
                             singleTapConfirmedEvent.screenCoordinate.x.toFloat(),

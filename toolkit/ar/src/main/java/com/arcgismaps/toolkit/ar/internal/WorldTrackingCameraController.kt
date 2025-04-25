@@ -103,9 +103,9 @@ internal class WorldTrackingCameraController(
      * @since 200.8.0
      */
     override fun getPointFromPose(pose: Pose, session: Session): Point? {
-        val hitPoseTM = pose.transformationMatrix
+        val hitPoseTransformationMatrix = pose.transformationMatrix
         val origin = cameraController.originCamera.value.transformationMatrix
-        return GeometryEngine.projectOrNull(Camera(origin + hitPoseTM).location, WorldScaleParameters.SR_CAMERA)
+        return GeometryEngine.projectOrNull(Camera(origin + hitPoseTransformationMatrix).location, WorldScaleParameters.SR_CAMERA)
     }
 
     /**
