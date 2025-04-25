@@ -51,7 +51,7 @@ internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
     clippingDistance: Double?,
     context: Context,
-    private val onError: (Throwable) -> Unit
+    private val onError: (Throwable?) -> Unit
 ) : WorldScaleCameraController {
     override val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
@@ -171,7 +171,9 @@ internal class GeospatialTrackingCameraController(
      */
     private fun checkForEarthStateErrors(earth: Earth) {
         when (earth.earthState) {
-            EarthState.ENABLED -> {}
+            EarthState.ENABLED -> {
+                onError(null)
+            }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
                 error = IllegalStateException(
                     "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."

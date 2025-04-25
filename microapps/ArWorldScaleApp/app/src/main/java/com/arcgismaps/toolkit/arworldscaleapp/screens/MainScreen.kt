@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -132,6 +133,7 @@ fun MainScreen() {
         )
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
+    var trackingError by remember { mutableStateOf<Throwable?>(null) }
     Scaffold(topBar = {
         TopAppBar(
             title = {
@@ -208,6 +210,13 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
+                    onTrackingErrorChanged = {
+                        Log.e(
+                            "WorldScaleSceneView",
+                            "Tracking error: ${it?.message}"
+                        )
+                        trackingError = it
+                    },
                     worldScaleSceneViewProxy = proxy,
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
@@ -273,6 +282,11 @@ fun MainScreen() {
                             }
 
                             else -> {}
+                        }
+                        if (trackingError != null) {
+                            TextWithScrim(
+                                text = "Tracking Error"
+                            )
                         }
                     }
 

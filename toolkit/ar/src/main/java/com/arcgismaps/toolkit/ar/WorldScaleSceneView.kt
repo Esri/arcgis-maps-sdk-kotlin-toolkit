@@ -143,6 +143,7 @@ public fun WorldScaleSceneView(
     worldScaleTrackingMode: WorldScaleTrackingMode = remember { WorldScaleTrackingMode.World() },
     clippingDistance: Double? = null,
     onInitializationStatusChanged: ((WorldScaleSceneViewStatus) -> Unit)? = null,
+    onTrackingErrorChanged: ((Throwable?) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
@@ -229,6 +230,7 @@ public fun WorldScaleSceneView(
 
     val calibrationState = remember { CalibrationState() }
 
+    val currentOnTrackingErrorChanged = rememberUpdatedState(onTrackingErrorChanged)
     val worldScaleCameraController: WorldScaleCameraController by rememberWorldScaleCameraController(
         context = LocalContext.current,
         worldScaleTrackingMode = worldScaleTrackingMode,
@@ -245,7 +247,8 @@ public fun WorldScaleSceneView(
             // session in WorldTracking Mode when the origin camera is reset, because AR tracking
             // will need to start from scratch.
             arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial)
-        }
+        },
+        onTrackingErrorChanged = currentOnTrackingErrorChanged.value
     )
 
     Box(modifier = modifier) {
@@ -348,7 +351,8 @@ internal fun rememberWorldScaleCameraController(
     calibrationState: CalibrationState,
     clippingDistance: Double?,
     onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit,
-    onResetOriginCamera: () -> Unit
+    onResetOriginCamera: () -> Unit,
+    onTrackingErrorChanged: ((Throwable?) -> Unit)?
 ): State<WorldScaleCameraController> {
     val worldScaleCameraController = remember(worldScaleTrackingMode) {
         when (worldScaleTrackingMode) {
@@ -358,7 +362,7 @@ internal fun rememberWorldScaleCameraController(
                     clippingDistance = clippingDistance,
                     context = context,
                     onError = {
-                        onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
+                        onTrackingErrorChanged?.invoke(it)
                     }
                 )
             }
