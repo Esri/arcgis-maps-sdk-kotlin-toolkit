@@ -40,6 +40,9 @@ android {
     // TODO: Remove this when Android Studio lint checker is fixed
     lint {
         disable.add("SuspiciousModifierThen")
+        // remove these disables when strings.xml lint is fixed via localization
+        disable += "MissingTranslation"
+        disable += "MissingQuantity"
     }
     
     defaultConfig {
