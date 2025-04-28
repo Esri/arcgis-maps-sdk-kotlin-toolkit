@@ -31,6 +31,7 @@ import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.toolkit.ar.ArCoreAuthorizationException
+import com.arcgismaps.toolkit.ar.ArCoreResourceExhaustedException
 import com.google.ar.core.Earth
 import com.google.ar.core.Earth.EarthState
 import com.google.ar.core.Frame
@@ -67,10 +68,7 @@ internal class GeospatialTrackingCameraController(
 
     private var error: Throwable? = null
 
-    private var testThrowCount = 0
-
     override fun updateCamera(frame: Frame, session: Session) {
-        testThrowCount++
         session.earth?.let { earth ->
             checkForEarthStateErrors(earth, hasSetOriginCamera)
             if (error != null) return@let
@@ -168,11 +166,7 @@ internal class GeospatialTrackingCameraController(
     private fun checkForEarthStateErrors(earth: Earth, hasSetOriginCamera: Boolean) {
         when (earth.earthState) {
             EarthState.ENABLED -> {
-                if (testThrowCount in 600..999) {
-                    onError(IllegalStateException("Test error"), hasSetOriginCamera)
-                } else {
-                    onError(null, hasSetOriginCamera)
-                }
+                onError(null, hasSetOriginCamera)
             }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
                 error = IllegalStateException(
@@ -189,9 +183,7 @@ internal class GeospatialTrackingCameraController(
             }
 
             EarthState.ERROR_RESOURCE_EXHAUSTED -> {
-                error = IllegalStateException(
-                    "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
-                ).also{
+                error = ArCoreResourceExhaustedException().also {
                     onError(it, hasSetOriginCamera)
                 }
             }
