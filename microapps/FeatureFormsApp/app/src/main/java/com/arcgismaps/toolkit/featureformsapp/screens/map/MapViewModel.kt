@@ -197,11 +197,7 @@ class MapViewModel @Inject constructor(
                                 geometry
                             )
                         ).onSuccess {
-                            map.referenceScale
-                            // zoom in to the feature
-                            //map.maxScale?.let { scale ->
-                                proxy.setViewpointScale(map.referenceScale)
-                            //}
+                            proxy.setViewpointScale(map.referenceScale)
                         }
                     }
                 }
@@ -504,6 +500,7 @@ fun ArcGISMap.clearSelection() {
             is FeatureLayer -> {
                 layer.clearSelection()
             }
+
             else -> {}
         }
     }
