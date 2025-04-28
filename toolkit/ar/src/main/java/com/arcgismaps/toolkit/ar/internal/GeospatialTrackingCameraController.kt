@@ -51,7 +51,7 @@ internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
     clippingDistance: Double?,
     context: Context,
-    private val onError: (Throwable?) -> Unit
+    private val onError: (error: Throwable?, hasSetOriginCamera: Boolean) -> Unit
 ) : WorldScaleCameraController {
     override val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
@@ -67,16 +67,12 @@ internal class GeospatialTrackingCameraController(
 
     private var error: Throwable? = null
 
+    private var testThrowCount = 0
+
     override fun updateCamera(frame: Frame, session: Session) {
+        testThrowCount++
         session.earth?.let { earth ->
-            if (!hasSetOriginCamera && error == null) {
-                // This code will check the earth state for any initialization errors
-                // We don't want to call onError after the WorldScaleSceneView is initialized,
-                // so we do this before we set the origin camera the first time, which will trigger
-                // the change to Initialized. Therefore this code should only run while WorldScaleSceneView
-                // is initializing.
-                checkForEarthStateErrors(earth)
-            }
+            checkForEarthStateErrors(earth, hasSetOriginCamera)
             if (error != null) return@let
             if (earth.trackingState != TrackingState.TRACKING) return@let
             if (earth.earthState != EarthState.ENABLED) return@let
@@ -169,31 +165,43 @@ internal class GeospatialTrackingCameraController(
      *
      * @since 200.7.0
      */
-    private fun checkForEarthStateErrors(earth: Earth) {
+    private fun checkForEarthStateErrors(earth: Earth, hasSetOriginCamera: Boolean) {
         when (earth.earthState) {
             EarthState.ENABLED -> {
-                onError(null)
+                if (testThrowCount in 600..999) {
+                    onError(IllegalStateException("Test error"), hasSetOriginCamera)
+                } else {
+                    onError(null, hasSetOriginCamera)
+                }
             }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
                 error = IllegalStateException(
                     "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
-                ).also(onError)
+                ).also {
+                    onError(it, hasSetOriginCamera)
+                }
             }
 
             EarthState.ERROR_NOT_AUTHORIZED -> {
-                error = ArCoreAuthorizationException().also(onError)
+                error = ArCoreAuthorizationException().also {
+                    onError(it, hasSetOriginCamera)
+                }
             }
 
             EarthState.ERROR_RESOURCE_EXHAUSTED -> {
                 error = IllegalStateException(
                     "The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console."
-                ).also(onError)
+                ).also{
+                    onError(it, hasSetOriginCamera)
+                }
             }
 
             EarthState.ERROR_APK_VERSION_TOO_OLD -> {
                 error = IllegalStateException(
                     "The ARCore APK is older than the current supported version."
-                ).also(onError)
+                ).also {
+                    onError(it, hasSetOriginCamera)
+                }
             }
         }
     }

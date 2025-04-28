@@ -361,8 +361,13 @@ internal fun rememberWorldScaleCameraController(
                     calibrationState = calibrationState,
                     clippingDistance = clippingDistance,
                     context = context,
-                    onError = {
-                        onTrackingErrorChanged?.invoke(it)
+                    onError = { error, hasSetOriginCamera ->
+                        if (!hasSetOriginCamera && error != null) {
+                            onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(error))
+                        }
+                        else {
+                            onTrackingErrorChanged?.invoke(error)
+                        }
                     }
                 )
             }
