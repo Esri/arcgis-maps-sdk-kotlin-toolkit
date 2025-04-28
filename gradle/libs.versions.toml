@@ -36,6 +36,8 @@ truth = "1.4.4"
 uiautomator = "2.3.0"
 arcore = "1.48.0"
 playServicesLocation = "21.3.0"
+gmazzo = "2.4.4"
+gradleSecrets = "2.0.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -104,10 +106,10 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1"}
+gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "gradleSecrets"}
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version = "2.2.0" }
+gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
 
 [bundles]
 camerax = [
