@@ -2,7 +2,7 @@
 
 The Overview Map displays...
 
-![Screenshot](mapview_screenshot.png)
+![Screenshot](mapview_screenshot.png) ![Screenshot](sceneview_screenshot.png)
 
 ### Basic usage for displaying an Overview Map
 
