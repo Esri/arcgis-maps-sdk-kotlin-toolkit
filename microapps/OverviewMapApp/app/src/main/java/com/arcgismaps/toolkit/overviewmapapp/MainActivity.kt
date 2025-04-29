@@ -35,6 +35,11 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.overviewmapapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
+/**
+ * The main activity of the application.
+ *
+ * @since 200.8.0
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +52,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * The app.
+ *
+ * @since 200.8.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewMapApp() {
@@ -58,12 +68,4 @@ fun OverviewMapApp() {
         }
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        OverviewMapApp()
-    }
 }
