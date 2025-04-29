@@ -67,4 +67,6 @@ Box {
 
 ## Example
 
-To see it in action, try out the [Overview Map micro-app](../../microapps/OverviewMapApp) and refer to [MainScreen.kt](../../microapps/OverviewMapApp/app/src/main/java/com/arcgismaps/toolkit/basemapgalleryapp/screens/MainScreen.kt) in the project.
+To see it in action, try out the [Overview Map micro-app](../../microapps/OverviewMapApp) and refer
+to [MainScreen.kt](../../microapps/OverviewMapApp/app/src/main/java/com/arcgismaps/toolkit/overviewmapapp/screens/MainScreen.kt)
+in the project.
