@@ -49,6 +49,12 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.overviewmap.OverviewMap
 import com.arcgismaps.toolkit.overviewmapapp.ViewModel
 
+/**
+ * The main screen of the application consisting of tabs that show either a [MapView] or a [SceneView]
+ * with an inset [OverviewMap].
+ *
+ *  @since 200.8.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
