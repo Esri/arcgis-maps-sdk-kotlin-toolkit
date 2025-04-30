@@ -25,10 +25,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
-import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
+import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
@@ -49,8 +50,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var portalItems = mutableStateListOf<BasemapGalleryItem>()
         private set
 
-    val arcGISMap =
-        ArcGISMap(BasemapStyle.ArcGISImagery).apply {
+    val arcGISScene =
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
             initialViewpoint =
                 Viewpoint(
                     center = Point(-11e6, 5e6, SpatialReference.webMercator()),
@@ -65,13 +66,31 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             portal.load()
                 .onFailure { Log.w("BasemapGallery", "Failed to load ${portal.url}") }
                 .onSuccess {
-                    portal.fetchBasemaps()
+                    // first get 3D basemaps
+                    portal.fetch3DBasemaps()
+                        .onFailure { Log.w("BasemapGallery", "Failed to fetch 3D basemaps") }
+                        .onSuccess {
+                            it.forEach { basemap ->
+                                basemap.load()
+                                    .onFailure { Log.w("BasemapGallery", "Failed to load basemap") }
+                                    .onSuccess {
+                                        basemap.item?.let { item ->
+                                            val sceneLayers =
+                                                basemap.baseLayers.filterIsInstance<ArcGISSceneLayer>()
+                                            val galleryItem =
+                                                BasemapGalleryItem(item, sceneLayers.size > 0)
+                                            portalItems.add(galleryItem)
+                                        }
+                                    }
+                            }
+                        }
+                    // then get developer basemaps
+                    portal.fetchDeveloperBasemaps()
                         .onFailure { Log.w("BasemapGallery", "Failed to fetch basemaps") }
                         .onSuccess {
                             it.forEach { basemap ->
                                 basemap.item?.let { item ->
-                                    val galleryItem = BasemapGalleryItem(item)
-                                    portalItems.add(galleryItem)
+                                    portalItems.add(BasemapGalleryItem(item, false))
                                 }
                             }
                         }
@@ -92,12 +111,12 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Change the basemap and reset the viewpoint.
+     * Change the basemap.
      *
      * @param basemap to set
      * @since 200.7.0
      */
     fun changeBasemap(basemap: Basemap) {
-        arcGISMap.setBasemap(basemap)
+        arcGISScene.setBasemap(basemap)
     }
 }

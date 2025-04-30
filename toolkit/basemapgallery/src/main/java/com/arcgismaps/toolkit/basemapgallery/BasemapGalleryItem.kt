@@ -28,6 +28,7 @@ import com.arcgismaps.portal.LoadableImage
  *
  * @property title the gallery item title
  * @property tag the object that this gallery item can return when clicked
+ * @property is3D indicates if this item is a 3D basemap
  * @param thumbnailProvider a lambda that returns a bitmap to use for the thumbnail image. If the
  * lambda returns null a default thumbnail is used.
  * @constructor creates a gallery item
@@ -36,11 +37,13 @@ import com.arcgismaps.portal.LoadableImage
 public class BasemapGalleryItem(
     public val title: String,
     public val tag: Any? = null,
+    public val is3D: Boolean,
     internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
-    internal constructor(title: String, tag: Any?, thumbnail: LoadableImage?) : this(
+    internal constructor(title: String, tag: Any?, is3D: Boolean, thumbnail: LoadableImage?) : this(
         title,
         tag,
+        is3D,
         thumbnailProvider = {
             var bitmap: Bitmap? = null
             thumbnail?.load()?.onSuccess { bitmap = thumbnail.image?.bitmap }
@@ -58,6 +61,7 @@ public class BasemapGalleryItem(
     public constructor(basemapStyleInfo: BasemapStyleInfo) : this(
         basemapStyleInfo.styleName,
         basemapStyleInfo,
+        false,
         basemapStyleInfo.thumbnail
     )
 
@@ -69,9 +73,30 @@ public class BasemapGalleryItem(
      * @param item the [Item]
      * @since 200.7.0
      */
+    @Deprecated(
+        "Use the constructor that takes Item and is3D instead. This deprecated constructor remains to maintain binary compatibility.",
+        level = DeprecationLevel.HIDDEN
+    )
     public constructor(item: Item) : this(
         item.title,
         item,
+        false,
+        item.thumbnail
+    )
+
+    /**
+     * Construct a [BasemapGalleryItem] with an [Item].
+     *
+     * If the [Item] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
+     *
+     * @param item the [Item]
+     * @param is3D indicates if this item is a 3D basemap
+     * @since 200.8.0
+     */
+    public constructor(item: Item, is3D: Boolean = false) : this(
+        item.title,
+        item,
+        is3D,
         item.thumbnail
     )
 }
