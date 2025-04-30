@@ -31,4 +31,5 @@
     <string name="show_privacy_info">Show Privacy Info</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
+    <string name="tracking_error_icon_description">Warning: Tracking Error</string>
 </resources>
