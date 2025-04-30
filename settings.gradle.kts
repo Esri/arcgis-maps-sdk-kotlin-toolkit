@@ -84,7 +84,7 @@ dependencyResolutionManagement {
                 "https://esri.jfrog.io/artifactory/arcgis"
             )
         }
-        if (artifactoryUrl != "") {
+        if (!artifactoryUrl.isBlank()) {
             maven {
                 url = java.net.URI(artifactoryUrl)
                 credentials {
