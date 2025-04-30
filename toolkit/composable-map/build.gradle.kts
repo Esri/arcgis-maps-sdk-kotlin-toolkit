@@ -64,6 +64,12 @@ android {
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 //https://youtrack.jetbrains.com/issue/KTIJ-21063
