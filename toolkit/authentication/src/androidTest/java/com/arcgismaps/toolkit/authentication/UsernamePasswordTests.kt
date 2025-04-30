@@ -107,6 +107,8 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun loginButtonEnabledState() = runTest {
         composeTestRule.setContent {
             UsernamePasswordAuthenticator(
@@ -155,6 +157,8 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun keyboardActions() = runTest {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
@@ -215,6 +219,8 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun testPasswordVisibility() = runTest {
         val password = "helloWorld"
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()

@@ -26,11 +26,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -42,11 +44,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +80,8 @@ import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
+import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.mapping.symbology.SymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
@@ -89,6 +96,7 @@ private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val treeSymbol = rememberTreeSymbol()
     val arcGISScene = remember {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
@@ -97,10 +105,11 @@ fun MainScreen() {
             // is calculated with elevation
             baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
             baseSurface.backgroundGrid.isVisible = false
-            baseSurface.opacity = 0.3f
             // add the Esri 3D Buildings layer
             operationalLayers.add(
-                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
+                ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282").apply {
+                    this.opacity = 0.5f
+                }
             )
         }
     }
@@ -108,7 +117,7 @@ fun MainScreen() {
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
     val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
-    var trackingMode by rememberSaveable(
+    var selectedTrackingMode by rememberSaveable(
         saver = Saver(
             save = {
                 it.value.name
@@ -140,7 +149,7 @@ fun MainScreen() {
             title = {
                 Text(
                     stringResource(
-                        R.string.top_bar_title, trackingMode::class.java.simpleName
+                        R.string.top_bar_title, selectedTrackingMode::class.java.simpleName
                     )
                 )
             },
@@ -152,24 +161,44 @@ fun MainScreen() {
 
                 DropdownMenu(
                     expanded = actionsExpanded,
-                    onDismissRequest = { actionsExpanded = false })
-                {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.world_tracking_dropdown_item)) },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.World()
-                            actionsExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.geospatial_tracking_dropdown_item)) },
-                        onClick = {
-                            trackingMode = WorldScaleTrackingMode.Geospatial()
-                            actionsExpanded = false
-                        }
-                    )
+                    onDismissRequest = { actionsExpanded = false }
+                ) {
+                    val trackingModes = remember {
+                        listOf(
+                            WorldScaleTrackingMode.World(),
+                            WorldScaleTrackingMode.Geospatial()
+                        )
+                    }
+
+                    trackingModes.forEach { trackingMode ->
+                        DropdownMenuItem(
+                            text = { Text("${trackingMode::class.java.simpleName} tracking") },
+                            onClick = {
+                                selectedTrackingMode = trackingMode
+                                actionsExpanded = false
+                            },
+                            contentPadding = PaddingValues(end = 12.dp),
+                            leadingIcon = {
+                                RadioButton(
+                                    selected = selectedTrackingMode == trackingMode,
+                                    onClick = {
+                                        selectedTrackingMode = trackingMode
+                                        actionsExpanded = false
+                                    }
+                                )
+                            }
+                        )
+                    }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Info,
+                                contentDescription = stringResource(R.string.privacy_info_dropdown_item)
+                            )
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
                         onClick = {
                             showPrivacyInfo = true
                             actionsExpanded = false
@@ -207,7 +236,8 @@ fun MainScreen() {
                     modifier = Modifier
                         .padding(it)
                         .fillMaxSize(),
-                    worldScaleTrackingMode = trackingMode,
+                    worldScaleTrackingMode = selectedTrackingMode,
+                    clippingDistance = 100.0,
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
@@ -221,13 +251,7 @@ fun MainScreen() {
                                 graphicsOverlays.first().graphics.add(
                                     Graphic(
                                         point,
-                                        SimpleMarkerSceneSymbol(
-                                            SimpleMarkerSceneSymbolStyle.Diamond,
-                                            Color.green,
-                                            height = 1.0,
-                                            width = 1.0,
-                                            depth = 1.0
-                                        )
+                                        treeSymbol.value
                                     )
                                 )
                             }
@@ -366,6 +390,36 @@ private fun TextWithScrim(text: String) {
     ) {
         Text(text = text)
     }
+}
+
+/**
+ * Creates and remembers a [Symbol] for a tree.
+ *
+ * Note the symbol is pulled from an online style, and a simple cylinder is used as a fallback.
+ *
+ * @since 200.7.0
+ */
+@Composable
+fun rememberTreeSymbol(): State<Symbol> {
+    val treeSymbol = remember { mutableStateOf<Symbol>(
+        SimpleMarkerSceneSymbol(
+            SimpleMarkerSceneSymbolStyle.Cylinder,
+            Color.green,
+            height = 1.7910805414617064,
+            width = 0.8883103942871093,
+            depth = 0.909887924194336
+        )
+    ) }
+    LaunchedEffect(Unit) {
+        with(SymbolStyle.createWithStyleNameAndPortal("EsriRealisticStreetSceneStyle")) {
+            getSymbol(listOf("Planter_Tapered")).onSuccess {
+                treeSymbol.value = it
+            }.onFailure { error ->
+                Log.e("MainScreen", "Failed to initialize symbol: $error")
+            }
+        }
+    }
+    return treeSymbol
 }
 
 /**

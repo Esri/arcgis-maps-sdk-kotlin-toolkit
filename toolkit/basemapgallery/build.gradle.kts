@@ -66,6 +66,12 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 dependencies {

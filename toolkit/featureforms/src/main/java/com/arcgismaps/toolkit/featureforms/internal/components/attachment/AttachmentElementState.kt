@@ -396,6 +396,7 @@ internal class FormAttachmentState(
     /**
      * Creates a thumbnail image for the attachment.
      */
+    @Suppress("DEPRECATION")
     private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
         if (formAttachment == null) {
             return@withContext

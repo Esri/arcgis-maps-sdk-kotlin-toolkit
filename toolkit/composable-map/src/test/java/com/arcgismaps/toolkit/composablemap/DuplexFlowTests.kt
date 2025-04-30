@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 
 import org.junit.Test
 
+@Suppress("DEPRECATION")
 class DuplexFlowTests {
 
     @Test
