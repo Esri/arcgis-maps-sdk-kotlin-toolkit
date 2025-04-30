@@ -46,7 +46,7 @@ function _display_help() {
 }
 
 function _check_options_and_set_variables() {
-  if [ -z "${ARTIFACTORY_URL}"]; then
+  if [ -z "${ARTIFACTORY_URL}" ]; then
     echo "error: ARTIFACTORY_URL is empty but publishing is being requested"
     exit 1
   fi
