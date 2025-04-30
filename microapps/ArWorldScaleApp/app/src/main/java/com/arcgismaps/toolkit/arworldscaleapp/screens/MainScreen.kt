@@ -24,9 +24,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -207,13 +207,14 @@ fun MainScreen() {
                 }
             }
         )
-    }) {
+    }) { innerPadding ->
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
+                        .apply()
                     showPrivacyInfo = false
                 }
             )
@@ -230,11 +231,12 @@ fun MainScreen() {
                 }
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)) {
                 WorldScaleSceneView(
                     arcGISScene = arcGISScene,
                     modifier = Modifier
-                        .padding(it)
                         .fillMaxSize(),
                     worldScaleTrackingMode = selectedTrackingMode,
                     clippingDistance = 100.0,
@@ -304,6 +306,17 @@ fun MainScreen() {
 
                             else -> {}
                         }
+
+                        if (trackingError != null) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = stringResource(R.string.tracking_error_icon_description),
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(16.dp),
+                                tint = androidx.compose.ui.graphics.Color.Yellow
+                            )
+                        }
                     }
 
                     is WorldScaleSceneViewStatus.FailedToInitialize -> {
@@ -314,18 +327,6 @@ fun MainScreen() {
                             )
                         )
                     }
-                }
-
-
-                if (trackingError != null) {
-                    androidx.compose.material3.Icon(
-                        Icons.Default.Warning,
-                        contentDescription = stringResource(R.string.tracking_error_icon_description),
-                        modifier = Modifier
-                            .height(32.dp)
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                    )
                 }
             }
         }
@@ -342,7 +343,7 @@ private fun PrivacyInfoDialog(
     hasCurrentlyAccepted: Boolean,
     onUserResponse: (accepted: Boolean) -> Unit
 ) {
-    Dialog (onDismissRequest = {
+    Dialog(onDismissRequest = {
         onUserResponse(hasCurrentlyAccepted)
     }) {
         Card {
@@ -401,15 +402,17 @@ private fun TextWithScrim(text: String) {
  */
 @Composable
 fun rememberTreeSymbol(): State<Symbol> {
-    val treeSymbol = remember { mutableStateOf<Symbol>(
-        SimpleMarkerSceneSymbol(
-            SimpleMarkerSceneSymbolStyle.Cylinder,
-            Color.green,
-            height = 1.7910805414617064,
-            width = 0.8883103942871093,
-            depth = 0.909887924194336
+    val treeSymbol = remember {
+        mutableStateOf<Symbol>(
+            SimpleMarkerSceneSymbol(
+                SimpleMarkerSceneSymbolStyle.Cylinder,
+                Color.green,
+                height = 1.7910805414617064,
+                width = 0.8883103942871093,
+                depth = 0.909887924194336
+            )
         )
-    ) }
+    }
     LaunchedEffect(Unit) {
         with(SymbolStyle.createWithStyleNameAndPortal("EsriRealisticStreetSceneStyle")) {
             getSymbol(listOf("Planter_Tapered")).onSuccess {

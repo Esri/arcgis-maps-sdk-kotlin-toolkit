@@ -270,7 +270,9 @@ public fun WorldScaleSceneView(
             visualizePlanes = false
         )
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
-        if (!worldScaleCameraController.hasSetOriginCamera) return@WorldScaleSceneView
+        // If the initialization status is FailedToInitialize, we don't want to display the scene view
+        // or transition to Initialized.
+        if (!worldScaleCameraController.hasSetOriginCamera || initializationStatus.value is WorldScaleSceneViewStatus.FailedToInitialize) return@WorldScaleSceneView
         // Once the origin camera is set, we can say we're initialized
         initializationStatus.update(
             WorldScaleSceneViewStatus.Initialized,
