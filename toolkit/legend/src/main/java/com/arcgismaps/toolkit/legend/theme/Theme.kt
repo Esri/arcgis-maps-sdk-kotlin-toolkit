@@ -32,6 +32,7 @@ import androidx.compose.ui.text.TextStyle
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class Typography internal constructor(
     val title: TextStyle,
     val layerName: TextStyle,

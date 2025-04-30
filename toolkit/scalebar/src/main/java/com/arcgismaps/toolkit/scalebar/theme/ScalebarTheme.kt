@@ -34,6 +34,7 @@ import com.arcgismaps.toolkit.scalebar.ScalebarStyle
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class ScalebarShapes internal constructor(
     public val textShadowBlurRadius: Float,
     public val barCornerRadius: Float,
@@ -52,6 +53,7 @@ public data class ScalebarShapes internal constructor(
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class ScalebarColors internal constructor(
     public var fillColor: Color,
     public var alternateFillColor: Color,
@@ -69,6 +71,7 @@ public data class ScalebarColors internal constructor(
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class LabelTypography internal constructor(
     public val labelStyle: TextStyle
 )

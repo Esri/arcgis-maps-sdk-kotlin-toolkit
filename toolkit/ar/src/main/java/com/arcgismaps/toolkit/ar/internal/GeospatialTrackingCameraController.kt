@@ -59,6 +59,7 @@ internal class GeospatialTrackingCameraController(
     override var hasSetOriginCamera: Boolean by mutableStateOf(false)
         private set
 
+    @Suppress("DEPRECATION")
     private val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         context.display
     } else {

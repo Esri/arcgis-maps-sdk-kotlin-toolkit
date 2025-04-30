@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -265,18 +266,18 @@ private class AuthenticatorStateImpl(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
-        val selectedAlias = suspendCancellableCoroutine { continuation ->
+        val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(alias) {}
+                continuation.resume(alias) { _, _, _ -> }
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback) {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) {}
+                continuation.resume(null) { _, _, _ -> }
             }
             continuation.invokeOnCancellation {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) {}
+                continuation.resume(null) { _, _, _ -> }
             }
         }
         return if (selectedAlias != null) {
