@@ -1,6 +1,8 @@
 # OverviewMap
 
-The Overview Map displays...
+The Overview Map is a small, secondary Map View (sometimes called an "inset map"), that can be
+superimposed on an existing Map View or Scene View, which shows a representation of the main view's
+current viewpoint.
 
 ![Screenshot](mapview_screenshot.png) ![Screenshot](sceneview_screenshot.png)
 
