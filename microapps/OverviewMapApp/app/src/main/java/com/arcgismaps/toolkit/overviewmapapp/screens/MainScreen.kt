@@ -64,9 +64,6 @@ fun MainScreen() {
         var tabIndex by rememberSaveable { mutableIntStateOf(0) }
         val tabs = listOf("MapView", "SceneView")
 
-        //val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(viewModel.viewpoint) }
-        val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
-
         Column(modifier = Modifier.fillMaxWidth()) {
             PrimaryTabRow(selectedTabIndex = tabIndex) {
                 tabs.forEachIndexed { index, title ->
@@ -75,18 +72,22 @@ fun MainScreen() {
                             Text(title)
                         },
                         selected = tabIndex == index,
-                        onClick = { tabIndex = index }
+                        onClick = {
+                            tabIndex = index
+                        }
                     )
                 }
             }
             when (tabIndex) {
                 0 -> {
                     Box {
+                        val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
+
                         MapView(
                             modifier = Modifier.fillMaxSize(),
                             arcGISMap = remember {
                                 ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
-                                    this.initialViewpoint = viewModel.viewpointForMapView.value
+                                    initialViewpoint = viewModel.viewpointForMapView.value
                                 }
                             },
                             onViewpointChangedForCenterAndScale = {
@@ -113,7 +114,7 @@ fun MainScreen() {
                             modifier = Modifier.fillMaxSize(),
                             arcGISScene = remember {
                                 ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
-                                    this.initialViewpoint = viewModel.viewpointForSceneView.value
+                                    initialViewpoint = viewModel.viewpointForSceneView.value
                                 }
                             },
                             onViewpointChangedForCenterAndScale = {
