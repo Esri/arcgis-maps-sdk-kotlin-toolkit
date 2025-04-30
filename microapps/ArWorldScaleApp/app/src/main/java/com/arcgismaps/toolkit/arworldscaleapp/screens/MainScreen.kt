@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -211,10 +212,6 @@ fun MainScreen() {
                         initializationStatus = it
                     },
                     onTrackingErrorChanged = {
-                        Log.e(
-                            "WorldScaleSceneView",
-                            "Tracking error: ${it?.message}"
-                        )
                         trackingError = it
                     },
                     worldScaleSceneViewProxy = proxy,
@@ -283,11 +280,6 @@ fun MainScreen() {
 
                             else -> {}
                         }
-                        if (trackingError != null) {
-                            TextWithScrim(
-                                text = "Tracking Error"
-                            )
-                        }
                     }
 
                     is WorldScaleSceneViewStatus.FailedToInitialize -> {
@@ -298,6 +290,18 @@ fun MainScreen() {
                             )
                         )
                     }
+                }
+
+
+                if (trackingError != null) {
+                    androidx.compose.material3.Icon(
+                        Icons.Default.Warning,
+                        contentDescription = stringResource(R.string.tracking_error_icon_description),
+                        modifier = Modifier
+                            .height(32.dp)
+                            .align(Alignment.TopEnd)
+                            .padding(16.dp)
+                    )
                 }
             }
         }
