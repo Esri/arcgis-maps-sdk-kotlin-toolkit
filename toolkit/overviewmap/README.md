@@ -46,7 +46,6 @@ or, for a Scene View overview
 
 ```kotlin
 val viewpoint: MutableState<Viewpoint?> = remember { mutableStateOf(null) }
-val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
 
 Box {
     SceneView(
