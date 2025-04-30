@@ -89,6 +89,8 @@ import java.time.Instant
  * means that no data will be clipped.
  * @param onInitializationStatusChanged lambda invoked when the initialization status
  * of this WorldScaleSceneView changes.
+ * @param onTrackingErrorChanged lambda invoked when a tracking error occurs. This will be called
+ * with a null error when the tracking error is resolved.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
  * viewpoint type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
