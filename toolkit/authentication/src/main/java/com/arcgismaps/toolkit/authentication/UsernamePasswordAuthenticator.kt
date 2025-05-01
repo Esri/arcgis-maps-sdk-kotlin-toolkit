@@ -89,7 +89,7 @@ public fun UsernamePasswordAuthenticator(
     Surface(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
-            supportingText = additionalInfo ?: "",
+            challengeCause = usernamePasswordChallenge.cause,
             onCancel = { usernamePasswordChallenge.cancel() },
             onConfirm = { username, password ->
                 usernamePasswordChallenge.continueWithCredentials(username, password)
@@ -111,9 +111,6 @@ internal fun UsernamePasswordAuthenticatorDialog(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    val challengeException = usernamePasswordChallenge.cause
-    val localContext = LocalContext.current
-
     Dialog(onDismissRequest = { usernamePasswordChallenge.cancel() }) {
         Card(
             colors = CardDefaults.cardColors(
@@ -123,10 +120,7 @@ internal fun UsernamePasswordAuthenticatorDialog(
         ) {
             UsernamePasswordAuthenticatorImpl(
                 hostname = usernamePasswordChallenge.hostname,
-                supportingText = localContext.getString(
-                    getSupportingText(challengeException),
-                    usernamePasswordChallenge.hostname
-                ),
+                challengeCause = usernamePasswordChallenge.cause,
                 onConfirm = { username, password ->
                     usernamePasswordChallenge.continueWithCredentials(username, password)
                 },
@@ -141,13 +135,14 @@ internal fun UsernamePasswordAuthenticatorDialog(
 private fun UsernamePasswordAuthenticatorImpl(
     hostname: String,
     modifier: Modifier = Modifier,
-    supportingText: String,
+    challengeCause : Throwable? = null,
     onConfirm: (username: String, password: String) -> Unit,
     onCancel: () -> Unit
 ) {
     var usernameFieldText by rememberSaveable { mutableStateOf("") }
     var passwordFieldText by rememberSaveable { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
+    val supportingText = LocalContext.current.getString(getSupportingText(challengeCause), hostname)
 
     fun submitUsernamePassword() {
         if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
@@ -265,7 +260,7 @@ private fun UsernamePasswordAuthenticatorImplPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticatorImpl(
         hostname = "https://www.arcgis.com",
-        supportingText = "Invalid username or password.",
+        challengeCause = null,
         onConfirm = { _, _ -> },
         onCancel = {},
         modifier = modifier
@@ -320,6 +315,6 @@ private fun getSupportingText(challengeException: Throwable?): Int {
     return when (challengeException) {
         null -> R.string.username_password_login_message
         is ArcGISAuthenticationException -> R.string.incorrect_credentials
-        else -> R.string.error_occurred
+        else -> R.string.sing_in_error_occurred
     }
 }
