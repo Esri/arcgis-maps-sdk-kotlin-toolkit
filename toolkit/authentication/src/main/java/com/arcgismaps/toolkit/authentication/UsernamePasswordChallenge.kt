@@ -18,30 +18,32 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.core.net.toUri
 
 /**
  * Represents an authentication challenge requiring a username and password.
  *
  * @property url the name of the server that initiated this challenge
+ * @property cause the exception that caused this challenge
  * @property onUsernamePasswordReceived called when the username and password should be submitted
  * @property onCancel called when the challenge should be cancelled
  * @since 200.2.0
  */
 public class UsernamePasswordChallenge(
     public val url: String,
-    private val onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
-    onCancel: () -> Unit
+    public val cause: Throwable? = null,
+    private val onUsernamePasswordReceived: (username: String, password: String) -> Unit,
+    onCancel: () -> Unit,
 ) {
 
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
     public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
     public val hostname: String by lazy {
-        Uri.parse(url).host ?: url
+        url.toUri().host ?: url
     }
 
 

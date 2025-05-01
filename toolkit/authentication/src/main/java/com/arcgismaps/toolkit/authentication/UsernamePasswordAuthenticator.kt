@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -65,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.exceptions.ArcGISAuthenticationException
 
 /**
  * Displays a username and password prompt to the user.
@@ -87,7 +89,7 @@ public fun UsernamePasswordAuthenticator(
     Surface(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
-            additionalInfo = additionalInfo ?: "",
+            supportingText = additionalInfo ?: "",
             onCancel = { usernamePasswordChallenge.cancel() },
             onConfirm = { username, password ->
                 usernamePasswordChallenge.continueWithCredentials(username, password)
@@ -109,7 +111,8 @@ internal fun UsernamePasswordAuthenticatorDialog(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
+    val challengeException = usernamePasswordChallenge.cause
+    val localContext = LocalContext.current
 
     Dialog(onDismissRequest = { usernamePasswordChallenge.cancel() }) {
         Card(
@@ -120,7 +123,10 @@ internal fun UsernamePasswordAuthenticatorDialog(
         ) {
             UsernamePasswordAuthenticatorImpl(
                 hostname = usernamePasswordChallenge.hostname,
-                additionalInfo = additionalInfo ?: "",
+                supportingText = localContext.getString(
+                    getSupportingText(challengeException),
+                    usernamePasswordChallenge.hostname
+                ),
                 onConfirm = { username, password ->
                     usernamePasswordChallenge.continueWithCredentials(username, password)
                 },
@@ -135,7 +141,7 @@ internal fun UsernamePasswordAuthenticatorDialog(
 private fun UsernamePasswordAuthenticatorImpl(
     hostname: String,
     modifier: Modifier = Modifier,
-    additionalInfo: String = "",
+    supportingText: String,
     onConfirm: (username: String, password: String) -> Unit,
     onCancel: () -> Unit
 ) {
@@ -163,18 +169,10 @@ private fun UsernamePasswordAuthenticatorImpl(
             textAlign = TextAlign.Start
         )
         Spacer(modifier = Modifier.height(16.dp))
-        if (additionalInfo.isNotEmpty()) {
-            Text(
-                text = additionalInfo,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
         Text(
             text = buildAnnotatedString {
-                val string = stringResource(id = R.string.username_password_login_message, hostname)
-                append(string)
-                string.indexOf(hostname).takeIf { it >= 0 }?.let { startIdx ->
+                append(supportingText)
+                supportingText.indexOf(hostname).takeIf { it >= 0 }?.let { startIdx ->
                     addStyle(
                         style = SpanStyle(fontWeight = FontWeight.Bold),
                         start = startIdx,
@@ -267,7 +265,7 @@ private fun UsernamePasswordAuthenticatorImplPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticatorImpl(
         hostname = "https://www.arcgis.com",
-        additionalInfo = "Invalid username or password.",
+        supportingText = "Invalid username or password.",
         onConfirm = { _, _ -> },
         onCancel = {},
         modifier = modifier
@@ -282,6 +280,7 @@ private fun UsernamePasswordAuthenticatorPreview() {
     UsernamePasswordAuthenticator(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com",
+            cause = null,
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
@@ -296,6 +295,7 @@ private fun UsernamePasswordAuthenticatorDialogPreview() {
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com",
+            cause = null,
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
@@ -309,8 +309,17 @@ private fun UsernamePasswordAuthenticatorDialogLocalePreview() {
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com/",
+            cause = null,
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         )
     )
+}
+
+private fun getSupportingText(challengeException: Throwable?): Int {
+    return when (challengeException) {
+        null -> R.string.username_password_login_message
+        is ArcGISAuthenticationException -> R.string.incorrect_credentials
+        else -> R.string.error_occurred
+    }
 }
