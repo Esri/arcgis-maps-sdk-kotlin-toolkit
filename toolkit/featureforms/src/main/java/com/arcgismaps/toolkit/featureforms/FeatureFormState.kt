@@ -164,6 +164,8 @@ public class FeatureFormState private constructor(
     /**
      * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
      * evaluates expressions.
+     *
+     * @since 200.8.0
      */
     public suspend fun discardEdits() :  Result<List<FormExpressionEvaluationError>> {
         val formData = getActiveFormStateData()
