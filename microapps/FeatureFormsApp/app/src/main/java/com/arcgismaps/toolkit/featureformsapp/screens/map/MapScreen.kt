@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -33,10 +34,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -150,7 +153,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     )
                 }
             }
-        }
+        },
+        contentWindowInsets = WindowInsets.safeDrawing
     ) { padding ->
         Box {
             // show the composable map using the mapViewModel
@@ -161,7 +165,17 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     .padding(padding)
                     .fillMaxSize(),
                 onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
-            )
+            ) {
+                val identifyTaskLocation by mapViewModel.identifyTaskLocation
+                identifyTaskLocation?.let { mapPoint ->
+                    Callout(location = mapPoint) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(15.dp),
+                            strokeWidth = 3.dp
+                        )
+                    }
+                }
+            }
             AnimatedVisibility(
                 visible = uiState is UIState.NotEditing,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -192,7 +206,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     state = rememberedForm,
                     onDismiss = {
-                       mapViewModel.setDefaultState()
+                        mapViewModel.setDefaultState()
                     },
                     onEditingEvent = { event ->
                         if (event is FeatureFormEditingEvent.SavedEdits) {
@@ -224,21 +238,22 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     paddingValues = padding
                 )
             }
+            AnimatedVisibility(
+                visible = uiState is UIState.SelectFeature,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(durationMillis = 10)),
+            ) {
+                val rememberedState = remember(this) {
+                    uiState as UIState.SelectFeature
+                }
+                SelectFeatureDialog(
+                    state = rememberedState,
+                    onSelectFeature = mapViewModel::selectFeature,
+                    onDismissRequest = mapViewModel::setDefaultState
+                )
+            }
         }
     }
-    when (uiState) {
-        // show pick a feature dialog if the layer is a sublayer
-        is UIState.SelectFeature -> {
-            SelectFeatureDialog(
-                state = uiState as UIState.SelectFeature,
-                onSelectFeature = mapViewModel::selectFeature,
-                onDismissRequest = mapViewModel::setDefaultState
-            )
-        }
-
-        else -> {}
-    }
-
     if (isBusy) {
         ProgressDialog()
     }
@@ -270,13 +285,12 @@ fun SelectFeatureDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 50.dp)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(15.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .wrapContentHeight()
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
@@ -294,7 +308,7 @@ fun SelectFeatureDialog(
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .wrapContentHeight()
                         .verticalScrollbar(lazyListState),
                     state = lazyListState
                 ) {
