@@ -218,6 +218,7 @@ public fun WorldScaleSceneView(
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = LocalContext.current.applicationContext,
+            worldScaleSceneViewProxy = worldScaleSceneViewProxy,
             onError = {
                 initializationStatus.update(
                     WorldScaleSceneViewStatus.FailedToInitialize(it),

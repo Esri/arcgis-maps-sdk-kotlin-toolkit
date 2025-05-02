@@ -30,8 +30,8 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import com.google.ar.core.Session
 import com.google.ar.core.VpsAvailability
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -56,10 +56,10 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         sceneViewProxy.setManualRenderingEnabled(true)
     }
 
-    private var _session: Session? = null
+    private var _sessionWrapper: ArSessionWrapper? = null
 
-    internal fun setSession(session: Session?) {
-        _session = session
+    internal fun setSessionWrapper(sessionWrapper: ArSessionWrapper?) {
+        _sessionWrapper = sessionWrapper
     }
 
     /**
@@ -72,29 +72,32 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         get() = sceneViewProxy.isWrapAroundEnabled
 
     public suspend fun checkVpsAvailability(latitude: Double, longitude: Double): Result<WorldScaleVpsAvailability> =
-        _session?.let { session ->
+        _sessionWrapper?.let { sessionWrapper ->
             suspendCancellableCoroutine { continuation ->
-                continuation.invokeOnCancellation {
-                    val result = if (it != null) {
-                        Result.failure(it)
-                    } else {
-                        Result.failure<WorldScaleVpsAvailability>(Exception("Operation cancelled"))
+                sessionWrapper.withLock { wrappedSession, _ ->
+                    wrappedSession?.let { session ->
+                        continuation.invokeOnCancellation {
+                            val result = if (it != null) {
+                                Result.failure(it)
+                            } else {
+                                Result.failure<WorldScaleVpsAvailability>(Exception("Operation cancelled"))
+                            }
+                            continuation.resume(result)
+                        }
+                        session.checkVpsAvailabilityAsync(
+                            latitude,
+                            longitude
+                        ) { availability: VpsAvailability ->
+                            val result = when (availability) {
+                                VpsAvailability.AVAILABLE -> Result.success(WorldScaleVpsAvailability.Available)
+                                VpsAvailability.UNAVAILABLE -> Result.success(WorldScaleVpsAvailability.Unavailable)
+                                VpsAvailability.ERROR_NOT_AUTHORIZED -> Result.success(WorldScaleVpsAvailability.NotAuthorized)
+                                VpsAvailability.ERROR_RESOURCE_EXHAUSTED -> Result.success(WorldScaleVpsAvailability.ResourceExhausted)
+                                else -> Result.failure(IllegalStateException("Unknown VPS availability"))
+                            }
+                            continuation.resume(result)
+                        }
                     }
-                    continuation.resume(result)
-                }
-                session.checkVpsAvailabilityAsync(
-                    latitude,
-                    longitude
-                ) { availability: VpsAvailability ->
-                    val result = when (availability) {
-                        VpsAvailability.AVAILABLE -> Result.success(WorldScaleVpsAvailability.Available)
-                        VpsAvailability.UNAVAILABLE -> Result.success(WorldScaleVpsAvailability.Unavailable)
-                        VpsAvailability.ERROR_NOT_AUTHORIZED -> Result.success(WorldScaleVpsAvailability.NotAuthorized)
-                        VpsAvailability.ERROR_RESOURCE_EXHAUSTED -> Result.success(WorldScaleVpsAvailability.ResourceExhausted)
-                        else -> Result.failure(IllegalStateException("Unknown VPS availability"))
-
-                    }
-                    continuation.resume(result)
                 }
             }
         } ?: Result.failure(IllegalStateException("ARCore session not initialized"))

@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import java.util.concurrent.locks.Lock
@@ -123,6 +124,7 @@ internal class ArSessionWrapper(
 @Composable
 internal fun rememberArSessionWrapper(
     applicationContext: Context,
+    worldScaleSceneViewProxy: WorldScaleSceneViewProxy? = null,
     onError: (Throwable) -> Unit = {},
     useGeospatial: Boolean = false
 ): ArSessionWrapper {
@@ -139,7 +141,9 @@ internal fun rememberArSessionWrapper(
     }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+        worldScaleSceneViewProxy?.setSessionWrapper(arSessionWrapper)
         onDispose {
+            worldScaleSceneViewProxy?.setSessionWrapper(null)
             lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
             arSessionWrapper.onDestroy(lifecycleOwner)
         }
