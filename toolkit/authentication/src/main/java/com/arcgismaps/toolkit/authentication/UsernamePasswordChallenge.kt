@@ -41,6 +41,12 @@ public class UsernamePasswordChallenge(
 
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    @Deprecated(
+        message = "additionalMessage is not used anymore. Use property `cause` to display the appropriate error message.",
+        level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith("cause")
+    )
     public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
     public val hostname: String by lazy {
         url.toUri().host ?: url
