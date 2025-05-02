@@ -258,7 +258,8 @@ class UsernamePasswordTests {
     /**
      * Given a UsernamePasswordAuthenticatorDialog,
      * When a username and password challenge is issued with null cause,
-     * Then the dialog prompt should be displayed with the default message,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that credentials are required.
      *
      * @since 200.8.0
      */
@@ -288,7 +289,8 @@ class UsernamePasswordTests {
     /**
      * Given a UsernamePasswordAuthenticator,
      * When a username and password challenge is issued with an ArcGISAuthenticationException cause,
-     * Then the dialog prompt should be displayed with the appropriate message,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that the credentials are incorrect.
      *
      * @since 200.8.0
      */
@@ -303,10 +305,9 @@ class UsernamePasswordTests {
         every { usernamePasswordChallengeMock.cause } returns mockCause
 
         composeTestRule.setContent {
-            UsernamePasswordAuthenticatorDialog(usernamePasswordChallengeMock)
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
         }
 
-        // ensure the dialog prompt is displayed as expected
         // ensure the dialog prompt is displayed as expected
         advanceUntilIdle()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
@@ -317,9 +318,10 @@ class UsernamePasswordTests {
     }
 
     /**
-     * Given a UsernamePasswordAuthenticator,
-     * When a username and password challenge is issued with an ArcGISAuthenticationException cause,
-     * Then the dialog prompt should be displayed with the appropriate message,
+     * Given a UsernamePasswordAuthenticatorDialog,
+     * When a username and password challenge is issued with an IllegalStateException cause,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that an error occurred.
      *
      * @since 200.8.0
      */

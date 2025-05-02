@@ -260,7 +260,6 @@ private fun UsernamePasswordAuthenticatorImplPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticatorImpl(
         hostname = "https://www.arcgis.com",
-        challengeCause = null,
         onConfirm = { _, _ -> },
         onCancel = {},
         modifier = modifier
@@ -275,7 +274,7 @@ private fun UsernamePasswordAuthenticatorPreview() {
     UsernamePasswordAuthenticator(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com",
-            cause = null,
+            cause = IllegalStateException("Exception"),
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
@@ -290,7 +289,6 @@ private fun UsernamePasswordAuthenticatorDialogPreview() {
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com",
-            cause = null,
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         ),
@@ -304,13 +302,17 @@ private fun UsernamePasswordAuthenticatorDialogLocalePreview() {
     UsernamePasswordAuthenticatorDialog(
         usernamePasswordChallenge = UsernamePasswordChallenge(
             url = "https://www.arcgis.com/",
-            cause = null,
             onUsernamePasswordReceived = { _, _ -> },
             onCancel = {}
         )
     )
 }
 
+/**
+ * Returns the string resource ID for the supporting text based on the challenge exception.
+ *
+ * @since 200.8.0
+ */
 private fun getSupportingText(challengeException: Throwable?): Int {
     return when (challengeException) {
         null -> R.string.username_password_login_message

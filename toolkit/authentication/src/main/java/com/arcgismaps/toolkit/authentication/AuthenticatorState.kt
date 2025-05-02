@@ -326,6 +326,7 @@ private class AuthenticatorStateImpl(
      * as a [Flow].
      *
      * @param url the url of the server that issued the challenge.
+     * @param exception the exception that caused the challenge, if any.
      * @return a [Flow] with a [UsernamePassword] provided by the user, or null if the user cancelled.
      * @since 200.2.0
      */
@@ -356,7 +357,7 @@ public fun AuthenticatorState(
 )
 
 /**
- * Creates an [OAuthUserCredential] for this [OAuthUserConfiguration]. SuspendsApri
+ * Creates an [OAuthUserCredential] for this [OAuthUserConfiguration]. Suspends
  * while the credential is being created, ie. until the user has signed in or cancelled the sign in.
  *
  * @param onPendingSignIn Called when an [OAuthUserSignIn] is available. Use this to display UI to the user.
