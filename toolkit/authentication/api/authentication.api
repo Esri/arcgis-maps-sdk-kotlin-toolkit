@@ -70,8 +70,9 @@ public final class com/arcgismaps/toolkit/authentication/UsernamePasswordAuthent
 
 public final class com/arcgismaps/toolkit/authentication/UsernamePasswordChallenge {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;)V
 	public final fun cancel ()V
 	public final fun continueWithCredentials (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun getAdditionalMessage ()Lkotlinx/coroutines/flow/StateFlow;

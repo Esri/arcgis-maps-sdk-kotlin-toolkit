@@ -27,23 +27,43 @@ import androidx.core.net.toUri
  * Represents an authentication challenge requiring a username and password.
  *
  * @property url the name of the server that initiated this challenge
- * @property cause the exception that caused this challenge
  * @property onUsernamePasswordReceived called when the username and password should be submitted
+ * @property cause the exception that caused this challenge
  * @property onCancel called when the challenge should be cancelled
- * @since 200.2.0
+ * @since 200.8.0
  */
 public class UsernamePasswordChallenge(
     public val url: String,
+    private val onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
     public val cause: Throwable? = null,
-    private val onUsernamePasswordReceived: (username: String, password: String) -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
+    /**
+     * Represents an authentication challenge requiring a username and password.
+     *
+     * @property url the name of the server that initiated this challenge
+     * @property onUsernamePasswordReceived called when the username and password should be submitted
+     * @property onCancel called when the challenge should be cancelled
+     *
+     * @since 200.2.0
+     */
+    @Deprecated(
+        message = "Use the constructor with `cause` instead. Ths deprecated method remains to maintain binary compatibility",
+        level = DeprecationLevel.HIDDEN,
+    )
+    public constructor(
+        url: String,
+        onUsernamePasswordReceived: (username: String, password: String) -> Unit,
+        onCancel: () -> Unit,
+    ) : this(
+        url, onUsernamePasswordReceived, cause = null, onCancel
+    )
 
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
 
     @Deprecated(
-        message = "additionalMessage is not used anymore. Use property `cause` to display the appropriate error message.",
+        message = "The `additionalMessage` property is no longer in use. Please use the `cause` property to display relevant error messages instead.",
         level = DeprecationLevel.WARNING,
         replaceWith = ReplaceWith("cause")
     )
