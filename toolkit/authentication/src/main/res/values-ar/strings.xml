@@ -14,7 +14,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   ~
-  --><resources>
+  -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation" >
     <string name="server_trust_title">مضيف غير موثوق به</string>
     <string name="server_trust_message">شهادة الخادم لـ %1$s غير موثوقة. قد يؤدي الاتصال إلى تعريض بياناتك للخطر. هل تريد المتابعة؟</string>
     <string name="cancel">إلغاء الأمر</string>
