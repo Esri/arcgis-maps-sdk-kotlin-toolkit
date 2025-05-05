@@ -61,6 +61,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
+import com.arcgismaps.toolkit.ar.internal.CameraState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
@@ -218,7 +219,6 @@ public fun WorldScaleSceneView(
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = LocalContext.current.applicationContext,
-            worldScaleSceneViewProxy = worldScaleSceneViewProxy,
             onError = {
                 initializationStatus.update(
                     WorldScaleSceneViewStatus.FailedToInitialize(it),
@@ -229,11 +229,22 @@ public fun WorldScaleSceneView(
         )
 
     val calibrationState = remember { CalibrationState() }
+    val cameraState = remember { CameraState() }
+
+    DisposableEffect(Unit) {
+        worldScaleSceneViewProxy.setSessionWrapper(arSessionWrapper)
+        worldScaleSceneViewProxy.setCameraState(cameraState)
+        onDispose {
+            worldScaleSceneViewProxy.setCameraState(null)
+            worldScaleSceneViewProxy.setSessionWrapper(null)
+        }
+    }
 
     val worldScaleCameraController: WorldScaleCameraController by rememberWorldScaleCameraController(
         context = LocalContext.current,
         worldScaleTrackingMode = worldScaleTrackingMode,
         calibrationState = calibrationState,
+        cameraState = cameraState,
         clippingDistance = clippingDistance,
         onUpdateInitializationStatus = {
             initializationStatus.update(
@@ -347,6 +358,7 @@ internal fun rememberWorldScaleCameraController(
     context: Context,
     worldScaleTrackingMode: WorldScaleTrackingMode,
     calibrationState: CalibrationState,
+    cameraState: CameraState,
     clippingDistance: Double?,
     onUpdateInitializationStatus: (WorldScaleSceneViewStatus) -> Unit,
     onResetOriginCamera: () -> Unit
@@ -356,6 +368,7 @@ internal fun rememberWorldScaleCameraController(
             is WorldScaleTrackingMode.Geospatial -> {
                 GeospatialTrackingCameraController(
                     calibrationState = calibrationState,
+                    cameraState = cameraState,
                     clippingDistance = clippingDistance,
                     context = context,
                     onError = {
@@ -368,6 +381,7 @@ internal fun rememberWorldScaleCameraController(
                 ArcGISEnvironment.applicationContext = context.applicationContext
                 WorldTrackingCameraController(
                     calibrationState = calibrationState,
+                    cameraState = cameraState,
                     clippingDistance = clippingDistance,
                     onLocationDataSourceFailedToStart = { it: Throwable ->
                         onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))

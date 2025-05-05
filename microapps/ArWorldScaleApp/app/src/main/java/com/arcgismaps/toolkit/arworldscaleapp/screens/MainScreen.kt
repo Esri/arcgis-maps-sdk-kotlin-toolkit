@@ -257,11 +257,8 @@ fun MainScreen() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         LaunchedEffect(null) {
                             while (true) {
-                                // good location, right outside the office
-                                Log.d("WSSVS", proxy.checkVpsAvailability(55.94428024174938, -3.1959703338987473).getOrNull().toString())
-                                // bad location off in the Pentlands
-                                //Log.d("WSSVS", proxy.checkVpsAvailability(55.87767704388873, -3.2590946997984593).getOrNull().toString())
-                                delay(1000)
+                                Log.d("WSSVP", proxy.checkVpsAvailability().getOrNull().toString())
+                                delay(5000)
                             }
                         }
                         if (displayCalibrationView) {
