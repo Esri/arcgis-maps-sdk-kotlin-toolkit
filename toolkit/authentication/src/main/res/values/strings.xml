@@ -16,7 +16,7 @@
   ~
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation" >
+<resources>
     <string name="server_trust_title">Untrusted host</string>
     <string name="server_trust_message">The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed?</string>
     <string name="cancel">Cancel</string>

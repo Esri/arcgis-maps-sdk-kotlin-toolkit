@@ -100,6 +100,10 @@ public class UsernamePasswordChallenge(
      *
      * @since 200.2.0
      */
+    @Deprecated(
+        message = "The `additionalMessage` property is no longer in use. Please use the `cause` property to display relevant error messages instead.",
+        level = DeprecationLevel.WARNING,
+    )
     public fun setAdditionalMessage(message: String?) {
         _additionalMessage.value = message
     }

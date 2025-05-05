@@ -340,7 +340,6 @@ class UsernamePasswordTests {
         }
 
         // ensure the dialog prompt is displayed as expected
-        // ensure the dialog prompt is displayed as expected
         advanceUntilIdle()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
 

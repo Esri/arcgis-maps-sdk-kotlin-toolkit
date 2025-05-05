@@ -85,7 +85,6 @@ public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
-    val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
     Surface(modifier = Modifier.fillMaxSize()) {
         UsernamePasswordAuthenticatorImpl(
             hostname = usernamePasswordChallenge.hostname,
@@ -142,7 +141,7 @@ private fun UsernamePasswordAuthenticatorImpl(
     var usernameFieldText by rememberSaveable { mutableStateOf("") }
     var passwordFieldText by rememberSaveable { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
-    val supportingText = LocalContext.current.getString(getSupportingText(challengeCause), hostname)
+    val supportingText = stringResource(getSupportingText(challengeCause), hostname)
 
     fun submitUsernamePassword() {
         if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
