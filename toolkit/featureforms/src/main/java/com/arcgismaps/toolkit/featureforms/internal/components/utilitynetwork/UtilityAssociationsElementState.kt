@@ -20,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,12 +62,43 @@ internal class UtilityAssociationsElementState(
     val filters: List<UtilityAssociationsFilterResult>
         get() = _filters.value
 
+    /**
+     * The selected [UtilityAssociationsFilterResult] to display. Use [setSelectedFilterResult] to
+     * set this value.
+     */
+    var selectedFilterResult : UtilityAssociationsFilterResult? = null
+        private set
+
+    /**
+     * The selected [UtilityAssociationGroupResult] to display. Use [setSelectedGroupResult] to
+     * set this value.
+     */
+    var selectedGroupResult : UtilityAssociationGroupResult? = null
+        private set
+
     init {
         scope.launch {
             // fetch the associations filter results for the element
             element.fetchAssociationsFilterResults()
-            _filters.value = element.associationsFilterResults
+            _filters.value = element.associationsFilterResults.filter {
+                // filter out the results that have no associations
+                it.resultCount > 0
+            }
             _loading.value = false
         }
+    }
+
+    /**
+     * Sets the selected [UtilityAssociationsFilterResult] to display.
+     */
+    fun setSelectedFilterResult(filterResult: UtilityAssociationsFilterResult) {
+        selectedFilterResult = filterResult
+    }
+
+    /**
+     * Sets the selected [UtilityAssociationGroupResult] to display.
+     */
+    fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult) {
+        selectedGroupResult = groupResult
     }
 }

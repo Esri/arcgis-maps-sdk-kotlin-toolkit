@@ -38,6 +38,7 @@ import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
@@ -196,7 +197,19 @@ class MapViewModel @Inject constructor(
                 // clear any features selected on the map
                 map.clearSelection()
                 // if there is an active feature form then select the feature
-                featureForm?.selectFeature()
+                if (featureForm != null) {
+                    featureForm.selectFeature()
+                    featureForm.feature.geometry?.let { geometry ->
+                        // set the viewpoint to the feature geometry
+                        proxy.setViewpointAnimated(
+                            viewpoint = Viewpoint(
+                                geometry
+                            )
+                        ).onSuccess {
+                            proxy.setViewpointScale(map.referenceScale)
+                        }
+                    }
+                }
             }
         }
     }

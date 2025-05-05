@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +42,6 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
-import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
@@ -55,14 +53,12 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  *
  * @param groupResults The [UtilityAssociationsFilterResult] to display.
  * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
- * @param onBackPressed A callback that is called when the back button is pressed.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun UtilityAssociationFilter(
     groupResults: List<UtilityAssociationGroupResult>,
-    onGroupClick: (Int) -> Unit,
-    onBackPressed: () -> Unit,
+    onGroupClick: (UtilityAssociationGroupResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // show the list of layers
@@ -84,7 +80,7 @@ internal fun UtilityAssociationFilter(
                             )
                         },
                         modifier = Modifier.clickable {
-                            onGroupClick(index)
+                            onGroupClick(group)
                         },
                         colors = ListItemDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -102,7 +98,6 @@ internal fun UtilityAssociationFilter(
             }
         }
     }
-    BackHandler(onBack = onBackPressed)
 }
 
 /**
@@ -115,7 +110,7 @@ internal fun UtilityAssociationFilter(
 @Composable
 internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
-    onItemClick: (UtilityAssociationResult) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -133,7 +128,7 @@ internal fun UtilityAssociations(
                         association = info.association,
                         associatedFeature = info.associatedFeature,
                         onClick = {
-                            onItemClick(info)
+                            onItemClick(index)
                         }
                     )
                     Surface(
