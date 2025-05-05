@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,15 +88,7 @@ internal fun BasemapGalleryItem(
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        BadgedBox(
-            badge = {
-                if (basemapGalleryItem.is3D) {
-                    Badge {
-                        Text("3D")
-                    }
-                }
-            }
-        ) {
+        Box {
             Image(
                 painter = thumbnail.value,
                 contentDescription = basemapGalleryItem.title,
@@ -104,22 +96,12 @@ internal fun BasemapGalleryItem(
                     .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
             )
+            if (basemapGalleryItem.is3D) {
+                Badge {
+                    Text("3D")
+                }
+            }
         }
-        // The following code is a possible workaround for the BadgedBox bug:
-//        Box {
-//            Image(
-//                painter = thumbnail.value,
-//                contentDescription = basemapGalleryItem.title,
-//                modifier = Modifier
-//                    .padding(8.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//            )
-//            if (basemapGalleryItem.is3D) {
-//                Badge {
-//                    Text("3D")
-//                }
-//            }
-//        }
         Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
     }
 }
