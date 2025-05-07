@@ -292,15 +292,14 @@ public fun WorldScaleSceneView(
                         }
                         if (hit == null) {
                             singleTapConfirmedCallback(singleTapConfirmedEvent)
-                            return@ArCameraFeed
                         }
-
-                        // hit is not null, so we can get the map point
-                        // first get the point relative to camera
-
-                        val mapPoint =
-                            worldScaleCameraController.getPointFromPose(hit.hitPose, session)
-                        singleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
+                        else {
+                            // hit is not null, so we can get the map point
+                            // first get the point relative to camera
+                            val mapPoint =
+                                worldScaleCameraController.getPointFromPose(hit.hitPose, session)
+                            singleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
+                        }
                     }
                     lastSingleTapConfirmedEvent = null
                 }
