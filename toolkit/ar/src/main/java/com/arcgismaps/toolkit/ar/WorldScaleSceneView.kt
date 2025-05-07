@@ -222,16 +222,13 @@ public fun WorldScaleSceneView(
     )
     // If PE data could not be configured, we can't position the scene camera accurately
     if (!pedataConfigured) return
-
-    val rememberedOnSingleTapConfirmedCallback = rememberUpdatedState(onSingleTapConfirmed)
-
-    val planeFindingMode = rememberUpdatedState(
-        if (rememberedOnSingleTapConfirmedCallback.value != null) {
+    val planeFindingMode = remember(onSingleTapConfirmed) {
+        if (onSingleTapConfirmed != null) {
             PlaneFindingMode.HORIZONTAL_AND_VERTICAL
         } else {
             PlaneFindingMode.DISABLED
         }
-    )
+    }
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = LocalContext.current.applicationContext,
@@ -242,7 +239,7 @@ public fun WorldScaleSceneView(
                 )
             },
             useGeospatial = worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial,
-            planeFindingMode = planeFindingMode.value
+            planeFindingMode = planeFindingMode
         )
 
     val calibrationState = remember { CalibrationState() }
@@ -264,22 +261,21 @@ public fun WorldScaleSceneView(
             // will need to start from scratch.
             arSessionWrapper.resetSession(
                 worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial,
-                planeFindingMode.value
+                planeFindingMode
             )
         }
     )
 
     var lastSingleTapConfirmedEvent: SingleTapConfirmedEvent? by remember { mutableStateOf(null) }
-    val rememberedSingleTapConfirmedEvent = rememberUpdatedState(lastSingleTapConfirmedEvent)
 
     Box(modifier = modifier) {
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
                 // if the user-provided lambda callback is not null
-                rememberedOnSingleTapConfirmedCallback.value?.let { singleTapConfirmedCallback ->
+                onSingleTapConfirmed?.let { userSingleTapConfirmedCallback ->
                     // if the last single tap confirmed event from the scene view is not null
-                    rememberedSingleTapConfirmedEvent.value?.let { singleTapConfirmedEvent ->
+                    lastSingleTapConfirmedEvent?.let { singleTapConfirmedEvent ->
                         val hitResult = frame.hitTest(
                             singleTapConfirmedEvent.screenCoordinate.x.toFloat(),
                             singleTapConfirmedEvent.screenCoordinate.y.toFloat()
@@ -291,14 +287,14 @@ public fun WorldScaleSceneView(
                             }
                         }
                         if (hit == null) {
-                            singleTapConfirmedCallback(singleTapConfirmedEvent)
+                            userSingleTapConfirmedCallback(singleTapConfirmedEvent)
                         }
                         else {
                             // hit is not null, so we can get the map point
                             // first get the point relative to camera
                             val mapPoint =
                                 worldScaleCameraController.getPointFromPose(hit.hitPose, session)
-                            singleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
+                            userSingleTapConfirmedCallback(singleTapConfirmedEvent.copy(mapPoint = mapPoint))
                         }
                     }
                     lastSingleTapConfirmedEvent = null
