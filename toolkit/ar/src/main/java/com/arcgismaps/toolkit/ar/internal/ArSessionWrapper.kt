@@ -40,7 +40,7 @@ internal class ArSessionWrapper(
     private val applicationContext: Context,
     private val onError: (Throwable) -> Unit,
     private var useGeospatial: Boolean,
-    private val planeFindingMode: PlaneFindingMode = PlaneFindingMode.HORIZONTAL
+    private val planeFindingMode: PlaneFindingMode = PlaneFindingMode.DISABLED
 ) :
     DefaultLifecycleObserver {
 
