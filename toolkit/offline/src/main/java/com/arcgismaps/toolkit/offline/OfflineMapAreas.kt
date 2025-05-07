@@ -18,11 +18,28 @@
 
 package com.arcgismaps.toolkit.offline
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 
 /**
  * Take a web map offline by downloading map areas.
@@ -30,12 +47,71 @@ import androidx.compose.ui.tooling.preview.Preview
  * @since 200.8.0
  */
 @Composable
-public fun OfflineMapAreas() {
-    Text(text = "OfflineMapAreas toolkit component")
+public fun OfflineMapAreas(
+    offlineMapState: OfflineMapState,
+    modifier: Modifier = Modifier
+) {
+    val initializationStatus by offlineMapState.initializationStatus
+
+    LaunchedEffect(offlineMapState) {
+        offlineMapState.initialize()
+    }
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            when (initializationStatus) {
+                is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                    Box(
+                        modifier = modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is InitializationStatus.FailedToInitialize -> {
+                    (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
+                        NonRecoveredErrorIndicator(
+                            it
+                        )
+                    }
+                }
+
+                else -> {
+                    if (offlineMapState.mode == OfflineMapMode.Preplanned) {
+                        offlineMapState.preplannedMapAreas?.let {
+                            PreplannedMapAreas(
+                                preplannedMapAreas = it,
+                                modifier = modifier
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-internal fun OfflineMapAreasPreview() {
-    MaterialTheme { Surface { OfflineMapAreas() } }
+private fun NonRecoveredErrorIndicator(errorMessage: String) {
+    Row {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = stringResource(id = R.string.error),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = errorMessage,
+            color = MaterialTheme.colorScheme.error
+        )
+    }
 }
