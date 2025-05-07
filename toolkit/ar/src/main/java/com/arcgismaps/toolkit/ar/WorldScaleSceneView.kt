@@ -232,7 +232,7 @@ public fun WorldScaleSceneView(
 
     val calibrationState = remember { CalibrationState() }
 
-    val currentOnTrackingErrorChanged = rememberUpdatedState(onTrackingErrorChanged)
+    val currentTrackingErrorChangedCallback = rememberUpdatedState(onTrackingErrorChanged)
     val worldScaleCameraController: WorldScaleCameraController by rememberWorldScaleCameraController(
         context = LocalContext.current,
         worldScaleTrackingMode = worldScaleTrackingMode,
@@ -250,7 +250,7 @@ public fun WorldScaleSceneView(
             // will need to start from scratch.
             arSessionWrapper.resetSession(worldScaleTrackingMode is WorldScaleTrackingMode.Geospatial)
         },
-        onTrackingErrorChanged = currentOnTrackingErrorChanged.value
+        onTrackingErrorChanged = currentTrackingErrorChangedCallback.value
     )
 
     Box(modifier = modifier) {
