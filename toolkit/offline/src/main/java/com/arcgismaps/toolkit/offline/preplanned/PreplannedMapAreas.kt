@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreas: List<PreplannedMapArea>,
-    modifier: Modifier = Modifier
+    modifier: Modifier
 ) {
     LazyColumn(modifier = modifier) {
         items(preplannedMapAreas) { mapArea ->
