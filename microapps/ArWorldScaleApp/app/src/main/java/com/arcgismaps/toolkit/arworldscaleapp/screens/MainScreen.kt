@@ -84,7 +84,6 @@ import com.arcgismaps.mapping.symbology.SymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
-import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
@@ -114,7 +113,6 @@ fun MainScreen() {
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
     val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
-    val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var selectedTrackingMode by rememberSaveable(
         saver = Saver(
@@ -239,7 +237,6 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
-                    worldScaleSceneViewProxy = proxy,
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
