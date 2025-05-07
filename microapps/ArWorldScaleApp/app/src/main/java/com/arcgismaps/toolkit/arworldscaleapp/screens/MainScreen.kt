@@ -255,7 +255,12 @@ fun MainScreen() {
                     graphicsOverlays = graphicsOverlays
                 ) {
                     var vpsAvailability by remember { mutableStateOf(false) }
-                    Text("VPS availability: $vpsAvailability")
+                    Card(modifier = Modifier.padding(4.dp)) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            text = if (vpsAvailability) "VPS Available" else "VPS Unavailable"
+                        )
+                    }
                     Box(modifier = Modifier.fillMaxSize()) {
                         LaunchedEffect(Unit) {
                             while (true) {
