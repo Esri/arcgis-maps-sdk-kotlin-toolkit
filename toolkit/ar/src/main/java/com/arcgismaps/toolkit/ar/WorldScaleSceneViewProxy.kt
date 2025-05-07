@@ -79,6 +79,13 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     public val isWrapAroundEnabled: Boolean?
         get() = sceneViewProxy.isWrapAroundEnabled
 
+    /**
+     * Query the availability of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
+     * at the current location. Where VPS is available, the accuracy of [WorldScaleTrackingMode.Geospatial] will be improved.
+     *
+     * @return A [Result] containing a [WorldScaleVpsAvailability], or failure
+     * @since 200.8.0
+     */
     public suspend fun checkVpsAvailability(): Result<WorldScaleVpsAvailability> =
         _cameraState?.let {
             it.location?.let { point ->
@@ -86,6 +93,15 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
             } ?: Result.failure(IllegalStateException("Unknown VPS availability"))
         } ?: Result.failure(IllegalStateException("Unknown VPS availability"))
 
+
+    /**
+     * Query the availability of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
+     * at the provided location. Where VPS is available, the accuracy of [WorldScaleTrackingMode.Geospatial] will be improved.
+     * @param latitude latitude of the location to query
+     * @param longitude longitude of the location to query
+     * @return A [Result] containing a [WorldScaleVpsAvailability], or failure
+     * @since 200.8.0
+     */
     public suspend fun checkVpsAvailability(latitude: Double, longitude: Double): Result<WorldScaleVpsAvailability> =
         _sessionWrapper?.let { sessionWrapper ->
             suspendCancellableCoroutine { continuation ->

@@ -254,10 +254,12 @@ fun MainScreen() {
                     },
                     graphicsOverlays = graphicsOverlays
                 ) {
+                    var vpsAvailability by remember { mutableStateOf(false) }
+                    Text("VPS availability: $vpsAvailability")
                     Box(modifier = Modifier.fillMaxSize()) {
-                        LaunchedEffect(null) {
+                        LaunchedEffect(Unit) {
                             while (true) {
-                                Log.d("WSSVP", proxy.checkVpsAvailability().getOrNull().toString())
+                                vpsAvailability = proxy.checkVpsAvailability().isSuccess
                                 delay(5000)
                             }
                         }

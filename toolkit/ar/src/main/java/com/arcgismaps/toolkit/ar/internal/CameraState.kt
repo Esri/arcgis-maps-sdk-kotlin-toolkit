@@ -20,6 +20,11 @@ package com.arcgismaps.toolkit.ar.internal
 
 import com.arcgismaps.geometry.Point
 
+/**
+ * State holder class for camera location
+ *
+ * @since 200.8.0
+ */
 internal class CameraState {
     var location: Point? = null
 }

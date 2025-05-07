@@ -94,6 +94,7 @@ internal class WorldTrackingCameraController(
      */
     override fun updateCamera(frame: Frame, session: Session) {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
+        // update shared camera state
         cameraController.transformationMatrix = cameraPosition
     }
 

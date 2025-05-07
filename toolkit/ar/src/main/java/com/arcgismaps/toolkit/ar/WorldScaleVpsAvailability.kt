@@ -6,13 +6,13 @@ package com.arcgismaps.toolkit.ar
  * at a specific location.
  *
  * @see WorldScaleSceneViewProxy.checkVpsAvailability
- * @since 200.7.0
+ * @since 200.8.0
  */
 public sealed class WorldScaleVpsAvailability {
     /**
      * VPS is available at the requested location.
      *
-     * @since 200.7.0
+     * @since 200.8.0
      */
     public data object Available : WorldScaleVpsAvailability()
 
@@ -21,7 +21,7 @@ public sealed class WorldScaleVpsAvailability {
      * [Enable the Geospatial API](https://developers.google.com/ar/develop/java/geospatial/enable)
      * for troubleshooting steps.
      *
-     * @since 200.7.0
+     * @since 200.8.0
      */
     public data object NotAuthorized : WorldScaleVpsAvailability()
 
@@ -30,14 +30,14 @@ public sealed class WorldScaleVpsAvailability {
      * See [Geospatial API usage quota]()https://developers.google.com/ar/develop/java/geospatial/api-usage-quota)
      * for more information.
      *
-     * @since 200.7.0
+     * @since 200.8.0
      */
     public data object ResourceExhausted : WorldScaleVpsAvailability()
 
     /**
      * VPS is not available at the requested location.
      *
-     * @since 200.7.0
+     * @since 200.8.0
      */
     public data object Unavailable : WorldScaleVpsAvailability()
 }
