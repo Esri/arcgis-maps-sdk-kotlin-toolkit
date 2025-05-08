@@ -18,39 +18,49 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.offline.OfflineMapAreas
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
-                )
-            }
+fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
+
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
         )
-    }
-    Column {
+    )
+
+    BottomSheetScaffold(
+        sheetContent = {
+            OfflineMapAreas(
+                viewModel.offlineMapState,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        },
+        modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 100.dp,
+        sheetSwipeEnabled = true,
+        topBar = null
+    ) { padding ->
         MapView(
+            arcGISMap = viewModel.arcGISMap,
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-            arcGISMap = arcGISMap
+                .padding(padding)
+                .fillMaxSize(),
         )
-        OfflineMapAreas()
     }
 }
