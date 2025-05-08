@@ -45,8 +45,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.OverviewMap
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
-import com.arcgismaps.toolkit.overviewmap.OverviewMap
 import com.arcgismaps.toolkit.overviewmapapp.ViewModel
 
 /**

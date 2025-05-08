@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.overviewmap
+package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,9 +36,6 @@ import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
-import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.mapping.view.GeoView
 
 /**
@@ -166,6 +163,7 @@ private fun OverviewMapImpl(
     MapView(
         modifier = modifier,
         arcGISMap = remember {
+            arcGISMap
             arcGISMap.apply {
                 viewpoint?.let {
                     initialViewpoint = scaledViewpoint(viewpoint, scaleFactor)
