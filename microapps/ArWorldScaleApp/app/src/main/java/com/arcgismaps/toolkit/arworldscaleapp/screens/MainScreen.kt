@@ -113,6 +113,8 @@ fun MainScreen() {
         }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
+    // The graphics overlay should have a surface placement of absolute to ensure
+    // that graphics are placed correctly if the user taps on a wall
     val graphicsOverlays = remember {
         listOf(
             GraphicsOverlay().apply {
