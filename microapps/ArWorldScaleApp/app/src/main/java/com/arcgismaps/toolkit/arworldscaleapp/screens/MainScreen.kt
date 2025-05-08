@@ -83,6 +83,7 @@ import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.symbology.SymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
@@ -112,7 +113,13 @@ fun MainScreen() {
         }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
-    val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
+    val graphicsOverlays = remember {
+        listOf(
+            GraphicsOverlay().apply {
+                sceneProperties.surfacePlacement = SurfacePlacement.Absolute
+            }
+        )
+    }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var selectedTrackingMode by rememberSaveable(
         saver = Saver(
