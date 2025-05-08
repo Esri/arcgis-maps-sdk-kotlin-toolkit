@@ -69,6 +69,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.Color
 import com.arcgismaps.LoadStatus
@@ -218,7 +219,9 @@ fun MainScreen() {
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    sharedPreferences.edit {
+                        putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
+                    }
                     showPrivacyInfo = false
                 }
             )
