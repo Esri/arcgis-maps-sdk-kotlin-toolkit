@@ -1,41 +1,43 @@
 [versions]
-activityCompose = "1.9.3"
-androidGradlePlugin = "8.7.3"
+activityCompose = "1.10.1"
+androidGradlePlugin = "8.9.2"
 androidXBrowser = "1.8.0"
 coilBOM = "2.5.0"
-composeBOM = "2024.11.00"
+composeBOM = "2025.04.01"
 androidxCamera = "1.4.2"
 androidxComposeCompiler = "1.5.12"
-androidxCore = "1.15.0"
+androidxCore = "1.16.0"
 androidxEspresso = "3.6.1"
 androidxHiltNavigationCompose = "1.2.0"
 androidxLifecycle = "2.8.7"
-androidxMaterialIcons = "1.7.5"
+androidxMaterialIcons = "1.7.8"
 androidxTestExt = "1.2.1"
 androidXTestRunner = "1.6.2"
 androidXTestRules = "1.6.1"
 androidxWindow = "1.3.0"
 binaryCompatibilityValidator = "0.17.0"
 compileSdk = "35"
-compose-navigation = "2.8.4"
+compose-navigation = "2.8.9"
 commonMark = "0.22.0"
 dokka = "2.0.0"
 hilt = "2.55"
 hiltExt = "1.2.0"
 junit = "4.13.2"
-kotlin = "2.1.0"
-ksp = "2.1.0-1.0.29"
-media3Exoplayer = "1.5.0"
+kotlin = "2.1.20"
+ksp = "2.1.20-1.0.32"
+media3Exoplayer = "1.6.1"
 minSdk = "28"
 mlkitBarcodeScanning = "17.3.0"
 kotlinxCoroutinesTest = "1.8.0"
 kotlinxSerializationJson = "1.8.0"
-mockkAndroid = "1.13.12"
-room = "2.6.1"
+mockkAndroid = "1.14.0"
+room = "2.7.0"
 truth = "1.4.4"
 uiautomator = "2.3.0"
-arcore = "1.47.0"
+arcore = "1.48.0"
 playServicesLocation = "21.3.0"
+gmazzo = "2.4.4"
+gradleSecrets = "2.0.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -104,10 +106,10 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1"}
+gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "gradleSecrets"}
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version = "2.2.0" }
+gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
 
 [bundles]
 camerax = [
