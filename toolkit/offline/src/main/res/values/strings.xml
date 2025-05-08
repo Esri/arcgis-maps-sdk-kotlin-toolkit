@@ -15,5 +15,8 @@
   -->
 
 <resources>
+    <string name="map_areas">Map Areas</string>
+    <string name="thumbnail_description">PortalItem Thumbnail</string>
+    <string name="download">Download</string>
     <string name="error">Error</string>
 </resources>

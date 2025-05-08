@@ -19,7 +19,7 @@
 package com.arcgismaps.toolkit.offline
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -58,31 +58,31 @@ public fun OfflineMapAreas(
         color = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            when (initializationStatus) {
-                is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+        when (initializationStatus) {
+            is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
                 }
+            }
 
-                is InitializationStatus.FailedToInitialize -> {
-                    (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
-                        NonRecoveredErrorIndicator(
-                            it
-                        )
-                    }
+            is InitializationStatus.FailedToInitialize -> {
+                (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
+                    NonRecoveredErrorIndicator(
+                        it
+                    )
                 }
+            }
 
-                else -> {
-                    if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                        offlineMapState.preplannedMapAreas?.let {
-                            PreplannedMapAreas(
-                                preplannedMapAreas = it,
-                                modifier = modifier
-                            )
-                        }
+            else -> {
+                if (offlineMapState.mode == OfflineMapMode.Preplanned) {
+                    offlineMapState.preplannedMapAreas?.let {
+                        PreplannedMapAreas(
+                            preplannedMapAreas = it,
+                            modifier = modifier
+                        )
                     }
                 }
             }

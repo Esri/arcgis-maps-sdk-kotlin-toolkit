@@ -79,8 +79,11 @@ public class OfflineMapState (
             throw it
         }
         preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
-        if (preplannedMapAreas != null) {
+        preplannedMapAreas?.let { preplannedMapArea ->
             mode = OfflineMapMode.Preplanned
+            preplannedMapArea.forEach {
+                it.portalItem.thumbnail?.load()
+            }
         }
 
         _initializationStatus.value = InitializationStatus.Initialized
