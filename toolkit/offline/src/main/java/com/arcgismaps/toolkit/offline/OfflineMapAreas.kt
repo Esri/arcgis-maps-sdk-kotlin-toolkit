@@ -18,12 +18,10 @@
 
 package com.arcgismaps.toolkit.offline
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -60,21 +58,14 @@ public fun OfflineMapAreas(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
     ) {
         Column(
-            modifier = modifier,
+            modifier = modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (initializationStatus) {
                 is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
-                    Box(
-                        modifier = modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    CircularProgressIndicator()
                 }
 
                 is InitializationStatus.FailedToInitialize -> {
