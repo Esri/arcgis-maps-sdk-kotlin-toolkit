@@ -288,8 +288,7 @@ public fun WorldScaleSceneView(
                         }
                         if (hit == null) {
                             userSingleTapConfirmedCallback(singleTapConfirmedEvent)
-                        }
-                        else {
+                        } else {
                             // hit is not null, so we can get the map point
                             // first get the point relative to camera
                             val mapPoint =
