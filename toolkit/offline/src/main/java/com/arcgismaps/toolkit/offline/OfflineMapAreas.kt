@@ -18,11 +18,10 @@
 
 package com.arcgismaps.toolkit.offline
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
@@ -93,13 +92,12 @@ public fun OfflineMapAreas(
 
 @Composable
 private fun NonRecoveredErrorIndicator(errorMessage: String) {
-    Row {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Icon(
             Icons.Default.Info,
             contentDescription = stringResource(id = R.string.error),
             tint = MaterialTheme.colorScheme.error
         )
-        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = errorMessage,
             color = MaterialTheme.colorScheme.error
