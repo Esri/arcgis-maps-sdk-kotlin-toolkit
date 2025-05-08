@@ -18,15 +18,33 @@
 
 package com.arcgismaps.toolkit.offline
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.asFlow
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
+import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
+import com.arcgismaps.toolkit.offline.workmanager.jobParameter
+import com.arcgismaps.toolkit.offline.workmanager.notificationIdParameter
+import com.arcgismaps.toolkit.offline.workmanager.uniqueWorkName
 import kotlinx.coroutines.CancellationException
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.random.Random
 
 /**
  * Represents the state of the offline map.
@@ -55,13 +73,19 @@ public class OfflineMapState (
      */
     public val initializationStatus: State<InitializationStatus> = _initializationStatus
 
+    private lateinit var scope: CoroutineScope
+
+    private lateinit var context: Context
+
+    internal val workManager by lazy { WorkManager.getInstance(context) }
+
     /**
      * Initializes the state object by loading the map, creating and loading the offline map task.
      *
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.8.0
      */
-    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+    internal suspend fun initialize(scope: CoroutineScope, context: Context): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
@@ -81,9 +105,154 @@ public class OfflineMapState (
         preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
         if (preplannedMapAreas != null) {
             mode = OfflineMapMode.Preplanned
+            // TODO: Wire this worker to run on map area selection
+            this.scope = scope
+            this.context = context
+            takePreplannedMapOffline()
         }
 
         _initializationStatus.value = InitializationStatus.Initialized
+    }
+    internal fun takePreplannedMapOffline() {
+        val offlineMapPath = context.getExternalFilesDir(null)?.path.toString() +
+                File.separator + "PreplannedMapArea"
+
+
+        val preplannedMapAreaToDownload = preplannedMapAreas?.first()!!
+
+        scope.launch {
+            // Create default download parameters from the offline map task
+            val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
+                preplannedMapArea = preplannedMapAreaToDownload
+            ).getOrThrow()
+            // Set the update mode to receive no updates
+            params.updateMode = PreplannedUpdateMode.NoUpdates
+            // Define the path where the map will be saved
+            val downloadDirectoryPath = offlineMapPath + File.separator +
+                    preplannedMapAreaToDownload.portalItem.title
+            File(downloadDirectoryPath).mkdirs()
+            // Create a job to download the preplanned offline map
+            val downloadPreplannedOfflineMapJob =
+                offlineMapTask.createDownloadPreplannedOfflineMapJob(
+                    parameters = params, downloadDirectoryPath = downloadDirectoryPath
+                )
+
+            // Start observing the worker's progress and status
+            observeWorkStatus(workManager, scope, onWorkInfoStateChanged = { workInfo ->
+                when (workInfo.state) {
+                    WorkInfo.State.ENQUEUED -> Log.e("OfflineMap", "ENQUEUED")
+                    WorkInfo.State.RUNNING -> Log.e(
+                        "OfflineMap", "RUNNING ${workInfo.progress.getInt("Progress", 0)}"
+                    )
+
+                    WorkInfo.State.SUCCEEDED -> Log.e("OfflineMap", "SUCCEEDED")
+                    WorkInfo.State.FAILED -> {
+                        val errorReason =
+                            workInfo.outputData.getString("Error") ?: "Unknown failure"
+                        Log.e(
+                            "OfflineMap",
+                            "FAILED: $errorReason - Details: ${workInfo.outputData.keyValueMap}"
+                        )
+                    }
+
+                    WorkInfo.State.BLOCKED -> Log.e("OfflineMap", "BLOCKED")
+                    WorkInfo.State.CANCELLED -> {
+                        val errorReason = workInfo.outputData.getString("Error")
+                        Log.e(
+                            "OfflineMap",
+                            "CANCELLED. Reason: $errorReason - Details: ${workInfo.outputData.keyValueMap}"
+                        )
+                    }
+                }
+            })
+            // Start offline map job
+            startOfflineMapJob(workManager, downloadPreplannedOfflineMapJob, context)
+        }
+    }
+
+    /**
+     * Starts the [downloadPreplannedOfflineMapJob] using OfflineJobWorker with WorkManager.
+     * The [downloadPreplannedOfflineMapJob] is serialized into a json file and the uri is passed
+     * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
+     */
+    private fun startOfflineMapJob(
+        workManager: WorkManager,
+        downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob,
+        context: Context
+    ) {
+        // create a temporary file path to save the offlineMapJob json file
+        val offlineJobJsonPath = context.getExternalFilesDir(null)?.path + "/OfflineJobJson"
+
+        // create the json file
+        val offlineJobJsonFile = File(offlineJobJsonPath)
+        // serialize the offlineMapJob into the file
+        offlineJobJsonFile.writeText(downloadPreplannedOfflineMapJob.toJson())
+
+        // create a non-zero notification id for the OfflineJobWorker
+        // this id will be used to post or update any progress/status notifications
+        val notificationId = Random.Default.nextInt(1, 100)
+
+        // create a one-time work request with an instance of OfflineJobWorker
+        val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
+            // run it as an expedited work
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the input data
+            .setInputData(
+                // add the notificationId and the json file path as a key/value pair
+                workDataOf(
+                    notificationIdParameter to notificationId,
+                    jobParameter to offlineJobJsonFile.absolutePath
+                )
+            ).build()
+
+
+        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
+        // only one instance of OfflineJobWorker is running at any time
+        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
+        // ones that are active
+        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
+    }
+
+    /**
+     * Starts observing any running or completed OfflineJobWorker work requests by capturing the
+     * LiveData as a flow. The flow starts receiving updates when the activity is in started
+     * or resumed state. This allows the application to capture immediate progress when
+     * in foreground and latest progress when the app resumes or restarts.
+     */
+    private fun observeWorkStatus(
+        workManager: WorkManager, scope: CoroutineScope, onWorkInfoStateChanged: (WorkInfo) -> Unit
+    ) {
+        // get the livedata observer of the unique work as a flow
+        val liveDataFlow = workManager.getWorkInfosForUniqueWorkLiveData(uniqueWorkName).asFlow()
+
+        scope.launch {
+            // collect the live data flow to get the latest work info list
+            liveDataFlow.collect { workInfoList ->
+                if (workInfoList.isNotEmpty()) {
+                    // fetch the first work info as we only ever run one work request at any time
+                    val workInfo = workInfoList[0]
+
+                    // emit changes in the work info state
+                    onWorkInfoStateChanged(workInfo)
+                    // check the current state of the work request
+                    when (workInfo.state) {
+                        // if work completed successfully
+                        WorkInfo.State.SUCCEEDED -> {}
+                        // if the work failed or was cancelled
+                        WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                            // this removes the completed WorkInfo from the WorkManager's database
+                            // otherwise, the observer will emit the WorkInfo on every launch
+                            // until WorkManager auto-prunes
+                            workManager.pruneWork()
+                        }
+                        // if the work is currently in progress
+                        WorkInfo.State.RUNNING -> {}
+                        // don't have to handle other states
+                        else -> {}
+                    }
+                }
+            }
+        }
     }
 }
 
