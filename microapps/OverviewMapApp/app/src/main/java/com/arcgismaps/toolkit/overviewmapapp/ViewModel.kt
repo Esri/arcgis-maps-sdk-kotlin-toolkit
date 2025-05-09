@@ -32,17 +32,9 @@ import com.arcgismaps.mapping.Viewpoint
  * @since 200.8.0
  */
 class ViewModel(application: Application) : AndroidViewModel(application) {
-    private val initialViewpoint = Viewpoint(
-        latitude = 39.8,
-        longitude = -98.6,
-        scale = 10e7
-    )
+    private val initialViewpoint = Viewpoint(latitude = 39.8, longitude = -98.6, scale = 10e7)
 
-    var viewpointForMapView = mutableStateOf(
-        initialViewpoint
-    )
+    var viewpointForMapView = mutableStateOf(initialViewpoint)
 
-    var viewpointForSceneView = mutableStateOf(
-        initialViewpoint
-    )
+    var viewpointForSceneView = mutableStateOf(initialViewpoint)
 }
