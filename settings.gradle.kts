@@ -178,5 +178,4 @@ include(":basemapgallery")
 project(":basemapgallery").projectDir = File(rootDir, "toolkit/basemapgallery")
 include(":overviewmap-app")
 project(":overviewmap-app").projectDir = File(rootDir, "microapps/OverviewMapApp/app")
-include(":overviewmap")
-project(":overviewmap").projectDir = File(rootDir, "toolkit/overviewmap")
+
