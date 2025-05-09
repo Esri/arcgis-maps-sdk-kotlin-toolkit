@@ -163,14 +163,19 @@ internal class GeospatialTrackingCameraController(
         }
     }
 
-    override fun getPointFromPose(pose: Pose, session: Session): Point? {
-        return try {
-            val geospatialPose = session.earth?.getGeospatialPose(pose) ?: return null
-            val point = Point(geospatialPose.longitude, geospatialPose.latitude, geospatialPose.altitude, WorldScaleParameters.SR_WGS84_WGS_VERTICAL)
-            GeometryEngine.projectOrNull(point, WorldScaleParameters.SR_CAMERA)
-        } catch (e: NotTrackingException) {
-            null
+    override fun getPointFromPose(pose: Pose, session: Session): Point? = try {
+        session.earth?.getGeospatialPose(pose)?.let { geospatialPose ->
+            Point(
+                geospatialPose.longitude,
+                geospatialPose.latitude,
+                geospatialPose.altitude,
+                WorldScaleParameters.SR_WGS84_WGS_VERTICAL
+            ).let {
+                GeometryEngine.projectOrNull(it, WorldScaleParameters.SR_CAMERA)
+            }
         }
+    } catch (e: NotTrackingException) {
+        null
     }
 
     /**
