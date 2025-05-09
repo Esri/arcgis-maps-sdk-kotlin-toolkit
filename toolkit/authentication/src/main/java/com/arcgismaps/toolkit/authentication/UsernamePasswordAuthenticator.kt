@@ -51,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -65,7 +64,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.exceptions.ArcGISAuthenticationException
 
 /**
@@ -316,6 +314,6 @@ private fun getSupportingText(challengeException: Throwable?): Int {
     return when (challengeException) {
         null -> R.string.username_password_login_message
         is ArcGISAuthenticationException -> R.string.incorrect_credentials
-        else -> R.string.sing_in_error_occurred
+        else -> R.string.sign_in_error_occurred
     }
 }

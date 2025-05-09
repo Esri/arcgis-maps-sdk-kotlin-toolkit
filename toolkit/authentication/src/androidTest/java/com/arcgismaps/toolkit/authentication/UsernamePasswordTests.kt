@@ -344,7 +344,7 @@ class UsernamePasswordTests {
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
 
         // verify that the default message is displayed
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sing_in_error_occurred, "arcgis.com"))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in_error_occurred, "arcgis.com"))
             .assertIsDisplayed()
     }
 
