@@ -163,7 +163,6 @@ private fun OverviewMapImpl(
     MapView(
         modifier = modifier,
         arcGISMap = remember {
-            arcGISMap
             arcGISMap.apply {
                 viewpoint?.let {
                     initialViewpoint = scaledViewpoint(viewpoint, scaleFactor)
