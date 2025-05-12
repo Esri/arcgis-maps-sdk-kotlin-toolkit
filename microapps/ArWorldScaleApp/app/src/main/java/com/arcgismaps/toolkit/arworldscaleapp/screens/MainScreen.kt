@@ -241,6 +241,7 @@ fun MainScreen() {
                         initializationStatus = it
                     },
                     worldScaleSceneViewProxy = proxy,
+                    onCurrentViewpointCameraChanged = { proxy.camera = it },
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
                             ?.let { point ->

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -31,7 +32,6 @@ import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
-import com.arcgismaps.toolkit.ar.internal.CameraState
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.VpsAvailability
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -64,11 +64,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     }
 
 
-    private var _cameraState : CameraState? = null
-
-    internal fun setCameraState(cameraState: CameraState?){
-        _cameraState = cameraState
-    }
+    public var camera : Camera? = null
 
     /**
      * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
@@ -87,10 +83,10 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @since 200.8.0
      */
     public suspend fun checkVpsAvailability(): Result<WorldScaleVpsAvailability> =
-        _cameraState?.let {
-            it.location?.let { point ->
+        camera?.let {
+            it.location.let { point ->
                 checkVpsAvailability(point.y, point.x)
-            } ?: Result.failure(IllegalStateException("Unknown VPS availability"))
+            }
         } ?: Result.failure(IllegalStateException("Unknown VPS availability"))
 
 

@@ -49,7 +49,6 @@ import kotlin.math.sqrt
  */
 internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val cameraState: CameraState,
     clippingDistance: Double?,
     context: Context,
     private val onError: (Throwable) -> Unit
@@ -96,9 +95,6 @@ internal class GeospatialTrackingCameraController(
                 ),
                 WorldScaleParameters.SR_CAMERA
             ) ?: return@let
-
-            // update shared camera state
-            cameraState.location = projectedLocation
 
             // get a pose relative to local coordinates so we can rotate the orientation relative
             // to the device orientation

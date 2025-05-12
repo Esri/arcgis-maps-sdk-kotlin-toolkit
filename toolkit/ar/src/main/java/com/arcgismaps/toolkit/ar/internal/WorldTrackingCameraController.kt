@@ -56,7 +56,6 @@ import java.time.Instant
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
-    private val cameraState: CameraState,
     clippingDistance: Double?,
     private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
@@ -94,7 +93,6 @@ internal class WorldTrackingCameraController(
      */
     override fun updateCamera(frame: Frame, session: Session) {
         val cameraPosition = frame.camera.displayOrientedPose.transformationMatrix
-        // update shared camera state
         cameraController.transformationMatrix = cameraPosition
     }
 
@@ -108,7 +106,6 @@ internal class WorldTrackingCameraController(
             ?.let { projectedLocation ->
                 // cache the location of the origin camera for later use
                 currentCameraLocation = projectedLocation
-                cameraState.location = currentCameraLocation
 
                 cameraController.setOriginCamera(
                     Camera(
