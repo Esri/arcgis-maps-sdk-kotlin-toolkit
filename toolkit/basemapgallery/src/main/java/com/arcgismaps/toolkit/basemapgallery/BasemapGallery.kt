@@ -97,7 +97,7 @@ internal fun BasemapGalleryItem(
                     .clip(RoundedCornerShape(8.dp))
             )
             if (basemapGalleryItem.is3D) {
-                Badge {
+                Badge(modifier = Modifier.align(Alignment.TopEnd)) {
                     Text("3D")
                 }
             }
