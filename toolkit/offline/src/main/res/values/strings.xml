@@ -16,4 +16,5 @@
 
 <resources>
     <string name="error">Error</string>
+    <string name="cancel_notification">com.arcgismaps.toolkit.offline.CANCEL_NOTIFICATION</string>
 </resources>

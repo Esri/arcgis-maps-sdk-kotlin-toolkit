@@ -21,21 +21,20 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
+import androidx.work.workDataOf
+import java.util.UUID
 
 /**
  * Custom BroadcastReceiver class that handles notification actions setup by WorkerNotification
  */
 internal class NotificationActionReceiver : BroadcastReceiver() {
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        // retrieve the data name or return if the context if null
-        val extraName = notificationAction
-        // get the actual data from the intent
-        val action = intent?.getStringExtra(extraName) ?: "none"
-        // if the action is cancel
-        if (action == "Cancel") {
-            // get the WorkManager instance and cancel all active workers
-            context?.let { WorkManager.getInstance(it) }?.cancelAllWork()
+    override fun onReceive(context: Context, intent: Intent) {
+        val workId = intent.getStringExtra(WorkerNotification.WORK_ID_KEY)
+        if (workId != null) {
+            WorkManager.getInstance(context).apply {
+                cancelWorkById(UUID.fromString(workId))
+                workDataOf(OfflineMapWorkManager.JOB_CANCELLED_KEY to "Cancelled from notification")
+            }
         }
     }
 }

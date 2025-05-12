@@ -17,138 +17,136 @@
 
 package com.arcgismaps.toolkit.offline.workmanager
 
-import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.work.ForegroundInfo
+import android.os.Build
+import com.arcgismaps.toolkit.offline.R
+import java.util.UUID
 
-/**
- * Helper class that handles progress and status notifications on [applicationContext] for
- * the offline map job run using WorkManager. a non-zero [notificationId] is used to show
- * and update the progress and status notifications
- */
-internal class WorkerNotification(
-    private val applicationContext: Context,
-    private val notificationId: Int
-) {
-    // unique channel id for the NotificationChannel
-    private val notificationChannelId by lazy {
-        "${applicationContext.packageName}-notifications"
+internal object WorkerNotification {
+    private const val CHANNEL_ID = "offline_map_channel_V2"
+    private const val CHANNEL_NAME = "Offline Map Downloads"
+    private const val CHANNEL_DESC = "Notifications for offline map download progress"
+    internal const val WORK_ID_KEY = "WORK_ID_KEY"
+
+    fun createNotificationChannel(context: Context) {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (nm.getNotificationChannel(CHANNEL_ID) == null) {
+            val channel = NotificationChannel(
+                /* id = */ CHANNEL_ID,
+                /* name = */ CHANNEL_NAME,
+                /* importance = */ NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = CHANNEL_DESC
+                enableLights(true)
+                enableVibration(true)
+            }
+            nm.createNotificationChannel(channel)
+        }
     }
 
-    // TODO  intent for notifications tap action that launch the MainActivity
-    private val mainActivityIntent by lazy {}
-
-    // intent for notification cancel action that launches a NotificationActionReceiver
-    private val cancelActionIntent by lazy {
-        // setup the intent to launch a NotificationActionReceiver
-        val intent = Intent(applicationContext, NotificationActionReceiver::class.java).apply {
-            // set this intent to only launch with this application package
-            setPackage(applicationContext.packageName)
-            // add the notification action as a string
-            putExtra(notificationAction, "Cancel")
-            putExtra("NotificationId", notificationId)
+    fun buildProgressForegroundInfo(
+        context: Context,
+        title: String,
+        message: String,
+        notificationId: Int,
+        workId: UUID,
+        progress: Int
+    ): ForegroundInfo {
+        val cancelIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = context.getString(R.string.cancel_notification)
+            putExtra(WORK_ID_KEY, workId.toString())
         }
-        // set the pending intent that will be passed to the NotificationManager
-        PendingIntent.getBroadcast(
-            applicationContext,
-            notificationId,
-            intent,
+
+        val pendingCancel = PendingIntent.getBroadcast(
+            context,
+            workId.hashCode(),
+            cancelIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-    }
 
-    init {
-        // create the notification channel
-        createNotificationChannel()
-    }
+        val launchIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
 
-    /**
-     * Creates and returns a new progress notification with the given [progress] value
-     */
-    fun createProgressNotification(progress: Int): Notification {
-        // use the default notification builder and set the progress to 0
-        return getDefaultNotificationBuilder(
-            setOngoing = true,
-            contentText = "Download in progress: $progress%"
-        ).setProgress(100, progress, false)
-            // add a cancellation action
-            .addAction(0, "Cancel", cancelActionIntent)
-            .build()
-    }
-
-    /**
-     * Creates and posts a new status notification with the [message] and dismisses any ongoing
-     * progress notifications
-     */
-    @SuppressLint("MissingPermission")
-    fun showStatusNotification(message: String) {
-        // build using the default notification builder with the status message
-        val notification = getDefaultNotificationBuilder(
-            setOngoing = false,
-            contentText = message
-        ).build().apply {
-            // this flag dismisses the notification on opening
-            flags = Notification.FLAG_AUTO_CANCEL
+        val pendingLaunch = launchIntent?.let {
+            PendingIntent.getActivity(
+                /* context = */ context,
+                /* requestCode = */ 0,
+                /* intent = */ it,
+                /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
-        with(NotificationManagerCompat.from(applicationContext)) {
-            // cancel the visible progress notification using its id
-            cancel(notificationId)
-            // post the new status notification with a new notificationId
-            notify(notificationId + 1, notification)
-        }
-    }
-
-    /**
-     * Creates a new notification channel and adds it to the NotificationManager
-     */
-    private fun createNotificationChannel() {
-        // get the channel properties from resources
-        val name = notificationChannelName
-        val descriptionText = notificationChannelDescription
-        val importance = NotificationManager.IMPORTANCE_HIGH
-        // create a new notification channel with the properties
-        val channel = NotificationChannel(notificationChannelId, name, importance).apply {
-            description = descriptionText
-        }
-        // get the notification system service as a NotificationManager
-        val notificationManager =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        // Add the channel to the NotificationManager
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    /**
-     * Creates and returns a new NotificationCompat.Builder with the given [contentText]
-     * and as an ongoing notification based on [setOngoing]
-     */
-    private fun getDefaultNotificationBuilder(
-        setOngoing: Boolean,
-        contentText: String
-    ): NotificationCompat.Builder {
-        return NotificationCompat.Builder(applicationContext, notificationChannelId)
-            // sets the notifications title
-            .setContentTitle(notificationTitle)
-            // sets the content that is displayed on expanding the notification
-            .setContentText(contentText)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(message)
             .setSmallIcon(android.R.drawable.stat_sys_download)
-            // sets it to only show the notification alert once, in case of progress
+            .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            // ongoing notifications cannot be dismissed by swiping them away
-            .setOngoing(setOngoing)
-            // sets it to show the notification immediately
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setProgress(100, progress, false)
+            .setContentIntent(pendingLaunch)
+            .addAction(android.R.drawable.ic_delete, "Cancel", pendingCancel)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                notificationId,
+                builder.build(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(notificationId, builder.build())
+        }
+    }
+
+    fun showCompletionNotification(
+        context: Context,
+        notificationId: Int,
+        title: String,
+        message: String
+    ): ForegroundInfo {
+        val launchIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+        val pendingLaunch = launchIntent?.let {
+            PendingIntent.getActivity(
+                /* context = */ context,
+                /* requestCode = */ 0,
+                /* intent = */ it,
+                /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setAutoCancel(true)
+            .setOngoing(false)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-        // sets the onclick action to launch the mainActivityIntent
-        //TODO: .setContentIntent(mainActivityIntent)
+            .setContentIntent(pendingLaunch)
+            .setProgress(0, 0, false)
+
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                notificationId,
+                builder.build(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(notificationId, builder.build())
+        }
     }
 }
-
-
