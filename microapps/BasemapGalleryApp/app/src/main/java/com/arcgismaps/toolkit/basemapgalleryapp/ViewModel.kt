@@ -61,6 +61,18 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
+            // get basemap style info from a basemap style service
+            val service = BasemapStylesService()
+            service.load()
+                .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
+                .onSuccess {
+                    // for each basemap style info create a gallery item and add it to the list of items
+                    service.info?.stylesInfo?.forEach { basemapStyleInfo ->
+                        val galleryItem = BasemapGalleryItem(basemapStyleInfo)
+                        styleItems.add(galleryItem)
+                    }
+                }
+
             // get basemap portal items from a portal
             val portal = Portal("https://www.arcgis.com")
             portal.load()
@@ -77,9 +89,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                                         basemap.item?.let { item ->
                                             val sceneLayers =
                                                 basemap.baseLayers.filterIsInstance<ArcGISSceneLayer>()
-                                            val galleryItem =
-                                                BasemapGalleryItem(item, sceneLayers.size > 0)
-                                            portalItems.add(galleryItem)
+                                            portalItems.add(
+                                                BasemapGalleryItem(item, sceneLayers.isNotEmpty()))
                                         }
                                     }
                             }
@@ -94,18 +105,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                                 }
                             }
                         }
-                }
-
-            // get basemap style info from a basemap style service
-            val service = BasemapStylesService()
-            service.load()
-                .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
-                .onSuccess {
-                    // for each basemap style info create a gallery item and add it to the list of items
-                    service.info?.stylesInfo?.forEach { basemapStyleInfo ->
-                        val galleryItem = BasemapGalleryItem(basemapStyleInfo)
-                        styleItems.add(galleryItem)
-                    }
                 }
         }
     }
