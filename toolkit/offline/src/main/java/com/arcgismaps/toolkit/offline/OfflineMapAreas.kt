@@ -78,12 +78,10 @@ public fun OfflineMapAreas(
 
             else -> {
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                    offlineMapState.preplannedMapAreas?.let {
-                        PreplannedMapAreas(
-                            preplannedMapAreas = it,
-                            modifier = modifier
-                        )
-                    }
+                    PreplannedMapAreas(
+                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
+                        modifier = modifier
+                    )
                 }
             }
         }

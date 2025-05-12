@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
+import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
 
@@ -44,6 +46,8 @@ public class OfflineMapState (
     private lateinit var portalItemId: String
 
     internal var preplannedMapAreas: List<PreplannedMapArea>? = null
+
+    internal var preplannedMapAreaStates: MutableList<PreplannedMapAreaState> = mutableListOf()
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
@@ -81,8 +85,12 @@ public class OfflineMapState (
         preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
         preplannedMapAreas?.let { preplannedMapArea ->
             mode = OfflineMapMode.Preplanned
-            preplannedMapArea.forEach {
-                it.portalItem.thumbnail?.load()
+            preplannedMapArea
+                .sortedBy { it.portalItem.title }
+                .forEach {
+                val preplannedMapAreaState = PreplannedMapAreaState(it)
+                preplannedMapAreaState.initialize()
+                preplannedMapAreaStates.add(preplannedMapAreaState)
             }
         }
 

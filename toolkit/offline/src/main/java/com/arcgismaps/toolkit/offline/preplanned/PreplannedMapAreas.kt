@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,10 +42,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
+import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.toolkit.offline.R
 
 /**
@@ -54,23 +60,22 @@ import com.arcgismaps.toolkit.offline.R
  */
 @Composable
 internal fun PreplannedMapAreas(
-    preplannedMapAreas: List<PreplannedMapArea>,
+    preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val preplannedMapAreasSorted = preplannedMapAreas.sortedBy { it.portalItem.title }
         Text(
             text = stringResource(id = R.string.map_areas),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
-            items(preplannedMapAreasSorted) { mapArea ->
+            items(preplannedMapAreaStates) { state ->
                 Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    mapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
+                    state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
                         Image(
                             bitmap = it,
                             contentDescription = stringResource(R.string.thumbnail_description),
@@ -83,15 +88,29 @@ internal fun PreplannedMapAreas(
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = mapArea.portalItem.title,
+                            text = state.preplannedMapArea.portalItem.title,
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(top = 6.dp)
+                            modifier = Modifier.padding(top = 6.dp),
+                            maxLines = 1, // Restrict to one line
+                            overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
                         Text(
-                            text = mapArea.portalItem.description,
+                            text = state.preplannedMapArea.portalItem.description,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
+                        )
+                        val statusString = getPreplannedMapAreaStatusString(
+                            context = LocalContext.current,
+                            status = state.status
+                        )
+                        Text(
+                            text = statusString,
+                            style =  MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            maxLines = 1, // Restrict to two lines
                         )
                     }
                     IconButton(
@@ -106,10 +125,23 @@ internal fun PreplannedMapAreas(
                         )
                     }
                 }
-                if (mapArea != preplannedMapAreasSorted.last()) {
+                if (state.preplannedMapArea != preplannedMapAreaStates.last().preplannedMapArea) {
                     HorizontalDivider(modifier = Modifier.padding(start = 80.dp))
                 }
             }
         }
+    }
+}
+
+private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
+    return when (status) {
+        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
+        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is Status.DownloadFailure -> getString(context, R.string.download_failed)
+        Status.Downloaded -> getString(context, R.string.downloaded)
+        Status.Downloading -> getString(context, R.string.downloading)
+        Status.PackageFailure -> getString(context, R.string.packaging_failed)
+        Status.Packaged -> getString(context, R.string.ready_to_download)
+        Status.Packaging -> getString(context, R.string.packaging)
     }
 }
