@@ -49,18 +49,18 @@ internal class OfflineJobWorker(
 
     // notificationId passed by the activity
     private val notificationId by lazy {
-        inputData.getInt(notificationIdParameter, 1)
+        inputData.getInt(key = notificationIdParameter, defaultValue = 1)
     }
 
     // WorkerNotification instance
     private val workerNotification by lazy {
-        WorkerNotification(context, notificationId)
+        WorkerNotification(applicationContext = context, notificationId = notificationId)
     }
 
     // must override for api versions < 31 for backwards compatibility
     // with foreground services
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return createForegroundInfo(0)
+        return createForegroundInfo(progress = 0)
     }
 
     /**
@@ -71,14 +71,14 @@ internal class OfflineJobWorker(
         // create a ForegroundInfo using the notificationId and a new progress notification
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(
-                notificationId,
-                workerNotification.createProgressNotification(progress),
-                FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                /* notificationId = */ notificationId,
+                /* notification = */ workerNotification.createProgressNotification(progress),
+                /* foregroundServiceType = */ FOREGROUND_SERVICE_TYPE_DATA_SYNC
             )
         } else {
             ForegroundInfo(
-                notificationId,
-                workerNotification.createProgressNotification(progress)
+                /* notificationId = */ notificationId,
+                /* notification = */ workerNotification.createProgressNotification(progress)
             )
         }
     }
