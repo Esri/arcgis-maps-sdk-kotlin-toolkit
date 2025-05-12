@@ -24,7 +24,6 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Info
@@ -50,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.launch
 
 /**
  * Take a web map offline by downloading map areas.
@@ -103,11 +101,7 @@ public fun OfflineMapAreas(
                         offlineMapState.preplannedMapAreas?.let {
                             PreplannedMapAreas(
                                 preplannedMapAreas = it,
-                                modifier = modifier.clickable {
-                                    scope.launch {
-                                        offlineMapState.takePreplannedMapOffline()
-                                    }
-                                }
+                                modifier = modifier
                             )
                         }
                     }
