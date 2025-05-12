@@ -24,6 +24,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Info
@@ -101,7 +102,9 @@ public fun OfflineMapAreas(
                         offlineMapState.preplannedMapAreas?.let {
                             PreplannedMapAreas(
                                 preplannedMapAreas = it,
-                                modifier = modifier
+                                modifier = modifier.clickable {
+                                    offlineMapState.takePreplannedMapOffline()
+                                }
                             )
                         }
                     }

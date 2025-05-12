@@ -27,6 +27,8 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
+import com.arcgismaps.toolkit.offline.jobParameter
+import com.arcgismaps.toolkit.offline.notificationIdParameter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -36,32 +38,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-// used to uniquely identify the work request so that only one worker is active at a time
-// also allows us to query and observe work progress
-internal const val uniqueWorkName = "com.arcgismaps.toolkit.offline.Worker"
-
-// data parameter keys for the WorkManager
-// key for the NotificationId parameter
-internal const val notificationIdParameter = "NotificationId"
-
-// key for the json job file path
-internal const val jobParameter = "JsonJobPath"
-
-internal const val notificationAction = "NotificationAction"
-
-internal const val notificationChannelName = "Offline Map Job Notifications"
-
-internal const val notificationChannelDescription =
-    "Shows notifications for offline map job progress"
-
-internal const val notificationTitle = "OfflineMapArea downloading..."
-
 /**
- * Class that runs a downloadPreplannedOfflineMapJob as a CoroutineWorker using WorkManager.
+ * Class that runs a [DownloadPreplannedOfflineMapJob] as a CoroutineWorker using WorkManager.
  */
 internal class OfflineJobWorker(
     private val context: Context,
-    params: WorkerParameters,
+    params: WorkerParameters
 ) :
     CoroutineWorker(context, params) {
 
@@ -115,7 +97,6 @@ internal class OfflineJobWorker(
             json = offlineJobJsonFile.readText()
         ) ?: return Result.failure() // return failure if the created job is null
 
-
         return try {
             // set this worker to run as a long-running foreground service
             // this will throw an exception, if the worker is launched when the app
@@ -160,20 +141,33 @@ internal class OfflineJobWorker(
                 Result.success()
             } else {
                 // if the job has failed show a final status notification
-                val errorMessage = jobResult.exceptionOrNull()?.message ?: "Unknown error during job execution"
-                Log.e(javaClass.simpleName, "Offline map job failed internally: $errorMessage", jobResult.exceptionOrNull())
+                val errorMessage = jobResult.exceptionOrNull()?.message
+                    ?: "Unknown error during job execution"
+                Log.e(
+                    javaClass.simpleName,
+                    "Offline map job failed internally: $errorMessage",
+                    jobResult.exceptionOrNull()
+                )
                 workerNotification.showStatusNotification("Failed: $errorMessage")
                 Result.failure(workDataOf("Error" to errorMessage))
             }
         } catch (cancellationException: CancellationException) {
             // a CancellationException is raised if the work is cancelled manually by the user
             // log and rethrow the cancellationException
-            Log.w(javaClass.simpleName, "Offline map job explicitly cancelled.", cancellationException)
+            Log.w(
+                javaClass.simpleName,
+                "Offline map job explicitly cancelled.",
+                cancellationException
+            )
             workerNotification.showStatusNotification("Cancelled")
             Result.failure(workDataOf("Error" to "Job cancelled by user or system"))
         } catch (exception: Exception) {
             // capture and log if any other exception occurs
-            Log.e(javaClass.simpleName, "Offline map job failed with exception: ${exception.message}", exception)
+            Log.e(
+                javaClass.simpleName,
+                "Offline map job failed with exception: ${exception.message}",
+                exception
+            )
             // post a job failed notification
             workerNotification.showStatusNotification("Failed: ${exception.message}")
             // return a failure result
@@ -182,21 +176,21 @@ internal class OfflineJobWorker(
         } finally {
             withContext(NonCancellable) {
                 try {
-                    Log.e(javaClass.simpleName, "Finally block: Attempting to cancel ArcGIS job.")
                     // cancel the job to free up any resources
-                    downloadPreplannedOfflineMapJob.cancel()
-                    Log.e(javaClass.simpleName, "Finally block: ArcGIS job cancellation attempted.")
-                } catch (e: Exception) {
-                    Log.e(javaClass.simpleName, "Error during final cancel of ArcGIS job in finally: ${e.message}", e)
-                }
-
-                try {
-                    Log.e(javaClass.simpleName, "Finally block: Deleting job JSON file: ${offlineJobJsonFile.path}")
+                    downloadPreplannedOfflineMapJob.cancel().getOrThrow()
+                    // delete the json job file
                     if (offlineJobJsonFile.exists()) {
                         offlineJobJsonFile.delete()
+                    } else {
+                        /*Do nothing*/
                     }
+
                 } catch (e: Exception) {
-                    Log.e(javaClass.simpleName, "Error deleting job JSON file in finally: ${e.message}", e)
+                    Log.e(
+                        javaClass.simpleName,
+                        "Error during final cancel of ArcGIS job: ${e.message}",
+                        e
+                    )
                 }
             }
         }

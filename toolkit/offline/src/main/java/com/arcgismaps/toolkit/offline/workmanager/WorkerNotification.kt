@@ -24,9 +24,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.arcgismaps.toolkit.offline.notificationAction
+import com.arcgismaps.toolkit.offline.notificationChannelDescription
+import com.arcgismaps.toolkit.offline.notificationChannelName
+import com.arcgismaps.toolkit.offline.notificationTitle
 
 /**
  * Helper class that handles progress and status notifications on [applicationContext] for
@@ -37,13 +40,27 @@ internal class WorkerNotification(
     private val applicationContext: Context,
     private val notificationId: Int
 ) {
+
     // unique channel id for the NotificationChannel
     private val notificationChannelId by lazy {
         "${applicationContext.packageName}-notifications"
     }
 
-    // TODO  intent for notifications tap action that launch the MainActivity
-    private val mainActivityIntent by lazy {}
+    // intent for notifications tap action that launch the MainActivity
+    private val mainActivityIntent by lazy {
+        // setup the intent to launch MainActivity
+        val intent = applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)?.apply {
+            // launches the activity if not already on top and active
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        // set the pending intent that will be passed to the NotificationManager
+        PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 
     // intent for notification cancel action that launches a NotificationActionReceiver
     private val cancelActionIntent by lazy {
@@ -53,7 +70,6 @@ internal class WorkerNotification(
             setPackage(applicationContext.packageName)
             // add the notification action as a string
             putExtra(notificationAction, "Cancel")
-            putExtra("NotificationId", notificationId)
         }
         // set the pending intent that will be passed to the NotificationManager
         PendingIntent.getBroadcast(
@@ -144,11 +160,9 @@ internal class WorkerNotification(
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             // ongoing notifications cannot be dismissed by swiping them away
             .setOngoing(setOngoing)
+            // sets the onclick action to launch the mainActivityIntent
+            .setContentIntent(mainActivityIntent)
             // sets it to show the notification immediately
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-        // sets the onclick action to launch the mainActivityIntent
-        //TODO: .setContentIntent(mainActivityIntent)
     }
 }
-
-

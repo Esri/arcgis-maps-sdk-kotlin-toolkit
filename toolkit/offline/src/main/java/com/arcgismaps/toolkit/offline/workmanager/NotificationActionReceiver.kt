@@ -21,21 +21,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
+import com.arcgismaps.toolkit.offline.notificationAction
 
 /**
  * Custom BroadcastReceiver class that handles notification actions setup by WorkerNotification
  */
 internal class NotificationActionReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
         // retrieve the data name or return if the context if null
         val extraName = notificationAction
         // get the actual data from the intent
-        val action = intent?.getStringExtra(extraName) ?: "none"
+        val action = intent.getStringExtra(extraName) ?: "none"
         // if the action is cancel
         if (action == "Cancel") {
             // get the WorkManager instance and cancel all active workers
-            context?.let { WorkManager.getInstance(it) }?.cancelAllWork()
+            WorkManager.getInstance(context).cancelAllWork()
         }
     }
 }
