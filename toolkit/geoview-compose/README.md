@@ -180,10 +180,10 @@ Box {
             ArcGISMap(BasemapStyle.ArcGISDarkGray)
         },
         onViewpointChangedForCenterAndScale = {
-            viewpoint.value = it
+            viewpoint = it
         },
         onVisibleAreaChanged = {
-            visibleArea.value = it
+            visibleArea = it
         }
     )
     OverviewMap(
