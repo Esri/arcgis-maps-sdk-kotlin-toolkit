@@ -265,6 +265,7 @@ fun MainScreen() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         LaunchedEffect(Unit) {
                             while (true) {
+                                // poll VPS availability at current device location every 5 seconds
                                 vpsAvailability = proxy.checkVpsAvailability().isSuccess
                                 delay(5000)
                             }
