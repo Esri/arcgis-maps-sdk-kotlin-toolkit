@@ -87,18 +87,18 @@ fun MainScreen() {
                             modifier = Modifier.fillMaxSize(),
                             arcGISMap = remember {
                                 ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
-                                    initialViewpoint = viewModel.viewpointForMapView.value
+                                    initialViewpoint = viewModel.viewpointForMapView
                                 }
                             },
                             onViewpointChangedForCenterAndScale = {
-                                viewModel.viewpointForMapView.value = it
+                                viewModel.viewpointForMapView = it
                             },
                             onVisibleAreaChanged = {
                                 visibleArea.value = it
                             }
                         )
                         OverviewMap(
-                            viewpoint = viewModel.viewpointForMapView.value,
+                            viewpoint = viewModel.viewpointForMapView,
                             visibleArea = visibleArea.value,
                             modifier = Modifier
                                 .size(250.dp, 200.dp)
@@ -114,15 +114,15 @@ fun MainScreen() {
                             modifier = Modifier.fillMaxSize(),
                             arcGISScene = remember {
                                 ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
-                                    initialViewpoint = viewModel.viewpointForSceneView.value
+                                    initialViewpoint = viewModel.viewpointForSceneView
                                 }
                             },
                             onViewpointChangedForCenterAndScale = {
-                                viewModel.viewpointForSceneView.value = it
+                                viewModel.viewpointForSceneView = it
                             },
                         )
                         OverviewMap(
-                            viewpoint = viewModel.viewpointForSceneView.value,
+                            viewpoint = viewModel.viewpointForSceneView,
                             modifier = Modifier
                                 .size(250.dp, 200.dp)
                                 .padding(20.dp)
