@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,8 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,10 +75,9 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
-import com.arcgismaps.mapping.symbology.Symbol
-import com.arcgismaps.mapping.symbology.SymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
@@ -93,10 +89,21 @@ import com.arcgismaps.toolkit.arworldscaleapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
+val graphicSymbol = SimpleMarkerSceneSymbol(
+    style = SimpleMarkerSceneSymbolStyle.Cone,
+    color = Color.red,
+    height = 0.5,
+    width = 0.5,
+    depth = 0.5,
+    anchorPosition = SceneSymbolAnchorPosition.Bottom
+).apply {
+    // The bottom of the cone is placed at the point tapped by the user
+    this.pitch = 180f
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val treeSymbol = rememberTreeSymbol()
     val arcGISScene = remember {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
@@ -253,12 +260,15 @@ fun MainScreen() {
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
-                                graphicsOverlays.first().graphics.add(
-                                    Graphic(
-                                        point,
-                                        treeSymbol.value
+                                graphicsOverlays.first().graphics.apply {
+                                    clear()
+                                    add(
+                                        Graphic(
+                                            point,
+                                            graphicSymbol
+                                        )
                                     )
-                                )
+                                }
                             }
                     },
                     graphicsOverlays = graphicsOverlays
@@ -383,36 +393,6 @@ private fun TextWithScrim(text: String) {
     ) {
         Text(text = text)
     }
-}
-
-/**
- * Creates and remembers a [Symbol] for a tree.
- *
- * Note the symbol is pulled from an online style, and a simple cylinder is used as a fallback.
- *
- * @since 200.7.0
- */
-@Composable
-fun rememberTreeSymbol(): State<Symbol> {
-    val treeSymbol = remember { mutableStateOf<Symbol>(
-        SimpleMarkerSceneSymbol(
-            SimpleMarkerSceneSymbolStyle.Cylinder,
-            Color.green,
-            height = 1.7910805414617064,
-            width = 0.8883103942871093,
-            depth = 0.909887924194336
-        )
-    ) }
-    LaunchedEffect(Unit) {
-        with(SymbolStyle.createWithStyleNameAndPortal("EsriRealisticStreetSceneStyle")) {
-            getSymbol(listOf("Planter_Tapered")).onSuccess {
-                treeSymbol.value = it
-            }.onFailure { error ->
-                Log.e("MainScreen", "Failed to initialize symbol: $error")
-            }
-        }
-    }
-    return treeSymbol
 }
 
 /**
