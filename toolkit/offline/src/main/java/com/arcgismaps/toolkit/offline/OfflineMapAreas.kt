@@ -61,13 +61,6 @@ public fun OfflineMapAreas(
     offlineMapState: OfflineMapState,
     modifier: Modifier = Modifier
 ) {
-    RequestNotificationPermission(
-        onResult = { isGranted ->
-            if (!isGranted) {
-                Log.e("OfflineMapAreas", "Notification permission request was denied.")
-            }
-        })
-
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
@@ -126,46 +119,5 @@ private fun NonRecoveredErrorIndicator(errorMessage: String) {
             text = errorMessage,
             color = MaterialTheme.colorScheme.error
         )
-    }
-}
-
-
-@Composable
-private fun RequestNotificationPermission(
-    onResult: (granted: Boolean) -> Unit
-) {
-    // Explicit notification permissions not required for versions < 33
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        return onResult(true)
-    }
-
-    // Use the context to check for permissions
-    val context = LocalContext.current
-
-    // Track current permission state
-    var hasPermission by remember {
-        mutableStateOf(
-            value = ContextCompat.checkSelfPermission(/* context = */ context,/* permission = */
-                POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    // If permission is already granted
-    if (hasPermission) {
-        return onResult(true)
-    }
-
-    // Launcher for the permission dialog
-    val launcher = rememberLauncherForActivityResult(RequestPermission()) { granted ->
-        hasPermission = granted
-        onResult(granted)
-    }
-
-    // If permissions is not already granted, show dialog to grant request
-    LaunchedEffect(hasPermission) {
-        if (!hasPermission) {
-            launcher.launch(POST_NOTIFICATIONS)
-        }
     }
 }

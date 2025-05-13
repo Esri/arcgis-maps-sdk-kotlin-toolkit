@@ -18,9 +18,15 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp
 
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +34,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.MainScreen
@@ -41,6 +54,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             MicroAppTheme {
                 OfflineMapAreasApp()
+                RequestNotificationPermission(
+                    onResult = { isGranted ->
+                        if (!isGranted) {
+                            Log.e("OfflineMapAreas", "Notification permission request was denied.")
+                        }
+                    })
             }
         }
     }
@@ -57,4 +76,44 @@ fun OfflineMapAreasApp() {
         }
     }
 
+}
+
+@Composable
+private fun RequestNotificationPermission(
+    onResult: (granted: Boolean) -> Unit
+) {
+    // Explicit notification permissions not required for versions < 33
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        return onResult(true)
+    }
+
+    // Use the context to check for permissions
+    val context = LocalContext.current
+
+    // Track current permission state
+    var hasPermission by remember {
+        mutableStateOf(
+            value = ContextCompat.checkSelfPermission(/* context = */ context,/* permission = */
+                POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // If permission is already granted
+    if (hasPermission) {
+        return onResult(true)
+    }
+
+    // Launcher for the permission dialog
+    val launcher = rememberLauncherForActivityResult(RequestPermission()) { granted ->
+        hasPermission = granted
+        onResult(granted)
+    }
+
+    // If permissions is not already granted, show dialog to grant request
+    LaunchedEffect(hasPermission) {
+        if (!hasPermission) {
+            launcher.launch(POST_NOTIFICATIONS)
+        }
+    }
 }
