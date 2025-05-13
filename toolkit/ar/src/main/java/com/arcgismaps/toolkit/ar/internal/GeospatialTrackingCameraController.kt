@@ -165,9 +165,20 @@ internal class GeospatialTrackingCameraController(
      * @since 200.7.0
      */
     private fun checkForEarthStateErrors(earth: Earth, hasSetOriginCamera: Boolean) {
+        if (earth.earthState != EarthState.ENABLED && error != null) {
+            // if we are in an error state and the earth state is not enabled,
+            // then don't do anything.
+            // This prevents us from changing an error that might already exist and propagating that
+            // to the user, but it's probably better than propagating a new error every frame even
+            // if it hasn't changed.
+            return
+        }
         when (earth.earthState) {
             EarthState.ENABLED -> {
-                onError(null, hasSetOriginCamera)
+                if (error != null) {
+                    onError(null, hasSetOriginCamera)
+                    error = null
+                }
             }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
                 error = IllegalStateException(
