@@ -44,8 +44,9 @@ import java.io.File
 internal class OfflineJobWorker(
     private val context: Context,
     params: WorkerParameters
-) :
-    CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params) {
+
+    private lateinit var downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob
 
     // notificationId passed by the activity
     private val notificationId by lazy {
@@ -93,7 +94,7 @@ internal class OfflineJobWorker(
             return Result.failure()
         }
         // create the DownloadPreplannedOfflineMapJob from the json file
-        val downloadPreplannedOfflineMapJob = DownloadPreplannedOfflineMapJob.fromJsonOrNull(
+        downloadPreplannedOfflineMapJob = DownloadPreplannedOfflineMapJob.fromJsonOrNull(
             json = offlineJobJsonFile.readText()
         ) ?: return Result.failure() // return failure if the created job is null
 
