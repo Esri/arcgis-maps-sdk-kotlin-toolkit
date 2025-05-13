@@ -133,6 +133,7 @@ public fun OverviewMap(
  * [MapView] the symbol should be suitable for a polygon geometry, and when the main view is a
  * [SceneView] the symbol should be suitable for a point geometry.
  * @param scaleFactor the scale factor applied to the viewpoint
+ *
  * @since 200.8.0
  */
 @Composable
@@ -190,6 +191,15 @@ private fun OverviewMapImpl(
     }
 }
 
+/**
+ * Creates a scaled view point by multiplying the input's target scale by the scale factor.
+ *
+ * @param viewpoint the starting viewpoint
+ * @param scaleFactor the scale factor
+ * @return a new viewpoint
+ *
+ * @since 200.8.0
+ */
 internal fun scaledViewpoint(viewpoint: Viewpoint, scaleFactor: Double): Viewpoint {
     return if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
         Viewpoint(
