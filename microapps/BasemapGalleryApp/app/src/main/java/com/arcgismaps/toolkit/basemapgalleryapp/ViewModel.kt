@@ -29,10 +29,10 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.BasemapStylesService
-import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 /**
@@ -62,49 +62,48 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             // get basemap style info from a basemap style service
-            val service = BasemapStylesService()
-            service.load()
-                .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
-                .onSuccess {
-                    // for each basemap style info create a gallery item and add it to the list of items
-                    service.info?.stylesInfo?.forEach { basemapStyleInfo ->
-                        val galleryItem = BasemapGalleryItem(basemapStyleInfo)
-                        styleItems.add(galleryItem)
+            async {
+                val service = BasemapStylesService()
+                service.load()
+                    .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
+                    .onSuccess {
+                        // for each basemap style info create a gallery item and add it to the list of items
+                        service.info?.stylesInfo?.forEach { basemapStyleInfo ->
+                            styleItems.add(BasemapGalleryItem(basemapStyleInfo))
+                        }
+                    }
+            }
+
+            // fetch 3D basemaps from a portal
+            val portal = Portal("https://www.arcgis.com")
+            val portal3DBasemapsJob = async {
+                portal.fetch3DBasemaps()
+            }
+
+            // fetch 2D basemaps from the portal
+            val portal2DBasemapsJob = async {
+                portal.fetchDeveloperBasemaps()
+            }
+
+            // for each portal basemap, create a gallery item and add it to the list of items;
+            // add the 3D basemaps first so they'll be at the top of the gallery
+            portal3DBasemapsJob.await()
+                .onFailure { Log.w("BasemapGallery", "Failed to fetch 3D basemaps") }
+                .onSuccess { basemapList ->
+                    basemapList.forEach { basemap ->
+                        basemap.item?.let { item ->
+                            portalItems.add(BasemapGalleryItem(item, true))
+                        }
                     }
                 }
-
-            // get basemap portal items from a portal
-            val portal = Portal("https://www.arcgis.com")
-            portal.load()
-                .onFailure { Log.w("BasemapGallery", "Failed to load ${portal.url}") }
+            portal2DBasemapsJob.await()
+                .onFailure { Log.w("BasemapGallery", "Failed to fetch 2D basemaps") }
                 .onSuccess {
-                    // first get 3D basemaps
-                    portal.fetch3DBasemaps()
-                        .onFailure { Log.w("BasemapGallery", "Failed to fetch 3D basemaps") }
-                        .onSuccess {
-                            it.forEach { basemap ->
-                                basemap.load()
-                                    .onFailure { Log.w("BasemapGallery", "Failed to load basemap") }
-                                    .onSuccess {
-                                        basemap.item?.let { item ->
-                                            val sceneLayers =
-                                                basemap.baseLayers.filterIsInstance<ArcGISSceneLayer>()
-                                            portalItems.add(
-                                                BasemapGalleryItem(item, sceneLayers.isNotEmpty()))
-                                        }
-                                    }
-                            }
+                    it.forEach { basemap ->
+                        basemap.item?.let { item ->
+                            portalItems.add(BasemapGalleryItem(item, false))
                         }
-                    // then get developer basemaps
-                    portal.fetchDeveloperBasemaps()
-                        .onFailure { Log.w("BasemapGallery", "Failed to fetch basemaps") }
-                        .onSuccess {
-                            it.forEach { basemap ->
-                                basemap.item?.let { item ->
-                                    portalItems.add(BasemapGalleryItem(item, false))
-                                }
-                            }
-                        }
+                    }
                 }
         }
     }
