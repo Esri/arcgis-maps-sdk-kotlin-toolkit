@@ -63,6 +63,7 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
+import com.arcgismaps.toolkit.ar.internal.WorldScaleInternalError
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
@@ -366,12 +367,14 @@ internal fun rememberWorldScaleCameraController(
                     calibrationState = calibrationState,
                     clippingDistance = clippingDistance,
                     context = context,
-                    onError = { error, hasSetOriginCamera ->
-                        if (!hasSetOriginCamera && error != null) {
-                            onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(error))
-                        }
-                        else {
-                            onTrackingErrorChanged?.invoke(error)
+                    onError = { internalError ->
+                        when (internalError) {
+                            is WorldScaleInternalError.InitializationError -> {
+                                onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(internalError.cause))
+                            }
+                            is WorldScaleInternalError.TrackingError -> {
+                                onTrackingErrorChanged?.invoke(internalError.cause)
+                            }
                         }
                     }
                 )
@@ -403,10 +406,6 @@ internal fun rememberWorldScaleCameraController(
     return rememberUpdatedState(worldScaleCameraController)
 }
 
-@Deprecated(
-    "Deprecation added for backwards compatibility. Use WorldScaleSceneView function with onTrackingErrorChanged instead.",
-    level = DeprecationLevel.HIDDEN
-)
 /**
  * A scene view that provides a world-scale augmented reality experience.
  *
@@ -422,9 +421,6 @@ internal fun rememberWorldScaleCameraController(
  * means that no data will be clipped.
  * @param onInitializationStatusChanged lambda invoked when the initialization status
  * of this WorldScaleSceneView changes.
- * @param onTrackingErrorChanged lambda invoked when a tracking error occurs. This will be called
- * with a null error when the tracking error is resolved.  Tracking errors may occur after the WorldScaleSceneView
- * has been initialized and are transient in nature.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
  * viewpoint type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
@@ -472,6 +468,10 @@ internal fun rememberWorldScaleCameraController(
  *
  * @since 200.7.0
  */
+@Deprecated(
+    "Deprecation added for backwards compatibility. Use WorldScaleSceneView function with onTrackingErrorChanged instead.",
+    level = DeprecationLevel.HIDDEN
+)
 @Composable
 public fun WorldScaleSceneView(
     arcGISScene: ArcGISScene,
