@@ -46,7 +46,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -166,27 +165,26 @@ private class AuthenticatorStateImpl(
     }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
-        return oAuthUserConfiguration?.let { oAuthUserConfiguration ->
-            if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
-                val oAuthUserCredential =
-                    oAuthUserConfiguration.handleOAuthChallenge {
-                        // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
-                        // when this value changes.
-                        _pendingOAuthUserSignIn.value = it
-                    }.also {
-                        // At this point we have suspended until the OAuth workflow is complete, so
-                        // we can get rid of the pending sign in. Composables observing this can know
-                        // to remove the OAuth prompt when this value changes.
-                        _pendingOAuthUserSignIn.value = null
-                    }.getOrThrow()
+        val oAuthUserConfiguration = oAuthUserConfiguration
+        return if (oAuthUserConfiguration != null && oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
+            val oAuthUserCredential =
+                oAuthUserConfiguration.handleOAuthChallenge {
+                    // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
+                    // when this value changes.
+                    _pendingOAuthUserSignIn.value = it
+                }.also {
+                    // At this point we have suspended until the OAuth workflow is complete, so
+                    // we can get rid of the pending sign in. Composables observing this can know
+                    // to remove the OAuth prompt when this value changes.
+                    _pendingOAuthUserSignIn.value = null
+                }.getOrThrow()
 
-                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
-                    oAuthUserCredential
-                )
-            } else {
-                handleArcGISTokenChallenge(challenge)
-            }
-        } ?: handleArcGISTokenChallenge(challenge)
+            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
+                oAuthUserCredential
+            )
+        } else {
+            handleArcGISTokenChallenge(challenge)
+        }
     }
 
     /**
@@ -204,7 +202,7 @@ private class AuthenticatorStateImpl(
         val maxRetryCount = 5
         var error: Throwable? = null
         repeat(maxRetryCount) {
-            val credential = awaitUsernamePassword(challenge.requestUrl).firstOrNull()
+            val credential = awaitUsernamePassword(challenge.requestUrl, error).firstOrNull()
                 ?: return ArcGISAuthenticationChallengeResponse.Cancel
             TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
                 .onSuccess {
@@ -328,13 +326,15 @@ private class AuthenticatorStateImpl(
      * as a [Flow].
      *
      * @param url the url of the server that issued the challenge.
+     * @param exception the exception that caused the challenge, if any.
      * @return a [Flow] with a [UsernamePassword] provided by the user, or null if the user cancelled.
      * @since 200.2.0
      */
-    private suspend fun awaitUsernamePassword(url: String): Flow<UsernamePassword?> =
+    private suspend fun awaitUsernamePassword(url: String, exception: Throwable? = null): Flow<UsernamePassword?> =
         callbackFlow<UsernamePassword?> {
             _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
                 url = url,
+                cause = exception,
                 onUsernamePasswordReceived = { username, password ->
                     trySendBlocking(UsernamePassword(username, password))
                 },
