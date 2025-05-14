@@ -53,7 +53,7 @@ function convertTemplateApp {
     # replace the string "template" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
     # replace the string "Template" in the contents of any file
-    find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1
+    find "${appDirName}" -type f -exec perl -i -pe s/TemplateApp/$composableFunctionName/ {} \; > /dev/null 2>&1
 
     popd > /dev/null
 }
@@ -79,7 +79,7 @@ componentName="${name,,}"
 componentName="${componentName%app}"
 composableFunctionName="${name^}"
 appDirName="${composableFunctionName}"
-if [[ ! "${appDirName}" =~ .+App$ ]] ; then
+if [[ ! "${appDirName}" =~ .+[Aa]pp$ ]] ; then
     appDirName="${composableFunctionName}App"
 fi
 
