@@ -31,9 +31,11 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
+import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
@@ -41,8 +43,11 @@ import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.preplanned.Status
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -56,7 +61,7 @@ internal const val uniqueWorkName = "com.arcgismaps.toolkit.offline.Worker"
 internal const val offlineMapFile = "offlineMap"
 internal const val offlineJobJsonFile = "offlineJob.json"
 internal const val notificationChannelName = "Offline Map Job Notifications"
-internal const val notificationTitle = "ArcGIS Maps Sample: Offline Map Download"
+internal const val notificationTitle = "Offline Map Download"
 internal const val notificationAction = "NotificationAction"
 internal const val notificationChannelDescription =
     "Shows notifications for offline map job progress"
@@ -130,40 +135,53 @@ public class OfflineMapState(
         preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
         preplannedMapAreas?.let { preplannedMapArea ->
             mode = OfflineMapMode.Preplanned
-            // TODO: Wire this worker to run on map area selection
-            this.scope = scope
-            this.context = context
             preplannedMapArea
                 .sortedBy { it.portalItem.title }
                 .forEach {
-                val preplannedMapAreaState = PreplannedMapAreaState(it)
-                preplannedMapAreaState.initialize()
-                preplannedMapAreaStates.add(preplannedMapAreaState)
-            }
+                    val preplannedMapAreaState = PreplannedMapAreaState(it)
+                    preplannedMapAreaState.initialize()
+                    preplannedMapAreaStates.add(preplannedMapAreaState)
+                }
         }
+        this.scope = scope
+        this.context = context
 
         _initializationStatus.value = InitializationStatus.Initialized
     }
 
-    internal fun takePreplannedMapOffline() {
+    internal fun takePreplannedMapOffline(selectedPreplannedMapArea: PreplannedMapArea) {
         scope.launch {
-            // Create an OfflineMapJob
-            val downloadPreplannedOfflineMapJob = createOfflineMapJob(portalItem)
-            // Start the OfflineMapJob
-            startOfflineMapJob(downloadPreplannedOfflineMapJob)
-            // Start observing the worker's progress and status
-            observeWorkStatus(workManager, onWorkInfoStateChanged = ::logWorkInfos)
+            val preplannedMapAreaState = preplannedMapAreaStates.find {
+                it.preplannedMapArea == selectedPreplannedMapArea
+            } ?: return@launch
+
+            // TODO: Update the state's status during restoration step
+            preplannedMapAreaState.status = Status.NotLoaded
+
+            if (!preplannedMapAreaState.status.canLoadPreplannedMapArea) return@launch
+
+            preplannedMapAreaState.status = Status.Downloading
+
+            try {
+                val downloadPreplannedOfflineMapJob = createOfflineMapJob(selectedPreplannedMapArea)
+                startOfflineMapJob(downloadPreplannedOfflineMapJob)
+
+                // Start observing WorkManager status once context and scope are available
+                scope.launch {
+                    observeWorkStatus(workManager, onWorkInfoStateChanged = ::logWorkInfos)
+                }
+            } catch (e: Exception) {
+                Log.e("OfflineMapState", "Error taking preplanned map offline", e)
+                preplannedMapAreaState.status = Status.DownloadFailure(e)
+            }
         }
     }
 
     private suspend fun createOfflineMapJob(
-        portalItem: PortalItem
+        preplannedMapArea: PreplannedMapArea
     ): DownloadPreplannedOfflineMapJob {
         // Check and delete if the offline map package file already exists
         File(offlineMapPath).deleteRecursively()
-
-        // TODO: Provide the map area to create the needed map params
-        val preplannedMapArea = preplannedMapAreas?.first()!!
 
         // Create default download parameters from the offline map task
         val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
@@ -182,6 +200,7 @@ public class OfflineMapState(
             parameters = params,
             downloadDirectoryPath = downloadDirectoryPath
         )
+
         return downloadPreplannedOfflineMapJob
     }
 
@@ -202,7 +221,7 @@ public class OfflineMapState(
 
         // create a non-zero notification id for the OfflineJobWorker
         // this id will be used to post or update any progress/status notifications
-        val notificationId = Random.Default.nextInt(1, 100)
+        val notificationId = Random.nextInt(1, 100)
 
         // create a one-time work request with an instance of OfflineJobWorker
         val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
