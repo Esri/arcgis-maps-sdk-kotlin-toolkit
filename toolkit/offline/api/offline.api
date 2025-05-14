@@ -42,6 +42,17 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
 	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/PortalItem;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getPortalItemUrl ()Ljava/lang/String;
+	public final fun getThumbnail ()Landroid/graphics/Bitmap;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun initialize-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setThumbnail (Landroid/graphics/Bitmap;)V
+}
+
 public final class com/arcgismaps/toolkit/offline/OfflineMapState {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;)V

@@ -18,15 +18,38 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.content.Context
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
+import com.arcgismaps.toolkit.offline.R
 
 /**
  * Displays a list of preplanned map areas.
@@ -35,16 +58,88 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 internal fun PreplannedMapAreas(
-    preplannedMapAreas: List<PreplannedMapArea>,
+    preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
-    LazyColumn(modifier = modifier) {
-        items(preplannedMapAreas) { mapArea ->
-            Text(
-                text = mapArea.portalItem.title,
-                modifier = Modifier.padding(8.dp)
-            )
-            HorizontalDivider()
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.map_areas),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(16.dp)
+        )
+        LazyColumn(modifier = Modifier) {
+            items(preplannedMapAreaStates) { state ->
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
+                        Image(
+                            bitmap = it,
+                            contentDescription = stringResource(R.string.thumbnail_description),
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .size(64.dp) // Ensures the image is square
+                                .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = state.preplannedMapArea.portalItem.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(top = 6.dp),
+                            maxLines = 1, // Restrict to one line
+                            overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
+                        )
+                        Text(
+                            text = state.preplannedMapArea.portalItem.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 2, // Restrict to two lines
+                            overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
+                        )
+                        val statusString = getPreplannedMapAreaStatusString(
+                            context = LocalContext.current,
+                            status = state.status
+                        )
+                        Text(
+                            text = statusString,
+                            style =  MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            maxLines = 1, // Restrict to one lines
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier
+                            .padding(top = 16.dp),
+                        onClick = { /* Handle download action here */ }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Download,
+                            contentDescription = stringResource(R.string.download),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                if (state.preplannedMapArea != preplannedMapAreaStates.last().preplannedMapArea) {
+                    HorizontalDivider(modifier = Modifier.padding(start = 80.dp))
+                }
+            }
         }
+    }
+}
+
+private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
+    return when (status) {
+        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
+        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is Status.DownloadFailure -> getString(context, R.string.download_failed)
+        Status.Downloaded -> getString(context, R.string.downloaded)
+        Status.Downloading -> getString(context, R.string.downloading)
+        Status.PackageFailure -> getString(context, R.string.packaging_failed)
+        Status.Packaged -> getString(context, R.string.ready_to_download)
+        Status.Packaging -> getString(context, R.string.packaging)
     }
 }
