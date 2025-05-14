@@ -62,7 +62,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             // get basemap style info from a basemap style service
-            async {
+            launch {
                 val service = BasemapStylesService()
                 service.load()
                     .onFailure { Log.w("BasemapGallery", "Failed to load basemap styles") }
