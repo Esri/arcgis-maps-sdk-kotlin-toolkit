@@ -49,8 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
-import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
-import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.toolkit.offline.R
 
 /**
@@ -61,7 +59,6 @@ import com.arcgismaps.toolkit.offline.R
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
-    onDownloadButtonClicked: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
     Column(
@@ -75,7 +72,7 @@ internal fun PreplannedMapAreas(
         )
         LazyColumn(modifier = Modifier) {
             items(preplannedMapAreaStates) { state ->
-                Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
                         Image(
                             bitmap = it,
@@ -111,13 +108,13 @@ internal fun PreplannedMapAreas(
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Normal
                             ),
-                            maxLines = 1, // Restrict to two lines
+                            maxLines = 1, // Restrict to one lines
                         )
                     }
                     IconButton(
                         modifier = Modifier
                             .padding(top = 16.dp),
-                        onClick = { onDownloadButtonClicked(state) }
+                        onClick = { /* Handle download action here */ }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Download,

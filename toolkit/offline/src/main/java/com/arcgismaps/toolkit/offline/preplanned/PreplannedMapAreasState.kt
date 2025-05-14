@@ -24,7 +24,7 @@ import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 
 /**
- * Represents the state of the preplanned map areas.
+ * Represents the state of a [PreplannedMapArea].
  *
  * @since 200.8.0
  */
@@ -39,11 +39,12 @@ internal class PreplannedMapAreaState(internal val preplannedMapArea: Preplanned
         preplannedMapArea.load()
             .onSuccess {
                 status = try {
-                    // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
-                    // that have incomplete metadata.
-                    // If the area loads, then you know for certain the status is complete.
                     Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
                 } catch (illegalStateException: IllegalStateException) {
+                    // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
+                    // that have incomplete metadata. We throw an illegalStateException when Package
+                    // Status is unknown. We can safely assume that the preplanned map area is packaged.
+                    // If the area loads, then we know for certain the status is complete.
                     Status.Packaged
                 }
             preplannedMapArea.portalItem.thumbnail?.load()
