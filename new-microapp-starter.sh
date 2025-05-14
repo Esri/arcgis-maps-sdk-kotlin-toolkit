@@ -52,7 +52,7 @@ function convertTemplateApp {
     find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
     # replace the string "template" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
-    # replace the string "Template" in the contents of any file
+    # replace the string "TemplateApp" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/TemplateApp/$composableFunctionName/ {} \; > /dev/null 2>&1
 
     popd > /dev/null
