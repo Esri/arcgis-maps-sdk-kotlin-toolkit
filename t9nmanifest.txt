@@ -4,5 +4,4 @@ toolkit/indoors/src/main/res/values/strings.xml
 toolkit/featureforms/src/main/res/values/strings.xml
 toolkit/popup/src/main/res/values/strings.xml
 toolkit/utilitynetworks/src/main/res/values/strings.xml
-toolkit/legend/src/main/res/values/strings.xml
 toolkit/offline/src/main/res/values/strings.xml

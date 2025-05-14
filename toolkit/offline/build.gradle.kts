@@ -61,6 +61,9 @@ android {
             }
         }
     }
+    lint {
+        disable += "MissingTranslation"
+    }
 
     /**
      * Configures the test report for connected (instrumented) tests to be copied to a central
@@ -78,7 +81,7 @@ apiValidation {
     // TODO: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
     // compose compiler generates public singletons for internal compose functions.
     // this may be resolved in the compose compiler.
-     val composableSingletons = listOf("" +
+     val composableSingletons = listOf(
              "com.arcgismaps.toolkit.offline.preplanned.ComposableSingletons\$PreplannedMapAreasKt"
      )
      ignoredClasses.addAll(composableSingletons)

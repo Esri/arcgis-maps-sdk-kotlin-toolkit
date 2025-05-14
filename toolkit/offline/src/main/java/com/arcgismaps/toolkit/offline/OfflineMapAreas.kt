@@ -55,7 +55,6 @@ public fun OfflineMapAreas(
     }
 
     Surface(
-        color = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
         when (initializationStatus) {
@@ -80,7 +79,7 @@ public fun OfflineMapAreas(
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
                     PreplannedMapAreas(
                         preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                        modifier = modifier
+                        modifier = Modifier
                     )
                 }
             }
