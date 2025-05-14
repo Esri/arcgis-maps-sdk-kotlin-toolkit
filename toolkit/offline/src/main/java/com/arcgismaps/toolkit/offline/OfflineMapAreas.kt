@@ -84,7 +84,10 @@ public fun OfflineMapAreas(
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
                     PreplannedMapAreas(
                         preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                        modifier = modifier
+                        modifier = modifier,
+                        onDownloadButtonClicked = { selectedPreplannedMapArea ->
+                            offlineMapState.takePreplannedMapOffline(selectedPreplannedMapArea.preplannedMapArea)
+                        }
                     )
                 }
             }
