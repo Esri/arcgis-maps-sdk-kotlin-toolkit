@@ -39,6 +39,8 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
+import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
@@ -75,6 +77,8 @@ public class OfflineMapState(
     private lateinit var portalItemId: String
 
     internal var preplannedMapAreas: List<PreplannedMapArea>? = null
+
+    internal var preplannedMapAreaStates: MutableList<PreplannedMapAreaState> = mutableListOf()
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
@@ -124,11 +128,18 @@ public class OfflineMapState(
             throw it
         }
         preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
-        if (preplannedMapAreas != null) {
+        preplannedMapAreas?.let { preplannedMapArea ->
             mode = OfflineMapMode.Preplanned
             // TODO: Wire this worker to run on map area selection
             this.scope = scope
             this.context = context
+            preplannedMapArea
+                .sortedBy { it.portalItem.title }
+                .forEach {
+                val preplannedMapAreaState = PreplannedMapAreaState(it)
+                preplannedMapAreaState.initialize()
+                preplannedMapAreaStates.add(preplannedMapAreaState)
+            }
         }
 
         _initializationStatus.value = InitializationStatus.Initialized

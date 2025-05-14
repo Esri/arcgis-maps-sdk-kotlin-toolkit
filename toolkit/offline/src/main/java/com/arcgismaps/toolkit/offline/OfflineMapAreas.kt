@@ -26,6 +26,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,37 +71,34 @@ public fun OfflineMapAreas(
     }
 
     Surface(
-        color = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            when (initializationStatus) {
-                is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+        when (initializationStatus) {
+            is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
                 }
+            }
 
-                is InitializationStatus.FailedToInitialize -> {
-                    (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
-                        NonRecoveredErrorIndicator(
-                            it
-                        )
-                    }
+            is InitializationStatus.FailedToInitialize -> {
+                (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
+                    NonRecoveredErrorIndicator(
+                        it
+                    )
                 }
+            }
 
-                else -> {
-                    if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                        offlineMapState.preplannedMapAreas?.let {
-                            PreplannedMapAreas(
-                                preplannedMapAreas = it,
-                                modifier = modifier.clickable {
-                                    offlineMapState.takePreplannedMapOffline()
-                                }
-                            )
+            else -> {
+                if (offlineMapState.mode == OfflineMapMode.Preplanned) {
+                    PreplannedMapAreas(
+                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
+                        modifier = Modifier.clickable {
+                            offlineMapState.takePreplannedMapOffline()
                         }
-                    }
+                    )
                 }
             }
         }

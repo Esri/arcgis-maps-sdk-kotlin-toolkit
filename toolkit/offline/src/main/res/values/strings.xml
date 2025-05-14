@@ -15,5 +15,16 @@
   -->
 
 <resources>
+    <string name="map_areas">Map Areas</string>
+    <string name="thumbnail_description">PortalItem Thumbnail</string>
+    <string name="download">Download</string>
     <string name="error">Error</string>
+    <string name="loading">Loading</string>
+    <string name="loading_failed">Loading failed</string>
+    <string name="ready_to_download">Ready to download</string>
+    <string name="packaging">Packaging</string>
+    <string name="packaging_failed">Packaging failed</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading</string>
+    <string name="download_failed">Download Failed</string>
 </resources>
