@@ -32,9 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -91,9 +89,8 @@ public fun OfflineMapAreas(
 
             else -> {
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                    val preplannedAreas = remember { offlineMapState.preplannedMapAreaStates.toMutableStateList() }
                     PreplannedMapAreas(
-                        preplannedMapAreaStates = preplannedAreas,
+                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
                         modifier = modifier,
                         onDownloadButtonClicked = { preplannedMapAreaState ->
                             if (preplannedMapAreaState.status.allowsDownload) {
