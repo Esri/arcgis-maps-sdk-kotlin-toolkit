@@ -52,7 +52,7 @@ internal class GeospatialTrackingCameraController(
     private val calibrationState: CalibrationState,
     clippingDistance: Double?,
     context: Context,
-    private val onError: (WorldScaleInternalError) -> Unit
+    private val onError: (ArErrorType) -> Unit
 ) : WorldScaleCameraController {
     override val cameraController = TransformationMatrixCameraController().apply {
         this.clippingDistance = clippingDistance
@@ -177,7 +177,7 @@ internal class GeospatialTrackingCameraController(
             EarthState.ENABLED -> {
                 if (error != null) {
                     error = null
-                    onError(WorldScaleInternalError.TrackingError(null))
+                    onError(ArErrorType.TrackingError(null))
                 }
             }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
@@ -185,9 +185,9 @@ internal class GeospatialTrackingCameraController(
                     "WorldScaleSceneView has encountered an internal error. The app should not attempt to recover from this error. Please see the Android logs for additional information."
                 ).also {
                     if (hasSetOriginCamera) {
-                        onError(WorldScaleInternalError.TrackingError(it))
+                        onError(ArErrorType.TrackingError(it))
                     } else {
-                        onError(WorldScaleInternalError.InitializationError(it))
+                        onError(ArErrorType.InitializationError(it))
                     }
                 }
             }
@@ -195,9 +195,9 @@ internal class GeospatialTrackingCameraController(
             EarthState.ERROR_NOT_AUTHORIZED -> {
                 error = ArCoreAuthorizationException().also {
                     if (hasSetOriginCamera) {
-                        onError(WorldScaleInternalError.TrackingError(it))
+                        onError(ArErrorType.TrackingError(it))
                     } else {
-                        onError(WorldScaleInternalError.InitializationError(it))
+                        onError(ArErrorType.InitializationError(it))
                     }
                 }
             }
@@ -205,9 +205,9 @@ internal class GeospatialTrackingCameraController(
             EarthState.ERROR_RESOURCE_EXHAUSTED -> {
                 error = ArCoreResourceExhaustedException().also {
                     if (hasSetOriginCamera) {
-                        onError(WorldScaleInternalError.TrackingError(it))
+                        onError(ArErrorType.TrackingError(it))
                     } else {
-                        onError(WorldScaleInternalError.InitializationError(it))
+                        onError(ArErrorType.InitializationError(it))
                     }
                 }
             }
@@ -217,9 +217,9 @@ internal class GeospatialTrackingCameraController(
                     "The ARCore APK is older than the current supported version."
                 ).also {
                     if (hasSetOriginCamera) {
-                        onError(WorldScaleInternalError.TrackingError(it))
+                        onError(ArErrorType.TrackingError(it))
                     } else {
-                        onError(WorldScaleInternalError.InitializationError(it))
+                        onError(ArErrorType.InitializationError(it))
                     }
                 }
             }

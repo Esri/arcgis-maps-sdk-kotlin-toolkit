@@ -63,7 +63,7 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
-import com.arcgismaps.toolkit.ar.internal.WorldScaleInternalError
+import com.arcgismaps.toolkit.ar.internal.ArErrorType
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
@@ -369,10 +369,10 @@ internal fun rememberWorldScaleCameraController(
                     context = context,
                     onError = { internalError ->
                         when (internalError) {
-                            is WorldScaleInternalError.InitializationError -> {
+                            is ArErrorType.InitializationError -> {
                                 onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(internalError.cause))
                             }
-                            is WorldScaleInternalError.TrackingError -> {
+                            is ArErrorType.TrackingError -> {
                                 onTrackingErrorChanged?.invoke(internalError.cause)
                             }
                         }

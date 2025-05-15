@@ -18,26 +18,24 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
-import com.arcgismaps.toolkit.ar.WorldScaleSceneView
-
 /**
- * Represents errors that can occur during the initialization or tracking of the [WorldScaleSceneView].
+ * Represents errors that can occur during the initialization or tracking of the an AR component.
  *
  * @since 200.8.0
  */
-internal sealed class WorldScaleInternalError {
+internal sealed class ArErrorType {
     /**
-     * Represents an error that occurs when the [WorldScaleSceneView] is not initialized.
+     * Represents an error that occurs when the component is not initialized.
      *
      * @since 200.8.0
      */
-    data class InitializationError(val cause: Throwable) : WorldScaleInternalError()
+    data class InitializationError(val cause: Throwable) : ArErrorType()
 
     /**
-     * Represents a transient error that occurs when the [WorldScaleSceneView] is initialized and
-     * running. If [cause] is null, then there is no error.
+     * Represents a transient error that occurs when the component is initialized and running.
+     * If [cause] is null, then there is no error.
      *
      * @since 200.8.0
      */
-    data class TrackingError(val cause: Throwable?) : WorldScaleInternalError()
+    data class TrackingError(val cause: Throwable?) : ArErrorType()
 }
