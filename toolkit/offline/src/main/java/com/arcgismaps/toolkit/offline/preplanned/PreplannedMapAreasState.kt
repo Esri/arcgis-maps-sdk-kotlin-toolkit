@@ -19,6 +19,9 @@
 package com.arcgismaps.toolkit.offline.preplanned
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -54,7 +57,7 @@ internal class PreplannedMapAreaState(
     private val workManager : WorkManager
 ) {
     // The status of the preplanned map area.
-    var status: Status = Status.NotLoaded
+    var status by mutableStateOf<Status>(Status.NotLoaded)
 
     private var preplannedMapAreaTitle = ""
 
