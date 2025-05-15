@@ -72,7 +72,7 @@ if [ "$1" == "-h" ]; then
 fi
 
 # prompt for component name
-echo "Please enter the name of the new microapp in CamelCase without spaces."
+echo "Please enter the name of the new microapp in CamelCase without spaces. The name should end with App e.g. CompassApp"
 read name
 
 componentName="${name,,}"
