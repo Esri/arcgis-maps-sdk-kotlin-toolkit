@@ -37,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,7 +59,8 @@ import com.arcgismaps.toolkit.offline.R
  */
 @Composable
 internal fun PreplannedMapAreas(
-    preplannedMapAreaStates: List<PreplannedMapAreaState>,
+    preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState>,
+    onDownloadButtonClicked: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
     Column(
@@ -114,7 +116,7 @@ internal fun PreplannedMapAreas(
                     IconButton(
                         modifier = Modifier
                             .padding(top = 16.dp),
-                        onClick = { /* Handle download action here */ }
+                        onClick = { onDownloadButtonClicked(state) }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Download,

@@ -27,6 +27,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
+import com.arcgismaps.toolkit.offline.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.jobParameter
 import com.arcgismaps.toolkit.offline.notificationIdParameter
 import kotlinx.coroutines.CancellationException
@@ -53,9 +54,17 @@ internal class OfflineJobWorker(
         inputData.getInt(key = notificationIdParameter, defaultValue = 1)
     }
 
+    private val jobAreaTitle by lazy {
+        inputData.getString(key = jobAreaTitleKey) ?: "Unknown area title"
+    }
+
     // WorkerNotification instance
     private val workerNotification by lazy {
-        WorkerNotification(applicationContext = context, notificationId = notificationId)
+        WorkerNotification(
+            applicationContext = context,
+            notificationId = notificationId,
+            jobAreaTitle = jobAreaTitle
+        )
     }
 
     // must override for api versions < 31 for backwards compatibility
@@ -138,7 +147,7 @@ internal class OfflineJobWorker(
             // handle and return the result
             if (jobResult.isSuccess) {
                 // if the job is successful show a final status notification
-                workerNotification.showStatusNotification("Completed")
+                workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
                 Result.success()
             } else {
                 // if the job has failed show a final status notification
@@ -149,7 +158,7 @@ internal class OfflineJobWorker(
                     "Offline map job failed internally: $errorMessage",
                     jobResult.exceptionOrNull()
                 )
-                workerNotification.showStatusNotification("Failed: $errorMessage")
+                workerNotification.showStatusNotification("The download for $jobAreaTitle failed: $errorMessage")
                 Result.failure(workDataOf("Error" to errorMessage))
             }
         } catch (cancellationException: CancellationException) {
@@ -160,7 +169,7 @@ internal class OfflineJobWorker(
                 "Offline map job explicitly cancelled.",
                 cancellationException
             )
-            workerNotification.showStatusNotification("Cancelled")
+            workerNotification.showStatusNotification("The download for $jobAreaTitle was cancelled")
             Result.failure(workDataOf("Error" to "Job cancelled by user or system"))
         } catch (exception: Exception) {
             // capture and log if any other exception occurs
@@ -170,7 +179,7 @@ internal class OfflineJobWorker(
                 exception
             )
             // post a job failed notification
-            workerNotification.showStatusNotification("Failed: ${exception.message}")
+            workerNotification.showStatusNotification("The download for $jobAreaTitle failed: ${exception.message}")
             // return a failure result
             Result.failure(workDataOf("Error" to exception.message))
 

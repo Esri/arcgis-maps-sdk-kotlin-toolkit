@@ -38,7 +38,8 @@ import com.arcgismaps.toolkit.offline.notificationTitle
  */
 internal class WorkerNotification(
     private val applicationContext: Context,
-    private val notificationId: Int
+    private val notificationId: Int,
+    private val jobAreaTitle: String
 ) {
 
     // unique channel id for the NotificationChannel
@@ -92,8 +93,9 @@ internal class WorkerNotification(
         // use the default notification builder and set the progress to 0
         return getDefaultNotificationBuilder(
             setOngoing = true,
-            contentText = "Download in progress: $progress%"
-        ).setProgress(100, progress, false)
+            contentText = "Download $jobAreaTitle in progress: $progress%"
+        ).setSmallIcon(android.R.drawable.stat_sys_download)
+            .setProgress(100, progress, false)
             // add a cancellation action
             .addAction(0, "Cancel", cancelActionIntent)
             .build()
@@ -109,7 +111,7 @@ internal class WorkerNotification(
         val notification = getDefaultNotificationBuilder(
             setOngoing = false,
             contentText = message
-        ).build().apply {
+        ).setSmallIcon(android.R.drawable.stat_sys_download_done).build().apply {
             // this flag dismisses the notification on opening
             flags = Notification.FLAG_AUTO_CANCEL
         }
@@ -154,7 +156,6 @@ internal class WorkerNotification(
             .setContentTitle(notificationTitle)
             // sets the content that is displayed on expanding the notification
             .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
             // sets it to only show the notification alert once, in case of progress
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)

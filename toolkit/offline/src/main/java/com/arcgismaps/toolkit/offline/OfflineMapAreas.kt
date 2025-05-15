@@ -18,39 +18,31 @@
 
 package com.arcgismaps.toolkit.offline
 
-import android.Manifest.permission.POST_NOTIFICATIONS
-import android.content.pm.PackageManager
-import android.os.Build
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.work.WorkManager
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
+import kotlinx.coroutines.launch
 
 /**
  * Take a web map offline by downloading map areas.
@@ -67,7 +59,13 @@ public fun OfflineMapAreas(
     val initializationStatus by offlineMapState.initializationStatus
 
     LaunchedEffect(offlineMapState) {
-        offlineMapState.initialize(scope, context)
+        offlineMapState.apply {
+            // TODO: Use singleton/centralized manager
+            workManager = WorkManager.getInstance(context)
+            getExternalFilesDirPath = context.getExternalFilesDir(null)?.path.toString()
+
+        }
+        offlineMapState.initialize()
     }
 
     Surface(
@@ -93,10 +91,16 @@ public fun OfflineMapAreas(
 
             else -> {
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
+                    val preplannedAreas = remember { offlineMapState.preplannedMapAreaStates.toMutableStateList() }
                     PreplannedMapAreas(
-                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                        modifier = Modifier.clickable {
-                            offlineMapState.takePreplannedMapOffline()
+                        preplannedMapAreaStates = preplannedAreas,
+                        modifier = modifier,
+                        onDownloadButtonClicked = { preplannedMapAreaState ->
+                            if (preplannedMapAreaState.status.allowsDownload) {
+                                scope.launch {
+                                    preplannedMapAreaState.downloadPreplannedMapArea()
+                                }
+                            }
                         }
                     )
                 }
