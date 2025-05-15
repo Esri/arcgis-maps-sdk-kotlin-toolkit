@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 internal suspend fun observeStatusForPreplannedWork(
     workManager: WorkManager,
     onWorkInfoStateChanged: (List<WorkInfo>) -> Unit,
+    // TODO, Provide callback lambdas to update status on PreplannedMapAreaState
     preplannedMapAreaState: PreplannedMapAreaState
 ) {
     coroutineScope {

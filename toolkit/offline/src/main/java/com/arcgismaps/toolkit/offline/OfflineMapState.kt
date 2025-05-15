@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.offline
 
-import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -27,15 +26,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.work.WorkManager
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.portal.Portal
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
-internal val portal = Portal("https://www.arcgis.com")
-internal val portalItem = PortalItem(portal, "acc027394bc84c2fb04d1ed317aac674")
 internal const val notificationIdParameter = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jobParameter = "JsonJobPath"

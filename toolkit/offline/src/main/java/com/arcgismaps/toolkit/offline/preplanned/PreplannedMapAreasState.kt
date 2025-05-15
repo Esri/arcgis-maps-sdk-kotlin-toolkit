@@ -34,7 +34,6 @@ import com.arcgismaps.toolkit.offline.jobParameter
 import com.arcgismaps.toolkit.offline.notificationIdParameter
 import com.arcgismaps.toolkit.offline.offlineJobJsonFile
 import com.arcgismaps.toolkit.offline.offlineMapFile
-import com.arcgismaps.toolkit.offline.portalItem
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.uniqueWorkName
 import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
@@ -88,8 +87,10 @@ internal class PreplannedMapAreaState(
             }
     }
 
-    internal suspend fun takePreplannedMapOffline() {
+    internal suspend fun downloadPreplannedMap() {
         try {
+            // Set the downloading status
+            status = Status.Downloading
             startOfflineMapJob(
                 downloadPreplannedOfflineMapJob = createOfflineMapJob(
                     preplannedMapArea = preplannedMapArea
@@ -101,6 +102,7 @@ internal class PreplannedMapAreaState(
                 onWorkInfoStateChanged = ::logWorkInfos,
                 preplannedMapAreaState = this
             )
+
         } catch (e: Exception) {
             Log.e("OfflineMapState", "Error taking preplanned map offline", e)
             status = Status.DownloadFailure(e)
@@ -123,7 +125,7 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val downloadDirectoryPath = offlineMapPath + File.separator + portalItem.itemId
+        val downloadDirectoryPath = offlineMapPath + File.separator + preplannedMapArea.portalItem
         File(downloadDirectoryPath).mkdirs()
         // Create a job to download the preplanned offline map
         val downloadPreplannedOfflineMapJob = offlineMapTask.createDownloadPreplannedOfflineMapJob(
@@ -149,9 +151,6 @@ internal class PreplannedMapAreaState(
         // this id will be used to post or update any progress/status notifications
         val notificationId = Random.nextInt(1, 100)
 
-        // title of the selected area to download
-        val jobAreaTitle =
-            downloadPreplannedOfflineMapJob.parameters.preplannedMapArea?.portalItem?.title
 
         // create a one-time work request with an instance of OfflineJobWorker
         val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
@@ -163,7 +162,7 @@ internal class PreplannedMapAreaState(
                 workDataOf(
                     notificationIdParameter to notificationId,
                     jobParameter to offlineJobJsonFile.absolutePath,
-                    jobAreaTitleKey to jobAreaTitle
+                    jobAreaTitleKey to preplannedMapAreaTitle
                 )
             ).build()
 

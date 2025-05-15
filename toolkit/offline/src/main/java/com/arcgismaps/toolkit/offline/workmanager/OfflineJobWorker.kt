@@ -147,7 +147,7 @@ internal class OfflineJobWorker(
             // handle and return the result
             if (jobResult.isSuccess) {
                 // if the job is successful show a final status notification
-                workerNotification.showStatusNotification("The job for $jobAreaTitle has completed successfully.")
+                workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
                 Result.success()
             } else {
                 // if the job has failed show a final status notification
@@ -158,7 +158,7 @@ internal class OfflineJobWorker(
                     "Offline map job failed internally: $errorMessage",
                     jobResult.exceptionOrNull()
                 )
-                workerNotification.showStatusNotification("The job for $jobAreaTitle failed: $errorMessage")
+                workerNotification.showStatusNotification("The download for $jobAreaTitle failed: $errorMessage")
                 Result.failure(workDataOf("Error" to errorMessage))
             }
         } catch (cancellationException: CancellationException) {
@@ -169,7 +169,7 @@ internal class OfflineJobWorker(
                 "Offline map job explicitly cancelled.",
                 cancellationException
             )
-            workerNotification.showStatusNotification("The job for $jobAreaTitle was cancelled")
+            workerNotification.showStatusNotification("The download for $jobAreaTitle was cancelled")
             Result.failure(workDataOf("Error" to "Job cancelled by user or system"))
         } catch (exception: Exception) {
             // capture and log if any other exception occurs
@@ -179,7 +179,7 @@ internal class OfflineJobWorker(
                 exception
             )
             // post a job failed notification
-            workerNotification.showStatusNotification("The job for $jobAreaTitle failed: ${exception.message}")
+            workerNotification.showStatusNotification("The download for $jobAreaTitle failed: ${exception.message}")
             // return a failure result
             Result.failure(workDataOf("Error" to exception.message))
 
