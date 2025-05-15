@@ -91,7 +91,6 @@ public fun OfflineMapAreas(
 
             else -> {
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-//                    val preplannedAreas = remember { offlineMapState.preplannedMapAreaStates.toMutableStateList() }
                     PreplannedMapAreas(
                         preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
                         modifier = modifier,
