@@ -87,8 +87,8 @@ public fun OverviewMap(
  * Choose this overload if your main view is a [SceneView]. If a non-default symbol is provided the
  * symbol must be suitable for a point geometry such as a [SimpleMarkerSymbol].
  *
- * @param viewpoint the viewpoint of the main view, this should be provided as a
- * [ViewpointType.CenterAndScale]
+ * @param viewpoint the viewpoint of the main view this overview map is for, this should be provided
+ * as a [ViewpointType.CenterAndScale]
  * @param modifier the modifier to apply
  * @param symbol the symbol to apply. Must be suitable for a point geometry.
  * @param scaleFactor the factor to multiply the main view's scale by. The OverviewMap will
@@ -123,8 +123,8 @@ public fun OverviewMap(
 /**
  * Internal implementation of the OverViewMap.
  *
- * @param viewpoint the viewpoint of the main view this overview map is for, this be provided as a
- * [ViewpointType.CenterAndScale]
+ * @param viewpoint the viewpoint of the main view this overview map is for, this should be provided
+ * as a [ViewpointType.CenterAndScale]
  * @param arcGISMap the map to display
  * @param modifier the modifier to apply
  * @param visibleArea the visible area. The visible area is only applicable when the main view is
