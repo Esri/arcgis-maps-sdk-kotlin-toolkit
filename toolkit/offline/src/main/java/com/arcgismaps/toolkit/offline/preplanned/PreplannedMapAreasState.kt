@@ -87,7 +87,7 @@ internal class PreplannedMapAreaState(
             }
     }
 
-    internal suspend fun downloadPreplannedMap() {
+    internal suspend fun downloadPreplannedMapArea() {
         try {
             // Set the downloading status
             status = Status.Downloading

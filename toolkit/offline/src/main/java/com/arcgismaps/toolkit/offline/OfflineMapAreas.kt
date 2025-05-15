@@ -98,7 +98,7 @@ public fun OfflineMapAreas(
                         onDownloadButtonClicked = { preplannedMapAreaState ->
                             if (preplannedMapAreaState.status.allowsDownload) {
                                 scope.launch {
-                                    preplannedMapAreaState.downloadPreplannedMap()
+                                    preplannedMapAreaState.downloadPreplannedMapArea()
                                 }
                             }
                         }
