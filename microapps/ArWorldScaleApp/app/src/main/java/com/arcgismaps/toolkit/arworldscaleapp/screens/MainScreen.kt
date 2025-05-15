@@ -90,6 +90,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
+import androidx.core.content.edit
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -213,8 +214,9 @@ fun MainScreen() {
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
-                        .apply()
+                    sharedPreferences.edit {
+                        putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
+                    }
                     showPrivacyInfo = false
                 }
             )
