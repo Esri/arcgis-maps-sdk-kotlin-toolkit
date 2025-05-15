@@ -77,57 +77,53 @@ fun MainScreen() {
                 )
             }
         }
-        when (tabIndex) {
-            0 -> {
-                Box {
-                    val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
+        if (tabIndex == 0) {
+            Box {
+                val visibleArea: MutableState<Polygon?> = remember { mutableStateOf(null) }
 
-                    MapView(
-                        modifier = Modifier.fillMaxSize(),
-                        arcGISMap = remember {
-                            ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
-                                initialViewpoint = viewModel.viewpointForMapView
-                            }
-                        },
-                        onViewpointChangedForCenterAndScale = {
-                            viewModel.viewpointForMapView = it
-                        },
-                        onVisibleAreaChanged = {
-                            visibleArea.value = it
+                MapView(
+                    modifier = Modifier.fillMaxSize(),
+                    arcGISMap = remember {
+                        ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
+                            initialViewpoint = viewModel.viewpointForMapView
                         }
-                    )
-                    OverviewMap(
-                        viewpoint = viewModel.viewpointForMapView,
-                        visibleArea = visibleArea.value,
-                        modifier = Modifier
-                            .size(250.dp, 200.dp)
-                            .padding(20.dp)
-                            .align(Alignment.TopEnd)
-                    )
-                }
+                    },
+                    onViewpointChangedForCenterAndScale = {
+                        viewModel.viewpointForMapView = it
+                    },
+                    onVisibleAreaChanged = {
+                        visibleArea.value = it
+                    }
+                )
+                OverviewMap(
+                    viewpoint = viewModel.viewpointForMapView,
+                    visibleArea = visibleArea.value,
+                    modifier = Modifier
+                        .size(250.dp, 200.dp)
+                        .padding(20.dp)
+                        .align(Alignment.TopEnd)
+                )
             }
-
-            1 -> {
-                Box {
-                    SceneView(
-                        modifier = Modifier.fillMaxSize(),
-                        arcGISScene = remember {
-                            ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
-                                initialViewpoint = viewModel.viewpointForSceneView
-                            }
-                        },
-                        onViewpointChangedForCenterAndScale = {
-                            viewModel.viewpointForSceneView = it
-                        },
-                    )
-                    OverviewMap(
-                        viewpoint = viewModel.viewpointForSceneView,
-                        modifier = Modifier
-                            .size(250.dp, 200.dp)
-                            .padding(20.dp)
-                            .align(Alignment.TopEnd)
-                    )
-                }
+        } else {
+            Box {
+                SceneView(
+                    modifier = Modifier.fillMaxSize(),
+                    arcGISScene = remember {
+                        ArcGISScene(BasemapStyle.ArcGISDarkGray).apply {
+                            initialViewpoint = viewModel.viewpointForSceneView
+                        }
+                    },
+                    onViewpointChangedForCenterAndScale = {
+                        viewModel.viewpointForSceneView = it
+                    },
+                )
+                OverviewMap(
+                    viewpoint = viewModel.viewpointForSceneView,
+                    modifier = Modifier
+                        .size(250.dp, 200.dp)
+                        .padding(20.dp)
+                        .align(Alignment.TopEnd)
+                )
             }
         }
     }
