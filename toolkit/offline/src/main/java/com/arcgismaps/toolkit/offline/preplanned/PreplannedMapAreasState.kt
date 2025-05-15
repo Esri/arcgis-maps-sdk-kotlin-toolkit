@@ -18,22 +18,56 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.util.Log
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
+import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.jobParameter
+import com.arcgismaps.toolkit.offline.notificationIdParameter
+import com.arcgismaps.toolkit.offline.offlineJobJsonFile
+import com.arcgismaps.toolkit.offline.offlineMapFile
+import com.arcgismaps.toolkit.offline.portalItem
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
+import com.arcgismaps.toolkit.offline.uniqueWorkName
+import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
+import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
+import com.arcgismaps.toolkit.offline.workmanager.observeStatusForPreplannedWork
+import java.io.File
+import kotlin.random.Random
 
 /**
  * Represents the state of a [PreplannedMapArea].
  *
  * @since 200.8.0
  */
-internal class PreplannedMapAreaState(internal val preplannedMapArea: PreplannedMapArea) {
+internal class PreplannedMapAreaState(
+    internal val preplannedMapArea: PreplannedMapArea,
+    private val offlineMapTask: OfflineMapTask,
+    private val getExternalFilesDirPath: String,
+    private val workManager : WorkManager
+) {
     // The status of the preplanned map area.
     var status: Status = Status.NotLoaded
 
-    // The offline map task.
-    var offlineMapTask: OfflineMapTask? = null
+    private var preplannedMapAreaTitle = ""
+
+    // TODO: This path is reset prior to a job, next, define local repository rules for offline map files.
+    private val offlineMapPath by lazy {
+        getExternalFilesDirPath + File.separator + offlineMapFile
+    }
+
+    // create a temporary file path to save the offlineMapJob json file
+    private val offlineJobJsonPath by lazy {
+        getExternalFilesDirPath + File.separator + offlineJobJsonFile
+    }
 
     internal suspend fun initialize() = runCatchingCancellable {
         preplannedMapArea.load()
@@ -47,9 +81,99 @@ internal class PreplannedMapAreaState(internal val preplannedMapArea: Preplanned
                     // If the area loads, then we know for certain the status is complete.
                     Status.Packaged
                 }
-            preplannedMapArea.portalItem.thumbnail?.load()
+                // Load the thumbnail
+                preplannedMapArea.portalItem.thumbnail?.load()
+                // Set preplanned area title
+                preplannedMapAreaTitle = preplannedMapArea.portalItem.title
+            }
+    }
+
+    internal suspend fun takePreplannedMapOffline() {
+        try {
+            startOfflineMapJob(
+                downloadPreplannedOfflineMapJob = createOfflineMapJob(
+                    preplannedMapArea = preplannedMapArea
+                )
+            )
+            // Start observing WorkManager status
+            observeStatusForPreplannedWork(
+                workManager = workManager,
+                onWorkInfoStateChanged = ::logWorkInfos,
+                preplannedMapAreaState = this
+            )
+        } catch (e: Exception) {
+            Log.e("OfflineMapState", "Error taking preplanned map offline", e)
+            status = Status.DownloadFailure(e)
         }
     }
+
+    private suspend fun createOfflineMapJob(
+        preplannedMapArea: PreplannedMapArea
+    ): DownloadPreplannedOfflineMapJob {
+        // Check and delete if the offline map package file already exists
+        File(offlineMapPath).deleteRecursively()
+
+        // Create default download parameters from the offline map task
+        val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
+            preplannedMapArea = preplannedMapArea
+        ).getOrThrow().apply {
+            // Set the update mode to receive no updates
+            updateMode = PreplannedUpdateMode.NoUpdates
+            continueOnErrors = false
+        }
+
+        // Define the path where the map will be saved
+        val downloadDirectoryPath = offlineMapPath + File.separator + portalItem.itemId
+        File(downloadDirectoryPath).mkdirs()
+        // Create a job to download the preplanned offline map
+        val downloadPreplannedOfflineMapJob = offlineMapTask.createDownloadPreplannedOfflineMapJob(
+            parameters = params,
+            downloadDirectoryPath = downloadDirectoryPath
+        )
+
+        return downloadPreplannedOfflineMapJob
+    }
+
+    /**
+     * Starts the [downloadPreplannedOfflineMapJob] using OfflineJobWorker with WorkManager.
+     * The [downloadPreplannedOfflineMapJob] is serialized into a json file and the uri is passed
+     * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
+     */
+    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob) {
+        // create the json file
+        val offlineJobJsonFile = File(offlineJobJsonPath)
+        // serialize the offlineMapJob into the file
+        offlineJobJsonFile.writeText(downloadPreplannedOfflineMapJob.toJson())
+
+        // create a non-zero notification id for the OfflineJobWorker
+        // this id will be used to post or update any progress/status notifications
+        val notificationId = Random.nextInt(1, 100)
+
+        // title of the selected area to download
+        val jobAreaTitle =
+            downloadPreplannedOfflineMapJob.parameters.preplannedMapArea?.portalItem?.title
+
+        // create a one-time work request with an instance of OfflineJobWorker
+        val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
+            // run it as an expedited work
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the input data
+            .setInputData(
+                // add the notificationId and the json file path as a key/value pair
+                workDataOf(
+                    notificationIdParameter to notificationId,
+                    jobParameter to offlineJobJsonFile.absolutePath,
+                    jobAreaTitleKey to jobAreaTitle
+                )
+            ).build()
+
+        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
+        // only one instance of OfflineJobWorker is running at any time
+        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
+        // ones that are active
+        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
+    }
+
 }
 
 internal sealed class Status {
