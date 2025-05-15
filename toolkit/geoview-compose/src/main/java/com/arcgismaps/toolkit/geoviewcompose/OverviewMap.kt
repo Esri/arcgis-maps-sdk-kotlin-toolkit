@@ -101,7 +101,6 @@ public fun OverviewMap(
 public fun OverviewMap(
     viewpoint: Viewpoint?,
     modifier: Modifier = Modifier,
-    scaleFactor: Double = 25.0,
     symbol: Symbol = remember {
         SimpleMarkerSymbol(
             style = SimpleMarkerSymbolStyle.Cross,
@@ -109,6 +108,7 @@ public fun OverviewMap(
             size = 20.0f
         )
     },
+    scaleFactor: Double = 25.0,
     arcGISMap: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }
 ) {
     OverviewMapImpl(
