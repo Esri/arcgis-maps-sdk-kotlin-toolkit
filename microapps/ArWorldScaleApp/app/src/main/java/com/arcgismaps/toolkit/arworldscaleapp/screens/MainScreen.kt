@@ -309,6 +309,7 @@ fun MainScreen() {
                             else -> {}
                         }
 
+                        // If an error occurs during an initialized AR session, show a warning icon
                         if (trackingError != null) {
                             Icon(
                                 Icons.Default.Warning,

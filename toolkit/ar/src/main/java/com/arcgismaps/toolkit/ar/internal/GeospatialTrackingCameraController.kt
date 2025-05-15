@@ -169,15 +169,15 @@ internal class GeospatialTrackingCameraController(
             // if we are in an error state and the earth state is not enabled,
             // then don't do anything.
             // This prevents us from changing an error that might already exist and propagating that
-            // to the user, but it's probably better than propagating a new error every frame even
+            // to the user, which is probably better than propagating a new error every frame even
             // if it hasn't changed.
             return
         }
         when (earth.earthState) {
             EarthState.ENABLED -> {
                 if (error != null) {
-                    onError(WorldScaleInternalError.TrackingError(null))
                     error = null
+                    onError(WorldScaleInternalError.TrackingError(null))
                 }
             }
             EarthState.ERROR_INTERNAL, EarthState.ERROR_GEOSPATIAL_MODE_DISABLED -> {
