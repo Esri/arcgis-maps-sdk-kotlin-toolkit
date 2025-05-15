@@ -385,7 +385,7 @@ internal fun rememberWorldScaleCameraController(
                 WorldTrackingCameraController(
                     calibrationState = calibrationState,
                     clippingDistance = clippingDistance,
-                    onLocationDataSourceFailedToStart = { it: Throwable ->
+                    onInitializationError = { it: Throwable ->
                         onUpdateInitializationStatus(WorldScaleSceneViewStatus.FailedToInitialize(it))
                     },
                     onResetOriginCamera = onResetOriginCamera

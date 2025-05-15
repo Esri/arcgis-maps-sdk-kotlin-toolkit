@@ -52,12 +52,17 @@ import java.time.Instant
  * @see updateCamera to update the camera using the orientation of the [Frame.getCamera].
  * @see updateCamera to calibrate the camera using heading and elevation offsets.
  *
+ * @param calibrationState a [CalibrationState] to use for elevation and heading calibration
+ * @param clippingDistance the distance to the far clipping plane
+ * @param onInitializationError called when an error occurs before the origin camera is initialized
+ * @param onResetOriginCamera called when the origin camera is reset
+ *
  * @since 200.7.0
  */
 internal class WorldTrackingCameraController(
     private val calibrationState: CalibrationState,
     clippingDistance: Double?,
-    private val onLocationDataSourceFailedToStart: (Throwable) -> Unit,
+    private val onInitializationError: (Throwable) -> Unit,
     private val onResetOriginCamera: () -> Unit
 ) : WorldScaleCameraController {
 
@@ -80,7 +85,7 @@ internal class WorldTrackingCameraController(
         val applicationContext = ArcGISEnvironment.applicationContext
         require(applicationContext != null)
 
-        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext)
+        worldScaleHeadingProvider = WorldScaleHeadingProvider(applicationContext, onInitializationError)
     }
 
     override var hasSetOriginCamera by mutableStateOf(false)
@@ -177,7 +182,7 @@ internal class WorldTrackingCameraController(
             locationDataSource.status.filterIsInstance<LocationDataSourceStatus.FailedToStart>()
                 .collect {
                     locationDataSource.error.value?.let { error ->
-                        onLocationDataSourceFailedToStart(
+                        onInitializationError(
                             error
                         )
                     }
