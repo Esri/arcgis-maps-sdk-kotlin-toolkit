@@ -27,7 +27,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.work.WorkManager
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
-import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
@@ -52,22 +51,24 @@ internal const val notificationChannelDescription =
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap
 ) {
-    internal var mode: OfflineMapMode = OfflineMapMode.Unknown
+    private var _mode: OfflineMapMode = OfflineMapMode.Unknown
+    internal val mode: OfflineMapMode
+        get() = _mode
 
     private lateinit var offlineMapTask: OfflineMapTask
 
     private lateinit var portalItemId: String
 
-    internal var preplannedMapAreas: List<PreplannedMapArea>? = null
-
-    internal var preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState> = mutableStateListOf()
-
-    private val _initializationStatus: MutableState<InitializationStatus> =
-        mutableStateOf(InitializationStatus.NotInitialized)
+    private var _preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState> = mutableStateListOf()
+    internal val preplannedMapAreaStates: List<PreplannedMapAreaState>
+        get() = _preplannedMapAreaStates
 
     // TODO: Use singleton/centralized manager
     internal lateinit var workManager: WorkManager
     internal lateinit var getExternalFilesDirPath: String
+
+    private val _initializationStatus: MutableState<InitializationStatus> =
+        mutableStateOf(InitializationStatus.NotInitialized)
 
     /**
      * The status of the initialization of the state object.
@@ -99,9 +100,9 @@ public class OfflineMapState(
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
             throw it
         }
-        preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
+        val preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
         preplannedMapAreas?.let { preplannedMapArea ->
-            mode = OfflineMapMode.Preplanned
+            _mode = OfflineMapMode.Preplanned
             preplannedMapArea
                 .sortedBy { it.portalItem.title }
                 .forEach {
@@ -112,7 +113,7 @@ public class OfflineMapState(
                         workManager = workManager
                     )
                     preplannedMapAreaState.initialize()
-                    preplannedMapAreaStates.add(preplannedMapAreaState)
+                    _preplannedMapAreaStates.add(preplannedMapAreaState)
                 }
         }
         _initializationStatus.value = InitializationStatus.Initialized

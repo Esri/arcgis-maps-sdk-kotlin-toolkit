@@ -91,9 +91,9 @@ public fun OfflineMapAreas(
 
             else -> {
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                    val preplannedAreas = remember { offlineMapState.preplannedMapAreaStates.toMutableStateList() }
+//                    val preplannedAreas = remember { offlineMapState.preplannedMapAreaStates.toMutableStateList() }
                     PreplannedMapAreas(
-                        preplannedMapAreaStates = preplannedAreas,
+                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
                         modifier = modifier,
                         onDownloadButtonClicked = { preplannedMapAreaState ->
                             if (preplannedMapAreaState.status.allowsDownload) {

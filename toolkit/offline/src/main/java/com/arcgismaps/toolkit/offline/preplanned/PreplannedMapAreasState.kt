@@ -57,7 +57,9 @@ internal class PreplannedMapAreaState(
     private val workManager : WorkManager
 ) {
     // The status of the preplanned map area.
-    var status by mutableStateOf<Status>(Status.NotLoaded)
+    private var _status by mutableStateOf<Status>(Status.NotLoaded)
+    internal val status: Status
+        get() = _status
 
     private var preplannedMapAreaTitle = ""
 
@@ -74,7 +76,7 @@ internal class PreplannedMapAreaState(
     internal suspend fun initialize() = runCatchingCancellable {
         preplannedMapArea.load()
             .onSuccess {
-                status = try {
+                _status = try {
                     Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
                 } catch (illegalStateException: IllegalStateException) {
                     // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
@@ -93,7 +95,7 @@ internal class PreplannedMapAreaState(
     internal suspend fun downloadPreplannedMapArea() {
         try {
             // Set the downloading status
-            status = Status.Downloading
+            _status = Status.Downloading
             startOfflineMapJob(
                 downloadPreplannedOfflineMapJob = createOfflineMapJob(
                     preplannedMapArea = preplannedMapArea
@@ -107,8 +109,8 @@ internal class PreplannedMapAreaState(
             )
 
         } catch (e: Exception) {
-            Log.e("OfflineMapState", "Error taking preplanned map offline", e)
-            status = Status.DownloadFailure(e)
+            Log.e("Offline: PreplannedMapAreaState", "Error taking preplanned map offline", e)
+            _status = Status.DownloadFailure(e)
         }
     }
 
@@ -176,6 +178,9 @@ internal class PreplannedMapAreaState(
         workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
     }
 
+    internal fun updateStatus(newStatus: Status) {
+        _status = newStatus
+    }
 }
 
 internal sealed class Status {

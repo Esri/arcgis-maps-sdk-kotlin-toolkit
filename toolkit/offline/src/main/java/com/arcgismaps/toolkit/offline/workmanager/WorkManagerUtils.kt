@@ -27,7 +27,6 @@ import com.arcgismaps.toolkit.offline.uniqueWorkName
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-
 /**
  * Starts observing any running or completed OfflineJobWorker work requests by capturing the
  * flow. The flow starts receiving updates when the activity is in started or resumed state.
@@ -52,7 +51,7 @@ internal suspend fun observeStatusForPreplannedWork(
                         when (workInfo.state) {
                             // if work completed successfully
                             WorkInfo.State.SUCCEEDED -> {
-                                preplannedMapAreaState.status = Status.Downloaded
+                                preplannedMapAreaState.updateStatus(Status.Downloaded)
                             }
                             // if the work failed or was cancelled
                             WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
@@ -60,16 +59,18 @@ internal suspend fun observeStatusForPreplannedWork(
                                 // otherwise, the observer will emit the WorkInfo on every launch
                                 // until WorkManager auto-prunes
                                 workManager.pruneWork()
-                                preplannedMapAreaState.status = Status.DownloadFailure(
-                                    Exception(
-                                        "${workInfo.tags}: FAILED. Reason: " +
-                                                "${workInfo.outputData.getString("Error")}"
+                                preplannedMapAreaState.updateStatus(
+                                    Status.DownloadFailure(
+                                        Exception(
+                                            "${workInfo.tags}: FAILED. Reason: " +
+                                                    "${workInfo.outputData.getString("Error")}"
+                                        )
                                     )
                                 )
                             }
                             // if the work is currently in progress
                             WorkInfo.State.RUNNING -> {
-                                preplannedMapAreaState.status = Status.Downloading
+                                preplannedMapAreaState.updateStatus(Status.Downloading)
                             }
                             // don't have to handle other states
                             else -> {}
@@ -83,37 +84,38 @@ internal suspend fun observeStatusForPreplannedWork(
 
 // Helper function to log the status of all workers
 internal fun logWorkInfos(workInfos: List<WorkInfo>) {
+    val tag = "Offline: WorkInfo"
     workInfos.forEach { workInfo ->
         when (workInfo.state) {
             WorkInfo.State.ENQUEUED -> {
-                Log.e("WorkInfo", "${workInfo.tags}: ENQUEUED")
+                Log.e(tag, "${workInfo.tags}: ENQUEUED")
             }
 
             WorkInfo.State.SUCCEEDED -> {
-                Log.e("WorkInfo", "${workInfo.tags}: SUCCEEDED")
+                Log.e(tag, "${workInfo.tags}: SUCCEEDED")
             }
 
             WorkInfo.State.BLOCKED -> {
-                Log.e("WorkInfo", "${workInfo.tags}: BLOCKED")
+                Log.e(tag, "${workInfo.tags}: BLOCKED")
             }
 
             WorkInfo.State.RUNNING -> {
                 Log.e(
-                    "WorkInfo",
+                    tag,
                     "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}"
                 )
             }
 
             WorkInfo.State.FAILED -> {
                 Log.e(
-                    "WorkInfo",
+                    tag,
                     "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
                 )
             }
 
             WorkInfo.State.CANCELLED -> {
                 Log.e(
-                    "WorkInfo",
+                    tag,
                     "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
                 )
             }
