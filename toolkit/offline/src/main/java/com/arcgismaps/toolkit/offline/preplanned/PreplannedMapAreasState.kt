@@ -125,7 +125,7 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val downloadDirectoryPath = offlineMapPath + File.separator + preplannedMapArea.portalItem
+        val downloadDirectoryPath = offlineMapPath + File.separator + preplannedMapArea.portalItem.itemId
         File(downloadDirectoryPath).mkdirs()
         // Create a job to download the preplanned offline map
         val downloadPreplannedOfflineMapJob = offlineMapTask.createDownloadPreplannedOfflineMapJob(
