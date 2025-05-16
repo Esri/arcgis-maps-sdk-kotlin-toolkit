@@ -24,18 +24,23 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.work.WorkManager
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
+// offlinemapareasapp/files/PreplannedMapAreas/7174767bbf164933914fc9ea74e172aa
+// offlinemapareasapp/files/OnDemandAreas/7174767bbf164933914fc9ea74e172aa
+// offlinemapareasapp/files/Jobs/PreplannedMapAreas/AreaTitle.json
+
 internal const val notificationIdParameter = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jobParameter = "JsonJobPath"
 internal const val uniqueWorkName = "com.arcgismaps.toolkit.offline.Worker"
-internal const val offlineMapFile = "offlineMap"
-internal const val offlineJobJsonFile = "offlineJob.json"
+internal const val preplannedMapAreas = "PreplannedMapAreas"
+internal const val onDemandAreas = "OnDemandAreas"
+internal const val jobsFolderName = "Jobs"
+// internal const val offlineJobJsonFile = "offlineJob.json"
 internal const val notificationChannelName = "Offline Map Job Notifications"
 internal const val notificationTitle = "Offline Map Download"
 internal const val notificationAction = "NotificationAction"
@@ -60,7 +65,8 @@ public class OfflineMapState(
 
     private lateinit var portalItemId: String
 
-    private var _preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState> = mutableStateListOf()
+    private var _preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState> =
+        mutableStateListOf()
     internal val preplannedMapAreaStates: List<PreplannedMapAreaState>
         get() = _preplannedMapAreaStates
 
@@ -110,7 +116,7 @@ public class OfflineMapState(
                     val preplannedMapAreaState = PreplannedMapAreaState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
-//                        getExternalFilesDirPath = getExternalFilesDirPath,
+                        getExternalFilesDirPath = workManagerRepository.createExternalDirPath(),
                         workManagerRepository = workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
@@ -172,7 +178,8 @@ internal enum class OfflineMapMode {
  *
  * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
  */
-internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
+    onFailure { if (it is T) throw it }
 
 /**
  * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the

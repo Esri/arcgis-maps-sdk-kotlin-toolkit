@@ -44,7 +44,10 @@ class OfflineViewModel(application: Application) : AndroidViewModel(application)
         )
     )
 
-    val offlineMapState = OfflineMapState(arcGISMap, workManagerRepository = WorkManagerRepository(getApplication<Application>().applicationContext))
+    val offlineMapState = OfflineMapState(
+        arcGISMap,
+        workManagerRepository = WorkManagerRepository(getApplication<Application>().applicationContext)
+    )
 
     init {
         viewModelScope.launch {

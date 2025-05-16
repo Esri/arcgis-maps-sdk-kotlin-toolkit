@@ -28,27 +28,77 @@ import com.arcgismaps.toolkit.offline.preplanned.Status
 import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.random.Random
 
-public object WorkManagerRepository {
-    private lateinit var workManager: WorkManager
+public class WorkManagerRepository(private val context: Context) {
+    private val workManager = WorkManager.getInstance(context)
 
-    public fun initialize(context: Context) {
-        workManager = WorkManager.getInstance(context)
+    // TODO: This path is reset prior to a job, next, define local repository rules for offline map files.
+    private val offlineMapPath by lazy {
+        createExternalDirPath() + File.separator + preplannedMapAreas
     }
 
-    public fun createPreplannedMapAreaRequestAndQueDownload(notificationId: String, jsonJobPath: String, preplannedMapAreaTitle: String) {
+    private val offlineJobJsonPath by lazy {
+        createExternalDirPath() + File.separator + jobsFolderName
+    }
+
+    internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
+        // create the json file
+        val offlineJobJsonFile = File(offlineJobJsonPath+ File.separator + jobPath).apply {
+            mkdirs()
+        }
+        // serialize the offlineMapJob into the file
+        offlineJobJsonFile.writeText(jobJson)
+        return offlineJobJsonFile
+    }
+
+    internal fun createExternalDirPath(): String {
+        return context.getExternalFilesDir(null)?.path.toString()
+    }
+
+    internal fun createContentsForPath(offlineMapDirectoryName: String): File {
+        val pathToCreate = createExternalDirPath() + File.separator + offlineMapDirectoryName
+        return File(pathToCreate).also { it.mkdirs() }
+    }
+
+    internal fun deleteContentsForDirectory(offlineMapDirectoryName: String) {
+        val pathToDelete = createExternalDirPath() + File.separator + offlineMapDirectoryName
+        File(pathToDelete).deleteRecursively()
+    }
+
+    internal fun createPreplannedMapAreaRequestAndQueDownload(
+        notificationId: Int,
+        jsonJobPath: String,
+        preplannedMapAreaTitle: String
+    ) {
+        // create a one-time work request with an instance of OfflineJobWorker
         val workRequest = OneTimeWorkRequestBuilder<PreplannedMapAreaJobWorker>()
+            // run it as an expedited work
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the input data
             .setInputData(
+                // add the notificationId and the json file path as a key/value pair
                 workDataOf(
                     notificationIdParameter to notificationId,
                     jobParameter to jsonJobPath,
                     jobAreaTitleKey to preplannedMapAreaTitle
                 )
             ).build()
-
+        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
+        // only one instance of OfflineJobWorker is running at any time
+        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
+        // ones that are active
         workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
     }
+
+    internal fun createNotificationIdForJob(): Int {
+        // create a non-zero notification id for the OfflineJobWorker
+        // this id will be used to post or update any progress/status notifications
+        val notificationId = Random.nextInt(1, 100)
+        return notificationId
+    }
+
 
     /**
      * Starts observing any running or completed OfflineJobWorker work requests by capturing the
@@ -57,7 +107,6 @@ public object WorkManagerRepository {
      * progress when the app resumes or restarts.
      */
     internal suspend fun observeStatusForPreplannedWork(
-//        workManager: WorkManager,
         onWorkInfoStateChanged: (List<WorkInfo>) -> Unit,
         // TODO, Provide callback lambdas to update status on PreplannedMapAreaState
         preplannedMapAreaState: PreplannedMapAreaState
