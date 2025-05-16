@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +46,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -54,6 +57,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -89,7 +93,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -143,7 +147,11 @@ fun MainScreen() {
         )
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
-    Scaffold(topBar = {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
         TopAppBar(
             title = {
                 Text(
@@ -188,6 +196,33 @@ fun MainScreen() {
                             }
                         )
                     }
+                    var vpsText = remember { "Check VPS availability" }
+                    DropdownMenuItem(
+                        text = { Text(vpsText) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "wow!"
+                            )
+                        },
+                        onClick = {
+                            actionsExpanded = false
+                            scope.launch {
+                                val vpsCheck = proxy.checkVpsAvailability()
+                                if (vpsCheck.isSuccess) {
+                                    snackbarHostState.showSnackbar(
+                                        "VPS status: Available",
+                                        withDismissAction = true
+                                    )
+                                } else {
+                                    snackbarHostState.showSnackbar(
+                                        "VPS status: Unavailable",
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
                         leadingIcon = {
@@ -241,7 +276,7 @@ fun MainScreen() {
                         initializationStatus = it
                     },
                     worldScaleSceneViewProxy = proxy,
-                    onCurrentViewpointCameraChanged = { proxy.camera = it },
+                    onCurrentViewpointCameraChanged = { proxy.setCamera(it) },
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
                             ?.let { point ->
@@ -255,21 +290,7 @@ fun MainScreen() {
                     },
                     graphicsOverlays = graphicsOverlays
                 ) {
-                    var vpsAvailability by remember { mutableStateOf(false) }
-                    Card(modifier = Modifier.padding(4.dp)) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            text = if (vpsAvailability) "VPS Available" else "VPS Unavailable"
-                        )
-                    }
                     Box(modifier = Modifier.fillMaxSize()) {
-                        LaunchedEffect(Unit) {
-                            while (true) {
-                                // poll VPS availability at current device location every 5 seconds
-                                vpsAvailability = proxy.checkVpsAvailability().isSuccess
-                                delay(5000)
-                            }
-                        }
                         if (displayCalibrationView) {
                             CalibrationView(
                                 onDismiss = { displayCalibrationView = false },

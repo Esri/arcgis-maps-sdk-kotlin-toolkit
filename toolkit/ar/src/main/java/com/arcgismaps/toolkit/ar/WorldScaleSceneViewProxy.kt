@@ -64,7 +64,11 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     }
 
 
-    public var camera : Camera? = null
+    private var _camera : Camera? = null
+
+    public fun setCamera(camera: Camera?){
+        _camera = camera
+    }
 
     /**
      * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
@@ -83,7 +87,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @since 200.8.0
      */
     public suspend fun checkVpsAvailability(): Result<WorldScaleVpsAvailability> =
-        camera?.let {
+        _camera?.let {
             it.location.let { point ->
                 checkVpsAvailability(point.y, point.x)
             }
