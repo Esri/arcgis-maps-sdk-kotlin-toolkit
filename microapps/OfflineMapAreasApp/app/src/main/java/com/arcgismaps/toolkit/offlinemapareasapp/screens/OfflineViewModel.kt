@@ -18,15 +18,22 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.offline.OfflineMapState
+import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import kotlinx.coroutines.launch
 
-class OfflineViewModel : ViewModel() {
+class OfflineViewModel(application: Application) : AndroidViewModel(application) {
 
     private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
 
@@ -37,11 +44,23 @@ class OfflineViewModel : ViewModel() {
         )
     )
 
-    val offlineMapState = OfflineMapState(arcGISMap)
+    val offlineMapState = OfflineMapState(arcGISMap, workManagerRepository = WorkManagerRepository(getApplication<Application>().applicationContext))
 
     init {
         viewModelScope.launch {
             arcGISMap.load()
         }
     }
+
+//    companion object {
+//        val Factory: ViewModelProvider.Factory = viewModelFactory {
+//            initializer {
+//                val workManagerRepository =
+//                    (this[APPLICATION_KEY] as WorkManagerRepository).container.workManagerRepository
+//                OfflineViewModel(
+//                    workManagerRepository = workManagerRepository
+//                )
+//            }
+//        }
+//    }
 }

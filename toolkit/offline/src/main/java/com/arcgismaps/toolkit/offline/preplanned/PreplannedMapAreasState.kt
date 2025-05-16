@@ -22,24 +22,16 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
-import com.arcgismaps.toolkit.offline.jobAreaTitleKey
-import com.arcgismaps.toolkit.offline.jobParameter
-import com.arcgismaps.toolkit.offline.notificationIdParameter
+import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.offlineJobJsonFile
 import com.arcgismaps.toolkit.offline.offlineMapFile
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
-import com.arcgismaps.toolkit.offline.uniqueWorkName
-import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
 import com.arcgismaps.toolkit.offline.workmanager.observeStatusForPreplannedWork
 import java.io.File
@@ -54,7 +46,8 @@ internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
     private val getExternalFilesDirPath: String,
-    private val workManager : WorkManager
+    private val workManagerRepository: WorkManagerRepository
+//    private val workManager : WorkManager
 ) {
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
@@ -157,25 +150,6 @@ internal class PreplannedMapAreaState(
         val notificationId = Random.nextInt(1, 100)
 
 
-        // create a one-time work request with an instance of OfflineJobWorker
-        val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
-            // run it as an expedited work
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            // add the input data
-            .setInputData(
-                // add the notificationId and the json file path as a key/value pair
-                workDataOf(
-                    notificationIdParameter to notificationId,
-                    jobParameter to offlineJobJsonFile.absolutePath,
-                    jobAreaTitleKey to preplannedMapAreaTitle
-                )
-            ).build()
-
-        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
-        // only one instance of OfflineJobWorker is running at any time
-        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
-        // ones that are active
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
     }
 
     internal fun updateStatus(newStatus: Status) {

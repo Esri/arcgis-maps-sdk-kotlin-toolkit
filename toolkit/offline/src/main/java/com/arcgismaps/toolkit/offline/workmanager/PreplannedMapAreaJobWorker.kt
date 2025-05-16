@@ -42,7 +42,7 @@ import java.io.File
 /**
  * Class that runs a [DownloadPreplannedOfflineMapJob] as a CoroutineWorker using WorkManager.
  */
-internal class OfflineJobWorker(
+internal class PreplannedMapAreaJobWorker(
     private val context: Context,
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {

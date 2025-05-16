@@ -1,0 +1,107 @@
+/*
+ * Copyright 2025 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package com.arcgismaps.toolkit.offline
+
+import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+
+public object WorkManagerRepository {
+    private lateinit var workManager: WorkManager
+
+    public fun initialize(context: Context) {
+        workManager = WorkManager.getInstance(context)
+    }
+
+    public fun createPreplannedMapAreaRequestAndQueDownload(notificationId: String, jsonJobPath: String, preplannedMapAreaTitle: String) {
+        val workRequest = OneTimeWorkRequestBuilder<PreplannedMapAreaJobWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(
+                workDataOf(
+                    notificationIdParameter to notificationId,
+                    jobParameter to jsonJobPath,
+                    jobAreaTitleKey to preplannedMapAreaTitle
+                )
+            ).build()
+
+        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
+    }
+
+    /**
+     * Starts observing any running or completed OfflineJobWorker work requests by capturing the
+     * flow. The flow starts receiving updates when the activity is in started or resumed state.
+     * This allows the application to capture immediate progress when in foreground and latest
+     * progress when the app resumes or restarts.
+     */
+    internal suspend fun observeStatusForPreplannedWork(
+//        workManager: WorkManager,
+        onWorkInfoStateChanged: (List<WorkInfo>) -> Unit,
+        // TODO, Provide callback lambdas to update status on PreplannedMapAreaState
+        preplannedMapAreaState: PreplannedMapAreaState
+    ) {
+        coroutineScope {
+            launch {
+                // collect the flow to get the latest work info list
+                workManager.getWorkInfosForUniqueWorkFlow(uniqueWorkName).collect { workInfoList ->
+                    if (workInfoList.isNotEmpty()) {
+                        // emit changes in the work info state
+                        onWorkInfoStateChanged(workInfoList)
+                        workInfoList.forEach { workInfo ->
+                            // check the current state of the work request
+                            when (workInfo.state) {
+                                // if work completed successfully
+                                WorkInfo.State.SUCCEEDED -> {
+                                    preplannedMapAreaState.updateStatus(Status.Downloaded)
+                                }
+                                // if the work failed or was cancelled
+                                WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                                    // this removes the completed WorkInfo from the WorkManager's database
+                                    // otherwise, the observer will emit the WorkInfo on every launch
+                                    // until WorkManager auto-prunes
+                                    workManager.pruneWork()
+                                    preplannedMapAreaState.updateStatus(
+                                        Status.DownloadFailure(
+                                            Exception(
+                                                "${workInfo.tags}: FAILED. Reason: " +
+                                                        "${workInfo.outputData.getString("Error")}"
+                                            )
+                                        )
+                                    )
+                                }
+                                // if the work is currently in progress
+                                WorkInfo.State.RUNNING -> {
+                                    preplannedMapAreaState.updateStatus(Status.Downloading)
+                                }
+                                // don't have to handle other states
+                                else -> {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

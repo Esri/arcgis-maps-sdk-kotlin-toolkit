@@ -49,7 +49,8 @@ internal const val notificationChannelDescription =
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap
+    private val arcGISMap: ArcGISMap,
+    private val workManagerRepository: WorkManagerRepository
 ) {
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
@@ -64,8 +65,8 @@ public class OfflineMapState(
         get() = _preplannedMapAreaStates
 
     // TODO: Use singleton/centralized manager
-    internal lateinit var workManager: WorkManager
-    internal lateinit var getExternalFilesDirPath: String
+//    internal lateinit var workManager: WorkManager
+//    internal lateinit var getExternalFilesDirPath: String
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
@@ -109,8 +110,8 @@ public class OfflineMapState(
                     val preplannedMapAreaState = PreplannedMapAreaState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
-                        getExternalFilesDirPath = getExternalFilesDirPath,
-                        workManager = workManager
+//                        getExternalFilesDirPath = getExternalFilesDirPath,
+                        workManagerRepository = workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
