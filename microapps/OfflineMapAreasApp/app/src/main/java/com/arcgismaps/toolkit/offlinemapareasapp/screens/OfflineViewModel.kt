@@ -20,12 +20,7 @@ package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
@@ -54,16 +49,4 @@ class OfflineViewModel(application: Application) : AndroidViewModel(application)
             arcGISMap.load()
         }
     }
-
-//    companion object {
-//        val Factory: ViewModelProvider.Factory = viewModelFactory {
-//            initializer {
-//                val workManagerRepository =
-//                    (this[APPLICATION_KEY] as WorkManagerRepository).container.workManagerRepository
-//                OfflineViewModel(
-//                    workManagerRepository = workManagerRepository
-//                )
-//            }
-//        }
-//    }
 }
