@@ -45,14 +45,14 @@ import com.arcgismaps.mapping.view.GeoView
  * Choose this overload if your main view is a [MapView]. If a non-default symbol is provided the
  * symbol must be suitable for a polygon geometry such as a [SimpleFillSymbol].
  *
- * @param viewpoint the viewpoint of the main view. This should be provided as a
+ * @param viewpoint the current viewpoint of the main view. This should be provided as a
  * [ViewpointType.CenterAndScale]
- * @param visibleArea the visible area of the main view
+ * @param visibleArea the current visible area of the main view
  * @param modifier the modifier to apply
- * @param symbol the symbol to apply. Must be suitable for a polygon geometry.
+ * @param symbol the symbol to use to show the main view's current visible area. Must be suitable for a polygon geometry.
  * @param scaleFactor the factor to multiply the main view's scale by. The OverviewMap will
  * display at the product of mainGeoViewScale * scaleFactor.
- * @param arcGISMap the map to display
+ * @param arcGISMap the map to display within the OverviewMap
  *
  * @since 200.8.0
  */
@@ -87,13 +87,13 @@ public fun OverviewMap(
  * Choose this overload if your main view is a [SceneView]. If a non-default symbol is provided the
  * symbol must be suitable for a point geometry such as a [SimpleMarkerSymbol].
  *
- * @param viewpoint the viewpoint of the main view this overview map is for, this should be provided
+ * @param viewpoint the current viewpoint of the main view this overview map is for, this should be provided
  * as a [ViewpointType.CenterAndScale]
  * @param modifier the modifier to apply
- * @param symbol the symbol to apply. Must be suitable for a point geometry.
+ * @param symbol the symbol to use to show the main view's current visible area. Must be suitable for a polygon geometry.
  * @param scaleFactor the factor to multiply the main view's scale by. The OverviewMap will
  * display at the product of mainGeoViewScale * scaleFactor.
- * @param arcGISMap the map to display
+ * @param arcGISMap the map to display within the OverviewMap
  *
  * @since 200.8.0
  */
