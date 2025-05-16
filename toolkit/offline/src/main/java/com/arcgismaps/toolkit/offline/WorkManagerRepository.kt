@@ -45,9 +45,8 @@ public class WorkManagerRepository(private val context: Context) {
 
     internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
         // create the json file
-        val offlineJobJsonFile = File(offlineJobJsonPath+ File.separator + jobPath).apply {
-            mkdirs()
-        }
+        val offlineJobJsonFile = File(offlineJobJsonPath+ File.separator + jobPath)
+        offlineJobJsonFile.parentFile?.mkdirs()
         // serialize the offlineMapJob into the file
         offlineJobJsonFile.writeText(jobJson)
         return offlineJobJsonFile
