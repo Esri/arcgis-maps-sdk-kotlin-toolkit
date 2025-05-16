@@ -21,7 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
-import com.arcgismaps.toolkit.offline.notificationAction
+import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 
 /**
  * Custom BroadcastReceiver class that handles notification actions setup by WorkerNotification
@@ -30,7 +30,7 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         // retrieve the data name or return if the context if null
-        val extraName = notificationAction
+        val extraName = notificationCancelActionKey
         // get the actual data from the intent
         val action = intent.getStringExtra(extraName) ?: "none"
         // if the action is cancel

@@ -29,30 +29,26 @@ import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.random.Random
+import java.util.UUID
 
 public class WorkManagerRepository(private val context: Context) {
+
     private val workManager = WorkManager.getInstance(context)
 
-    // TODO: This path is reset prior to a job, next, define local repository rules for offline map files.
-    private val offlineMapPath by lazy {
-        createExternalDirPath() + File.separator + preplannedMapAreas
-    }
-
     private val offlineJobJsonPath by lazy {
-        createExternalDirPath() + File.separator + jobsFolderName
+        createExternalDirPath() + File.separator + jsonJobsTempDir
     }
 
     internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
         // create the json file
-        val offlineJobJsonFile = File(offlineJobJsonPath+ File.separator + jobPath)
+        val offlineJobJsonFile = File(offlineJobJsonPath + File.separator + jobPath)
         offlineJobJsonFile.parentFile?.mkdirs()
         // serialize the offlineMapJob into the file
         offlineJobJsonFile.writeText(jobJson)
         return offlineJobJsonFile
     }
 
-    internal fun createExternalDirPath(): String {
+    private fun createExternalDirPath(): String {
         return context.getExternalFilesDir(null)?.path.toString()
     }
 
@@ -70,7 +66,7 @@ public class WorkManagerRepository(private val context: Context) {
         notificationId: Int,
         jsonJobPath: String,
         preplannedMapAreaTitle: String
-    ) {
+    ): UUID {
         // create a one-time work request with an instance of OfflineJobWorker
         val workRequest = OneTimeWorkRequestBuilder<PreplannedMapAreaJobWorker>()
             // run it as an expedited work
@@ -79,23 +75,26 @@ public class WorkManagerRepository(private val context: Context) {
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
                 workDataOf(
-                    notificationIdParameter to notificationId,
-                    jobParameter to jsonJobPath,
+                    notificationIdKey to notificationId,
+                    jsonJobPathKey to jsonJobPath,
                     jobAreaTitleKey to preplannedMapAreaTitle
                 )
             ).build()
+
         // enqueue the work request to run as a unique work with the uniqueWorkName, so that
         // only one instance of OfflineJobWorker is running at any time
         // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
         // ones that are active
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
+        workManager.enqueueUniqueWork(
+            uniqueWorkName = prePlannedWorkNameKey + notificationId,
+            existingWorkPolicy = ExistingWorkPolicy.KEEP,
+            request = workRequest
+        )
+        return workRequest.id
     }
 
     internal fun createNotificationIdForJob(): Int {
-        // create a non-zero notification id for the OfflineJobWorker
-        // this id will be used to post or update any progress/status notifications
-        val notificationId = Random.nextInt(1, 100)
-        return notificationId
+        return UUID.randomUUID().hashCode()
     }
 
 
@@ -113,43 +112,48 @@ public class WorkManagerRepository(private val context: Context) {
         coroutineScope {
             launch {
                 // collect the flow to get the latest work info list
-                workManager.getWorkInfosForUniqueWorkFlow(uniqueWorkName).collect { workInfoList ->
-                    if (workInfoList.isNotEmpty()) {
-                        // emit changes in the work info state
-                        onWorkInfoStateChanged(workInfoList)
-                        workInfoList.forEach { workInfo ->
-                            // check the current state of the work request
-                            when (workInfo.state) {
-                                // if work completed successfully
-                                WorkInfo.State.SUCCEEDED -> {
-                                    preplannedMapAreaState.updateStatus(Status.Downloaded)
-                                }
-                                // if the work failed or was cancelled
-                                WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                                    // this removes the completed WorkInfo from the WorkManager's database
-                                    // otherwise, the observer will emit the WorkInfo on every launch
-                                    // until WorkManager auto-prunes
-                                    workManager.pruneWork()
-                                    preplannedMapAreaState.updateStatus(
-                                        Status.DownloadFailure(
-                                            Exception(
-                                                "${workInfo.tags}: FAILED. Reason: " +
-                                                        "${workInfo.outputData.getString("Error")}"
+                workManager.getWorkInfosForUniqueWorkFlow(prePlannedWorkNameKey)
+                    .collect { workInfoList ->
+                        if (workInfoList.isNotEmpty()) {
+                            // emit changes in the work info state
+                            onWorkInfoStateChanged(workInfoList)
+                            workInfoList.forEach { workInfo ->
+                                // check the current state of the work request
+                                when (workInfo.state) {
+                                    // if work completed successfully
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        preplannedMapAreaState.updateStatus(Status.Downloaded)
+                                    }
+                                    // if the work failed or was cancelled
+                                    WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                                        // this removes the completed WorkInfo from the WorkManager's database
+                                        // otherwise, the observer will emit the WorkInfo on every launch
+                                        // until WorkManager auto-prunes
+                                        workManager.pruneWork()
+                                        preplannedMapAreaState.updateStatus(
+                                            Status.DownloadFailure(
+                                                Exception(
+                                                    "${workInfo.tags}: FAILED. Reason: " +
+                                                            "${workInfo.outputData.getString("Error")}"
+                                                )
                                             )
                                         )
-                                    )
+                                    }
+                                    // if the work is currently in progress
+                                    WorkInfo.State.RUNNING -> {
+                                        preplannedMapAreaState.updateStatus(Status.Downloading)
+                                    }
+                                    // don't have to handle other states
+                                    else -> {}
                                 }
-                                // if the work is currently in progress
-                                WorkInfo.State.RUNNING -> {
-                                    preplannedMapAreaState.updateStatus(Status.Downloading)
-                                }
-                                // don't have to handle other states
-                                else -> {}
                             }
                         }
                     }
-                }
             }
         }
+    }
+
+    internal fun getProgressForUUID(workerUUID: UUID) {
+
     }
 }

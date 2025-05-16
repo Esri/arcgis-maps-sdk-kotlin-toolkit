@@ -26,7 +26,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arcgismaps.toolkit.offline.notificationAction
+import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 import com.arcgismaps.toolkit.offline.notificationChannelDescription
 import com.arcgismaps.toolkit.offline.notificationChannelName
 import com.arcgismaps.toolkit.offline.notificationTitle
@@ -70,7 +70,7 @@ internal class WorkerNotification(
             // set this intent to only launch with this application package
             setPackage(applicationContext.packageName)
             // add the notification action as a string
-            putExtra(notificationAction, "Cancel")
+            putExtra(notificationCancelActionKey, "Cancel")
         }
         // set the pending intent that will be passed to the NotificationManager
         PendingIntent.getBroadcast(

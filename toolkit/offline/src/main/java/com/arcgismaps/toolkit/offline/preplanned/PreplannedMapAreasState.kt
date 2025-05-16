@@ -32,7 +32,6 @@ import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
 import java.io.File
-import kotlin.random.Random
 
 /**
  * Represents the state of a [PreplannedMapArea].
@@ -42,9 +41,7 @@ import kotlin.random.Random
 internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
-    private val getExternalFilesDirPath: String,
     private val workManagerRepository: WorkManagerRepository
-//    private val workManager : WorkManager
 ) {
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
@@ -127,20 +124,18 @@ internal class PreplannedMapAreaState(
      * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob) {
-        // PreplannedMapAreas/AreaTitle.json
         val jsonJobFile = workManagerRepository.saveJobToDisk(
-            jobPath = preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title.trim()}.json",
+            jobPath = preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
             jobJson =  downloadPreplannedOfflineMapJob.toJson()
         )
 
-        // TODO: Update this to create unique ids
-        val notificationId = Random.nextInt(1,100)
-
-        workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
-            notificationId = notificationId,
+        val workerUUID  = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+            notificationId = workManagerRepository.createNotificationIdForJob(),
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )
+
+        workManagerRepository.getProgressForUUID(workerUUID)
     }
 
     internal fun updateStatus(newStatus: Status) {

@@ -28,8 +28,8 @@ import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
-import com.arcgismaps.toolkit.offline.jobParameter
-import com.arcgismaps.toolkit.offline.notificationIdParameter
+import com.arcgismaps.toolkit.offline.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.notificationIdKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -51,7 +51,7 @@ internal class PreplannedMapAreaJobWorker(
 
     // notificationId passed by the activity
     private val notificationId by lazy {
-        inputData.getInt(key = notificationIdParameter, defaultValue = 1)
+        inputData.getInt(key = notificationIdKey, defaultValue = 1)
     }
 
     private val jobAreaTitle by lazy {
@@ -95,7 +95,7 @@ internal class PreplannedMapAreaJobWorker(
 
     override suspend fun doWork(): Result {
         // get the job parameter which is the json file path
-        val offlineJobJsonPath = inputData.getString(jobParameter) ?: return Result.failure()
+        val offlineJobJsonPath = inputData.getString(jsonJobPathKey) ?: return Result.failure()
         // load the json file
         val offlineJobJsonFile = File(offlineJobJsonPath)
         // if the file doesn't exist return failure

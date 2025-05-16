@@ -20,12 +20,6 @@ package com.arcgismaps.toolkit.offline.workmanager
 
 import android.util.Log
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
-import com.arcgismaps.toolkit.offline.preplanned.Status
-import com.arcgismaps.toolkit.offline.uniqueWorkName
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 // Helper function to log the status of all workers
 internal fun logWorkInfos(workInfos: List<WorkInfo>) {

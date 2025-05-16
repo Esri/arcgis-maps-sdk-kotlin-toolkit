@@ -29,21 +29,16 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
-// offlinemapareasapp/files/PreplannedMapAreas/7174767bbf164933914fc9ea74e172aa
-// offlinemapareasapp/files/OnDemandAreas/7174767bbf164933914fc9ea74e172aa
-// offlinemapareasapp/files/Jobs/PreplannedMapAreas/AreaTitle.json
-
-internal const val notificationIdParameter = "NotificationId"
+internal const val notificationIdKey = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
-internal const val jobParameter = "JsonJobPath"
-internal const val uniqueWorkName = "com.arcgismaps.toolkit.offline.Worker"
+internal const val jsonJobPathKey = "JsonJobPath"
+internal const val prePlannedWorkNameKey = "PreplannedWorker.UUID."
 internal const val preplannedMapAreas = "PreplannedMapAreas"
 internal const val onDemandAreas = "OnDemandAreas"
-internal const val jobsFolderName = "Jobs"
-// internal const val offlineJobJsonFile = "offlineJob.json"
+internal const val jsonJobsTempDir = "Jobs"
 internal const val notificationChannelName = "Offline Map Job Notifications"
 internal const val notificationTitle = "Offline Map Download"
-internal const val notificationAction = "NotificationAction"
+internal const val notificationCancelActionKey = "NotificationCancelActionKey"
 internal const val notificationChannelDescription =
     "Shows notifications for offline map job progress"
 
@@ -69,10 +64,6 @@ public class OfflineMapState(
         mutableStateListOf()
     internal val preplannedMapAreaStates: List<PreplannedMapAreaState>
         get() = _preplannedMapAreaStates
-
-    // TODO: Use singleton/centralized manager
-//    internal lateinit var workManager: WorkManager
-//    internal lateinit var getExternalFilesDirPath: String
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
@@ -116,7 +107,6 @@ public class OfflineMapState(
                     val preplannedMapAreaState = PreplannedMapAreaState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
-                        getExternalFilesDirPath = workManagerRepository.createExternalDirPath(),
                         workManagerRepository = workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
@@ -186,6 +176,4 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
  * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
  * in the failure but will be rethrown.
  */
-internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
-    runCatching(block)
-        .except<CancellationException, R>()
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> = runCatching(block).except<CancellationException, R>()
