@@ -59,7 +59,7 @@ public final class com/arcgismaps/toolkit/geoviewcompose/MapViewScope : com/arcg
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/OverviewMapKt {
-	public static final fun OverviewMap (Lcom/arcgismaps/mapping/Viewpoint;Landroidx/compose/ui/Modifier;DLcom/arcgismaps/mapping/symbology/Symbol;Lcom/arcgismaps/mapping/ArcGISMap;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OverviewMap (Lcom/arcgismaps/mapping/Viewpoint;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/mapping/symbology/Symbol;DLcom/arcgismaps/mapping/ArcGISMap;Landroidx/compose/runtime/Composer;II)V
 	public static final fun OverviewMap (Lcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/geometry/Polygon;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/mapping/symbology/Symbol;DLcom/arcgismaps/mapping/ArcGISMap;Landroidx/compose/runtime/Composer;II)V
 }
 
