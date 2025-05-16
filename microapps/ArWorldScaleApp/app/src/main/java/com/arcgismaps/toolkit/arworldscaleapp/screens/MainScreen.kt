@@ -196,31 +196,34 @@ fun MainScreen() {
                             }
                         )
                     }
-                    var vpsText = remember { "Check VPS availability" }
+                    val vpsAvailableText = stringResource(R.string.vps_available)
+                    val vpsUnavailableText = stringResource(R.string.vps_unavailable)
                     DropdownMenuItem(
-                        text = { Text(vpsText) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "wow!"
-                            )
-                        },
+                        text = { Text(stringResource(R.string.check_vps)) },
                         onClick = {
                             actionsExpanded = false
                             scope.launch {
                                 val vpsCheck = proxy.checkVpsAvailability()
                                 if (vpsCheck.isSuccess) {
                                     snackbarHostState.showSnackbar(
-                                        "VPS status: Available",
+                                        vpsAvailableText,
                                         withDismissAction = true
                                     )
                                 } else {
                                     snackbarHostState.showSnackbar(
-                                        "VPS status: Unavailable",
+                                        vpsUnavailableText,
                                         withDismissAction = true
                                     )
                                 }
                             }
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "wow!"
+                            )
                         }
                     )
                     DropdownMenuItem(
@@ -276,7 +279,6 @@ fun MainScreen() {
                         initializationStatus = it
                     },
                     worldScaleSceneViewProxy = proxy,
-                    onCurrentViewpointCameraChanged = { proxy.setCamera(it) },
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
                             ?.let { point ->

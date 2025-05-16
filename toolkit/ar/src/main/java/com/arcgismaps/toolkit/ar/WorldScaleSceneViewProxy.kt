@@ -66,7 +66,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
 
     private var _camera : Camera? = null
 
-    public fun setCamera(camera: Camera?){
+    internal fun setCamera(camera: Camera?){
         _camera = camera
     }
 
