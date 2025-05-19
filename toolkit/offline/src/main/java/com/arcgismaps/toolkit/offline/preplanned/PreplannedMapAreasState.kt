@@ -32,6 +32,7 @@ import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
 import java.io.File
+import java.util.UUID
 
 /**
  * Represents the state of a [PreplannedMapArea].
@@ -73,7 +74,7 @@ internal class PreplannedMapAreaState(
         try {
             // Set the downloading status
             _status = Status.Downloading
-            startOfflineMapJob(
+            val offlineWorkerUUID = startOfflineMapJob(
                 downloadPreplannedOfflineMapJob = createOfflineMapJob(
                     preplannedMapArea = preplannedMapArea
                 )
@@ -81,7 +82,8 @@ internal class PreplannedMapAreaState(
             // Start observing WorkManager status
             workManagerRepository.observeStatusForPreplannedWork(
                 onWorkInfoStateChanged = ::logWorkInfos,
-                preplannedMapAreaState = this
+                preplannedMapAreaState = this,
+                offlineWorkerUUID = offlineWorkerUUID
             )
 
         } catch (e: Exception) {
@@ -93,8 +95,6 @@ internal class PreplannedMapAreaState(
     private suspend fun createOfflineMapJob(
         preplannedMapArea: PreplannedMapArea
     ): DownloadPreplannedOfflineMapJob {
-        workManagerRepository.deleteContentsForDirectory(preplannedMapAreas)
-
         // Create default download parameters from the offline map task
         val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
             preplannedMapArea = preplannedMapArea
@@ -123,7 +123,7 @@ internal class PreplannedMapAreaState(
      * The [downloadPreplannedOfflineMapJob] is serialized into a json file and the uri is passed
      * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
      */
-    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob) {
+    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
             jobPath = preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
             jobJson =  downloadPreplannedOfflineMapJob.toJson()
@@ -136,6 +136,8 @@ internal class PreplannedMapAreaState(
         )
 
         workManagerRepository.getProgressForUUID(workerUUID)
+
+        return workerUUID
     }
 
     internal fun updateStatus(newStatus: Status) {

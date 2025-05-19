@@ -18,35 +18,27 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.offline.OfflineMapState
-import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import kotlinx.coroutines.launch
 
-class OfflineViewModel(application: Application) : AndroidViewModel(application) {
+class OfflineViewModel : ViewModel() {
 
     private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
 
     val arcGISMap = ArcGISMap(
         PortalItem(
-            Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-            napervilleWaterNetwork
+            Portal.arcGISOnline(connection = Portal.Connection.Anonymous), napervilleWaterNetwork
         )
     )
 
-    val offlineMapState = OfflineMapState(
-        arcGISMap,
-        workManagerRepository = WorkManagerRepository(getApplication<Application>().applicationContext)
-    )
+    val offlineMapState = OfflineMapState(arcGISMap)
 
     init {
-        viewModelScope.launch {
-            arcGISMap.load()
-        }
+        viewModelScope.launch { arcGISMap.load() }
     }
 }

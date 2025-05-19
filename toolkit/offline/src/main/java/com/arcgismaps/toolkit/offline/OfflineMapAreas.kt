@@ -57,13 +57,7 @@ public fun OfflineMapAreas(
     val initializationStatus by offlineMapState.initializationStatus
 
     LaunchedEffect(offlineMapState) {
-        offlineMapState.apply {
-            // TODO: Use singleton/centralized manager
-            //workManager = WorkManager.getInstance(context)
-            //getExternalFilesDirPath = context.getExternalFilesDir(null)?.path.toString()
-
-        }
-        offlineMapState.initialize()
+        offlineMapState.initialize(context)
     }
 
     Surface(

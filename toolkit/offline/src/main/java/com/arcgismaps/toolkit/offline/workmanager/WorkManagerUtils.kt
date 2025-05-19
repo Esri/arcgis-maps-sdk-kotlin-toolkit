@@ -22,42 +22,40 @@ import android.util.Log
 import androidx.work.WorkInfo
 
 // Helper function to log the status of all workers
-internal fun logWorkInfos(workInfos: List<WorkInfo>) {
+internal fun logWorkInfos(workInfo: WorkInfo) {
     val tag = "Offline: WorkInfo"
-    workInfos.forEach { workInfo ->
-        when (workInfo.state) {
-            WorkInfo.State.ENQUEUED -> {
-                Log.e(tag, "${workInfo.tags}: ENQUEUED")
-            }
+    when (workInfo.state) {
+        WorkInfo.State.ENQUEUED -> {
+            Log.e(tag, "${workInfo.tags}: ENQUEUED")
+        }
 
-            WorkInfo.State.SUCCEEDED -> {
-                Log.e(tag, "${workInfo.tags}: SUCCEEDED")
-            }
+        WorkInfo.State.SUCCEEDED -> {
+            Log.e(tag, "${workInfo.tags}: SUCCEEDED")
+        }
 
-            WorkInfo.State.BLOCKED -> {
-                Log.e(tag, "${workInfo.tags}: BLOCKED")
-            }
+        WorkInfo.State.BLOCKED -> {
+            Log.e(tag, "${workInfo.tags}: BLOCKED")
+        }
 
-            WorkInfo.State.RUNNING -> {
-                Log.e(
-                    tag,
-                    "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}"
-                )
-            }
+        WorkInfo.State.RUNNING -> {
+            Log.e(
+                tag,
+                "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}"
+            )
+        }
 
-            WorkInfo.State.FAILED -> {
-                Log.e(
-                    tag,
-                    "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
-                )
-            }
+        WorkInfo.State.FAILED -> {
+            Log.e(
+                tag,
+                "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
+            )
+        }
 
-            WorkInfo.State.CANCELLED -> {
-                Log.e(
-                    tag,
-                    "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
-                )
-            }
+        WorkInfo.State.CANCELLED -> {
+            Log.e(
+                tag,
+                "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
+            )
         }
     }
 }

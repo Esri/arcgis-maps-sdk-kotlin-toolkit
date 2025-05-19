@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -49,9 +50,9 @@ internal const val notificationChannelDescription =
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap,
-    private val workManagerRepository: WorkManagerRepository
+    private val arcGISMap: ArcGISMap
 ) {
+    private lateinit var _workManagerRepository: WorkManagerRepository
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
         get() = _mode
@@ -81,7 +82,7 @@ public class OfflineMapState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.8.0
      */
-    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
+    internal suspend fun initialize(context: Context): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
@@ -91,6 +92,7 @@ public class OfflineMapState(
             throw it
         }
 
+        _workManagerRepository = WorkManagerRepository(context)
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItemId = arcGISMap.item?.itemId ?: throw IllegalStateException("Item ID not found")
 
@@ -107,7 +109,7 @@ public class OfflineMapState(
                     val preplannedMapAreaState = PreplannedMapAreaState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
-                        workManagerRepository = workManagerRepository
+                        workManagerRepository = _workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
