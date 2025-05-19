@@ -260,15 +260,15 @@ fun MainScreen() {
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
-                                graphicsOverlays.first().graphics.apply {
-                                    clear()
-                                    add(
-                                        Graphic(
-                                            point,
-                                            graphicSymbol
-                                        )
+                                val graphicsOverlay = graphicsOverlays.first()
+                                graphicsOverlay.graphics.firstOrNull()?.apply {
+                                    geometry = point
+                                } ?: graphicsOverlay.graphics.add(
+                                    Graphic(
+                                        geometry = point,
+                                        symbol = graphicSymbol
                                     )
-                                }
+                                )
                             }
                     },
                     graphicsOverlays = graphicsOverlays
