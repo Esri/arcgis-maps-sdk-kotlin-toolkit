@@ -37,7 +37,7 @@ import com.arcgismaps.portal.LoadableImage
 public class BasemapGalleryItem(
     public val title: String,
     public val tag: Any? = null,
-    public val is3D: Boolean,
+    public val is3D: Boolean = false,
     internal val thumbnailProvider: suspend () -> Bitmap? = { null }
 ) {
     internal constructor(title: String, tag: Any?, is3D: Boolean, thumbnail: LoadableImage?) : this(
