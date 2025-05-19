@@ -153,6 +153,6 @@ internal class WorkManagerRepository(private val context: Context) {
     }
 
     internal fun getProgressForUUID(workerUUID: UUID) {
-
+        // TODO: Provide updates to the UI using job progress from the UUID.
     }
 }

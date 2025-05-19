@@ -21,8 +21,10 @@ package com.arcgismaps.toolkit.offline.workmanager
 import android.util.Log
 import androidx.work.WorkInfo
 
-// Helper function to log the status of all workers
-internal fun logWorkInfos(workInfo: WorkInfo) {
+/**
+ * Helper function to log the current status the provided [workInfo].
+ */
+internal fun logWorkInfo(workInfo: WorkInfo) {
     val tag = "Offline: WorkInfo"
     when (workInfo.state) {
         WorkInfo.State.ENQUEUED -> {
