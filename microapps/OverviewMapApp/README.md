@@ -12,4 +12,4 @@ Tha application shows two tabs, one that demonstrates the Overview Map being use
 and one that demonstrates the Overview Map being used with a Scene View.
 
 For more information on the `OverviewMap` component and how it works, see
-its [Readme](../../toolkit/geoview-compose/README.md).
+its [Readme](../../toolkit/geoview-compose#display-an-overviewmap).
