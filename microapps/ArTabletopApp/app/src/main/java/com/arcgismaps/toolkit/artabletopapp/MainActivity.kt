@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.artabletopapp
 
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -60,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onResume() {
