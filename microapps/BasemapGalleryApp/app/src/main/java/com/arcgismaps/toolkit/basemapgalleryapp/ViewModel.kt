@@ -87,24 +87,22 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
             // for each portal basemap, create a gallery item and add it to the list of items;
             // add the 3D basemaps first so they'll be at the top of the gallery
-            portal3DBasemapsJob.await()
-                .onFailure { Log.w("BasemapGallery", "Failed to fetch 3D basemaps") }
-                .onSuccess { basemapList ->
-                    basemapList.forEach { basemap ->
-                        basemap.item?.let { item ->
-                            portalItems.add(BasemapGalleryItem(item, true))
-                        }
-                    }
+            var basemapGalleryItems = portal3DBasemapsJob.await()
+                .getOrElse {
+                    Log.w("BasemapGallery", "Failed to fetch 3D basemaps")
+                    emptyList()
                 }
-            portal2DBasemapsJob.await()
-                .onFailure { Log.w("BasemapGallery", "Failed to fetch 2D basemaps") }
-                .onSuccess {
-                    it.forEach { basemap ->
-                        basemap.item?.let { item ->
-                            portalItems.add(BasemapGalleryItem(item, false))
-                        }
-                    }
+                .mapNotNull { basemap ->  basemap.item }
+                .map { item -> BasemapGalleryItem(item, true) }
+            portalItems.addAll(basemapGalleryItems)
+            basemapGalleryItems = portal2DBasemapsJob.await()
+                .getOrElse {
+                    Log.w("BasemapGallery", "Failed to fetch 2D basemaps")
+                    emptyList()
                 }
+                .mapNotNull { basemap ->  basemap.item }
+                .map { item -> BasemapGalleryItem(item, false) }
+            portalItems.addAll(basemapGalleryItems)
         }
     }
 
