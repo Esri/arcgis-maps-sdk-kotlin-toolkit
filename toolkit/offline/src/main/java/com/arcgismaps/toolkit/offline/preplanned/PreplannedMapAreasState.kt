@@ -27,10 +27,11 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
-import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
+import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import java.io.File
 import java.util.UUID
 
@@ -47,11 +48,20 @@ internal class PreplannedMapAreaState(
 ) {
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
-    internal val status: Status
-        get() = _status
+    internal val status: Status get() = _status
 
-    private var preplannedMapAreaTitle = ""
-
+    /**
+     * Loads and initializes the associated preplanned map area.
+     *
+     * This function attempts to load the metadata, packaging status, and thumbnail of the
+     * `PreplannedMapArea`. If successful, it updates the current status of the map area.
+     * For legacy web maps with incomplete metadata (`Unknown` packaging status), it assumes
+     * that a successfully loaded map area is packaged.
+     *
+     * @return A [Result] indicating success or failure of initialization.
+     *
+     * @since 200.8.0
+     */
     internal suspend fun initialize() = runCatchingCancellable {
         preplannedMapArea.load()
             .onSuccess {
@@ -66,11 +76,14 @@ internal class PreplannedMapAreaState(
                 }
                 // Load the thumbnail
                 preplannedMapArea.portalItem.thumbnail?.load()
-                // Set preplanned area title
-                preplannedMapAreaTitle = preplannedMapArea.portalItem.title
             }
     }
 
+    /**
+     * Initiates downloading of the associated preplanned map area for offline use.
+     *
+     * @since 200.8.0
+     */
     internal suspend fun downloadPreplannedMapArea() {
         try {
             // Set the downloading status
@@ -82,17 +95,29 @@ internal class PreplannedMapAreaState(
             )
             // Start observing WorkManager status
             workManagerRepository.observeStatusForPreplannedWork(
-                onWorkInfoStateChanged = ::logWorkInfos,
+                onWorkInfoStateChanged = ::logWorkInfo,
                 preplannedMapAreaState = this,
                 offlineWorkerUUID = offlineWorkerUUID
             )
 
         } catch (e: Exception) {
-            Log.e("Offline: PreplannedMapAreaState", "Error taking preplanned map offline", e)
+            Log.e(TAG, "Error taking preplanned map offline", e)
             _status = Status.DownloadFailure(e)
         }
     }
 
+    /**
+     * Creates a download job for fetching the preplanned map area offline.
+     *
+     * Generates default parameters for downloading, including no updates mode and error handling settings.
+     * Defines a directory path where map data will be stored and creates a download job using these configurations.
+     *
+     * @param preplannedMapArea The target [PreplannedMapArea] to be downloaded offline.
+     *
+     * @return An instance of [DownloadPreplannedOfflineMapJob] configured with download parameters.
+     *
+     * @since 200.8.0
+     */
     private suspend fun createOfflineMapJob(
         preplannedMapArea: PreplannedMapArea
     ): DownloadPreplannedOfflineMapJob {
@@ -120,9 +145,16 @@ internal class PreplannedMapAreaState(
     }
 
     /**
-     * Starts the [downloadPreplannedOfflineMapJob] using OfflineJobWorker with WorkManager.
-     * The [downloadPreplannedOfflineMapJob] is serialized into a json file and the uri is passed
-     * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
+     * Starts an offline map job using WorkManager for managing background tasks.
+     *
+     * Serializes the download job into JSON format, saves it to disk, and queues it as a WorkRequest
+     * in WorkManager.
+     *
+     * @param downloadPreplannedOfflineMapJob The prepared offline map job to execute using WorkManager.
+     *
+     * @return A unique identifier ([UUID]) associated with this task within WorkManager's queue system.
+     *
+     * @since 200.8.0
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
@@ -130,7 +162,7 @@ internal class PreplannedMapAreaState(
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        val workerUUID  = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+        val workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
             notificationId = workManagerRepository.createNotificationIdForJob(),
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
@@ -141,44 +173,85 @@ internal class PreplannedMapAreaState(
         return workerUUID
     }
 
+    /**
+     * Updates the current state of this preplanned map area instance.
+     *
+     * @param newStatus The updated [Status] value representing this area's current state.
+     *
+     * @since 200.8.0
+     */
     internal fun updateStatus(newStatus: Status) {
         _status = newStatus
     }
 }
 
+/**
+ * Represents various states of a preplanned map area during its lifecycle.
+ *
+ * @since 200.8.0
+ */
 internal sealed class Status {
 
-    // Preplanned map area not loaded.
+    /**
+     * Preplanned map area not loaded.
+     */
     data object NotLoaded : Status()
 
-    // Preplanned map area is loading.
+    /**
+     * Preplanned map area is loading.
+     */
     data object Loading : Status()
 
-    // Preplanned map area failed to load.
+    /**
+     * Preplanned map area failed to load.
+     */
     data class LoadFailure(val error: Throwable) : Status()
 
-    // Preplanned map area is packaging.
+    /**
+     * Preplanned map area is packaging.
+     */
     data object Packaging : Status()
 
-    // Preplanned map area is packaged and ready for download.
+    /**
+     * Preplanned map area is packaged and ready for download.
+     */
     data object Packaged : Status()
 
-    // Preplanned map area packaging failed.
+    /**
+     * Preplanned map area packaging failed.
+     */
     data object PackageFailure : Status()
 
-    // Preplanned map area is being downloaded.
+    /**
+     * Preplanned map area is being downloaded.
+     */
     data object Downloading : Status()
 
-    // Preplanned map area is downloaded.
+    /**
+     * Preplanned map area is downloaded.
+     */
     data object Downloaded : Status()
 
-    // Preplanned map area failed to download.
+    /**
+     * Preplanned map area failed to download.
+     */
     data class DownloadFailure(val error: Throwable) : Status()
 
-    // Downloaded mobile map package failed to load.
+    /**
+     * Downloaded mobile map package failed to load.
+     */
     data class MmpkLoadFailure(val error: Throwable) : Status()
 
     companion object {
+        /**
+         * Maps a given packaging status to the corresponding [Status] type.
+         *
+         * @param packagingStatus The packaging status to translate into a [Status].
+         * @return A [Status] object representing the translated state of the preplanned map area.
+         * @throws IllegalStateException if the status is unknown or unrecognized.
+         *
+         * @since 200.8.0
+         */
         fun fromPackagingStatus(packagingStatus: PreplannedPackagingStatus): Status {
             return when (packagingStatus) {
                 PreplannedPackagingStatus.Processing -> Packaging
@@ -189,21 +262,29 @@ internal sealed class Status {
         }
     }
 
-    // Indicates whether the model can load the preplanned map area.
+    /**
+     * Indicates whether the model can load the preplanned map area.
+     */
     val canLoadPreplannedMapArea: Boolean
         get() = when (this) {
             is NotLoaded, is LoadFailure, is PackageFailure -> true
             is Loading, is Packaging, is Packaged, is Downloading, is Downloaded, is MmpkLoadFailure, is DownloadFailure -> false
         }
 
-    // Indicates if download is allowed for this status.
+    /**
+     * Indicates if download is allowed for this status.
+     */
     val allowsDownload: Boolean
         get() = when (this) {
             is Packaged, is DownloadFailure -> true
             is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is Downloaded, is MmpkLoadFailure -> false
         }
 
-    // Indicates whether the preplanned map area is downloaded.
+    /**
+     * Indicates whether the preplanned map area is downloaded.
+     */
     val isDownloaded: Boolean
         get() = this is Downloaded
 }
+
+private val TAG = LOG_TAG + File.separator + "PreplannedMapAreasState"

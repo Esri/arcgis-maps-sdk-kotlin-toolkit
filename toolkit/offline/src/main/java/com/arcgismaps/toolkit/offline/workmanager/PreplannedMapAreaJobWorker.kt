@@ -27,10 +27,12 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
+import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.notificationIdKey
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
@@ -40,8 +42,13 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Class that runs a [DownloadPreplannedOfflineMapJob] as a CoroutineWorker using WorkManager.
+ * Executes a [DownloadPreplannedOfflineMapJob] as a CoroutineWorker using WorkManager.
+ * Manages job execution, progress tracking, foreground notifications, and cleanup operations
+ * for a preplanned map download.
+ *
+ * @since 200.8.0
  */
+
 internal class PreplannedMapAreaJobWorker(
     private val context: Context,
     params: WorkerParameters
@@ -49,16 +56,24 @@ internal class PreplannedMapAreaJobWorker(
 
     private lateinit var downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob
 
-    // notificationId passed by the activity
+    /**
+     * Retrieves the unique notification ID passed from input data to identify related notifications.
+     */
     private val notificationId by lazy {
         inputData.getInt(key = notificationIdKey, defaultValue = 1)
     }
 
+    /**
+     * Retrieves the title of the map area being processed from input data.
+     */
     private val jobAreaTitle by lazy {
         inputData.getString(key = jobAreaTitleKey) ?: "Unknown area title"
     }
 
-    // WorkerNotification instance
+    /**
+     * Initializes a [WorkerNotification] instance for managing updates during job execution
+     * via notifications such as progress and final status messages.
+     */
     private val workerNotification by lazy {
         WorkerNotification(
             applicationContext = context,
@@ -67,18 +82,26 @@ internal class PreplannedMapAreaJobWorker(
         )
     }
 
-    // must override for api versions < 31 for backwards compatibility
-    // with foreground services
+    /**
+     * Provides the [ForegroundInfo] required to run this worker as a foreground service. Sets up
+     * an override for API levels below 31 to ensure backward compatibility.
+     *
+     * @return A [ForegroundInfo] instance configured with progress details.
+     * @since 200.8.0
+     */
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return createForegroundInfo(progress = 0)
     }
 
     /**
-     * Creates and returns a new ForegroundInfo with a progress notification and the given
-     * [progress] value.
+     * Creates a [ForegroundInfo] object with a [progress] notification based on the given value.
+     * Ensures proper setup of the notification ID, type, and visibility depending on the API level.
+     *
+     * @param progress The current download progress percentage (0-100).
+     * @return A [ForegroundInfo] instance configured with ongoing progress details.
+     * @since 200.8.0
      */
     private fun createForegroundInfo(progress: Int): ForegroundInfo {
-        // create a ForegroundInfo using the notificationId and a new progress notification
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(
                 /* notificationId = */ notificationId,
@@ -93,116 +116,90 @@ internal class PreplannedMapAreaJobWorker(
         }
     }
 
+    /**
+     * Performs the main work operation to execute the offline map job. Handles preparation,
+     * execution, progress tracking, error management, and resource cleanup during job execution.
+     * Implements notifications for user updates.
+     *
+     * @return A [Result] indicating success or failure of the worker's operation.
+     * @since 200.8.0
+     */
     override suspend fun doWork(): Result {
-        // get the job parameter which is the json file path
+        // Retrieve the JSON file path from input data
         val offlineJobJsonPath = inputData.getString(jsonJobPathKey) ?: return Result.failure()
-        // load the json file
+        // Load the JSON file, return failure if it doesn't exist.
         val offlineJobJsonFile = File(offlineJobJsonPath)
-        // if the file doesn't exist return failure
         if (!offlineJobJsonFile.exists()) {
             return Result.failure()
         }
-        // create the DownloadPreplannedOfflineMapJob from the json file
+        // Deserialize the job from the JSON file; return failure if deserialization fails
         downloadPreplannedOfflineMapJob = DownloadPreplannedOfflineMapJob.fromJsonOrNull(
             json = offlineJobJsonFile.readText()
-        ) ?: return Result.failure() // return failure if the created job is null
+        ) ?: return Result.failure()
 
         return try {
-            // set this worker to run as a long-running foreground service
-            // this will throw an exception, if the worker is launched when the app
-            // is not in foreground
+            // Set up this worker to run as a foreground service with initial progress notification.
             setForeground(createForegroundInfo(0))
-            // check and delete if the offline map package file already exists
-            // this check is needed, if the download has failed midway and is restarted later
-            // by WorkManager
+            // Delete existing map package directory to ensure clean download process.
             File(downloadPreplannedOfflineMapJob.downloadDirectoryPath).deleteRecursively()
-
-            // start the downloadPreplannedOfflineMapJob
-            // this job internally runs on a Dispatchers.IO context, hence this CoroutineWorker
-            // can be run on the default Dispatchers.Default context
+            // Start downloading the preplanned offline map job.
             downloadPreplannedOfflineMapJob.start()
-
-            // collect job progress, wait for the job to finish and get the result
-            val jobResult = coroutineScope {
-                // launch the progress collector in a new coroutine
-                val progressCollectorJob = launch {
-                    // collect on progress until the job has completed in a success/failure
-                    downloadPreplannedOfflineMapJob.progress.takeWhile {
-                        downloadPreplannedOfflineMapJob.status.value != JobStatus.Failed
-                                && downloadPreplannedOfflineMapJob.status.value != JobStatus.Succeeded
-                    }.collect { progress ->
-                        // update the worker progress
-                        setProgress(workDataOf("Progress" to progress))
-                        // update the ongoing progress notification
-                        setForeground(createForegroundInfo(progress))
+            // Collect and handle job progress until completion or failure and get the result
+            val jobResult = withContext(Dispatchers.IO) {
+                coroutineScope {
+                    val progressCollectorJob = launch {
+                        // Collect progress until the job has completed in a success/failure
+                        downloadPreplannedOfflineMapJob.progress.takeWhile {
+                            downloadPreplannedOfflineMapJob.status.value != JobStatus.Failed
+                                    && downloadPreplannedOfflineMapJob.status.value != JobStatus.Succeeded
+                        }.collect { progress ->
+                            // Update the worker progress & ongoing progress notification
+                            setProgress(workDataOf("Progress" to progress))
+                            setForeground(createForegroundInfo(progress))
+                        }
                     }
+                    // Suspends until the job has completed
+                    val result = downloadPreplannedOfflineMapJob.result()
+                    // Cancel the progress collection coroutine if it is still running
+                    progressCollectorJob.cancelAndJoin()
+                    // Return the job result
+                    result
                 }
-                // suspends until the downloadPreplannedOfflineMapJob has completed
-                val result = downloadPreplannedOfflineMapJob.result()
-                // cancel the progress collection coroutine if it is still running
-                progressCollectorJob.cancelAndJoin()
-                // return the result
-                result
             }
-            // handle and return the result
+            // Handle success or failure of the job based on its result status.
             if (jobResult.isSuccess) {
-                // if the job is successful show a final status notification
                 workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
                 Result.success()
             } else {
-                // if the job has failed show a final status notification
                 val errorMessage = jobResult.exceptionOrNull()?.message
                     ?: "Unknown error during job execution"
-                Log.e(
-                    javaClass.simpleName,
-                    "Offline map job failed internally: $errorMessage",
-                    jobResult.exceptionOrNull()
-                )
+                Log.e(TAG, "Job failed internally: $errorMessage", jobResult.exceptionOrNull())
                 workerNotification.showStatusNotification("The download for $jobAreaTitle failed: $errorMessage")
                 Result.failure(workDataOf("Error" to errorMessage))
             }
         } catch (cancellationException: CancellationException) {
-            // a CancellationException is raised if the work is cancelled manually by the user
-            // log and rethrow the cancellationException
-            Log.w(
-                javaClass.simpleName,
-                "Offline map job explicitly cancelled.",
-                cancellationException
-            )
+            // Handle user/system-triggered cancellation by logging and notifying cancellation status.
+            Log.w(TAG, "Job cancelled.", cancellationException)
             workerNotification.showStatusNotification("The download for $jobAreaTitle was cancelled")
             Result.failure(workDataOf("Error" to "Job cancelled by user or system"))
         } catch (exception: Exception) {
-            // capture and log if any other exception occurs
-            Log.e(
-                javaClass.simpleName,
-                "Offline map job failed with exception: ${exception.message}",
-                exception
-            )
-            // post a job failed notification
+            // Log unexpected exceptions and notify failure status with error details.
+            Log.e(TAG, "Job failed with exception: ${exception.message}", exception)
             workerNotification.showStatusNotification("The download for $jobAreaTitle failed: ${exception.message}")
-            // return a failure result
             Result.failure(workDataOf("Error" to exception.message))
 
         } finally {
             withContext(NonCancellable) {
                 try {
-                    // cancel the job to free up any resources
+                    // Cancel ongoing resources and delete temporary files on completion/failure.
                     downloadPreplannedOfflineMapJob.cancel().getOrThrow()
-                    // delete the json job file
-                    if (offlineJobJsonFile.exists()) {
-                        offlineJobJsonFile.delete()
-                    } else {
-                        /*Do nothing*/
-                    }
-
+                    offlineJobJsonFile.delete()
                 } catch (e: Exception) {
-                    Log.e(
-                        javaClass.simpleName,
-                        "Error during final cancel of ArcGIS job: ${e.message}",
-                        e
-                    )
+                    Log.e(TAG, "Error during job cleanup: ${e.message}", e)
                 }
             }
         }
     }
 }
+
+private val TAG = LOG_TAG + File.separator + "PreplannedMapAreaJobWorker"

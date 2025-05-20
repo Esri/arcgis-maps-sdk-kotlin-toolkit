@@ -20,42 +20,41 @@ package com.arcgismaps.toolkit.offline.workmanager
 
 import android.util.Log
 import androidx.work.WorkInfo
+import com.arcgismaps.toolkit.offline.LOG_TAG
+import java.io.File
 
-// Helper function to log the status of all workers
-internal fun logWorkInfos(workInfo: WorkInfo) {
-    val tag = "Offline: WorkInfo"
+/**
+ * Logs the current state and details of a given WorkManager's [WorkInfo].
+ *
+ * @param workInfo The [WorkInfo] instance representing the state of a WorkManager task.
+ * @since 200.8.0
+ */
+internal fun logWorkInfo(workInfo: WorkInfo) {
     when (workInfo.state) {
         WorkInfo.State.ENQUEUED -> {
-            Log.e(tag, "${workInfo.tags}: ENQUEUED")
+            Log.e(TAG, "${workInfo.tags}: ENQUEUED")
         }
 
         WorkInfo.State.SUCCEEDED -> {
-            Log.e(tag, "${workInfo.tags}: SUCCEEDED")
+            Log.e(TAG, "${workInfo.tags}: SUCCEEDED")
         }
 
         WorkInfo.State.BLOCKED -> {
-            Log.e(tag, "${workInfo.tags}: BLOCKED")
+            Log.e(TAG, "${workInfo.tags}: BLOCKED")
         }
 
         WorkInfo.State.RUNNING -> {
-            Log.e(
-                tag,
-                "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}"
-            )
+            Log.e(TAG, "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}")
         }
 
         WorkInfo.State.FAILED -> {
-            Log.e(
-                tag,
-                "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
-            )
+            Log.e(TAG, "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
         }
 
         WorkInfo.State.CANCELLED -> {
-            Log.e(
-                tag,
-                "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}"
-            )
+            Log.e(TAG, "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
         }
     }
 }
+
+private val TAG = LOG_TAG + File.separator + "WorkInfo"
