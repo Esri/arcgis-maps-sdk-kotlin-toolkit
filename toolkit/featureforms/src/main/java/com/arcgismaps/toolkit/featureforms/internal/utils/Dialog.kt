@@ -41,12 +41,15 @@ import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSizeLimitExceededException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.EmptyAttachmentException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.maxAttachmentUploadSize
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -67,6 +70,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.time.Instant
+import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -527,11 +531,11 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
             size = it
         }
     }
-    // check if the size is within the limit of 50 MB
+    // check if the size is within the limits
     return@withContext if (size == 0L) {
-        Result.failure(Exception(context.getString(R.string.attachment_is_empty)))
-    } else if (size > 50_000_000) {
-        Result.failure(Exception(context.getString(R.string.attachment_too_large)))
+        Result.failure(EmptyAttachmentException())
+    } else if (size > maxAttachmentUploadSize) {
+        Result.failure(AttachmentSizeLimitExceededException(maxAttachmentUploadSize))
     } else {
         var result = Result.success(Unit)
         context.readBytes(uri).onFailure {
