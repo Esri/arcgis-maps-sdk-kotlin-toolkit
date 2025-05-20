@@ -110,6 +110,7 @@ public class OfflineMapState(
                     val preplannedMapAreaState = PreplannedMapAreaState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
+                        portalItemId = portalItemId,
                         workManagerRepository = _workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
