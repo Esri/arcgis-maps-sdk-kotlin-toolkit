@@ -23,10 +23,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -37,8 +39,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
 /**
@@ -52,7 +57,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 @Composable
 internal fun UtilityAssociationsElement(
     state: UtilityAssociationsElementState,
-    onItemClick: (Int) -> Unit,
+    onItemClick: (UtilityAssociationsFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -67,13 +72,34 @@ internal fun UtilityAssociationsElement(
             state.description,
             Modifier.padding(top = 16.dp, end = 16.dp)
         )
-        Filters(
-            filterResults = state.filters,
-            onClick = onItemClick,
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .clip(RoundedCornerShape(15.dp))
-        )
+        when {
+            // Show loading indicator when loading
+            state.loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            // If loaded and no filters found show no associations found text
+            !state.loading && state.filters.isEmpty() -> {
+                Text(
+                    text = stringResource(R.string.no_associations_found),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontStyle = FontStyle.Italic
+                    ),
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+            // Show filters when loaded and filters found
+            else -> {
+                Filters(
+                    filterResults = state.filters,
+                    onClick = onItemClick,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                )
+            }
+        }
     }
 }
 
@@ -121,20 +147,27 @@ private fun ElementHeader(
 @Composable
 private fun Filters(
     filterResults: List<UtilityAssociationsFilterResult>,
-    onClick: (Int) -> Unit,
+    onClick: (UtilityAssociationsFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier) {
         Column {
             filterResults.forEachIndexed { i, filterResult ->
-                val enabled = filterResult.resultCount > 0
                 ListItem(
                     headlineContent = {
                         Text(text = filterResult.filter.title)
                     },
-                    modifier = Modifier.clickable(enabled = enabled) {
-                        onClick(i)
+                    modifier = Modifier.clickable {
+                        onClick(filterResult)
                     },
+                    supportingContent = if (filterResult.filter.description.isNotEmpty()) {
+                        {
+                            Text(
+                                text = filterResult.filter.description,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    } else null,
                     trailingContent = {
                         Row(
                             horizontalArrangement = Arrangement.Center,

@@ -22,6 +22,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
@@ -39,6 +40,9 @@ android {
     // TODO: Remove this when Android Studio lint checker is fixed
     lint {
         disable.add("SuspiciousModifierThen")
+        // remove these disables when strings.xml lint is fixed via localization
+        disable += "MissingTranslation"
+        disable += "MissingQuantity"
     }
     
     defaultConfig {
@@ -112,8 +116,13 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
-
     )
     
     ignoredClasses.addAll(composableSingletons)

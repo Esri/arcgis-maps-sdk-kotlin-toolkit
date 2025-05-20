@@ -16,12 +16,14 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.compose.runtime.Immutable
+import androidx.annotation.MainThread
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
@@ -31,6 +33,7 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -62,9 +65,12 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import com.arcgismaps.toolkit.featureforms.internal.navigation.lifecycleIsResumed
 import com.arcgismaps.toolkit.featureforms.internal.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
 /**
@@ -78,13 +84,12 @@ import kotlinx.coroutines.launch
  * is updated when navigating from one form to another.
  *
  * [FeatureForm.evaluateExpressions] is called automatically when navigating to a new [FeatureForm]
- * or when navigating back to a previous [FeatureForm]. When expressions are running, this in indicated
- * by the [isEvaluatingExpressions] property. Expressions are also run when this class is created so
- * you do not need to call [FeatureForm.evaluateExpressions] manually.
+ * or when navigating back to a previous [FeatureForm]. Expressions are also run when this class is
+ * created so you do not need to call [FeatureForm.evaluateExpressions] manually.
  *
  * @param featureForm the [FeatureForm] to create the state for.
  *
- * @since 200.7.0
+ * @since 200.8.0
  */
 @Stable
 public class FeatureFormState private constructor(
@@ -95,8 +100,6 @@ public class FeatureFormState private constructor(
     private lateinit var coroutineScope: CoroutineScope
 
     private val _activeFeatureForm: MutableState<FeatureForm> = mutableStateOf(featureForm)
-
-    private val _isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
 
     /**
      * A navigation callback that is called when navigating to a new [FeatureForm]. This should
@@ -123,19 +126,6 @@ public class FeatureFormState private constructor(
      */
     public val activeFeatureForm: FeatureForm by _activeFeatureForm
 
-    /**
-     * Indicates if the [activeFeatureForm] is currently evaluating expressions.
-     *
-     * Note that this property is observable and if you use it in the composable function it will be
-     * recomposed on every change.
-     *
-     * To observe changes to this property outside a restartable function, use [snapshotFlow]:
-     * ```
-     * snapshotFlow { evaluatingExpressions }
-     * ```
-     */
-    public val isEvaluatingExpressions: Boolean by _isEvaluatingExpressions
-
     public constructor(
         featureForm: FeatureForm,
         coroutineScope: CoroutineScope
@@ -149,9 +139,12 @@ public class FeatureFormState private constructor(
             elements = formElements,
             scope = coroutineScope
         )
+        val formStateData = FormStateData(featureForm, states)
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, states))
-        evaluateExpressions()
+        store.addLast(formStateData)
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            formStateData.evaluateExpressions()
+        }
     }
 
     internal constructor(
@@ -161,8 +154,28 @@ public class FeatureFormState private constructor(
     ) : this(featureForm) {
         this.coroutineScope = coroutineScope
         // Add the provided state collection to the store.
-        store.addLast(FormStateData(featureForm, stateCollection))
-        evaluateExpressions()
+        val formStateData = FormStateData(this.featureForm, stateCollection)
+        store.addLast(formStateData)
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            formStateData.evaluateExpressions()
+        }
+    }
+
+    /**
+     * Discards all the edits made to the [activeFeatureForm], refreshes the attachments and
+     * evaluates expressions.
+     *
+     * @since 200.8.0
+     */
+    public suspend fun discardEdits() :  Result<List<FormExpressionEvaluationError>> {
+        val formData = getActiveFormStateData()
+        formData.featureForm.discardEdits()
+        formData.stateCollection.forEach {
+            if (it.state is AttachmentElementState) {
+                (it.state as AttachmentElementState).refreshAttachments()
+            }
+        }
+        return formData.evaluateExpressions()
     }
 
     /**
@@ -184,76 +197,138 @@ public class FeatureFormState private constructor(
     }
 
     /**
-     * Sets the [FeatureForm] associated with the provided [feature] to be the [activeFeatureForm],
-     * adds the form to the stack and navigates to the new form.
+     * Updates the [activeFeatureForm] to the current form on top of the stack. This should be
+     * called after navigating to a new form or popping the current form from the stack.
      *
-     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
-    internal fun navigateTo(feature: ArcGISFeature) {
-        navigateToRoute?.let { navigate ->
-            val form = FeatureForm(feature)
-            val formElements = form.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
-            val states = createStates(
-                form = form,
-                elements = formElements,
-                scope = coroutineScope
-            )
-            store.addLast(FormStateData(form, states))
-            _activeFeatureForm.value = form
-            // Navigate to the form view after setting the active form.
-            navigate(NavigationRoute.FormView)
-            evaluateExpressions()
+    internal suspend fun updateActiveFeatureForm() {
+        val formStateData = getActiveFormStateData()
+        // Check if the active feature form is different from the current form.
+        if (_activeFeatureForm.value != formStateData.featureForm) {
+            _activeFeatureForm.value = formStateData.featureForm
+            if (formStateData.initialEvaluation.value.not()) {
+                formStateData.evaluateExpressions()
+            }
         }
     }
 
     /**
-     * Pops the current [FeatureForm] from the stack and sets the previous form as the [activeFeatureForm].
+     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
+     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * is complete.
+     *
+     * @param backStackEntry the [NavBackStackEntry] of the current destination.
+     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
      */
-    internal fun popBackStack(): Boolean {
-        navigateBack?.let { navigate ->
-            return if (store.size <= 1) {
-                false
-            } else {
-                store.removeLast()
-                _activeFeatureForm.value = getActiveFormStateData().featureForm
-                // Navigate back to the form view after popping the current form.
-                navigate()
-                evaluateExpressions()
-                true
-            }
-        } ?: return false
+    @MainThread
+    internal fun navigateTo(backStackEntry: NavBackStackEntry, feature: ArcGISFeature, ): Boolean {
+        val navigateTo = navigateToRoute ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+        val form = FeatureForm(feature)
+        val states = createStates(
+            form = form,
+            elements = form.elements,
+            scope = coroutineScope
+        )
+        // Add the new form to the stack.
+        store.addLast(FormStateData(form, states))
+        // Navigate to the form view.
+        navigateTo(NavigationRoute.FormView)
+        return true
     }
 
     /**
-     * Returns the [FormStateData] for the currently active [FeatureForm].
+     * Based on the current destination given by the [backStackEntry], this function navigates back
+     * to the previous view and pops the current [FeatureForm] from the stack (if required).
+     *
+     * Note that this will pop the current form from the stack even if there are edits. Check if
+     * there are edits before calling this function.
+     *
+     * [updateActiveFeatureForm] must be called after this to update the [activeFeatureForm], preferably
+     * after the navigation is complete.
+     *
+     * @return true if the navigation was successful, false otherwise.
+     */
+    @MainThread
+    internal fun popBackStack(backStackEntry: NavBackStackEntry): Boolean {
+        val navigate = navigateBack ?: return false
+        // Check if the backStackEntry is in the resumed state.
+        if (backStackEntry.lifecycleIsResumed().not()) return false
+        // Check the current destination and pop the stack accordingly.
+        return when {
+            backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+                // Check if the stack has more than one form.
+                if (store.size <= 1) {
+                    false
+                } else {
+                    // Remove the current form from the stack.
+                    store.removeLast()
+                    // Navigate back to the form view after popping the current form.
+                    navigate()
+                }
+            }
+
+            backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() ||
+                backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+                // Navigate back to the previous view.
+                navigate()
+            }
+
+            else -> false
+        }
+    }
+
+    /**
+     * Returns the [FormStateData] that is currently on top of the stack.
      */
     internal fun getActiveFormStateData(): FormStateData {
         return store.last()
-    }
-
-    /**
-     * Evaluates expressions for the [activeFeatureForm] and sets the [isEvaluatingExpressions] to
-     * true while the expressions are being evaluated.
-     */
-    internal fun evaluateExpressions() {
-        coroutineScope.launch {
-            _isEvaluatingExpressions.value = true
-            activeFeatureForm.evaluateExpressions()
-            _isEvaluatingExpressions.value = false
-        }
     }
 }
 
 /**
  * A structure that holds the [FeatureForm] and its associated [FormStateCollection].
  *
- * This class is also [Immutable] and enables composition optimizations.
+ * This class is also [Stable] and enables composition optimizations.
+ *
+ * @param featureForm the [FeatureForm] to create the state for.
+ * @param stateCollection the [FormStateCollection] created for the [featureForm].
  */
-@Immutable
+@Stable
 internal data class FormStateData(
     val featureForm: FeatureForm,
     val stateCollection: FormStateCollection
-)
+) {
+    /**
+     * Indicates if the expressions for the [featureForm] have been evaluated at least once.
+     */
+    var initialEvaluation : MutableState<Boolean> = mutableStateOf(false)
+        private set
+
+    /**
+     * Indicates if the expressions for the [featureForm] are currently being evaluated.
+     */
+    var isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+        private set
+
+    /**
+     * Evaluates the expressions for the [featureForm] and returns the result. After a successful
+     * evaluation, the [initialEvaluation] is set to true. While this function is running, the
+     * [isEvaluatingExpressions] will be true.
+     */
+    suspend fun evaluateExpressions() : Result<List<FormExpressionEvaluationError>> {
+        try {
+            isEvaluatingExpressions.value = true
+            return featureForm.evaluateExpressions().onSuccess {
+                // Set the initial evaluation to true after the first successful evaluation.
+                initialEvaluation.value = true
+            }
+        } finally {
+            isEvaluatingExpressions.value = false
+        }
+    }
+}
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the
@@ -277,12 +352,11 @@ internal fun createStates(
     }
     filteredElements.forEach { element ->
         when (element) {
-
             is AttachmentsFormElement -> {
                 val state = AttachmentElementState(
-                    formElement = form.defaultAttachmentsElement!!,
+                    formElement = element,
                     scope = scope,
-                    id = form.defaultAttachmentsElement!!.hashCode(),
+                    id = element.hashCode(),
                     evaluateExpressions = form::evaluateExpressions
                 )
                 states.add(element, state)

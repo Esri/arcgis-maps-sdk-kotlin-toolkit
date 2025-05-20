@@ -38,6 +38,7 @@ import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
@@ -167,6 +168,15 @@ class MapViewModel @Inject constructor(
     val error: State<Error?>
         get() = _error
 
+    private val _identifyTaskLocation: MutableState<Point?> = mutableStateOf(null)
+
+    /**
+     * The current location of the identify task. This is used to indicate if there is an
+     * identify task in progress for the given location.
+     */
+    val identifyTaskLocation : State<Point?>
+        get() = _identifyTaskLocation
+
     /**
      * A flow that emits the active feature form in the editing state, or null if not editing.
      */
@@ -187,7 +197,19 @@ class MapViewModel @Inject constructor(
                 // clear any features selected on the map
                 map.clearSelection()
                 // if there is an active feature form then select the feature
-                featureForm?.selectFeature()
+                if (featureForm != null) {
+                    featureForm.selectFeature()
+                    featureForm.feature.geometry?.let { geometry ->
+                        // set the viewpoint to the feature geometry
+                        proxy.setViewpointAnimated(
+                            viewpoint = Viewpoint(
+                                geometry
+                            )
+                        ).onSuccess {
+                            proxy.setViewpointScale(map.referenceScale)
+                        }
+                    }
+                }
             }
         }
     }
@@ -212,9 +234,11 @@ class MapViewModel @Inject constructor(
      * and sets the UI state to select a feature if multiple features are identified.
      */
     fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-        // do not identify layers if the state is editing
-        if (_uiState.value is UIState.Editing) return
+        // do not identify layers if the state is not editing or
+        // if there is an identify task already in progress
+        if (_uiState.value !is UIState.NotEditing || identifyTaskLocation.value != null) return
         scope.launch {
+            _identifyTaskLocation.value = singleTapEvent.mapPoint
             proxy.identifyLayers(
                 screenCoordinate = singleTapEvent.screenCoordinate,
                 tolerance = 10.dp,
@@ -256,6 +280,8 @@ class MapViewModel @Inject constructor(
                             Toast.LENGTH_LONG
                         ).show()
                     }
+                } finally {
+                    _identifyTaskLocation.value = null
                 }
             }
         }
@@ -487,6 +513,7 @@ fun ArcGISMap.clearSelection() {
             is FeatureLayer -> {
                 layer.clearSelection()
             }
+
             else -> {}
         }
     }

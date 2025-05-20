@@ -158,6 +158,7 @@
     <string name="the_form_has_validation_errors">The form has validation errors</string>
     <string name="the_form_has_edits">The form has edits</string>
     <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
+    <string name="no_associations_found">No associations found</string>
     <string name="terminal">Terminal : %1$s</string>
     <string name="containment_visible">Containment Visible : %1$s</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
