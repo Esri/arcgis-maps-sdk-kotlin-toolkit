@@ -22,28 +22,17 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
-import com.arcgismaps.toolkit.offline.jobAreaTitleKey
-import com.arcgismaps.toolkit.offline.jobParameter
-import com.arcgismaps.toolkit.offline.notificationIdParameter
-import com.arcgismaps.toolkit.offline.offlineJobJsonFile
-import com.arcgismaps.toolkit.offline.offlineMapFile
+import com.arcgismaps.toolkit.offline.WorkManagerRepository
+import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
-import com.arcgismaps.toolkit.offline.uniqueWorkName
-import com.arcgismaps.toolkit.offline.workmanager.OfflineJobWorker
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfos
-import com.arcgismaps.toolkit.offline.workmanager.observeStatusForPreplannedWork
 import java.io.File
-import kotlin.random.Random
+import java.util.UUID
 
 /**
  * Represents the state of a [PreplannedMapArea].
@@ -53,8 +42,8 @@ import kotlin.random.Random
 internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
-    private val getExternalFilesDirPath: String,
-    private val workManager : WorkManager
+    private val portalItemId: String,
+    private val workManagerRepository: WorkManagerRepository
 ) {
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
@@ -62,16 +51,6 @@ internal class PreplannedMapAreaState(
         get() = _status
 
     private var preplannedMapAreaTitle = ""
-
-    // TODO: This path is reset prior to a job, next, define local repository rules for offline map files.
-    private val offlineMapPath by lazy {
-        getExternalFilesDirPath + File.separator + offlineMapFile
-    }
-
-    // create a temporary file path to save the offlineMapJob json file
-    private val offlineJobJsonPath by lazy {
-        getExternalFilesDirPath + File.separator + offlineJobJsonFile
-    }
 
     internal suspend fun initialize() = runCatchingCancellable {
         preplannedMapArea.load()
@@ -96,16 +75,16 @@ internal class PreplannedMapAreaState(
         try {
             // Set the downloading status
             _status = Status.Downloading
-            startOfflineMapJob(
+            val offlineWorkerUUID = startOfflineMapJob(
                 downloadPreplannedOfflineMapJob = createOfflineMapJob(
                     preplannedMapArea = preplannedMapArea
                 )
             )
             // Start observing WorkManager status
-            observeStatusForPreplannedWork(
-                workManager = workManager,
+            workManagerRepository.observeStatusForPreplannedWork(
                 onWorkInfoStateChanged = ::logWorkInfos,
-                preplannedMapAreaState = this
+                preplannedMapAreaState = this,
+                offlineWorkerUUID = offlineWorkerUUID
             )
 
         } catch (e: Exception) {
@@ -117,9 +96,6 @@ internal class PreplannedMapAreaState(
     private suspend fun createOfflineMapJob(
         preplannedMapArea: PreplannedMapArea
     ): DownloadPreplannedOfflineMapJob {
-        // Check and delete if the offline map package file already exists
-        File(offlineMapPath).deleteRecursively()
-
         // Create default download parameters from the offline map task
         val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
             preplannedMapArea = preplannedMapArea
@@ -130,12 +106,14 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val downloadDirectoryPath = offlineMapPath + File.separator + preplannedMapArea.portalItem.itemId
-        File(downloadDirectoryPath).mkdirs()
+        val preplannedMapAreaDownloadDirectory = workManagerRepository.createContentsForPath(
+            offlineMapDirectoryName = portalItemId + File.separator + preplannedMapAreas + File.separator + preplannedMapArea.portalItem.itemId
+        )
+
         // Create a job to download the preplanned offline map
         val downloadPreplannedOfflineMapJob = offlineMapTask.createDownloadPreplannedOfflineMapJob(
             parameters = params,
-            downloadDirectoryPath = downloadDirectoryPath
+            downloadDirectoryPath = preplannedMapAreaDownloadDirectory.path
         )
 
         return downloadPreplannedOfflineMapJob
@@ -146,36 +124,21 @@ internal class PreplannedMapAreaState(
      * The [downloadPreplannedOfflineMapJob] is serialized into a json file and the uri is passed
      * to the OfflineJobWorker, since WorkManager enforces a MAX_DATA_BYTES for the WorkRequest's data
      */
-    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob) {
-        // create the json file
-        val offlineJobJsonFile = File(offlineJobJsonPath)
-        // serialize the offlineMapJob into the file
-        offlineJobJsonFile.writeText(downloadPreplannedOfflineMapJob.toJson())
+    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
+        val jsonJobFile = workManagerRepository.saveJobToDisk(
+            jobPath = portalItemId + File.separator + preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
+            jobJson = downloadPreplannedOfflineMapJob.toJson()
+        )
 
-        // create a non-zero notification id for the OfflineJobWorker
-        // this id will be used to post or update any progress/status notifications
-        val notificationId = Random.nextInt(1, 100)
+        val workerUUID  = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+            notificationId = workManagerRepository.createNotificationIdForJob(),
+            jsonJobPath = jsonJobFile.path,
+            preplannedMapAreaTitle = preplannedMapArea.portalItem.title
+        )
 
+        workManagerRepository.getProgressForUUID(workerUUID)
 
-        // create a one-time work request with an instance of OfflineJobWorker
-        val workRequest = OneTimeWorkRequestBuilder<OfflineJobWorker>()
-            // run it as an expedited work
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            // add the input data
-            .setInputData(
-                // add the notificationId and the json file path as a key/value pair
-                workDataOf(
-                    notificationIdParameter to notificationId,
-                    jobParameter to offlineJobJsonFile.absolutePath,
-                    jobAreaTitleKey to preplannedMapAreaTitle
-                )
-            ).build()
-
-        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
-        // only one instance of OfflineJobWorker is running at any time
-        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
-        // ones that are active
-        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, workRequest)
+        return workerUUID
     }
 
     internal fun updateStatus(newStatus: Status) {

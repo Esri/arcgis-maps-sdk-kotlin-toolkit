@@ -32,16 +32,13 @@ class OfflineViewModel : ViewModel() {
 
     val arcGISMap = ArcGISMap(
         PortalItem(
-            Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-            napervilleWaterNetwork
+            Portal.arcGISOnline(connection = Portal.Connection.Anonymous), napervilleWaterNetwork
         )
     )
 
     val offlineMapState = OfflineMapState(arcGISMap)
 
     init {
-        viewModelScope.launch {
-            arcGISMap.load()
-        }
+        viewModelScope.launch { arcGISMap.load() }
     }
 }
