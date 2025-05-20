@@ -34,7 +34,7 @@ import java.util.UUID
 /**
  * Manages WorkManager operations for offline map tasks, including job creation, queuing,
  * progress tracking, and cleanup. Provides utilities to handle serialization of jobs,
- * manage notifications, and observe job states for preplanned map areas.
+ * manage notifications, and observe job states for preplanned and onDemand map areas.
  *
  * @since 200.8.0
  */
@@ -152,15 +152,16 @@ internal class WorkManagerRepository(private val context: Context) {
      * corresponding statuses in [PreplannedMapAreaState]. Finally, prunes completed tasks
      * from WorkManager's database when necessary.
      *
-     * @param onWorkInfoStateChanged A callback function triggered when work state changes occur.
-     * @param preplannedMapAreaState The [PreplannedMapAreaState] instance to update based on task progress or completion.
+     *
      * @param offlineWorkerUUID The unique identifier associated with the specific task being observed in WorkManager.
+     * @param preplannedMapAreaState The [PreplannedMapAreaState] instance to update based on task progress or completion.
+     * @param onWorkInfoStateChanged A callback function triggered when work state changes occur.
      * @since 200.8.0
      */
     internal suspend fun observeStatusForPreplannedWork(
-        onWorkInfoStateChanged: (WorkInfo) -> Unit,
+        offlineWorkerUUID: UUID,
         preplannedMapAreaState: PreplannedMapAreaState,
-        offlineWorkerUUID: UUID
+        onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
         coroutineScope {
             launch {

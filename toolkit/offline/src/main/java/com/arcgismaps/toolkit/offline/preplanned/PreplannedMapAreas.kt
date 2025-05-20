@@ -134,10 +134,10 @@ internal fun PreplannedMapAreas(
 
 /**
  * Retrieves a user-friendly status string for a preplanned map area based on its current status.
+ *
  * @param context The `Context` used to access application-specific resources like strings.
  * @param status  The current state of the preplanned map area, represented by an instance of `Status`.
  * @return A localized string corresponding to the given status.
- *
  * @since 200.8.0
  */
 private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
