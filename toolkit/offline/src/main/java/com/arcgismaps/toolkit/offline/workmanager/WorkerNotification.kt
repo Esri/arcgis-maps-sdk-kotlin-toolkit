@@ -32,9 +32,14 @@ import com.arcgismaps.toolkit.offline.notificationChannelName
 import com.arcgismaps.toolkit.offline.notificationTitle
 
 /**
- * Helper class that handles progress and status notifications on [applicationContext] for
- * the offline map job run using WorkManager. a non-zero [notificationId] is used to show
- * and update the progress and status notifications
+ * Handles progress and status notifications for offline map jobs executed via WorkManager.
+ * Provides methods to create, update, and cancel notifications related to the download of offline
+ * map areas. Uses Android's notification system to inform about job progress and completion statuses.
+ *
+ * @param applicationContext The application context used to access resources and system services.
+ * @param notificationId A unique identifier for managing notifications associated with a specific job.
+ * @param jobAreaTitle The title of the map area being processed, displayed in notifications.
+ * @since 200.8.0
  */
 internal class WorkerNotification(
     private val applicationContext: Context,
@@ -50,10 +55,11 @@ internal class WorkerNotification(
     // intent for notifications tap action that launch the MainActivity
     private val mainActivityIntent by lazy {
         // setup the intent to launch MainActivity
-        val intent = applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)?.apply {
-            // launches the activity if not already on top and active
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        val intent = applicationContext.packageManager
+            .getLaunchIntentForPackage(applicationContext.packageName)?.apply {
+                // launches the activity if not already on top and active
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
         // set the pending intent that will be passed to the NotificationManager
         PendingIntent.getActivity(
             applicationContext,
@@ -87,7 +93,12 @@ internal class WorkerNotification(
     }
 
     /**
-     * Creates and returns a new progress notification with the given [progress] value
+     * Creates a progress notification displaying the current download percentage.
+     * Includes an action button to cancel the job directly from the notification.
+     *
+     * @param progress The download progress percentage (0-100).
+     * @return A [Notification] instance configured with progress details.
+     * @since 200.8.0
      */
     fun createProgressNotification(progress: Int): Notification {
         // use the default notification builder and set the progress to 0
@@ -102,8 +113,11 @@ internal class WorkerNotification(
     }
 
     /**
-     * Creates and posts a new status notification with the [message] and dismisses any ongoing
-     * progress notifications
+     * Displays a status notification indicating job completion or failure.
+     * Cancels any ongoing progress notifications before posting the new message.
+     *
+     * @param message The status message describing the outcome of the job.
+     * @since 200.8.0
      */
     @SuppressLint("MissingPermission")
     fun showStatusNotification(message: String) {
@@ -126,6 +140,7 @@ internal class WorkerNotification(
 
     /**
      * Creates a new notification channel and adds it to the NotificationManager
+     * @since 200.8.0
      */
     private fun createNotificationChannel() {
         // get the channel properties from resources
@@ -144,8 +159,14 @@ internal class WorkerNotification(
     }
 
     /**
-     * Creates and returns a new NotificationCompat.Builder with the given [contentText]
-     * and as an ongoing notification based on [setOngoing]
+     * Builds a default notification with common attributes for job updates.
+     * Configures whether the notification is ongoing or dismissible and links an
+     * intent to launch the main activity when tapped.
+     *
+     * @param setOngoing Specifies if the notification is ongoing (non-dismissible).
+     * @param contentText The text displayed within the notification body.
+     * @return A [NotificationCompat.Builder] pre-configured with default settings.
+     * @since 200.8.0
      */
     private fun getDefaultNotificationBuilder(
         setOngoing: Boolean,

@@ -24,10 +24,20 @@ import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 
 /**
- * Custom BroadcastReceiver class that handles notification actions setup by WorkerNotification
+ * Handles notification actions triggered by the user, canceling the offline map job.
+ *
+ * @since 200.8.0
  */
 internal class NotificationActionReceiver : BroadcastReceiver() {
 
+    /**
+     * Processes the incoming broadcast intent and performs the associated action.
+     *
+     * @param context The application context used to access WorkManager.
+     * @param intent The broadcast intent containing the action data.
+     *
+     * @since 200.8.0
+     */
     override fun onReceive(context: Context, intent: Intent) {
         // retrieve the data name or return if the context if null
         val extraName = notificationCancelActionKey

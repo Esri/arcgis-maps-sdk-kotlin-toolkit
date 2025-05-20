@@ -27,6 +27,7 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
@@ -60,7 +61,6 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-
     internal suspend fun initialize() = runCatchingCancellable {
         preplannedMapArea.load()
             .onSuccess {
@@ -100,7 +100,7 @@ internal class PreplannedMapAreaState(
             )
 
         } catch (e: Exception) {
-            Log.e("Offline: PreplannedMapAreaState", "Error taking preplanned map offline", e)
+            Log.e(TAG, "Error taking preplanned map offline", e)
             _status = Status.DownloadFailure(e)
         }
     }
@@ -285,3 +285,5 @@ internal sealed class Status {
     val isDownloaded: Boolean
         get() = this is Downloaded
 }
+
+private val TAG = LOG_TAG + File.separator + "PreplannedMapAreasState"

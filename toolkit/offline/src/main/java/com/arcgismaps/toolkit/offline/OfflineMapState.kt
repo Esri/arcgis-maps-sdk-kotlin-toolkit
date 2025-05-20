@@ -30,6 +30,7 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
+internal const val LOG_TAG = "Offline"
 internal const val notificationIdKey = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jsonJobPathKey = "JsonJobPath"

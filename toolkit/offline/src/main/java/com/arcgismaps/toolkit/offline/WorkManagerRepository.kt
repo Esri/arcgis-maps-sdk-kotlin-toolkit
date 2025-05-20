@@ -31,6 +31,13 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
+/**
+ * Manages WorkManager operations for offline map tasks, including job creation, queuing,
+ * progress tracking, and cleanup. Provides utilities to handle serialization of jobs,
+ * manage notifications, and observe job states for preplanned map areas.
+ *
+ * @since 200.8.0
+ */
 internal class WorkManagerRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
@@ -39,6 +46,16 @@ internal class WorkManagerRepository(private val context: Context) {
         createExternalDirPath() + File.separator + jsonJobsTempDir
     }
 
+    /**
+     * Saves a serialized offline map job as a JSON file on disk. Ensures directories are created
+     * and writes the provided JSON content to the specified path.
+     *
+     * @param jobPath The relative path where the JSON file should be saved.
+     * @param jobJson The serialized string representation of the offline map job.
+     * @return A [File] instance pointing to the saved JSON file.
+     *
+     * @since 200.8.0
+     */
     internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
         // create the json file
         val offlineJobJsonFile = File(offlineJobJsonPath + File.separator + jobPath)
@@ -48,10 +65,24 @@ internal class WorkManagerRepository(private val context: Context) {
         return offlineJobJsonFile
     }
 
+    /**
+     * Retrieves the external directory path for storing application files.
+     *
+     * @return The external directory path as a [String].
+     * @since 200.8.0
+     */
+
     private fun createExternalDirPath(): String {
         return context.getExternalFilesDir(null)?.path.toString()
     }
 
+    /**
+     * Creates directories for storing offline map contents at the specified path within external storage.
+     *
+     * @param offlineMapDirectoryName The name of the directory to create within external storage.
+     * @return A [File] instance representing the created directory structure.
+     * @since 200.8.0
+     */
     internal fun createContentsForPath(offlineMapDirectoryName: String): File {
         val pathToCreate = createExternalDirPath() + File.separator + offlineMapDirectoryName
         return File(pathToCreate).also { it.mkdirs() }
@@ -62,6 +93,18 @@ internal class WorkManagerRepository(private val context: Context) {
         File(pathToDelete).deleteRecursively()
     }
 
+    /**
+     * Creates and enqueues a one-time WorkManager request for downloading an offline map area
+     * using [PreplannedMapAreaJobWorker]. Sets up expedited work with input data containing
+     * notification and job details. Ensures only one worker instance runs at any time by
+     * replacing active workers with the same unique name as per the defined policy.
+     *
+     * @param notificationId The unique ID for notifications associated with this job.
+     * @param jsonJobPath The file path to the serialized JSON representation of the job.
+     * @param preplannedMapAreaTitle The title of the preplanned map area being downloaded.
+     * @return A [UUID] representing the identifier of the enqueued WorkManager request.
+     * @since 200.8.0
+     */
     internal fun createPreplannedMapAreaRequestAndQueDownload(
         notificationId: Int,
         jsonJobPath: String,
@@ -93,20 +136,29 @@ internal class WorkManagerRepository(private val context: Context) {
         return workRequest.id
     }
 
+    /**
+     * Generates a random unique ID for notifications associated with new jobs.
+     *
+     * @return An integer representing a randomly generated notification ID.
+     * @since 200.8.0
+     */
     internal fun createNotificationIdForJob(): Int {
         return UUID.randomUUID().hashCode()
     }
 
-
     /**
-     * Starts observing any running or completed OfflineJobWorker work requests by capturing the
-     * flow. The flow starts receiving updates when the activity is in started or resumed state.
-     * This allows the application to capture immediate progress when in foreground and latest
-     * progress when the app resumes or restarts.
+     * Observes updates on a specific WorkManager task identified by its UUID and
+     * handles status changes for preplanned map areas. Monitors task states to update
+     * corresponding statuses in [PreplannedMapAreaState]. Finally, prunes completed tasks
+     * from WorkManager's database when necessary.
+     *
+     * @param onWorkInfoStateChanged A callback function triggered when work state changes occur.
+     * @param preplannedMapAreaState The [PreplannedMapAreaState] instance to update based on task progress or completion.
+     * @param offlineWorkerUUID The unique identifier associated with the specific task being observed in WorkManager.
+     * @since 200.8.0
      */
     internal suspend fun observeStatusForPreplannedWork(
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
-        // TODO, Provide callback lambdas to update status on PreplannedMapAreaState
         preplannedMapAreaState: PreplannedMapAreaState,
         offlineWorkerUUID: UUID
     ) {
