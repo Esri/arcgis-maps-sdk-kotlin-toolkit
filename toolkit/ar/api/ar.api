@@ -130,7 +130,6 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy {
 	public final fun checkVpsAvailability-0E7RQCE (DDLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun checkVpsAvailability-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun exportImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getCamera ()Lcom/arcgismaps/mapping/view/Camera;
 	public final fun getFieldOfView ()Ljava/lang/Double;
 	public final fun getFieldOfViewDistortionRatio ()Ljava/lang/Double;
 	public final fun getLayerViewState (Lcom/arcgismaps/mapping/layers/Layer;)Lcom/arcgismaps/mapping/view/LayerViewState;
@@ -146,7 +145,6 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy {
 	public final fun locationToScreen (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/LocationToScreenResult;
 	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setCamera (Lcom/arcgismaps/mapping/view/Camera;)V
 }
 
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewScope {

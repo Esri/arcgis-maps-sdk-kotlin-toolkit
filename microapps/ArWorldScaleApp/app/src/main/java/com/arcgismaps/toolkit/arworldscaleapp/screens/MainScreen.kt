@@ -91,6 +91,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleSceneView
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
+import com.arcgismaps.toolkit.ar.WorldScaleVpsAvailability
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
 import kotlinx.coroutines.launch
@@ -197,14 +198,14 @@ fun MainScreen() {
                         )
                     }
                     val vpsAvailableText = stringResource(R.string.vps_available)
-                    val vpsUnavailableText = stringResource(R.string.vps_unavailable)
+                    val vpsUnavailableText = stringResource(R.string.vps_unavailable_unknown)
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.check_vps)) },
                         onClick = {
                             actionsExpanded = false
                             scope.launch {
                                 val vpsCheck = proxy.checkVpsAvailability()
-                                if (vpsCheck.isSuccess) {
+                                if (vpsCheck.getOrNull() == WorldScaleVpsAvailability.Available) {
                                     snackbarHostState.showSnackbar(
                                         vpsAvailableText,
                                         withDismissAction = true
@@ -222,7 +223,7 @@ fun MainScreen() {
                             Icon(
                                 modifier = Modifier.padding(horizontal = 12.dp),
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "wow!"
+                                contentDescription = stringResource(R.string.check_vps)
                             )
                         }
                     )

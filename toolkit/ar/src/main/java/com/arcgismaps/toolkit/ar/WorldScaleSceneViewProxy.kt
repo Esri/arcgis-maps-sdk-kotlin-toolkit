@@ -64,10 +64,10 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
     }
 
 
-    private var _camera : Camera? = null
+    private var _currentCamera : Camera? = null
 
-    internal fun setCamera(camera: Camera?){
-        _camera = camera
+    internal fun setCurrentCamera(camera: Camera?){
+        _currentCamera = camera
     }
 
     /**
@@ -87,7 +87,7 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * @since 200.8.0
      */
     public suspend fun checkVpsAvailability(): Result<WorldScaleVpsAvailability> =
-        _camera?.let {
+        _currentCamera?.let {
             it.location.let { point ->
                 checkVpsAvailability(point.y, point.x)
             }
@@ -107,14 +107,6 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
             suspendCancellableCoroutine { continuation ->
                 sessionWrapper.withLock { wrappedSession, _ ->
                     wrappedSession?.let { session ->
-                        continuation.invokeOnCancellation {
-                            val result = if (it != null) {
-                                Result.failure(it)
-                            } else {
-                                Result.failure<WorldScaleVpsAvailability>(Exception("Operation cancelled"))
-                            }
-                            continuation.resume(result)
-                        }
                         session.checkVpsAvailabilityAsync(
                             latitude,
                             longitude

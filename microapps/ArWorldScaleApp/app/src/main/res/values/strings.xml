@@ -31,7 +31,7 @@
     <string name="show_privacy_info">Show Privacy Info</string>
     <string name="check_vps">Check VPS</string>
     <string name="vps_available">VPS Status: Available</string>
-    <string name="vps_unavailable">VPS Status: Unvailable</string>
+    <string name="vps_unavailable_unknown">VPS Status: Unavailable or unknown</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
 </resources>

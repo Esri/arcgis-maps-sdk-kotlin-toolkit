@@ -311,7 +311,7 @@ public fun WorldScaleSceneView(
             onLayerViewStateChanged = onLayerViewStateChanged,
             onInteractingChanged = onInteractingChanged,
             onCurrentViewpointCameraChanged = {
-                worldScaleSceneViewProxy.setCamera(it)
+                worldScaleSceneViewProxy.setCurrentCamera(it)
                 onCurrentViewpointCameraChanged?.invoke(it)
             },
             onRotate = onRotate,
