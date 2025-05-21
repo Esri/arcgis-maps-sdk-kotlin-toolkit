@@ -75,7 +75,7 @@ class ItemRemoteDataSource(
         /**
          * Folder under the portal to fetch the portal items from.
          */
-        const val portalFolder = "Nautilus"
+        const val portalFolder = "Apollo"
     }
 
     suspend fun fetchItemData(portalUri: String, connection: Portal.Connection): List<ItemData> =

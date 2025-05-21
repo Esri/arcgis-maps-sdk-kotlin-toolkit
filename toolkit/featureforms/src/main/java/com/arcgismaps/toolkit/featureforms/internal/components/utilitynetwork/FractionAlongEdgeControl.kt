@@ -29,8 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
 internal fun FractionAlongEdgeControl(
@@ -50,7 +52,7 @@ internal fun FractionAlongEdgeControl(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PropertyRow(
-                title = "Fraction Along Edge",
+                title = stringResource(R.string.fraction_along_edge),
                 value = "$percent %",
                 modifier = Modifier.fillMaxWidth()
             )

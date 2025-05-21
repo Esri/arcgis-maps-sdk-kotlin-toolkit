@@ -24,7 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
 internal fun ContentVisibleControl(
@@ -38,7 +40,7 @@ internal fun ContentVisibleControl(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = "Content Visible")
+        Text(text = stringResource(R.string.containment_visible))
         Switch(
             checked = value,
             onCheckedChange = onValueChange,

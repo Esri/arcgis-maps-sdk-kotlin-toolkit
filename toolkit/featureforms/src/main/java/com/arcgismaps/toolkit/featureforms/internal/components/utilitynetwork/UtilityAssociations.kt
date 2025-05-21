@@ -211,7 +211,7 @@ private fun AssociationItem(
 
         association.associationType is UtilityAssociationType.Containment &&
             associatedFeature.globalId == association.toElement.globalId -> {
-            stringResource(R.string.containment_visible, association.isContainmentVisible)
+            stringResource(R.string.containment_visible_value, association.isContainmentVisible)
         }
 
         else -> ""

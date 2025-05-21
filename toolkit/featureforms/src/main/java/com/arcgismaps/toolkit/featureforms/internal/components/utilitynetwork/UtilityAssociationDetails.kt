@@ -38,11 +38,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
-import com.arcgismaps.utilitynetworks.UtilityTerminal
 
 /**
  * A composable that displays the details of a [UtilityAssociationResult].
@@ -62,14 +63,14 @@ internal fun UtilityAssociationDetails(
         mutableStateOf(false)
     }
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(modifier = Modifier.padding(24.dp)) {
             Column {
                 PropertyRow(
-                    title = "From Element",
+                    title = stringResource(R.string.from_element),
                     value = "${association.fromElement.objectId}",
                     modifier = Modifier
                         .padding(20.dp)
@@ -89,7 +90,7 @@ internal fun UtilityAssociationDetails(
         Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             Column {
                 PropertyRow(
-                    title = "To Element",
+                    title = stringResource(R.string.to_element),
                     value = "${association.toElement.objectId}",
                     modifier = Modifier
                         .padding(20.dp)
@@ -108,7 +109,7 @@ internal fun UtilityAssociationDetails(
         }
         Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             PropertyRow(
-                title = "Association Type",
+                title = stringResource(R.string.association_type),
                 value = filter.filterType.toString(),
                 modifier = Modifier
                     .padding(20.dp)
@@ -136,11 +137,11 @@ internal fun UtilityAssociationDetails(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Button(onClick = { showConfirmationDialog = true }) {
-            Text(text = "Remove Association")
+            Text(text = stringResource(R.string.remove_association))
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Only removes the association. The feature remains.",
+            text = stringResource(R.string.remove_association_tooltip),
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -185,19 +186,19 @@ private fun RemoveAssociationConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Remove Association?")
+            Text(text = "${stringResource(R.string.remove_association)}?")
         },
         text = {
-            Text(text = "This will remove the association. The feature will remain.")
+            Text(text = stringResource(R.string.remove_association_tooltip))
         },
         confirmButton = {
             TextButton(onRemove) {
-                Text(text = "Remove")
+                Text(text = stringResource(R.string.remove))
             }
         },
         dismissButton = {
             TextButton(onDismiss) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.cancel))
             }
         }
     )
@@ -230,37 +231,6 @@ internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
         UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
         UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
             association.fractionAlongEdge
-        }
-
-        else -> null
-    }
-}
-
-
-internal fun UtilityAssociationResult.shouldShowTerminal(): Boolean {
-    val target = association.getTargetElement(associatedFeature)
-    return when (this.association.associationType) {
-        UtilityAssociationType.Connectivity,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
-            target.networkSource.sourceType != UtilityNetworkSourceType.Edge
-        }
-
-        else -> false
-    }
-}
-
-internal fun UtilityAssociationResult.getTerminalValue(): UtilityTerminal? {
-    val target = association.getTargetElement(associatedFeature)
-    return when (this.association.associationType) {
-        UtilityAssociationType.Connectivity,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
-            if (target.networkSource.sourceType != UtilityNetworkSourceType.Edge) {
-                target.terminal
-            } else null
         }
 
         else -> null

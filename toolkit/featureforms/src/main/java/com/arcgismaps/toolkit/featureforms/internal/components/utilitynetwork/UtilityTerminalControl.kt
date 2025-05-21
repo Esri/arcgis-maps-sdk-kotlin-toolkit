@@ -19,11 +19,9 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.utilitynetworks.UtilityAssociationResult
-import com.arcgismaps.utilitynetworks.UtilityAssociationType
-import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
-import com.arcgismaps.utilitynetworks.UtilityTerminal
+import com.arcgismaps.toolkit.featureforms.R
 
 @Composable
 internal fun UtilityTerminalControl(
@@ -31,7 +29,7 @@ internal fun UtilityTerminalControl(
     modifier: Modifier = Modifier
 ) {
     PropertyRow(
-        title = "Terminal",
+        title = stringResource(R.string.terminal),
         value = name,
         modifier = modifier
     )

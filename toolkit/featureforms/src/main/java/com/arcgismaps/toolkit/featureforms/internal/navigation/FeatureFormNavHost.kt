@@ -132,7 +132,7 @@ internal fun FeatureFormNavHost(
             // Display the association details
             UtilityAssociationDetails(
                 state = utilityAssociationsElementState,
-                //modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
