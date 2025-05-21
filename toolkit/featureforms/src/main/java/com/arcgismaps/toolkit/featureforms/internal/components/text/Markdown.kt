@@ -212,7 +212,7 @@ private fun ListNode(
     isOrdered: Boolean,
     modifier: Modifier = Modifier
 ) {
-    var number = if (isOrdered) (node as OrderedList).startNumber else 0
+    var number = if (isOrdered) (node as OrderedList).markerStartNumber else 0
     Column(
         modifier = modifier
     ) {
