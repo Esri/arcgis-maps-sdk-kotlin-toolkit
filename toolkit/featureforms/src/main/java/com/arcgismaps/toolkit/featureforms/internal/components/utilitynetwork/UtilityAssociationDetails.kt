@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -127,7 +126,7 @@ internal fun UtilityAssociationDetails(
                 )
             }
         }
-        if (associationResult.shouldShowFractionAlongEdge()) {
+        associationResult.getFractionAlongEdge()?.let { fraction ->
             FractionAlongEdgeControl(
                 fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
                 enabled = false,
@@ -156,6 +155,9 @@ internal fun UtilityAssociationDetails(
     }
 }
 
+/**
+ * A composable that displays a row with a title and value.
+ */
 @Composable
 internal fun PropertyRow(
     title: String,
@@ -178,6 +180,12 @@ internal fun PropertyRow(
     }
 }
 
+/**
+ * A composable that displays a confirmation dialog for removing an association.
+ *
+ * @param onDismiss A callback that is called when the dialog is dismissed.
+ * @param onRemove A callback that is called when the remove button is clicked.
+ */
 @Composable
 private fun RemoveAssociationConfirmationDialog(
     onDismiss: () -> Unit,
@@ -204,17 +212,11 @@ private fun RemoveAssociationConfirmationDialog(
     )
 }
 
-internal fun UtilityAssociationResult.shouldShowFractionAlongEdge(): Boolean {
-    return when (association.associationType) {
-        UtilityAssociationType.Connectivity,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> true
-
-        else -> false
-    }
-}
-
+/**
+ * Extension function that returns the fraction along edge of the association result, if applicable.
+ *
+ * @return The fraction along edge of the association result, or null if not applicable.
+ */
 internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
     val target = association.getTargetElement(associatedFeature)
     return when (this.association.associationType) {

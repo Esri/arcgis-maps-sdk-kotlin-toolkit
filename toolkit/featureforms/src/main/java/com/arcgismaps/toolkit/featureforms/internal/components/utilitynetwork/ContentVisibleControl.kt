@@ -27,7 +27,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.utilitynetworks.UtilityAssociation
 
+/**
+ * A composable that represents a content visible control of a [UtilityAssociation], specifically the
+ * [UtilityAssociation.isContainmentVisible] property.
+ *
+ * @param value The current value of the content visible control.
+ * @param enabled A boolean indicating whether the control is enabled or not.
+ * @param onValueChange A callback that is called when the value of the control changes.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
 @Composable
 internal fun ContentVisibleControl(
     value : Boolean,

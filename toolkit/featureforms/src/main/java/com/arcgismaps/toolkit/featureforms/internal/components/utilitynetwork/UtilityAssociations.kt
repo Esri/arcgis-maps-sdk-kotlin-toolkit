@@ -112,6 +112,7 @@ internal fun UtilityAssociationFilter(
  *
  * @param groupResult The [UtilityAssociationGroupResult] to display.
  * @param onItemClick A callback that is called when an association is clicked.
+ * @param onDetailsClick A callback that is called when the details icon is clicked.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable

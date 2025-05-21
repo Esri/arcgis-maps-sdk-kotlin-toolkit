@@ -16,8 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -38,7 +36,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
-import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import kotlinx.coroutines.launch
 
 /**
@@ -58,7 +55,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun UNAssociationsScreen(
     formStateData: FormStateData,
-    route : NavigationRoute.UNAssociationsView,
+    route: NavigationRoute.UNAssociationsView,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
@@ -93,29 +90,26 @@ internal fun UNAssociationsScreen(
             }
         }
     }
-//    Column(
-//        modifier = modifier,
-//        verticalArrangement = Arrangement.Top
-//    ) {
-        UtilityAssociations(
-            groupResult = groupResult,
-            onItemClick = { index ->
-                if (hasEdits) {
-                    pendingNavigationAction = NavigationAction.NavigateToFeature(index)
-                } else {
-                    val feature = groupResult.associationResults[index].associatedFeature
-                    // Navigate to the next form if there are no edits.
-                    onNavigateToFeature(feature)
-                }
-            },
-            onDetailsClick = { index ->
-                val association = groupResult.associationResults[index]
-                utilityAssociationsElementState.setSelectedAssociationResult(association)
-                onNavigateToAssociation(utilityAssociationsElementState.id)
-            },
-            modifier = modifier.padding(16.dp).fillMaxSize()
-        )
-//    }
+    UtilityAssociations(
+        groupResult = groupResult,
+        onItemClick = { index ->
+            if (hasEdits) {
+                pendingNavigationAction = NavigationAction.NavigateToFeature(index)
+            } else {
+                val feature = groupResult.associationResults[index].associatedFeature
+                // Navigate to the next form if there are no edits.
+                onNavigateToFeature(feature)
+            }
+        },
+        onDetailsClick = { index ->
+            val association = groupResult.associationResults[index]
+            utilityAssociationsElementState.setSelectedAssociationResult(association)
+            onNavigateToAssociation(utilityAssociationsElementState.id)
+        },
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    )
     if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {

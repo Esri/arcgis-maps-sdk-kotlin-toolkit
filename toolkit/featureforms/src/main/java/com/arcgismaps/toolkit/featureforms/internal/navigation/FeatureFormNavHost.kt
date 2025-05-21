@@ -21,8 +21,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -117,12 +115,7 @@ internal fun FeatureFormNavHost(
             }
         }
 
-        composable<NavigationRoute.UNAssociationDetailView>(
-            enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = { slideOutHorizontally { h -> h } }
-        ) { backStackEntry ->
+        composable<NavigationRoute.UNAssociationDetailView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetailView>()
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
             // Get the selected UtilityAssociationsElementState from the state collection
