@@ -269,13 +269,9 @@ public class FeatureFormState private constructor(
                 }
             }
 
-            backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() ||
-                backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
-                // Navigate back to the previous view.
+            else -> {
                 navigate()
             }
-
-            else -> false
         }
     }
 

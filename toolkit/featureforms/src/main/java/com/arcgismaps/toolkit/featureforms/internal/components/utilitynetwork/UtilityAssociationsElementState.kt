@@ -22,6 +22,7 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -76,6 +77,13 @@ internal class UtilityAssociationsElementState(
     var selectedGroupResult : UtilityAssociationGroupResult? = null
         private set
 
+    /**
+     * The selected [UtilityAssociationResult] to display. Use [setSelectedAssociationResult] to
+     * set this value.
+     */
+    var selectedAssociationResult : UtilityAssociationResult? = null
+        private set
+
     init {
         scope.launch {
             // fetch the associations filter results for the element
@@ -100,5 +108,12 @@ internal class UtilityAssociationsElementState(
      */
     fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult) {
         selectedGroupResult = groupResult
+    }
+
+    /**
+     * Sets the selected [UtilityAssociationResult] to display.
+     */
+    fun setSelectedAssociationResult(associationResult: UtilityAssociationResult) {
+        selectedAssociationResult = associationResult
     }
 }

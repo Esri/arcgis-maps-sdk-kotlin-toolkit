@@ -21,6 +21,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -34,6 +36,8 @@ import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
@@ -95,9 +99,14 @@ internal fun FeatureFormNavHost(
                 route = route,
                 onSave = onSaveForm,
                 onDiscard = onDiscardForm,
-                onNavigateTo = { feature ->
+                onNavigateToFeature = { feature ->
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)
+                },
+                onNavigateToAssociation = { stateId ->
+                    val route = NavigationRoute.UNAssociationDetailView(stateId = stateId)
+                    // Request the state to navigate to the association.
+                    navController.navigateSafely(backStackEntry, route)
                 },
                 modifier = Modifier.fillMaxSize()
             )
@@ -106,6 +115,25 @@ internal fun FeatureFormNavHost(
                 // form.
                 state.updateActiveFeatureForm()
             }
+        }
+
+        composable<NavigationRoute.UNAssociationDetailView>(
+            enterTransition = { slideInHorizontally { h -> h } },
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() },
+            popExitTransition = { slideOutHorizontally { h -> h } }
+        ) { backStackEntry ->
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetailView>()
+            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+            // Get the selected UtilityAssociationsElementState from the state collection
+            val utilityAssociationsElementState = formData.stateCollection[route.stateId]
+                // guard against null value
+                as? UtilityAssociationsElementState ?: return@composable
+            // Display the association details
+            UtilityAssociationDetails(
+                state = utilityAssociationsElementState,
+                //modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

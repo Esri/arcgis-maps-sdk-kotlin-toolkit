@@ -55,4 +55,9 @@ internal sealed class NavigationRoute {
     data class UNAssociationsView(
         val stateId: Int
     ) : NavigationRoute()
+
+    @Serializable
+    data class UNAssociationDetailView(
+        val stateId: Int
+    ) : NavigationRoute()
 }

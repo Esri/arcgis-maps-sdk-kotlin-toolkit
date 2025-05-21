@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,6 +38,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import kotlinx.coroutines.launch
 
 /**
@@ -49,7 +51,8 @@ import kotlinx.coroutines.launch
  * return a [Result] that indicates the success or failure of the save operation.
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
- * @param onNavigateTo The callback to be invoked when the user selects an association to navigate to.
+ * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
+ * @param onNavigateToAssociation The callback to be invoked when the user selects an association to navigate to.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
@@ -58,7 +61,8 @@ internal fun UNAssociationsScreen(
     route : NavigationRoute.UNAssociationsView,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
-    onNavigateTo: (ArcGISFeature) -> Unit,
+    onNavigateToFeature: (ArcGISFeature) -> Unit,
+    onNavigateToAssociation: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val featureForm = formStateData.featureForm
@@ -81,32 +85,37 @@ internal fun UNAssociationsScreen(
         mutableStateOf(NavigationAction.None)
     }
     // Handler for navigating to a selected associated feature
-    val navigateToAssociation: (NavigationAction) -> Unit = { action ->
-        if (action is NavigationAction.NavigateToAssociation) {
+    val navigateToFeature: (NavigationAction) -> Unit = { action ->
+        if (action is NavigationAction.NavigateToFeature) {
             val selectedIndex = action.index
             groupResult.associationResults.getOrNull(selectedIndex)?.associatedFeature?.let { feature ->
-                onNavigateTo(feature)
+                onNavigateToFeature(feature)
             }
         }
     }
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top
-    ) {
+//    Column(
+//        modifier = modifier,
+//        verticalArrangement = Arrangement.Top
+//    ) {
         UtilityAssociations(
             groupResult = groupResult,
             onItemClick = { index ->
                 if (hasEdits) {
-                    pendingNavigationAction = NavigationAction.NavigateToAssociation(index)
+                    pendingNavigationAction = NavigationAction.NavigateToFeature(index)
                 } else {
                     val feature = groupResult.associationResults[index].associatedFeature
                     // Navigate to the next form if there are no edits.
-                    onNavigateTo(feature)
+                    onNavigateToFeature(feature)
                 }
             },
-            modifier = Modifier.padding(16.dp)
+            onDetailsClick = { index ->
+                val association = groupResult.associationResults[index]
+                utilityAssociationsElementState.setSelectedAssociationResult(association)
+                onNavigateToAssociation(utilityAssociationsElementState.id)
+            },
+            modifier = modifier.padding(16.dp).fillMaxSize()
         )
-    }
+//    }
     if (pendingNavigationAction != NavigationAction.None) {
         SaveEditsDialog(
             onDismissRequest = {
@@ -117,7 +126,7 @@ internal fun UNAssociationsScreen(
                 scope.launch {
                     onSave(featureForm, true).onSuccess {
                         // If the save is successful, navigate to the association
-                        navigateToAssociation(pendingNavigationAction)
+                        navigateToFeature(pendingNavigationAction)
                     }
                     pendingNavigationAction = NavigationAction.None
                 }
@@ -126,7 +135,7 @@ internal fun UNAssociationsScreen(
                 scope.launch {
                     onDiscard(true)
                     // Navigate to the association after discarding changes
-                    navigateToAssociation(pendingNavigationAction)
+                    navigateToFeature(pendingNavigationAction)
                     pendingNavigationAction = NavigationAction.None
                 }
             }
