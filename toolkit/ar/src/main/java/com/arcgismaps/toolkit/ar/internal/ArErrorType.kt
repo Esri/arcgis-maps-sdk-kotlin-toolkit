@@ -19,7 +19,7 @@
 package com.arcgismaps.toolkit.ar.internal
 
 /**
- * Represents errors that can occur during the initialization or tracking of the an AR component.
+ * Represents errors that can occur during the initialization or tracking of an AR component.
  *
  * @since 200.8.0
  */
