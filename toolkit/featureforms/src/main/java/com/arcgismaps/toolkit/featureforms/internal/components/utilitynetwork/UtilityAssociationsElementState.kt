@@ -106,14 +106,14 @@ internal class UtilityAssociationsElementState(
     /**
      * Sets the selected [UtilityAssociationGroupResult] to display.
      */
-    fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult) {
+    fun setSelectedGroupResult(groupResult: UtilityAssociationGroupResult?) {
         selectedGroupResult = groupResult
     }
 
     /**
      * Sets the selected [UtilityAssociationResult] to display.
      */
-    fun setSelectedAssociationResult(associationResult: UtilityAssociationResult) {
+    fun setSelectedAssociationResult(associationResult: UtilityAssociationResult?) {
         selectedAssociationResult = associationResult
     }
 }

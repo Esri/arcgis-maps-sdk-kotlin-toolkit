@@ -218,14 +218,19 @@ private fun RemoveAssociationConfirmationDialog(
  * @return The fraction along edge of the association result, or null if not applicable.
  */
 internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
-    val target = association.getTargetElement(associatedFeature)
-    return when (this.association.associationType) {
+    return when (association.associationType) {
 
         UtilityAssociationType.Connectivity -> {
-            if (target.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
-                target.fractionAlongEdge
-            } else {
-                null
+            when {
+                association.fromElement.networkSource.sourceType == UtilityNetworkSourceType.Edge -> {
+                    association.fromElement.fractionAlongEdge
+                }
+
+                association.toElement.networkSource.sourceType == UtilityNetworkSourceType.Edge -> {
+                    association.toElement.fractionAlongEdge
+                }
+
+                else -> null
             }
         }
 
