@@ -89,12 +89,12 @@ import com.arcgismaps.toolkit.arworldscaleapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
-val graphicSymbol = SimpleMarkerSceneSymbol(
+val coneSymbol = SimpleMarkerSceneSymbol(
     style = SimpleMarkerSceneSymbolStyle.Cone,
-    color = Color.red,
-    height = 0.5,
-    width = 0.5,
-    depth = 0.5,
+    color = Color.fromRgba(255, 0, 0, 70),
+    height = 0.4,
+    width = 0.2,
+    depth = 0.2,
     anchorPosition = SceneSymbolAnchorPosition.Bottom
 ).apply {
     // The bottom of the cone is placed at the point tapped by the user
@@ -266,7 +266,7 @@ fun MainScreen() {
                                 } ?: graphicsOverlay.graphics.add(
                                     Graphic(
                                         geometry = point,
-                                        symbol = graphicSymbol
+                                        symbol = coneSymbol
                                     )
                                 )
                             }
