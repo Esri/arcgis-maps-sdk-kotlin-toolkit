@@ -163,6 +163,21 @@ internal class GeospatialTrackingCameraController(
         }
     }
 
+    override fun getPointFromPose(pose: Pose, session: Session): Point? = try {
+        session.earth?.getGeospatialPose(pose)?.let { geospatialPose ->
+            Point(
+                geospatialPose.longitude,
+                geospatialPose.latitude,
+                geospatialPose.altitude,
+                WorldScaleParameters.SR_WGS84_WGS_VERTICAL
+            ).let {
+                GeometryEngine.projectOrNull(it, WorldScaleParameters.SR_CAMERA)
+            }
+        }
+    } catch (e: NotTrackingException) {
+        null
+    }
+
     /**
      * Checks the [EarthState] of the [Earth] object and sets the [error] if there is an error.
      *
