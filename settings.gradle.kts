@@ -53,6 +53,25 @@ val sdkBuildNumber: String =
         ?: localProperties.getProperty("sdkBuildNumber")
         ?: ""
 
+// The Artifactory credentials for the ArcGIS Maps SDK for Kotlin repository.
+// First look for the credentials provided via command line (for CI builds), if not found,
+// take the one defined in local.properties.
+// CI builds pass -PartifactoryURL=${ARTIFACTORY_URL} -PartifactoryUsername=${ARTIFACTORY_USER} -PartifactoryPassword=${ARTIFACTORY_PASSWORD}
+val artifactoryUrl: String =
+    providers.gradleProperty("artifactoryUrl").orNull
+        ?: localProperties.getProperty("artifactoryUrl")
+        ?: ""
+
+val artifactoryUsername: String =
+    providers.gradleProperty("artifactoryUsername").orNull
+        ?: localProperties.getProperty("artifactoryUsername")
+        ?: ""
+
+val artifactoryPassword: String =
+    providers.gradleProperty("artifactoryPassword").orNull
+        ?: localProperties.getProperty("artifactoryPassword")
+        ?: ""
+
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -65,10 +84,14 @@ dependencyResolutionManagement {
                 "https://esri.jfrog.io/artifactory/arcgis"
             )
         }
-        maven {
-            url = java.net.URI(
-                "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
-            )
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
+            }
         }
     }
 
@@ -176,3 +199,6 @@ include(":basemapgallery-app")
 project(":basemapgallery-app").projectDir = File(rootDir, "microapps/BasemapGalleryApp/app")
 include(":basemapgallery")
 project(":basemapgallery").projectDir = File(rootDir, "toolkit/basemapgallery")
+include(":overviewmap-app")
+project(":overviewmap-app").projectDir = File(rootDir, "microapps/OverviewMapApp/app")
+

@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,8 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +66,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.Color
 import com.arcgismaps.LoadStatus
@@ -77,14 +75,13 @@ import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.symbology.SceneSymbolAnchorPosition
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
-import com.arcgismaps.mapping.symbology.Symbol
-import com.arcgismaps.mapping.symbology.SymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
-import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
@@ -92,10 +89,21 @@ import com.arcgismaps.toolkit.arworldscaleapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
+val graphicSymbol = SimpleMarkerSceneSymbol(
+    style = SimpleMarkerSceneSymbolStyle.Cone,
+    color = Color.red,
+    height = 0.5,
+    width = 0.5,
+    depth = 0.5,
+    anchorPosition = SceneSymbolAnchorPosition.Bottom
+).apply {
+    // The bottom of the cone is placed at the point tapped by the user
+    this.pitch = 180f
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val treeSymbol = rememberTreeSymbol()
     val arcGISScene = remember {
         val basemap = Basemap(BasemapStyle.ArcGISHumanGeography)
         ArcGISScene(basemap).apply {
@@ -113,8 +121,16 @@ fun MainScreen() {
         }
     }
     var displayCalibrationView by remember { mutableStateOf(false) }
-    val graphicsOverlays = remember { listOf(GraphicsOverlay()) }
-    val proxy = remember { WorldScaleSceneViewProxy() }
+    // The graphics overlay should have a surface placement of absolute to ensure
+    // that graphics are placed correctly in 3D space if the user taps on a real object in the camera
+    // feed, such as a wall or tree
+    val graphicsOverlays = remember {
+        listOf(
+            GraphicsOverlay().apply {
+                sceneProperties.surfacePlacement = SurfacePlacement.Absolute
+            }
+        )
+    }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var selectedTrackingMode by rememberSaveable(
         saver = Saver(
@@ -211,7 +227,9 @@ fun MainScreen() {
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    sharedPreferences.edit {
+                        putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
+                    }
                     showPrivacyInfo = false
                 }
             )
@@ -239,14 +257,16 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
-                    worldScaleSceneViewProxy = proxy,
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                        proxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                        singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
-                                graphicsOverlays.first().graphics.add(
+                                val graphicsOverlay = graphicsOverlays.first()
+                                graphicsOverlay.graphics.firstOrNull()?.apply {
+                                    geometry = point
+                                } ?: graphicsOverlay.graphics.add(
                                     Graphic(
-                                        point,
-                                        treeSymbol.value
+                                        geometry = point,
+                                        symbol = graphicSymbol
                                     )
                                 )
                             }
@@ -373,36 +393,6 @@ private fun TextWithScrim(text: String) {
     ) {
         Text(text = text)
     }
-}
-
-/**
- * Creates and remembers a [Symbol] for a tree.
- *
- * Note the symbol is pulled from an online style, and a simple cylinder is used as a fallback.
- *
- * @since 200.7.0
- */
-@Composable
-fun rememberTreeSymbol(): State<Symbol> {
-    val treeSymbol = remember { mutableStateOf<Symbol>(
-        SimpleMarkerSceneSymbol(
-            SimpleMarkerSceneSymbolStyle.Cylinder,
-            Color.green,
-            height = 1.7910805414617064,
-            width = 0.8883103942871093,
-            depth = 0.909887924194336
-        )
-    ) }
-    LaunchedEffect(Unit) {
-        with(SymbolStyle.createWithStyleNameAndPortal("EsriRealisticStreetSceneStyle")) {
-            getSymbol(listOf("Planter_Tapered")).onSuccess {
-                treeSymbol.value = it
-            }.onFailure { error ->
-                Log.e("MainScreen", "Failed to initialize symbol: $error")
-            }
-        }
-    }
-    return treeSymbol
 }
 
 /**

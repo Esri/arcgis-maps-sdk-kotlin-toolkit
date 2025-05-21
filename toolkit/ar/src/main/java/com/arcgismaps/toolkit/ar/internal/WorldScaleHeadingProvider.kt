@@ -33,10 +33,11 @@ import java.util.concurrent.Executor
  * Provides headings for [WorldTrackingCameraController] using the Fused Orientation Provider API.
  *
  * @param context the context the app is running in
+ * @param onError called when an error occurs while requesting orientation updates
  *
  * @since 200.7.0
  */
-internal class WorldScaleHeadingProvider(context: Context) {
+internal class WorldScaleHeadingProvider(context: Context, private val onError: (Throwable) -> Unit) {
 
     private val fusedOrientationProviderClient = LocationServices.getFusedOrientationProviderClient(context)
     private val listener = DeviceOrientationListener { deviceOrientation ->
@@ -53,7 +54,9 @@ internal class WorldScaleHeadingProvider(context: Context) {
     val headings = _headings.asSharedFlow()
 
     fun start(){
-        fusedOrientationProviderClient.requestOrientationUpdates(request, executor, listener)
+        fusedOrientationProviderClient
+            .requestOrientationUpdates(request, executor, listener)
+            .addOnFailureListener(onError)
     }
 
     fun stop(){

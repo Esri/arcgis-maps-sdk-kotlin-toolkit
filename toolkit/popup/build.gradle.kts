@@ -46,6 +46,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
 
     buildFeatures {
@@ -66,6 +68,12 @@ android {
     // Remove this if tests will be added.
     tasks.withType<Test> {
         enabled = false
+    }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 
 }

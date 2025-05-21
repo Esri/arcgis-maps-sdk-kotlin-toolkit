@@ -111,6 +111,7 @@ public fun DialogAuthenticator(
  * @since 200.4.0
  */
 @Composable
+@Suppress("DEPRECATION")
 private fun AuthenticatorDelegate(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,

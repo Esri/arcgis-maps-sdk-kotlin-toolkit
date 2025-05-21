@@ -83,6 +83,12 @@ android {
         targetSdk = libs.versions.compileSdk.get().toInt()
         disable += "MissingTranslation"
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 apiValidation {
