@@ -2,7 +2,7 @@
 
 The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the new ArcGIS Maps SDK for Kotlin.
 
-## Toolkit Components
+## Toolkit Components Test
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
