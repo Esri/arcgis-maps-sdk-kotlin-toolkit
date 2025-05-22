@@ -32,6 +32,8 @@ import com.arcgismaps.toolkit.offline.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
@@ -44,7 +46,8 @@ internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
     private val portalItemId: String,
-    private val workManagerRepository: WorkManagerRepository
+    private val workManagerRepository: WorkManagerRepository,
+    private val scope: CoroutineScope
 ) {
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
@@ -84,25 +87,24 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-    internal suspend fun downloadPreplannedMapArea() {
-        try {
-            // Set the downloading status
-            _status = Status.Downloading
-            val offlineWorkerUUID = startOfflineMapJob(
-                downloadPreplannedOfflineMapJob = createOfflineMapJob(
-                    preplannedMapArea = preplannedMapArea
+    internal fun downloadPreplannedMapArea() {
+        scope.launch {
+            try {
+                _status = Status.Downloading
+                val offlineWorkerUUID = startOfflineMapJob(
+                    downloadPreplannedOfflineMapJob = createOfflineMapJob(
+                        preplannedMapArea = preplannedMapArea
+                    )
                 )
-            )
-            // Start observing WorkManager status
-            workManagerRepository.observeStatusForPreplannedWork(
-                onWorkInfoStateChanged = ::logWorkInfo,
-                preplannedMapAreaState = this,
-                offlineWorkerUUID = offlineWorkerUUID
-            )
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error taking preplanned map offline", e)
-            _status = Status.DownloadFailure(e)
+                workManagerRepository.observeStatusForPreplannedWork(
+                    onWorkInfoStateChanged = ::logWorkInfo,
+                    preplannedMapAreaState = this@PreplannedMapAreaState,
+                    offlineWorkerUUID = offlineWorkerUUID
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error taking preplanned map offline", e)
+                _status = Status.DownloadFailure(e)
+            }
         }
     }
 
@@ -121,6 +123,7 @@ internal class PreplannedMapAreaState(
     private suspend fun createOfflineMapJob(
         preplannedMapArea: PreplannedMapArea
     ): DownloadPreplannedOfflineMapJob {
+
         // Create default download parameters from the offline map task
         val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
             preplannedMapArea = preplannedMapArea

@@ -29,6 +29,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 
 internal const val LOG_TAG = "Offline"
 internal const val notificationIdKey = "NotificationId"
@@ -51,7 +52,8 @@ internal const val notificationChannelDescription =
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap
+    private val arcGISMap: ArcGISMap,
+    private val viewModelScope: CoroutineScope
 ) {
     private lateinit var _workManagerRepository: WorkManagerRepository
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
@@ -111,7 +113,8 @@ public class OfflineMapState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
-                        workManagerRepository = _workManagerRepository
+                        workManagerRepository = _workManagerRepository,
+                        scope = viewModelScope
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)

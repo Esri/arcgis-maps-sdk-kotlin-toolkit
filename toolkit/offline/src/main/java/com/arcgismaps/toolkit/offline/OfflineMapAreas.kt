@@ -32,15 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
-import kotlinx.coroutines.launch
 
 /**
  * Take a web map offline by downloading map areas.
@@ -52,7 +49,6 @@ public fun OfflineMapAreas(
     offlineMapState: OfflineMapState,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
 
@@ -85,14 +81,7 @@ public fun OfflineMapAreas(
                 if (offlineMapState.mode == OfflineMapMode.Preplanned) {
                     PreplannedMapAreas(
                         preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                        modifier = modifier,
-                        onDownloadButtonClicked = { preplannedMapAreaState ->
-                            if (preplannedMapAreaState.status.allowsDownload) {
-                                scope.launch {
-                                    preplannedMapAreaState.downloadPreplannedMapArea()
-                                }
-                            }
-                        }
+                        modifier = modifier
                     )
                 }
             }

@@ -26,8 +26,6 @@ import androidx.work.workDataOf
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
@@ -163,46 +161,42 @@ internal class WorkManagerRepository(private val context: Context) {
         preplannedMapAreaState: PreplannedMapAreaState,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        coroutineScope {
-            launch {
-                // collect the flow to get the latest work info list
-                workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
-                    .collect { workInfo ->
-                        if (workInfo != null) {
-                            // emit changes in the work info state
-                            onWorkInfoStateChanged(workInfo)
-                            // check the current state of the work request
-                            when (workInfo.state) {
-                                // if work completed successfully
-                                WorkInfo.State.SUCCEEDED -> {
-                                    preplannedMapAreaState.updateStatus(Status.Downloaded)
-                                }
-                                // if the work failed or was cancelled
-                                WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                                    // this removes the completed WorkInfo from the WorkManager's database
-                                    // otherwise, the observer will emit the WorkInfo on every launch
-                                    // until WorkManager auto-prunes
-                                    workManager.pruneWork()
-                                    preplannedMapAreaState.updateStatus(
-                                        Status.DownloadFailure(
-                                            Exception(
-                                                "${workInfo.tags}: FAILED. Reason: " +
-                                                        "${workInfo.outputData.getString("Error")}"
-                                            )
-                                        )
-                                    )
-                                }
-                                // if the work is currently in progress
-                                WorkInfo.State.RUNNING -> {
-                                    preplannedMapAreaState.updateStatus(Status.Downloading)
-                                }
-                                // don't have to handle other states
-                                else -> {}
-                            }
+        // collect the flow to get the latest work info list
+        workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
+            .collect { workInfo ->
+                if (workInfo != null) {
+                    // emit changes in the work info state
+                    onWorkInfoStateChanged(workInfo)
+                    // check the current state of the work request
+                    when (workInfo.state) {
+                        // if work completed successfully
+                        WorkInfo.State.SUCCEEDED -> {
+                            preplannedMapAreaState.updateStatus(Status.Downloaded)
                         }
+                        // if the work failed or was cancelled
+                        WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                            // this removes the completed WorkInfo from the WorkManager's database
+                            // otherwise, the observer will emit the WorkInfo on every launch
+                            // until WorkManager auto-prunes
+                            workManager.pruneWork()
+                            preplannedMapAreaState.updateStatus(
+                                Status.DownloadFailure(
+                                    Exception(
+                                        "${workInfo.tags}: FAILED. Reason: " +
+                                                "${workInfo.outputData.getString("Error")}"
+                                    )
+                                )
+                            )
+                        }
+                        // if the work is currently in progress
+                        WorkInfo.State.RUNNING -> {
+                            preplannedMapAreaState.updateStatus(Status.Downloading)
+                        }
+                        // don't have to handle other states
+                        else -> {}
                     }
+                }
             }
-        }
     }
 
     internal fun getProgressForUUID(workerUUID: UUID) {
