@@ -55,7 +55,7 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapState {
 	public static final field $stable I
-	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;)V
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
 }
 

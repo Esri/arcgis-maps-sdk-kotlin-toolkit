@@ -59,7 +59,6 @@ import com.arcgismaps.toolkit.offline.R
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
-//    onDownloadButtonClicked: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
     Column(
