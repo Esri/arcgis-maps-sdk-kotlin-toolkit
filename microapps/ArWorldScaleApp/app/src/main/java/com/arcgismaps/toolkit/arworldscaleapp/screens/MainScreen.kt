@@ -263,7 +263,6 @@ fun MainScreen() {
                     onTrackingErrorChanged = {
                         trackingError = it
                     },
-                    worldScaleSceneViewProxy = proxy,
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
                             ?.let { point ->
