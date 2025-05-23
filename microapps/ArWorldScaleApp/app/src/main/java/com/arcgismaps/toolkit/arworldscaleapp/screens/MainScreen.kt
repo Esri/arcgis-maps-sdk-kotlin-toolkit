@@ -23,9 +23,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -66,7 +67,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.Color
 import com.arcgismaps.LoadStatus
@@ -86,6 +86,7 @@ import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
+import androidx.core.content.edit
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -158,6 +159,7 @@ fun MainScreen() {
         )
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
+    var trackingError by remember { mutableStateOf<Throwable?>(null) }
     Scaffold(topBar = {
         TopAppBar(
             title = {
@@ -221,7 +223,7 @@ fun MainScreen() {
                 }
             }
         )
-    }) {
+    }) { innerPadding ->
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
@@ -246,16 +248,20 @@ fun MainScreen() {
                 }
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)) {
                 WorldScaleSceneView(
                     arcGISScene = arcGISScene,
                     modifier = Modifier
-                        .padding(it)
                         .fillMaxSize(),
                     worldScaleTrackingMode = selectedTrackingMode,
                     clippingDistance = 100.0,
                     onInitializationStatusChanged = {
                         initializationStatus = it
+                    },
+                    onTrackingErrorChanged = {
+                        trackingError = it
                     },
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
@@ -319,6 +325,18 @@ fun MainScreen() {
 
                             else -> {}
                         }
+
+                        // If an error occurs during an initialized AR session, show a warning icon
+                        if (trackingError != null) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = stringResource(R.string.tracking_error_icon_description),
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(16.dp),
+                                tint = androidx.compose.ui.graphics.Color.Yellow
+                            )
+                        }
                     }
 
                     is WorldScaleSceneViewStatus.FailedToInitialize -> {
@@ -345,7 +363,7 @@ private fun PrivacyInfoDialog(
     hasCurrentlyAccepted: Boolean,
     onUserResponse: (accepted: Boolean) -> Unit
 ) {
-    Dialog (onDismissRequest = {
+    Dialog(onDismissRequest = {
         onUserResponse(hasCurrentlyAccepted)
     }) {
         Card {

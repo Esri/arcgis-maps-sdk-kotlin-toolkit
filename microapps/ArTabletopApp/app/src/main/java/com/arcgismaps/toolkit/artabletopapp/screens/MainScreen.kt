@@ -53,7 +53,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.data.ArcGISFeature
@@ -67,6 +66,7 @@ import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -103,9 +103,7 @@ fun MainScreen() {
                 acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit {
-                        putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted)
-                    }
+                    sharedPreferences.edit { putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted) }
                     showPrivacyInfo = false
                 }
             )
