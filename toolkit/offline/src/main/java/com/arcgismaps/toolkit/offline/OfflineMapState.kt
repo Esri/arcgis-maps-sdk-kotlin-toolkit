@@ -29,7 +29,6 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 
 internal const val LOG_TAG = "Offline"
 internal const val notificationIdKey = "NotificationId"
