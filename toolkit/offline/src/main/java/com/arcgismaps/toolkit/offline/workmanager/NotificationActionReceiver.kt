@@ -45,11 +45,7 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
         val extraName = notificationCancelActionKey
         // get the actual data from the intent
         val action = intent.getStringExtra(extraName) ?: "none"
-        // if the action is cancel
-//        if (action == "Cancel") {
-//            // get the WorkManager instance and cancel all active workers
-//            WorkManager.getInstance(context).cancelAllWork() // TODO: Cancel the selected worker, not all.
-//        }
+        // if the action is cancel then cancel the work associated with the notification
         val workId = intent.getStringExtra(notificationIdKey)?.let { UUID.fromString(it) }
         if (action == "Cancel" && workId != null) {
             WorkManager.getInstance(context).cancelWorkById(workId)

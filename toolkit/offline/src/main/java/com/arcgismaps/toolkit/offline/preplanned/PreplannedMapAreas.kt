@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -91,6 +91,7 @@ internal fun PreplannedMapAreas(
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
+                        // Display the title with a maximum of one line
                         Text(
                             text = state.preplannedMapArea.portalItem.title,
                             style = MaterialTheme.typography.titleSmall,
@@ -98,25 +99,32 @@ internal fun PreplannedMapAreas(
                             maxLines = 1, // Restrict to one line
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
+                        // Display the description with a maximum of two lines
                         Text(
                             text = state.preplannedMapArea.portalItem.description,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
-                        val statusString = getPreplannedMapAreaStatusString(
-                            context = LocalContext.current,
-                            status = state.status
-                        )
+                        // Display the status string
+                        val statusString = if (state.isSelected) {
+                            stringResource(R.string.currently_open)
+                        } else {
+                            getPreplannedMapAreaStatusString(
+                                context = LocalContext.current,
+                                status = state.status
+                            )
+                        }
                         Text(
                             text = statusString,
-                            style =  MaterialTheme.typography.labelSmall.copy(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             maxLines = 1, // Restrict to one lines
                         )
                     }
+                    // Display the action button based on the status
                     when {
                         state.status.allowsDownload -> {
                             DownloadButton {
@@ -124,7 +132,7 @@ internal fun PreplannedMapAreas(
                             }
                         }
                         state.status == Status.Downloading -> {
-                            SquareButtonWithProgressIndicator(state.downloadProgress.value) {
+                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }
@@ -183,28 +191,24 @@ private fun DownloadButton(onClick: () -> Unit) {
 }
 
 @Composable
-internal fun SquareButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
+internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(top = 24.dp)
-            .size(30.dp) // Adjust size as needed
+            .size(30.dp)
     ) {
         // Circular Progress Indicator
         CircularProgressIndicator(
             progress = { progress / 100f },
-//            modifier = Modifier.fillMaxSize(),
-//            color = MaterialTheme.colorScheme.primary,
-//            trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
         )
-
-        // Square Button
+        // Square Button to cancel the download
         Button(
             onClick = onClick,
-            modifier = Modifier.size(10.dp), // Adjust size as needed
+            modifier = Modifier.size(10.dp),
             shape = RectangleShape
         ) {
-//            Text("Click")
+            // Empty content for the button
         }
     }
 }
@@ -213,11 +217,16 @@ internal fun SquareButtonWithProgressIndicator(progress: Int, onClick: () -> Uni
 private fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
     Button(
         modifier = Modifier
-            .padding(top = 16.dp),
+            .padding(top = 16.dp)
+            .widthIn(max = 80.dp), // restricts max width
         contentPadding = PaddingValues(horizontal = 10.dp),
         enabled = isEnabled,
         onClick = onClick
     ) {
-        Text("Open")
+        Text(
+            text = stringResource(R.string.open),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
