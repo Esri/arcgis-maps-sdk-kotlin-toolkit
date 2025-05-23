@@ -21,16 +21,21 @@ package com.arcgismaps.toolkit.offline.preplanned
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
+import androidx.compose.ui.graphics.RectangleShape
 
 /**
  * Displays a list of preplanned map areas.
@@ -111,20 +117,22 @@ internal fun PreplannedMapAreas(
                             maxLines = 1, // Restrict to one lines
                         )
                     }
-                    IconButton(
-                        modifier = Modifier
-                            .padding(top = 16.dp),
-                        onClick = {
-                            if (state.status.allowsDownload) {
+                    when {
+                        state.status.allowsDownload -> {
+                            DownloadButton {
                                 state.downloadPreplannedMapArea()
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Download,
-                            contentDescription = stringResource(R.string.download),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                        state.status == Status.Downloading -> {
+                            SquareButtonWithProgressIndicator(state.downloadProgress.value) {
+                                state.cancelDownload()
+                            }
+                        }
+                        state.status.isDownloaded -> {
+                            OpenButton {
+                                state.status.canLoadPreplannedMapArea
+                            }
+                        }
                     }
                 }
                 if (state.preplannedMapArea != preplannedMapAreaStates.last().preplannedMapArea) {
@@ -153,5 +161,61 @@ private fun getPreplannedMapAreaStatusString(context: Context, status: Status): 
         Status.PackageFailure -> getString(context, R.string.packaging_failed)
         Status.Packaged -> getString(context, R.string.ready_to_download)
         Status.Packaging -> getString(context, R.string.packaging)
+    }
+}
+
+@Composable
+private fun DownloadButton(onClick: () -> Unit) {
+    IconButton(
+        modifier = Modifier
+            .padding(top = 24.dp)
+            .size(30.dp),
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Download,
+            contentDescription = stringResource(R.string.download),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+internal fun SquareButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(top = 24.dp)
+            .size(30.dp) // Adjust size as needed
+    ) {
+        // Circular Progress Indicator
+        CircularProgressIndicator(
+            progress = { progress / 100f },
+//            modifier = Modifier.fillMaxSize(),
+//            color = MaterialTheme.colorScheme.primary,
+//            trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
+        )
+
+        // Square Button
+        Button(
+            onClick = onClick,
+            modifier = Modifier.size(10.dp), // Adjust size as needed
+            shape = RectangleShape
+        ) {
+//            Text("Click")
+        }
+    }
+}
+
+@Composable
+private fun OpenButton(isEnabled: Boolean = true, onClick: () -> Unit) {
+    Button(
+        modifier = Modifier
+            .padding(top = 16.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp),
+        enabled = isEnabled,
+        onClick = onClick
+    ) {
+        Text("Open")
     }
 }

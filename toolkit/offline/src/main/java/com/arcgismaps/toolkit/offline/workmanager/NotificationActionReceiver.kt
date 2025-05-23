@@ -22,6 +22,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
+import com.arcgismaps.toolkit.offline.notificationIdKey
+import java.util.UUID
 
 /**
  * Handles notification actions triggered by the user, canceling the offline map job.
@@ -44,9 +46,13 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
         // get the actual data from the intent
         val action = intent.getStringExtra(extraName) ?: "none"
         // if the action is cancel
-        if (action == "Cancel") {
-            // get the WorkManager instance and cancel all active workers
-            WorkManager.getInstance(context).cancelAllWork() // TODO: Cancel the selected worker, not all.
+//        if (action == "Cancel") {
+//            // get the WorkManager instance and cancel all active workers
+//            WorkManager.getInstance(context).cancelAllWork() // TODO: Cancel the selected worker, not all.
+//        }
+        val workId = intent.getStringExtra(notificationIdKey)?.let { UUID.fromString(it) }
+        if (action == "Cancel" && workId != null) {
+            WorkManager.getInstance(context).cancelWorkById(workId)
         }
     }
 }

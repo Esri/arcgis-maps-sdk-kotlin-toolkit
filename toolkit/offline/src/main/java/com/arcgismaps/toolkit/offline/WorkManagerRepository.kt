@@ -165,6 +165,10 @@ internal class WorkManagerRepository(private val context: Context) {
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
                 if (workInfo != null) {
+                    // Report progress
+                    val progress = workInfo.progress.getInt("Progress", 0)
+                    preplannedMapAreaState.updateDownloadProgress(progress)
+
                     // emit changes in the work info state
                     onWorkInfoStateChanged(workInfo)
                     // check the current state of the work request
@@ -197,6 +201,10 @@ internal class WorkManagerRepository(private val context: Context) {
                     }
                 }
             }
+    }
+
+    internal fun cancelWorkRequest(workerUUID: UUID) {
+        workManager.cancelWorkById(workerUUID)
     }
 
     internal fun getProgressForUUID(workerUUID: UUID) {

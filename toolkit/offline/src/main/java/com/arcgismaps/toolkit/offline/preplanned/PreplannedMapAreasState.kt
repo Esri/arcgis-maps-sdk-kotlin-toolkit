@@ -19,7 +19,11 @@
 package com.arcgismaps.toolkit.offline.preplanned
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
@@ -49,9 +53,19 @@ internal class PreplannedMapAreaState(
     private val workManagerRepository: WorkManagerRepository,
     private val scope: CoroutineScope
 ) {
+    private lateinit var workerUUID: UUID
+
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
-    internal val status: Status get() = _status
+    internal val status: Status
+        get() = _status
+
+    private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
+    /**
+     *
+     * @since 200.8.0
+     */
+    internal val downloadProgress: State<Int> = _downloadProgress
 
     /**
      * Loads and initializes the associated preplanned map area.
@@ -165,7 +179,7 @@ internal class PreplannedMapAreaState(
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        val workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
             notificationId = workManagerRepository.createNotificationIdForJob(),
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
@@ -185,6 +199,14 @@ internal class PreplannedMapAreaState(
      */
     internal fun updateStatus(newStatus: Status) {
         _status = newStatus
+    }
+
+    internal fun updateDownloadProgress(progress: Int) {
+        _downloadProgress.value = progress
+    }
+
+    internal fun cancelDownload() {
+        workManagerRepository.cancelWorkRequest(workerUUID)
     }
 }
 
