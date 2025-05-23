@@ -176,6 +176,10 @@ internal class WorkManagerRepository(private val context: Context) {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
+                            val path = workInfo.outputData.getString("mobileMapPackagePath")
+                            if (path != null) {
+                                preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(path)
+                            }
                         }
                         // if the work failed or was cancelled
                         WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {

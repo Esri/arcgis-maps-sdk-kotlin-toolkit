@@ -22,10 +22,11 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
@@ -51,9 +52,17 @@ internal class PreplannedMapAreaState(
     private val offlineMapTask: OfflineMapTask,
     private val portalItemId: String,
     private val workManagerRepository: WorkManagerRepository,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val onSelectionChangedListener: (ArcGISMap) -> Unit
 ) {
     private lateinit var workerUUID: UUID
+
+    private lateinit var mobileMapPackage: MobileMapPackage
+    private lateinit var map: ArcGISMap
+
+    private var _isSelected by mutableStateOf(false)
+    internal val isSelected: Boolean
+        get() = _isSelected
 
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
@@ -207,6 +216,35 @@ internal class PreplannedMapAreaState(
 
     internal fun cancelDownload() {
         workManagerRepository.cancelWorkRequest(workerUUID)
+    }
+
+    internal fun createAndLoadMMPKAndOfflineMap(
+        mobileMapPackagePath: String
+    ) {
+        scope.launch {
+            runCatchingCancellable {
+                mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
+                mobileMapPackage.load()
+                    .onSuccess {
+                        Log.d(TAG, "Mobile map package loaded successfully")
+                    }.onFailure { exception ->
+                        Log.e(TAG, "Error loading mobile map package", exception)
+                        _status = Status.MmpkLoadFailure(exception)
+                    }
+                map = mobileMapPackage.maps.firstOrNull()
+                    ?: throw IllegalStateException("No maps found in the mobile map package")
+            }.onFailure { exception ->
+                Log.e(TAG, "Error loading mobile map package", exception)
+                _status = Status.MmpkLoadFailure(exception)
+            }
+        }
+    }
+
+    internal fun setSelected(selected: Boolean) {
+        _isSelected = selected
+        if (selected) {
+            onSelectionChangedListener(map)
+        }
     }
 }
 

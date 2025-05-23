@@ -129,8 +129,10 @@ internal fun PreplannedMapAreas(
                             }
                         }
                         state.status.isDownloaded -> {
-                            OpenButton {
-                                state.status.canLoadPreplannedMapArea
+                            OpenButton(!state.isSelected) {
+                                // Unselect all, then select this one
+                                preplannedMapAreaStates.forEach { it.setSelected(false) }
+                                state.setSelected(true)
                             }
                         }
                     }
@@ -208,7 +210,7 @@ internal fun SquareButtonWithProgressIndicator(progress: Int, onClick: () -> Uni
 }
 
 @Composable
-private fun OpenButton(isEnabled: Boolean = true, onClick: () -> Unit) {
+private fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
     Button(
         modifier = Modifier
             .padding(top = 16.dp),

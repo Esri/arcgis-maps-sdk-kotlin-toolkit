@@ -169,7 +169,11 @@ internal class PreplannedMapAreaJobWorker(
             // Handle success or failure of the job based on its result status.
             if (jobResult.isSuccess) {
                 workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
-                Result.success()
+                val downloadPreplannedOfflineMapResult = jobResult.getOrNull()
+                val outputData = workDataOf(
+                    "mobileMapPackagePath" to (downloadPreplannedOfflineMapResult?.mobileMapPackage?.path ?: ""),
+                )
+                Result.success(outputData)
             } else {
                 val errorMessage = jobResult.exceptionOrNull()?.message
                     ?: "Unknown error during job execution"
