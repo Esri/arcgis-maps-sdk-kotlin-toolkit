@@ -52,8 +52,7 @@ internal const val notificationChannelDescription =
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap,
-    private val viewModelScope: CoroutineScope
+    private val arcGISMap: ArcGISMap
 ) {
     private lateinit var _workManagerRepository: WorkManagerRepository
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
@@ -113,8 +112,7 @@ public class OfflineMapState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
-                        workManagerRepository = _workManagerRepository,
-                        scope = viewModelScope
+                        workManagerRepository = _workManagerRepository
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)

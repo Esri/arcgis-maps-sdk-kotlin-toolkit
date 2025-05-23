@@ -36,7 +36,7 @@ class OfflineViewModel : ViewModel() {
         )
     )
 
-    val offlineMapState = OfflineMapState(arcGISMap, viewModelScope = viewModelScope)
+    val offlineMapState = OfflineMapState(arcGISMap)
 
     init {
         viewModelScope.launch { arcGISMap.load() }
