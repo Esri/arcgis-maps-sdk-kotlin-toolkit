@@ -68,7 +68,7 @@ internal fun FractionAlongEdgeControl(
         ) {
             PropertyRow(
                 title = stringResource(R.string.fraction_along_edge),
-                value = "$percent %",
+                value = stringResource(R.string.percent_along_edge, percent),
                 modifier = Modifier.fillMaxWidth()
             )
             Slider(
