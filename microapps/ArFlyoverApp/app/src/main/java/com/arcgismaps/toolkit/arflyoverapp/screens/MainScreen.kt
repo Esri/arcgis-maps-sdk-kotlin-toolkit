@@ -52,19 +52,14 @@ fun MainScreen() {
 
     FlyoverSceneView(
         arcGISScene = arcGISScene,
-        initialCamera = remember {
-            Camera(
-                Point(
-                    2.82407,
-                    41.99101,
-                    230.0,
-                    SpatialReference.wgs84()
-                ),
-                heading = 160.0,
-                pitch = 90.0,
-                roll = 0.0
-            )
+        initialLocation = remember {
+            Point(
+                2.82407,
+                41.99101,
+                230.0,
+                SpatialReference.wgs84())
         },
+        initialHeading = 160.0,
         translationFactor = 1000.0
     )
 }
