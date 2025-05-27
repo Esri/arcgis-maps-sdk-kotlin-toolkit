@@ -34,4 +34,5 @@
     <string name="vps_unavailable_unknown">VPS Status: Unavailable or unknown</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
+    <string name="tracking_error_icon_description">Warning: Tracking Error</string>
 </resources>

@@ -66,13 +66,14 @@ import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
 @Composable
 fun MainScreen() {
     val arcGISSceneLayer = remember {
-        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/DevA_BuildingShells/SceneServer")
+        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/nSZVuSZjHpEZZbRo/arcgis/rest/services/Rotterdam_3D_getextureerd_WGS/SceneServer")
     }
     val arcGISScene = remember {
         ArcGISScene().apply {
@@ -82,7 +83,7 @@ fun MainScreen() {
         }
     }
     val arcGISSceneAnchor = remember {
-        Point(-122.68350326165559, 45.53257485106716, 0.0, arcGISScene.spatialReference)
+        Point(4.487801, 51.916874,0.0, arcGISScene.spatialReference)
     }
 
     // Tracks the currently selected building
@@ -102,7 +103,7 @@ fun MainScreen() {
                 acceptedPrivacyInfo,
                 onUserResponse = { accepted ->
                     acceptedPrivacyInfo = accepted
-                    sharedPreferences.edit().putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted).apply()
+                    sharedPreferences.edit { putBoolean(KEY_PREF_ACCEPTED_PRIVACY_INFO, accepted) }
                     showPrivacyInfo = false
                 }
             )
@@ -124,9 +125,9 @@ fun MainScreen() {
             TableTopSceneView(
                 arcGISScene = arcGISScene,
                 arcGISSceneAnchor = arcGISSceneAnchor,
-                translationFactor = 400.0,
+                translationFactor = 600.0,
                 modifier = Modifier.fillMaxSize(),
-                clippingDistance = 400.0,
+                clippingDistance = 200.0,
                 tableTopSceneViewProxy = tableTopSceneViewProxy,
                 onInitializationStatusChanged = {
                     initializationStatus = it
