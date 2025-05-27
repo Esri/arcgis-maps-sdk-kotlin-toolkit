@@ -210,8 +210,4 @@ internal class WorkManagerRepository(private val context: Context) {
     internal fun cancelWorkRequest(workerUUID: UUID) {
         workManager.cancelWorkById(workerUUID)
     }
-
-    internal fun getProgressForUUID(workerUUID: UUID) {
-        // TODO: Implement this method to get the progress of the work request
-    }
 }

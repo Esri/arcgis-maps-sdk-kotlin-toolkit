@@ -194,8 +194,6 @@ internal class PreplannedMapAreaState(
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )
 
-        workManagerRepository.getProgressForUUID(workerUUID)
-
         return workerUUID
     }
 
