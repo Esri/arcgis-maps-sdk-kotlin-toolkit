@@ -74,8 +74,11 @@
 
     function convertTemplate {
 	pushd toolkit > /dev/null
-	# replace the string "template" in any directory names
-	find "${componentName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
+        # replace the string "template" in any directory names
+        find "${componentName}" -type d -name "*template*" | while read dir; do
+           mv "$dir" "${dir//template/$componentName}"
+        done
+	
 	# replace the string "Template" in any file names
 	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
 	# replace the string "template" in the contents of any file
