@@ -40,7 +40,7 @@ class OfflineViewModel : ViewModel() {
     val arcGISMap
         get() = selectedMap.value ?: onlineMap
 
-    val offlineMapState = OfflineMapState(arcGISMap, viewModelScope = viewModelScope) {
+    val offlineMapState = OfflineMapState(arcGISMap) {
         selectedMap.value = it
     }
 

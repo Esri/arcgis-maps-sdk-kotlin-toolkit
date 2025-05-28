@@ -115,7 +115,6 @@ public class OfflineMapState(
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
                         workManagerRepository = _workManagerRepository,
-                        scope = viewModelScope,
                         onSelectionChangedListener = onSelectionChangedListener
                     )
                     preplannedMapAreaState.initialize()

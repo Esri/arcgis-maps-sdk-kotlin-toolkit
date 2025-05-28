@@ -128,7 +128,9 @@ internal fun PreplannedMapAreas(
                     when {
                         state.status.allowsDownload -> {
                             DownloadButton {
-                                state.downloadPreplannedMapArea()
+                                if (state.status.allowsDownload) {
+                                    state.downloadPreplannedMapArea()
+                                }
                             }
                         }
                         state.status == Status.Downloading -> {

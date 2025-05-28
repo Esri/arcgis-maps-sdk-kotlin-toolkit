@@ -38,9 +38,11 @@ import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
+import kotlinx.coroutines.cancel
 
 /**
  * Represents the state of a [PreplannedMapArea].
@@ -52,7 +54,6 @@ internal class PreplannedMapAreaState(
     private val offlineMapTask: OfflineMapTask,
     private val portalItemId: String,
     private val workManagerRepository: WorkManagerRepository,
-    private val scope: CoroutineScope,
     private val onSelectionChangedListener: (ArcGISMap) -> Unit
 ) {
     private lateinit var workerUUID: UUID
@@ -75,6 +76,8 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal val downloadProgress: State<Int> = _downloadProgress
+
+    private lateinit var scope: CoroutineScope
 
     /**
      * Loads and initializes the associated preplanned map area.
@@ -110,25 +113,33 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-    internal fun downloadPreplannedMapArea() {
+    internal fun downloadPreplannedMapArea() = runCatchingCancellable {
+        scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
-            try {
-                _status = Status.Downloading
-                val offlineWorkerUUID = startOfflineMapJob(
-                    downloadPreplannedOfflineMapJob = createOfflineMapJob(
-                        preplannedMapArea = preplannedMapArea
-                    )
+            _status = Status.Downloading
+            val offlineWorkerUUID = startOfflineMapJob(
+                downloadPreplannedOfflineMapJob = createOfflineMapJob(
+                    preplannedMapArea = preplannedMapArea
                 )
-                workManagerRepository.observeStatusForPreplannedWork(
-                    onWorkInfoStateChanged = ::logWorkInfo,
-                    preplannedMapAreaState = this@PreplannedMapAreaState,
-                    offlineWorkerUUID = offlineWorkerUUID
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Error taking preplanned map offline", e)
-                _status = Status.DownloadFailure(e)
-            }
+            )
+            workManagerRepository.observeStatusForPreplannedWork(
+                onWorkInfoStateChanged = ::logWorkInfo,
+                preplannedMapAreaState = this@PreplannedMapAreaState,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
         }
+    }
+
+    /**
+     * Cancels the current coroutine scope.
+     *
+     * This function is used to clean up resources and stop any ongoing operations
+     * associated with this instance of [PreplannedMapAreaState].
+     *
+     * @since 200.8.0
+     */
+    internal fun disposeScope() {
+        scope.cancel()
     }
 
     /**

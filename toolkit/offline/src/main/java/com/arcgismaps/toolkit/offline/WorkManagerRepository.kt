@@ -180,6 +180,7 @@ internal class WorkManagerRepository(private val context: Context) {
                             if (path != null) {
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(path)
                             }
+                            preplannedMapAreaState.disposeScope()
                         }
                         // if the work failed or was cancelled
                         WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
@@ -195,6 +196,7 @@ internal class WorkManagerRepository(private val context: Context) {
                                     )
                                 )
                             )
+                            preplannedMapAreaState.disposeScope()
                         }
                         // if the work is currently in progress
                         WorkInfo.State.RUNNING -> {
