@@ -59,7 +59,6 @@ import com.arcgismaps.toolkit.offline.R
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
-    onDownloadButtonClicked: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
     Column(
@@ -115,7 +114,11 @@ internal fun PreplannedMapAreas(
                     IconButton(
                         modifier = Modifier
                             .padding(top = 16.dp),
-                        onClick = { onDownloadButtonClicked(state) }
+                        onClick = {
+                            if (state.status.allowsDownload) {
+                                state.downloadPreplannedMapArea()
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Download,
