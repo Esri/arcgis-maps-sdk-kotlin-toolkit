@@ -70,6 +70,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Config
 import java.time.Instant
 
 /**
@@ -215,7 +216,8 @@ public fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(
-                    applicationContext = context.applicationContext
+                    applicationContext = context.applicationContext,
+                    planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
                 )
             SideEffect {
                 // We need to check, otherwise during subsequent recompositions we could accidentally

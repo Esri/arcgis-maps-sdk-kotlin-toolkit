@@ -567,13 +567,13 @@ fun Map<String, List<ArcGISFeature>>.getFeatureCount(): Int {
 }
 
 /**
- * Returns the additional message if present or the message of the exception. If the exception is
- * a [FeatureFormValidationException.RequiredException] then the message is "Field is required".
+ * Returns the message of the exception. If the exception is a
+ * [FeatureFormValidationException.RequiredException] then the message is "Field is required".
  */
 fun FeatureFormValidationException.getMessage(): String {
     return when (this) {
         is FeatureFormValidationException.RequiredException -> "Field is required"
-        else -> additionalMessage ?: message
+        else -> message
     }
 }
 

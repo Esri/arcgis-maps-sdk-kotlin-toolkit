@@ -38,6 +38,7 @@ import com.google.ar.core.Session
  *
  * @since 200.6.0
  */
+@Suppress("DEPRECATION")
 internal class DisplayRotationHelper(context: Context) :
     DisplayListener {
     private var viewportChanged = false
