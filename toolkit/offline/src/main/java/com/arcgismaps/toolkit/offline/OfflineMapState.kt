@@ -53,7 +53,6 @@ internal const val notificationChannelDescription =
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
-    private val viewModelScope: CoroutineScope,
     private val onSelectionChangedListener: (ArcGISMap) -> Unit = { }
 ) {
     private lateinit var _workManagerRepository: WorkManagerRepository

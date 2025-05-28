@@ -227,25 +227,23 @@ internal class PreplannedMapAreaState(
         workManagerRepository.cancelWorkRequest(workerUUID)
     }
 
-    internal fun createAndLoadMMPKAndOfflineMap(
+    internal suspend fun createAndLoadMMPKAndOfflineMap(
         mobileMapPackagePath: String
     ) {
-        scope.launch {
-            runCatchingCancellable {
-                mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
-                mobileMapPackage.load()
-                    .onSuccess {
-                        Log.d(TAG, "Mobile map package loaded successfully")
-                    }.onFailure { exception ->
-                        Log.e(TAG, "Error loading mobile map package", exception)
-                        _status = Status.MmpkLoadFailure(exception)
-                    }
-                map = mobileMapPackage.maps.firstOrNull()
-                    ?: throw IllegalStateException("No maps found in the mobile map package")
-            }.onFailure { exception ->
-                Log.e(TAG, "Error loading mobile map package", exception)
-                _status = Status.MmpkLoadFailure(exception)
-            }
+        runCatchingCancellable {
+            mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
+            mobileMapPackage.load()
+                .onSuccess {
+                    Log.d(TAG, "Mobile map package loaded successfully")
+                }.onFailure { exception ->
+                    Log.e(TAG, "Error loading mobile map package", exception)
+                    _status = Status.MmpkLoadFailure(exception)
+                }
+            map = mobileMapPackage.maps.firstOrNull()
+                ?: throw IllegalStateException("No maps found in the mobile map package")
+        }.onFailure { exception ->
+            Log.e(TAG, "Error loading mobile map package", exception)
+            _status = Status.MmpkLoadFailure(exception)
         }
     }
 
