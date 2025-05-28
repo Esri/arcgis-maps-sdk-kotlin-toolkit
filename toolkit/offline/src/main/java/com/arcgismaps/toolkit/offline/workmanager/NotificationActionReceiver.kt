@@ -21,8 +21,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
+import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
-import com.arcgismaps.toolkit.offline.notificationIdKey
 import java.util.UUID
 
 /**
@@ -41,13 +41,14 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
      * @since 200.8.0
      */
     override fun onReceive(context: Context, intent: Intent) {
-        // retrieve the data name or return if the context if null
-        val extraName = notificationCancelActionKey
         // get the actual data from the intent
-        val action = intent.getStringExtra(extraName) ?: "none"
+        val action = intent.getStringExtra(notificationCancelActionKey) ?: return
+        if (action != "Cancel") return
+
         // if the action is cancel then cancel the work associated with the notification
-        val workId = intent.getStringExtra(notificationIdKey)?.let { UUID.fromString(it) }
-        if (action == "Cancel" && workId != null) {
+        val uuidString = intent.getStringExtra(jobWorkerUuidKey)
+        if (uuidString != null) {
+            val workId = UUID.fromString(uuidString)
             WorkManager.getInstance(context).cancelWorkById(workId)
         }
     }

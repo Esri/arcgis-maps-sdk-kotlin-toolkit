@@ -26,11 +26,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 import com.arcgismaps.toolkit.offline.notificationChannelDescription
 import com.arcgismaps.toolkit.offline.notificationChannelName
-import com.arcgismaps.toolkit.offline.notificationIdKey
 import com.arcgismaps.toolkit.offline.notificationTitle
+import java.util.UUID
 
 /**
  * Handles progress and status notifications for offline map jobs executed via WorkManager.
@@ -45,7 +46,8 @@ import com.arcgismaps.toolkit.offline.notificationTitle
 internal class WorkerNotification(
     private val applicationContext: Context,
     private val notificationId: Int,
-    private val jobAreaTitle: String
+    private val jobAreaTitle: String,
+    private val workerUuid: UUID
 ) {
 
     // unique channel id for the NotificationChannel
@@ -78,13 +80,12 @@ internal class WorkerNotification(
             setPackage(applicationContext.packageName)
             // add the notification action as a string
             putExtra(notificationCancelActionKey, "Cancel")
-            // add the notificationId as a string
-            putExtra(notificationIdKey, notificationId.toString())
+            putExtra(jobWorkerUuidKey, workerUuid.toString())
         }
         // set the pending intent that will be passed to the NotificationManager
         PendingIntent.getBroadcast(
             applicationContext,
-            notificationId,
+            workerUuid.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

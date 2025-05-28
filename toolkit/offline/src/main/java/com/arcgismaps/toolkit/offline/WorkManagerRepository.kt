@@ -116,7 +116,6 @@ internal class WorkManagerRepository(private val context: Context) {
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
                 workDataOf(
-                    notificationIdKey to notificationId,
                     jsonJobPathKey to jsonJobPath,
                     jobAreaTitleKey to preplannedMapAreaTitle
                 )
@@ -127,7 +126,7 @@ internal class WorkManagerRepository(private val context: Context) {
         // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
         // ones that are active
         workManager.enqueueUniqueWork(
-            uniqueWorkName = prePlannedWorkNameKey + notificationId,
+            uniqueWorkName = jobWorkerUuidKey + workRequest.id,
             existingWorkPolicy = ExistingWorkPolicy.KEEP,
             request = workRequest
         )

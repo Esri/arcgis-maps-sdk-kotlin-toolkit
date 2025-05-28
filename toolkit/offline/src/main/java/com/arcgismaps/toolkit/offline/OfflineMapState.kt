@@ -31,10 +31,9 @@ import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import kotlinx.coroutines.CancellationException
 
 internal const val LOG_TAG = "Offline"
-internal const val notificationIdKey = "NotificationId"
+internal const val jobWorkerUuidKey = "WorkerUUID"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jsonJobPathKey = "JsonJobPath"
-internal const val prePlannedWorkNameKey = "PreplannedWorker.UUID."
 internal const val preplannedMapAreas = "PreplannedMapAreas"
 internal const val onDemandAreas = "OnDemandAreas"
 internal const val jsonJobsTempDir = "Jobs"
