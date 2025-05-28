@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
@@ -17,6 +35,8 @@ import org.junit.Test
 
 /**
  * Tests for [WorldScaleSceneViewProxy.checkVpsAvailability]
+ *
+ * @since 200.8.0
  */
 class VPSAvailabilityTests {
     @get:Rule
@@ -31,8 +51,10 @@ class VPSAvailabilityTests {
      * Tests that VPS is available at a location with data,
      * and unavailable at a location without data.
      *
-     * This test should be run manually on a device with [Google Play services for AR](https://play.google.com/store/apps/details?id=com.google.ar.core) installed.
-     * A valid [API key](https://developers.google.com/ar/develop/authorization?platform=android) must be placed in the manifest.
+     * This test should be run manually on a device with
+     * [Google Play services for AR](https://play.google.com/store/apps/details?id=com.google.ar.core) installed.
+     * A valid [API key](https://developers.google.com/ar/develop/authorization?platform=android)
+     * must be placed in the manifest.
      *
      * @since 200.8.0
      */
