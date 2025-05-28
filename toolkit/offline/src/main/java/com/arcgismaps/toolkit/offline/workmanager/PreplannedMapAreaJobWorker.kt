@@ -30,6 +30,7 @@ import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
 import com.arcgismaps.toolkit.offline.notificationIdKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -171,7 +172,7 @@ internal class PreplannedMapAreaJobWorker(
                 workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
                 val downloadPreplannedOfflineMapResult = jobResult.getOrNull()
                 val outputData = workDataOf(
-                    "mobileMapPackagePath" to (downloadPreplannedOfflineMapResult?.mobileMapPackage?.path ?: ""),
+                    mobileMapPackagePathKey to (downloadPreplannedOfflineMapResult?.mobileMapPackage?.path ?: ""),
                 )
                 Result.success(outputData)
             } else {

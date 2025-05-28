@@ -176,9 +176,14 @@ internal class WorkManagerRepository(private val context: Context) {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
-                            val path = workInfo.outputData.getString("mobileMapPackagePath")
-                            if (path != null) {
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(path)
+                            } ?: run {
+                                preplannedMapAreaState.updateStatus(
+                                    Status.MmpkLoadFailure(
+                                        Exception("Mobile Map Package path is null")
+                                    )
+                                )
                             }
                             preplannedMapAreaState.disposeScope()
                         }
@@ -209,6 +214,12 @@ internal class WorkManagerRepository(private val context: Context) {
             }
     }
 
+    /**
+     * Cancels a WorkManager request by its unique identifier (UUID).
+     *
+     * @param workerUUID The UUID of the WorkManager request to cancel.
+     * @since 200.8.0
+     */
     internal fun cancelWorkRequest(workerUUID: UUID) {
         workManager.cancelWorkById(workerUUID)
     }

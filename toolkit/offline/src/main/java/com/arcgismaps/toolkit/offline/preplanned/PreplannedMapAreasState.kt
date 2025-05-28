@@ -61,6 +61,7 @@ internal class PreplannedMapAreaState(
     private lateinit var mobileMapPackage: MobileMapPackage
     private lateinit var map: ArcGISMap
 
+    // Enabled when a downloaded map is chosen to be displayed by pressing the "Open" button.
     private var _isSelected by mutableStateOf(false)
     internal val isSelected: Boolean
         get() = _isSelected
@@ -70,11 +71,8 @@ internal class PreplannedMapAreaState(
     internal val status: Status
         get() = _status
 
+    // The download progress of the preplanned map area.
     private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
-    /**
-     *
-     * @since 200.8.0
-     */
     internal val downloadProgress: State<Int> = _downloadProgress
 
     private lateinit var scope: CoroutineScope

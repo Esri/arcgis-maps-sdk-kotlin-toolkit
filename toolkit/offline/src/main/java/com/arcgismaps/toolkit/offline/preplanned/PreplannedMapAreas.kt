@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.offline.preplanned
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -78,7 +81,10 @@ internal fun PreplannedMapAreas(
         )
         LazyColumn(modifier = Modifier) {
             items(preplannedMapAreaStates) { state ->
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
                         Image(
                             bitmap = it,
@@ -179,9 +185,7 @@ private fun getPreplannedMapAreaStatusString(context: Context, status: Status): 
 @Composable
 private fun DownloadButton(onClick: () -> Unit) {
     IconButton(
-        modifier = Modifier
-            .padding(top = 24.dp)
-            .size(30.dp),
+        modifier = Modifier.size(30.dp),
         onClick = onClick
     ) {
         Icon(
@@ -197,30 +201,27 @@ internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: (
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(top = 24.dp)
             .size(30.dp)
+            .clickable { onClick.invoke() }
     ) {
         // Circular Progress Indicator
         CircularProgressIndicator(
             progress = { progress / 100f },
         )
         // Square Button to cancel the download
-        Button(
-            onClick = onClick,
-            modifier = Modifier.size(10.dp),
-            shape = RectangleShape
-        ) {
-            // Empty content for the button
-        }
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(RectangleShape)
+                .background(ButtonDefaults.buttonColors().containerColor),
+        )
     }
 }
 
 @Composable
 private fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
     Button(
-        modifier = Modifier
-            .padding(top = 16.dp)
-            .widthIn(max = 80.dp), // restricts max width
+        modifier = Modifier.widthIn(max = 80.dp), // restricts max width
         contentPadding = PaddingValues(horizontal = 10.dp),
         enabled = isEnabled,
         onClick = onClick

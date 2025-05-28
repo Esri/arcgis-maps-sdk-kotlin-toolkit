@@ -35,6 +35,7 @@ internal const val notificationIdKey = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jsonJobPathKey = "JsonJobPath"
 internal const val prePlannedWorkNameKey = "PreplannedWorker.UUID."
+internal const val mobileMapPackagePathKey = "MobileMapPackagePath"
 internal const val preplannedMapAreas = "PreplannedMapAreas"
 internal const val onDemandAreas = "OnDemandAreas"
 internal const val jsonJobsTempDir = "Jobs"
@@ -52,7 +53,7 @@ internal const val notificationChannelDescription =
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
-    private val onSelectionChangedListener: (ArcGISMap) -> Unit = { }
+    private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     private lateinit var _workManagerRepository: WorkManagerRepository
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
@@ -113,7 +114,7 @@ public class OfflineMapState(
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
                         workManagerRepository = _workManagerRepository,
-                        onSelectionChangedListener = onSelectionChangedListener
+                        onSelectionChangedListener = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
