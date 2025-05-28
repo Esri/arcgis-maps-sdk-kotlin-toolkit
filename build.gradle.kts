@@ -39,6 +39,28 @@ buildscript {
         // before any dependent subproject uses its symbols to configure a dokka task.
         classpath(libs.dokka.versioning)
     }
+    val localProperties = java.util.Properties().apply {
+        val localPropertiesFile = file("local.properties")
+        if (localPropertiesFile.exists()) {
+            load(localPropertiesFile.inputStream())
+        }
+    }
+    // Find these in properties passed through command line or read from local.properties and
+    // set them as project properties
+    val artifactoryUrl: String? = project.findProperty("artifactoryUrl") as String?
+        ?: localProperties.getProperty("artifactoryUrl")
+        ?: "https://esri.jfrog.io/artifactory/arcgis"
+    val artifactoryUsername: String? = project.findProperty("artifactoryUsername") as String?
+        ?: localProperties.getProperty("artifactoryUsername")
+        ?: ""
+    val artifactoryPassword: String? = project.findProperty("artifactoryPassword") as String?
+        ?: localProperties.getProperty("artifactoryPassword")
+        ?: ""
+
+    project.extra.set("artifactoryUrl", artifactoryUrl)
+    project.extra.set("artifactoryUsername", artifactoryUsername)
+    project.extra.set("artifactoryPassword", artifactoryPassword)
+
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }
 

@@ -23,6 +23,8 @@
     <string name="allow_connection">Allow connection</string>
     <string name="username_password_login_title">Authentication required</string>
     <string name="username_password_login_message">You need to sign in to access %1$s</string>
+    <string name="incorrect_credentials">The credentials were incorrect for %1$s. Please try again.</string>
+    <string name="sign_in_error_occurred">An error occurred signing in to %1$s. Please try again.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Username</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

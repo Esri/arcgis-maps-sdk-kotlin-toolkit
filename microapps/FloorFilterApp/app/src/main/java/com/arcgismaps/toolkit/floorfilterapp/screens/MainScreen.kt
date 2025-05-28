@@ -58,6 +58,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
 
     // use default UI properties
+    @Suppress("DEPRECATION")
     val floorFilterState: FloorFilterState by remember {
         mutableStateOf(FloorFilterState(
             geoModel = floorAwareWebMap,

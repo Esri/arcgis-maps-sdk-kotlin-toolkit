@@ -56,6 +56,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
+@Suppress("DEPRECATION")
 fun FeatureFormsAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+

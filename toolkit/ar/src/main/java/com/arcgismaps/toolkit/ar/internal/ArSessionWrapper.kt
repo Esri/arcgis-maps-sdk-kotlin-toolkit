@@ -26,6 +26,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Config
+import com.google.ar.core.Config.PlaneFindingMode
 import com.google.ar.core.Session
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -38,7 +39,8 @@ import java.util.concurrent.locks.ReentrantLock
 internal class ArSessionWrapper(
     private val applicationContext: Context,
     private val onError: (Throwable) -> Unit,
-    private var useGeospatial: Boolean
+    private var useGeospatial: Boolean,
+    private val planeFindingMode: PlaneFindingMode = PlaneFindingMode.DISABLED
 ) :
     DefaultLifecycleObserver {
 
@@ -65,14 +67,14 @@ internal class ArSessionWrapper(
         withLock { session, _ ->
             val newSession = session ?: Session(applicationContext).also {
                 this.session = it
-                configureSession(useGeospatial)
+                configureSession(useGeospatial, planeFindingMode)
             }
             shouldInitializeDisplay = true
             newSession.resume()
         }
     }
 
-    private fun configureSession(useGeospatial: Boolean) {
+    private fun configureSession(useGeospatial: Boolean, planeFindingMode: PlaneFindingMode) {
         session?.configure(
             session?.config?.apply {
                 lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
@@ -84,7 +86,7 @@ internal class ArSessionWrapper(
                     geospatialMode = Config.GeospatialMode.ENABLED
                 }
                 // We only want to detect horizontal planes.
-                setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
+                setPlaneFindingMode(planeFindingMode)
             }
         )
         this.useGeospatial = useGeospatial
@@ -99,7 +101,7 @@ internal class ArSessionWrapper(
         }
     }
 
-    fun resetSession(useGeospatial: Boolean = false) {
+    fun resetSession(useGeospatial: Boolean = false, planeFindingMode: PlaneFindingMode) {
         withLock { session, _ ->
             session?.let {
                 it.pause()
@@ -110,7 +112,7 @@ internal class ArSessionWrapper(
             shouldInitializeDisplay = true
             newSession.resume()
             this.session = newSession
-            configureSession(useGeospatial)
+            configureSession(useGeospatial, planeFindingMode)
         }
     }
 }
@@ -124,7 +126,8 @@ internal class ArSessionWrapper(
 internal fun rememberArSessionWrapper(
     applicationContext: Context,
     onError: (Throwable) -> Unit = {},
-    useGeospatial: Boolean = false
+    useGeospatial: Boolean = false,
+    planeFindingMode: Config.PlaneFindingMode
 ): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
     val arSessionWrapper = remember {
@@ -134,8 +137,8 @@ internal fun rememberArSessionWrapper(
             useGeospatial
         )
     }
-    LaunchedEffect(useGeospatial) {
-        arSessionWrapper.resetSession(useGeospatial)
+    LaunchedEffect(useGeospatial, planeFindingMode) {
+        arSessionWrapper.resetSession(useGeospatial, planeFindingMode)
     }
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
