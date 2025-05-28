@@ -1,0 +1,61 @@
+public abstract class com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initializing : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
+	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/PortalItem;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getPortalItemUrl ()Ljava/lang/String;
+	public final fun getThumbnail ()Landroid/graphics/Bitmap;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun initialize-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setThumbnail (Landroid/graphics/Bitmap;)V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;)V
+	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
+}
+
