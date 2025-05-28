@@ -80,7 +80,11 @@
         done
 	
 	# replace the string "Template" in any file names
-	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	find "${componentName}" -type f -name "*Template*"
+	find "${componentName}" -type f -name "*Template*" | while read file; do
+           mv "$file" "${file//Template/$composableFunctionName}"
+        done
+	
 	# replace the string "template" in the contents of any file
 	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/g {} \; > /dev/null 2>&1
 	# replace the string "Template" in the contents of any file	
