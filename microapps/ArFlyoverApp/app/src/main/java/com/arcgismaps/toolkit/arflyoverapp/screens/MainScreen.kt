@@ -33,12 +33,11 @@ import com.arcgismaps.toolkit.ar.FlyoverSceneView
 @Composable
 fun MainScreen() {
 
-    val elevationSource = remember {
+    val elevationSource =
         ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
-    }
-    val meshLayer = remember {
+
+    val meshLayer =
         IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
-    }
 
     val arcGISScene by remember {
         mutableStateOf(
