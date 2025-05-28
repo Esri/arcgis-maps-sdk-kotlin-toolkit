@@ -80,7 +80,6 @@
         done
 	
 	# replace the string "Template" in any file names
-	find "${componentName}" -type f -name "*Template*"
 	find "${componentName}" -type f -name "*Template*" | while read file; do
            mv "$file" "${file//Template/$composableFunctionName}"
         done
