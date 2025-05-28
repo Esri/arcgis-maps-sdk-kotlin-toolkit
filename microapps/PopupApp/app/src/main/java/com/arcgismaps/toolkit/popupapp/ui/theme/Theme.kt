@@ -58,6 +58,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
+@Suppress("DEPRECATION")
 fun PopupAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+

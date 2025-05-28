@@ -30,3 +30,12 @@ package com.arcgismaps.toolkit.ar
  * @since 200.7.0
  */
 public class ArCoreAuthorizationException: Exception("The Google Cloud authorization provided by the application is not valid.")
+
+/**
+ * Indicates that the application has exhausted the quota allotted to the ARCore API on the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console.
+ *
+ * For more information about the ARCore request quota, see the Google documentation on [Quota and billing](https://developers.google.com/ar/develop/authorization?platform=android#quota-and-billing).
+ *
+ * @since 200.8.0
+ */
+public class ArCoreResourceExhaustedException: Exception("The application has exhausted the quota allotted to the given Google Cloud project. The developer should request additional quota for the ARCore API for their project from the Google Cloud Console.")

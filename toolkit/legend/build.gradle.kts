@@ -74,6 +74,12 @@ android {
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 apiValidation {

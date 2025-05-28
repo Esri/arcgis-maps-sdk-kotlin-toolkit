@@ -52,8 +52,8 @@ function convertTemplateApp {
     find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
     # replace the string "template" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
-    # replace the string "Template" in the contents of any file
-    find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1
+    # replace the string "TemplateApp" in the contents of any file
+    find "${appDirName}" -type f -exec perl -i -pe s/TemplateApp/$composableFunctionName/ {} \; > /dev/null 2>&1
 
     popd > /dev/null
 }
@@ -72,14 +72,14 @@ if [ "$1" == "-h" ]; then
 fi
 
 # prompt for component name
-echo "Please enter the name of the new microapp in CamelCase without spaces."
+echo "Please enter the name of the new microapp in CamelCase without spaces. The name should end with App e.g. CompassApp."
 read name
 
 componentName="${name,,}"
 componentName="${componentName%app}"
 composableFunctionName="${name^}"
 appDirName="${composableFunctionName}"
-if [[ ! "${appDirName}" =~ .+App$ ]] ; then
+if [[ ! "${appDirName}" =~ .+[Aa]pp$ ]] ; then
     appDirName="${composableFunctionName}App"
 fi
 
