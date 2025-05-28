@@ -42,7 +42,6 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.Config
 
-
 @Composable
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
@@ -88,23 +87,25 @@ public fun FlyoverSceneView(
     val arSessionWrapper =
         rememberArSessionWrapper(
             applicationContext = context.applicationContext,
-            planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
+            planeFindingMode = Config.PlaneFindingMode.DISABLED
         )
 
     val sceneViewProxy = remember {
         SceneViewProxy()
     }
 
-    val cameraController = TransformationMatrixCameraController().apply {
-        setOriginCamera(
-            Camera(
-                locationPoint = initialLocation,
-                pitch = 90.0,
-                roll = 0.0,
-                heading = initialHeading
+    val cameraController = remember {
+        TransformationMatrixCameraController().apply {
+            setOriginCamera(
+                Camera(
+                    locationPoint = initialLocation,
+                    pitch = 90.0,
+                    roll = 0.0,
+                    heading = initialHeading
+                )
             )
-        )
-        setTranslationFactor(translationFactor)
+            setTranslationFactor(translationFactor)
+        }
     }
 
     Box(modifier = Modifier) {
