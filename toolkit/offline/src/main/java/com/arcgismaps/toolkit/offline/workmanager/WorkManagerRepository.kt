@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.arcgismaps.toolkit.offline
+package com.arcgismaps.toolkit.offline.workmanager
 
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
@@ -23,9 +23,14 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.toolkit.offline.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.jsonJobsTempDir
+import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
+import com.arcgismaps.toolkit.offline.notificationIdKey
+import com.arcgismaps.toolkit.offline.prePlannedWorkNameKey
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
-import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import java.io.File
 import java.util.UUID
 

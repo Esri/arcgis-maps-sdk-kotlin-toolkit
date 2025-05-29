@@ -33,7 +33,7 @@ import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.LOG_TAG
-import com.arcgismaps.toolkit.offline.WorkManagerRepository
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo

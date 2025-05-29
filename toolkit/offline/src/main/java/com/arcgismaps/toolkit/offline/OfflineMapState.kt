@@ -28,6 +28,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
 
 internal const val LOG_TAG = "Offline"
