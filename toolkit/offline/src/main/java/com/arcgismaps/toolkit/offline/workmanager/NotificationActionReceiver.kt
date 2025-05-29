@@ -46,7 +46,8 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
         // if the action is cancel
         if (action == "Cancel") {
             // get the WorkManager instance and cancel all active workers
-            WorkManager.getInstance(context).cancelAllWork() // TODO: Cancel the selected worker, not all.
+            WorkManager.getInstance(context)
+                .cancelAllWork() // TODO: Cancel the selected worker, not all.
         }
     }
 }

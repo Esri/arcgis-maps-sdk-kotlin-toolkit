@@ -18,16 +18,22 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.LOG_TAG
-import com.arcgismaps.toolkit.offline.WorkManagerRepository
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
@@ -47,11 +53,27 @@ internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
     private val portalItemId: String,
-    private val workManagerRepository: WorkManagerRepository
+    private val workManagerRepository: WorkManagerRepository,
+    private val onSelectionChangedListener: (ArcGISMap) -> Unit
 ) {
+    private lateinit var workerUUID: UUID
+
+    private lateinit var mobileMapPackage: MobileMapPackage
+    private lateinit var map: ArcGISMap
+
+    // Enabled when a downloaded map is chosen to be displayed by pressing the "Open" button.
+    private var _isSelected by mutableStateOf(false)
+    internal val isSelected: Boolean
+        get() = _isSelected
+
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
-    internal val status: Status get() = _status
+    internal val status: Status
+        get() = _status
+
+    // The download progress of the preplanned map area.
+    private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
+    internal val downloadProgress: State<Int> = _downloadProgress
 
     private lateinit var scope: CoroutineScope
 
@@ -175,13 +197,11 @@ internal class PreplannedMapAreaState(
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        val workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
             notificationId = workManagerRepository.createNotificationIdForJob(),
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )
-
-        workManagerRepository.getProgressForUUID(workerUUID)
 
         return workerUUID
     }
@@ -195,6 +215,41 @@ internal class PreplannedMapAreaState(
      */
     internal fun updateStatus(newStatus: Status) {
         _status = newStatus
+    }
+
+    internal fun updateDownloadProgress(progress: Int) {
+        _downloadProgress.value = progress
+    }
+
+    internal fun cancelDownload() {
+        workManagerRepository.cancelWorkRequest(workerUUID)
+    }
+
+    internal suspend fun createAndLoadMMPKAndOfflineMap(
+        mobileMapPackagePath: String
+    ) {
+        runCatchingCancellable {
+            mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
+            mobileMapPackage.load()
+                .onSuccess {
+                    Log.d(TAG, "Mobile map package loaded successfully")
+                }.onFailure { exception ->
+                    Log.e(TAG, "Error loading mobile map package", exception)
+                    _status = Status.MmpkLoadFailure(exception)
+                }
+            map = mobileMapPackage.maps.firstOrNull()
+                ?: throw IllegalStateException("No maps found in the mobile map package")
+        }.onFailure { exception ->
+            Log.e(TAG, "Error loading mobile map package", exception)
+            _status = Status.MmpkLoadFailure(exception)
+        }
+    }
+
+    internal fun setSelected(selected: Boolean) {
+        _isSelected = selected
+        if (selected) {
+            onSelectionChangedListener(map)
+        }
     }
 }
 

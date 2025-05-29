@@ -20,17 +20,25 @@ package com.arcgismaps.toolkit.offline.preplanned
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
+import androidx.compose.ui.graphics.RectangleShape
 
 /**
  * Displays a list of preplanned map areas.
@@ -72,7 +81,10 @@ internal fun PreplannedMapAreas(
         )
         LazyColumn(modifier = Modifier) {
             items(preplannedMapAreaStates) { state ->
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
                         Image(
                             bitmap = it,
@@ -85,6 +97,7 @@ internal fun PreplannedMapAreas(
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
+                        // Display the title with a maximum of one line
                         Text(
                             text = state.preplannedMapArea.portalItem.title,
                             style = MaterialTheme.typography.titleSmall,
@@ -92,39 +105,52 @@ internal fun PreplannedMapAreas(
                             maxLines = 1, // Restrict to one line
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
+                        // Display the description with a maximum of two lines
                         Text(
                             text = state.preplannedMapArea.portalItem.description,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
-                        val statusString = getPreplannedMapAreaStatusString(
-                            context = LocalContext.current,
-                            status = state.status
-                        )
+                        // Display the status string
+                        val statusString = if (state.isSelected) {
+                            stringResource(R.string.currently_open)
+                        } else {
+                            getPreplannedMapAreaStatusString(
+                                context = LocalContext.current,
+                                status = state.status
+                            )
+                        }
                         Text(
                             text = statusString,
-                            style =  MaterialTheme.typography.labelSmall.copy(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             maxLines = 1, // Restrict to one lines
                         )
                     }
-                    IconButton(
-                        modifier = Modifier
-                            .padding(top = 16.dp),
-                        onClick = {
-                            if (state.status.allowsDownload) {
-                                state.downloadPreplannedMapArea()
+                    // Display the action button based on the status
+                    when {
+                        state.status.allowsDownload -> {
+                            DownloadButton {
+                                if (state.status.allowsDownload) {
+                                    state.downloadPreplannedMapArea()
+                                }
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Download,
-                            contentDescription = stringResource(R.string.download),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                        state.status == Status.Downloading -> {
+                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
+                                state.cancelDownload()
+                            }
+                        }
+                        state.status.isDownloaded -> {
+                            OpenButton(!state.isSelected) {
+                                // Unselect all, then select this one
+                                preplannedMapAreaStates.forEach { it.setSelected(false) }
+                                state.setSelected(true)
+                            }
+                        }
                     }
                 }
                 if (state.preplannedMapArea != preplannedMapAreaStates.last().preplannedMapArea) {
@@ -153,5 +179,57 @@ private fun getPreplannedMapAreaStatusString(context: Context, status: Status): 
         Status.PackageFailure -> getString(context, R.string.packaging_failed)
         Status.Packaged -> getString(context, R.string.ready_to_download)
         Status.Packaging -> getString(context, R.string.packaging)
+    }
+}
+
+@Composable
+private fun DownloadButton(onClick: () -> Unit) {
+    IconButton(
+        modifier = Modifier.size(30.dp),
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Download,
+            contentDescription = stringResource(R.string.download),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(30.dp)
+            .clickable { onClick.invoke() }
+    ) {
+        // Circular Progress Indicator
+        CircularProgressIndicator(
+            progress = { progress / 100f },
+        )
+        // Square Button to cancel the download
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(RectangleShape)
+                .background(ButtonDefaults.buttonColors().containerColor),
+        )
+    }
+}
+
+@Composable
+private fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
+    Button(
+        modifier = Modifier.widthIn(max = 80.dp), // restricts max width
+        contentPadding = PaddingValues(horizontal = 10.dp),
+        enabled = isEnabled,
+        onClick = onClick
+    ) {
+        Text(
+            text = stringResource(R.string.open),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

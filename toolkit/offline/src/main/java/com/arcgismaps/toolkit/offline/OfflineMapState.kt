@@ -28,6 +28,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
 
 internal const val LOG_TAG = "Offline"
@@ -35,6 +36,7 @@ internal const val notificationIdKey = "NotificationId"
 internal const val jobAreaTitleKey = "JobAreaTitle"
 internal const val jsonJobPathKey = "JsonJobPath"
 internal const val prePlannedWorkNameKey = "PreplannedWorker.UUID."
+internal const val mobileMapPackagePathKey = "MobileMapPackagePath"
 internal const val preplannedMapAreas = "PreplannedMapAreas"
 internal const val onDemandAreas = "OnDemandAreas"
 internal const val jsonJobsTempDir = "Jobs"
@@ -51,7 +53,8 @@ internal const val notificationChannelDescription =
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap
+    private val arcGISMap: ArcGISMap,
+    private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     private lateinit var _workManagerRepository: WorkManagerRepository
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
@@ -111,7 +114,8 @@ public class OfflineMapState(
                         preplannedMapArea = it,
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
-                        workManagerRepository = _workManagerRepository
+                        workManagerRepository = _workManagerRepository,
+                        onSelectionChangedListener = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
