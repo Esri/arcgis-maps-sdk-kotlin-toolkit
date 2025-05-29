@@ -52,7 +52,7 @@ internal fun logWorkInfo(workInfo: WorkInfo) {
         }
 
         WorkInfo.State.CANCELLED -> {
-            Log.e(TAG, "${workInfo.tags}: CANCELLED - Stop reason: ${workInfo.stopReason.toStopReasonString()}")
+            Log.e(TAG, "${workInfo.tags}: CANCELLED - Stop reason: ${workInfo.stopReason.toStopReasonString()}, ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
         }
     }
 }

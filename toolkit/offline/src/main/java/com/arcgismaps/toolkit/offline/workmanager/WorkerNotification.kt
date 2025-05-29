@@ -70,9 +70,9 @@ internal class WorkerNotification(
     }
 
     // intent for notification action to WorkManager’s cancellation mechanism
-    private val cancelIntent = WorkManager
-        .getInstance(applicationContext)
-        .createCancelPendingIntent(workerUuid)
+    private val cancelActionIntent by lazy {
+        WorkManager.getInstance(applicationContext).createCancelPendingIntent(workerUuid)
+    }
 
     init {
         // create the notification channel
@@ -95,7 +95,7 @@ internal class WorkerNotification(
         ).setSmallIcon(android.R.drawable.stat_sys_download)
             .setProgress(100, progress, false)
             // add a cancellation action
-            .addAction(0, "Cancel", cancelIntent)
+            .addAction(0, "Cancel", cancelActionIntent)
             .build()
     }
 
