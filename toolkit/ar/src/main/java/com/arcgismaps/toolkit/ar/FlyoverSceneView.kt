@@ -48,7 +48,8 @@ public fun FlyoverSceneView(
     initialLocation: Point,
     initialHeading: Double,
     translationFactor: Double,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    flyoverSceneViewProxy: FlyoverSceneViewProxy = remember { FlyoverSceneViewProxy() }
 ) {
     val context = LocalContext.current
 
@@ -90,9 +91,9 @@ public fun FlyoverSceneView(
             planeFindingMode = Config.PlaneFindingMode.DISABLED
         )
 
-    val sceneViewProxy = remember {
-        SceneViewProxy()
-    }
+//    val sceneViewProxy = remember {
+//        SceneViewProxy()
+//    }
 
     val cameraController = remember {
         TransformationMatrixCameraController().apply {
@@ -114,7 +115,7 @@ public fun FlyoverSceneView(
             onFrame = { frame, displayRotation, session ->
                 cameraController.transformationMatrix =
                     frame.camera.displayOrientedPose.transformationMatrix
-                sceneViewProxy.renderFrame()
+                flyoverSceneViewProxy.sceneViewProxy.renderFrame()
             },
             onTapWithHitResult = {},
             onFirstPlaneDetected = {},
@@ -124,12 +125,12 @@ public fun FlyoverSceneView(
 
     SceneView(
         arcGISScene = arcGISScene,
-        sceneViewProxy = sceneViewProxy,
+        sceneViewProxy = flyoverSceneViewProxy.sceneViewProxy,
         cameraController = cameraController,
         atmosphereEffect = AtmosphereEffect.Realistic,
         spaceEffect = SpaceEffect.Stars,
         modifier = modifier
     )
 
-    sceneViewProxy.setManualRenderingEnabled(true)
+    //sceneViewProxy.setManualRenderingEnabled(true)
 }
