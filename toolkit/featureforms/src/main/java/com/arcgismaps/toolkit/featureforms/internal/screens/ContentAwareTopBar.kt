@@ -256,6 +256,10 @@ private fun getTopBarTitleAndSubtitle(
             Pair(title, subTitle)
         }
 
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationDetailView>() -> {
+            Pair(stringResource(R.string.association_settings), "")
+        }
+
         else -> {
             Pair(defaultTitle, defaultTitle)
         }

@@ -49,5 +49,5 @@ internal sealed class NavigationAction(val value: Int) : Parcelable {
      * @param index The index of the association to navigate to.
      */
     @Parcelize
-    data class NavigateToAssociation(val index : Int) : NavigationAction(3)
+    data class NavigateToFeature(val index : Int) : NavigationAction(3)
 }
