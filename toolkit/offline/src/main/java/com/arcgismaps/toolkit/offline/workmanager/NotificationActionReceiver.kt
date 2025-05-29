@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 import java.util.UUID
@@ -49,7 +50,9 @@ internal class NotificationActionReceiver : BroadcastReceiver() {
         val uuidString = intent.getStringExtra(jobWorkerUuidKey)
         if (uuidString != null) {
             val workId = UUID.fromString(uuidString)
-            WorkManager.getInstance(context).cancelWorkById(workId)
+            WorkManager.getInstance(context).cancelWorkById(workId).apply {
+                workDataOf("Error" to "Notification Cancellation", "Worker:" to workId.toString())
+            }
         }
     }
 }

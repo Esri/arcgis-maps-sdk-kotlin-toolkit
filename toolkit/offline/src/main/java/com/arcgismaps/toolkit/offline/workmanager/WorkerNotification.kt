@@ -39,13 +39,11 @@ import java.util.UUID
  * map areas. Uses Android's notification system to inform about job progress and completion statuses.
  *
  * @param applicationContext The application context used to access resources and system services.
- * @param notificationId A unique identifier for managing notifications associated with a specific job.
  * @param jobAreaTitle The title of the map area being processed, displayed in notifications.
  * @since 200.8.0
  */
 internal class WorkerNotification(
     private val applicationContext: Context,
-    private val notificationId: Int,
     private val jobAreaTitle: String,
     private val workerUuid: UUID
 ) {
@@ -136,9 +134,9 @@ internal class WorkerNotification(
 
         with(NotificationManagerCompat.from(applicationContext)) {
             // cancel the visible progress notification using its id
-            cancel(notificationId)
+            cancel(workerUuid.hashCode())
             // post the new status notification with a new notificationId
-            notify(notificationId + 1, notification)
+            notify(workerUuid.hashCode() + 1, notification)
         }
     }
 

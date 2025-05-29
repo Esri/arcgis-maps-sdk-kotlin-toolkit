@@ -212,6 +212,8 @@ internal class WorkManagerRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal fun cancelWorkRequest(workerUUID: UUID) {
-        workManager.cancelWorkById(workerUUID)
+        workManager.cancelWorkById(workerUUID).apply {
+            workDataOf("Error" to "WorkRequest Cancelled", "Worker:" to workerUUID.hashCode())
+        }
     }
 }
