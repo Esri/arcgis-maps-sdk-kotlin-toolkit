@@ -115,13 +115,22 @@ public class OfflineMapState(
                         offlineMapTask = offlineMapTask,
                         portalItemId = portalItemId,
                         workManagerRepository = _workManagerRepository,
-                        onSelectionChangedListener = onSelectionChanged
+                        onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
                 }
         }
         _initializationStatus.value = InitializationStatus.Initialized
+    }
+
+    /**
+     * Resets the current selection of preplanned map areas.
+     *
+     * @since 200.8.0
+     */
+    public fun resetSelectedMapArea() {
+        _preplannedMapAreaStates.forEach { it.setSelected(false) }
     }
 }
 
