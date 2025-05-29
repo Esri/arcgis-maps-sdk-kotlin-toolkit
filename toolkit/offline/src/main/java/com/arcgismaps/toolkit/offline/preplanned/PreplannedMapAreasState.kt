@@ -33,7 +33,7 @@ import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.LOG_TAG
-import com.arcgismaps.toolkit.offline.WorkManagerRepository
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
@@ -61,6 +61,7 @@ internal class PreplannedMapAreaState(
     private lateinit var mobileMapPackage: MobileMapPackage
     private lateinit var map: ArcGISMap
 
+    // Enabled when a downloaded map is chosen to be displayed by pressing the "Open" button.
     private var _isSelected by mutableStateOf(false)
     internal val isSelected: Boolean
         get() = _isSelected
@@ -70,11 +71,8 @@ internal class PreplannedMapAreaState(
     internal val status: Status
         get() = _status
 
+    // The download progress of the preplanned map area.
     private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
-    /**
-     *
-     * @since 200.8.0
-     */
     internal val downloadProgress: State<Int> = _downloadProgress
 
     private lateinit var scope: CoroutineScope
