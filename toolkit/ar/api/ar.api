@@ -8,6 +8,10 @@ public final class com/arcgismaps/toolkit/ar/ArCoreResourceExhaustedException : 
 	public fun <init> ()V
 }
 
+public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewKt {
+	public static final fun FlyoverSceneView (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/geometry/Point;DDLandroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class com/arcgismaps/toolkit/ar/TableTopSceneViewKt {
 	public static final fun TableTopSceneView-yL0mQJU (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/geometry/Point;DLandroidx/compose/ui/Modifier;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
 }
