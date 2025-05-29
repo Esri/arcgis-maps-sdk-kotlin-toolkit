@@ -36,8 +36,8 @@ class OfflineViewModel : ViewModel() {
             napervilleWaterNetwork
         )
     )
-
     val selectedMap = mutableStateOf<ArcGISMap?>(null)
+
     val arcGISMap
         get() = selectedMap.value ?: onlineMap
 

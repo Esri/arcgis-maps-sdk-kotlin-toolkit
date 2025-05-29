@@ -22,8 +22,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
-import com.arcgismaps.toolkit.offline.notificationIdKey
-import java.util.UUID
 
 /**
  * Handles notification actions triggered by the user, canceling the offline map job.

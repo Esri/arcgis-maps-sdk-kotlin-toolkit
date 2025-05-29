@@ -29,7 +29,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.arcgismaps.toolkit.offline.notificationCancelActionKey
 import com.arcgismaps.toolkit.offline.notificationChannelDescription
 import com.arcgismaps.toolkit.offline.notificationChannelName
-import com.arcgismaps.toolkit.offline.notificationIdKey
 import com.arcgismaps.toolkit.offline.notificationTitle
 
 /**
@@ -78,8 +77,6 @@ internal class WorkerNotification(
             setPackage(applicationContext.packageName)
             // add the notification action as a string
             putExtra(notificationCancelActionKey, "Cancel")
-            // add the notificationId as a string
-            putExtra(notificationIdKey, notificationId.toString())
         }
         // set the pending intent that will be passed to the NotificationManager
         PendingIntent.getBroadcast(
