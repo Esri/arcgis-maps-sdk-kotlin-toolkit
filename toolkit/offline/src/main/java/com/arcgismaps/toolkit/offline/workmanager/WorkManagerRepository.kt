@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.arcgismaps.toolkit.offline
+package com.arcgismaps.toolkit.offline.workmanager
 
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
@@ -23,9 +23,14 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.toolkit.offline.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.jsonJobsTempDir
+import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
+import com.arcgismaps.toolkit.offline.notificationIdKey
+import com.arcgismaps.toolkit.offline.prePlannedWorkNameKey
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
-import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import java.io.File
 import java.util.UUID
 
@@ -176,9 +181,14 @@ internal class WorkManagerRepository(private val context: Context) {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
-                            val path = workInfo.outputData.getString("mobileMapPackagePath")
-                            if (path != null) {
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(path)
+                            } ?: run {
+                                preplannedMapAreaState.updateStatus(
+                                    Status.MmpkLoadFailure(
+                                        Exception("Mobile Map Package path is null")
+                                    )
+                                )
                             }
                             preplannedMapAreaState.disposeScope()
                         }
@@ -209,6 +219,12 @@ internal class WorkManagerRepository(private val context: Context) {
             }
     }
 
+    /**
+     * Cancels a WorkManager request by its unique identifier (UUID).
+     *
+     * @param workerUUID The UUID of the WorkManager request to cancel.
+     * @since 200.8.0
+     */
     internal fun cancelWorkRequest(workerUUID: UUID) {
         workManager.cancelWorkById(workerUUID)
     }

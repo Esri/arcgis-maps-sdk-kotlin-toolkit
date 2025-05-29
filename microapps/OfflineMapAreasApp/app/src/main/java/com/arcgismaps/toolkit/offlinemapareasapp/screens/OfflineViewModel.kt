@@ -30,12 +30,13 @@ import kotlinx.coroutines.launch
 class OfflineViewModel : ViewModel() {
 
     private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
-    val onlineMap = ArcGISMap(
+    private val onlineMap = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
             napervilleWaterNetwork
         )
     )
+
     val selectedMap = mutableStateOf<ArcGISMap?>(null)
     val arcGISMap
         get() = selectedMap.value ?: onlineMap
