@@ -54,7 +54,7 @@ internal class PreplannedMapAreaState(
     private val offlineMapTask: OfflineMapTask,
     private val portalItemId: String,
     private val workManagerRepository: WorkManagerRepository,
-    private val onSelectionChangedListener: (ArcGISMap) -> Unit
+    private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
     private lateinit var workerUUID: UUID
 
@@ -247,7 +247,7 @@ internal class PreplannedMapAreaState(
     internal fun setSelected(selected: Boolean) {
         _isSelected = selected
         if (selected) {
-            onSelectionChangedListener(map)
+            onSelectionChanged(map)
         }
     }
 }
