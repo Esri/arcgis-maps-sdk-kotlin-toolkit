@@ -29,9 +29,9 @@ import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
-import com.arcgismaps.toolkit.offline.notificationIdKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -61,7 +61,7 @@ internal class PreplannedMapAreaJobWorker(
      * Retrieves the unique notification ID passed from input data to identify related notifications.
      */
     private val notificationId by lazy {
-        inputData.getInt(key = notificationIdKey, defaultValue = 1)
+        inputData.getInt(key = jobWorkerUuidKey, defaultValue = 1)
     }
 
     /**
@@ -79,7 +79,8 @@ internal class PreplannedMapAreaJobWorker(
         WorkerNotification(
             applicationContext = context,
             notificationId = notificationId,
-            jobAreaTitle = jobAreaTitle
+            jobAreaTitle = jobAreaTitle,
+            workerUuid = id
         )
     }
 
