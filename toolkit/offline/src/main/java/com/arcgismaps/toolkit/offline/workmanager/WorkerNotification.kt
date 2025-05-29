@@ -26,8 +26,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
-import com.arcgismaps.toolkit.offline.notificationCancelActionKey
+import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.notificationChannelDescription
 import com.arcgismaps.toolkit.offline.notificationChannelName
 import com.arcgismaps.toolkit.offline.notificationTitle
@@ -70,24 +69,10 @@ internal class WorkerNotification(
         )
     }
 
-    // intent for notification cancel action that launches a NotificationActionReceiver
-    private val cancelActionIntent by lazy {
-        // setup the intent to launch a NotificationActionReceiver
-        val intent = Intent(applicationContext, NotificationActionReceiver::class.java).apply {
-            // set this intent to only launch with this application package
-            setPackage(applicationContext.packageName)
-            // add the notification action as a string
-            putExtra(notificationCancelActionKey, "Cancel")
-            putExtra(jobWorkerUuidKey, workerUuid.toString())
-        }
-        // set the pending intent that will be passed to the NotificationManager
-        PendingIntent.getBroadcast(
-            applicationContext,
-            workerUuid.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-    }
+    // intent for notification action to WorkManager’s cancellation mechanism
+    private val cancelIntent = WorkManager
+        .getInstance(applicationContext)
+        .createCancelPendingIntent(workerUuid)
 
     init {
         // create the notification channel
@@ -110,7 +95,7 @@ internal class WorkerNotification(
         ).setSmallIcon(android.R.drawable.stat_sys_download)
             .setProgress(100, progress, false)
             // add a cancellation action
-            .addAction(0, "Cancel", cancelActionIntent)
+            .addAction(0, "Cancel", cancelIntent)
             .build()
     }
 
