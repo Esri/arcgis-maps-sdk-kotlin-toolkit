@@ -25,6 +25,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
+import com.arcgismaps.httpcore.authentication.IapSignIn
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
@@ -169,6 +170,22 @@ public class OAuthUserSignInActivity : ComponentActivity() {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
+            }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): String? {
+            return if (resultCode == RESULT_CODE_SUCCESS) {
+                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+            } else {
+                null
+            }
+        }
+    }
+
+    public class IapContract : ActivityResultContract<String, String?>() {
+        override fun createIntent(context: Context, authorizedUrl: String): Intent =
+            Intent(context, OAuthUserSignInActivity::class.java).apply {
+                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, authorizedUrl)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {

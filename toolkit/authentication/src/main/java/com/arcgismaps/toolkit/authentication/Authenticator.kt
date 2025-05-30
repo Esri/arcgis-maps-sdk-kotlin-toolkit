@@ -133,6 +133,14 @@ private fun AuthenticatorDelegate(
         OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
+    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
+        IapAuthenticator(
+            authorizedUrl = it.authorizeUrl,
+            complete = it::complete,
+            cancel = it::cancel
+        )
+    }
+
     val pendingServerTrustChallenge =
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 

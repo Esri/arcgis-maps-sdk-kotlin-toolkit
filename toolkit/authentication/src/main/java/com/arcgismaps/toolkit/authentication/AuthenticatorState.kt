@@ -24,7 +24,11 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeType
 import com.arcgismaps.httpcore.authentication.CertificateCredential
+import com.arcgismaps.httpcore.authentication.IapConfiguration
+import com.arcgismaps.httpcore.authentication.IapCredential
+import com.arcgismaps.httpcore.authentication.IapSignIn
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
@@ -70,6 +74,20 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
+
+    /**
+     * The [IapConfiguration] to use for any IAP sign ins. If null, IAP will not be used for any
+     * [ArcGISAuthenticationChallenge] of type [ArcGISAuthenticationChallengeType.Iap].
+     * TODO: What happens if this is null and an IAP challenge is received?
+     * @since 200.8.0
+     */
+    public var iapConfiguration: IapConfiguration?
+
+    /**
+     * The current [IapSignIn] awaiting completion. Use this to complete or cancel the IAP authentication challenge.
+     * @since 200.8.0
+     */
+    public val pendingIapSignIn: StateFlow<IapSignIn?>
 
     /**
      * The current [ServerTrustChallenge] awaiting completion. Use this to trust or distrust a server trust challenge.
@@ -121,6 +139,10 @@ private class AuthenticatorStateImpl(
 ) : AuthenticatorState {
 
     override var oAuthUserConfiguration: OAuthUserConfiguration? = null
+    override var iapConfiguration: IapConfiguration? = null
+
+    private val _pendingIapSignIn = MutableStateFlow<IapSignIn?>(null)
+    override val pendingIapSignIn = _pendingIapSignIn.asStateFlow()
 
     private val _pendingOAuthUserSignIn = MutableStateFlow<OAuthUserSignIn?>(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
@@ -144,8 +166,10 @@ private class AuthenticatorStateImpl(
         pendingOAuthUserSignIn,
         pendingUsernamePasswordChallenge,
         pendingClientCertificateChallenge,
-        pendingServerTrustChallenge) { a, b, c, d ->
-            a != null || b != null || c != null || d != null
+        pendingServerTrustChallenge,
+        pendingIapSignIn
+    ) { oAuth, usernamePassword, clientCert, serverTrust, iap ->
+        listOf(oAuth, usernamePassword, clientCert, serverTrust, iap).any { it != null }
     }
 
     override fun dismissAll() {
@@ -153,6 +177,7 @@ private class AuthenticatorStateImpl(
         pendingUsernamePasswordChallenge.value?.cancel()
         pendingClientCertificateChallenge.value?.onCancel?.invoke()
         pendingServerTrustChallenge.value?.distrust()
+        pendingIapSignIn.value?.cancel()
     }
 
     init {
@@ -165,10 +190,15 @@ private class AuthenticatorStateImpl(
     }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
+        val iapConfiguration = iapConfiguration
         val oAuthUserConfiguration = oAuthUserConfiguration
-        return if (oAuthUserConfiguration != null && oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
-            val oAuthUserCredential =
-                oAuthUserConfiguration.handleOAuthChallenge {
+        return when {
+            challenge.type is ArcGISAuthenticationChallengeType.Iap && iapConfiguration != null -> {
+                handleIapBasedSignIn(iapConfiguration)
+            }
+
+            oAuthUserConfiguration != null && oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl) -> {
+                val oAuthUserCredential = oAuthUserConfiguration.handleOAuthChallenge {
                     // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
                     // when this value changes.
                     _pendingOAuthUserSignIn.value = it
@@ -179,12 +209,31 @@ private class AuthenticatorStateImpl(
                     _pendingOAuthUserSignIn.value = null
                 }.getOrThrow()
 
-            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
-                oAuthUserCredential
-            )
-        } else {
-            handleArcGISTokenChallenge(challenge)
+                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
+                    oAuthUserCredential
+                )
+            }
+
+            else -> {
+                handleArcGISTokenChallenge(challenge)
+            }
         }
+    }
+
+    /**
+     * Handles an IAP-based sign in by suspending until the user has completed the sign in or cancelled it.
+     *
+     * @param iapConfiguration the [IapConfiguration] to use for the sign in.
+     * @return an [ArcGISAuthenticationChallengeResponse] with an [IapCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
+     * if the user cancelled.
+     * @since 200.8.0
+     */
+    private suspend fun handleIapBasedSignIn(iapConfiguration: IapConfiguration): ArcGISAuthenticationChallengeResponse {
+        val iapCredential = iapConfiguration.handleIapChallenge { _pendingIapSignIn.value = it }
+            .also { _pendingIapSignIn.value = null }
+            .getOrThrow()
+
+        return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(iapCredential)
     }
 
     /**
@@ -348,6 +397,14 @@ private class AuthenticatorStateImpl(
         }
 }
 
+/**
+ * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
+ *
+ * @param setAsArcGISAuthenticationChallengeHandler if true, this [AuthenticatorState] will handle all [ArcGISAuthenticationChallenge]s
+ * @param setAsNetworkAuthenticationChallengeHandler if true, this [AuthenticatorState] will handle all [NetworkAuthenticationChallenge]s
+ * @return a new [AuthenticatorState] instance.
+ * @since 200.8.0
+ */
 public fun AuthenticatorState(
     setAsArcGISAuthenticationChallengeHandler: Boolean = true,
     setAsNetworkAuthenticationChallengeHandler: Boolean = true
@@ -369,6 +426,17 @@ private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
 ): Result<OAuthUserCredential> =
     OAuthUserCredential.create(this) { oAuthUserSignIn ->
         onPendingSignIn(oAuthUserSignIn)
+    }
+
+/**
+ * 
+ * @since 200.8.0
+ */
+private suspend fun IapConfiguration.handleIapChallenge(
+    onPendingSignIn: (IapSignIn) -> Unit
+): Result<IapCredential> =
+    IapCredential.create(this) { iapSignIn ->
+        onPendingSignIn(iapSignIn)
     }
 
 /**

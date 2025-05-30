@@ -18,11 +18,14 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
@@ -82,6 +85,38 @@ internal fun OAuthAuthenticator(
                     launcher.launch(oAuthPendingSignIn)
                 }
             }
+        }
+    }
+}
+
+/**
+ * Composable function that handles launching a browser for IAP authentication.
+ *
+ * @param authorizedUrl The authorized URL to load in the browser for IAP authentication.
+ * @param complete Callback function to be called with the redirect URL upon successful authentication.
+ * @param cancel Callback function to be called when the authentication is cancelled.
+ */
+@Composable
+internal fun IapAuthenticator(
+    authorizedUrl: String,
+    complete : (String) -> Unit,
+    cancel: () -> Unit,
+) {
+    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = OAuthUserSignInActivity.IapContract()
+    ) { redirectUrl ->
+        if (!redirectUrl.isNullOrEmpty()) {
+            complete(redirectUrl)
+        } else {
+            cancel()
+        }
+    }
+
+    LaunchedEffect(authorizedUrl) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(authorizedUrl)
         }
     }
 }
