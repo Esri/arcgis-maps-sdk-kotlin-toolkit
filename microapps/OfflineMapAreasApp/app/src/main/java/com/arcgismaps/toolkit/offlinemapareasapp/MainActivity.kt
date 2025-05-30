@@ -18,28 +18,27 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp
 
-import android.Manifest.permission.CAMERA
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -61,7 +60,7 @@ import com.arcgismaps.toolkit.offlinemapareasapp.data.PortalSettings
 import com.arcgismaps.toolkit.offlinemapareasapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.offlinemapareasapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.offlinemapareasapp.navigation.Navigator
-import com.arcgismaps.toolkit.offlinemapareasapp.theme.FeatureFormsAppTheme
+import com.arcgismaps.toolkit.offlinemapareasapp.theme.OfflineMapAreasAppTheme
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,26 +87,15 @@ class MainActivity : ComponentActivity() {
 
     private val appState: MutableStateFlow<AppState> = MutableStateFlow(AppState.Loading)
 
-    private val hasPermissions = mutableStateOf<Boolean?>(null)
-
-    // Register the permissions callback, which handles the user's response to the
-    // system permissions dialog.
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        hasPermissions.value = isGranted
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
         enableEdgeToEdge()
         setContent {
-            FeatureFormsAppTheme {
-                FeatureFormApp(
+            OfflineMapAreasAppTheme {
+                OfflineMapAreasApp(
                     appState.collectAsState().value,
-                    navigator,
-                    hasPermissions.value
+                    navigator
                 )
             }
         }
@@ -118,14 +106,6 @@ class MainActivity : ComponentActivity() {
                 PortalSettingsFactory::class.java
             )
             loadCredentials(factory.getPortalSettings())
-        }
-        // check for permissions
-        when (ContextCompat.checkSelfPermission(this, CAMERA)) {
-            PackageManager.PERMISSION_GRANTED -> {
-                hasPermissions.value = true
-            }
-
-            else -> requestPermissionLauncher.launch(CAMERA)
         }
     }
 
@@ -156,14 +136,50 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun FeatureFormApp(
-    appState: AppState,
-    navigator: Navigator,
-    hasPermissions: Boolean?
+private fun RequestNotificationPermission(
+    onResult: (granted: Boolean) -> Unit
 ) {
-    var showPermissionsDialog by remember(hasPermissions) {
-        mutableStateOf(hasPermissions != null && hasPermissions == false)
+    // Explicit notification permissions not required for versions < 33
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        return onResult(true)
     }
+
+    // Use the context to check for permissions
+    val context = LocalContext.current
+
+    // Track current permission state
+    var hasPermission by remember {
+        mutableStateOf(
+            value = ContextCompat.checkSelfPermission(/* context = */ context,/* permission = */
+                POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // If permission is already granted
+    if (hasPermission) {
+        return onResult(true)
+    }
+
+    // Launcher for the permission dialog
+    val launcher = rememberLauncherForActivityResult(RequestPermission()) { granted ->
+        hasPermission = granted
+        onResult(granted)
+    }
+
+    // If permissions is not already granted, show dialog to grant request
+    LaunchedEffect(hasPermission) {
+        if (!hasPermission) {
+            launcher.launch(POST_NOTIFICATIONS)
+        }
+    }
+}
+
+@Composable
+fun OfflineMapAreasApp(
+    appState: AppState,
+    navigator: Navigator
+) {
     if (appState is AppState.Loading) {
         AnimatedLoading({ true }, modifier = Modifier.fillMaxSize())
     } else {
@@ -183,24 +199,12 @@ fun FeatureFormApp(
             startDestination = startDestination
         )
     }
-    if (showPermissionsDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showPermissionsDialog = false
-            },
-            text = {
-                Text(text = stringResource(R.string.camera_permission_required))
-            },
-            icon = {
-                Icon(imageVector = Icons.Rounded.Warning, contentDescription = "Warning")
-            },
-            confirmButton = {
-                Button(onClick = { showPermissionsDialog = false }) {
-                    Text(text = stringResource(id = R.string.okay))
-                }
+    RequestNotificationPermission(
+        onResult = { isGranted ->
+            if (!isGranted) {
+                Log.e("OfflineMapAreas", "Notification permission request was denied.")
             }
-        )
-    }
+        })
 }
 
 @Composable

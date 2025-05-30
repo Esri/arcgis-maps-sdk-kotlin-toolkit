@@ -94,7 +94,7 @@ fun AppNavigation(
             }
 
         }
-        // MapView Screen - shows the map and the FeatureForms
+        // MapView Screen - shows the map and the OfflineMapAreas
         composable(
             NavigationRoute.MapView.route,
             enterTransition = { slideInHorizontally { h -> h } },

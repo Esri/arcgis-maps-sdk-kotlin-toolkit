@@ -41,7 +41,7 @@ import javax.inject.Inject
 open class BaseMapViewModel(application: Application) : AndroidViewModel(application)
 
 /**
- * A view model for the FeatureForms MapView UI
+ * A view model for the OfflineMapAreas MapView UI
  * @constructor to be invoked by injection
  */
 @HiltViewModel
