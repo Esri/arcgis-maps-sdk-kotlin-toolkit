@@ -403,7 +403,7 @@ private class AuthenticatorStateImpl(
  * @param setAsArcGISAuthenticationChallengeHandler if true, this [AuthenticatorState] will handle all [ArcGISAuthenticationChallenge]s
  * @param setAsNetworkAuthenticationChallengeHandler if true, this [AuthenticatorState] will handle all [NetworkAuthenticationChallenge]s
  * @return a new [AuthenticatorState] instance.
- * @since 200.8.0
+ * @since 200.2.0
  */
 public fun AuthenticatorState(
     setAsArcGISAuthenticationChallengeHandler: Boolean = true,
