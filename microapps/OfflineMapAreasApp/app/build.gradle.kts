@@ -21,6 +21,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 secrets {
@@ -77,17 +79,34 @@ android {
 }
 
 dependencies {
+    implementation(project(":authentication"))
     implementation(project(":geoview-compose"))
-    implementation(arcgis.mapsSdk)
     implementation(project(":offline"))
     implementation(project(":microapps-lib"))
+    // sdk
+    implementation(arcgis.mapsSdk)
+    // hilt
+    implementation(libs.hilt.android.core)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
+    // room
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    implementation(libs.room.ext)
+    ksp(libs.room.compiler)
+    // jetpack window manager
+    implementation(libs.androidx.window)
+    implementation(libs.androidx.window.core)
+    // compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
