@@ -180,6 +180,16 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * An ActivityResultContract that takes a String as input and returns a nullable String as output.
+     * The input string represents an IAP authorize URL, and the output string represents a redirect URI as
+     * the result of an IAP sign in prompt, or null if the IAP sign in failed. This contract can be used to launch the
+     * [IapContract] for a result.
+     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
+     * for more details.
+     *
+     * @since 200.8.0
+     */
     public class IapContract : ActivityResultContract<String, String?>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
