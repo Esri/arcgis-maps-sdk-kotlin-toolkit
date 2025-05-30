@@ -25,7 +25,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
-import com.arcgismaps.httpcore.authentication.IapSignIn
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
@@ -182,9 +181,9 @@ public class OAuthUserSignInActivity : ComponentActivity() {
     }
 
     public class IapContract : ActivityResultContract<String, String?>() {
-        override fun createIntent(context: Context, authorizedUrl: String): Intent =
+        override fun createIntent(context: Context, input: String): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, authorizedUrl)
+                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
             }
 

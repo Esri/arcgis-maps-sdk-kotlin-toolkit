@@ -429,7 +429,11 @@ private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
     }
 
 /**
- * 
+ * Creates an [IapCredential] for this [IapConfiguration]. Suspends
+ * while the credential is being created, ie. until the user has signed in or cancelled the sign in.
+ *
+ * @param onPendingSignIn Called when an [IapSignIn] is available. Use this to display UI to the user.
+ * @return A [Result] containing the [IapCredential] if successful.
  * @since 200.8.0
  */
 private suspend fun IapConfiguration.handleIapChallenge(
