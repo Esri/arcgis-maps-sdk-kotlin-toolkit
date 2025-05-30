@@ -40,7 +40,6 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -53,7 +52,6 @@ class UtilityAssociationsFormElementTests {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
@@ -131,7 +129,7 @@ class UtilityAssociationsFormElementTests {
         // Verify the association filters are displayed
         val connectedNode = composeTestRule.onNodeWithText("Connected").assertIsDisplayed()
         composeTestRule.onNodeWithText("Structure").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Structure").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Container").assertIsDisplayed()
 
         // Click on the connected filter
         connectedNode.performClick()
