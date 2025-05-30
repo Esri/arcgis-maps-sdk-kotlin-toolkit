@@ -95,6 +95,7 @@ internal fun OAuthAuthenticator(
  * @param authorizedUrl The authorized URL to load in the browser for IAP authentication.
  * @param complete Callback function to be called with the redirect URL upon successful authentication.
  * @param cancel Callback function to be called when the authentication is cancelled.
+ * @since 200.8.0
  */
 @Composable
 internal fun IapAuthenticator(
