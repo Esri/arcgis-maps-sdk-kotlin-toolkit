@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens.browse
 
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState

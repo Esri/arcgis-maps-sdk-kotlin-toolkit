@@ -23,6 +23,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
+        enableEdgeToEdge()
         setContent {
             FeatureFormsAppTheme {
                 FeatureFormApp(
@@ -235,8 +237,8 @@ fun AnimatedLoading(
  * Represents the current app state based on the login state of the user.
  */
 sealed class AppState {
-    object Loading : AppState()
-    object LoggedIn : AppState()
-    object NotLoggedIn : AppState()
-    object SkipSignIn : AppState()
+    data object Loading : AppState()
+    data object LoggedIn : AppState()
+    data object NotLoggedIn : AppState()
+    data object SkipSignIn : AppState()
 }

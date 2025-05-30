@@ -19,35 +19,19 @@
 package com.arcgismaps.toolkit.offlinemapareasapp.screens.map
 
 import android.content.Context
-import android.content.res.Resources
-import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,8 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -64,14 +46,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.layers.ArcGISSublayer
-import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.offline.OfflineMapAreas
 import com.arcgismaps.toolkit.offline.OfflineMapState
@@ -81,26 +58,10 @@ import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetExpans
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.StandardBottomSheet
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.rememberBottomSheetScaffoldState
 import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.rememberStandardBottomSheetState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
-    val scope = rememberCoroutineScope()
-
-    val coroutineScope = rememberCoroutineScope()
-
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = true
-        )
-    )
-
-    // Radio options
-    val options = listOf("Go Online", "Offline Maps")
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -126,27 +87,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 mapViewProxy = mapViewModel.proxy,
                 modifier = Modifier
                     .padding(padding)
-                    .fillMaxSize(),
-                onSingleTapConfirmed = {
-
-                }
+                    .fillMaxSize()
             )
-            AnimatedVisibility(
-                visible = true,
-                modifier = Modifier.align(Alignment.BottomEnd)
-            ) {
-                // show the add feature button when the user is not editing
-                FloatingActionButton(
-                    onClick = {
-                    },
-                    modifier = Modifier.padding(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Feature"
-                    )
-                }
-            }
             AnimatedVisibility(
                 visible = true,
                 enter = slideInVertically { h -> h },
@@ -191,33 +133,10 @@ fun FeatureFormSheet(
         ) {
             OfflineMapAreas(
                 offlineMapState = offlineMapState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
-}
-
-@Composable
-fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text(text = stringResource(R.string.discard))
-            }
-        },
-        dismissButton = {
-            Button(onClick = onCancel) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        },
-        title = {
-            Text(text = stringResource(R.string.discard_edits))
-        },
-        text = {
-            Text(text = stringResource(R.string.all_changes_will_be_lost))
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -273,50 +192,6 @@ fun getWindowSize(context: Context): WindowSizeClass {
     val density = context.resources.displayMetrics.density
     return WindowSizeClass.compute(width / density, height / density)
 }
-
-/**
- * Returns the label of the feature. If the feature has a name attribute, it will return that.
- * If the feature has an objectid attribute, it will return "Object ID : <objectid>". If neither
- * of these attributes are present, it will return "Unnamed Feature".
- */
-val ArcGISFeature.label: String
-    get() {
-        return if (attributes["name"] != null) {
-            attributes["name"] as String
-        } else if (attributes["objectid"] != null) {
-            "Object ID : ${attributes["objectid"]}"
-        } else {
-            "Unnamed Feature"
-        }
-    }
-
-/**
- * Returns the symbol of the feature as a bitmap. If the feature's layer is a subtype feature layer,
- * it will return the symbol of the sublayer that the feature belongs to. If the feature's layer is
- * a feature layer, it will return the symbol of the feature layer.
- *
- * If the symbol cannot be created, it will return null.
- */
-suspend fun ArcGISFeature.getSymbol(resources: Resources): Bitmap? {
-    val renderer = when (featureTable?.layer) {
-        is SubtypeFeatureLayer -> sublayer?.renderer
-        is FeatureLayer -> (featureTable?.layer as? FeatureLayer)?.renderer
-        else -> null
-    }
-    val symbol = renderer?.getSymbol(this) ?: return null
-    return symbol.createSwatch(resources.displayMetrics.density).getOrNull()?.bitmap
-}
-
-/**
- * Returns the sublayer that the feature belongs to. If the feature's layer is not a subtype feature
- * layer, it will return null.
- */
-val ArcGISFeature.sublayer: ArcGISSublayer?
-    get() {
-        val subtypeFeatureLayer = featureTable?.layer as? SubtypeFeatureLayer ?: return null
-        val code = getFeatureSubtype()?.code ?: return null
-        return subtypeFeatureLayer.getSublayerWithSubtypeCode(code)
-    }
 
 @Preview
 @Composable

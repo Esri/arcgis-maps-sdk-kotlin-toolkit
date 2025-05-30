@@ -22,7 +22,6 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.signOut
 import com.arcgismaps.toolkit.offlinemapareasapp.R
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

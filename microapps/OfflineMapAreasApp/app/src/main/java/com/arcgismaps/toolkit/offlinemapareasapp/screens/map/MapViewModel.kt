@@ -19,14 +19,11 @@
 package com.arcgismaps.toolkit.offlinemapareasapp.screens.map
 
 import android.app.Application
-import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import com.arcgismaps.data.FeatureTemplate
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.offline.OfflineMapState
@@ -36,22 +33,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
-data class LayerTemplates(
-    val layer: FeatureLayer,
-    val templates: List<TemplateRow>,
-    val defaultFeatureRow: DefaultFeatureRow?
-)
-
-data class TemplateRow(
-    val template: FeatureTemplate,
-    val bitmap: Bitmap?
-)
-
-data class DefaultFeatureRow(
-    val bitmap: Bitmap?
-)
 
 /**
  * Base class for context aware AndroidViewModel. This class must have only a single application
@@ -77,13 +58,7 @@ class MapViewModel @Inject constructor(
     var portalItem: PortalItem = portalItemRepository(itemId)
         ?: throw IllegalStateException("portal item not found with id $itemId")
 
-    private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
-    private val onlineMap = ArcGISMap(
-        PortalItem(
-            Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-            napervilleWaterNetwork
-        )
-    )
+    private val onlineMap = ArcGISMap(portalItem)
     val selectedMap = mutableStateOf<ArcGISMap?>(null)
 
     val arcGISMap

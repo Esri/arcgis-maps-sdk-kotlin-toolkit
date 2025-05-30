@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.offlinemapareasapp.screens.login
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
@@ -95,10 +94,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.authentication.Authenticator
-import com.arcgismaps.toolkit.offlinemapareasapp.R
 import com.arcgismaps.toolkit.offlinemapareasapp.AnimatedLoading
+import com.arcgismaps.toolkit.offlinemapareasapp.R
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),

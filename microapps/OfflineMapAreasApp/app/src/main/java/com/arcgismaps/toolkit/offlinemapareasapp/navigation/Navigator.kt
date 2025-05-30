@@ -43,9 +43,9 @@ class Navigator {
 }
 
 sealed class NavigationRoute private constructor(val route: String) {
-    object Login : NavigationRoute("login")
-    object Home : NavigationRoute("home")
-    object MapView : NavigationRoute("mapview/{uri}")
+    data object Login : NavigationRoute("login")
+    data object Home : NavigationRoute("home")
+    data object MapView : NavigationRoute("mapview/{uri}")
 }
 
 @Composable

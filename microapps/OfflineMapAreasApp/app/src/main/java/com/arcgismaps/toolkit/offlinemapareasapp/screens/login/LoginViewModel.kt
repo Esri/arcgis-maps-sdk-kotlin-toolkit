@@ -107,8 +107,8 @@ class LoginViewModel @Inject constructor(
 }
 
 sealed class LoginState {
-    object Loading : LoginState()
-    object Success : LoginState()
+    data object Loading : LoginState()
+    data object Success : LoginState()
     data class Failed(val message: String) : LoginState()
-    object NotLoggedIn : LoginState()
+    data object NotLoggedIn : LoginState()
 }
