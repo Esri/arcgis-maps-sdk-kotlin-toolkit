@@ -24,11 +24,10 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.jsonJobsTempDir
 import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
-import com.arcgismaps.toolkit.offline.notificationIdKey
-import com.arcgismaps.toolkit.offline.prePlannedWorkNameKey
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import java.io.File
@@ -102,14 +101,12 @@ internal class WorkManagerRepository(private val context: Context) {
      * notification and job details. Ensures only one worker instance runs at any time by
      * replacing active workers with the same unique name as per the defined policy.
      *
-     * @param notificationId The unique ID for notifications associated with this job.
      * @param jsonJobPath The file path to the serialized JSON representation of the job.
      * @param preplannedMapAreaTitle The title of the preplanned map area being downloaded.
      * @return A [UUID] representing the identifier of the enqueued WorkManager request.
      * @since 200.8.0
      */
     internal fun createPreplannedMapAreaRequestAndQueDownload(
-        notificationId: Int,
         jsonJobPath: String,
         preplannedMapAreaTitle: String
     ): UUID {
@@ -121,7 +118,6 @@ internal class WorkManagerRepository(private val context: Context) {
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
                 workDataOf(
-                    notificationIdKey to notificationId,
                     jsonJobPathKey to jsonJobPath,
                     jobAreaTitleKey to preplannedMapAreaTitle
                 )
@@ -132,21 +128,11 @@ internal class WorkManagerRepository(private val context: Context) {
         // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
         // ones that are active
         workManager.enqueueUniqueWork(
-            uniqueWorkName = prePlannedWorkNameKey + notificationId,
+            uniqueWorkName = jobWorkerUuidKey + workRequest.id,
             existingWorkPolicy = ExistingWorkPolicy.KEEP,
             request = workRequest
         )
         return workRequest.id
-    }
-
-    /**
-     * Generates a random unique ID for notifications associated with new jobs.
-     *
-     * @return An integer representing a randomly generated notification ID.
-     * @since 200.8.0
-     */
-    internal fun createNotificationIdForJob(): Int {
-        return UUID.randomUUID().hashCode()
     }
 
     /**

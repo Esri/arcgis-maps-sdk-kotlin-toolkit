@@ -21,7 +21,6 @@
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync" />
-        <receiver android:name=".workmanager.NotificationActionReceiver" />
     </application>
 
 </manifest>

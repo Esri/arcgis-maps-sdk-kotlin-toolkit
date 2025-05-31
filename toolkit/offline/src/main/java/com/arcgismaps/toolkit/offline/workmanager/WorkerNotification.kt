@@ -26,10 +26,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arcgismaps.toolkit.offline.notificationCancelActionKey
+import androidx.work.WorkManager
 import com.arcgismaps.toolkit.offline.notificationChannelDescription
 import com.arcgismaps.toolkit.offline.notificationChannelName
 import com.arcgismaps.toolkit.offline.notificationTitle
+import java.util.UUID
 
 /**
  * Handles progress and status notifications for offline map jobs executed via WorkManager.
@@ -37,14 +38,13 @@ import com.arcgismaps.toolkit.offline.notificationTitle
  * map areas. Uses Android's notification system to inform about job progress and completion statuses.
  *
  * @param applicationContext The application context used to access resources and system services.
- * @param notificationId A unique identifier for managing notifications associated with a specific job.
  * @param jobAreaTitle The title of the map area being processed, displayed in notifications.
  * @since 200.8.0
  */
 internal class WorkerNotification(
     private val applicationContext: Context,
-    private val notificationId: Int,
-    private val jobAreaTitle: String
+    private val jobAreaTitle: String,
+    private val workerUuid: UUID
 ) {
 
     // unique channel id for the NotificationChannel
@@ -69,22 +69,9 @@ internal class WorkerNotification(
         )
     }
 
-    // intent for notification cancel action that launches a NotificationActionReceiver
+    // intent for notification action to WorkManager’s cancellation mechanism
     private val cancelActionIntent by lazy {
-        // setup the intent to launch a NotificationActionReceiver
-        val intent = Intent(applicationContext, NotificationActionReceiver::class.java).apply {
-            // set this intent to only launch with this application package
-            setPackage(applicationContext.packageName)
-            // add the notification action as a string
-            putExtra(notificationCancelActionKey, "Cancel")
-        }
-        // set the pending intent that will be passed to the NotificationManager
-        PendingIntent.getBroadcast(
-            applicationContext,
-            notificationId,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        WorkManager.getInstance(applicationContext).createCancelPendingIntent(workerUuid)
     }
 
     init {
@@ -132,9 +119,9 @@ internal class WorkerNotification(
 
         with(NotificationManagerCompat.from(applicationContext)) {
             // cancel the visible progress notification using its id
-            cancel(notificationId)
+            cancel(workerUuid.hashCode())
             // post the new status notification with a new notificationId
-            notify(notificationId + 1, notification)
+            notify(workerUuid.hashCode() + 1, notification)
         }
     }
 

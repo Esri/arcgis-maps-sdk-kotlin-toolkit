@@ -31,7 +31,6 @@ import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
-import com.arcgismaps.toolkit.offline.notificationIdKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -58,13 +57,6 @@ internal class PreplannedMapAreaJobWorker(
     private lateinit var downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob
 
     /**
-     * Retrieves the unique notification ID passed from input data to identify related notifications.
-     */
-    private val notificationId by lazy {
-        inputData.getInt(key = notificationIdKey, defaultValue = 1)
-    }
-
-    /**
      * Retrieves the title of the map area being processed from input data.
      */
     private val jobAreaTitle by lazy {
@@ -78,8 +70,8 @@ internal class PreplannedMapAreaJobWorker(
     private val workerNotification by lazy {
         WorkerNotification(
             applicationContext = context,
-            notificationId = notificationId,
-            jobAreaTitle = jobAreaTitle
+            jobAreaTitle = jobAreaTitle,
+            workerUuid = id
         )
     }
 
@@ -105,13 +97,13 @@ internal class PreplannedMapAreaJobWorker(
     private fun createForegroundInfo(progress: Int): ForegroundInfo {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(
-                /* notificationId = */ notificationId,
+                /* notificationId = */ id.hashCode(),
                 /* notification = */ workerNotification.createProgressNotification(progress),
                 /* foregroundServiceType = */ FOREGROUND_SERVICE_TYPE_DATA_SYNC
             )
         } else {
             ForegroundInfo(
-                /* notificationId = */ notificationId,
+                /* notificationId = */ id.hashCode(),
                 /* notification = */ workerNotification.createProgressNotification(progress)
             )
         }

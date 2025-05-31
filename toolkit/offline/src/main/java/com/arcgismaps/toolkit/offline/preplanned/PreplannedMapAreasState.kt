@@ -198,7 +198,6 @@ internal class PreplannedMapAreaState(
         )
 
         workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
-            notificationId = workManagerRepository.createNotificationIdForJob(),
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )

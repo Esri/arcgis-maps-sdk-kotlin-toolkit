@@ -52,9 +52,36 @@ internal fun logWorkInfo(workInfo: WorkInfo) {
         }
 
         WorkInfo.State.CANCELLED -> {
-            Log.e(TAG, "${workInfo.tags}: CANCELLED. Reason: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
+            Log.e(TAG, "${workInfo.tags}: CANCELLED - Stop reason: ${workInfo.stopReason.toStopReasonString()}, ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
         }
     }
+}
+
+/**
+ * Converts a [WorkInfo.stopReason] integer into a human-readable string.
+ */
+private fun Int.toStopReasonString(): String = when (this) {
+    WorkInfo.STOP_REASON_CANCELLED_BY_APP -> "Cancelled by App"
+    WorkInfo.STOP_REASON_PREEMPT -> "Preempted by higher priority task"
+    WorkInfo.STOP_REASON_TIMEOUT -> "Worker timed out"
+    WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT -> "Foreground service timeout"
+    WorkInfo.STOP_REASON_DEVICE_STATE -> "Stopped due to device state"
+    WorkInfo.STOP_REASON_CONSTRAINT_BATTERY_NOT_LOW -> "Battery-not-low constraint unmet"
+    WorkInfo.STOP_REASON_CONSTRAINT_CHARGING -> "Charging constraint unmet"
+    WorkInfo.STOP_REASON_CONSTRAINT_CONNECTIVITY -> "Connectivity constraint unmet"
+    WorkInfo.STOP_REASON_CONSTRAINT_DEVICE_IDLE -> "Device-idle constraint unmet"
+    WorkInfo.STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW -> "Storage-not-low constraint unmet"
+    WorkInfo.STOP_REASON_QUOTA -> "App quota exceeded"
+    WorkInfo.STOP_REASON_BACKGROUND_RESTRICTION -> "Background restricted"
+    WorkInfo.STOP_REASON_APP_STANDBY -> "App standby bucket changed"
+    WorkInfo.STOP_REASON_USER -> "Stopped by user (force-stop/uninstall)"
+    WorkInfo.STOP_REASON_SYSTEM_PROCESSING -> "System processing required"
+    WorkInfo.STOP_REASON_NOT_STOPPED -> "Not stopped yet"
+    WorkInfo.STOP_REASON_UNKNOWN -> "Unknown stop reason"
+    WorkInfo.STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED ->
+        "Estimated app launch time changed"
+
+    else -> "Unrecognized reason ($this)"
 }
 
 private val TAG = LOG_TAG + File.separator + "WorkInfo"
