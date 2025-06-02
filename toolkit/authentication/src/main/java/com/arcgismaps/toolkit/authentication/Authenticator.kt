@@ -136,8 +136,8 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
         IapAuthenticator(
             authorizedUrl = it.authorizeUrl,
-            complete = it::complete,
-            cancel = it::cancel
+            onComplete = it::complete,
+            onCancel = it::cancel
         )
     }
 
