@@ -35,6 +35,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -67,6 +68,50 @@ import com.google.ar.core.Config
 import com.google.ar.core.TrackingState
 import java.time.Instant
 
+/**
+ * A scene view that provides an augmented reality fly over experience.
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
+ * @param initialLocation the initial location of the FlyoverSceneView's camera.
+ * @param initialHeading the initial heading of the FlyoverSceneView's camera.
+ * @param translationFactor The translation factor that defines how much the FlyoverSceneView translates as the device moves.
+ * @param modifier Modifier to be applied to the FlyoverSceneView.
+ * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale].
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry].
+ * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
+ * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
+ * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
+ * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the FlyoverSceneView has changed.
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes.
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the FlyoverSceneView.
+ * @param imageOverlays image overlays for displaying images in the FlyoverSceneView.
+ * @param timeExtent the [TimeExtent] used by the FlyoverSceneView.
+ * @param onTimeExtentChanged lambda invoked when the FlyoverSceneView's [TimeExtent] is changed.
+ * @param sunTime the position of the sun in the FlyoverSceneView based on a specific date and time.
+ * @param sunLighting the type of ambient sunlight and shadows in the FlyoverSceneView.
+ * @param ambientLightColor the color of the FlyoverSceneView's ambient light.
+ * @param onNavigationChanged lambda invoked when the navigation status of the FlyoverSceneView has changed.
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the FlyoverSceneView has changed.
+ * @param onLayerViewStateChanged lambda invoked when the FlyoverSceneView's layer view state is changed.
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the FlyoverSceneView.
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the FlyoverSceneView has changed.
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the FlyoverSceneView.
+ * @param onScale lambda invoked when a user performs a pinch gesture on the FlyoverSceneView.
+ * @param onUp lambda invoked when the user removes all their pointers from the FlyoverSceneView.
+ * @param onDown lambda invoked when the user first presses on the FlyoverSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the FlyoverSceneView.
+ * @param onDoubleTap lambda invoked the user double taps on the FlyoverSceneView.
+ * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
+ * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
+ *
+ * @since 200.8.0
+ */
 @Composable
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
