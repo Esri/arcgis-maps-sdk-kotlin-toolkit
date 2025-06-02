@@ -19,13 +19,14 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +47,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -51,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -66,7 +72,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.Color
 import com.arcgismaps.LoadStatus
@@ -82,19 +87,22 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
+import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
+import com.arcgismaps.toolkit.ar.WorldScaleVpsAvailability
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
+import kotlinx.coroutines.launch
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
-val graphicSymbol = SimpleMarkerSceneSymbol(
+val coneSymbol = SimpleMarkerSceneSymbol(
     style = SimpleMarkerSceneSymbolStyle.Cone,
-    color = Color.red,
-    height = 0.5,
-    width = 0.5,
-    depth = 0.5,
+    color = Color.fromRgba(255, 0, 0, 70),
+    height = 0.4,
+    width = 0.2,
+    depth = 0.2,
     anchorPosition = SceneSymbolAnchorPosition.Bottom
 ).apply {
     // The bottom of the cone is placed at the point tapped by the user
@@ -131,6 +139,7 @@ fun MainScreen() {
             }
         )
     }
+    val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var selectedTrackingMode by rememberSaveable(
         saver = Saver(
@@ -158,7 +167,12 @@ fun MainScreen() {
         )
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
-    Scaffold(topBar = {
+    var trackingError by remember { mutableStateOf<Throwable?>(null) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
         TopAppBar(
             title = {
                 Text(
@@ -203,6 +217,36 @@ fun MainScreen() {
                             }
                         )
                     }
+                    val vpsAvailableText = stringResource(R.string.vps_available)
+                    val vpsUnavailableText = stringResource(R.string.vps_unavailable_unknown)
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.check_vps)) },
+                        onClick = {
+                            actionsExpanded = false
+                            scope.launch {
+                                val vpsCheck = proxy.checkVpsAvailability()
+                                if (vpsCheck.getOrNull() == WorldScaleVpsAvailability.Available) {
+                                    snackbarHostState.showSnackbar(
+                                        vpsAvailableText,
+                                        withDismissAction = true
+                                    )
+                                } else {
+                                    snackbarHostState.showSnackbar(
+                                        vpsUnavailableText,
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.check_vps)
+                            )
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
                         leadingIcon = {
@@ -221,7 +265,7 @@ fun MainScreen() {
                 }
             }
         )
-    }) {
+    }) { innerPadding ->
         if (showPrivacyInfo) {
             PrivacyInfoDialog(
                 hasCurrentlyAccepted = acceptedPrivacyInfo,
@@ -246,16 +290,21 @@ fun MainScreen() {
                 }
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)) {
                 WorldScaleSceneView(
                     arcGISScene = arcGISScene,
                     modifier = Modifier
-                        .padding(it)
                         .fillMaxSize(),
                     worldScaleTrackingMode = selectedTrackingMode,
                     clippingDistance = 100.0,
                     onInitializationStatusChanged = {
                         initializationStatus = it
+                    },
+                    worldScaleSceneViewProxy = proxy,
+                    onTrackingErrorChanged = {
+                        trackingError = it
                     },
                     onSingleTapConfirmed = { singleTapConfirmedEvent ->
                         singleTapConfirmedEvent.mapPoint
@@ -266,7 +315,7 @@ fun MainScreen() {
                                 } ?: graphicsOverlay.graphics.add(
                                     Graphic(
                                         geometry = point,
-                                        symbol = graphicSymbol
+                                        symbol = coneSymbol
                                     )
                                 )
                             }
@@ -319,6 +368,18 @@ fun MainScreen() {
 
                             else -> {}
                         }
+
+                        // If an error occurs during an initialized AR session, show a warning icon
+                        if (trackingError != null) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = stringResource(R.string.tracking_error_icon_description),
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(16.dp),
+                                tint = androidx.compose.ui.graphics.Color.Yellow
+                            )
+                        }
                     }
 
                     is WorldScaleSceneViewStatus.FailedToInitialize -> {
@@ -345,7 +406,7 @@ private fun PrivacyInfoDialog(
     hasCurrentlyAccepted: Boolean,
     onUserResponse: (accepted: Boolean) -> Unit
 ) {
-    Dialog (onDismissRequest = {
+    Dialog(onDismissRequest = {
         onUserResponse(hasCurrentlyAccepted)
     }) {
         Card {
