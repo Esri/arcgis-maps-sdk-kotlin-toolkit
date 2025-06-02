@@ -251,6 +251,13 @@ public fun WorldScaleSceneView(
 
     val calibrationState = remember { CalibrationState() }
 
+    DisposableEffect(Unit) {
+        worldScaleSceneViewProxy.setSessionWrapper(arSessionWrapper)
+        onDispose {
+            worldScaleSceneViewProxy.setSessionWrapper(null)
+        }
+    }
+
     val currentTrackingErrorChangedCallback = rememberUpdatedState(onTrackingErrorChanged)
     val worldScaleCameraController: WorldScaleCameraController by rememberWorldScaleCameraController(
         context = LocalContext.current,
@@ -349,7 +356,10 @@ public fun WorldScaleSceneView(
             onSpatialReferenceChanged = onSpatialReferenceChanged,
             onLayerViewStateChanged = onLayerViewStateChanged,
             onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onCurrentViewpointCameraChanged = {
+                worldScaleSceneViewProxy.setCurrentCamera(it)
+                onCurrentViewpointCameraChanged?.invoke(it)
+            },
             onRotate = onRotate,
             onScale = onScale,
             onUp = onUp,
