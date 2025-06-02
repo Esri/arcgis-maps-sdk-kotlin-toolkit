@@ -198,7 +198,6 @@ public fun FlyoverSceneView(
     }
 
     LaunchedEffect(initialLocation, initialHeading) {
-        Log.d("Blah", "Launched effect")
         cameraController.setOriginCamera(
             Camera(
                 locationPoint = initialLocation,
