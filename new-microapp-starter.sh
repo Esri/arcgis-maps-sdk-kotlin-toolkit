@@ -51,7 +51,6 @@ function convertTemplateApp {
        mv "$dir" "${dir//template/$componentName}"
     done
     
-    #find "${appDirName}" -type d -exec rename -s "*template*" $componentName {} \;
     # replace the string "Template" in any file names
     find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
     # replace the string "template" in the contents of any file
