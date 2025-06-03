@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.arworldscaleapp.screens
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -45,6 +47,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -52,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -82,11 +87,13 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SurfacePlacement
 import com.arcgismaps.toolkit.ar.WorldScaleSceneView
+import com.arcgismaps.toolkit.ar.WorldScaleSceneViewProxy
 import com.arcgismaps.toolkit.ar.WorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.ar.WorldScaleTrackingMode
+import com.arcgismaps.toolkit.ar.WorldScaleVpsAvailability
 import com.arcgismaps.toolkit.ar.rememberWorldScaleSceneViewStatus
 import com.arcgismaps.toolkit.arworldscaleapp.R
-import androidx.core.content.edit
+import kotlinx.coroutines.launch
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -133,6 +140,7 @@ fun MainScreen() {
             }
         )
     }
+    val proxy = remember { WorldScaleSceneViewProxy() }
     var initializationStatus by rememberWorldScaleSceneViewStatus()
     var selectedTrackingMode by rememberSaveable(
         saver = Saver(
@@ -161,7 +169,11 @@ fun MainScreen() {
     }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     var trackingError by remember { mutableStateOf<Throwable?>(null) }
-    Scaffold(topBar = {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
         TopAppBar(
             title = {
                 Text(
@@ -206,6 +218,36 @@ fun MainScreen() {
                             }
                         )
                     }
+                    val vpsAvailableText = stringResource(R.string.vps_available)
+                    val vpsUnavailableText = stringResource(R.string.vps_unavailable_unknown)
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.check_vps)) },
+                        onClick = {
+                            actionsExpanded = false
+                            scope.launch {
+                                val vpsCheck = proxy.checkVpsAvailability()
+                                if (vpsCheck.getOrNull() == WorldScaleVpsAvailability.Available) {
+                                    snackbarHostState.showSnackbar(
+                                        vpsAvailableText,
+                                        withDismissAction = true
+                                    )
+                                } else {
+                                    snackbarHostState.showSnackbar(
+                                        vpsUnavailableText,
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        },
+                        contentPadding = PaddingValues(end = 12.dp),
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.check_vps)
+                            )
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.privacy_info_dropdown_item)) },
                         leadingIcon = {
@@ -261,6 +303,7 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     },
+                    worldScaleSceneViewProxy = proxy,
                     onTrackingErrorChanged = {
                         trackingError = it
                     },
