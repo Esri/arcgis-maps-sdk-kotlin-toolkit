@@ -192,12 +192,12 @@ private class AuthenticatorStateImpl(
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
         val iapConfiguration = iapConfiguration
         val oAuthUserConfiguration = oAuthUserConfiguration
-        return when {
-            challenge.type is ArcGISAuthenticationChallengeType.Iap && iapConfiguration != null -> {
-                handleIapBasedSignIn(iapConfiguration)
-            }
-
-            oAuthUserConfiguration != null && oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl) -> {
+        return if (challenge.type == ArcGISAuthenticationChallengeType.Iap
+            && iapConfiguration?.canBeUsedForUrl(challenge.requestUrl) == true
+        ) {
+            handleIapBasedSignIn(iapConfiguration)
+        } else if (challenge.type == ArcGISAuthenticationChallengeType.OAuthOrToken) {
+            if (oAuthUserConfiguration?.canBeUsedForUrl(challenge.requestUrl) == true) {
                 val oAuthUserCredential = oAuthUserConfiguration.handleOAuthChallenge {
                     // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
                     // when this value changes.
@@ -212,11 +212,12 @@ private class AuthenticatorStateImpl(
                 ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
                 )
-            }
-
-            else -> {
+            } else {
                 handleArcGISTokenChallenge(challenge)
             }
+        } else {
+            // Handle ArcGIS token challenge
+            handleArcGISTokenChallenge(challenge)
         }
     }
 
