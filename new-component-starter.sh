@@ -83,6 +83,11 @@
 	find "${componentName}" -type f -name "*Template*" | while read file; do
            mv "$file" "${file//Template/$composableFunctionName}"
         done
+
+	# replace the string "template" in any file names
+	find "${componentName}" -type f -name "*template*" | while read file; do
+           mv "$file" "${file//template/$componentName}"
+        done
 	
 	# replace the string "template" in the contents of any file
 	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/g {} \; > /dev/null 2>&1
