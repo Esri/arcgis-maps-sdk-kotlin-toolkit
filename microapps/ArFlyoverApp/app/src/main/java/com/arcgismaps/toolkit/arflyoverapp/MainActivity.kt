@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.arflyoverapp
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
                 ArFlyoverApp()
             }
         }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }
 
