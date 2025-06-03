@@ -23,6 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.serialization) apply true
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 android {
@@ -96,6 +97,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.material.icons)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)

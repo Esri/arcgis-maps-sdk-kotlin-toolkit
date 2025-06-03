@@ -197,7 +197,7 @@ internal class PreplannedMapAreaState(
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueueDownload(
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )

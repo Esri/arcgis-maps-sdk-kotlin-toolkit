@@ -17,12 +17,16 @@
 package com.arcgismaps.toolkit.offline.workmanager
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.toolkit.offline.OfflineMapInfo
 import com.arcgismaps.toolkit.offline.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.jsonJobPathKey
@@ -44,8 +48,15 @@ internal class WorkManagerRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
+    private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
+    internal val offlineMapInfos: MutableList<OfflineMapInfo> = _offlineMapInfos.toMutableStateList()
+
     private val offlineJobJsonPath by lazy {
-        createExternalDirPath() + File.separator + jsonJobsTempDir
+        getExternalDirPath() + File.separator + jsonJobsTempDir
+    }
+
+    init {
+        loadOfflineMapInfos()
     }
 
     /**
@@ -74,7 +85,7 @@ internal class WorkManagerRepository(private val context: Context) {
      * @since 200.8.0
      */
 
-    private fun createExternalDirPath(): String {
+    private fun getExternalDirPath(): String {
         return context.getExternalFilesDir(null)?.path.toString()
     }
 
@@ -86,13 +97,38 @@ internal class WorkManagerRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal fun createContentsForPath(offlineMapDirectoryName: String): File {
-        val pathToCreate = createExternalDirPath() + File.separator + offlineMapDirectoryName
+        val pathToCreate = getExternalDirPath() + File.separator + offlineMapDirectoryName
         return File(pathToCreate).also { it.mkdirs() }
     }
 
+    /**
+     *
+     * @since 200.8.0
+     */
     internal fun deleteContentsForDirectory(offlineMapDirectoryName: String) {
-        val pathToDelete = createExternalDirPath() + File.separator + offlineMapDirectoryName
+        val pathToDelete = getExternalDirPath() + File.separator + offlineMapDirectoryName
         File(pathToDelete).deleteRecursively()
+    }
+
+    /**
+     *
+     * @since 200.8.0
+     */
+    private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
+        val baseDir = File(getExternalDirPath()) // TODO build offline dir path
+        val offlineMapInfos = mutableListOf<OfflineMapInfo>()
+        if (!baseDir.exists() || !baseDir.isDirectory) {
+            return offlineMapInfos
+        }
+        val entries: Array<File> = baseDir.listFiles() ?: return offlineMapInfos
+        for (fileEntry in entries) {
+            if (!fileEntry.isDirectory || fileEntry.name.equals(jsonJobsTempDir)) {
+                continue
+            }
+            val info = OfflineMapInfo.makeFromDirectory(fileEntry) ?: continue
+            offlineMapInfos.add(info)
+        }
+        return offlineMapInfos
     }
 
     /**
@@ -106,7 +142,7 @@ internal class WorkManagerRepository(private val context: Context) {
      * @return A [UUID] representing the identifier of the enqueued WorkManager request.
      * @since 200.8.0
      */
-    internal fun createPreplannedMapAreaRequestAndQueDownload(
+    internal fun createPreplannedMapAreaRequestAndQueueDownload(
         jsonJobPath: String,
         preplannedMapAreaTitle: String
     ): UUID {
@@ -152,6 +188,9 @@ internal class WorkManagerRepository(private val context: Context) {
         preplannedMapAreaState: PreplannedMapAreaState,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
+        val offlineMapInfo = OfflineMapInfo.createFromPortalItem(
+            portalItem = preplannedMapAreaState.preplannedMapArea.portalItem
+        )
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
@@ -169,6 +208,8 @@ internal class WorkManagerRepository(private val context: Context) {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
                             workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(path)
+                                _offlineMapInfos.add(offlineMapInfo)
+
                             } ?: run {
                                 preplannedMapAreaState.updateStatus(
                                     Status.MmpkLoadFailure(

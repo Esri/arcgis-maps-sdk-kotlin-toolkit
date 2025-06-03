@@ -25,6 +25,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
@@ -55,7 +56,21 @@ public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
+    public constructor(
+        offlineMapInfo: OfflineMapInfo,
+        onSelectionChanged: (ArcGISMap) -> Unit = { }
+    ) : this(
+        arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
+        onSelectionChanged = onSelectionChanged
+    ) {
+        // TODO
+    }
+
     private lateinit var _workManagerRepository: WorkManagerRepository
+
+    public val offlineMapInfos: List<OfflineMapInfo>
+        get() = _workManagerRepository.offlineMapInfos
+
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
         get() = _mode
@@ -192,4 +207,5 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
  * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
  * in the failure but will be rethrown.
  */
-internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> = runCatching(block).except<CancellationException, R>()
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block).except<CancellationException, R>()
