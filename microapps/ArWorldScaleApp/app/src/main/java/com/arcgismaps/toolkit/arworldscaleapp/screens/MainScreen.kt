@@ -120,7 +120,6 @@ fun MainScreen() {
             // is calculated with elevation
             baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
             baseSurface.backgroundGrid.isVisible = false
-            baseSurface.opacity = 0.5f
             // add the Esri 3D Buildings layer
             operationalLayers.add(
                 ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282").apply {

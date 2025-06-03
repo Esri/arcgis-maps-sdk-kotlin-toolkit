@@ -316,7 +316,7 @@ public fun WorldScaleSceneView(
             },
             onTapWithHitResult = { },
             onFirstPlaneDetected = { },
-            visualizePlanes = true
+            visualizePlanes = false
         )
         // Don't display the scene view if the camera has not been set up yet, or else a globe will appear
         // If the initialization status is FailedToInitialize, we don't want to display the scene view
