@@ -216,7 +216,6 @@ private class AuthenticatorStateImpl(
                 handleArcGISTokenChallenge(challenge)
             }
         } else {
-            // Handle ArcGIS token challenge
             handleArcGISTokenChallenge(challenge)
         }
     }
