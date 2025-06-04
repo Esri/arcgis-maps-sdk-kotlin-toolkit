@@ -137,6 +137,8 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewKt {
 public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun checkVpsAvailability-0E7RQCE (DDLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun checkVpsAvailability-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun exportImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getFieldOfView ()Ljava/lang/Double;
 	public final fun getFieldOfViewDistortionRatio ()Ljava/lang/Double;
@@ -214,5 +216,41 @@ public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$Geospatial :
 public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$World : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
 	public static final field $stable I
 	public fun <init> ()V
+}
+
+public abstract class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Available : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Available;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$NotAuthorized : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$NotAuthorized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$ResourceExhausted : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$ResourceExhausted;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Unavailable : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Unavailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
