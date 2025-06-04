@@ -21,6 +21,8 @@ package com.arcgismaps.toolkit.offline
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.toolkit.offline.workmanager.INFO_FILENAME
+import com.arcgismaps.toolkit.offline.workmanager.THUMBNAIL_FILENAME
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -67,16 +69,13 @@ public class OfflineMapInfo internal constructor(
 
 
     public companion object {
-        /// The file names for the serialized offline map info
-        private const val INFO_FILENAME = "info.json"
-        private const val THUMBNAIL_FILENAME = "thumbnail.png"
 
         /**
          * Load a [portalItem], and it's thumbnail (if any), then return an [OfflineMapInfo].
          *
          * @since 200.8.0
          */
-        public suspend fun createFromPortalItem(portalItem: PortalItem): OfflineMapInfo {
+        internal suspend fun createFromPortalItem(portalItem: PortalItem): OfflineMapInfo {
             runCatching { portalItem.load() }
 
             val thumbBitmap: Bitmap? = portalItem.thumbnail?.let { loadableImage ->

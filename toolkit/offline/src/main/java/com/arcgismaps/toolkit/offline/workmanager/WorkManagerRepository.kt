@@ -19,19 +19,14 @@ package com.arcgismaps.toolkit.offline.workmanager
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.offline.OfflineMapInfo
-import com.arcgismaps.toolkit.offline.jobAreaTitleKey
-import com.arcgismaps.toolkit.offline.jobWorkerUuidKey
-import com.arcgismaps.toolkit.offline.jsonJobPathKey
-import com.arcgismaps.toolkit.offline.jsonJobsTempDir
-import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import java.io.File
@@ -49,14 +44,27 @@ internal class WorkManagerRepository(private val context: Context) {
     private val workManager = WorkManager.getInstance(context)
 
     private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
-    internal val offlineMapInfos: MutableList<OfflineMapInfo> = _offlineMapInfos.toMutableStateList()
-
-    private val offlineJobJsonPath by lazy {
-        getExternalDirPath() + File.separator + jsonJobsTempDir
-    }
+    internal val offlineMapInfos = _offlineMapInfos.toMutableList()
 
     init {
         loadOfflineMapInfos()
+    }
+
+    /**
+     * Creates directories for storing offline map contents at the specified path within external storage.
+     *
+     * @param offlineMapDirectoryName The name of the directory to create within external storage.
+     * @return A [File] instance representing the created directory structure.
+     * @since 200.8.0
+     */
+    internal fun createPendingPreplannedJobPath(
+        portalItemID: String,
+        preplannedMapAreaID: String
+    ): File {
+        return File(
+            OfflineURLs.pendingJobInfoDirectory(context, portalItemID),
+            preplannedMapAreaID
+        ).also { it.mkdirs() }
     }
 
     /**
@@ -69,60 +77,32 @@ internal class WorkManagerRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
-        // create the json file
-        val offlineJobJsonFile = File(offlineJobJsonPath + File.separator + jobPath)
-        offlineJobJsonFile.parentFile?.mkdirs()
+    internal fun saveJobToDisk(portalItem: PortalItem, jobJson: String): File {
+        // create the job pending dir
+        val offlineJobJsonFile = File(
+            /* parent = */ OfflineURLs.pendingJobInfoDirectory(context, portalItem.itemId),
+            /* child = */ "${portalItem.title}.json"
+        )
+        offlineJobJsonFile.mkdirs()
         // serialize the offlineMapJob into the file
         offlineJobJsonFile.writeText(jobJson)
         return offlineJobJsonFile
     }
 
     /**
-     * Retrieves the external directory path for storing application files.
-     *
-     * @return The external directory path as a [String].
-     * @since 200.8.0
-     */
-
-    private fun getExternalDirPath(): String {
-        return context.getExternalFilesDir(null)?.path.toString()
-    }
-
-    /**
-     * Creates directories for storing offline map contents at the specified path within external storage.
-     *
-     * @param offlineMapDirectoryName The name of the directory to create within external storage.
-     * @return A [File] instance representing the created directory structure.
-     * @since 200.8.0
-     */
-    internal fun createContentsForPath(offlineMapDirectoryName: String): File {
-        val pathToCreate = getExternalDirPath() + File.separator + offlineMapDirectoryName
-        return File(pathToCreate).also { it.mkdirs() }
-    }
-
-    /**
-     *
-     * @since 200.8.0
-     */
-    internal fun deleteContentsForDirectory(offlineMapDirectoryName: String) {
-        val pathToDelete = getExternalDirPath() + File.separator + offlineMapDirectoryName
-        File(pathToDelete).deleteRecursively()
-    }
-
-    /**
+     * Returns the list of [OfflineMapInfo] available from disk.
      *
      * @since 200.8.0
      */
     private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
-        val baseDir = File(getExternalDirPath()) // TODO build offline dir path
+        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
             return offlineMapInfos
         }
         val entries: Array<File> = baseDir.listFiles() ?: return offlineMapInfos
         for (fileEntry in entries) {
-            if (!fileEntry.isDirectory || fileEntry.name.equals(jsonJobsTempDir)) {
+            if (!fileEntry.isDirectory || fileEntry.name.equals(INFO_FILENAME)) {
                 continue
             }
             val info = OfflineMapInfo.makeFromDirectory(fileEntry) ?: continue

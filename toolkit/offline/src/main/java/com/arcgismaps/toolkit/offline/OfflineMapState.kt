@@ -25,26 +25,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
-
-internal const val LOG_TAG = "Offline"
-internal const val jobAreaTitleKey = "JobAreaTitle"
-internal const val jsonJobPathKey = "JsonJobPath"
-internal const val jobWorkerUuidKey = "WorkerUUID"
-internal const val mobileMapPackagePathKey = "MobileMapPackagePath"
-internal const val preplannedMapAreas = "PreplannedMapAreas"
-internal const val onDemandAreas = "OnDemandAreas"
-internal const val jsonJobsTempDir = "Jobs"
-internal const val notificationChannelName = "Offline Map Job Notifications"
-internal const val notificationTitle = "Offline Map Download"
-internal const val notificationCancelActionKey = "NotificationCancelActionKey"
-internal const val notificationChannelDescription =
-    "Shows notifications for offline map job progress"
 
 /**
  * Represents the state of the offline map.
@@ -69,7 +54,7 @@ public class OfflineMapState(
     private lateinit var _workManagerRepository: WorkManagerRepository
 
     public val offlineMapInfos: List<OfflineMapInfo>
-        get() = _workManagerRepository.offlineMapInfos
+        get() = _workManagerRepository.offlineMapInfos.toList()
 
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode

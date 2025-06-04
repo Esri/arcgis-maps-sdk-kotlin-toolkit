@@ -32,11 +32,11 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
-import com.arcgismaps.toolkit.offline.LOG_TAG
 import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
-import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
+import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
+import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -166,8 +166,10 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val preplannedMapAreaDownloadDirectory = workManagerRepository.createContentsForPath(
-            offlineMapDirectoryName = portalItemId + File.separator + preplannedMapAreas + File.separator + preplannedMapArea.portalItem.itemId
+        val preplannedMapAreaDownloadDirectory = workManagerRepository.createPendingPreplannedJobPath(
+            portalItemID = portalItemId,
+            preplannedMapAreaID = preplannedMapArea.portalItem.itemId
+            //offlineMapDirectoryName = portalItemId + File.separator + preplannedMapAreas + File.separator + preplannedMapArea.portalItem.itemId
         )
 
         // Create a job to download the preplanned offline map
@@ -193,7 +195,8 @@ internal class PreplannedMapAreaState(
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
-            jobPath = portalItemId + File.separator + preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
+            portalItem = preplannedMapArea.portalItem,
+            //jobPath = portalItemId + File.separator + preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 

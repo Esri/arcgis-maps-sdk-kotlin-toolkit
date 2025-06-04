@@ -27,10 +27,6 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
-import com.arcgismaps.toolkit.offline.LOG_TAG
-import com.arcgismaps.toolkit.offline.jobAreaTitleKey
-import com.arcgismaps.toolkit.offline.jsonJobPathKey
-import com.arcgismaps.toolkit.offline.mobileMapPackagePathKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
