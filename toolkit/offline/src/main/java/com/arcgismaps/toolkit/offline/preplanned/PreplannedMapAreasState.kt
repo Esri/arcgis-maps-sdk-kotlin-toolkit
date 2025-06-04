@@ -169,7 +169,6 @@ internal class PreplannedMapAreaState(
         val preplannedMapAreaDownloadDirectory = workManagerRepository.createPendingPreplannedJobPath(
             portalItemID = portalItemId,
             preplannedMapAreaID = preplannedMapArea.portalItem.itemId
-            //offlineMapDirectoryName = portalItemId + File.separator + preplannedMapAreas + File.separator + preplannedMapArea.portalItem.itemId
         )
 
         // Create a job to download the preplanned offline map
@@ -195,8 +194,7 @@ internal class PreplannedMapAreaState(
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
-            portalItem = preplannedMapArea.portalItem,
-            //jobPath = portalItemId + File.separator + preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
+            pendingJobInfoPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 

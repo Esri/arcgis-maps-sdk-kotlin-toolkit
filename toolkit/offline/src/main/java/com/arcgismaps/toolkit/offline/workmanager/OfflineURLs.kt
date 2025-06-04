@@ -33,10 +33,7 @@ internal object OfflineURLs {
      * @since 200.8.0
      */
     internal fun offlineManagerDirectory(context: Context): String {
-        val dir = File(context.filesDir, offlineManagerDir)
-        if (!dir.exists()) {
-            dir.mkdirs()
-        }
+        val dir = File(context.filesDir, offlineManagerDir).mkdirsIfNotExists()
         return dir.absolutePath
     }
 
@@ -50,10 +47,7 @@ internal object OfflineURLs {
      */
     internal fun portalItemDirectory(context: Context, portalItemID: String): String {
         val base = File(offlineManagerDirectory(context))
-        val itemDir = File(base, portalItemID)
-        if (!itemDir.exists()) {
-            itemDir.mkdirs()
-        }
+        val itemDir = File(base, portalItemID).mkdirsIfNotExists()
         return itemDir.absolutePath
     }
 
@@ -75,16 +69,9 @@ internal object OfflineURLs {
         preplannedMapAreaID: String? = null
     ): String {
         val itemDir = File(portalItemDirectory(context, portalItemID))
-        val preplannedDir = File(itemDir, preplannedMapAreas)
-        if (!preplannedDir.exists()) {
-            preplannedDir.mkdirs()
-        }
-
+        val preplannedDir = File(itemDir, preplannedMapAreas).mkdirsIfNotExists()
         return if (preplannedMapAreaID != null) {
-            val areaDir = File(preplannedDir, preplannedMapAreaID)
-            if (!areaDir.exists()) {
-                areaDir.mkdirs()
-            }
+            val areaDir = File(preplannedDir, preplannedMapAreaID).mkdirsIfNotExists()
             areaDir.absolutePath
         } else {
             preplannedDir.absolutePath
@@ -110,16 +97,9 @@ internal object OfflineURLs {
         onDemandMapAreaID: String? = null
     ): String {
         val itemDir = File(portalItemDirectory(context, portalItemID))
-        val onDemandDir = File(itemDir, onDemandAreas)
-        if (!onDemandDir.exists()) {
-            onDemandDir.mkdirs()
-        }
-
+        val onDemandDir = File(itemDir, onDemandAreas).mkdirsIfNotExists()
         return if (onDemandMapAreaID != null) {
-            val areaDir = File(onDemandDir, onDemandMapAreaID)
-            if (!areaDir.exists()) {
-                areaDir.mkdirs()
-            }
+            val areaDir = File(onDemandDir, onDemandMapAreaID).mkdirsIfNotExists()
             areaDir.absolutePath
         } else {
             onDemandDir.absolutePath
@@ -130,21 +110,14 @@ internal object OfflineURLs {
      * Returns the path to the “PendingDownloads” directory in app caches,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<you-app-cache>/PendingDownloads/<portalItemID>/...`
+     * - `<your-app-cache>/PendingDownloads/<portalItemID>/...`
      *
      * @since 200.8.0
      */
     internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): String {
         val caches = context.cacheDir
-        val pendingBase = File(caches, pendingMapInfoDir)
-        if (!pendingBase.exists()) {
-            pendingBase.mkdirs()
-        }
-
-        val itemPendingDir = File(pendingBase, portalItemID)
-        if (!itemPendingDir.exists()) {
-            itemPendingDir.mkdirs()
-        }
+        val pendingBase = File(caches, pendingMapInfoDir).mkdirsIfNotExists()
+        val itemPendingDir = File(pendingBase, portalItemID).mkdirsIfNotExists()
         return itemPendingDir.absolutePath
     }
 
@@ -152,21 +125,19 @@ internal object OfflineURLs {
      * Returns the path to the “PendingDownloads” directory in app caches,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<you-app-cache>/PendingJobs/<portalItemID>/`
+     * - `<your-app-cache>/PendingJobs/<portalItemID>/`
      *
      * @since 200.8.0
      */
     internal fun pendingJobInfoDirectory(context: Context, portalItemID: String): String {
         val caches = context.cacheDir
-        val pendingBase = File(caches, pendingJobsDir)
-        if (!pendingBase.exists()) {
-            pendingBase.mkdirs()
-        }
-
-        val itemPendingDir = File(pendingBase, portalItemID)
-        if (!itemPendingDir.exists()) {
-            itemPendingDir.mkdirs()
-        }
+        val pendingBase = File(caches, pendingJobsDir).mkdirsIfNotExists()
+        val itemPendingDir = File(pendingBase, portalItemID).mkdirsIfNotExists()
         return itemPendingDir.absolutePath
+    }
+
+    private fun File.mkdirsIfNotExists(): File {
+        if (!exists()) mkdirs()
+        return this
     }
 }

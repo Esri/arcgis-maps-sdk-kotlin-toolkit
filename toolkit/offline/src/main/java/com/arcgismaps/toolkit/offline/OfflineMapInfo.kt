@@ -21,8 +21,9 @@ package com.arcgismaps.toolkit.offline
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.toolkit.offline.workmanager.INFO_FILENAME
-import com.arcgismaps.toolkit.offline.workmanager.THUMBNAIL_FILENAME
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -33,36 +34,85 @@ import java.io.FileOutputStream
  *
  * @since 200.8.0
  */
-public class OfflineMapInfo internal constructor(
-    codableInfo: CodableInfo,
+public class OfflineMapInfo private constructor(
+    private val info: CodableInfo,
     public val thumbnail: Bitmap?
 ) {
 
     /**
+     * Load a [portalItem], and it's thumbnail (if any), then construct an [OfflineMapInfo].
      *
+     * @since 200.8.0
      */
-    private var info: CodableInfo = codableInfo
+    internal constructor(portalItem: PortalItem) : this(
+        info = runBlocking {
+            runCatching { portalItem.load() }
+            val itemId = portalItem.itemId
+            val itemUrl = portalItem.url
+            CodableInfo(
+                portalItemID = itemId,
+                title = portalItem.title,
+                description = portalItem.description,
+                portalItemURL = itemUrl
+            )
+        },
+        thumbnail = runBlocking {
+            portalItem.thumbnail?.let { loadableImage ->
+                runCatching { loadableImage.load() }
+                loadableImage.image?.bitmap
+            }
+        }
+    )
 
     /**
+     * Constructor to create [OfflineMapInfo] from a [directory] on disk.
      *
+     * @since 200.8.0
+     */
+    internal constructor(directory: File) : this(
+        info = runBlocking {
+            val infoFile = File(directory, offlineMapInfoJsonFile)
+            val jsonString = infoFile.readText(Charsets.UTF_8)
+            Json.decodeFromString(CodableInfo.serializer(), jsonString)
+        },
+        thumbnail = runBlocking {
+            val thumbnailFile = File(directory, offlineMapInfoThumbnailFile)
+            if (thumbnailFile.exists()) {
+                BitmapFactory.decodeFile(thumbnailFile.absolutePath)
+            } else {
+                null
+            }
+        }
+    )
+
+    /**
+     * The ID of the portal item associated with the map.
+     *
+     * @since 200.8.0
      */
     public val id: String
         get() = info.portalItemID
 
     /**
+     * The title of the portal item associated with the map.
      *
+     * @since 200.8.0
      */
     public val title: String
         get() = info.title
 
     /**
+     * The description of the portal item associated with the map.
      *
+     * @since 200.8.0
      */
     public val description: String
         get() = info.description
 
     /**
+     * The URL of the portal item associated with the map.
      *
+     * @since 200.8.0
      */
     public val portalItemUrl: String
         get() = info.portalItemURL
@@ -71,35 +121,12 @@ public class OfflineMapInfo internal constructor(
     public companion object {
 
         /**
-         * Load a [portalItem], and it's thumbnail (if any), then return an [OfflineMapInfo].
+         * Load an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
          *
-         * @since 200.8.0
-         */
-        internal suspend fun createFromPortalItem(portalItem: PortalItem): OfflineMapInfo {
-            runCatching { portalItem.load() }
-
-            val thumbBitmap: Bitmap? = portalItem.thumbnail?.let { loadableImage ->
-                runCatching { loadableImage.load() }
-                loadableImage.image?.bitmap
-            }
-
-            val codable = CodableInfo(
-                portalItemID = portalItem.itemId,
-                title = portalItem.title,
-                description = portalItem.description,
-                portalItemURL = portalItem.url
-            )
-            return OfflineMapInfo(codable, thumbBitmap)
-        }
-
-        /**
-         * Load an [OfflineMapInfo] from a [directory] on disk (if “info.json” exists there).
-         *
-         * @return [OfflineMapInfo] or null if no info.json or parse failed
          * @since 200.8.0
          */
         public fun makeFromDirectory(directory: File): OfflineMapInfo? {
-            val infoFile = File(directory, INFO_FILENAME)
+            val infoFile = File(directory, offlineMapInfoJsonFile)
             if (!infoFile.exists()) {
                 return null
             }
@@ -113,7 +140,7 @@ public class OfflineMapInfo internal constructor(
                 )
             }.getOrNull() ?: return null
 
-            val thumbnailFile = File(directory, THUMBNAIL_FILENAME)
+            val thumbnailFile = File(directory, offlineMapInfoThumbnailFile)
             val bmp: Bitmap? = if (thumbnailFile.exists()) {
                 BitmapFactory.decodeFile(thumbnailFile.absolutePath)
             } else {
@@ -125,17 +152,21 @@ public class OfflineMapInfo internal constructor(
 
         /**
          * Delete any saved “info.json” and “thumbnail.png” from this [directory].
+         *
+         * @since 200.8.0
          */
         public fun removeFromDirectory(directory: File) {
-            File(directory, INFO_FILENAME).delete()
-            File(directory, THUMBNAIL_FILENAME).delete()
+            File(directory, offlineMapInfoJsonFile).delete()
+            File(directory, offlineMapInfoThumbnailFile).delete()
         }
 
         /**
          * Returns true if “info.json” exists in the given [directory].
+         *
+         * @since 200.8.0
          */
         public fun doesInfoExist(directory: File): Boolean {
-            return File(directory, INFO_FILENAME).exists()
+            return File(directory, offlineMapInfoJsonFile).exists()
         }
     }
 
@@ -149,14 +180,14 @@ public class OfflineMapInfo internal constructor(
             directory.mkdirs()
         }
 
-        val infoFile = File(directory, INFO_FILENAME)
+        val infoFile = File(directory, offlineMapInfoJsonFile)
         val jsonString = Json.encodeToString(CodableInfo.serializer(), info)
         runCatching {
             infoFile.writeText(jsonString, Charsets.UTF_8)
         }
 
         thumbnail?.let { bmp ->
-            val thumbFile = File(directory, THUMBNAIL_FILENAME)
+            val thumbFile = File(directory, offlineMapInfoThumbnailFile)
             runCatching {
                 FileOutputStream(thumbFile).use { out ->
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -167,6 +198,8 @@ public class OfflineMapInfo internal constructor(
 
     /**
      * The codable info is stored in json.
+     *
+     * @since 200.8.0
      */
     @Serializable
     internal data class CodableInfo(

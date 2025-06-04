@@ -41,6 +41,11 @@ public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
+    /**
+     * Represents the state of the offline map.
+     *
+     * @since 200.8.0
+     */
     public constructor(
         offlineMapInfo: OfflineMapInfo,
         onSelectionChanged: (ArcGISMap) -> Unit = { }
