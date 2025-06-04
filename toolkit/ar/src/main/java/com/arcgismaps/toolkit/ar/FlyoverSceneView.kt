@@ -19,9 +19,9 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -54,7 +53,6 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
-import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -72,9 +70,6 @@ import java.time.Instant
  * A scene view that provides an augmented reality fly over experience.
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
- * @param initialLocation the initial location of the FlyoverSceneView's camera.
- * @param initialHeading the initial heading of the FlyoverSceneView's camera.
- * @param translationFactor The translation factor that defines how much the FlyoverSceneView translates as the device moves.
  * @param modifier Modifier to be applied to the FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
@@ -115,11 +110,8 @@ import java.time.Instant
 @Composable
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
-    initialLocation: Point,
-    initialHeading: Double,
-    translationFactor: Double,
+    flyoverSceneViewProxy: FlyoverSceneViewProxy,
     modifier: Modifier = Modifier,
-    flyoverSceneViewProxy: FlyoverSceneViewProxy = remember { FlyoverSceneViewProxy() },
     interactionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -193,24 +185,11 @@ public fun FlyoverSceneView(
             planeFindingMode = Config.PlaneFindingMode.DISABLED
         )
 
-    val cameraController = remember {
-        TransformationMatrixCameraController()
-    }
-
-    LaunchedEffect(initialLocation, initialHeading) {
-        cameraController.setOriginCamera(
-            Camera(
-                locationPoint = initialLocation,
-                pitch = 90.0,
-                roll = 0.0,
-                heading = initialHeading
-            )
-        )
-        arSessionWrapper.resetSession(planeFindingMode = Config.PlaneFindingMode.DISABLED)
-    }
-
-    LaunchedEffect(translationFactor) {
-        cameraController.setTranslationFactor(translationFactor)
+    DisposableEffect(Unit) {
+        flyoverSceneViewProxy.setSessionWrapper(arSessionWrapper)
+        onDispose {
+            flyoverSceneViewProxy.setSessionWrapper(null)
+        }
     }
 
     Box(modifier = Modifier) {
@@ -218,7 +197,7 @@ public fun FlyoverSceneView(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
                 if (frame.camera.trackingState == TrackingState.TRACKING) {
-                    cameraController.transformationMatrix =
+                    flyoverSceneViewProxy.cameraController.transformationMatrix =
                         frame.camera.displayOrientedPose.transformationMatrix
                 }
                 flyoverSceneViewProxy.sceneViewProxy.renderFrame()
@@ -232,7 +211,7 @@ public fun FlyoverSceneView(
     SceneView(
         arcGISScene = arcGISScene,
         sceneViewProxy = flyoverSceneViewProxy.sceneViewProxy,
-        cameraController = cameraController,
+        cameraController = flyoverSceneViewProxy.cameraController,
         atmosphereEffect = atmosphereEffect,
         spaceEffect = spaceEffect,
         modifier = modifier,

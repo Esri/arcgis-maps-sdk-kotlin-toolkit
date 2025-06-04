@@ -19,9 +19,12 @@
 package com.arcgismaps.toolkit.ar
 
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -29,7 +32,25 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.mapping.view.TransformationMatrixCameraController
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
+import com.google.ar.core.Config
+
+@Composable
+public fun rememberFlyoverSceneViewProxy(
+    initialLocation: Point,
+    initialHeading: Double,
+    translationFactor: Double
+): FlyoverSceneViewProxy {
+    return remember {
+        FlyoverSceneViewProxy(
+            initialLocation = initialLocation,
+            initialHeading = initialHeading,
+            translationFactor = translationFactor
+        )
+    }
+}
 
 /**
  * Used to perform operations on a [FlyoverSceneView].
@@ -43,10 +64,48 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
  * @since 200.8.0
  */
 public class FlyoverSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
-    public constructor() : this(SceneViewProxy())
+    internal val cameraController = TransformationMatrixCameraController()
+
+    internal constructor(
+        initialLocation: Point,
+        initialHeading: Double,
+        translationFactor: Double
+    ) : this(SceneViewProxy()) {
+        cameraController.setOriginCamera(
+            Camera(
+                locationPoint = initialLocation,
+                pitch = 90.0,
+                roll = 0.0,
+                heading = initialHeading
+            )
+        )
+        cameraController.setTranslationFactor(translationFactor)
+    }
 
     init {
         sceneViewProxy.setManualRenderingEnabled(true)
+    }
+
+    private var _sessionWrapper: ArSessionWrapper? = null
+
+    internal fun setSessionWrapper(sessionWrapper: ArSessionWrapper?) {
+        _sessionWrapper = sessionWrapper
+    }
+
+    public fun setLocationAndHeading(location: Point, heading: Double) {
+        cameraController.setOriginCamera(
+            Camera(
+                locationPoint = location,
+                pitch = 90.0,
+                roll = 0.0,
+                heading = heading
+            )
+        )
+        _sessionWrapper?.resetSession(planeFindingMode = Config.PlaneFindingMode.DISABLED)
+    }
+
+    public fun setTranslationFactor(translationFactor: Double) {
+        cameraController.setTranslationFactor(translationFactor)
     }
 
     /**
