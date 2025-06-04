@@ -65,6 +65,13 @@ fun MainScreen() {
         initialHeading = initialHeading,
         translationFactor = 1000.0
     )
+//    val flyoverSceneViewProxy = remember {
+//        FlyoverSceneViewProxy(
+//            initialLocation = initialLocation,
+//            initialHeading = initialHeading,
+//            translationFactor = 1000.0
+//        )
+//    }
 
     FlyoverSceneView(
         arcGISScene = arcGISScene,
@@ -73,12 +80,6 @@ fun MainScreen() {
 
     Button(onClick = {
         flyoverSceneViewProxy.setLocationAndHeading(
-//            location = Point(
-//                -3.200833,
-//                55.948612,
-//                150.0,
-//                SpatialReference.wgs84()
-//            ),
             location = initialLocation,
             heading = initialHeading
         )

@@ -66,7 +66,13 @@ public fun rememberFlyoverSceneViewProxy(
 public class FlyoverSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
     internal val cameraController = TransformationMatrixCameraController()
 
-    internal constructor(
+    /**
+     * When instantiating this class from a composable, use [rememberFlyoverSceneViewProxy] to
+     * automatically remember the proxy.
+     *
+     * @since 200.8.0
+     */
+    public constructor(
         initialLocation: Point,
         initialHeading: Double,
         translationFactor: Double
@@ -92,6 +98,14 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         _sessionWrapper = sessionWrapper
     }
 
+    /**
+     * Sets the camera location and heading.
+     *
+     * @param location the camera location
+     * @param heading the camera heading
+     *
+     * @since 200.8.0
+     */
     public fun setLocationAndHeading(location: Point, heading: Double) {
         cameraController.setOriginCamera(
             Camera(
@@ -104,6 +118,14 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         _sessionWrapper?.resetSession(planeFindingMode = Config.PlaneFindingMode.DISABLED)
     }
 
+    /**
+     * Sets the translation factor that defines how much the scene view translates
+     * as the device moves.
+     *
+     * @param translationFactor the translation factor
+     *
+     * @since 200.8.0
+     */
     public fun setTranslationFactor(translationFactor: Double) {
         cameraController.setTranslationFactor(translationFactor)
     }
