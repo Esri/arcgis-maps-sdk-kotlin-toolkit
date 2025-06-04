@@ -25,6 +25,7 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.offline.OfflineMapInfo
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
@@ -47,6 +48,18 @@ internal class WorkManagerRepository(private val context: Context) {
 
     init {
         loadOfflineMapInfos()
+    }
+
+    /**
+     * Saves the map info to the pending folder for a particular portal item.
+     * The info will stay in that folder until the job completes.
+     */
+    private fun savePendingMapInfo(portalItem: PortalItem) {
+        val pendingMapInfoDir = OfflineURLs.pendingMapInfoDirectory(context, portalItem.itemId)
+        if (!OfflineMapInfo.doesInfoExist(pendingMapInfoDir)) {
+            val info = OfflineMapInfo(portalItem)
+            info.saveToDirectory(pendingMapInfoDir)
+        }
     }
 
     /**
@@ -118,7 +131,7 @@ internal class WorkManagerRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    private fun movePreplannedJobResultToDestination(offlineMapCacheDownloadPath: String): String {
+    private fun movePreplannedJobResultToDestination(offlineMapCacheDownloadPath: String): File {
         val cacheAreaDir = File(offlineMapCacheDownloadPath)
         val areaItemID = cacheAreaDir.name
         val portalDir = cacheAreaDir.parentFile
@@ -133,8 +146,25 @@ internal class WorkManagerRepository(private val context: Context) {
             val target = File(destDir, child.name)
             child.copyRecursively(target, overwrite = true)
         }
+        movePreplannedOfflineMapInfoToDestination(portalItemID,areaItemID)
         cacheAreaDir.deleteRecursively()
-        return destDir.absolutePath
+        return destDir
+    }
+
+    private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String, areaItemID: String) {
+        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, areaItemID)
+        val infoFile = File(pendingDir, offlineMapInfoJsonFile)
+        val destDirPath = OfflineURLs.prePlannedDirectory(
+            context = context,
+            portalItemID = portalItemID,
+            preplannedMapAreaID = areaItemID
+        )
+        infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
+        val thumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
+        if (thumbnailFile.exists()) {
+            thumbnailFile.copyRecursively(File(destDirPath, offlineMapInfoThumbnailFile), overwrite = true)
+        }
+        pendingDir.deleteRecursively()
     }
 
     /**
@@ -194,9 +224,7 @@ internal class WorkManagerRepository(private val context: Context) {
         preplannedMapAreaState: PreplannedMapAreaState,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        val offlineMapInfo = OfflineMapInfo(
-            portalItem = preplannedMapAreaState.preplannedMapArea.portalItem
-        )
+        savePendingMapInfo(preplannedMapAreaState.preplannedMapArea.portalItem)
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
@@ -213,10 +241,12 @@ internal class WorkManagerRepository(private val context: Context) {
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
                             workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
+                                val destDir = movePreplannedJobResultToDestination(path)
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                                    mobileMapPackagePath = movePreplannedJobResultToDestination(path)
+                                    mobileMapPackagePath = destDir.absolutePath
                                 )
-                                _offlineMapInfos.add(offlineMapInfo)
+                                OfflineMapInfo.makeFromDirectory(destDir)
+                                    ?.let { _offlineMapInfos.add(it) }
                             } ?: run {
                                 preplannedMapAreaState.updateStatus(
                                     Status.MmpkLoadFailure(

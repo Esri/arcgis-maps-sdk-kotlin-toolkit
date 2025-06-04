@@ -114,11 +114,11 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): String {
+    internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): File {
         val caches = context.cacheDir
         val pendingBase = File(caches, pendingMapInfoDir).mkdirsIfNotExists()
         val itemPendingDir = File(pendingBase, portalItemID).mkdirsIfNotExists()
-        return itemPendingDir.absolutePath
+        return itemPendingDir
     }
 
     /**
