@@ -29,6 +29,9 @@
     <string name="privacy_info_dropdown_item">Privacy Info</string>
     <string name="privacy_info_not_accepted">Privacy Info not accepted</string>
     <string name="show_privacy_info">Show Privacy Info</string>
+    <string name="check_vps">Check VPS</string>
+    <string name="vps_available">VPS Status: Available</string>
+    <string name="vps_unavailable_unknown">VPS Status: Unavailable or unknown</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
     <string name="tracking_error_icon_description">Warning: Tracking Error</string>

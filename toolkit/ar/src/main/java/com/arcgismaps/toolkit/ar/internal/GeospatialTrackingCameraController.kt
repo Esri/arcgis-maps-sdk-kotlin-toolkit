@@ -90,7 +90,6 @@ internal class GeospatialTrackingCameraController(
                 WorldScaleParameters.SR_CAMERA
             ) ?: return@let
 
-
             // get a pose relative to local coordinates so we can rotate the orientation relative
             // to the device orientation
             val localPose = try {
