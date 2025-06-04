@@ -66,6 +66,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEdits
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -176,7 +177,7 @@ internal fun ContentAwareTopBar(
                 pendingNavigationAction = NavigationAction.None
             },
             onSave = {
-                scope.launch {
+                scope.launch(Dispatchers.Main) {
                     // Check if the pending action is to navigate back, since NavigateToAssociation
                     // is not triggered by the top bar
                     val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
@@ -188,7 +189,7 @@ internal fun ContentAwareTopBar(
                 }
             },
             onDiscard = {
-                scope.launch {
+                scope.launch(Dispatchers.Main) {
                     // Check if the pending action is to navigate back, since NavigateToAssociation
                     // is not triggered by the top bar
                     val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
