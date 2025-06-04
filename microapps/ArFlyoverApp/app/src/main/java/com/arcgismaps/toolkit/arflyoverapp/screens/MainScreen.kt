@@ -94,6 +94,7 @@ fun MainScreen() {
             }
         )
     }
+
     // Display FlyoverSceneView only if user has accepted the privacy info
     if (acceptedPrivacyInfo) {
         FlyoverSceneView(
