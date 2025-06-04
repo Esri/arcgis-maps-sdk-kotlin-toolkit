@@ -18,4 +18,5 @@
 
 <resources>
     <string name="app_name">ArFlyoverApp</string>
+    <string name="arcore_not_installed_screen_message">Google Play Services for AR must be installed to run this app.</string>
 </resources>
