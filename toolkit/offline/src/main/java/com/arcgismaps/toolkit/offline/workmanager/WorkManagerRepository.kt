@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 package com.arcgismaps.toolkit.offline.workmanager
 
 import android.content.Context
@@ -63,10 +64,11 @@ internal class WorkManagerRepository(private val context: Context) {
     }
 
     /**
-     * Creates directories for storing offline map contents at the specified path within external storage.
+     * Creates and returns the directory file for a pending preplanned job.
      *
-     * @param offlineMapDirectoryName The name of the directory to create within external storage.
-     * @return A [File] instance representing the created directory structure.
+     * @param portalItemID The ID of the portal item for which to create a pending job folder.
+     * @param preplannedMapAreaID The ID of the specific preplanned map area under the portal item.
+     * @return A [File] instance pointing to the created `<portalItemID>/<preplannedMapAreaID>` directory.
      * @since 200.8.0
      */
     internal fun createPendingPreplannedJobPath(
@@ -89,9 +91,9 @@ internal class WorkManagerRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    internal fun saveJobToDisk(pendingJobInfoPath: String, jobJson: String): File {
+    internal fun saveJobToDisk(jobPath: String, jobJson: String): File {
         // create the job pending dir
-        val offlineJobJsonFile = File(pendingJobInfoPath, downloadJobJsonFile)
+        val offlineJobJsonFile = File(jobPath, downloadJobJsonFile)
         offlineJobJsonFile.parentFile?.let { parent ->
             if (!parent.exists()) {
                 parent.mkdirs()
@@ -146,23 +148,25 @@ internal class WorkManagerRepository(private val context: Context) {
             val target = File(destDir, child.name)
             child.copyRecursively(target, overwrite = true)
         }
-        movePreplannedOfflineMapInfoToDestination(portalItemID,areaItemID)
+        movePreplannedOfflineMapInfoToDestination(portalItemID)
         cacheAreaDir.deleteRecursively()
         return destDir
     }
 
-    private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String, areaItemID: String) {
-        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, areaItemID)
+    private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
+        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, portalItemID)
         val infoFile = File(pendingDir, offlineMapInfoJsonFile)
-        val destDirPath = OfflineURLs.prePlannedDirectory(
+        val destDirPath = OfflineURLs.portalItemDirectory(
             context = context,
-            portalItemID = portalItemID,
-            preplannedMapAreaID = areaItemID
+            portalItemID = portalItemID
         )
         infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
         val thumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
         if (thumbnailFile.exists()) {
-            thumbnailFile.copyRecursively(File(destDirPath, offlineMapInfoThumbnailFile), overwrite = true)
+            thumbnailFile.copyRecursively(
+                File(destDirPath, offlineMapInfoThumbnailFile),
+                overwrite = true
+            )
         }
         pendingDir.deleteRecursively()
     }
@@ -222,9 +226,10 @@ internal class WorkManagerRepository(private val context: Context) {
     internal suspend fun observeStatusForPreplannedWork(
         offlineWorkerUUID: UUID,
         preplannedMapAreaState: PreplannedMapAreaState,
+        portalItem: PortalItem,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        savePendingMapInfo(preplannedMapAreaState.preplannedMapArea.portalItem)
+        savePendingMapInfo(portalItem)
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
