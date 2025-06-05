@@ -59,6 +59,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import androidx.compose.ui.graphics.RectangleShape
+import com.arcgismaps.toolkit.offline.DownloadDetailsBottomSheet
+import com.arcgismaps.toolkit.offline.DownloadDetailsScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 /**
  * Displays a list of preplanned map areas.
@@ -70,6 +76,25 @@ internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
+    var showSheet by remember { mutableStateOf(false) }
+    var selectedState by remember { mutableStateOf<PreplannedMapAreaState?>(null) }
+
+    // Show the modal bottom sheet if needed
+    if (showSheet && selectedState != null) {
+        DownloadDetailsBottomSheet(
+            showSheet = showSheet,
+            onDismiss = { showSheet = false },
+            thumbnail = selectedState!!.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap() /* your default image */,
+            title = selectedState!!.preplannedMapArea.portalItem.title,
+            description = selectedState!!.preplannedMapArea.portalItem.description,
+//            size = "", // pass actual size if available
+//            isAvailableToDownload = true, // set as needed
+//            isDeletable = true, // set as needed
+//            onStartDownload = { /* ... */ },
+//            onDeleteDownload = { /* ... */ }
+        )
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -82,6 +107,11 @@ internal fun PreplannedMapAreas(
         LazyColumn(modifier = Modifier) {
             items(preplannedMapAreaStates) { state ->
                 Row(
+                    modifier = Modifier
+                        .clickable {
+                            selectedState = state
+                            showSheet = true
+                        },
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
