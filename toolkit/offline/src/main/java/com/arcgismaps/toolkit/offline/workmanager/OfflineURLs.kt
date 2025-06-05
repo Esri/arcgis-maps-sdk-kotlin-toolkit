@@ -96,6 +96,28 @@ internal object OfflineURLs {
     }
 
     /**
+     * Checks whether a given [preplannedMapAreaID] associated with a [portalItemID]
+     * has already been downloaded locally.
+     *
+     * @return The path to the preplanned area’s local folder if it exists,
+     *         otherwise `null`.
+     * @since 200.8.0
+     */
+    internal fun isPrePlannedAreaDownloaded(
+        context: Context,
+        portalItemID: String,
+        preplannedMapAreaID: String
+    ): String? {
+        val destDir = File(
+            File(portalItemDirectory(context, portalItemID), preplannedMapAreas),
+            preplannedMapAreaID
+        )
+        return if (destDir.exists())
+            destDir.path
+        else null
+    }
+
+    /**
      * Returns the path to the “OnDemand” subdirectory for a portal item,
      * creates the directory if it doesn’t already exist:
      *

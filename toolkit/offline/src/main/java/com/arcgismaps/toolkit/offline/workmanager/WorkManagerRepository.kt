@@ -172,6 +172,22 @@ internal class WorkManagerRepository(private val context: Context) {
     }
 
     /**
+     * Checks whether a given preplanned [areaItem] associated with a [portalItem]
+     * has already been downloaded locally.
+     *
+     * @return The path to the preplanned area’s local folder if it exists,
+     *         otherwise `null`.
+     * @since 200.8.0
+     */
+    fun isPrePlannedAreaDownloaded(portalItem: PortalItem, areaItem: PortalItem): String? {
+        return OfflineURLs.isPrePlannedAreaDownloaded(
+            context = context,
+            portalItemID = portalItem.itemId,
+            preplannedMapAreaID = areaItem.itemId
+        )
+    }
+
+    /**
      * Creates and enqueues a one-time WorkManager request for downloading an offline map area
      * using [PreplannedMapAreaJobWorker]. Sets up expedited work with input data containing
      * notification and job details. Ensures only one worker instance runs at any time by
@@ -250,8 +266,14 @@ internal class WorkManagerRepository(private val context: Context) {
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                                     mobileMapPackagePath = destDir.absolutePath
                                 )
-                                OfflineMapInfo.makeFromDirectory(destDir)
-                                    ?.let { _offlineMapInfos.add(it) }
+                                OfflineMapInfo.makeFromDirectory(
+                                    directory = File(
+                                        OfflineURLs.portalItemDirectory(
+                                            context = context,
+                                            portalItemID = portalItem.itemId
+                                        )
+                                    )
+                                )?.let { _offlineMapInfos.add(it) }
                             } ?: run {
                                 preplannedMapAreaState.updateStatus(
                                     Status.MmpkLoadFailure(

@@ -195,7 +195,7 @@ internal class PreplannedMapAreaState(
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
-            pendingJobInfoPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
+            jobPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 

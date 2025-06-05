@@ -29,6 +29,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
 
@@ -117,15 +119,25 @@ public class OfflineMapState(
             _mode = OfflineMapMode.Preplanned
             preplannedMapArea
                 .sortedBy { it.portalItem.title }
-                .forEach {
+                .forEach { mapArea ->
                     val preplannedMapAreaState = PreplannedMapAreaState(
-                        preplannedMapArea = it,
+                        preplannedMapArea = mapArea,
                         offlineMapTask = offlineMapTask,
                         portalItem = portalItem,
                         workManagerRepository = _workManagerRepository,
                         onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
+                    val preplannedPath = _workManagerRepository.isPrePlannedAreaDownloaded(
+                        portalItem = portalItem,
+                        areaItem = mapArea.portalItem
+                    )
+                    if (preplannedPath != null) {
+                        preplannedMapAreaState.updateStatus(Status.Downloaded)
+                        preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                            mobileMapPackagePath = preplannedPath
+                        )
+                    }
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
                 }
         }
