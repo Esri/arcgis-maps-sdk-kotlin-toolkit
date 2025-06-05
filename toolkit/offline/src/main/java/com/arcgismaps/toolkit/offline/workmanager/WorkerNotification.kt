@@ -27,9 +27,6 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkManager
-import com.arcgismaps.toolkit.offline.notificationChannelDescription
-import com.arcgismaps.toolkit.offline.notificationChannelName
-import com.arcgismaps.toolkit.offline.notificationTitle
 import java.util.UUID
 
 /**

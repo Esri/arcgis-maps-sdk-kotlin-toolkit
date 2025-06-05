@@ -26,24 +26,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
+import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
-
-internal const val LOG_TAG = "Offline"
-internal const val jobAreaTitleKey = "JobAreaTitle"
-internal const val jsonJobPathKey = "JsonJobPath"
-internal const val jobWorkerUuidKey = "WorkerUUID"
-internal const val mobileMapPackagePathKey = "MobileMapPackagePath"
-internal const val preplannedMapAreas = "PreplannedMapAreas"
-internal const val onDemandAreas = "OnDemandAreas"
-internal const val jsonJobsTempDir = "Jobs"
-internal const val notificationChannelName = "Offline Map Job Notifications"
-internal const val notificationTitle = "Offline Map Download"
-internal const val notificationCancelActionKey = "NotificationCancelActionKey"
-internal const val notificationChannelDescription =
-    "Shows notifications for offline map job progress"
 
 /**
  * Represents the state of the offline map.
@@ -55,14 +44,36 @@ public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
+    /**
+     * Represents the state of the offline map with a given [OfflineMapInfo].
+     *
+     * @since 200.8.0
+     */
+    public constructor(
+        offlineMapInfo: OfflineMapInfo,
+        onSelectionChanged: (ArcGISMap) -> Unit = { }
+    ) : this(
+        arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
+        onSelectionChanged = onSelectionChanged
+    )
+
     private lateinit var _workManagerRepository: WorkManagerRepository
+
+    /**
+     * The portal item information for web maps that have downloaded map areas.
+     *
+     * @since 200.8.0
+     */
+    public val offlineMapInfos: List<OfflineMapInfo>
+        get() = _workManagerRepository.offlineMapInfos.toList()
+
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
         get() = _mode
 
     private lateinit var offlineMapTask: OfflineMapTask
 
-    private lateinit var portalItemId: String
+    private lateinit var portalItem: PortalItem
 
     private var _preplannedMapAreaStates: SnapshotStateList<PreplannedMapAreaState> =
         mutableStateListOf()
@@ -97,7 +108,7 @@ public class OfflineMapState(
 
         _workManagerRepository = WorkManagerRepository(context)
         offlineMapTask = OfflineMapTask(arcGISMap)
-        portalItemId = arcGISMap.item?.itemId ?: throw IllegalStateException("Item ID not found")
+        portalItem = (arcGISMap.item as? PortalItem) ?: throw IllegalStateException("Item not found")
 
         offlineMapTask.load().getOrElse {
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
@@ -108,15 +119,25 @@ public class OfflineMapState(
             _mode = OfflineMapMode.Preplanned
             preplannedMapArea
                 .sortedBy { it.portalItem.title }
-                .forEach {
+                .forEach { mapArea ->
                     val preplannedMapAreaState = PreplannedMapAreaState(
-                        preplannedMapArea = it,
+                        preplannedMapArea = mapArea,
                         offlineMapTask = offlineMapTask,
-                        portalItemId = portalItemId,
+                        portalItem = portalItem,
                         workManagerRepository = _workManagerRepository,
                         onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
+                    val preplannedPath = _workManagerRepository.isPrePlannedAreaDownloaded(
+                        portalItem = portalItem,
+                        areaItem = mapArea.portalItem
+                    )
+                    if (preplannedPath != null) {
+                        preplannedMapAreaState.updateStatus(Status.Downloaded)
+                        preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                            mobileMapPackagePath = preplannedPath
+                        )
+                    }
                     _preplannedMapAreaStates.add(preplannedMapAreaState)
                 }
         }
@@ -192,4 +213,5 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> =
  * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
  * in the failure but will be rethrown.
  */
-internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> = runCatching(block).except<CancellationException, R>()
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block).except<CancellationException, R>()

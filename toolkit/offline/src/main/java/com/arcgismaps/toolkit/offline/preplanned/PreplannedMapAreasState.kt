@@ -27,22 +27,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.MobileMapPackage
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
-import com.arcgismaps.toolkit.offline.LOG_TAG
-import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
-import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
+import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
+import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
-import kotlinx.coroutines.cancel
 
 /**
  * Represents the state of a [PreplannedMapArea].
@@ -52,7 +52,7 @@ import kotlinx.coroutines.cancel
 internal class PreplannedMapAreaState(
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
-    private val portalItemId: String,
+    private val portalItem: PortalItem,
     private val workManagerRepository: WorkManagerRepository,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
@@ -123,6 +123,7 @@ internal class PreplannedMapAreaState(
             workManagerRepository.observeStatusForPreplannedWork(
                 onWorkInfoStateChanged = ::logWorkInfo,
                 preplannedMapAreaState = this@PreplannedMapAreaState,
+                portalItem = portalItem,
                 offlineWorkerUUID = offlineWorkerUUID
             )
         }
@@ -166,8 +167,9 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val preplannedMapAreaDownloadDirectory = workManagerRepository.createContentsForPath(
-            offlineMapDirectoryName = portalItemId + File.separator + preplannedMapAreas + File.separator + preplannedMapArea.portalItem.itemId
+        val preplannedMapAreaDownloadDirectory = workManagerRepository.createPendingPreplannedJobPath(
+            portalItemID = portalItem.itemId,
+            preplannedMapAreaID = preplannedMapArea.portalItem.itemId
         )
 
         // Create a job to download the preplanned offline map
@@ -193,11 +195,11 @@ internal class PreplannedMapAreaState(
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
         val jsonJobFile = workManagerRepository.saveJobToDisk(
-            jobPath = portalItemId + File.separator + preplannedMapAreas + File.separator + "${preplannedMapArea.portalItem.title}.json",
+            jobPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueDownload(
+        workerUUID = workManagerRepository.createPreplannedMapAreaRequestAndQueueDownload(
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )
