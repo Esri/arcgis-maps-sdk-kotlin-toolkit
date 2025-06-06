@@ -33,6 +33,7 @@ import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
 import com.arcgismaps.toolkit.offline.LOG_TAG
+import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
 import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import com.arcgismaps.toolkit.offline.preplannedMapAreas
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
@@ -74,6 +75,10 @@ internal class PreplannedMapAreaState(
     // The download progress of the preplanned map area.
     private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
     internal val downloadProgress: State<Int> = _downloadProgress
+
+    private var _directorySize: Int = 0
+    internal val directorySize: Int
+        get() = _directorySize
 
     private lateinit var scope: CoroutineScope
 
@@ -205,6 +210,15 @@ internal class PreplannedMapAreaState(
         return workerUUID
     }
 
+    internal fun deleteMapArea() {
+        if (workManagerRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
+            Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
+            _status = Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
+        } else {
+            Log.e(TAG, "Failed to delete preplanned map area: ${mobileMapPackage.path}")
+        }
+    }
+
     /**
      * Updates the current state of this preplanned map area instance.
      *
@@ -231,6 +245,7 @@ internal class PreplannedMapAreaState(
             mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
             mobileMapPackage.load()
                 .onSuccess {
+                    _directorySize = getDirectorySize(mobileMapPackagePath)
                     Log.d(TAG, "Mobile map package loaded successfully")
                 }.onFailure { exception ->
                     Log.e(TAG, "Error loading mobile map package", exception)

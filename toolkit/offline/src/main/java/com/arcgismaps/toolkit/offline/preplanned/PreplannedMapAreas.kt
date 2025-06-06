@@ -59,11 +59,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import androidx.compose.ui.graphics.RectangleShape
-import com.arcgismaps.toolkit.offline.DownloadDetailsBottomSheet
-import com.arcgismaps.toolkit.offline.DownloadDetailsScreen
+import com.arcgismaps.toolkit.offline.MapAreaDetailsBottomSheet
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
 /**
@@ -76,23 +76,28 @@ internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
-    var showSheet by remember { mutableStateOf(false) }
+    var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedState by remember { mutableStateOf<PreplannedMapAreaState?>(null) }
 
     // Show the modal bottom sheet if needed
     if (showSheet && selectedState != null) {
-        DownloadDetailsBottomSheet(
-            showSheet = showSheet,
-            onDismiss = { showSheet = false },
-            thumbnail = selectedState!!.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap() /* your default image */,
-            title = selectedState!!.preplannedMapArea.portalItem.title,
-            description = selectedState!!.preplannedMapArea.portalItem.description,
-//            size = "", // pass actual size if available
-//            isAvailableToDownload = true, // set as needed
-//            isDeletable = true, // set as needed
-//            onStartDownload = { /* ... */ },
-//            onDeleteDownload = { /* ... */ }
-        )
+        selectedState?.let {
+            MapAreaDetailsBottomSheet(
+                showSheet = showSheet,
+                onDismiss = { showSheet = false },
+                thumbnail = it.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+                title = it.preplannedMapArea.portalItem.title,
+                description = it.preplannedMapArea.portalItem.description,
+                size = it.directorySize,
+                isAvailableToDownload = it.status.allowsDownload,
+                onStartDownload = {
+                    it.downloadPreplannedMapArea()
+                    showSheet = false
+                },
+                isDeletable = it.status.isDownloaded,
+                onDeleteDownload = { it.deleteMapArea() }
+            )
+        }
     }
 
     Column(

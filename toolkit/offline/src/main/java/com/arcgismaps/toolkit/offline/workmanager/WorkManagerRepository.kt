@@ -90,9 +90,8 @@ internal class WorkManagerRepository(private val context: Context) {
         return File(pathToCreate).also { it.mkdirs() }
     }
 
-    internal fun deleteContentsForDirectory(offlineMapDirectoryName: String) {
-        val pathToDelete = createExternalDirPath() + File.separator + offlineMapDirectoryName
-        File(pathToDelete).deleteRecursively()
+    internal fun deleteContentsForDirectory(offlineMapDirectoryName: String): Boolean {
+        return File(offlineMapDirectoryName).deleteRecursively()
     }
 
     /**
