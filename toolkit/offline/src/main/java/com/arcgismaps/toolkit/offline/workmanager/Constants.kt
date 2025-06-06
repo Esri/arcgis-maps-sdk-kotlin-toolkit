@@ -31,6 +31,7 @@ internal const val downloadJobJsonFile = "Job.json"
 internal const val offlineManagerDir = "com.arcgismaps.toolkit.offline.offlineManager"
 internal const val pendingMapInfoDir = "PendingMapInfo"
 internal const val pendingJobsDir = "PendingJobs"
+internal const val offlineMapAreasCacheDir = "OfflineMapAreasCache"
 internal const val preplannedMapAreas = "Preplanned"
 internal const val onDemandAreas = "OnDemand"
 

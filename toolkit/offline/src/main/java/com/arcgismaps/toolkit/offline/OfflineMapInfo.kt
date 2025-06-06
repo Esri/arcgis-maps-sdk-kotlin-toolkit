@@ -65,27 +65,6 @@ public class OfflineMapInfo private constructor(
     )
 
     /**
-     * Constructor to create [OfflineMapInfo] from a [directory] on disk.
-     *
-     * @since 200.8.0
-     */
-    internal constructor(directory: File) : this(
-        info = runBlocking {
-            val infoFile = File(directory, offlineMapInfoJsonFile)
-            val jsonString = infoFile.readText(Charsets.UTF_8)
-            Json.decodeFromString(CodableInfo.serializer(), jsonString)
-        },
-        thumbnail = runBlocking {
-            val thumbnailFile = File(directory, offlineMapInfoThumbnailFile)
-            if (thumbnailFile.exists()) {
-                BitmapFactory.decodeFile(thumbnailFile.absolutePath)
-            } else {
-                null
-            }
-        }
-    )
-
-    /**
      * The ID of the portal item associated with the map.
      *
      * @since 200.8.0
@@ -165,7 +144,7 @@ public class OfflineMapInfo private constructor(
          *
          * @since 200.8.0
          */
-        public fun doesInfoExist(directory: File): Boolean {
+        public fun isSerializedFilePresent(directory: File): Boolean {
             return File(directory, offlineMapInfoJsonFile).exists()
         }
     }

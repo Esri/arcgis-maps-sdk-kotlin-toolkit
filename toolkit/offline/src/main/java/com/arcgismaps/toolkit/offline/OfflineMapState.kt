@@ -30,8 +30,6 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
-import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
-import com.arcgismaps.toolkit.offline.workmanager.WorkManagerRepository
 import kotlinx.coroutines.CancellationException
 
 /**
@@ -57,15 +55,7 @@ public class OfflineMapState(
         onSelectionChanged = onSelectionChanged
     )
 
-    private lateinit var _workManagerRepository: WorkManagerRepository
-
-    /**
-     * The portal item information for web maps that have downloaded map areas.
-     *
-     * @since 200.8.0
-     */
-    public val offlineMapInfos: List<OfflineMapInfo>
-        get() = _workManagerRepository.offlineMapInfos.toList()
+    private lateinit var _offlineManagerRepository: OfflineManagerRepository
 
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
@@ -106,7 +96,7 @@ public class OfflineMapState(
             throw it
         }
 
-        _workManagerRepository = WorkManagerRepository(context)
+        _offlineManagerRepository = OfflineManagerRepository(context)
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItem = (arcGISMap.item as? PortalItem) ?: throw IllegalStateException("Item not found")
 
@@ -124,11 +114,11 @@ public class OfflineMapState(
                         preplannedMapArea = mapArea,
                         offlineMapTask = offlineMapTask,
                         portalItem = portalItem,
-                        workManagerRepository = _workManagerRepository,
+                        offlineManagerRepository = _offlineManagerRepository,
                         onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
-                    val preplannedPath = _workManagerRepository.isPrePlannedAreaDownloaded(
+                    val preplannedPath = _offlineManagerRepository.isPrePlannedAreaDownloaded(
                         portalItem = portalItem,
                         areaItem = mapArea.portalItem
                     )

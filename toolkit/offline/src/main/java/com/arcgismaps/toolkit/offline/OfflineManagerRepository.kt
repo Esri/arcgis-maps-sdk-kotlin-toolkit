@@ -15,7 +15,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.offline.workmanager
+package com.arcgismaps.toolkit.offline
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
@@ -27,9 +27,17 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.toolkit.offline.OfflineMapInfo
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
+import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
+import com.arcgismaps.toolkit.offline.workmanager.downloadJobJsonFile
+import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.workmanager.jobWorkerUuidKey
+import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
 import java.io.File
 import java.util.UUID
 
@@ -40,15 +48,21 @@ import java.util.UUID
  *
  * @since 200.8.0
  */
-internal class WorkManagerRepository(private val context: Context) {
+public class OfflineManagerRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
     private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
-    internal val offlineMapInfos = _offlineMapInfos.toMutableList()
+
+    /**
+     * The portal item information for web maps that have downloaded map areas.
+     *
+     * @since 200.8.0
+     */
+    public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos.toList()
 
     init {
-        loadOfflineMapInfos()
+        _offlineMapInfos.addAll(loadOfflineMapInfos())
     }
 
     /**
@@ -57,7 +71,7 @@ internal class WorkManagerRepository(private val context: Context) {
      */
     private fun savePendingMapInfo(portalItem: PortalItem) {
         val pendingMapInfoDir = OfflineURLs.pendingMapInfoDirectory(context, portalItem.itemId)
-        if (!OfflineMapInfo.doesInfoExist(pendingMapInfoDir)) {
+        if (!OfflineMapInfo.isSerializedFilePresent(pendingMapInfoDir)) {
             val info = OfflineMapInfo(portalItem)
             info.saveToDirectory(pendingMapInfoDir)
         }
@@ -179,7 +193,7 @@ internal class WorkManagerRepository(private val context: Context) {
      *         otherwise `null`.
      * @since 200.8.0
      */
-    fun isPrePlannedAreaDownloaded(portalItem: PortalItem, areaItem: PortalItem): String? {
+    internal fun isPrePlannedAreaDownloaded(portalItem: PortalItem, areaItem: PortalItem): String? {
         return OfflineURLs.isPrePlannedAreaDownloaded(
             context = context,
             portalItemID = portalItem.itemId,

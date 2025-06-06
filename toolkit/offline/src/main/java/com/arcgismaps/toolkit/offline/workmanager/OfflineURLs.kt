@@ -28,7 +28,6 @@ import java.io.File
  */
 internal object OfflineURLs {
 
-
     /**
      * Retrieves the external directory path for storing application files (`<your-app-files-dir>`):
      *
@@ -36,9 +35,20 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-
-    internal fun getExternalDirPath(context: Context): String {
+    private fun getExternalDirPath(context: Context): String {
         return context.getExternalFilesDir(null)?.path.toString()
+    }
+
+
+    /**
+     * Retrieves the external directory path for caching OfflineMapAreas files:
+     *
+     * - `/storage/emulated/0/Android/data/com.yourpackagename.appname/files/OfflineMapAreasCache`
+     *
+     * @since 200.8.0
+     */
+    private fun getOfflineCacheDirPath(context: Context): String {
+        return File(getExternalDirPath(context), offlineMapAreasCacheDir).path.toString()
     }
 
     /**
@@ -50,7 +60,8 @@ internal object OfflineURLs {
      * @since 200.8.0
      */
     internal fun offlineManagerDirectory(context: Context): String {
-        val dir = File(context.filesDir, offlineManagerDir).mkdirsIfNotExists()
+        val dir = File(getExternalDirPath(context), offlineManagerDir)
+            .makeDirectoryIfItDoesNotExist()
         return dir.absolutePath
     }
 
@@ -64,7 +75,7 @@ internal object OfflineURLs {
      */
     internal fun portalItemDirectory(context: Context, portalItemID: String): String {
         val base = File(offlineManagerDirectory(context))
-        val itemDir = File(base, portalItemID).mkdirsIfNotExists()
+        val itemDir = File(base, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemDir.absolutePath
     }
 
@@ -86,9 +97,9 @@ internal object OfflineURLs {
         preplannedMapAreaID: String? = null
     ): String {
         val itemDir = File(portalItemDirectory(context, portalItemID))
-        val preplannedDir = File(itemDir, preplannedMapAreas).mkdirsIfNotExists()
+        val preplannedDir = File(itemDir, preplannedMapAreas).makeDirectoryIfItDoesNotExist()
         return if (preplannedMapAreaID != null) {
-            val areaDir = File(preplannedDir, preplannedMapAreaID).mkdirsIfNotExists()
+            val areaDir = File(preplannedDir, preplannedMapAreaID).makeDirectoryIfItDoesNotExist()
             areaDir.absolutePath
         } else {
             preplannedDir.absolutePath
@@ -136,9 +147,9 @@ internal object OfflineURLs {
         onDemandMapAreaID: String? = null
     ): String {
         val itemDir = File(portalItemDirectory(context, portalItemID))
-        val onDemandDir = File(itemDir, onDemandAreas).mkdirsIfNotExists()
+        val onDemandDir = File(itemDir, onDemandAreas).makeDirectoryIfItDoesNotExist()
         return if (onDemandMapAreaID != null) {
-            val areaDir = File(onDemandDir, onDemandMapAreaID).mkdirsIfNotExists()
+            val areaDir = File(onDemandDir, onDemandMapAreaID).makeDirectoryIfItDoesNotExist()
             areaDir.absolutePath
         } else {
             onDemandDir.absolutePath
@@ -146,36 +157,36 @@ internal object OfflineURLs {
     }
 
     /**
-     * Returns the path to the “PendingMapInfo” directory in app caches,
+     * Returns the path to the “PendingMapInfo” directory from the external cache,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-cache>/PendingMapInfo/<portalItemID>/...`
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/...`
      *
      * @since 200.8.0
      */
     internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): File {
-        val caches = context.cacheDir
-        val pendingBase = File(caches, pendingMapInfoDir).mkdirsIfNotExists()
-        val itemPendingDir = File(pendingBase, portalItemID).mkdirsIfNotExists()
+        val caches = getOfflineCacheDirPath(context)
+        val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
+        val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemPendingDir
     }
 
     /**
-     * Returns the path to the “PendingMapInfo” directory in app caches,
+     * Returns the path to the “PendingMapInfo” directory from the external cache,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-cache>/PendingJobs/<portalItemID>/`
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingJobs/<portalItemID>/`
      *
      * @since 200.8.0
      */
     internal fun pendingJobInfoDirectory(context: Context, portalItemID: String): String {
-        val caches = context.cacheDir
-        val pendingBase = File(caches, pendingJobsDir).mkdirsIfNotExists()
-        val itemPendingDir = File(pendingBase, portalItemID).mkdirsIfNotExists()
+        val caches = getOfflineCacheDirPath(context)
+        val pendingBase = File(caches, pendingJobsDir).makeDirectoryIfItDoesNotExist()
+        val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemPendingDir.absolutePath
     }
 
-    private fun File.mkdirsIfNotExists(): File {
+    private fun File.makeDirectoryIfItDoesNotExist(): File {
         if (!exists()) mkdirs()
         return this
     }
