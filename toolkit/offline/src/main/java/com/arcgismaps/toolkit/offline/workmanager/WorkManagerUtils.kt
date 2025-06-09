@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.offline.workmanager
 
 import android.util.Log
 import androidx.work.WorkInfo
-import com.arcgismaps.toolkit.offline.LOG_TAG
 import java.io.File
 
 /**
