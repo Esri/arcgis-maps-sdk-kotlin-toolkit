@@ -63,10 +63,10 @@ internal class PreplannedMapAreaState(
     private lateinit var map: ArcGISMap
 
     // Enabled when a downloaded map is chosen to be displayed by pressing the "Open" button.
-    private var _isSelected by mutableStateOf(false)
-    internal val isSelected: Boolean
-        get() = _isSelected
-
+    private var _isSelectedToOpen by mutableStateOf(false)
+    internal val isSelectedToOpen: Boolean
+        get() = _isSelectedToOpen
+    
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
     internal val status: Status
@@ -76,7 +76,7 @@ internal class PreplannedMapAreaState(
     private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
     internal val downloadProgress: State<Int> = _downloadProgress
 
-    private var _directorySize: Int = 0
+    private var _directorySize by mutableIntStateOf(0)
     internal val directorySize: Int
         get() = _directorySize
 
@@ -259,8 +259,8 @@ internal class PreplannedMapAreaState(
         }
     }
 
-    internal fun setSelected(selected: Boolean) {
-        _isSelected = selected
+    internal fun setSelectedToOpen(selected: Boolean) {
+        _isSelectedToOpen = selected
         if (selected) {
             onSelectionChanged(map)
         }

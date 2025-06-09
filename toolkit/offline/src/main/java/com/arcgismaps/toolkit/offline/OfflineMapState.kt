@@ -129,7 +129,7 @@ public class OfflineMapState(
      * @since 200.8.0
      */
     public fun resetSelectedMapArea() {
-        _preplannedMapAreaStates.forEach { it.setSelected(false) }
+        _preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
     }
 }
 

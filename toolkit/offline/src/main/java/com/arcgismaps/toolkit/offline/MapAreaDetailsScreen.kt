@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,11 +37,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,12 +52,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
+    sheetState: SheetState,
+    scope: CoroutineScope,
     onDismiss: () -> Unit,
     thumbnail: ImageBitmap?,
     title: String,
@@ -68,11 +71,6 @@ internal fun MapAreaDetailsBottomSheet(
     onStartDownload: () -> Unit,
     onDeleteDownload: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-    val scope = rememberCoroutineScope()
-
     if (showSheet) {
         // Launch expand when shown
         LaunchedEffect(Unit) {
@@ -138,7 +136,7 @@ internal fun MapAreaDetailsScreen(
             Text(text = "Size: ${formatSize(size)}", style = MaterialTheme.typography.bodyMedium)
         }
         // Description label
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(id = R.string.description),
             style = MaterialTheme.typography.labelSmall,
@@ -152,6 +150,7 @@ internal fun MapAreaDetailsScreen(
             modifier = Modifier
                 .background(Color.White, shape = RoundedCornerShape(10.dp))
                 .padding(12.dp)
+                .fillMaxWidth()
         ) {
             Text(
                 text = htmlToPlainText(description),
