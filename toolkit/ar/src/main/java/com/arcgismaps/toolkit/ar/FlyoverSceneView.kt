@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -145,6 +146,8 @@ public fun FlyoverSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null
 ) {
+    val initializationStatus = null
+
     val context = LocalContext.current
 
     val cameraPermissionGranted by rememberPermissionsGranted(listOf(Manifest.permission.CAMERA)) {
@@ -185,7 +188,7 @@ public fun FlyoverSceneView(
             planeFindingMode = Config.PlaneFindingMode.DISABLED
         )
 
-    DisposableEffect(Unit) {
+    DisposableEffect(flyoverSceneViewProxy) {
         flyoverSceneViewProxy.setSessionWrapper(arSessionWrapper)
         onDispose {
             flyoverSceneViewProxy.setSessionWrapper(null)
@@ -193,14 +196,17 @@ public fun FlyoverSceneView(
     }
 
     Box(modifier = Modifier) {
+        // use rememberUpdatedState so that the lambda used below always sees the latest proxy
+        val proxy by rememberUpdatedState(flyoverSceneViewProxy)
+
         ArCameraFeed(
             session = arSessionWrapper,
             onFrame = { frame, displayRotation, session ->
                 if (frame.camera.trackingState == TrackingState.TRACKING) {
-                    flyoverSceneViewProxy.cameraController.transformationMatrix =
+                    proxy.cameraController.transformationMatrix =
                         frame.camera.displayOrientedPose.transformationMatrix
                 }
-                flyoverSceneViewProxy.sceneViewProxy.renderFrame()
+                proxy.sceneViewProxy.renderFrame()
             },
             onTapWithHitResult = {},
             onFirstPlaneDetected = {},
