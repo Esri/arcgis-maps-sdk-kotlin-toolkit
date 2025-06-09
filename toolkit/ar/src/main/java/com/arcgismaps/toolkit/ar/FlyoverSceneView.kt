@@ -58,11 +58,14 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
+import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.TrackingState
 import java.time.Instant
@@ -113,6 +116,7 @@ public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
     modifier: Modifier = Modifier,
+    onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     interactionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -146,40 +150,48 @@ public fun FlyoverSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null
 ) {
-    val initializationStatus = null
+    val initializationStatus = rememberFlyoverSceneViewStatus()
 
     val context = LocalContext.current
 
     val cameraPermissionGranted by rememberPermissionsGranted(listOf(Manifest.permission.CAMERA)) {
         // onNotGranted
-//        initializationStatus.update(
-//            TFlyoverSceneViewStatus.FailedToInitialize(
-//                IllegalStateException(
-//                    context.getString(R.string.camera_permission_not_granted)
-//                )
-//            ),
-//            onInitializationStatusChanged
-//        )
+        initializationStatus.update(
+            FlyoverSceneViewStatus.FailedToInitialize(
+                IllegalStateException(
+                    context.getString(R.string.camera_permission_not_granted)
+                )
+            ),
+            onInitializationStatusChanged
+        )
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-//        val arCoreAvailability = checkArCoreAvailability(context)
-//        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-//            initializationStatus.update(
-//                FlyoverSceneViewStatus.FailedToInitialize(
-//                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-//                ),
-//                onInitializationStatusChanged
-//            )
-//        } else {
-        arCoreInstalled = true
-//        }
+        val arCoreAvailability = checkArCoreAvailability(context)
+        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+            initializationStatus.update(
+                FlyoverSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
+                ),
+                onInitializationStatusChanged
+            )
+        } else {
+            arCoreInstalled = true
+        }
     }
 
     if (!cameraPermissionGranted) {
         return
+    }
+
+    // if we get here camera permission is already granted so if ArCore is installed we are initialized
+    if (arCoreInstalled) {
+        initializationStatus.update(
+            FlyoverSceneViewStatus.Initialized,
+            onInitializationStatusChanged
+        )
     }
 
     val arSessionWrapper =
