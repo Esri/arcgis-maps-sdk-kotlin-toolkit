@@ -179,7 +179,9 @@ public class OfflineRepository(private val context: Context) {
             context = context,
             portalItemID = portalItemID
         )
-        infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
+        if (infoFile.exists()) {
+            infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
+        }
         val thumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
         if (thumbnailFile.exists()) {
             thumbnailFile.copyRecursively(
