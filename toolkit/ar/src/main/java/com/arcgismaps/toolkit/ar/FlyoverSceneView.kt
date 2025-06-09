@@ -208,7 +208,8 @@ public fun FlyoverSceneView(
     }
 
     Box(modifier = Modifier) {
-        // use rememberUpdatedState so that the lambda used below always sees the latest proxy
+        // Use rememberUpdatedState so that the lambda used below always sees the latest proxy. Without
+        // this if we changed the proxy argument updating and rendering would stop.
         val proxy by rememberUpdatedState(flyoverSceneViewProxy)
 
         ArCameraFeed(

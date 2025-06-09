@@ -37,6 +37,11 @@ import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.Config
 
+/**
+ * Create and remember a [FlyoverSceneViewProxy].
+ *
+ * @since 200.8.0
+ */
 @Composable
 public fun rememberFlyoverSceneViewProxy(
     initialLocation: Point,
