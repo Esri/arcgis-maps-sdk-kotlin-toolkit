@@ -45,8 +45,8 @@ public fun rememberFlyoverSceneViewProxy(
 ): FlyoverSceneViewProxy {
     return remember {
         FlyoverSceneViewProxy(
-            initialLocation = initialLocation,
-            initialHeading = initialHeading,
+            location = initialLocation,
+            heading = initialHeading,
             translationFactor = translationFactor
         )
     }
@@ -70,19 +70,24 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
      * When instantiating this class from a composable, use [rememberFlyoverSceneViewProxy] to
      * automatically remember the proxy.
      *
+     * @param location the starting location
+     * @param heading the starting heading
+     * @param translationFactor the translation factor that defines how much the scene view translates
+     * as the device moves.
+     *
      * @since 200.8.0
      */
     public constructor(
-        initialLocation: Point,
-        initialHeading: Double,
+        location: Point,
+        heading: Double,
         translationFactor: Double
     ) : this(SceneViewProxy()) {
         cameraController.setOriginCamera(
             Camera(
-                locationPoint = initialLocation,
+                locationPoint = location,
                 pitch = 90.0,
                 roll = 0.0,
-                heading = initialHeading
+                heading = heading
             )
         )
         cameraController.setTranslationFactor(translationFactor)
@@ -96,13 +101,14 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
 
     internal fun setSessionWrapper(sessionWrapper: ArSessionWrapper?) {
         _sessionWrapper = sessionWrapper
+        _sessionWrapper?.resetSession(planeFindingMode = Config.PlaneFindingMode.DISABLED)
     }
 
     /**
      * Sets the camera location and heading.
      *
-     * @param location the camera location
-     * @param heading the camera heading
+     * @param location the starting location
+     * @param heading the starting heading
      *
      * @since 200.8.0
      */
