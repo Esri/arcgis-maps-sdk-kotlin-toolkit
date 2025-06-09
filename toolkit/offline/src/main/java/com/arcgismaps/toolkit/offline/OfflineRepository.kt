@@ -172,6 +172,21 @@ public class OfflineRepository(private val context: Context) {
         return File(offlineMapDirectoryName).deleteRecursively()
     }
 
+    /**
+     * Removes the offline map information for a given portal item ID.
+     * Deletes the info.json and thumbnail file from the corresponding directory
+     * and removes the info from the list.
+     *
+     * @param portalItemID The ID of the portal item whose offline map info should be removed.
+     * @since 200.8.0
+     */
+    internal fun removeOfflineMapInfo(portalItemID: String) {
+        _offlineMapInfos.removeAll { it.id == portalItemID }
+        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val offlineMapInfoDir = File(baseDir, portalItemID)
+        OfflineMapInfo.removeFromDirectory(offlineMapInfoDir)
+    }
+
     private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
         val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, portalItemID)
         val infoFile = File(pendingDir, offlineMapInfoJsonFile)

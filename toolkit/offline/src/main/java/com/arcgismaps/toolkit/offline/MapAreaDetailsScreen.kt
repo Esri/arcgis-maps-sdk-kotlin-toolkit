@@ -29,7 +29,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.Button
@@ -72,7 +74,7 @@ internal fun MapAreaDetailsBottomSheet(
     onDeleteDownload: () -> Unit
 ) {
     if (showSheet) {
-        // Launch expand when shown
+        // Launch expanded when shown
         LaunchedEffect(Unit) {
             scope.launch { sheetState.expand() }
         }
@@ -105,8 +107,11 @@ internal fun MapAreaDetailsScreen(
     onStartDownload: () -> Unit,
     onDeleteDownload: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (thumbnail != null) {

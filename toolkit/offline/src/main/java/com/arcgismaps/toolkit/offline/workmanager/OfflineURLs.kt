@@ -60,7 +60,7 @@ internal object OfflineURLs {
      * @since 200.8.0
      */
     internal fun offlineManagerDirectory(context: Context): String {
-        val dir = File(getExternalDirPath(context), offlineManagerDir)
+        val dir = File(getExternalDirPath(context), offlineDir)
             .makeDirectoryIfItDoesNotExist()
         return dir.absolutePath
     }

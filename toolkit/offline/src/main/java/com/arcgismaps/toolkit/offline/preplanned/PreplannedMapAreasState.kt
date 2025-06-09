@@ -212,10 +212,31 @@ internal class PreplannedMapAreaState(
         return workerUUID
     }
 
-    internal fun deleteMapArea() {
+    /**
+     * Removes the downloaded preplanned map area from the device.
+     *
+     * This function deletes the contents of the directory associated with the preplanned map area
+     * and updates the status to reflect that the area is no longer loaded. If specified, it also
+     * removes the offline map information from the repository.
+     *
+     * @param shouldRemoveOfflineMapInfo A lambda function that determines whether to remove offline map info.
+     *
+     * @since 200.8.0
+     */
+    internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
         if (offlineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
             Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
-            _status = Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
+            // Reset the status to reflect the deletion
+            _status = Status.NotLoaded
+            if (shouldRemoveOfflineMapInfo()) {
+                offlineRepository.removeOfflineMapInfo(
+                    portalItemID = portalItem.itemId
+                )
+            }
+            scope = CoroutineScope(Dispatchers.IO)
+            scope.launch {
+               initialize()
+            }
         } else {
             Log.e(TAG, "Failed to delete preplanned map area: ${mobileMapPackage.path}")
         }

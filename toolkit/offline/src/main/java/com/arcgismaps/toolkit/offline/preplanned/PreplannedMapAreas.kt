@@ -114,7 +114,9 @@ internal fun PreplannedMapAreas(
                         }
                 },
                 isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
-                onDeleteDownload = { showDetailsState.deleteMapArea() }
+                onDeleteDownload = {
+                    showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+                }
             )
     }
 
