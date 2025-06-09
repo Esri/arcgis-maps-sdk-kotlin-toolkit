@@ -44,19 +44,35 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
 	public static final field $stable I
-	public fun <init> (Lcom/arcgismaps/mapping/PortalItem;)V
+	public static final field Companion Lcom/arcgismaps/toolkit/offline/OfflineMapInfo$Companion;
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo$CodableInfo;Landroid/graphics/Bitmap;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
 	public final fun getPortalItemUrl ()Ljava/lang/String;
 	public final fun getThumbnail ()Landroid/graphics/Bitmap;
 	public final fun getTitle ()Ljava/lang/String;
-	public final fun initialize-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setThumbnail (Landroid/graphics/Bitmap;)V
+	public final fun saveToDirectory (Ljava/io/File;)V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapInfo$Companion {
+	public final fun createFromDirectory (Ljava/io/File;)Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;
+	public final fun isSerializedFilePresent (Ljava/io/File;)Z
+	public final fun removeFromDirectory (Ljava/io/File;)V
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapState {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
+	public final fun resetSelectedMapArea ()V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineRepository {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getOfflineMapInfos ()Ljava/util/List;
 }
 
