@@ -27,13 +27,17 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
-private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
+private const val KEY_INTENT_EXTRA_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
-private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
+private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
+private const val KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_SIGN_OUT"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
+
+private const val SIGN_IN = "SIGN_IN"
+private const val SIGN_OUT = "SIGN_OUT"
 
 /**
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
@@ -95,15 +99,16 @@ private const val RESULT_CODE_CANCELED = 2
  */
 public class OAuthUserSignInActivity : ComponentActivity() {
 
+    private var signOutRequest = false
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
-            // authorize URL should be a valid string since we are adding it in the ActivityResultContract
-            val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
-            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            authorizeUrl?.let {
-                launchCustomTabs(it, useIncognito)
-            }
+        val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
+        if (intent.hasExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE)) {
+            signOutRequest = true
+        }
+        url?.let {
+            launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
         }
     }
 
@@ -119,9 +124,21 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
         if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            // if we got here the user must have pressed the back button or the x button while the
-            // custom tab was visible - finish by cancelling OAuth sign in
-            setResult(RESULT_CODE_CANCELED, Intent())
+            if (signOutRequest) {
+                // As of now, we don't have a way to get the sign out response from the browser so we assume if the user
+                // returns to this activity by pressing the back button or the "x" button, the sign out was successful.
+                setResult(
+                    RESULT_CODE_SUCCESS,
+                    Intent().apply {
+                        putExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, true)
+                    }
+                )
+                signOutRequest = false
+            } else {
+                // if we got here the user must have pressed the back button or the x button while the
+                // custom tab was visible
+                setResult(RESULT_CODE_CANCELED, Intent())
+            }
             finish()
         }
     }
@@ -166,8 +183,8 @@ public class OAuthUserSignInActivity : ComponentActivity() {
     public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
+                putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, SIGN_IN)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
@@ -184,17 +201,17 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * An ActivityResultContract that takes a String as input and returns a nullable String as output.
      * The input string represents an IAP authorize URL, and the output string represents a redirect URI as
      * the result of an IAP sign in prompt, or null if the IAP sign in failed. This contract can be used to launch the
-     * [IapContract] for a result.
+     * [IapSigInContract] for a result.
      * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
      * for more details.
      *
      * @since 200.8.0
      */
-    public class IapContract : ActivityResultContract<String, String?>() {
+    public class IapSigInContract : ActivityResultContract<String, String?>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
+                putExtra(KEY_INTENT_EXTRA_URL, input)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, SIGN_IN)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
@@ -203,6 +220,29 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             } else {
                 null
             }
+        }
+    }
+
+    /**
+     * An ActivityResultContract that takes a String as input and returns a Boolean as output.
+     * The input string represents an IAP sign out URL, and the output boolean indicates whether the
+     * IAP sign out was successful or not. This contract can be used to launch the
+     * [IapSignOutContract] for a result.
+     *
+     * @since 200.8.0
+     */
+    public class IapSignOutContract : ActivityResultContract<String, Boolean>() {
+        override fun createIntent(context: Context, input: String): Intent =
+            Intent(context, OAuthUserSignInActivity::class.java).apply {
+                putExtra(KEY_INTENT_EXTRA_URL, input)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, SIGN_OUT)
+            }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): Boolean {
+            return if (resultCode == RESULT_CODE_SUCCESS)
+                intent?.getBooleanExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, false) ?: false
+            else
+                false
         }
     }
 }

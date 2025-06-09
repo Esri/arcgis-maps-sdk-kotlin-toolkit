@@ -24,7 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Tests the [IapAuthenticator] composable for launching a Custom Tab and handling redirects.
+ * Tests the [IapSignInAuthenticator] composable for launching a Custom Tab and handling redirects.
  *
  * @since 200.8.0
  */
@@ -34,7 +34,7 @@ class IapAuthenticatorTest {
     val composeTestRule = createComposeRule()
 
     /**
-     * Given an [IapAuthenticator] composable,
+     * Given an [IapSignInAuthenticator] composable,
      * When it is launched with a valid URL,
      * Then it should launch a Custom Tab with that URL.
      *
@@ -51,7 +51,7 @@ class IapAuthenticatorTest {
         val expectedRedirectUri = "kotlin-iap-test-1"
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
-            IapAuthenticator(
+            IapSignInAuthenticator(
                 authorizedUrl = "https://www.arcgis.com/index.html",
                 onComplete = { receivedRedirectUri = it },
                 onCancel = { cancellationHandled= true }
@@ -70,7 +70,7 @@ class IapAuthenticatorTest {
 
 
     /**
-     * Given an [IapAuthenticator] composable,
+     * Given an [IapSignInAuthenticator] composable,
      * When the browser is launched
      * And the user cancels the operation by pressing back,
      * Then it should handle cancellation correctly.
@@ -82,7 +82,7 @@ class IapAuthenticatorTest {
         var cancellationHandled = false
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
-            IapAuthenticator(
+            IapSignInAuthenticator(
                 authorizedUrl = "https://www.arcgis.com/index.html",
                 onComplete = { /* Handle success */ },
                 onCancel = { cancellationHandled = true }

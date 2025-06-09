@@ -96,14 +96,14 @@ internal fun OAuthAuthenticator(
  * @since 200.8.0
  */
 @Composable
-internal fun IapAuthenticator(
+internal fun IapSignInAuthenticator(
     authorizedUrl: String,
     onComplete : (String) -> Unit,
     onCancel: () -> Unit,
 ) {
     var hasLaunched by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapContract()
+        contract = OAuthUserSignInActivity.IapSigInContract()
     ) { redirectUrl ->
         if (!redirectUrl.isNullOrEmpty()) {
             onComplete(redirectUrl)
@@ -116,6 +116,31 @@ internal fun IapAuthenticator(
         if (!hasLaunched) {
             hasLaunched = true
             launcher.launch(authorizedUrl)
+        }
+    }
+}
+
+@Composable
+internal fun IAPSignOutAuthenticator(
+    iapSignOutUrl: String,
+    onCompleteSignOut: (Boolean) -> Unit,
+    onCancelSignOut: (Exception) -> Unit
+) {
+    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = OAuthUserSignInActivity.IapSignOutContract()
+    ) { res ->
+        if (res) {
+            onCompleteSignOut(true)
+        } else {
+            onCancelSignOut(Exception("IAP sign out cancelled"))
+        }
+    }
+
+    LaunchedEffect(iapSignOutUrl) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(iapSignOutUrl)
         }
     }
 }

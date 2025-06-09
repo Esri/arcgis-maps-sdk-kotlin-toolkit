@@ -25,6 +25,7 @@ import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import androidx.core.net.toUri
 
 /**
  * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
@@ -76,5 +77,5 @@ internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boole
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
-    }.launchUrl(this, Uri.parse(authorizeUrl))
+    }.launchUrl(this, authorizeUrl.toUri())
 }
