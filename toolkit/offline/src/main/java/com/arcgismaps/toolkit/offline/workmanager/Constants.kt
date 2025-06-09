@@ -28,7 +28,7 @@ internal const val mobileMapPackagePathKey = "MobileMapPackagePath"
 internal const val downloadJobJsonFile = "Job.json"
 
 // Offline URLs constants
-internal const val offlineManagerDir = "com.arcgismaps.toolkit.offline.offlineManager"
+internal const val offlineManagerDir = "com.arcgismaps.toolkit.offline"
 internal const val pendingMapInfoDir = "PendingMapInfo"
 internal const val pendingJobsDir = "PendingJobs"
 internal const val offlineMapAreasCacheDir = "OfflineMapAreasCache"

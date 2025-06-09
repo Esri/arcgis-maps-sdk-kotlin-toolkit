@@ -100,11 +100,11 @@ public class OfflineMapInfo private constructor(
     public companion object {
 
         /**
-         * Load an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
+         * Creates an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
          *
          * @since 200.8.0
          */
-        public fun makeFromDirectory(directory: File): OfflineMapInfo? {
+        public fun createFromDirectory(directory: File): OfflineMapInfo? {
             val infoFile = File(directory, offlineMapInfoJsonFile)
             if (!infoFile.exists()) {
                 return null

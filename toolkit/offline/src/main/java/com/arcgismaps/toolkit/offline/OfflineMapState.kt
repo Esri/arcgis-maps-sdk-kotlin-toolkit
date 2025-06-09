@@ -55,7 +55,7 @@ public class OfflineMapState(
         onSelectionChanged = onSelectionChanged
     )
 
-    private lateinit var _offlineManagerRepository: OfflineManagerRepository
+    private lateinit var _offlineRepository: OfflineRepository
 
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
@@ -96,9 +96,10 @@ public class OfflineMapState(
             throw it
         }
 
-        _offlineManagerRepository = OfflineManagerRepository(context)
+        _offlineRepository = OfflineRepository(context)
         offlineMapTask = OfflineMapTask(arcGISMap)
-        portalItem = (arcGISMap.item as? PortalItem) ?: throw IllegalStateException("Item not found")
+        portalItem = (arcGISMap.item as? PortalItem)
+            ?: throw IllegalStateException("Item not found")
 
         offlineMapTask.load().getOrElse {
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
@@ -114,13 +115,13 @@ public class OfflineMapState(
                         preplannedMapArea = mapArea,
                         offlineMapTask = offlineMapTask,
                         portalItem = portalItem,
-                        offlineManagerRepository = _offlineManagerRepository,
+                        offlineRepository = _offlineRepository,
                         onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
-                    val preplannedPath = _offlineManagerRepository.isPrePlannedAreaDownloaded(
-                        portalItem = portalItem,
-                        areaItem = mapArea.portalItem
+                    val preplannedPath = _offlineRepository.isPrePlannedAreaDownloaded(
+                        portalItemID = portalItem.itemId,
+                        preplannedMapAreaID = mapArea.portalItem.itemId
                     )
                     if (preplannedPath != null) {
                         preplannedMapAreaState.updateStatus(Status.Downloaded)
