@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package com.arcgismaps.toolkit.offline
+package com.arcgismaps.toolkit.offline.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
 import kotlinx.coroutines.CoroutineScope

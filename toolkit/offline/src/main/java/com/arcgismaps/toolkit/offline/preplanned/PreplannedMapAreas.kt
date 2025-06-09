@@ -62,7 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import androidx.compose.ui.graphics.RectangleShape
-import com.arcgismaps.toolkit.offline.MapAreaDetailsBottomSheet
+import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
