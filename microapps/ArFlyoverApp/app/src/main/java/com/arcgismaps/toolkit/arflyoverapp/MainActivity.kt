@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Check if Google Play Services for AR is installed on the device. If it's not installed, this
-     * method should get called twice: once to request the installation and once to ensure it was
+     * method must get called twice: once to request the installation and once to ensure it was
      * installed when the activity resumes.
      */
     private fun checkGooglePlayServicesArInstalled() {
