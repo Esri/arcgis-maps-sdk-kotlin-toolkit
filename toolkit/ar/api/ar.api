@@ -9,7 +9,7 @@ public final class com/arcgismaps/toolkit/ar/ArCoreResourceExhaustedException : 
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewKt {
-	public static final fun FlyoverSceneView-Gnm3GPA (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final fun FlyoverSceneView-H0GAfME (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;IIIIII)V
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy {
@@ -37,6 +37,41 @@ public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy {
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxyKt {
 	public static final fun rememberFlyoverSceneViewProxy (Lcom/arcgismaps/geometry/Point;DDLandroidx/compose/runtime/Composer;I)Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;
+}
+
+public abstract class com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$FailedToInitialize : com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus {
+	public static final field $stable I
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$Initialized : com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$Initializing : com/arcgismaps/toolkit/ar/FlyoverSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewStatusKt {
+	public static final fun rememberFlyoverSceneViewStatus (Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/MutableState;
 }
 
 public final class com/arcgismaps/toolkit/ar/TableTopSceneViewKt {
