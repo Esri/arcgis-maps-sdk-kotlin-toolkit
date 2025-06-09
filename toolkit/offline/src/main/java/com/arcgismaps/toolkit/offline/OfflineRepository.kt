@@ -30,7 +30,6 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
-import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs.portalItemDirectory
 import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import com.arcgismaps.toolkit.offline.workmanager.downloadJobJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
@@ -200,7 +199,7 @@ public class OfflineRepository(private val context: Context) {
         preplannedMapAreaID: String
     ): String? {
         val destDir = File(
-            File(portalItemDirectory(context, portalItemID), preplannedMapAreas),
+            File(OfflineURLs.portalItemDirectory(context, portalItemID), preplannedMapAreas),
             preplannedMapAreaID
         )
         return if (destDir.exists())
