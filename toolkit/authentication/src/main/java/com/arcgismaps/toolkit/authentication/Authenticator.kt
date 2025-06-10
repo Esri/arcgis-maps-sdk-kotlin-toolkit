@@ -141,6 +141,14 @@ private fun AuthenticatorDelegate(
         )
     }
 
+    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
+        IapSignOutAuthenticator(
+            iapSignOutUrl = it.signOutUrl,
+            onCompleteSignOut = it::complete,
+            onCancelSignOut = it::cancel
+        )
+    }
+
     val pendingServerTrustChallenge =
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 

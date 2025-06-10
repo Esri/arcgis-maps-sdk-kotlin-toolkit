@@ -121,7 +121,7 @@ internal fun IapSignInAuthenticator(
 }
 
 @Composable
-internal fun IAPSignOutAuthenticator(
+internal fun IapSignOutAuthenticator(
     iapSignOutUrl: String,
     onCompleteSignOut: (Boolean) -> Unit,
     onCancelSignOut: (Exception) -> Unit

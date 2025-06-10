@@ -25,10 +25,12 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeType
+import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.CertificateCredential
 import com.arcgismaps.httpcore.authentication.IapConfiguration
 import com.arcgismaps.httpcore.authentication.IapCredential
 import com.arcgismaps.httpcore.authentication.IapSignIn
+import com.arcgismaps.httpcore.authentication.IapSignOut
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
@@ -39,7 +41,6 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -90,6 +91,12 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     public val pendingIapSignIn: StateFlow<IapSignIn?>
 
     /**
+     * The current [IapSignOut] awaiting completion. Use this to complete the IAP sign out challenge.
+     * @since 200.8.0
+     */
+    public val pendingIapSignOut: StateFlow<IapSignOut?>
+
+    /**
      * The current [ServerTrustChallenge] awaiting completion. Use this to trust or distrust a server trust challenge.
      *
      * @since 200.2.0
@@ -126,6 +133,15 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public fun dismissAll()
+
+    /**
+     * Revokes OAuth tokens and all credentials from the [AuthenticationManager.arcGISCredentialStore]
+     * and [AuthenticationManager.networkCredentialStore]. If an IAP credential exists in
+     * the [AuthenticationManager.arcGISCredentialStore], it will display a custom tab to invalidate the IAP session.
+     *
+     * @since 200.8.0
+     */
+    public suspend fun signOut()
 }
 
 /**
@@ -143,6 +159,9 @@ private class AuthenticatorStateImpl(
 
     private val _pendingIapSignIn = MutableStateFlow<IapSignIn?>(null)
     override val pendingIapSignIn = _pendingIapSignIn.asStateFlow()
+
+    private val _pendingIapSignOut = MutableStateFlow<IapSignOut?>(null)
+    override val pendingIapSignOut = _pendingIapSignOut.asStateFlow()
 
     private val _pendingOAuthUserSignIn = MutableStateFlow<OAuthUserSignIn?>(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
@@ -167,9 +186,10 @@ private class AuthenticatorStateImpl(
         pendingUsernamePasswordChallenge,
         pendingClientCertificateChallenge,
         pendingServerTrustChallenge,
+        pendingIapSignOut,
         pendingIapSignIn
-    ) { oAuth, usernamePassword, clientCert, serverTrust, iap ->
-        listOf(oAuth, usernamePassword, clientCert, serverTrust, iap).any { it != null }
+    ) { values ->
+        values.any { it != null }
     }
 
     override fun dismissAll() {
@@ -178,6 +198,7 @@ private class AuthenticatorStateImpl(
         pendingClientCertificateChallenge.value?.onCancel?.invoke()
         pendingServerTrustChallenge.value?.distrust()
         pendingIapSignIn.value?.cancel()
+        pendingIapSignOut.value?.cancel(null)
     }
 
     init {
@@ -218,6 +239,26 @@ private class AuthenticatorStateImpl(
         } else {
             handleArcGISTokenChallenge(challenge)
         }
+    }
+
+    override suspend fun signOut() {
+        val arcGISCredentialStore = ArcGISEnvironment.authenticationManager.arcGISCredentialStore
+        val networkCredentialStore = ArcGISEnvironment.authenticationManager.networkCredentialStore
+
+        arcGISCredentialStore.getCredentials().forEach {
+            when {
+                it is OAuthUserCredential -> {
+                    it.revokeToken()
+                }
+                it is IapCredential -> {
+                    it.invalidate { iapSignOut ->
+                        _pendingIapSignOut.value = iapSignOut
+                    }
+                }
+            }
+        }
+        arcGISCredentialStore.removeAll()
+        networkCredentialStore.removeAll()
     }
 
     /**
@@ -311,7 +352,6 @@ private class AuthenticatorStateImpl(
      * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
      * @since 200.2.0
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->

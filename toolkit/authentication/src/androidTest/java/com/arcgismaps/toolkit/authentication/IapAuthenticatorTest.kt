@@ -98,7 +98,7 @@ class IapAuthenticatorTest {
     }
 
     /**
-     * Given an [IAPSignOutAuthenticator] composable,
+     * Given an [IapSignOutAuthenticator] composable,
      * When it is launched with a sign-out URL,
      * And the user presses back,
      * Then it should complete the sign-out process without cancellation.
@@ -112,7 +112,7 @@ class IapAuthenticatorTest {
         val expectedSignOutUrl = "https://www.google.com/signout"
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
-            IAPSignOutAuthenticator(
+            IapSignOutAuthenticator(
                 iapSignOutUrl = expectedSignOutUrl,
                 onCompleteSignOut = { signOutCompleted = it },
                 onCancelSignOut = { signOutCancelled = true }
