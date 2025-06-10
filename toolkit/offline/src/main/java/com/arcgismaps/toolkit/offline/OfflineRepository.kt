@@ -184,14 +184,13 @@ public class OfflineRepository(private val context: Context) {
         val pendingInfoFile = File(pendingDir, offlineMapInfoJsonFile).takeIf { it.exists() }
             ?: return
         val pendingThumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
-        // do not overwrite map info if it already exists
-        val destInfoFile = File(destDir, offlineMapInfoJsonFile).takeIf { it.exists() }
-            ?: return
-        val destThumbnailFile = File(destDir, offlineMapInfoThumbnailFile)
+        // null if map info file already exists to prevent overwrite
+        val destInfoFile = File(destDir, offlineMapInfoJsonFile).takeIf { !it.exists() }
+        val destThumbnailFile = File(destDir, offlineMapInfoThumbnailFile).takeIf { !it.exists() }
         // copy pending map info to destination
-        pendingInfoFile.copyRecursively(destInfoFile)
+        destInfoFile?.let { pendingInfoFile.copyRecursively(it) }
         // copy map info thumbnail if pending thumbnail file exists
-        if (pendingThumbnailFile.exists()) {
+        if (pendingThumbnailFile.exists() && destThumbnailFile != null) {
             pendingThumbnailFile.copyRecursively(destThumbnailFile)
         }
         pendingDir.deleteRecursively()
