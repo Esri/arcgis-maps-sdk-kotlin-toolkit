@@ -96,4 +96,36 @@ class IapAuthenticatorTest {
         // Verify that the cancellation was handled
         assertThat(cancellationHandled).isTrue()
     }
+
+    /**
+     * Given an [IAPSignOutAuthenticator] composable,
+     * When it is launched with a sign-out URL,
+     * And the user presses back,
+     * Then it should complete the sign-out process without cancellation.
+     *
+     * @since 200.8.0
+     */
+    @Test
+    fun verifyIapSignOutAuthenticatorCompletesOnBackPress() {
+        var signOutCompleted = false
+        var signOutCancelled = false
+        val expectedSignOutUrl = "https://www.google.com/signout"
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        composeTestRule.setContent {
+            IAPSignOutAuthenticator(
+                iapSignOutUrl = expectedSignOutUrl,
+                onCompleteSignOut = { signOutCompleted = it },
+                onCancelSignOut = { signOutCancelled = true }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        // Verify that the Custom Tab is launched with the correct URL
+        uiDevice.awaitViewVisible("com.android.chrome")
+        uiDevice.pressBack()
+        composeTestRule.waitForIdle()
+        // Verify that the sign out was completed
+        assertThat(signOutCompleted).isTrue()
+        assertThat(signOutCancelled).isFalse()
+    }
 }

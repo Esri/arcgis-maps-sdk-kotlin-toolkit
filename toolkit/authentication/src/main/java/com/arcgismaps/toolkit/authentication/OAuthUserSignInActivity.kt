@@ -104,7 +104,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
-        if (intent.hasExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE)) {
+        if (intent.getStringExtra(KEY_INTENT_EXTRA_PROMPT_TYPE) == SIGN_OUT) {
             signOutRequest = true
         }
         url?.let {
