@@ -108,6 +108,7 @@ import java.time.Instant
  * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
+ * @param content the content of the FlyoverSceneView.
  *
  * @since 200.8.0
  */
@@ -148,7 +149,8 @@ public fun FlyoverSceneView(
     onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
-    onPan: ((PanChangeEvent) -> Unit)? = null
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    content: (@Composable FlyoverSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberFlyoverSceneViewStatus()
 
@@ -169,17 +171,17 @@ public fun FlyoverSceneView(
     var arCoreInstalled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            initializationStatus.update(
-                FlyoverSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
-                onInitializationStatusChanged
-            )
-        } else {
+//        val arCoreAvailability = checkArCoreAvailability(context)
+//        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+//            initializationStatus.update(
+//                FlyoverSceneViewStatus.FailedToInitialize(
+//                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
+//                ),
+//                onInitializationStatusChanged
+//            )
+//        } else {
             arCoreInstalled = true
-        }
+//        }
     }
 
     if (!cameraPermissionGranted) {
@@ -263,6 +265,9 @@ public fun FlyoverSceneView(
         onDoubleTap = onDoubleTap,
         onLongPress = onLongPress,
         onTwoPointerTap = onTwoPointerTap,
-        onPan = onPan
+        onPan = onPan,
+        content = {
+            content?.invoke(FlyoverSceneViewScope(this))
+        }
     )
 }
