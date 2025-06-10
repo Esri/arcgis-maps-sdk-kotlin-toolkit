@@ -96,14 +96,14 @@ internal fun OAuthAuthenticator(
  * @since 200.8.0
  */
 @Composable
-internal fun IapAuthenticator(
+internal fun IapSignInAuthenticator(
     authorizedUrl: String,
     onComplete : (String) -> Unit,
     onCancel: () -> Unit,
 ) {
     var hasLaunched by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapContract()
+        contract = OAuthUserSignInActivity.IapSignInContract()
     ) { redirectUrl ->
         if (!redirectUrl.isNullOrEmpty()) {
             onComplete(redirectUrl)
