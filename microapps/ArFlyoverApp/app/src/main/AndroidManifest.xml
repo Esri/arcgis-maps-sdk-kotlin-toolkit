@@ -51,6 +51,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
+             to be installed, as the app does not include any non-AR features. -->
+        <meta-data android:name="com.google.ar.core" android:value="required" />
     </application>
 
 </manifest>
