@@ -171,17 +171,17 @@ public fun FlyoverSceneView(
     var arCoreInstalled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-//        val arCoreAvailability = checkArCoreAvailability(context)
-//        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-//            initializationStatus.update(
-//                FlyoverSceneViewStatus.FailedToInitialize(
-//                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-//                ),
-//                onInitializationStatusChanged
-//            )
-//        } else {
+        val arCoreAvailability = checkArCoreAvailability(context)
+        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+            initializationStatus.update(
+                FlyoverSceneViewStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
+                ),
+                onInitializationStatusChanged
+            )
+        } else {
             arCoreInstalled = true
-//        }
+        }
     }
 
     if (!cameraPermissionGranted) {
