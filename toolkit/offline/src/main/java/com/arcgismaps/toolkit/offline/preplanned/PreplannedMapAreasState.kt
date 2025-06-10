@@ -233,9 +233,10 @@ internal class PreplannedMapAreaState(
                     portalItemID = portalItem.itemId
                 )
             }
-            scope = CoroutineScope(Dispatchers.IO)
-            scope.launch {
-               initialize()
+            val localScope = CoroutineScope(Dispatchers.IO)
+            localScope.launch {
+                initialize()
+                localScope.cancel()
             }
         } else {
             Log.e(TAG, "Failed to delete preplanned map area: ${mobileMapPackage.path}")
