@@ -142,7 +142,7 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
     }
 
     /**
-     * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
+     * True if continuous panning across the international date line is enabled in the FlyoverSceneView false otherwise.
      * A null value represents that it is currently undetermined.
      *
      * @since 200.8.0
@@ -151,7 +151,7 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         get() = sceneViewProxy.isWrapAroundEnabled
 
     /**
-     * Exports an image snapshot of the current WorldScaleSceneView.
+     * Exports an image snapshot of the current FlyoverSceneView.
      *
      * @return A [Result] containing a [BitmapDrawable], or failure
      * @since 200.8.0
@@ -311,7 +311,7 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's WorldScaleSceneView is not
+     * @return the [LayerViewState] of the provided layer, or null if this proxy's FlyoverSceneView is not
      * part of the composition
      * @since 200.8.0
      */
@@ -319,14 +319,14 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         sceneViewProxy.getLayerViewState(layer)
 
     /**
-     * Converts a location in map coordinates to a point in screen coordinates relative to the upper-left corner of the WorldScaleSceneView.
+     * Converts a location in map coordinates to a point in screen coordinates relative to the upper-left corner of the FlyoverSceneView.
      *
      * The screen coordinates are in device-independent pixels (DIP) relative to the upper-left corner of the scene
      * view at position 0,0. The [LocationToScreenResult] indicates whether the screen coordinates are visible
      * in the scene view. They can be invisible if they are on the other side of the globe, not in the
      * [com.arcgismaps.mapping.Viewpoint], or are blocked by the base surface or elevation layer.
      *
-     * To call this method, assign a scene to the WorldScaleSceneView, ensure that it is loaded and the draw status is
+     * To call this method, assign a scene to the FlyoverSceneView ensure that it is loaded and the draw status is
      * [DrawStatus.Completed].
      *
      * @param point a location defined within the spatial reference of the scene view
@@ -343,7 +343,7 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
      * values are approximated, and as the distance between the camera and the surface increases, the precision of
      * the elevation value decreases.
      *
-     * To call this method, assign a scene to the WorldScaleSceneView, ensure that it is loaded and the draw status is
+     * To call this method, assign a scene to the FlyoverSceneView ensure that it is loaded and the draw status is
      * [DrawStatus.Completed].
      *
      * @param screenCoordinate a pixel coordinate relative to the upper-left corner of the screen.
@@ -354,12 +354,12 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         sceneViewProxy.screenToLocation(screenCoordinate)
 
     /**
-     * Converts a screen coordinate (in pixels) to a point on the base surface of the scene within the WorldScaleSceneView's spatial reference.
+     * Converts a screen coordinate (in pixels) to a point on the base surface of the scene within the FlyoverSceneView's spatial reference.
      *
-     * To call this method, assign a scene to the WorldScaleSceneView, ensure that it is loaded and the draw status is
+     * To call this method, assign a scene to the FlyoverSceneView ensure that it is loaded and the draw status is
      * [DrawStatus.Completed].
      *
-     * May return null in some circumstances, such as if the WorldScaleSceneView's spatial reference has not been determined yet.
+     * May return null in some circumstances, such as if the FlyoverSceneView's spatial reference has not been determined yet.
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined
@@ -369,7 +369,7 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         sceneViewProxy.screenToBaseSurface(screenCoordinate)
 
     /**
-     * The horizontal field of view of the WorldScaleSceneView in degrees.
+     * The horizontal field of view of the FlyoverSceneView in degrees.
      *
      * The value of the field of view is influenced by the size and orientation of the device screen.
      * A landscape orientation has a larger field of view value than a portrait orientation.
