@@ -60,7 +60,7 @@ public sealed class FlyoverSceneViewStatus private constructor() {
 
 /**
  * Remembers a [MutableState] of [FlyoverSceneViewStatus] that can be used to track the
- * initialization status of a [TableTopSceneView]. The initial value of the [MutableState] is
+ * initialization status of a [FlyoverSceneView]. The initial value of the [MutableState] is
  * [FlyoverSceneViewStatus.Initializing].
  *
  * @since 200.8.0
