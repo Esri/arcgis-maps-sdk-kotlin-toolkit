@@ -115,7 +115,8 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
     }
 
     /**
-     * Sets the camera location and heading.
+     * Sets the camera location and heading and resets the AR session to use those values as the
+     * camera origin.
      *
      * @param location the camera's origin location.
      * @param heading the camera heading.
