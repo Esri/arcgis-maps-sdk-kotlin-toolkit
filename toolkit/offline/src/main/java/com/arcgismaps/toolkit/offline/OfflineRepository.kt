@@ -71,7 +71,9 @@ public class OfflineRepository(private val context: Context) {
      * The info will stay in that folder until the job completes.
      */
     private fun savePendingMapInfo(portalItem: PortalItem) {
-        val pendingMapInfoDir = OfflineURLs.pendingMapInfoDirectory(context, portalItem.itemId)
+        val pendingMapInfoDir = File(
+            OfflineURLs.pendingMapInfoDirectoryPath(context, portalItem.itemId)
+        )
         if (!OfflineMapInfo.isSerializedFilePresent(pendingMapInfoDir)) {
             val info = OfflineMapInfo(portalItem)
             info.saveToDirectory(pendingMapInfoDir)
@@ -91,7 +93,7 @@ public class OfflineRepository(private val context: Context) {
         preplannedMapAreaID: String
     ): File {
         return File(
-            OfflineURLs.pendingJobInfoDirectory(context, portalItemID),
+            OfflineURLs.pendingJobInfoDirectoryPath(context, portalItemID),
             preplannedMapAreaID
         ).also { it.mkdirs() }
     }
@@ -125,7 +127,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
-        val baseDir = File(OfflineURLs.offlineRepositoryDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
             return offlineMapInfos
@@ -154,7 +156,7 @@ public class OfflineRepository(private val context: Context) {
         val areaItemID = cacheAreaDir.name
         val portalDir = cacheAreaDir.parentFile
         val portalItemID = portalDir?.name.toString()
-        val destDirPath = OfflineURLs.prePlannedDirectory(
+        val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
             preplannedMapAreaID = areaItemID
@@ -178,7 +180,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
-        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, portalItemID)
+        val pendingDir = File(OfflineURLs.pendingMapInfoDirectoryPath(context, portalItemID))
         val destDir = File(OfflineURLs.portalItemDirectoryPath(context, portalItemID))
         // use pending map info file only if it exists
         val pendingInfoFile = File(pendingDir, offlineMapInfoJsonFile).takeIf { it.exists() }

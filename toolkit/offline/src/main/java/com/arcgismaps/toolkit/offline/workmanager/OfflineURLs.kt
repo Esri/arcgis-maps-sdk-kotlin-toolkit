@@ -52,14 +52,14 @@ internal object OfflineURLs {
     }
 
     /**
-     * Returns the path to the offline manager directory,
+     * Returns the path to the offline repository directory,
      * creates the directory if it doesn’t already exist:
      *
      * - `<your-app-files-dir>/com.esri.toolkit.offline`
      *
      * @since 200.8.0
      */
-    internal fun offlineRepositoryDirectory(context: Context): String {
+    internal fun offlineRepositoryDirectoryPath(context: Context): String {
         val dir = File(getExternalDirPath(context), offlineRepositoryDir)
             .makeDirectoryIfItDoesNotExist()
         return dir.absolutePath
@@ -74,7 +74,7 @@ internal object OfflineURLs {
      * @since 200.8.0
      */
     internal fun portalItemDirectoryPath(context: Context, portalItemID: String): String {
-        val base = File(offlineRepositoryDirectory(context))
+        val base = File(offlineRepositoryDirectoryPath(context))
         val itemDir = File(base, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemDir.absolutePath
     }
@@ -91,7 +91,7 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun prePlannedDirectory(
+    internal fun prePlannedDirectoryPath(
         context: Context,
         portalItemID: String,
         preplannedMapAreaID: String? = null
@@ -119,7 +119,7 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun onDemandDirectory(
+    internal fun onDemandDirectoryPath(
         context: Context,
         portalItemID: String,
         onDemandMapAreaID: String? = null
@@ -142,11 +142,11 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): File {
+    internal fun pendingMapInfoDirectoryPath(context: Context, portalItemID: String): String {
         val caches = getOfflineCacheDirPath(context)
         val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
-        return itemPendingDir
+        return itemPendingDir.absolutePath
     }
 
     /**
@@ -157,7 +157,7 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun pendingJobInfoDirectory(context: Context, portalItemID: String): String {
+    internal fun pendingJobInfoDirectoryPath(context: Context, portalItemID: String): String {
         val caches = getOfflineCacheDirPath(context)
         val pendingBase = File(caches, pendingJobsDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
