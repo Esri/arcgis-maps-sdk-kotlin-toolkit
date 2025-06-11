@@ -93,31 +93,31 @@ internal fun PreplannedMapAreas(
 
     // Show the modal bottom sheet if needed
     if (showSheet && showDetailsState != null) {
-            MapAreaDetailsBottomSheet(
-                showSheet = true,
-                sheetState = sheetState,
-                scope = scope,
-                onDismiss = { showSheet = false },
-                thumbnail = showDetailsState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
-                title = showDetailsState.preplannedMapArea.portalItem.title,
-                description = showDetailsState.preplannedMapArea.portalItem.description,
-                size = showDetailsState.directorySize,
-                isAvailableToDownload = showDetailsState.status.allowsDownload,
-                onStartDownload = {
-                    showDetailsState.downloadPreplannedMapArea()
-                    scope
-                        .launch { sheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showSheet = false
-                            }
+        MapAreaDetailsBottomSheet(
+            showSheet = true,
+            sheetState = sheetState,
+            scope = scope,
+            onDismiss = { showSheet = false },
+            thumbnail = showDetailsState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+            title = showDetailsState.preplannedMapArea.portalItem.title,
+            description = showDetailsState.preplannedMapArea.portalItem.description,
+            size = showDetailsState.directorySize,
+            isAvailableToDownload = showDetailsState.status.allowsDownload,
+            onStartDownload = {
+                showDetailsState.downloadPreplannedMapArea()
+                scope
+                    .launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showSheet = false
                         }
-                },
-                isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
-                onDeleteDownload = {
-                    showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
-                }
-            )
+                    }
+            },
+            isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
+            onDeleteDownload = {
+                showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+            }
+        )
     }
 
     Column(

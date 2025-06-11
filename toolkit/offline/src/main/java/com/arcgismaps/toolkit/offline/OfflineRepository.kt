@@ -68,7 +68,7 @@ public class OfflineRepository(private val context: Context) {
     }
 
     /**
-     * Removes all the offlineMapInfos and downloads from the disk.
+     * Removes all downloads for all offline maps from the disk and clears offline map infos.
      *
      * @since 200.8.0
      */
@@ -198,8 +198,13 @@ public class OfflineRepository(private val context: Context) {
         return destDir
     }
 
-    internal fun deleteContentsForDirectory(offlineMapDirectoryName: String): Boolean {
-        return File(offlineMapDirectoryName).deleteRecursively()
+    /**
+     * Delete the file at the given [offlineMapDirectoryPath].
+     *
+     * @since 200.8.0
+     */
+    internal fun deleteContentsForDirectory(offlineMapDirectoryPath: String): Boolean {
+        return File(offlineMapDirectoryPath).deleteRecursively()
     }
 
     /**
