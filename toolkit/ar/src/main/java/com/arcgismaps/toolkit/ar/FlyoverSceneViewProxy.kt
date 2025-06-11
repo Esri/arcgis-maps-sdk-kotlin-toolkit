@@ -40,18 +40,23 @@ import com.google.ar.core.Config
 /**
  * Create and remember a [FlyoverSceneViewProxy].
  *
+ * @param location the camera's origin location.
+ * @param heading the camera heading.
+ * @param translationFactor the translation factor that defines how much the scene view translates
+ * as the device moves.
+ *
  * @since 200.8.0
  */
 @Composable
 public fun rememberFlyoverSceneViewProxy(
-    initialLocation: Point,
-    initialHeading: Double,
+    location: Point,
+    heading: Double,
     translationFactor: Double
 ): FlyoverSceneViewProxy {
     return remember {
         FlyoverSceneViewProxy(
-            location = initialLocation,
-            heading = initialHeading,
+            location = location,
+            heading = heading,
             translationFactor = translationFactor
         )
     }
@@ -75,8 +80,8 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
      * When instantiating this class from a composable, use [rememberFlyoverSceneViewProxy] to
      * automatically remember the proxy.
      *
-     * @param location the starting location
-     * @param heading the starting heading
+     * @param location the camera's origin location.
+     * @param heading the camera heading.
      * @param translationFactor the translation factor that defines how much the scene view translates
      * as the device moves.
      *
@@ -112,8 +117,8 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
     /**
      * Sets the camera location and heading.
      *
-     * @param location the starting location
-     * @param heading the starting heading
+     * @param location the camera's origin location.
+     * @param heading the camera heading.
      *
      * @since 200.8.0
      */
