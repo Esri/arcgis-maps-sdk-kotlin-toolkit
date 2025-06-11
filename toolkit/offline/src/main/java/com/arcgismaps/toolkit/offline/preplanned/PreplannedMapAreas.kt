@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -83,7 +84,7 @@ internal fun PreplannedMapAreas(
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
-    val showDetailsState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
+    val selectedPreplannedMapAreaState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
         ?.let { preplannedMapAreaStates[it] }
 
     val sheetState = rememberModalBottomSheetState(
@@ -92,19 +93,19 @@ internal fun PreplannedMapAreas(
     val scope = rememberCoroutineScope()
 
     // Show the modal bottom sheet if needed
-    if (showSheet && showDetailsState != null) {
+    if (showSheet && selectedPreplannedMapAreaState != null) {
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
-            thumbnail = showDetailsState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
-            title = showDetailsState.preplannedMapArea.portalItem.title,
-            description = showDetailsState.preplannedMapArea.portalItem.description,
-            size = showDetailsState.directorySize,
-            isAvailableToDownload = showDetailsState.status.allowsDownload,
+            thumbnail = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+            title = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.title,
+            description = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.description,
+            size = selectedPreplannedMapAreaState.directorySize,
+            isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
             onStartDownload = {
-                showDetailsState.downloadPreplannedMapArea()
+                selectedPreplannedMapAreaState.downloadPreplannedMapArea()
                 scope
                     .launch { sheetState.hide() }
                     .invokeOnCompletion {
@@ -113,9 +114,9 @@ internal fun PreplannedMapAreas(
                         }
                     }
             },
-            isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
+            isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
-                showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+                selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
             }
         )
     }
@@ -140,15 +141,23 @@ internal fun PreplannedMapAreas(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
+                    // Display the thumbnail image if available, otherwise show a placeholder icon
+                    val thumbnail = state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()
+                    if (thumbnail != null) {
                         Image(
-                            bitmap = it,
+                            bitmap = thumbnail,
                             contentDescription = stringResource(R.string.thumbnail_description),
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
                                 .size(64.dp) // Ensures the image is square
                                 .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
                             contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.BrokenImage,
+                            contentDescription = stringResource(id = R.string.no_image_available),
+                            modifier = Modifier.size(84.dp)
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {

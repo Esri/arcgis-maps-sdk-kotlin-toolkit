@@ -40,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
@@ -154,7 +156,10 @@ internal fun MapAreaDetailsScreen(
         Spacer(modifier = Modifier.height(4.dp))
         Box(
             modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(10.dp))
+                .background(
+                    MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(10.dp)
+                )
                 .padding(12.dp)
                 .fillMaxWidth()
         ) {
@@ -176,6 +181,25 @@ internal fun MapAreaDetailsScreen(
                     Text(stringResource(id = R.string.remove_download))
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMapAreaDetailsScreen() {
+    MaterialTheme {
+        Surface {
+            MapAreaDetailsScreen(
+                thumbnail = null,
+                title = "City Hall Area",
+                description = "A map that contains stormwater network within...",
+                size = 40000,
+                isAvailableToDownload = false,
+                isDeletable = true,
+                onStartDownload = { },
+                onDeleteDownload = { }
+            )
         }
     }
 }
