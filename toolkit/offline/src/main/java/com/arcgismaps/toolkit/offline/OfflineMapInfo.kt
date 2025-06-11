@@ -36,7 +36,7 @@ import java.io.FileOutputStream
  */
 public class OfflineMapInfo private constructor(
     private val info: CodableInfo,
-    public val thumbnail: Bitmap?
+    private val _thumbnail: Bitmap?
 ) {
 
     /**
@@ -56,7 +56,7 @@ public class OfflineMapInfo private constructor(
                 portalItemURL = itemUrl
             )
         },
-        thumbnail = runBlocking {
+        _thumbnail = runBlocking {
             portalItem.thumbnail?.let { loadableImage ->
                 runCatching { loadableImage.load() }
                 loadableImage.image?.bitmap
@@ -71,6 +71,14 @@ public class OfflineMapInfo private constructor(
      */
     public val id: String
         get() = info.portalItemID
+
+    /**
+     * The thumbnail of the portal item associated with the map.
+     *
+     * @since 200.8.0
+     */
+    public val thumbnail: Bitmap?
+        get() = _thumbnail
 
     /**
      * The title of the portal item associated with the map.
@@ -165,7 +173,7 @@ public class OfflineMapInfo private constructor(
             infoFile.writeText(jsonString, Charsets.UTF_8)
         }
 
-        thumbnail?.let { bmp ->
+        _thumbnail?.let { bmp ->
             val thumbFile = File(directory, offlineMapInfoThumbnailFile)
             runCatching {
                 FileOutputStream(thumbFile).use { out ->

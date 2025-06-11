@@ -52,15 +52,15 @@ internal object OfflineURLs {
     }
 
     /**
-     * Returns the path to the offline manager directory,
+     * Returns the path to the offline repository directory,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline`
      *
      * @since 200.8.0
      */
-    internal fun offlineManagerDirectory(context: Context): String {
-        val dir = File(getExternalDirPath(context), offlineManagerDir)
+    internal fun offlineRepositoryDirectoryPath(context: Context): String {
+        val dir = File(getExternalDirPath(context), offlineRepositoryDir)
             .makeDirectoryIfItDoesNotExist()
         return dir.absolutePath
     }
@@ -69,12 +69,12 @@ internal object OfflineURLs {
      * Returns the path to the web‐map directory for a specific portal item ID,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>`
      *
      * @since 200.8.0
      */
-    internal fun portalItemDirectory(context: Context, portalItemID: String): String {
-        val base = File(offlineManagerDirectory(context))
+    internal fun portalItemDirectoryPath(context: Context, portalItemID: String): String {
+        val base = File(offlineRepositoryDirectoryPath(context))
         val itemDir = File(base, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemDir.absolutePath
     }
@@ -83,20 +83,20 @@ internal object OfflineURLs {
      * Returns the path to the “Preplanned” subdirectory for a portal item,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/Preplanned/<preplannedMapAreaID>`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/Preplanned/<preplannedMapAreaID>`
      *
      * If [preplannedMapAreaID] is null:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/Preplanned`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/Preplanned`
      *
      * @since 200.8.0
      */
-    internal fun prePlannedDirectory(
+    internal fun prePlannedDirectoryPath(
         context: Context,
         portalItemID: String,
         preplannedMapAreaID: String? = null
     ): String {
-        val itemDir = File(portalItemDirectory(context, portalItemID))
+        val itemDir = File(portalItemDirectoryPath(context, portalItemID))
         val preplannedDir = File(itemDir, preplannedMapAreas).makeDirectoryIfItDoesNotExist()
         return if (preplannedMapAreaID != null) {
             val areaDir = File(preplannedDir, preplannedMapAreaID).makeDirectoryIfItDoesNotExist()
@@ -110,21 +110,21 @@ internal object OfflineURLs {
      * Returns the path to the “OnDemand” subdirectory for a portal item,
      * creates the directory if it doesn’t already exist:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/OnDemand/<onDemandMapAreaID>`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/OnDemand/<onDemandMapAreaID>`
      *
      *
      * If [onDemandMapAreaID] is null:
      *
-     * - `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/OnDemand`
+     * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/OnDemand`
      *
      * @since 200.8.0
      */
-    internal fun onDemandDirectory(
+    internal fun onDemandDirectoryPath(
         context: Context,
         portalItemID: String,
         onDemandMapAreaID: String? = null
     ): String {
-        val itemDir = File(portalItemDirectory(context, portalItemID))
+        val itemDir = File(portalItemDirectoryPath(context, portalItemID))
         val onDemandDir = File(itemDir, onDemandAreas).makeDirectoryIfItDoesNotExist()
         return if (onDemandMapAreaID != null) {
             val areaDir = File(onDemandDir, onDemandMapAreaID).makeDirectoryIfItDoesNotExist()
@@ -142,11 +142,11 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun pendingMapInfoDirectory(context: Context, portalItemID: String): File {
+    internal fun pendingMapInfoDirectoryPath(context: Context, portalItemID: String): String {
         val caches = getOfflineCacheDirPath(context)
         val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
-        return itemPendingDir
+        return itemPendingDir.absolutePath
     }
 
     /**
@@ -157,7 +157,7 @@ internal object OfflineURLs {
      *
      * @since 200.8.0
      */
-    internal fun pendingJobInfoDirectory(context: Context, portalItemID: String): String {
+    internal fun pendingJobInfoDirectoryPath(context: Context, portalItemID: String): String {
         val caches = getOfflineCacheDirPath(context)
         val pendingBase = File(caches, pendingJobsDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
