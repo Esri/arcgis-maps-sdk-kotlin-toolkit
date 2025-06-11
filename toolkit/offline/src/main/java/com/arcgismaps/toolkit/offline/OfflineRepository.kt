@@ -67,6 +67,35 @@ public class OfflineRepository(private val context: Context) {
     }
 
     /**
+     * Removes all the offlineMapInfos and downloads from the disk.
+     *
+     * @since 200.8.0
+     */
+    public fun removeAllDownloads() {
+        _offlineMapInfos.clear()
+        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        if (baseDir.exists()) {
+            baseDir.deleteRecursively()
+        }
+    }
+
+    /**
+     * Removes all downloads for a specific web map's [OfflineMapInfo].
+     * Deletes the corresponding directory and removes the info from the list.
+     *
+     * @param offlineMapInfo The [OfflineMapInfo] to remove.
+     * @since 200.8.0
+     */
+    public fun removeDownloadsForWebmap(offlineMapInfo: OfflineMapInfo) {
+        _offlineMapInfos.remove(offlineMapInfo)
+        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
+        if (offlineMapInfoDir.exists()) {
+            offlineMapInfoDir.deleteRecursively()
+        }
+    }
+
+    /**
      * Saves the [OfflineMapInfo] to the pending folder for a particular web map's portal item.
      * The info will stay in that folder until the job completes.
      */

@@ -31,6 +31,6 @@
     <string name="currently_open">Currently Open</string>
     <string name="description">Description</string>
     <string name="download_map_area">Download Map Area</string>
-    <string name="delete_map_area">Delete Map Area</string>
+    <string name="remove_download">Remove Download</string>
     <string name="no_image_available">No Image Available</string>
 </resources>

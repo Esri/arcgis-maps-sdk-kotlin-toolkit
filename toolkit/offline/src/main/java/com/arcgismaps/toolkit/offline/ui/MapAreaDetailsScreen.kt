@@ -173,7 +173,7 @@ internal fun MapAreaDetailsScreen(
             }
             if (isDeletable) {
                 Button(onClick = { onDeleteDownload() }) {
-                    Text(stringResource(id = R.string.delete_map_area))
+                    Text(stringResource(id = R.string.remove_download))
                 }
             }
         }
