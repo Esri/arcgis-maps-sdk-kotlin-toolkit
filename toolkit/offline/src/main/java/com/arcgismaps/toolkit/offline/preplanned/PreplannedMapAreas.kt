@@ -32,19 +32,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,17 +62,64 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import androidx.compose.ui.graphics.RectangleShape
+import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 
 /**
  * Displays a list of preplanned map areas.
  *
  * @since 200.8.0
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
+    var showSheet by rememberSaveable { mutableStateOf(false) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
+    val showDetailsState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
+        ?.let { preplannedMapAreaStates[it] }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val scope = rememberCoroutineScope()
+
+    // Show the modal bottom sheet if needed
+    if (showSheet && showDetailsState != null) {
+            MapAreaDetailsBottomSheet(
+                showSheet = true,
+                sheetState = sheetState,
+                scope = scope,
+                onDismiss = { showSheet = false },
+                thumbnail = showDetailsState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+                title = showDetailsState.preplannedMapArea.portalItem.title,
+                description = showDetailsState.preplannedMapArea.portalItem.description,
+                size = showDetailsState.directorySize,
+                isAvailableToDownload = showDetailsState.status.allowsDownload,
+                onStartDownload = {
+                    showDetailsState.downloadPreplannedMapArea()
+                    scope
+                        .launch { sheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showSheet = false
+                            }
+                        }
+                },
+                isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
+                onDeleteDownload = {
+                    showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+                }
+            )
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -80,8 +130,13 @@ internal fun PreplannedMapAreas(
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
-            items(preplannedMapAreaStates) { state ->
+            itemsIndexed(preplannedMapAreaStates) { index, state ->
                 Row(
+                    modifier = Modifier
+                        .clickable {
+                            selectedIndex = index
+                            showSheet = true
+                        },
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -113,7 +168,7 @@ internal fun PreplannedMapAreas(
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
                         // Display the status string
-                        val statusString = if (state.isSelected) {
+                        val statusString = if (state.isSelectedToOpen) {
                             stringResource(R.string.currently_open)
                         } else {
                             getPreplannedMapAreaStatusString(
@@ -145,10 +200,10 @@ internal fun PreplannedMapAreas(
                             }
                         }
                         state.status.isDownloaded -> {
-                            OpenButton(!state.isSelected) {
+                            OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
-                                preplannedMapAreaStates.forEach { it.setSelected(false) }
-                                state.setSelected(true)
+                                preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
+                                state.setSelectedToOpen(true)
                             }
                         }
                     }
