@@ -81,6 +81,15 @@ public class OfflineRepository(private val context: Context) {
     }
 
     /**
+     * Delete the file at the given [offlineMapDirectoryPath].
+     *
+     * @since 200.8.0
+     */
+    internal fun deleteContentsForDirectory(offlineMapDirectoryPath: String): Boolean {
+        return File(offlineMapDirectoryPath).deleteRecursively()
+    }
+
+    /**
      * Creates and returns the directory file for a pending preplanned job.
      *
      * @param portalItemID The ID of the portal item for which to create a pending job folder.
@@ -257,6 +266,50 @@ public class OfflineRepository(private val context: Context) {
             request = workRequest
         )
         return workRequest.id
+    }
+
+    /**
+     * Removes all the offlineMapInfos and downloads from the disk.
+     *
+     * @since 200.8.0
+     */
+    public fun removeAllDownloads() {
+        _offlineMapInfos.clear()
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        if (baseDir.exists()) {
+            baseDir.deleteRecursively()
+        }
+    }
+
+    /**
+     * Removes all downloads for a specific web map's [OfflineMapInfo].
+     * Deletes the corresponding directory and removes the info from the list.
+     *
+     * @param offlineMapInfo The [OfflineMapInfo] to remove.
+     * @since 200.8.0
+     */
+    public fun removeDownloadsForWebmap(offlineMapInfo: OfflineMapInfo) {
+        _offlineMapInfos.remove(offlineMapInfo)
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
+        if (offlineMapInfoDir.exists()) {
+            offlineMapInfoDir.deleteRecursively()
+        }
+    }
+
+    /**
+     * Removes the offline map information for a given portal item ID.
+     * Deletes the info.json and thumbnail file from the corresponding directory
+     * and removes the info from the list.
+     *
+     * @param portalItemID The ID of the portal item whose offline map info should be removed.
+     * @since 200.8.0
+     */
+    internal fun removeOfflineMapInfo(portalItemID: String) {
+        _offlineMapInfos.removeAll { it.id == portalItemID }
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        val offlineMapInfoDir = File(baseDir, portalItemID)
+        OfflineMapInfo.removeFromDirectory(offlineMapInfoDir)
     }
 
     /**
