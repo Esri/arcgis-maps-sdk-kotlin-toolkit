@@ -78,7 +78,6 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     /**
      * The [IapConfiguration] to use for any IAP sign ins. If null, IAP will not be used for any
      * [ArcGISAuthenticationChallenge] of type [ArcGISAuthenticationChallengeType.Iap].
-     * TODO: What happens if this is null and an IAP challenge is received?
      * @since 200.8.0
      */
     public var iapConfiguration: IapConfiguration?
@@ -311,7 +310,6 @@ private class AuthenticatorStateImpl(
      * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
      * @since 200.2.0
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
