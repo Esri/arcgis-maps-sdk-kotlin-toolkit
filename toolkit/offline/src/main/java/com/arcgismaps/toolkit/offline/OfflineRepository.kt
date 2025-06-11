@@ -18,8 +18,6 @@
 package com.arcgismaps.toolkit.offline
 
 import android.content.Context
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -74,7 +72,7 @@ public class OfflineRepository(private val context: Context) {
      */
     public fun removeAllDownloads() {
         _offlineMapInfos.clear()
-        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         if (baseDir.exists()) {
             baseDir.deleteRecursively()
         }
@@ -89,7 +87,7 @@ public class OfflineRepository(private val context: Context) {
      */
     public fun removeDownloadsForWebmap(offlineMapInfo: OfflineMapInfo) {
         _offlineMapInfos.remove(offlineMapInfo)
-        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
         if (offlineMapInfoDir.exists()) {
             offlineMapInfoDir.deleteRecursively()
@@ -101,7 +99,9 @@ public class OfflineRepository(private val context: Context) {
      * The info will stay in that folder until the job completes.
      */
     private fun savePendingMapInfo(portalItem: PortalItem) {
-        val pendingMapInfoDir = OfflineURLs.pendingMapInfoDirectory(context, portalItem.itemId)
+        val pendingMapInfoDir = File(
+            OfflineURLs.pendingMapInfoDirectoryPath(context, portalItem.itemId)
+        )
         if (!OfflineMapInfo.isSerializedFilePresent(pendingMapInfoDir)) {
             val info = OfflineMapInfo(portalItem)
             info.saveToDirectory(pendingMapInfoDir)
@@ -121,7 +121,7 @@ public class OfflineRepository(private val context: Context) {
         preplannedMapAreaID: String
     ): File {
         return File(
-            OfflineURLs.pendingJobInfoDirectory(context, portalItemID),
+            OfflineURLs.pendingJobInfoDirectoryPath(context, portalItemID),
             preplannedMapAreaID
         ).also { it.mkdirs() }
     }
@@ -155,7 +155,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
-        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
             return offlineMapInfos
@@ -173,8 +173,9 @@ public class OfflineRepository(private val context: Context) {
 
     /**
      * Returns the path to the final “Preplanned/<areaItemID>” folder.
-     * Moves all contents from: `<your-app-cache>/PendingJobs/<portalItemID>/<areaItemID>`
-     * into: `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/Preplanned/<areaItemID>`
+     *
+     * - Moves all contents from: `<your-app-files-dir>/PendingJobs/<portalItemID>/<areaItemID>`
+     * - into: `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/Preplanned/<areaItemID>`
      *
      * @since 200.8.0
      */
@@ -183,7 +184,7 @@ public class OfflineRepository(private val context: Context) {
         val areaItemID = cacheAreaDir.name
         val portalDir = cacheAreaDir.parentFile
         val portalItemID = portalDir?.name.toString()
-        val destDirPath = OfflineURLs.prePlannedDirectory(
+        val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
             preplannedMapAreaID = areaItemID
@@ -217,27 +218,34 @@ public class OfflineRepository(private val context: Context) {
      */
     internal fun removeOfflineMapInfo(portalItemID: String) {
         _offlineMapInfos.removeAll { it.id == portalItemID }
-        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, portalItemID)
         OfflineMapInfo.removeFromDirectory(offlineMapInfoDir)
     }
 
+    /**
+     * Moves [OfflineMapInfo] contents from the pending map info to its final destination.
+     *
+     * - Moves all info & thumbnail from: `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/`
+     * - into: `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/`.
+     *
+     * @since 200.8.0
+     */
     private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
-        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, portalItemID)
-        val infoFile = File(pendingDir, offlineMapInfoJsonFile)
-        val destDirPath = OfflineURLs.portalItemDirectory(
-            context = context,
-            portalItemID = portalItemID
-        )
-        if (infoFile.exists()) {
-            infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
-        }
-        val thumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
-        if (thumbnailFile.exists()) {
-            thumbnailFile.copyRecursively(
-                File(destDirPath, offlineMapInfoThumbnailFile),
-                overwrite = true
-            )
+        val pendingDir = File(OfflineURLs.pendingMapInfoDirectoryPath(context, portalItemID))
+        val destDir = File(OfflineURLs.portalItemDirectoryPath(context, portalItemID))
+        // use pending map info file only if it exists
+        val pendingInfoFile = File(pendingDir, offlineMapInfoJsonFile).takeIf { it.exists() }
+            ?: return
+        val pendingThumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
+        // null if map info file already exists to prevent overwrite
+        val destInfoFile = File(destDir, offlineMapInfoJsonFile).takeIf { !it.exists() }
+        val destThumbnailFile = File(destDir, offlineMapInfoThumbnailFile).takeIf { !it.exists() }
+        // copy pending map info to destination
+        destInfoFile?.let { pendingInfoFile.copyRecursively(it) }
+        // copy map info thumbnail if pending thumbnail file exists
+        if (pendingThumbnailFile.exists() && destThumbnailFile != null) {
+            pendingThumbnailFile.copyRecursively(destThumbnailFile)
         }
         pendingDir.deleteRecursively()
     }
@@ -255,7 +263,7 @@ public class OfflineRepository(private val context: Context) {
         preplannedMapAreaID: String
     ): String? {
         val destDir = File(
-            File(OfflineURLs.portalItemDirectory(context, portalItemID), preplannedMapAreas),
+            File(OfflineURLs.portalItemDirectoryPath(context, portalItemID), preplannedMapAreas),
             preplannedMapAreaID
         )
         return if (destDir.exists())
@@ -344,17 +352,20 @@ public class OfflineRepository(private val context: Context) {
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                                     mobileMapPackagePath = destDir.absolutePath
                                 )
-                                // create offline map information from local directory
-                                OfflineMapInfo.createFromDirectory(
-                                    directory = File(
-                                        OfflineURLs.portalItemDirectory(
-                                            context = context,
-                                            portalItemID = portalItem.itemId
+                                // skip adding map info if it already exists in the list
+                                if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
+                                    // create offline map information from local directory
+                                    OfflineMapInfo.createFromDirectory(
+                                        directory = File(
+                                            OfflineURLs.portalItemDirectoryPath(
+                                                context = context,
+                                                portalItemID = portalItem.itemId
+                                            )
                                         )
-                                    )
-                                )?.let {
-                                    // if non-null info was created, add it to the list
-                                    _offlineMapInfos.add(it)
+                                    )?.let {
+                                        // if non-null info was created, add it to the list
+                                        _offlineMapInfos.add(it)
+                                    }
                                 }
                             } ?: run {
                                 preplannedMapAreaState.updateStatus(
