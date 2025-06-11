@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.arflyoverapp.screens
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -105,13 +104,13 @@ fun MainScreen() {
     // Display FlyoverSceneView only if user has accepted the privacy info
     if (acceptedPrivacyInfo) {
         val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-            initialLocation = Point(
+            location = Point(
                 2.82407,
                 41.99101,
                 230.0,
                 SpatialReference.wgs84()
             ),
-            initialHeading = 160.0,
+            heading = 160.0,
             translationFactor = 1000.0
         )
 
