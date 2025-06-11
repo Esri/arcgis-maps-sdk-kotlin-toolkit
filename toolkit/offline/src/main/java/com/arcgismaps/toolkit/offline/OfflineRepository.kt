@@ -53,14 +53,14 @@ public class OfflineRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
-    private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
+    private var _offlineMapInfos: MutableList<OfflineMapInfo> = mutableListOf()
 
     /**
      * The portal item information for web maps that have downloaded map areas.
      *
      * @since 200.8.0
      */
-    public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos.toList()
+    public val offlineMapInfos: List<OfflineMapInfo> get() =  _offlineMapInfos.toList()
 
     init {
         _offlineMapInfos.addAll(loadOfflineMapInfos())

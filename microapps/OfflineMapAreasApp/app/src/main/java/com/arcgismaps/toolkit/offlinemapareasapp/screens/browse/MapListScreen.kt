@@ -106,8 +106,6 @@ fun MapListScreen(
     mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val offlineRepository = OfflineRepository(context)
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
     var showSignOutProgress by rememberSaveable { mutableStateOf(false) }
@@ -215,11 +213,7 @@ fun MapListScreen(
                     }
                 } else {
                     // Showing on device maps
-                    val offlineMapInfos = offlineRepository.offlineMapInfos
-                    OnDeviceMapInfo(
-                        offlineMapInfos = offlineMapInfos,
-                        offlineRepository = offlineRepository,
-                        onClick = { itemId -> onItemClick(itemId) })
+                    OnDeviceMapInfo(onClick = { itemId -> onItemClick(itemId) })
                 }
             }
         }
