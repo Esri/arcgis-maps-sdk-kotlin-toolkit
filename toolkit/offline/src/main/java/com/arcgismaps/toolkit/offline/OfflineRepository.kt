@@ -18,8 +18,6 @@
 package com.arcgismaps.toolkit.offline
 
 import android.content.Context
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -53,17 +51,47 @@ public class OfflineRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
-    private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
+    private var _offlineMapInfos: MutableList<OfflineMapInfo> = mutableListOf()
 
     /**
      * The portal item information for web maps that have downloaded map areas.
      *
      * @since 200.8.0
      */
-    public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos.toList()
+    public val offlineMapInfos: List<OfflineMapInfo>
+        get() = _offlineMapInfos.toList()
 
     init {
         _offlineMapInfos.addAll(loadOfflineMapInfos())
+    }
+
+    /**
+     * Removes all downloads for all offline maps from the disk and clears offline map infos.
+     *
+     * @since 200.8.0
+     */
+    public fun removeAllDownloads() {
+        _offlineMapInfos.clear()
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        if (baseDir.exists()) {
+            baseDir.deleteRecursively()
+        }
+    }
+
+    /**
+     * Removes all downloads for a specific web map's [OfflineMapInfo].
+     * Deletes the corresponding directory and removes the info from the list.
+     *
+     * @param offlineMapInfo The [OfflineMapInfo] to remove.
+     * @since 200.8.0
+     */
+    public fun removeDownloadsForWebmap(offlineMapInfo: OfflineMapInfo) {
+        _offlineMapInfos.remove(offlineMapInfo)
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
+        if (offlineMapInfoDir.exists()) {
+            offlineMapInfoDir.deleteRecursively()
+        }
     }
 
     /**
@@ -169,6 +197,30 @@ public class OfflineRepository(private val context: Context) {
         movePreplannedOfflineMapInfoToDestination(portalItemID)
         cacheAreaDir.deleteRecursively()
         return destDir
+    }
+
+    /**
+     * Delete the file at the given [offlineMapDirectoryPath].
+     *
+     * @since 200.8.0
+     */
+    internal fun deleteContentsForDirectory(offlineMapDirectoryPath: String): Boolean {
+        return File(offlineMapDirectoryPath).deleteRecursively()
+    }
+
+    /**
+     * Removes the offline map information for a given portal item ID.
+     * Deletes the info.json and thumbnail file from the corresponding directory
+     * and removes the info from the list.
+     *
+     * @param portalItemID The ID of the portal item whose offline map info should be removed.
+     * @since 200.8.0
+     */
+    internal fun removeOfflineMapInfo(portalItemID: String) {
+        _offlineMapInfos.removeAll { it.id == portalItemID }
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
+        val offlineMapInfoDir = File(baseDir, portalItemID)
+        OfflineMapInfo.removeFromDirectory(offlineMapInfoDir)
     }
 
     /**

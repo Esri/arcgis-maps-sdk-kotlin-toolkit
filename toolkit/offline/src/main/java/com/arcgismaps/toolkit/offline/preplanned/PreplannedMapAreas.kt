@@ -27,24 +27,30 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,17 +65,64 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import androidx.compose.ui.graphics.RectangleShape
+import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 
 /**
  * Displays a list of preplanned map areas.
  *
  * @since 200.8.0
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     modifier: Modifier
 ) {
+    var showSheet by rememberSaveable { mutableStateOf(false) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
+    val selectedPreplannedMapAreaState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
+        ?.let { preplannedMapAreaStates[it] }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val scope = rememberCoroutineScope()
+
+    // Show the modal bottom sheet if needed
+    if (showSheet && selectedPreplannedMapAreaState != null) {
+        MapAreaDetailsBottomSheet(
+            showSheet = true,
+            sheetState = sheetState,
+            scope = scope,
+            onDismiss = { showSheet = false },
+            thumbnail = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+            title = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.title,
+            description = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.description,
+            size = selectedPreplannedMapAreaState.directorySize,
+            isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
+            onStartDownload = {
+                selectedPreplannedMapAreaState.downloadPreplannedMapArea()
+                scope
+                    .launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showSheet = false
+                        }
+                    }
+            },
+            isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
+            onDeleteDownload = {
+                selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+            }
+        )
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -80,21 +133,41 @@ internal fun PreplannedMapAreas(
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
-            items(preplannedMapAreaStates) { state ->
+            itemsIndexed(preplannedMapAreaStates) { index, state ->
                 Row(
+                    modifier = Modifier
+                        .clickable {
+                            selectedIndex = index
+                            showSheet = true
+                        },
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
-                        Image(
-                            bitmap = it,
-                            contentDescription = stringResource(R.string.thumbnail_description),
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .size(64.dp) // Ensures the image is square
-                                .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
-                            contentScale = ContentScale.Crop
-                        )
+                    // Display the thumbnail image if available, otherwise show a placeholder icon
+                    val thumbnail = state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .size(64.dp) // Ensures the image is square
+                            .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
+                    ) {
+                        if (thumbnail != null) {
+                            Image(
+                                modifier = Modifier.fillMaxSize(),
+                                bitmap = thumbnail,
+                                contentDescription = stringResource(R.string.thumbnail_description),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier
+                                    .size(32.dp) // half the size of the image Box
+                                    .align(Alignment.Center),
+                                imageVector = Icons.Default.ImageNotSupported,
+                                contentDescription = stringResource(id = R.string.no_image_available),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         // Display the title with a maximum of one line
@@ -113,7 +186,7 @@ internal fun PreplannedMapAreas(
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
                         // Display the status string
-                        val statusString = if (state.isSelected) {
+                        val statusString = if (state.isSelectedToOpen) {
                             stringResource(R.string.currently_open)
                         } else {
                             getPreplannedMapAreaStatusString(
@@ -145,10 +218,10 @@ internal fun PreplannedMapAreas(
                             }
                         }
                         state.status.isDownloaded -> {
-                            OpenButton(!state.isSelected) {
+                            OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
-                                preplannedMapAreaStates.forEach { it.setSelected(false) }
-                                state.setSelected(true)
+                                preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
+                                state.setSelectedToOpen(true)
                             }
                         }
                     }

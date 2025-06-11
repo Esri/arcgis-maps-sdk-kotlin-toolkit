@@ -33,6 +33,7 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 import com.arcgismaps.toolkit.offline.OfflineRepository
@@ -62,10 +63,10 @@ internal class PreplannedMapAreaState(
     private lateinit var map: ArcGISMap
 
     // Enabled when a downloaded map is chosen to be displayed by pressing the "Open" button.
-    private var _isSelected by mutableStateOf(false)
-    internal val isSelected: Boolean
-        get() = _isSelected
-
+    private var _isSelectedToOpen by mutableStateOf(false)
+    internal val isSelectedToOpen: Boolean
+        get() = _isSelectedToOpen
+    
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
     internal val status: Status
@@ -74,6 +75,10 @@ internal class PreplannedMapAreaState(
     // The download progress of the preplanned map area.
     private var _downloadProgress: MutableState<Int> = mutableIntStateOf(0)
     internal val downloadProgress: State<Int> = _downloadProgress
+
+    private var _directorySize by mutableIntStateOf(0)
+    internal val directorySize: Int
+        get() = _directorySize
 
     private lateinit var scope: CoroutineScope
 
@@ -208,6 +213,37 @@ internal class PreplannedMapAreaState(
     }
 
     /**
+     * Removes the downloaded preplanned map area from the device.
+     *
+     * This function deletes the contents of the directory associated with the preplanned map area
+     * and updates the status to reflect that the area is no longer loaded. If specified, it also
+     * removes the offline map information from the repository.
+     *
+     * @param shouldRemoveOfflineMapInfo A lambda function that determines whether to remove offline map info.
+     *
+     * @since 200.8.0
+     */
+    internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
+        if (offlineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
+            Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
+            // Reset the status to reflect the deletion
+            _status = Status.NotLoaded
+            if (shouldRemoveOfflineMapInfo()) {
+                offlineRepository.removeOfflineMapInfo(
+                    portalItemID = portalItem.itemId
+                )
+            }
+            val localScope = CoroutineScope(Dispatchers.IO)
+            localScope.launch {
+                initialize()
+                localScope.cancel()
+            }
+        } else {
+            Log.e(TAG, "Failed to delete preplanned map area: ${mobileMapPackage.path}")
+        }
+    }
+
+    /**
      * Updates the current state of this preplanned map area instance.
      *
      * @param newStatus The updated [Status] value representing this area's current state.
@@ -233,6 +269,7 @@ internal class PreplannedMapAreaState(
             mobileMapPackage = MobileMapPackage(mobileMapPackagePath)
             mobileMapPackage.load()
                 .onSuccess {
+                    _directorySize = getDirectorySize(mobileMapPackagePath)
                     Log.d(TAG, "Mobile map package loaded successfully")
                 }.onFailure { exception ->
                     Log.e(TAG, "Error loading mobile map package", exception)
@@ -246,8 +283,8 @@ internal class PreplannedMapAreaState(
         }
     }
 
-    internal fun setSelected(selected: Boolean) {
-        _isSelected = selected
+    internal fun setSelectedToOpen(selected: Boolean) {
+        _isSelectedToOpen = selected
         if (selected) {
             onSelectionChanged(map)
         }
