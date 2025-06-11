@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -117,23 +119,32 @@ internal fun MapAreaDetailsScreen(
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (thumbnail != null) {
-            Image(
-                bitmap = thumbnail,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(200.dp)
-                    .shadow(8.dp, RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp)),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Default.BrokenImage,
-                contentDescription = stringResource(id = R.string.no_image_available),
-                modifier = Modifier.size(300.dp)
-            )
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .padding(12.dp)
+                .shadow(8.dp, RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(10.dp))
+                .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surface),
+        ) {
+            if (thumbnail != null) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    bitmap = thumbnail,
+                    contentDescription = stringResource(R.string.thumbnail_description),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(50.dp), // 1/4th the size of the image Box
+                    imageVector = Icons.Default.ImageNotSupported,
+                    contentDescription = stringResource(id = R.string.no_image_available),
+                    tint = Color.Gray,
+                )
+            }
         }
         // Title
         Spacer(modifier = Modifier.height(16.dp))

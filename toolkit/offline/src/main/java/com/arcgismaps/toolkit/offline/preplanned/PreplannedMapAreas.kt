@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -37,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -143,22 +145,29 @@ internal fun PreplannedMapAreas(
                 ) {
                     // Display the thumbnail image if available, otherwise show a placeholder icon
                     val thumbnail = state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()
-                    if (thumbnail != null) {
-                        Image(
-                            bitmap = thumbnail,
-                            contentDescription = stringResource(R.string.thumbnail_description),
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .size(64.dp) // Ensures the image is square
-                                .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.BrokenImage,
-                            contentDescription = stringResource(id = R.string.no_image_available),
-                            modifier = Modifier.size(84.dp)
-                        )
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .size(64.dp) // Ensures the image is square
+                            .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
+                    ) {
+                        if (thumbnail != null) {
+                            Image(
+                                modifier = Modifier.fillMaxSize(),
+                                bitmap = thumbnail,
+                                contentDescription = stringResource(R.string.thumbnail_description),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier
+                                    .size(32.dp) // half the size of the image Box
+                                    .align(Alignment.Center),
+                                imageVector = Icons.Default.ImageNotSupported,
+                                contentDescription = stringResource(id = R.string.no_image_available),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         // Display the title with a maximum of one line
