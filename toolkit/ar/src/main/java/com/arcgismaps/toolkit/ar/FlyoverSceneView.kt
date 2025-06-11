@@ -22,12 +22,9 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -58,14 +55,13 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
+import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberPermissionsGranted
 import com.arcgismaps.toolkit.ar.internal.transformationMatrix
 import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.TrackingState
 import java.time.Instant
@@ -74,14 +70,15 @@ import java.time.Instant
  * A scene view that provides an augmented reality fly over experience.
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
- * @param modifier Modifier to be applied to the FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param modifier Modifier to be applied to the FlyoverSceneView.
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this FlyoverSceneView.
+ * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry].
  * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
- * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
  * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
  * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
  * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
@@ -117,7 +114,7 @@ public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
     modifier: Modifier = Modifier,
-    interactionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -156,6 +153,15 @@ public fun FlyoverSceneView(
 
     val context = LocalContext.current
 
+    val arCoreInstalled by rememberArCoreInstalled(
+        onFailed = {
+            initializationStatus.update(
+                FlyoverSceneViewStatus.FailedToInitialize(it),
+                onInitializationStatusChanged
+            )
+        }
+    )
+
     val cameraPermissionGranted by rememberPermissionsGranted(listOf(Manifest.permission.CAMERA)) {
         // onNotGranted
         initializationStatus.update(
@@ -168,32 +174,13 @@ public fun FlyoverSceneView(
         )
     }
 
-    var arCoreInstalled by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            initializationStatus.update(
-                FlyoverSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
-                onInitializationStatusChanged
-            )
-        } else {
-            arCoreInstalled = true
-        }
-    }
-
-    if (!cameraPermissionGranted) {
-        return
-    }
-
-    // if we get here camera permission is already granted so if ArCore is installed we are initialized
-    if (arCoreInstalled) {
-        initializationStatus.update(
+    when {
+        arCoreInstalled && cameraPermissionGranted -> initializationStatus.update(
             FlyoverSceneViewStatus.Initialized,
             onInitializationStatusChanged
         )
+        // if ARCore is not installed or camera permission not granted we can't display anything
+        else -> return
     }
 
     val arSessionWrapper =
@@ -239,7 +226,7 @@ public fun FlyoverSceneView(
         onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         graphicsOverlays = graphicsOverlays,
-        sceneViewInteractionOptions = interactionOptions,
+        sceneViewInteractionOptions = sceneViewInteractionOptions,
         viewLabelProperties = viewLabelProperties,
         selectionProperties = selectionProperties,
         isAttributionBarVisible = isAttributionBarVisible,
