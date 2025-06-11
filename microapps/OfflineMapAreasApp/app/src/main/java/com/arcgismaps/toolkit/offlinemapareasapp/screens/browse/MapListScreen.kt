@@ -56,6 +56,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -75,14 +78,17 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.portal.LoadableImage
+import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offlinemapareasapp.AnimatedLoading
 import com.arcgismaps.toolkit.offlinemapareasapp.R
 import java.time.Instant
@@ -100,12 +106,17 @@ fun MapListScreen(
     mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val offlineRepository = OfflineRepository(context)
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
-    var showSignOutProgress by rememberSaveable {
-        mutableStateOf(false)
-    }
-    Box(modifier = modifier.fillMaxSize().safeContentPadding()) {
+    var showSignOutProgress by rememberSaveable { mutableStateOf(false) }
+    var isShowingOnDeviceMaps by rememberSaveable { mutableStateOf(false) }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .safeContentPadding()
+    ) {
         AppSearchBar(
             uiState.searchText,
             isLoading = uiState.isLoading,
@@ -120,11 +131,40 @@ fun MapListScreen(
                 mapListViewModel.signOut()
             }
         )
+
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(0, 2),
+                selected = (isShowingOnDeviceMaps),
+                onClick = { isShowingOnDeviceMaps = !isShowingOnDeviceMaps },
+            ) {
+                Text(
+                    text = "View on-device maps",
+                    fontWeight = if (isShowingOnDeviceMaps) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(1, 2),
+                selected = (!isShowingOnDeviceMaps),
+                onClick = { isShowingOnDeviceMaps = !isShowingOnDeviceMaps },
+            ) {
+                Text(
+                    text = "View online maps",
+                    fontWeight = if (!isShowingOnDeviceMaps) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+        }
+
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         Crossfade(
             targetState = uiState.isLoading,
-            modifier = Modifier.padding(top = 88.dp),
+            modifier = Modifier.padding(top = 12.dp),
             label = "list fade"
         ) { state ->
             when (state) {
@@ -137,39 +177,49 @@ fun MapListScreen(
                     )
                 }
 
-                false -> if (uiState.data.isNotEmpty()) {
-                    val itemThumbnailPlaceholder = painterResource(id = R.drawable.ic_default_map)
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        items(
-                            uiState.data
-                        ) { item ->
-                            MapListItem(
-                                title = item.title,
-                                lastModified = item.modified?.format("MMM dd yyyy")
-                                    ?: "",
-                                shareType = item.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnail = item.thumbnail,
-                                placeholder = itemThumbnailPlaceholder,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            ) {
-                                onItemClick(item.itemId)
+                false -> if (!isShowingOnDeviceMaps) {
+                    if (uiState.data.isNotEmpty()) {
+                        val itemThumbnailPlaceholder =
+                            painterResource(id = R.drawable.ic_default_map)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            items(
+                                uiState.data
+                            ) { item ->
+                                MapListItem(
+                                    title = item.title,
+                                    lastModified = item.modified?.format("MMM dd yyyy")
+                                        ?: "",
+                                    shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                                    thumbnail = item.thumbnail,
+                                    placeholder = itemThumbnailPlaceholder,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                ) {
+                                    onItemClick(item.itemId)
+                                }
                             }
                         }
+                    } else if (!uiState.isLoading) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "Nothing to show.")
+                        }
                     }
-                } else if (!uiState.isLoading) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Nothing to show.")
-                    }
+                } else {
+                    // Showing on device maps
+                    val offlineMapInfos = offlineRepository.offlineMapInfos
+                    OnDeviceMapInfo(
+                        offlineMapInfos = offlineMapInfos,
+                        offlineRepository = offlineRepository,
+                        onClick = { itemId -> onItemClick(itemId) })
                 }
             }
         }
@@ -256,7 +306,7 @@ fun MapListItemThumbnail(
         AsyncImage(
             imageLoader = imageLoader,
             modifier = modifier,
-            contentScale =contentScale
+            contentScale = contentScale
         )
     } ?: Image(
         painter = placeholder,
