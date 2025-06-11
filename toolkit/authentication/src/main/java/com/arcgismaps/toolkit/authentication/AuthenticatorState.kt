@@ -137,7 +137,8 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     /**
      * Revokes OAuth tokens and all credentials from the [AuthenticationManager.arcGISCredentialStore]
      * and [AuthenticationManager.networkCredentialStore]. If an IAP credential exists in
-     * the [AuthenticationManager.arcGISCredentialStore], it will display a custom tab to invalidate the IAP session.
+     * the [AuthenticationManager.arcGISCredentialStore], it will display a custom tab for the user to invalidate
+     * the IAP session.
      *
      * @since 200.8.0
      */
@@ -253,6 +254,8 @@ private class AuthenticatorStateImpl(
                 it is IapCredential -> {
                     it.invalidate { iapSignOut ->
                         _pendingIapSignOut.value = iapSignOut
+                    }.also {
+                        _pendingIapSignOut.value = null
                     }
                 }
             }
