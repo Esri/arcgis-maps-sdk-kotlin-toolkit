@@ -55,8 +55,8 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapInfo$Companion {
-	public final fun doesInfoExist (Ljava/io/File;)Z
-	public final fun makeFromDirectory (Ljava/io/File;)Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;
+	public final fun createFromDirectory (Ljava/io/File;)Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;
+	public final fun isSerializedFilePresent (Ljava/io/File;)Z
 	public final fun removeFromDirectory (Ljava/io/File;)V
 }
 
@@ -67,7 +67,12 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapState {
 	public fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
-	public final fun getOfflineMapInfos ()Ljava/util/List;
 	public final fun resetSelectedMapArea ()V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineRepository {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getOfflineMapInfos ()Ljava/util/List;
 }
 

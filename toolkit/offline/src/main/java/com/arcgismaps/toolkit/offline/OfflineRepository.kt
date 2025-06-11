@@ -15,7 +15,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.offline.workmanager
+package com.arcgismaps.toolkit.offline
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
@@ -27,9 +27,18 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.toolkit.offline.OfflineMapInfo
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
+import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
+import com.arcgismaps.toolkit.offline.workmanager.downloadJobJsonFile
+import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
+import com.arcgismaps.toolkit.offline.workmanager.jobWorkerUuidKey
+import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
+import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
+import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
+import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
 import java.io.File
 import java.util.UUID
 
@@ -40,24 +49,32 @@ import java.util.UUID
  *
  * @since 200.8.0
  */
-internal class WorkManagerRepository(private val context: Context) {
+public class OfflineRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
     private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
-    internal val offlineMapInfos = _offlineMapInfos.toMutableList()
+
+    /**
+     * The portal item information for web maps that have downloaded map areas.
+     *
+     * @since 200.8.0
+     */
+    public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos.toList()
 
     init {
-        loadOfflineMapInfos()
+        _offlineMapInfos.addAll(loadOfflineMapInfos())
     }
 
     /**
-     * Saves the map info to the pending folder for a particular portal item.
+     * Saves the [OfflineMapInfo] to the pending folder for a particular web map's portal item.
      * The info will stay in that folder until the job completes.
      */
     private fun savePendingMapInfo(portalItem: PortalItem) {
-        val pendingMapInfoDir = OfflineURLs.pendingMapInfoDirectory(context, portalItem.itemId)
-        if (!OfflineMapInfo.doesInfoExist(pendingMapInfoDir)) {
+        val pendingMapInfoDir = File(
+            OfflineURLs.pendingMapInfoDirectoryPath(context, portalItem.itemId)
+        )
+        if (!OfflineMapInfo.isSerializedFilePresent(pendingMapInfoDir)) {
             val info = OfflineMapInfo(portalItem)
             info.saveToDirectory(pendingMapInfoDir)
         }
@@ -76,7 +93,7 @@ internal class WorkManagerRepository(private val context: Context) {
         preplannedMapAreaID: String
     ): File {
         return File(
-            OfflineURLs.pendingJobInfoDirectory(context, portalItemID),
+            OfflineURLs.pendingJobInfoDirectoryPath(context, portalItemID),
             preplannedMapAreaID
         ).also { it.mkdirs() }
     }
@@ -110,7 +127,7 @@ internal class WorkManagerRepository(private val context: Context) {
      * @since 200.8.0
      */
     private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
-        val baseDir = File(OfflineURLs.offlineManagerDirectory(context))
+        val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
             return offlineMapInfos
@@ -120,7 +137,7 @@ internal class WorkManagerRepository(private val context: Context) {
             if (!fileEntry.isDirectory || fileEntry.name.equals(offlineMapInfoJsonFile)) {
                 continue
             }
-            val info = OfflineMapInfo.makeFromDirectory(fileEntry) ?: continue
+            val info = OfflineMapInfo.createFromDirectory(fileEntry) ?: continue
             offlineMapInfos.add(info)
         }
         return offlineMapInfos
@@ -128,8 +145,9 @@ internal class WorkManagerRepository(private val context: Context) {
 
     /**
      * Returns the path to the final “Preplanned/<areaItemID>” folder.
-     * Moves all contents from: `<your-app-cache>/PendingJobs/<portalItemID>/<areaItemID>`
-     * into: `<your-app-files-dir>/com.esri.ArcGISToolkit.offlineManager/<portalItemID>/Preplanned/<areaItemID>`
+     *
+     * - Moves all contents from: `<your-app-files-dir>/PendingJobs/<portalItemID>/<areaItemID>`
+     * - into: `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/Preplanned/<areaItemID>`
      *
      * @since 200.8.0
      */
@@ -138,7 +156,7 @@ internal class WorkManagerRepository(private val context: Context) {
         val areaItemID = cacheAreaDir.name
         val portalDir = cacheAreaDir.parentFile
         val portalItemID = portalDir?.name.toString()
-        val destDirPath = OfflineURLs.prePlannedDirectory(
+        val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
             preplannedMapAreaID = areaItemID
@@ -153,38 +171,52 @@ internal class WorkManagerRepository(private val context: Context) {
         return destDir
     }
 
+    /**
+     * Moves [OfflineMapInfo] contents from the pending map info to its final destination.
+     *
+     * - Moves all info & thumbnail from: `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/`
+     * - into: `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/`.
+     *
+     * @since 200.8.0
+     */
     private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
-        val pendingDir = OfflineURLs.pendingMapInfoDirectory(context, portalItemID)
-        val infoFile = File(pendingDir, offlineMapInfoJsonFile)
-        val destDirPath = OfflineURLs.portalItemDirectory(
-            context = context,
-            portalItemID = portalItemID
-        )
-        infoFile.copyRecursively(File(destDirPath, offlineMapInfoJsonFile), overwrite = true)
-        val thumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
-        if (thumbnailFile.exists()) {
-            thumbnailFile.copyRecursively(
-                File(destDirPath, offlineMapInfoThumbnailFile),
-                overwrite = true
-            )
+        val pendingDir = File(OfflineURLs.pendingMapInfoDirectoryPath(context, portalItemID))
+        val destDir = File(OfflineURLs.portalItemDirectoryPath(context, portalItemID))
+        // use pending map info file only if it exists
+        val pendingInfoFile = File(pendingDir, offlineMapInfoJsonFile).takeIf { it.exists() }
+            ?: return
+        val pendingThumbnailFile = File(pendingDir, offlineMapInfoThumbnailFile)
+        // null if map info file already exists to prevent overwrite
+        val destInfoFile = File(destDir, offlineMapInfoJsonFile).takeIf { !it.exists() }
+        val destThumbnailFile = File(destDir, offlineMapInfoThumbnailFile).takeIf { !it.exists() }
+        // copy pending map info to destination
+        destInfoFile?.let { pendingInfoFile.copyRecursively(it) }
+        // copy map info thumbnail if pending thumbnail file exists
+        if (pendingThumbnailFile.exists() && destThumbnailFile != null) {
+            pendingThumbnailFile.copyRecursively(destThumbnailFile)
         }
         pendingDir.deleteRecursively()
     }
 
     /**
-     * Checks whether a given preplanned [areaItem] associated with a [portalItem]
+     * Checks whether a given [preplannedMapAreaID] associated with a [portalItemID]
      * has already been downloaded locally.
      *
      * @return The path to the preplanned area’s local folder if it exists,
      *         otherwise `null`.
      * @since 200.8.0
      */
-    fun isPrePlannedAreaDownloaded(portalItem: PortalItem, areaItem: PortalItem): String? {
-        return OfflineURLs.isPrePlannedAreaDownloaded(
-            context = context,
-            portalItemID = portalItem.itemId,
-            preplannedMapAreaID = areaItem.itemId
+    internal fun isPrePlannedAreaDownloaded(
+        portalItemID: String,
+        preplannedMapAreaID: String
+    ): String? {
+        val destDir = File(
+            File(OfflineURLs.portalItemDirectoryPath(context, portalItemID), preplannedMapAreas),
+            preplannedMapAreaID
         )
+        return if (destDir.exists())
+            destDir.path
+        else null
     }
 
     /**
@@ -262,18 +294,27 @@ internal class WorkManagerRepository(private val context: Context) {
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
                             workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
+                                // using the pending path, move the result to final destination path
                                 val destDir = movePreplannedJobResultToDestination(path)
+                                // create & load the downloaded map
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                                     mobileMapPackagePath = destDir.absolutePath
                                 )
-                                OfflineMapInfo.makeFromDirectory(
-                                    directory = File(
-                                        OfflineURLs.portalItemDirectory(
-                                            context = context,
-                                            portalItemID = portalItem.itemId
+                                // skip adding map info if it already exists in the list
+                                if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
+                                    // create offline map information from local directory
+                                    OfflineMapInfo.createFromDirectory(
+                                        directory = File(
+                                            OfflineURLs.portalItemDirectoryPath(
+                                                context = context,
+                                                portalItemID = portalItem.itemId
+                                            )
                                         )
-                                    )
-                                )?.let { _offlineMapInfos.add(it) }
+                                    )?.let {
+                                        // if non-null info was created, add it to the list
+                                        _offlineMapInfos.add(it)
+                                    }
+                                }
                             } ?: run {
                                 preplannedMapAreaState.updateStatus(
                                     Status.MmpkLoadFailure(

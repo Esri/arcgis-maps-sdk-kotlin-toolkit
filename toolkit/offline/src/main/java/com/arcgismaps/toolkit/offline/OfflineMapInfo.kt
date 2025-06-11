@@ -36,7 +36,7 @@ import java.io.FileOutputStream
  */
 public class OfflineMapInfo private constructor(
     private val info: CodableInfo,
-    public val thumbnail: Bitmap?
+    private val _thumbnail: Bitmap?
 ) {
 
     /**
@@ -56,31 +56,10 @@ public class OfflineMapInfo private constructor(
                 portalItemURL = itemUrl
             )
         },
-        thumbnail = runBlocking {
+        _thumbnail = runBlocking {
             portalItem.thumbnail?.let { loadableImage ->
                 runCatching { loadableImage.load() }
                 loadableImage.image?.bitmap
-            }
-        }
-    )
-
-    /**
-     * Constructor to create [OfflineMapInfo] from a [directory] on disk.
-     *
-     * @since 200.8.0
-     */
-    internal constructor(directory: File) : this(
-        info = runBlocking {
-            val infoFile = File(directory, offlineMapInfoJsonFile)
-            val jsonString = infoFile.readText(Charsets.UTF_8)
-            Json.decodeFromString(CodableInfo.serializer(), jsonString)
-        },
-        thumbnail = runBlocking {
-            val thumbnailFile = File(directory, offlineMapInfoThumbnailFile)
-            if (thumbnailFile.exists()) {
-                BitmapFactory.decodeFile(thumbnailFile.absolutePath)
-            } else {
-                null
             }
         }
     )
@@ -92,6 +71,14 @@ public class OfflineMapInfo private constructor(
      */
     public val id: String
         get() = info.portalItemID
+
+    /**
+     * The thumbnail of the portal item associated with the map.
+     *
+     * @since 200.8.0
+     */
+    public val thumbnail: Bitmap?
+        get() = _thumbnail
 
     /**
      * The title of the portal item associated with the map.
@@ -121,11 +108,11 @@ public class OfflineMapInfo private constructor(
     public companion object {
 
         /**
-         * Load an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
+         * Creates an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
          *
          * @since 200.8.0
          */
-        public fun makeFromDirectory(directory: File): OfflineMapInfo? {
+        public fun createFromDirectory(directory: File): OfflineMapInfo? {
             val infoFile = File(directory, offlineMapInfoJsonFile)
             if (!infoFile.exists()) {
                 return null
@@ -165,7 +152,7 @@ public class OfflineMapInfo private constructor(
          *
          * @since 200.8.0
          */
-        public fun doesInfoExist(directory: File): Boolean {
+        public fun isSerializedFilePresent(directory: File): Boolean {
             return File(directory, offlineMapInfoJsonFile).exists()
         }
     }
@@ -186,7 +173,7 @@ public class OfflineMapInfo private constructor(
             infoFile.writeText(jsonString, Charsets.UTF_8)
         }
 
-        thumbnail?.let { bmp ->
+        _thumbnail?.let { bmp ->
             val thumbFile = File(directory, offlineMapInfoThumbnailFile)
             runCatching {
                 FileOutputStream(thumbFile).use { out ->
