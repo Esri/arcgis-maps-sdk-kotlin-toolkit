@@ -56,3 +56,35 @@ internal fun IapSignInAuthenticator(
         }
     }
 }
+
+/**
+ * Composable function that handles signing out of IAP by launching the provided [iapSignOutUrl] in a browser.
+ *
+ * @param iapSignOutUrl The URL to sign out of IAP.
+ * @param onCompleteSignOut Callback function that gets invoked with a boolean indicating success or failure of the sign-out.
+ * @param onCancelSignOut Callback function that gets invoked with an exception if the sign-out is cancelled.
+ */
+@Composable
+internal fun IapSignOutAuthenticator(
+    iapSignOutUrl: String,
+    onCompleteSignOut: (Boolean) -> Unit,
+    onCancelSignOut: (Exception) -> Unit
+) {
+    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = OAuthUserSignInActivity.IapSignOutContract()
+    ) { res ->
+        if (res) {
+            onCompleteSignOut(true)
+        } else {
+            onCancelSignOut(Exception("IAP sign out cancelled"))
+        }
+    }
+
+    LaunchedEffect(iapSignOutUrl) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(iapSignOutUrl)
+        }
+    }
+}
