@@ -199,7 +199,7 @@ private class AuthenticatorStateImpl(
         pendingClientCertificateChallenge.value?.onCancel?.invoke()
         pendingServerTrustChallenge.value?.distrust()
         pendingIapSignIn.value?.cancel()
-        pendingIapSignOut.value?.cancel(null)
+        pendingIapSignOut.value?.cancel()
     }
 
     init {

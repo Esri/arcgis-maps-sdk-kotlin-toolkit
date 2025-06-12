@@ -9,12 +9,14 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
 	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingIapSignIn ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingIapSignOut ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingOAuthUserSignIn ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun setIapConfiguration (Lcom/arcgismaps/httpcore/authentication/IapConfiguration;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
+	public abstract fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
@@ -59,13 +61,22 @@ public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity
 	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
 }
 
-public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapContract : androidx/activity/result/contract/ActivityResultContract {
+public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSigInContract : androidx/activity/result/contract/ActivityResultContract {
 	public static final field $stable I
 	public fun <init> ()V
 	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
 	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
 	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSignOutContract : androidx/activity/result/contract/ActivityResultContract {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
+	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/Boolean;
+	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 }
 
 public final class com/arcgismaps/toolkit/authentication/ServerTrustChallenge {
