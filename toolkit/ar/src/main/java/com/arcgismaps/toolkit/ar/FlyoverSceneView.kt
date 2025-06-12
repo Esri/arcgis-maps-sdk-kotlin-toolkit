@@ -72,13 +72,13 @@ import java.time.Instant
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
  * @param modifier Modifier to be applied to the FlyoverSceneView.
- * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this FlyoverSceneView.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale].
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry].
  * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this FlyoverSceneView.
  * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
  * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
  * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
@@ -113,11 +113,11 @@ public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
     modifier: Modifier = Modifier,
-    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
