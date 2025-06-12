@@ -18,6 +18,8 @@
 package com.arcgismaps.toolkit.offline
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -51,15 +53,14 @@ public class OfflineRepository(private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
-    private var _offlineMapInfos: MutableList<OfflineMapInfo> = mutableListOf()
+    private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
 
     /**
      * The portal item information for web maps that have downloaded map areas.
      *
      * @since 200.8.0
      */
-    public val offlineMapInfos: List<OfflineMapInfo>
-        get() = _offlineMapInfos.toList()
+    public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos
 
     init {
         _offlineMapInfos.addAll(loadOfflineMapInfos())
