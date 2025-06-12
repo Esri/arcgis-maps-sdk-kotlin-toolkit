@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.authentication
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,60 +86,3 @@ internal fun OAuthAuthenticator(
     }
 }
 
-/**
- * Composable function that handles launching a browser for IAP authentication.
- *
- * @param authorizedUrl The authorized URL to load in the browser for IAP authentication.
- * @param onComplete Callback function that gets invoked with the redirect URL upon successful authentication.
- * @param onCancel Callback function that gets invoked when the authentication is cancelled.
- * @since 200.8.0
- */
-@Composable
-internal fun IapSignInAuthenticator(
-    authorizedUrl: String,
-    onComplete : (String) -> Unit,
-    onCancel: () -> Unit,
-) {
-    var hasLaunched by rememberSaveable { mutableStateOf(false) }
-    val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapSigInContract()
-    ) { redirectUrl ->
-        if (!redirectUrl.isNullOrEmpty()) {
-            onComplete(redirectUrl)
-        } else {
-            onCancel()
-        }
-    }
-
-    LaunchedEffect(authorizedUrl) {
-        if (!hasLaunched) {
-            hasLaunched = true
-            launcher.launch(authorizedUrl)
-        }
-    }
-}
-
-@Composable
-internal fun IapSignOutAuthenticator(
-    iapSignOutUrl: String,
-    onCompleteSignOut: (Boolean) -> Unit,
-    onCancelSignOut: (Exception) -> Unit
-) {
-    var hasLaunched by rememberSaveable { mutableStateOf(false) }
-    val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapSignOutContract()
-    ) { res ->
-        if (res) {
-            onCompleteSignOut(true)
-        } else {
-            onCancelSignOut(Exception("IAP sign out cancelled"))
-        }
-    }
-
-    LaunchedEffect(iapSignOutUrl) {
-        if (!hasLaunched) {
-            hasLaunched = true
-            launcher.launch(iapSignOutUrl)
-        }
-    }
-}

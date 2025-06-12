@@ -43,6 +43,10 @@ private const val SIGN_OUT = "SIGN_OUT"
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
+ * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in and sign-out flows. The behavior
+ * for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
+ * for user interaction and processes the result upon completion.
+ *
  * This activity must be registered in your application's manifest. There are two ways to configure
  * the manifest entry for [OAuthUserSignInActivity]:
  *
