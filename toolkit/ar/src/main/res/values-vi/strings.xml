@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Chưa được cấp quyền truy cập máy ảnh</string>
-    <string name="arcore_not_installed_message">Phải cài đặt ARCore để sử dụng TableTopSceneView. Mức độ khả dụng của ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Đ_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ớ</string>
+    <string name="location_data_source_failed_to_start">Đ_Location Data Source failed to start: %1$s______________________ớ</string>
+    <string name="location_permission_not_granted">Đ_Location permission not granted_________________ớ</string>
+    <string name="permissions_not_granted_message">Đ_"The following permissions are required, but not granted: %1$s"_________________________________ớ</string>
+    <string name="close_calibration">Đ_Close calibration__________________ớ</string>
+    <string name="heading_title">Đ_Heading_______________ớ</string>
+    <string name="decrease_heading">Đ_Decrease Heading_________________ớ</string>
+    <string name="increase_heading">Đ_Increase Heading_________________ớ</string>
+    <string name="reset_heading">Đ_Reset Heading______________ớ</string>
+    <string name="heading_slider_description">Đ_Heading slider_______________ớ</string>
+    <string name="elevation_title">Đ_Elevation___________________ớ</string>
+    <string name="decrease_elevation">Đ_Decrease Elevation___________________ớ</string>
+    <string name="increase_elevation">Đ_Increase Elevation___________________ớ</string>
+    <string name="reset_elevation">Đ_Reset Elevation________________ớ</string>
+    <string name="elevation_slider_description">Đ_Elevation slider_________________ớ</string>
 </resources>

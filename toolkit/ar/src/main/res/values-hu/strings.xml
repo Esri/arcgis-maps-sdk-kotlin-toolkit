@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameraengedély nincs megadva</string>
-    <string name="arcore_not_installed_message">A TableTopSceneView használatához telepíteni kell az ARCore alkalmazást. ARCore rendelkezésre állása: %1$s</string>
+    <string name="arcore_not_installed_message">í_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ő</string>
+    <string name="location_data_source_failed_to_start">í_Location Data Source failed to start: %1$s______________________ő</string>
+    <string name="location_permission_not_granted">í_Location permission not granted_________________ő</string>
+    <string name="permissions_not_granted_message">í_"The following permissions are required, but not granted: %1$s"_________________________________ő</string>
+    <string name="close_calibration">í_Close calibration__________________ő</string>
+    <string name="heading_title">í_Heading_______________ő</string>
+    <string name="decrease_heading">í_Decrease Heading_________________ő</string>
+    <string name="increase_heading">í_Increase Heading_________________ő</string>
+    <string name="reset_heading">í_Reset Heading______________ő</string>
+    <string name="heading_slider_description">í_Heading slider_______________ő</string>
+    <string name="elevation_title">í_Elevation___________________ő</string>
+    <string name="decrease_elevation">í_Decrease Elevation___________________ő</string>
+    <string name="increase_elevation">í_Increase Elevation___________________ő</string>
+    <string name="reset_elevation">í_Reset Elevation________________ő</string>
+    <string name="elevation_slider_description">í_Elevation slider_________________ő</string>
 </resources>

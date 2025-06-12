@@ -21,6 +21,8 @@
     <string name="allow_connection">Autoriser la connexion</string>
     <string name="username_password_login_title">Authentification requise</string>
     <string name="username_password_login_message">Vous devez vous connecter pour accéder à %1$s</string>
+    <string name="incorrect_credentials">æ_The credentials were incorrect for %1$s. Please try again______________________________Â.</string>
+    <string name="sign_in_error_occurred">æ_An error occurred signing in to %1$s. Please try again_____________________________Â.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nom d’utilisateur</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

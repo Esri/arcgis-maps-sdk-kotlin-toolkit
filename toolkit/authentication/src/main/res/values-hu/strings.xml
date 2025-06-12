@@ -21,6 +21,8 @@
     <string name="allow_connection">Kapcsolat engedélyezése</string>
     <string name="username_password_login_title">Hitelesítés szükséges</string>
     <string name="username_password_login_message">A(z) %1$s eléréséhez be kell jelentkeznie</string>
+    <string name="incorrect_credentials">í_The credentials were incorrect for %1$s. Please try again______________________________ő.</string>
+    <string name="sign_in_error_occurred">í_An error occurred signing in to %1$s. Please try again_____________________________ő.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Felhasználónév</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

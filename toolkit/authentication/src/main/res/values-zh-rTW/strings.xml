@@ -21,6 +21,8 @@
     <string name="allow_connection">允許連線</string>
     <string name="username_password_login_title">需要驗證</string>
     <string name="username_password_login_message">您需要登入才能存取 %1$s</string>
+    <string name="incorrect_credentials">試_The credentials were incorrect for %1$s. Please try again______________________________驗.</string>
+    <string name="sign_in_error_occurred">試_An error occurred signing in to %1$s. Please try again_____________________________驗.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">使用者名稱</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

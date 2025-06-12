@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Разрешение за камерата не е дадено</string>
-    <string name="arcore_not_installed_message">ARCore трябва да е инсталиран, за да се използва TableTopSceneView. Наличност на ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">й_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________й</string>
+    <string name="location_data_source_failed_to_start">й_Location Data Source failed to start: %1$s______________________й</string>
+    <string name="location_permission_not_granted">й_Location permission not granted_________________й</string>
+    <string name="permissions_not_granted_message">й_"The following permissions are required, but not granted: %1$s"_________________________________й</string>
+    <string name="close_calibration">й_Close calibration__________________й</string>
+    <string name="heading_title">й_Heading_______________й</string>
+    <string name="decrease_heading">й_Decrease Heading_________________й</string>
+    <string name="increase_heading">й_Increase Heading_________________й</string>
+    <string name="reset_heading">й_Reset Heading______________й</string>
+    <string name="heading_slider_description">й_Heading slider_______________й</string>
+    <string name="elevation_title">й_Elevation___________________й</string>
+    <string name="decrease_elevation">й_Decrease Elevation___________________й</string>
+    <string name="increase_elevation">й_Increase Elevation___________________й</string>
+    <string name="reset_elevation">й_Reset Elevation________________й</string>
+    <string name="elevation_slider_description">й_Elevation slider_________________й</string>
 </resources>

@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Leidimas naudoti kamerą nesuteiktas</string>
-    <string name="arcore_not_installed_message">Norint naudoti TableTopSceneView turi būti įdiegtas ARCore. ARCore prieinamumas: %1$s</string>
+    <string name="arcore_not_installed_message">Į_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________š</string>
+    <string name="location_data_source_failed_to_start">Į_Location Data Source failed to start: %1$s______________________š</string>
+    <string name="location_permission_not_granted">Į_Location permission not granted_________________š</string>
+    <string name="permissions_not_granted_message">Į_"The following permissions are required, but not granted: %1$s"_________________________________š</string>
+    <string name="close_calibration">Į_Close calibration__________________š</string>
+    <string name="heading_title">Į_Heading_______________š</string>
+    <string name="decrease_heading">Į_Decrease Heading_________________š</string>
+    <string name="increase_heading">Į_Increase Heading_________________š</string>
+    <string name="reset_heading">Į_Reset Heading______________š</string>
+    <string name="heading_slider_description">Į_Heading slider_______________š</string>
+    <string name="elevation_title">Į_Elevation___________________š</string>
+    <string name="decrease_elevation">Į_Decrease Elevation___________________š</string>
+    <string name="increase_elevation">Į_Increase Elevation___________________š</string>
+    <string name="reset_elevation">Į_Reset Elevation________________š</string>
+    <string name="elevation_slider_description">Į_Elevation slider_________________š</string>
 </resources>

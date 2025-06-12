@@ -21,6 +21,8 @@
     <string name="allow_connection">Дозволити підключення</string>
     <string name="username_password_login_title">Потрібна аутентифікація</string>
     <string name="username_password_login_message">Для доступу до %1$s потрібно виконати вхід у систему</string>
+    <string name="incorrect_credentials">ґ_The credentials were incorrect for %1$s. Please try again______________________________Ї.</string>
+    <string name="sign_in_error_occurred">ґ_An error occurred signing in to %1$s. Please try again_____________________________Ї.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Ім\'я користувача</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

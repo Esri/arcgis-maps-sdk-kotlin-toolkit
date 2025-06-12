@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Autorisation d’accès à l’appareil photo non accordée</string>
-    <string name="arcore_not_installed_message">ARCore doit être installé pour que TableTopSceneView puisse être utilisé. Disponibilité d’ARCore : %1$s</string>
+    <string name="arcore_not_installed_message">æ_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________Â</string>
+    <string name="location_data_source_failed_to_start">æ_Location Data Source failed to start: %1$s______________________Â</string>
+    <string name="location_permission_not_granted">æ_Location permission not granted_________________Â</string>
+    <string name="permissions_not_granted_message">æ_"The following permissions are required, but not granted: %1$s"_________________________________Â</string>
+    <string name="close_calibration">æ_Close calibration__________________Â</string>
+    <string name="heading_title">æ_Heading_______________Â</string>
+    <string name="decrease_heading">æ_Decrease Heading_________________Â</string>
+    <string name="increase_heading">æ_Increase Heading_________________Â</string>
+    <string name="reset_heading">æ_Reset Heading______________Â</string>
+    <string name="heading_slider_description">æ_Heading slider_______________Â</string>
+    <string name="elevation_title">æ_Elevation___________________Â</string>
+    <string name="decrease_elevation">æ_Decrease Elevation___________________Â</string>
+    <string name="increase_elevation">æ_Increase Elevation___________________Â</string>
+    <string name="reset_elevation">æ_Reset Elevation________________Â</string>
+    <string name="elevation_slider_description">æ_Elevation slider_________________Â</string>
 </resources>

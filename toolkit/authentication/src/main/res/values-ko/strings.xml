@@ -21,6 +21,8 @@
     <string name="allow_connection">연결 허용</string>
     <string name="username_password_login_title">인증 필요</string>
     <string name="username_password_login_message">%1$s에 접근하려면 로그인해야 합니다</string>
+    <string name="incorrect_credentials">한_The credentials were incorrect for %1$s. Please try again______________________________빠.</string>
+    <string name="sign_in_error_occurred">한_An error occurred signing in to %1$s. Please try again_____________________________빠.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">사용자 이름</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

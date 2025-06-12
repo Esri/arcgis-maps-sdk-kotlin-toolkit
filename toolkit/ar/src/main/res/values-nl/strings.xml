@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Cameramachtiging wordt niet verleend</string>
-    <string name="arcore_not_installed_message">Als u TableTopSceneView wilt gebruiken, moet ARCore geïnstalleerd zijn. Beschikbaarheid ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Ĳ_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ä</string>
+    <string name="location_data_source_failed_to_start">Ĳ_Location Data Source failed to start: %1$s______________________ä</string>
+    <string name="location_permission_not_granted">Ĳ_Location permission not granted_________________ä</string>
+    <string name="permissions_not_granted_message">Ĳ_"The following permissions are required, but not granted: %1$s"_________________________________ä</string>
+    <string name="close_calibration">Ĳ_Close calibration__________________ä</string>
+    <string name="heading_title">Ĳ_Heading_______________ä</string>
+    <string name="decrease_heading">Ĳ_Decrease Heading_________________ä</string>
+    <string name="increase_heading">Ĳ_Increase Heading_________________ä</string>
+    <string name="reset_heading">Ĳ_Reset Heading______________ä</string>
+    <string name="heading_slider_description">Ĳ_Heading slider_______________ä</string>
+    <string name="elevation_title">Ĳ_Elevation___________________ä</string>
+    <string name="decrease_elevation">Ĳ_Decrease Elevation___________________ä</string>
+    <string name="increase_elevation">Ĳ_Increase Elevation___________________ä</string>
+    <string name="reset_elevation">Ĳ_Reset Elevation________________ä</string>
+    <string name="elevation_slider_description">Ĳ_Elevation slider_________________ä</string>
 </resources>
