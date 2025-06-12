@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,7 +36,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -83,7 +86,7 @@ internal fun PreplannedMapAreas(
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
-    val showDetailsState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
+    val selectedPreplannedMapAreaState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
         ?.let { preplannedMapAreaStates[it] }
 
     val sheetState = rememberModalBottomSheetState(
@@ -92,32 +95,32 @@ internal fun PreplannedMapAreas(
     val scope = rememberCoroutineScope()
 
     // Show the modal bottom sheet if needed
-    if (showSheet && showDetailsState != null) {
-            MapAreaDetailsBottomSheet(
-                showSheet = true,
-                sheetState = sheetState,
-                scope = scope,
-                onDismiss = { showSheet = false },
-                thumbnail = showDetailsState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
-                title = showDetailsState.preplannedMapArea.portalItem.title,
-                description = showDetailsState.preplannedMapArea.portalItem.description,
-                size = showDetailsState.directorySize,
-                isAvailableToDownload = showDetailsState.status.allowsDownload,
-                onStartDownload = {
-                    showDetailsState.downloadPreplannedMapArea()
-                    scope
-                        .launch { sheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showSheet = false
-                            }
+    if (showSheet && selectedPreplannedMapAreaState != null) {
+        MapAreaDetailsBottomSheet(
+            showSheet = true,
+            sheetState = sheetState,
+            scope = scope,
+            onDismiss = { showSheet = false },
+            thumbnail = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
+            title = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.title,
+            description = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.description,
+            size = selectedPreplannedMapAreaState.directorySize,
+            isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
+            onStartDownload = {
+                selectedPreplannedMapAreaState.downloadPreplannedMapArea()
+                scope
+                    .launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showSheet = false
                         }
-                },
-                isDeletable = showDetailsState.status.isDownloaded && !showDetailsState.isSelectedToOpen,
-                onDeleteDownload = {
-                    showDetailsState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
-                }
-            )
+                    }
+            },
+            isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
+            onDeleteDownload = {
+                selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+            }
+        )
     }
 
     Column(
@@ -140,16 +143,31 @@ internal fun PreplannedMapAreas(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()?.let {
-                        Image(
-                            bitmap = it,
-                            contentDescription = stringResource(R.string.thumbnail_description),
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .size(64.dp) // Ensures the image is square
-                                .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
-                            contentScale = ContentScale.Crop
-                        )
+                    // Display the thumbnail image if available, otherwise show a placeholder icon
+                    val thumbnail = state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .size(64.dp) // Ensures the image is square
+                            .clip(RoundedCornerShape(10.dp)), // Applies rounded corners
+                    ) {
+                        if (thumbnail != null) {
+                            Image(
+                                modifier = Modifier.fillMaxSize(),
+                                bitmap = thumbnail,
+                                contentDescription = stringResource(R.string.thumbnail_description),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier
+                                    .size(32.dp) // half the size of the image Box
+                                    .align(Alignment.Center),
+                                imageVector = Icons.Default.ImageNotSupported,
+                                contentDescription = stringResource(id = R.string.no_image_available),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         // Display the title with a maximum of one line

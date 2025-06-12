@@ -15,6 +15,7 @@
  *  limitations under the License.
  *
  */
+
 package com.arcgismaps.toolkit.offline.internal.utils
 
 import java.io.File
