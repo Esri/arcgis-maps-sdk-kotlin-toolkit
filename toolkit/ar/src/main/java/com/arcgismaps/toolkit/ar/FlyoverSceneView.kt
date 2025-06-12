@@ -187,7 +187,7 @@ public fun FlyoverSceneView(
             planeFindingMode = Config.PlaneFindingMode.DISABLED
         )
 
-    DisposableEffect(flyoverSceneViewProxy) {
+    DisposableEffect(flyoverSceneViewProxy, arSessionWrapper) {
         flyoverSceneViewProxy.setSessionWrapper(arSessionWrapper)
         onDispose {
             flyoverSceneViewProxy.setSessionWrapper(null)
