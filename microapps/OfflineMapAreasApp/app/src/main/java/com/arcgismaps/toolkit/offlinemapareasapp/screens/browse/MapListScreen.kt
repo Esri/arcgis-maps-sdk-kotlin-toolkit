@@ -213,7 +213,15 @@ fun MapListScreen(
                     }
                 } else {
                     // Showing on device maps
-                    OnDeviceMapInfo(onClick = { itemId -> onItemClick(itemId) })
+
+                    val context = LocalContext.current
+                    val offlineRepository = OfflineRepository(context)
+
+                    OnDeviceMapInfo(
+                        offlineRepository = offlineRepository,
+                        offlineMapInfos = offlineRepository.offlineMapInfos,
+                        onClick = { itemId -> onItemClick(itemId) }
+                    )
                 }
             }
         }
