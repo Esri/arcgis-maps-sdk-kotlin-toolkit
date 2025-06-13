@@ -15,6 +15,7 @@
  *  limitations under the License.
  *
  */
+
 package com.arcgismaps.toolkit.offline.ui
 
 import androidx.compose.foundation.Image
