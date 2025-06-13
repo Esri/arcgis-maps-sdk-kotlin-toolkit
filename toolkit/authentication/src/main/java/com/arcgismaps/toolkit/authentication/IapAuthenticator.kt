@@ -58,9 +58,9 @@ internal fun IapSignInAuthenticator(
 }
 
 /**
- * Composable function that handles signing out of IAP by launching the provided [iapSignOutUrl] in a browser.
+ * Composable function that handles invalidating an IAP session by launching the provided [iapSignOutUrl] in a browser.
  *
- * @param iapSignOutUrl The URL to sign out of IAP.
+ * @param iapSignOutUrl The URL that will be launched guiding the user to sign-out of the IAP session.
  * @param onCompleteSignOut Callback function that gets invoked with a boolean indicating success or failure of the sign-out.
  * @param onCancelSignOut Callback function that gets invoked with an exception if the sign-out is cancelled.
  * @since 200.8.0

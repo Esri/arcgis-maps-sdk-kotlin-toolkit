@@ -43,17 +43,18 @@ private const val SIGN_OUT = "SIGN_OUT"
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
- * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in and sign-out flows. The behavior
- * for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
+ * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. Sign-out is currently only supported
+ * IAP. The behavior for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
  * for user interaction and processes the result upon completion.
  *
  * This activity must be registered in your application's manifest. There are two ways to configure
  * the manifest entry for [OAuthUserSignInActivity]:
  *
- * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
- * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
- * immediately handle the completion of the challenge. In this case, the activity should be declared
- * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ * When completing an authentication challenge by signing in or signing out, the Custom Tabs should redirect back to
+ * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
+ * This applies to both OAuth and IAP sign-in and sign-out flows.
+ * In this case, the activity should be declared in the manifest using `launchMode="singleTop"` and an
+ * `intent-filter` should be specified:
  *
  * ```
  * <activity
@@ -99,6 +100,8 @@ private const val SIGN_OUT = "SIGN_OUT"
  * startActivity(newIntent)
  * ```
  *
+ * Currently, IAP sign-out does not support a redirect URI, so the `OAuthUserSignInActivity` must be used to handle the
+ * sign-out flow. This can be done by intercepting the `close` event in the Custom Tabs.
  * @since 200.2.0
  */
 public class OAuthUserSignInActivity : ComponentActivity() {
@@ -129,7 +132,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         //   we can use this to ignore this "rogue" focus changed event.
         if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             if (signOutRequest) {
-                // As of now, we don't have a way to get the sign out response from the browser so we assume if the user
+                // As of now, we don't have a way to get the sign-out response from the browser so we assume if the user
                 // returns to this activity by pressing the back button or the "x" button, the sign out was successful.
                 setResult(
                     RESULT_CODE_SUCCESS,
@@ -161,17 +164,17 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * @since 200.2.0
      */
     public fun handleRedirectIntent(intent: Intent?) {
-        intent?.data?.let { uri ->
+        val uri = intent?.data
+        if (uri != null) {
             val uriString = uri.toString()
             val newIntent = Intent().apply {
                 putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uriString)
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
-            finish()
-        } ?: {
+        } else {
             setResult(RESULT_CODE_CANCELED)
-            finish()
         }
+        finish()
     }
 
     /**
