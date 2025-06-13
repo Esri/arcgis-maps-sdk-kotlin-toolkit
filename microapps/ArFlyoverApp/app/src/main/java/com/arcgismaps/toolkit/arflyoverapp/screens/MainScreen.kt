@@ -57,6 +57,7 @@ import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.layers.IntegratedMeshLayer
 import com.arcgismaps.toolkit.ar.FlyoverSceneView
+import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.arflyoverapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
@@ -81,8 +82,13 @@ fun MainScreen() {
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-    var acceptedPrivacyInfo by rememberSaveable { mutableStateOf(sharedPreferences.getBoolean(
-        KEY_PREF_ACCEPTED_PRIVACY_INFO, false)) }
+    var acceptedPrivacyInfo by rememberSaveable {
+        mutableStateOf(
+            sharedPreferences.getBoolean(
+                KEY_PREF_ACCEPTED_PRIVACY_INFO, false
+            )
+        )
+    }
     var showPrivacyInfo by rememberSaveable { mutableStateOf(!acceptedPrivacyInfo) }
     if (showPrivacyInfo) {
         PrivacyInfoDialog(
@@ -97,18 +103,20 @@ fun MainScreen() {
 
     // Display FlyoverSceneView only if user has accepted the privacy info
     if (acceptedPrivacyInfo) {
+        val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
+            location = Point(
+                2.82407,
+                41.99101,
+                230.0,
+                SpatialReference.wgs84()
+            ),
+            heading = 160.0,
+            translationFactor = 1000.0
+        )
+
         FlyoverSceneView(
             arcGISScene = arcGISScene,
-            initialLocation = remember {
-                Point(
-                    2.82407,
-                    41.99101,
-                    230.0,
-                    SpatialReference.wgs84()
-                )
-            },
-            initialHeading = 160.0,
-            translationFactor = 1000.0
+            flyoverSceneViewProxy = flyoverSceneViewProxy
         )
     } else {
         // otherwise display a message and a button that causes the privacy info dialog to be shown
