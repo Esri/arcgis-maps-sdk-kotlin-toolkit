@@ -87,7 +87,7 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      * contains the [content] lambda provided by the application. A thin border line is drawn around
      * the entire Callout.
      *
-     * If the given geoelement is a DynamicEntity then the Callout automatically updates its location
+     * If the given [GeoElement] is a DynamicEntity then the Callout automatically updates its location
      * everytime the DynamicEntity changes. The content of the Callout however will not be automatically
      * updated.
      *
