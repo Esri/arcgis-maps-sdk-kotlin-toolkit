@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -29,6 +30,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
+import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapParameters
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
@@ -38,10 +40,12 @@ import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
+import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.UUID
 
@@ -57,6 +61,15 @@ internal class PreplannedMapAreaState(
     private val offlineRepository: OfflineRepository,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
+
+    internal suspend fun makeParameters(offlineMapTask: OfflineMapTask): DownloadPreplannedOfflineMapParameters? {
+        val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
+            preplannedMapArea = preplannedMapArea
+        ).getOrNull()
+        params?.let { it.updateMode = PreplannedUpdateMode.NoUpdates }
+        return params
+    }
+
     private lateinit var workerUUID: UUID
 
     private lateinit var mobileMapPackage: MobileMapPackage
@@ -66,7 +79,7 @@ internal class PreplannedMapAreaState(
     private var _isSelectedToOpen by mutableStateOf(false)
     internal val isSelectedToOpen: Boolean
         get() = _isSelectedToOpen
-    
+
     // The status of the preplanned map area.
     private var _status by mutableStateOf<Status>(Status.NotLoaded)
     internal val status: Status
