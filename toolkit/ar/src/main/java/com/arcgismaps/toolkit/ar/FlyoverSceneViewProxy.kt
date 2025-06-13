@@ -92,13 +92,9 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
         heading: Double,
         translationFactor: Double
     ) : this(SceneViewProxy()) {
-        cameraController.setOriginCamera(
-            Camera(
-                locationPoint = location,
-                pitch = 90.0,
-                roll = 0.0,
-                heading = heading
-            )
+        setLocationAndHeading(
+            location = location,
+            heading = heading
         )
         cameraController.setTranslationFactor(translationFactor)
     }
