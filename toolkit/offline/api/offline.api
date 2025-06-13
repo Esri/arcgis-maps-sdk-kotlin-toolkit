@@ -72,7 +72,10 @@ public final class com/arcgismaps/toolkit/offline/OfflineMapState {
 
 public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public static final field $stable I
-	public fun <init> (Landroid/content/Context;)V
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/OfflineRepository;
 	public final fun getOfflineMapInfos ()Ljava/util/List;
+	public final fun refreshOfflineMapInfos (Landroid/content/Context;)V
+	public final fun removeAllDownloads (Landroid/content/Context;)V
+	public final fun removeDownloadsForWebmap (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
