@@ -49,11 +49,10 @@ public fun OfflineMapAreas(
     offlineMapState: OfflineMapState,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
 
     LaunchedEffect(offlineMapState) {
-        offlineMapState.initialize(context)
+        offlineMapState.initialize()
     }
 
     Surface(

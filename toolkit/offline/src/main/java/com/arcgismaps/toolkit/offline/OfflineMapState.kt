@@ -40,6 +40,7 @@ import kotlinx.coroutines.CancellationException
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
+    private val offlineRepository: OfflineRepository,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     /**
@@ -49,13 +50,13 @@ public class OfflineMapState(
      */
     public constructor(
         offlineMapInfo: OfflineMapInfo,
+        offlineRepository: OfflineRepository,
         onSelectionChanged: (ArcGISMap) -> Unit = { }
     ) : this(
         arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
+        offlineRepository = offlineRepository,
         onSelectionChanged = onSelectionChanged
     )
-
-    private lateinit var _offlineRepository: OfflineRepository
 
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
@@ -86,7 +87,7 @@ public class OfflineMapState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.8.0
      */
-    internal suspend fun initialize(context: Context): Result<Unit> = runCatchingCancellable {
+    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
@@ -96,7 +97,7 @@ public class OfflineMapState(
             throw it
         }
 
-        _offlineRepository = OfflineRepository(context)
+        // TODO: Check if we need to reload the OfflineMapInfo here
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItem = (arcGISMap.item as? PortalItem)
             ?: throw IllegalStateException("Item not found")
@@ -115,11 +116,11 @@ public class OfflineMapState(
                         preplannedMapArea = mapArea,
                         offlineMapTask = offlineMapTask,
                         portalItem = portalItem,
-                        offlineRepository = _offlineRepository,
+                        offlineRepository = offlineRepository,
                         onSelectionChanged = onSelectionChanged
                     )
                     preplannedMapAreaState.initialize()
-                    val preplannedPath = _offlineRepository.isPrePlannedAreaDownloaded(
+                    val preplannedPath = offlineRepository.isPrePlannedAreaDownloaded(
                         portalItemID = portalItem.itemId,
                         preplannedMapAreaID = mapArea.portalItem.itemId
                     )
