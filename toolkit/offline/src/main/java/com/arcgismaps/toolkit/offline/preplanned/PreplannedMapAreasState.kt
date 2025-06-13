@@ -228,7 +228,7 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
-        if (OfflineRepository.deleteContentsForDirectory(context = context, mobileMapPackage.path)) {
+        if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
             Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
             _status = Status.NotLoaded
@@ -264,7 +264,7 @@ internal class PreplannedMapAreaState(
     }
 
     internal fun cancelDownload() {
-        OfflineRepository.cancelWorkRequest(context = context, workerUUID)
+        OfflineRepository.cancelWorkRequest(context, workerUUID)
     }
 
     internal suspend fun createAndLoadMMPKAndOfflineMap(
