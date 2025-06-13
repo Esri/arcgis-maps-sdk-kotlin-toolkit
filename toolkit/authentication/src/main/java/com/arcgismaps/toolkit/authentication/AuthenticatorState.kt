@@ -211,18 +211,30 @@ private class AuthenticatorStateImpl(
         }
     }
 
+    /**
+     * Handles an OAuth or token challenge by checking if the [oAuthUserConfiguration] can be used for the
+     * given [challenge.requestUrl]. If it can, it will handle the OAuth challenge and return
+     * an [ArcGISAuthenticationChallengeResponse] with an [OAuthUserCredential].
+     * If it cannot, it will handle the ArcGIS token challenge instead.
+     *
+     * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
+     * @return an [ArcGISAuthenticationChallengeResponse] with an [ArcGISCredential] or
+     * [ArcGISAuthenticationChallengeResponse.Cancel] if the user cancelled the challenge.
+     * @since 200.8.0
+     */
     private suspend fun handleOAuthOrTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
         val oAuthUserConfiguration = oAuthUserConfiguration
-        if (oAuthUserConfiguration?.canBeUsedForUrl(challenge.requestUrl) == true) {
+        return if (oAuthUserConfiguration?.canBeUsedForUrl(challenge.requestUrl) == true) {
             val oAuthUserCredential = oAuthUserConfiguration.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
                 .also { _pendingOAuthUserSignIn.value = null }
                 .getOrThrow()
 
-            return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(oAuthUserCredential)
+            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(oAuthUserCredential)
+        } else {
+            return handleArcGISTokenChallenge(challenge)
         }
-        return handleArcGISTokenChallenge(challenge)
     }
 
     /**
