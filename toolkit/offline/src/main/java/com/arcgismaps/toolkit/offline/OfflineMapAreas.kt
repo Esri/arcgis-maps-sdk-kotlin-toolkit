@@ -18,10 +18,8 @@
 
 package com.arcgismaps.toolkit.offline
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -34,17 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
-import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
-import com.arcgismaps.toolkit.offline.ui.OfflineDisabled
 
 /**
  * Take a web map offline by downloading map areas.
@@ -58,19 +51,14 @@ public fun OfflineMapAreas(
 ) {
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
-    var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(offlineMapState, isRefreshEnabled) {
-        if (isRefreshEnabled) {
-            offlineMapState.resetInitialize()
-        }
-        offlineMapState.initialize(context).onFailure {
-            Log.e("TAG", it.stackTraceToString())
-        }
-        isRefreshEnabled = false
+    LaunchedEffect(offlineMapState) {
+        offlineMapState.initialize(context)
     }
 
-    Surface(modifier = modifier) {
+    Surface(
+        modifier = modifier
+    ) {
         when (initializationStatus) {
             is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
@@ -82,42 +70,27 @@ public fun OfflineMapAreas(
             }
 
             is InitializationStatus.FailedToInitialize -> {
-                NonRecoveredErrorIndicator(
-                    error = (initializationStatus as InitializationStatus.FailedToInitialize).error,
-                    onRefresh = { isRefreshEnabled = true }
-                )
+                (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
+                    NonRecoveredErrorIndicator(
+                        it
+                    )
+                }
             }
 
-            is InitializationStatus.Initialized -> {
-                if (offlineMapState.mapIsOfflineDisabled) {
-                    OfflineDisabled(onRefresh = { isRefreshEnabled = true })
-                } else {
-                    when (offlineMapState.mode) {
-                        OfflineMapMode.Preplanned -> {
-                            Column {
-                                PreplannedMapAreas(
-                                    preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                                    modifier = modifier
-                                )
-                                if (offlineMapState.isShowingOnlyOfflineModels) {
-                                    NoInternetNoAreas(onRefresh = { isRefreshEnabled = true })
-                                }
-                            }
-                        }
-
-                        OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
-                            // TODO: Init OnDemand screen...
-                        }
-                    }
+            else -> {
+                if (offlineMapState.mode == OfflineMapMode.Preplanned) {
+                    PreplannedMapAreas(
+                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
+                        modifier = modifier
+                    )
                 }
             }
         }
     }
 }
 
-
 @Composable
-private fun NonRecoveredErrorIndicator(error: Throwable, onRefresh: () -> Unit) {
+private fun NonRecoveredErrorIndicator(errorMessage: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Icon(
             Icons.Default.Info,
@@ -125,7 +98,7 @@ private fun NonRecoveredErrorIndicator(error: Throwable, onRefresh: () -> Unit) 
             tint = MaterialTheme.colorScheme.error
         )
         Text(
-            text = error.message.toString(),
+            text = errorMessage,
             color = MaterialTheme.colorScheme.error
         )
     }
