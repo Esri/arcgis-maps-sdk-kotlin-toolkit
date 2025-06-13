@@ -107,7 +107,6 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
 
     internal fun setSessionWrapper(sessionWrapper: ArSessionWrapper?) {
         _sessionWrapper = sessionWrapper
-        _sessionWrapper?.resetSession(planeFindingMode = Config.PlaneFindingMode.DISABLED)
     }
 
     /**
