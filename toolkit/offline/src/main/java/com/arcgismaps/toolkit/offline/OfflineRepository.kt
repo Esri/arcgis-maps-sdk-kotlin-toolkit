@@ -49,9 +49,7 @@ import java.util.UUID
  *
  * @since 200.8.0
  */
-public class OfflineRepository(private val context: Context) {
-
-    private val workManager = WorkManager.getInstance(context)
+public object OfflineRepository {
 
     private var _offlineMapInfos: SnapshotStateList<OfflineMapInfo> = mutableStateListOf()
 
@@ -62,8 +60,9 @@ public class OfflineRepository(private val context: Context) {
      */
     public val offlineMapInfos: List<OfflineMapInfo> = _offlineMapInfos
 
-    init {
-        _offlineMapInfos.addAll(loadOfflineMapInfos())
+    public fun refreshOfflineMapInfos(context: Context) {
+        _offlineMapInfos.clear()
+        _offlineMapInfos.addAll(loadOfflineMapInfos(context))
     }
 
     /**
@@ -71,7 +70,7 @@ public class OfflineRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    public fun removeAllDownloads() {
+    public fun removeAllDownloads(context: Context) {
         _offlineMapInfos.clear()
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         if (baseDir.exists()) {
@@ -86,7 +85,7 @@ public class OfflineRepository(private val context: Context) {
      * @param offlineMapInfo The [OfflineMapInfo] to remove.
      * @since 200.8.0
      */
-    public fun removeDownloadsForWebmap(offlineMapInfo: OfflineMapInfo) {
+    public fun removeDownloadsForWebmap(context: Context, offlineMapInfo: OfflineMapInfo) {
         _offlineMapInfos.remove(offlineMapInfo)
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
@@ -99,7 +98,7 @@ public class OfflineRepository(private val context: Context) {
      * Saves the [OfflineMapInfo] to the pending folder for a particular web map's portal item.
      * The info will stay in that folder until the job completes.
      */
-    private fun savePendingMapInfo(portalItem: PortalItem) {
+    private fun savePendingMapInfo(context: Context, portalItem: PortalItem) {
         val pendingMapInfoDir = File(
             OfflineURLs.pendingMapInfoDirectoryPath(context, portalItem.itemId)
         )
@@ -118,6 +117,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal fun createPendingPreplannedJobPath(
+        context: Context,
         portalItemID: String,
         preplannedMapAreaID: String
     ): File {
@@ -155,7 +155,7 @@ public class OfflineRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    private fun loadOfflineMapInfos(): List<OfflineMapInfo> {
+    private fun loadOfflineMapInfos(context: Context): List<OfflineMapInfo> {
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
@@ -180,7 +180,10 @@ public class OfflineRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    private fun movePreplannedJobResultToDestination(offlineMapCacheDownloadPath: String): File {
+    private fun movePreplannedJobResultToDestination(
+        context: Context,
+        offlineMapCacheDownloadPath: String
+    ): File {
         val cacheAreaDir = File(offlineMapCacheDownloadPath)
         val areaItemID = cacheAreaDir.name
         val portalDir = cacheAreaDir.parentFile
@@ -195,7 +198,7 @@ public class OfflineRepository(private val context: Context) {
             val target = File(destDir, child.name)
             child.copyRecursively(target, overwrite = true)
         }
-        movePreplannedOfflineMapInfoToDestination(portalItemID)
+        movePreplannedOfflineMapInfoToDestination(context, portalItemID)
         cacheAreaDir.deleteRecursively()
         return destDir
     }
@@ -205,7 +208,10 @@ public class OfflineRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    internal fun deleteContentsForDirectory(offlineMapDirectoryPath: String): Boolean {
+    internal fun deleteContentsForDirectory(
+        context: Context,
+        offlineMapDirectoryPath: String
+    ): Boolean {
         return File(offlineMapDirectoryPath).deleteRecursively()
     }
 
@@ -217,7 +223,7 @@ public class OfflineRepository(private val context: Context) {
      * @param portalItemID The ID of the portal item whose offline map info should be removed.
      * @since 200.8.0
      */
-    internal fun removeOfflineMapInfo(portalItemID: String) {
+    internal fun removeOfflineMapInfo(context: Context, portalItemID: String) {
         _offlineMapInfos.removeAll { it.id == portalItemID }
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, portalItemID)
@@ -232,7 +238,7 @@ public class OfflineRepository(private val context: Context) {
      *
      * @since 200.8.0
      */
-    private fun movePreplannedOfflineMapInfoToDestination(portalItemID: String) {
+    private fun movePreplannedOfflineMapInfoToDestination(context: Context, portalItemID: String) {
         val pendingDir = File(OfflineURLs.pendingMapInfoDirectoryPath(context, portalItemID))
         val destDir = File(OfflineURLs.portalItemDirectoryPath(context, portalItemID))
         // use pending map info file only if it exists
@@ -260,6 +266,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal fun isPrePlannedAreaDownloaded(
+        context: Context,
         portalItemID: String,
         preplannedMapAreaID: String
     ): String? {
@@ -284,6 +291,7 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal fun createPreplannedMapAreaRequestAndQueueDownload(
+        context: Context,
         jsonJobPath: String,
         preplannedMapAreaTitle: String
     ): UUID {
@@ -304,7 +312,7 @@ public class OfflineRepository(private val context: Context) {
         // only one instance of OfflineJobWorker is running at any time
         // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
         // ones that are active
-        workManager.enqueueUniqueWork(
+        WorkManager.getInstance(context).enqueueUniqueWork(
             uniqueWorkName = jobWorkerUuidKey + workRequest.id,
             existingWorkPolicy = ExistingWorkPolicy.KEEP,
             request = workRequest
@@ -325,12 +333,14 @@ public class OfflineRepository(private val context: Context) {
      * @since 200.8.0
      */
     internal suspend fun observeStatusForPreplannedWork(
+        context: Context,
         offlineWorkerUUID: UUID,
         preplannedMapAreaState: PreplannedMapAreaState,
         portalItem: PortalItem,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        savePendingMapInfo(portalItem)
+        val workManager = WorkManager.getInstance(context)
+        savePendingMapInfo(context, portalItem)
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
@@ -348,7 +358,7 @@ public class OfflineRepository(private val context: Context) {
                             preplannedMapAreaState.updateStatus(Status.Downloaded)
                             workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 // using the pending path, move the result to final destination path
-                                val destDir = movePreplannedJobResultToDestination(path)
+                                val destDir = movePreplannedJobResultToDestination(context, path)
                                 // create & load the downloaded map
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                                     mobileMapPackagePath = destDir.absolutePath
@@ -410,7 +420,7 @@ public class OfflineRepository(private val context: Context) {
      * @param workerUUID The UUID of the WorkManager request to cancel.
      * @since 200.8.0
      */
-    internal fun cancelWorkRequest(workerUUID: UUID) {
-        workManager.cancelWorkById(workerUUID)
+    internal fun cancelWorkRequest(context: Context, workerUUID: UUID) {
+        WorkManager.getInstance(context).cancelWorkById(workerUUID)
     }
 }

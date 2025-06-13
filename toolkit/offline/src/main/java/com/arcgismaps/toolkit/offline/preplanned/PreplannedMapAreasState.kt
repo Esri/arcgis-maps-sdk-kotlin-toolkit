@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -51,10 +52,11 @@ import java.util.UUID
  * @since 200.8.0
  */
 internal class PreplannedMapAreaState(
+    private val context: Context,
     internal val preplannedMapArea: PreplannedMapArea,
     private val offlineMapTask: OfflineMapTask,
     private val portalItem: PortalItem,
-    private val offlineRepository: OfflineRepository,
+//    private val offlineRepository: OfflineRepository,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
     private lateinit var workerUUID: UUID
@@ -125,7 +127,8 @@ internal class PreplannedMapAreaState(
                     preplannedMapArea = preplannedMapArea
                 )
             )
-            offlineRepository.observeStatusForPreplannedWork(
+            OfflineRepository.observeStatusForPreplannedWork(
+                context = context,
                 onWorkInfoStateChanged = ::logWorkInfo,
                 preplannedMapAreaState = this@PreplannedMapAreaState,
                 portalItem = portalItem,
@@ -172,7 +175,8 @@ internal class PreplannedMapAreaState(
         }
 
         // Define the path where the map will be saved
-        val preplannedMapAreaDownloadDirectory = offlineRepository.createPendingPreplannedJobPath(
+        val preplannedMapAreaDownloadDirectory = OfflineRepository.createPendingPreplannedJobPath(
+            context = context,
             portalItemID = portalItem.itemId,
             preplannedMapAreaID = preplannedMapArea.portalItem.itemId
         )
@@ -199,12 +203,13 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
-        val jsonJobFile = offlineRepository.saveJobToDisk(
+        val jsonJobFile = OfflineRepository.saveJobToDisk(
             jobPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
 
-        workerUUID = offlineRepository.createPreplannedMapAreaRequestAndQueueDownload(
+        workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
+            context = context,
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = preplannedMapArea.portalItem.title
         )
@@ -224,12 +229,13 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
-        if (offlineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
+        if (OfflineRepository.deleteContentsForDirectory(context = context, mobileMapPackage.path)) {
             Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
             _status = Status.NotLoaded
             if (shouldRemoveOfflineMapInfo()) {
-                offlineRepository.removeOfflineMapInfo(
+                OfflineRepository.removeOfflineMapInfo(
+                    context = context,
                     portalItemID = portalItem.itemId
                 )
             }
@@ -259,7 +265,7 @@ internal class PreplannedMapAreaState(
     }
 
     internal fun cancelDownload() {
-        offlineRepository.cancelWorkRequest(workerUUID)
+        OfflineRepository.cancelWorkRequest(context = context, workerUUID)
     }
 
     internal suspend fun createAndLoadMMPKAndOfflineMap(

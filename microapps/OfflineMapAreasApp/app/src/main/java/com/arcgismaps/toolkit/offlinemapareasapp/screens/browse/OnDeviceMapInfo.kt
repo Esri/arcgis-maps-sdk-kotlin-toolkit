@@ -44,6 +44,7 @@ fun OnDeviceMapInfo(
     offlineMapInfos: List<OfflineMapInfo>,
     offlineRepository: OfflineRepository,
 ) {
+    val context = LocalContext.current
     LazyColumn {
         item {
             Button(
@@ -52,7 +53,7 @@ fun OnDeviceMapInfo(
                     .padding(24.dp),
                 enabled = offlineMapInfos.isNotEmpty(),
                 onClick = {
-                    offlineRepository.removeAllDownloads()
+                    offlineRepository.removeAllDownloads(context)
                 }) {
                 Text("Remove all downloads")
             }
@@ -65,7 +66,7 @@ fun OnDeviceMapInfo(
                         onClick.invoke(offlineMapInfo.id)
                     },
                     onDelete = {
-                        offlineRepository.removeDownloadsForWebmap(offlineMapInfo)
+                        offlineRepository.removeDownloadsForWebmap(context, offlineMapInfo)
                     })
             }
         }
