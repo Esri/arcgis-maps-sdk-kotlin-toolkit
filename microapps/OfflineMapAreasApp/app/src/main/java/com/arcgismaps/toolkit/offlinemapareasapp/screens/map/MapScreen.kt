@@ -18,14 +18,10 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens.map
 
-import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,33 +31,27 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.window.core.layout.WindowSizeClass
-import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.offline.OfflineMapAreas
 import com.arcgismaps.toolkit.offline.OfflineMapState
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.BottomSheetMaxWidth
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetExpansionHeight
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetLayout
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetState
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.SheetValue
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.StandardBottomSheet
-import com.arcgismaps.toolkit.offlinemapareasapp.screens.bottomsheet.rememberStandardBottomSheetState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,11 +61,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val options = listOf("Go Online", "Offline Maps")
     var selectedOption by remember { mutableStateOf(options[0]) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
-        confirmValueChange = { it != SheetValue.Hidden },
-        skipHiddenState = false
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var isBottomSheetVisible by remember { mutableStateOf(true) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -114,9 +101,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                     if (option == "Go Online") {
                                         mapViewModel.selectedMap.value = null
                                         mapViewModel.offlineMapState.resetSelectedMapArea()
-                                        scope.launch { bottomSheetState.partialExpand() }
+                                        isBottomSheetVisible = true
                                     } else if (option == "Offline Maps") {
-                                        scope.launch { bottomSheetState.expand() }
+                                        isBottomSheetVisible = true
                                     }
                                 },
                                 enabled = option == "Offline Maps" || mapViewModel.selectedMap.value != null
@@ -127,32 +114,29 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             )
         }
     ) { padding ->
-        Box {
+        Box(modifier = Modifier.padding(padding)) {
             // show the composable map using the mapViewModel
             MapView(
                 arcGISMap = mapViewModel.arcGISMap,
                 mapViewProxy = mapViewModel.proxy,
                 onDown = {
-                    if (bottomSheetState.isVisible) {
-                        scope.launch { bottomSheetState.hide() }
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) isBottomSheetVisible = false
                     }
                 },
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically { h -> h },
-                exit = slideOutVertically { h -> h },
-                label = "Offline map areas sheet"
-            ) {
-                OfflineMapAreasSheet(
-                    modifier = Modifier.padding(padding),
-                    offlineMapState = mapViewModel.offlineMapState,
-                    bottomSheetState = bottomSheetState
-                )
-            }
+            OfflineMapAreasSheet(
+                modifier = Modifier,
+                offlineMapState = mapViewModel.offlineMapState,
+                sheetState = sheetState,
+                isBottomSheetVisible = isBottomSheetVisible,
+                onDismiss = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) isBottomSheetVisible = false
+                    }
+                }
+            )
         }
     }
 }
@@ -162,37 +146,26 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
 fun OfflineMapAreasSheet(
     modifier: Modifier = Modifier,
     offlineMapState: OfflineMapState,
-    bottomSheetState: SheetState,
+    sheetState: SheetState,
+    isBottomSheetVisible: Boolean,
+    onDismiss: () -> Unit
 ) {
-    val windowSize = getWindowSize(LocalContext.current)
-
-    SheetLayout(
-        windowSizeClass = windowSize,
-        sheetOffsetY = { bottomSheetState.requireOffset() },
-        modifier = modifier,
-        maxWidth = BottomSheetMaxWidth,
-    ) { layoutWidth, layoutHeight ->
-        StandardBottomSheet(
-            state = bottomSheetState,
-            peekHeight = 40.dp,
-            expansionHeight = SheetExpansionHeight(0.5f),
-            sheetSwipeEnabled = true,
-            shape = RoundedCornerShape(5.dp),
-            layoutHeight = layoutHeight.toFloat(),
-            sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
+    if (isBottomSheetVisible) {
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = sheetState,
+            scrimColor = Color.Transparent,
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
-            OfflineMapAreas(
-                offlineMapState = offlineMapState,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+            Box {
+                OfflineMapAreas(
+                    offlineMapState = offlineMapState,
+                    modifier = modifier
+                        .padding(horizontal = 16.dp)
+                        .animateContentSize()
+                        .align(Alignment.BottomCenter)
+                )
+            }
         }
     }
-}
-
-fun getWindowSize(context: Context): WindowSizeClass {
-    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-    val width = metrics.bounds.width()
-    val height = metrics.bounds.height()
-    val density = context.resources.displayMetrics.density
-    return WindowSizeClass.compute(width / density, height / density)
 }

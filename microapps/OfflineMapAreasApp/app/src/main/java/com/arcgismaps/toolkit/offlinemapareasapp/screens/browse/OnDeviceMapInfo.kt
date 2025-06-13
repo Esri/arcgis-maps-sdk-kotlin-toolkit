@@ -41,9 +41,10 @@ import com.arcgismaps.toolkit.offline.OfflineRepository
 @Composable
 fun OnDeviceMapInfo(
     onClick: (String) -> Unit,
-    offlineMapInfos: List<OfflineMapInfo>,
-    offlineRepository: OfflineRepository,
+    offlineMapInfos: List<OfflineMapInfo>
 ) {
+    val context = LocalContext.current
+
     LazyColumn {
         item {
             Button(
@@ -52,7 +53,7 @@ fun OnDeviceMapInfo(
                     .padding(24.dp),
                 enabled = offlineMapInfos.isNotEmpty(),
                 onClick = {
-                    offlineRepository.removeAllDownloads()
+                    OfflineRepository.removeAllDownloads(context)
                 }) {
                 Text("Remove all downloads")
             }
@@ -65,7 +66,7 @@ fun OnDeviceMapInfo(
                         onClick.invoke(offlineMapInfo.id)
                     },
                     onDelete = {
-                        offlineRepository.removeDownloadsForWebmap(offlineMapInfo)
+                        OfflineRepository.removeDownloadsForWebmap(context,offlineMapInfo)
                     })
             }
         }

@@ -30,6 +30,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
+import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapParameters
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
@@ -58,6 +59,15 @@ internal class PreplannedMapAreaState(
     private val portalItem: PortalItem,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
+
+    internal suspend fun makeParameters(offlineMapTask: OfflineMapTask): DownloadPreplannedOfflineMapParameters? {
+        val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
+            preplannedMapArea = preplannedMapArea
+        ).getOrNull()
+        params?.let { it.updateMode = PreplannedUpdateMode.NoUpdates }
+        return params
+    }
+
     private lateinit var workerUUID: UUID
 
     private lateinit var mobileMapPackage: MobileMapPackage
