@@ -19,18 +19,27 @@
 package com.arcgismaps.toolkit.offline
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
+import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
+import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
+import java.io.File
 
 /**
  * Represents the state of the offline map.
@@ -81,6 +90,22 @@ public class OfflineMapState(
     public val initializationStatus: State<InitializationStatus> = _initializationStatus
 
     /**
+     * A Boolean value indicating if only offline models are being shown.
+     *
+     * @since 200.8.0
+     */
+    internal var isShowingOnlyOfflineModels by mutableStateOf(false)
+        private set
+
+    /**
+     * A Boolean value indicating whether the web map is offline disabled.
+     *
+     * @since 200.8.0
+     */
+    internal var mapIsOfflineDisabled by mutableStateOf(false)
+        private set
+
+    /**
      * Initializes the state object by loading the map, creating and loading the offline map task.
      *
      * @return the [Result] indicating if the initialization was successful or not
@@ -91,48 +116,132 @@ public class OfflineMapState(
             return Result.success(Unit)
         }
         _initializationStatus.value = InitializationStatus.Initializing
-        arcGISMap.load().getOrElse {
-            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
-            throw it
+        // initialize the offline repository
+        _offlineRepository = OfflineRepository(context)
+        // check if the arcgis map can load
+        isShowingOnlyOfflineModels = false
+        // load the map, and ignore network error if device is offline
+        arcGISMap.load().getOrElse { error ->
+            // check if the error is due to network connection
+            if (error.message?.contains("Unable to resolve host") == true) {
+                // enable offline only mode
+                isShowingOnlyOfflineModels = true
+            } else {
+                // unexpected error, report failed status
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                throw error
+            }
         }
 
-        _offlineRepository = OfflineRepository(context)
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItem = (arcGISMap.item as? PortalItem)
             ?: throw IllegalStateException("Item not found")
 
-        offlineMapTask.load().getOrElse {
-            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
-            throw it
+        // load the task, and ignore network error if device is offline
+        offlineMapTask.load().getOrElse { error ->
+            // check if the error is not due to network connection
+            if (error.message?.contains("Unable to resolve host") == false) {
+                // unexpected error, report failed status
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                throw error
+            }
         }
-        val preplannedMapAreas = offlineMapTask.getPreplannedMapAreas().getOrNull()
-        preplannedMapAreas?.let { preplannedMapArea ->
-            _mode = OfflineMapMode.Preplanned
-            preplannedMapArea
-                .sortedBy { it.portalItem.title }
-                .forEach { mapArea ->
-                    val preplannedMapAreaState = PreplannedMapAreaState(
-                        preplannedMapArea = mapArea,
-                        offlineMapTask = offlineMapTask,
-                        portalItem = portalItem,
-                        offlineRepository = _offlineRepository,
-                        onSelectionChanged = onSelectionChanged
-                    )
-                    preplannedMapAreaState.initialize()
-                    val preplannedPath = _offlineRepository.isPrePlannedAreaDownloaded(
-                        portalItemID = portalItem.itemId,
-                        preplannedMapAreaID = mapArea.portalItem.itemId
-                    )
-                    if (preplannedPath != null) {
-                        preplannedMapAreaState.updateStatus(Status.Downloaded)
-                        preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                            mobileMapPackagePath = preplannedPath
-                        )
-                    }
-                    _preplannedMapAreaStates.add(preplannedMapAreaState)
-                }
+
+        // determine if offline is disabled for the map
+        mapIsOfflineDisabled =
+            (arcGISMap.loadStatus.value == LoadStatus.Loaded) && (arcGISMap.offlineSettings == null)
+
+        // load the preplanned map area states
+        loadPreplannedMapAreas(context)
+
+        // check if preplanned for loaded
+        if (_mode != OfflineMapMode.Preplanned || _mode == OfflineMapMode.Unknown) {
+            // TODO: Load OnDemandMapAresState
+            if (_mode == OfflineMapMode.Unknown)
+                _mode = OfflineMapMode.OnDemand
         }
         _initializationStatus.value = InitializationStatus.Initialized
+    }
+
+    /**
+     *
+     * @since 200.8.0
+     */
+    private suspend fun loadPreplannedMapAreas(context: Context) {
+        _mode = OfflineMapMode.Preplanned
+        val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
+        try {
+            preplannedMapAreas.addAll(
+                elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
+            )
+        } catch (e: Exception) {
+            preplannedMapAreas.clear()
+        }
+        if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
+            loadOfflinePreplannedMapAreas(context = context)
+        } else {
+            preplannedMapAreas.let { preplannedMapArea ->
+                preplannedMapArea
+                    .sortedBy { it.portalItem.title }
+                    .forEach { mapArea ->
+                        val preplannedMapAreaState = PreplannedMapAreaState(
+                            preplannedMapArea = mapArea,
+                            offlineMapTask = offlineMapTask,
+                            portalItem = portalItem,
+                            offlineRepository = _offlineRepository,
+                            onSelectionChanged = onSelectionChanged
+                        )
+                        preplannedMapAreaState.initialize()
+                        val preplannedPath = _offlineRepository.isPrePlannedAreaDownloaded(
+                            portalItemID = portalItem.itemId,
+                            preplannedMapAreaID = mapArea.portalItem.itemId
+                        )
+                        if (preplannedPath != null) {
+                            preplannedMapAreaState.updateStatus(Status.Downloaded)
+                            preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                                mobileMapPackagePath = preplannedPath
+                            )
+                        }
+                        _preplannedMapAreaStates.add(preplannedMapAreaState)
+                    }
+            }
+        }
+    }
+
+    /**
+     * Loads the offline preplanned map models with information from the downloaded mobile map
+     * packages for the online map.
+     */
+    private fun loadOfflinePreplannedMapAreas(context: Context) {
+        val preplannedDirectory = File(
+            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)
+        )
+        val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
+            ?: emptyList()
+        preplannedMapAreaItemIds.forEach { itemId ->
+            // TODO
+        }
+
+
+    }
+
+    private suspend fun makeOfflinePreplannedMapAreaState(
+        context: Context,
+        areaItemId: String
+    ): PreplannedMapAreaState? {
+        val areaDir = File(
+            OfflineURLs.prePlannedDirectoryPath(
+                context = context,
+                portalItemID = portalItem.itemId,
+                preplannedMapAreaID = areaItemId
+            )
+        )
+
+        if (!areaDir.exists() || !areaDir.isDirectory) return null
+        val mmpk = MobileMapPackage(areaDir.absolutePath)
+        val loadResult = mmpk.load().getOrNull() ?: return null
+        val item = mmpk.item ?: return null
+        return null
     }
 
     /**
@@ -142,6 +251,15 @@ public class OfflineMapState(
      */
     public fun resetSelectedMapArea() {
         _preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
+    }
+
+    /**
+     * Support to refresh & re-initialize the offline map area state.
+     *
+     * @since 200.8.0
+     */
+    internal fun resetInitialize() {
+        _initializationStatus.value = InitializationStatus.NotInitialized
     }
 }
 
