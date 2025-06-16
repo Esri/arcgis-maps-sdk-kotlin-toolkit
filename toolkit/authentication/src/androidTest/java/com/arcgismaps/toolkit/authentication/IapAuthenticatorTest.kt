@@ -109,7 +109,7 @@ class IapAuthenticatorTest {
     fun verifyIapSignOutAuthenticatorCompletesOnBackPress() {
         var signOutCompleted = false
         var signOutCancelled = false
-        val expectedSignOutUrl = "https://www.google.com/signout"
+        val expectedSignOutUrl = "https://www.arcgis.com/index.html"
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignOutAuthenticator(
