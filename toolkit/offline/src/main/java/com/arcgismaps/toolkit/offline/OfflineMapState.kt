@@ -163,7 +163,6 @@ public class OfflineMapState(
      * @since 200.8.0
      */
     private suspend fun loadPreplannedMapAreas(context: Context) {
-        _mode = OfflineMapMode.Preplanned
         _preplannedMapAreaStates.clear()
         val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
         try {
@@ -176,6 +175,7 @@ public class OfflineMapState(
         if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
+            _mode = OfflineMapMode.Preplanned
             preplannedMapAreas.let { preplannedMapArea ->
                 preplannedMapArea
                     .sortedBy { it.portalItem.title }
@@ -215,6 +215,10 @@ public class OfflineMapState(
         )
         val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
             ?: emptyList()
+
+        if (preplannedMapAreaItemIds.isNotEmpty())
+            _mode = OfflineMapMode.Preplanned
+
         preplannedMapAreaItemIds.forEach { itemId ->
             makeOfflinePreplannedMapAreaState(context, itemId)
                 ?.let { _preplannedMapAreaStates.add(it) }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Error
@@ -95,7 +96,7 @@ internal fun RefreshButton(onRefresh: () -> Unit) {
         Icon(
             modifier = Modifier.size(16.dp),
             imageVector = Icons.Default.Refresh,
-            contentDescription = "A label for a button to refresh map area content."
+            contentDescription = "Icon to refresh map area content."
         )
         Spacer(Modifier.width(4.dp))
         Text(text = stringResource(R.string.refresh), style = MaterialTheme.typography.labelSmall)
@@ -159,7 +160,20 @@ internal fun EmptyOnDemandOfflineAreas(onlyFooterVisible: Boolean = false, onAdd
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.empty_on_demand_message),
         icon = Icons.Default.ArrowDownward,
-        actions = { Button(onClick = onAdd) { Text(stringResource(R.string.map_areas)) } },
+        actions = {
+            Button(onClick = onAdd) {
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Icon to add map area"
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.add_map_area),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        },
         onlyFooterVisible = onlyFooterVisible
     )
 }
