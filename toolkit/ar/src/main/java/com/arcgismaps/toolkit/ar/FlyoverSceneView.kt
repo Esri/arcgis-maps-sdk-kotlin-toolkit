@@ -71,6 +71,8 @@ import java.time.Instant
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param translationFactor the translation factor that defines how much the scene view translates
+ * as the device moves.
  * @param modifier Modifier to be applied to the FlyoverSceneView.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
@@ -112,6 +114,7 @@ import java.time.Instant
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
+    translationFactor: Double,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -193,6 +196,8 @@ public fun FlyoverSceneView(
             flyoverSceneViewProxy.setSessionWrapper(null)
         }
     }
+
+    flyoverSceneViewProxy.setTranslationFactor(translationFactor)
 
     Box(modifier = Modifier) {
         // Use rememberUpdatedState so that the lambda used below always sees the latest proxy. Without
