@@ -91,7 +91,7 @@ internal class PreplannedMapAreaState(
     internal val description = item.description
 
     private var _thumbnail by mutableStateOf<Bitmap?>(null)
-    internal val thumbnail: Bitmap? get() = _thumbnail
+    internal val thumbnail: Bitmap? get() = _thumbnail ?: item.thumbnail?.image?.bitmap
 
     /**
      * Loads and initializes the associated preplanned map area.
