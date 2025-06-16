@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">ไม่ได้อนุมัติสิทธิ์การเข้าถึงกล้อง</string>
-    <string name="arcore_not_installed_message">ต้องติดตั้ง ARCore เพื่อใช้งาน TableTopSceneView ความพร้อมใช้งานของ ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">ก้_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ษฺ</string>
+    <string name="location_data_source_failed_to_start">ก้_Location Data Source failed to start: %1$s______________________ษฺ</string>
+    <string name="location_permission_not_granted">ก้_Location permission not granted_________________ษฺ</string>
+    <string name="permissions_not_granted_message">ก้_"The following permissions are required, but not granted: %1$s"_________________________________ษฺ</string>
+    <string name="close_calibration">ก้_Close calibration__________________ษฺ</string>
+    <string name="heading_title">ก้_Heading_______________ษฺ</string>
+    <string name="decrease_heading">ก้_Decrease Heading_________________ษฺ</string>
+    <string name="increase_heading">ก้_Increase Heading_________________ษฺ</string>
+    <string name="reset_heading">ก้_Reset Heading______________ษฺ</string>
+    <string name="heading_slider_description">ก้_Heading slider_______________ษฺ</string>
+    <string name="elevation_title">ก้_Elevation___________________ษฺ</string>
+    <string name="decrease_elevation">ก้_Decrease Elevation___________________ษฺ</string>
+    <string name="increase_elevation">ก้_Increase Elevation___________________ษฺ</string>
+    <string name="reset_elevation">ก้_Reset Elevation________________ษฺ</string>
+    <string name="elevation_slider_description">ก้_Elevation slider_________________ษฺ</string>
 </resources>

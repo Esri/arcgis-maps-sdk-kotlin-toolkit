@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Permisiunea camerei nu a fost acordată</string>
-    <string name="arcore_not_installed_message">ARTCore trebuie să fie instalat pentru a utiliza TableTopSceneView. Disponibilitatea ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Ă_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ș</string>
+    <string name="location_data_source_failed_to_start">Ă_Location Data Source failed to start: %1$s______________________ș</string>
+    <string name="location_permission_not_granted">Ă_Location permission not granted_________________ș</string>
+    <string name="permissions_not_granted_message">Ă_"The following permissions are required, but not granted: %1$s"_________________________________ș</string>
+    <string name="close_calibration">Ă_Close calibration__________________ș</string>
+    <string name="heading_title">Ă_Heading_______________ș</string>
+    <string name="decrease_heading">Ă_Decrease Heading_________________ș</string>
+    <string name="increase_heading">Ă_Increase Heading_________________ș</string>
+    <string name="reset_heading">Ă_Reset Heading______________ș</string>
+    <string name="heading_slider_description">Ă_Heading slider_______________ș</string>
+    <string name="elevation_title">Ă_Elevation___________________ș</string>
+    <string name="decrease_elevation">Ă_Decrease Elevation___________________ș</string>
+    <string name="increase_elevation">Ă_Increase Elevation___________________ș</string>
+    <string name="reset_elevation">Ă_Reset Elevation________________ș</string>
+    <string name="elevation_slider_description">Ă_Elevation slider_________________ș</string>
 </resources>

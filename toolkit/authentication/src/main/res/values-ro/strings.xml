@@ -21,6 +21,8 @@
     <string name="allow_connection">Permiteți conectarea</string>
     <string name="username_password_login_title">Autentificare necesară</string>
     <string name="username_password_login_message">Trebuie să vă autentificați pentru a accesa %1$s</string>
+    <string name="incorrect_credentials">Ă_The credentials were incorrect for %1$s. Please try again______________________________ș.</string>
+    <string name="sign_in_error_occurred">Ă_An error occurred signing in to %1$s. Please try again_____________________________ș.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nume de utilizator</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

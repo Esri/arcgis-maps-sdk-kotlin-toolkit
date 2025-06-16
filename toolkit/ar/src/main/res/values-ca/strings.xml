@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">No s\'ha concedit el permís de càmera</string>
-    <string name="arcore_not_installed_message">Per fer servir TableTopSceneView, cal que l\'ARCore estigui instal·lat. Disponibilitat de l\'ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">ó_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________à</string>
+    <string name="location_data_source_failed_to_start">ó_Location Data Source failed to start: %1$s______________________à</string>
+    <string name="location_permission_not_granted">ó_Location permission not granted_________________à</string>
+    <string name="permissions_not_granted_message">ó_"The following permissions are required, but not granted: %1$s"_________________________________à</string>
+    <string name="close_calibration">ó_Close calibration__________________à</string>
+    <string name="heading_title">ó_Heading_______________à</string>
+    <string name="decrease_heading">ó_Decrease Heading_________________à</string>
+    <string name="increase_heading">ó_Increase Heading_________________à</string>
+    <string name="reset_heading">ó_Reset Heading______________à</string>
+    <string name="heading_slider_description">ó_Heading slider_______________à</string>
+    <string name="elevation_title">ó_Elevation___________________à</string>
+    <string name="decrease_elevation">ó_Decrease Elevation___________________à</string>
+    <string name="increase_elevation">ó_Increase Elevation___________________à</string>
+    <string name="reset_elevation">ó_Reset Elevation________________à</string>
+    <string name="elevation_slider_description">ó_Elevation slider_________________à</string>
 </resources>

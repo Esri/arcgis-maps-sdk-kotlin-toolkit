@@ -21,6 +21,8 @@
     <string name="allow_connection">Tillåt anslutning</string>
     <string name="username_password_login_title">Autentisering krävs</string>
     <string name="username_password_login_message">Du måste logga in för att få åtkomst till %1$s</string>
+    <string name="incorrect_credentials">Å_The credentials were incorrect for %1$s. Please try again______________________________ö.</string>
+    <string name="sign_in_error_occurred">Å_An error occurred signing in to %1$s. Please try again_____________________________ö.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Användarnamn</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameras atļauja nav piešķirta</string>
-    <string name="arcore_not_installed_message">Ir jāinstalē ARCore, lai varētu izmantot TableTopSceneView. ARCore pieejamība: %1$s</string>
+    <string name="arcore_not_installed_message">ķ_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ū</string>
+    <string name="location_data_source_failed_to_start">ķ_Location Data Source failed to start: %1$s______________________ū</string>
+    <string name="location_permission_not_granted">ķ_Location permission not granted_________________ū</string>
+    <string name="permissions_not_granted_message">ķ_"The following permissions are required, but not granted: %1$s"_________________________________ū</string>
+    <string name="close_calibration">ķ_Close calibration__________________ū</string>
+    <string name="heading_title">ķ_Heading_______________ū</string>
+    <string name="decrease_heading">ķ_Decrease Heading_________________ū</string>
+    <string name="increase_heading">ķ_Increase Heading_________________ū</string>
+    <string name="reset_heading">ķ_Reset Heading______________ū</string>
+    <string name="heading_slider_description">ķ_Heading slider_______________ū</string>
+    <string name="elevation_title">ķ_Elevation___________________ū</string>
+    <string name="decrease_elevation">ķ_Decrease Elevation___________________ū</string>
+    <string name="increase_elevation">ķ_Increase Elevation___________________ū</string>
+    <string name="reset_elevation">ķ_Reset Elevation________________ū</string>
+    <string name="elevation_slider_description">ķ_Elevation slider_________________ū</string>
 </resources>

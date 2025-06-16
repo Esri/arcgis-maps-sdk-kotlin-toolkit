@@ -21,6 +21,8 @@
     <string name="allow_connection">Разрешить подключение</string>
     <string name="username_password_login_title">Требуется аутентификация</string>
     <string name="username_password_login_message">Вам необходимо войти для доступа к %1$s</string>
+    <string name="incorrect_credentials">Ж_The credentials were incorrect for %1$s. Please try again______________________________Я.</string>
+    <string name="sign_in_error_occurred">Ж_An error occurred signing in to %1$s. Please try again_____________________________Я.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Имя пользователя</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
