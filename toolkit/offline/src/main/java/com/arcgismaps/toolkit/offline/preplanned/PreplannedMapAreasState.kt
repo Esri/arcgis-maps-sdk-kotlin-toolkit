@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.offline.preplanned
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -88,7 +89,9 @@ internal class PreplannedMapAreaState(
 
     internal val title = item.title
     internal val description = item.description
-    internal val thumbnail = item.thumbnail
+
+    private var _thumbnail by mutableStateOf<Bitmap?>(null)
+    internal val thumbnail: Bitmap? get() = _thumbnail
 
     /**
      * Loads and initializes the associated preplanned map area.
@@ -103,7 +106,7 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal suspend fun initialize() = runCatchingCancellable {
-        preplannedMapArea?.load()
+        preplannedMapArea?.retryLoad()
             ?.onSuccess {
                 _status = try {
                     Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
@@ -115,7 +118,10 @@ internal class PreplannedMapAreaState(
                     Status.Packaged
                 }
                 // Load the thumbnail
-                preplannedMapArea.portalItem.thumbnail?.load()
+                _thumbnail = preplannedMapArea.portalItem.thumbnail?.let { loadableImage ->
+                    runCatching { loadableImage.load() }
+                    loadableImage.image?.bitmap
+                }
             } ?: {
             // preplannedMapArea is null.
         }

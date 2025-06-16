@@ -117,7 +117,7 @@ public class OfflineMapState(
         // check if the arcgis map can load
         isShowingOnlyOfflineModels = false
         // load the map, and ignore network error if device is offline
-        arcGISMap.load().getOrElse { error ->
+        arcGISMap.retryLoad().getOrElse { error ->
             // check if the error is due to network connection
             if (error.message?.contains("Unable to resolve host") == true) {
                 // enable offline only mode
@@ -133,7 +133,7 @@ public class OfflineMapState(
             ?: throw IllegalStateException("Item not found")
 
         // load the task, and ignore network error if device is offline
-        offlineMapTask.load().getOrElse { error ->
+        offlineMapTask.retryLoad().getOrElse { error ->
             // check if the error is not due to network connection
             if (error.message?.contains("Unable to resolve host") == false) {
                 // unexpected error, report failed status
@@ -164,6 +164,7 @@ public class OfflineMapState(
      */
     private suspend fun loadPreplannedMapAreas(context: Context) {
         _mode = OfflineMapMode.Preplanned
+        _preplannedMapAreaStates.clear()
         val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
         try {
             preplannedMapAreas.addAll(
