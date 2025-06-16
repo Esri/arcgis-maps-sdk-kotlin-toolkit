@@ -176,7 +176,7 @@ internal class PreplannedMapAreaState(
      * Defines a directory path where map data will be stored and creates a download job using these configurations.
      *
      * @param preplannedMapArea The target [PreplannedMapArea] to be downloaded offline.
-     *
+     * @param offlineMapTask The target [OfflineMapTask] to create the params & the job.
      * @return An instance of [DownloadPreplannedOfflineMapJob] configured with download parameters.
      *
      * @since 200.8.0
