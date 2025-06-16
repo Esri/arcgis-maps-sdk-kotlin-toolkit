@@ -67,9 +67,7 @@ public fun OfflineMapAreas(
         if (isRefreshEnabled) {
             offlineMapState.resetInitialize()
         }
-        offlineMapState.initialize(context).onFailure {
-            Log.e("TAG", it.stackTraceToString())
-        }
+        offlineMapState.initialize(context)
         isRefreshEnabled = false
     }
 
@@ -92,10 +90,13 @@ public fun OfflineMapAreas(
             }
 
             is InitializationStatus.Initialized -> {
+                // Check if the map has offline mode disabled
                 if (offlineMapState.mapIsOfflineDisabled) {
                     OfflineDisabled(onRefresh = { isRefreshEnabled = true })
                 } else {
+                    // If offline mode is enabled, display the offline modes
                     when (offlineMapState.mode) {
+                        // For preplanned, display online & offline map areas.
                         OfflineMapMode.Preplanned -> {
                             Column {
                                 PreplannedMapAreas(
@@ -112,7 +113,7 @@ public fun OfflineMapAreas(
                                 }
                             }
                         }
-
+                        // If not preplanned state & map has offline mode enabled, display the on demand areas
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
                             // TODO: Init OnDemand screen...
                             EmptyOnDemandOfflineAreas(onAdd = {

@@ -114,7 +114,7 @@ public class OfflineMapState(
         _initializationStatus.value = InitializationStatus.Initializing
         // initialize the offline repository
         OfflineRepository.refreshOfflineMapInfos(context)
-        // check if the arcgis map can load
+        // reset to check if map has offline enabled
         isShowingOnlyOfflineModels = false
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
@@ -159,6 +159,9 @@ public class OfflineMapState(
     }
 
     /**
+     * Loads preplanned map areas from the [portalItem], initializes their [preplannedMapAreaStates],
+     * and updates download status. If no online areas are available or “offline-only” mode is enabled,
+     * falls back [loadOfflinePreplannedMapAreas].
      *
      * @since 200.8.0
      */
@@ -206,8 +209,10 @@ public class OfflineMapState(
     }
 
     /**
-     * Loads the offline preplanned map models with information from the downloaded mobile map
-     * packages for the online map.
+     * Scans the local preplanned directory for downloaded maps and creates [PreplannedMapAreaState]s.
+     * Sets the [OfflineMapMode.Preplanned] when any local areas are found.
+     *
+     * @since 200.8.0
      */
     private suspend fun loadOfflinePreplannedMapAreas(context: Context) {
         val preplannedDirectory = File(
@@ -225,6 +230,13 @@ public class OfflineMapState(
         }
     }
 
+    /**
+     * Attempts to create a [PreplannedMapAreaState] for a given area ID by loading
+     * its [MobileMapPackage] from disk. Returns null if the directory is missing
+     * or the package fails to load; otherwise initializes status and map.
+     *
+     * @since 200.8.0
+     */
     private suspend fun makeOfflinePreplannedMapAreaState(
         context: Context,
         areaItemId: String
