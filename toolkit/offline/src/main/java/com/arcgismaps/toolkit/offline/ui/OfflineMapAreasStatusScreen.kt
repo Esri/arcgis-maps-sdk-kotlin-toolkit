@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
 
 @Composable
-internal fun ContentUnavailable(
+internal fun OfflineMapAreasStatusContent(
     title: String,
     message: String,
     icon: ImageVector,
@@ -68,20 +68,20 @@ internal fun ContentUnavailable(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
                 Text(
                     modifier = Modifier.wrapContentSize(),
                     text = message,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
         } else {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
+            Icon(icon, contentDescription = null, modifier = Modifier.size(28.dp))
             Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
             Text(message, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
@@ -93,17 +93,18 @@ internal fun ContentUnavailable(
 internal fun RefreshButton(onRefresh: () -> Unit) {
     Button(onClick = onRefresh) {
         Icon(
-            Icons.Default.Refresh,
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.Default.Refresh,
             contentDescription = "A label for a button to refresh map area content."
         )
         Spacer(Modifier.width(4.dp))
-        Text(stringResource(R.string.refresh))
+        Text(text = stringResource(R.string.refresh), style = MaterialTheme.typography.labelSmall)
     }
 }
 
 @Composable
 internal fun NoInternetNoAreas(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
-    ContentUnavailable(
+    OfflineMapAreasStatusContent(
         title = stringResource(R.string.no_internet_connection_error_message),
         message = stringResource(R.string.no_internet_error_message),
         icon = Icons.Default.WifiOff,
@@ -117,7 +118,7 @@ internal fun EmptyPreplannedOfflineAreas(
     onlyFooterVisible: Boolean = false,
     onRefresh: () -> Unit
 ) {
-    ContentUnavailable(
+    OfflineMapAreasStatusContent(
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.no_offline_map_areas_error_message),
         icon = Icons.Default.ArrowDownward,
@@ -127,10 +128,14 @@ internal fun EmptyPreplannedOfflineAreas(
 }
 
 @Composable
-internal fun PreplannedError(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
-    ContentUnavailable(
+internal fun OfflineMapAreasError(
+    error: Throwable,
+    onlyFooterVisible: Boolean = false,
+    onRefresh: () -> Unit
+) {
+    OfflineMapAreasStatusContent(
         title = stringResource(R.string.error_fetching_areas),
-        message = stringResource(R.string.error_fetching_areas_message),
+        message = stringResource(R.string.error_fetching_areas_message) + "\n\n" + error.message,
         icon = Icons.Default.Error,
         actions = { RefreshButton(onRefresh) },
         onlyFooterVisible = onlyFooterVisible
@@ -139,7 +144,7 @@ internal fun PreplannedError(onlyFooterVisible: Boolean = false, onRefresh: () -
 
 @Composable
 internal fun OfflineDisabled(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
-    ContentUnavailable(
+    OfflineMapAreasStatusContent(
         title = stringResource(R.string.offline_disabled),
         message = stringResource(R.string.offline_disabled_message),
         icon = Icons.Default.Block,
@@ -150,7 +155,7 @@ internal fun OfflineDisabled(onlyFooterVisible: Boolean = false, onRefresh: () -
 
 @Composable
 internal fun EmptyOnDemandOfflineAreas(onlyFooterVisible: Boolean = false, onAdd: () -> Unit) {
-    ContentUnavailable(
+    OfflineMapAreasStatusContent(
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.empty_on_demand_message),
         icon = Icons.Default.ArrowDownward,
@@ -191,10 +196,10 @@ private fun EmptyPreplannedOfflineAreasPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreplannedErrorPreview() {
+private fun OfflineMapAreasErrorPreview() {
     MaterialTheme {
         Surface {
-            PreplannedError { }
+            OfflineMapAreasError(error = Throwable("Failed to initialize map areas")) { }
         }
     }
 }
@@ -211,7 +216,7 @@ private fun OfflineDisabledPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentUnavailablePreview() {
+private fun EmptyOnDemandOfflineAreasPreview() {
     MaterialTheme {
         Surface {
             EmptyOnDemandOfflineAreas { }

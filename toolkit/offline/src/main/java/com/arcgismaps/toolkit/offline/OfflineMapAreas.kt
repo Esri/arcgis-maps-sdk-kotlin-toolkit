@@ -43,8 +43,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
+import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
+import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
 import com.arcgismaps.toolkit.offline.ui.OfflineDisabled
+import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
 
 /**
  * Take a web map offline by downloading map areas.
@@ -82,9 +85,9 @@ public fun OfflineMapAreas(
             }
 
             is InitializationStatus.FailedToInitialize -> {
-                NonRecoveredErrorIndicator(
-                    error = (initializationStatus as InitializationStatus.FailedToInitialize).error,
-                    onRefresh = { isRefreshEnabled = true }
+                OfflineMapAreasError(
+                    onRefresh = { isRefreshEnabled = true },
+                    error = (initializationStatus as InitializationStatus.FailedToInitialize).error
                 )
             }
 
@@ -101,34 +104,24 @@ public fun OfflineMapAreas(
                                 )
                                 if (offlineMapState.isShowingOnlyOfflineModels) {
                                     NoInternetNoAreas(
-                                        onlyFooterVisible = true,
-                                        onRefresh = { isRefreshEnabled = true })
+                                        onlyFooterVisible = offlineMapState.preplannedMapAreaStates.isNotEmpty(),
+                                        onRefresh = { isRefreshEnabled = true }
+                                    )
+                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()){
+                                    EmptyPreplannedOfflineAreas(onRefresh = { isRefreshEnabled = true })
                                 }
                             }
                         }
 
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
                             // TODO: Init OnDemand screen...
+                            EmptyOnDemandOfflineAreas(onAdd = {
+                                // TODO: Add new on demand map area
+                            })
                         }
                     }
                 }
             }
         }
-    }
-}
-
-
-@Composable
-private fun NonRecoveredErrorIndicator(error: Throwable, onRefresh: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(
-            Icons.Default.Info,
-            contentDescription = stringResource(id = R.string.error),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Text(
-            text = error.message.toString(),
-            color = MaterialTheme.colorScheme.error
-        )
     }
 }

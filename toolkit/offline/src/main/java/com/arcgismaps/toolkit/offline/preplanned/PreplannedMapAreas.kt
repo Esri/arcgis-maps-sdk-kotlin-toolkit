@@ -100,7 +100,7 @@ internal fun PreplannedMapAreas(
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
-            thumbnail = selectedPreplannedMapAreaState.thumbnail?.image?.bitmap?.asImageBitmap(),
+            thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
             title = selectedPreplannedMapAreaState.title,
             description = selectedPreplannedMapAreaState.description,
             size = selectedPreplannedMapAreaState.directorySize,
@@ -143,7 +143,7 @@ internal fun PreplannedMapAreas(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Display the thumbnail image if available, otherwise show a placeholder icon
-                    val thumbnail = state.thumbnail?.image?.bitmap?.asImageBitmap()
+                    val thumbnail = state.thumbnail?.asImageBitmap()
                     Box(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
