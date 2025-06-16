@@ -59,8 +59,9 @@ class IapAuthenticatorTest {
         }
 
         composeTestRule.waitForIdle()
-        // Verify that the Custom Tab is launched with the correct URL
+        // Verify that the Custom Tab is launched
         uiDevice.awaitViewVisible("com.android.chrome")
+        // Simulate a successful redirect by sending an intent with the expected redirect URI
         InstrumentationRegistry.getInstrumentation().context.startActivity(createSuccessfulRedirectIntent("$expectedRedirectUri://auth"))
         composeTestRule.waitForIdle()
         // Verify that the redirect URI was received
@@ -72,19 +73,20 @@ class IapAuthenticatorTest {
     /**
      * Given an [IapSignInAuthenticator] composable,
      * When the browser is launched
-     * And the user cancels the operation by pressing back,
+     * And the user cancels the operation by pressing the back button,
      * Then it should handle cancellation correctly.
      *
      * @since 200.8.0
      */
     @Test
     fun verifyIapAuthenticatorHandlesCancellation() {
+        var onCompleteCalled = false
         var cancellationHandled = false
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
                 authorizedUrl = "https://www.arcgis.com/index.html",
-                onComplete = { /* Handle success */ },
+                onComplete = { onCompleteCalled = true },
                 onCancel = { cancellationHandled = true }
             )
         }
@@ -95,6 +97,7 @@ class IapAuthenticatorTest {
         composeTestRule.waitForIdle()
         // Verify that the cancellation was handled
         assertThat(cancellationHandled).isTrue()
+        assertThat(onCompleteCalled).isFalse()
     }
 
     /**
