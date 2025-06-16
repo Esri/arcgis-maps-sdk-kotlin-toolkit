@@ -19,8 +19,6 @@
 package com.arcgismaps.toolkit.offline.ui.material3.tokens
 
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.offline.ui.material3.ColorSchemeKeyTokens
-import com.arcgismaps.toolkit.offline.ui.material3.tokens.ShapeKeyTokens
 
 internal object SheetBottomTokens {
     val DockedContainerColor = ColorSchemeKeyTokens.SurfaceContainerLow

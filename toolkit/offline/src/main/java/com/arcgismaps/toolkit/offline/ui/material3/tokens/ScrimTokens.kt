@@ -18,8 +18,6 @@
 
 package com.arcgismaps.toolkit.offline.ui.material3.tokens
 
-import com.arcgismaps.toolkit.offline.ui.material3.ColorSchemeKeyTokens
-
 internal object ScrimTokens {
     val ContainerColor = ColorSchemeKeyTokens.Scrim
     const val ContainerOpacity = 0.32f

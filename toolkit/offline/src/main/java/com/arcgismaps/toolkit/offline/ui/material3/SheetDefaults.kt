@@ -59,6 +59,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.runtime.ReadOnlyComposable
+import com.arcgismaps.toolkit.offline.ui.material3.tokens.ColorSchemeKeyTokens
+import com.arcgismaps.toolkit.offline.ui.material3.tokens.fromToken
 
 /**
  * State of a sheet composable, such as [ModalBottomSheet]
@@ -326,7 +328,7 @@ internal object BottomSheetDefaults {
         shape: Shape = MaterialTheme.shapes.extraLarge,
         color: Color = SheetBottomTokens.DockedDragHandleColor.value,
     ) {
-        val dragHandleDescription = getString(Strings.BottomSheetDragHandleDescription)
+        val dragHandleDescription = "Drag handle"
         Surface(
             modifier =
                 modifier.padding(vertical = DragHandleVerticalPadding).semantics {
