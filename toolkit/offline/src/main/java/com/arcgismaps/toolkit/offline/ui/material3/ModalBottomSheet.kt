@@ -55,7 +55,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.ui.R
 import androidx.compose.material3.Surface
@@ -537,7 +536,6 @@ private fun Scrim(color: Color, onDismissRequest: () -> Unit, visible: Boolean) 
 }
 
 @Composable
-@ExperimentalMaterial3Api
 @Deprecated(
     level = DeprecationLevel.HIDDEN,
     message = "Use constructor with contentWindowInsets parameter.",
@@ -564,16 +562,16 @@ private fun Scrim(color: Color, onDismissRequest: () -> Unit, visible: Boolean) 
 internal fun ModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    sheetState: androidx.compose.material3.SheetState = androidx.compose.material3.rememberModalBottomSheetState(),
-    sheetMaxWidth: Dp = androidx.compose.material3.BottomSheetDefaults.SheetMaxWidth,
-    shape: Shape = androidx.compose.material3.BottomSheetDefaults.ExpandedShape,
-    containerColor: Color = androidx.compose.material3.BottomSheetDefaults.ContainerColor,
+    sheetState: SheetState = rememberModalBottomSheetState(),
+    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
+    shape: Shape = BottomSheetDefaults.ExpandedShape,
+    containerColor: Color = BottomSheetDefaults.ContainerColor,
     contentColor: Color = contentColorFor(containerColor),
     tonalElevation: Dp = 0.dp,
-    scrimColor: Color = androidx.compose.material3.BottomSheetDefaults.ScrimColor,
-    dragHandle: @Composable (() -> Unit)? = { androidx.compose.material3.BottomSheetDefaults.DragHandle() },
-    windowInsets: WindowInsets = androidx.compose.material3.BottomSheetDefaults.windowInsets,
-    properties: androidx.compose.material3.ModalBottomSheetProperties = androidx.compose.material3.ModalBottomSheetDefaults.properties,
+    scrimColor: Color = BottomSheetDefaults.ScrimColor,
+    dragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
+    windowInsets: WindowInsets = BottomSheetDefaults.windowInsets,
+    properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties,
     content: @Composable ColumnScope.() -> Unit,
 ) =
     ModalBottomSheet(
@@ -798,7 +796,7 @@ private class ModalBottomSheetDialogWrapper(
     ComponentDialog(
         ContextThemeWrapper(
             composeView.context,
-            androidx.compose.material3.R.style.EdgeToEdgeFloatingDialogWindowTheme
+            com.arcgismaps.toolkit.offline.R.style.OfflineEdgeToEdgeFloatingDialogWindowTheme
         )
     ),
     ViewRootForInspector {
