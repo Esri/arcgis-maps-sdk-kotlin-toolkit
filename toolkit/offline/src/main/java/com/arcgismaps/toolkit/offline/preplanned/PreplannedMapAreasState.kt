@@ -26,11 +26,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.arcgismaps.location.LocationDisplayAutoPanMode
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Item
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
-import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapParameters
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
@@ -54,19 +55,11 @@ import java.util.UUID
  */
 internal class PreplannedMapAreaState(
     private val context: Context,
-    internal val preplannedMapArea: PreplannedMapArea,
-    private val offlineMapTask: OfflineMapTask,
-    private val portalItem: PortalItem,
+    private val item: Item,
+    internal val preplannedMapArea: PreplannedMapArea? = null,
+    private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
-
-    internal suspend fun makeParameters(offlineMapTask: OfflineMapTask): DownloadPreplannedOfflineMapParameters? {
-        val params = offlineMapTask.createDefaultDownloadPreplannedOfflineMapParameters(
-            preplannedMapArea = preplannedMapArea
-        ).getOrNull()
-        params?.let { it.updateMode = PreplannedUpdateMode.NoUpdates }
-        return params
-    }
 
     private lateinit var workerUUID: UUID
 
@@ -93,6 +86,10 @@ internal class PreplannedMapAreaState(
 
     private lateinit var scope: CoroutineScope
 
+    internal val title = item.title
+    internal val description = item.description
+    internal val thumbnail = item.thumbnail
+
     /**
      * Loads and initializes the associated preplanned map area.
      *
@@ -106,8 +103,8 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal suspend fun initialize() = runCatchingCancellable {
-        preplannedMapArea.load()
-            .onSuccess {
+        preplannedMapArea?.load()
+            ?.onSuccess {
                 _status = try {
                     Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
                 } catch (illegalStateException: IllegalStateException) {
@@ -119,7 +116,9 @@ internal class PreplannedMapAreaState(
                 }
                 // Load the thumbnail
                 preplannedMapArea.portalItem.thumbnail?.load()
-            }
+            } ?: {
+            // preplannedMapArea is null.
+        }
     }
 
     /**
@@ -127,24 +126,30 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-    internal fun downloadPreplannedMapArea() = runCatchingCancellable {
-        scope = CoroutineScope(Dispatchers.IO)
-        scope.launch {
-            _status = Status.Downloading
-            val offlineWorkerUUID = startOfflineMapJob(
-                downloadPreplannedOfflineMapJob = createOfflineMapJob(
-                    preplannedMapArea = preplannedMapArea
+    internal fun downloadPreplannedMapArea() =
+        runCatchingCancellable {
+            scope = CoroutineScope(Dispatchers.IO)
+            val area = preplannedMapArea ?: return@runCatchingCancellable
+            val task = offlineMapTask ?: return@runCatchingCancellable
+            val portalItem = item as? PortalItem ?: return@runCatchingCancellable
+
+            scope.launch {
+                _status = Status.Downloading
+                val offlineWorkerUUID = startOfflineMapJob(
+                    downloadPreplannedOfflineMapJob = createOfflineMapJob(
+                        preplannedMapArea = area,
+                        offlineMapTask = task
+                    )
                 )
-            )
-            OfflineRepository.observeStatusForPreplannedWork(
-                context = context,
-                onWorkInfoStateChanged = ::logWorkInfo,
-                preplannedMapAreaState = this@PreplannedMapAreaState,
-                portalItem = portalItem,
-                offlineWorkerUUID = offlineWorkerUUID
-            )
+                OfflineRepository.observeStatusForPreplannedWork(
+                    context = context,
+                    onWorkInfoStateChanged = ::logWorkInfo,
+                    preplannedMapAreaState = this@PreplannedMapAreaState,
+                    portalItem = portalItem,
+                    offlineWorkerUUID = offlineWorkerUUID
+                )
+            }
         }
-    }
 
     /**
      * Cancels the current coroutine scope.
@@ -171,7 +176,8 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     private suspend fun createOfflineMapJob(
-        preplannedMapArea: PreplannedMapArea
+        preplannedMapArea: PreplannedMapArea,
+        offlineMapTask: OfflineMapTask
     ): DownloadPreplannedOfflineMapJob {
 
         // Create default download parameters from the offline map task
@@ -186,7 +192,7 @@ internal class PreplannedMapAreaState(
         // Define the path where the map will be saved
         val preplannedMapAreaDownloadDirectory = OfflineRepository.createPendingPreplannedJobPath(
             context = context,
-            portalItemID = portalItem.itemId,
+            portalItemID = item.itemId,
             preplannedMapAreaID = preplannedMapArea.portalItem.itemId
         )
 
@@ -220,7 +226,7 @@ internal class PreplannedMapAreaState(
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
             jsonJobPath = jsonJobFile.path,
-            preplannedMapAreaTitle = preplannedMapArea.portalItem.title
+            preplannedMapAreaTitle = item.title
         )
 
         return workerUUID
@@ -245,7 +251,7 @@ internal class PreplannedMapAreaState(
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
-                    portalItemID = portalItem.itemId
+                    portalItemID = item.itemId
                 )
             }
             val localScope = CoroutineScope(Dispatchers.IO)

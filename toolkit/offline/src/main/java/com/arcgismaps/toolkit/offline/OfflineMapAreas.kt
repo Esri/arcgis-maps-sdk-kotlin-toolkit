@@ -100,7 +100,9 @@ public fun OfflineMapAreas(
                                     modifier = modifier
                                 )
                                 if (offlineMapState.isShowingOnlyOfflineModels) {
-                                    NoInternetNoAreas(onRefresh = { isRefreshEnabled = true })
+                                    NoInternetNoAreas(
+                                        onlyFooterVisible = true,
+                                        onRefresh = { isRefreshEnabled = true })
                                 }
                             }
                         }

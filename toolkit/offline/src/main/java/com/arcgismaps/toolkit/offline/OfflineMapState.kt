@@ -175,46 +175,48 @@ public class OfflineMapState(
         if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
-        preplannedMapAreas.let { preplannedMapArea ->
-            preplannedMapArea
-                .sortedBy { it.portalItem.title }
-                .forEach { mapArea ->
-                    val preplannedMapAreaState = PreplannedMapAreaState(
-                        context = context,
-                        preplannedMapArea = mapArea,
-                        offlineMapTask = offlineMapTask,
-                        portalItem = portalItem,
-                        onSelectionChanged = onSelectionChanged
-                    )
-                    preplannedMapAreaState.initialize()
-                    val preplannedPath = OfflineRepository.isPrePlannedAreaDownloaded(
-                        context = context,
-                        portalItemID = portalItem.itemId,
-                        preplannedMapAreaID = mapArea.portalItem.itemId
-                    )
-                    if (preplannedPath != null) {
-                        preplannedMapAreaState.updateStatus(Status.Downloaded)
-                        preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                            mobileMapPackagePath = preplannedPath
+            preplannedMapAreas.let { preplannedMapArea ->
+                preplannedMapArea
+                    .sortedBy { it.portalItem.title }
+                    .forEach { mapArea ->
+                        val preplannedMapAreaState = PreplannedMapAreaState(
+                            context = context,
+                            preplannedMapArea = mapArea,
+                            offlineMapTask = offlineMapTask,
+                            item = portalItem,
+                            onSelectionChanged = onSelectionChanged
                         )
+                        preplannedMapAreaState.initialize()
+                        val preplannedPath = OfflineRepository.isPrePlannedAreaDownloaded(
+                            context = context,
+                            portalItemID = portalItem.itemId,
+                            preplannedMapAreaID = mapArea.portalItem.itemId
+                        )
+                        if (preplannedPath != null) {
+                            preplannedMapAreaState.updateStatus(Status.Downloaded)
+                            preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                                mobileMapPackagePath = preplannedPath
+                            )
+                        }
+                        _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
-                    _preplannedMapAreaStates.add(preplannedMapAreaState)
-                }
+            }
         }
     }
-}
+
     /**
      * Loads the offline preplanned map models with information from the downloaded mobile map
      * packages for the online map.
      */
-    private fun loadOfflinePreplannedMapAreas(context: Context) {
+    private suspend fun loadOfflinePreplannedMapAreas(context: Context) {
         val preplannedDirectory = File(
             OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)
         )
         val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
             ?: emptyList()
         preplannedMapAreaItemIds.forEach { itemId ->
-            // TODO
+            makeOfflinePreplannedMapAreaState(context, itemId)
+                ?.let { _preplannedMapAreaStates.add(it) }
         }
     }
 
@@ -229,12 +231,29 @@ public class OfflineMapState(
                 preplannedMapAreaID = areaItemId
             )
         )
-
         if (!areaDir.exists() || !areaDir.isDirectory) return null
-        val mmpk = MobileMapPackage(areaDir.absolutePath)
-        val loadResult = mmpk.load().getOrNull() ?: return null
+        val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
+            load().getOrElse { return null }
+        }
         val item = mmpk.item ?: return null
-        return null
+
+        val preplannedMapAreaState = PreplannedMapAreaState(
+            context = context,
+            item = item,
+            onSelectionChanged = onSelectionChanged
+        )
+        val preplannedPath = OfflineRepository.isPrePlannedAreaDownloaded(
+            context = context,
+            portalItemID = portalItem.itemId,
+            preplannedMapAreaID = areaItemId
+        )
+        if (preplannedPath != null) {
+            preplannedMapAreaState.updateStatus(Status.Downloaded)
+            preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                mobileMapPackagePath = preplannedPath
+            )
+        }
+        return preplannedMapAreaState
     }
 
     /**

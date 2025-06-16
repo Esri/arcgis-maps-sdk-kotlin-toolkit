@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Block
@@ -53,6 +54,7 @@ internal fun ContentUnavailable(
     title: String,
     message: String,
     icon: ImageVector,
+    onlyFooterVisible: Boolean,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     Column(
@@ -62,10 +64,28 @@ internal fun ContentUnavailable(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
-        Text(title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
-        Text(message, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
+        if (onlyFooterVisible) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
+                Text(
+                    modifier = Modifier.wrapContentSize(),
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
+        } else {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
+            Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+            Text(message, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
+        }
     }
 }
 
@@ -82,52 +102,60 @@ internal fun RefreshButton(onRefresh: () -> Unit) {
 }
 
 @Composable
-internal fun NoInternetNoAreas(onRefresh: () -> Unit) {
+internal fun NoInternetNoAreas(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
     ContentUnavailable(
         title = stringResource(R.string.no_internet_connection_error_message),
         message = stringResource(R.string.no_internet_error_message),
         icon = Icons.Default.WifiOff,
-        actions = { RefreshButton(onRefresh) }
+        actions = { RefreshButton(onRefresh) },
+        onlyFooterVisible = onlyFooterVisible
     )
 }
 
 @Composable
-internal fun EmptyPreplannedOfflineAreas(onRefresh: () -> Unit) {
+internal fun EmptyPreplannedOfflineAreas(
+    onlyFooterVisible: Boolean = false,
+    onRefresh: () -> Unit
+) {
     ContentUnavailable(
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.no_offline_map_areas_error_message),
         icon = Icons.Default.ArrowDownward,
-        actions = { RefreshButton(onRefresh) }
+        actions = { RefreshButton(onRefresh) },
+        onlyFooterVisible = onlyFooterVisible
     )
 }
 
 @Composable
-internal fun PreplannedError(onRefresh: () -> Unit) {
+internal fun PreplannedError(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
     ContentUnavailable(
         title = stringResource(R.string.error_fetching_areas),
         message = stringResource(R.string.error_fetching_areas_message),
         icon = Icons.Default.Error,
-        actions = { RefreshButton(onRefresh) }
+        actions = { RefreshButton(onRefresh) },
+        onlyFooterVisible = onlyFooterVisible
     )
 }
 
 @Composable
-internal fun OfflineDisabled(onRefresh: () -> Unit) {
+internal fun OfflineDisabled(onlyFooterVisible: Boolean = false, onRefresh: () -> Unit) {
     ContentUnavailable(
         title = stringResource(R.string.offline_disabled),
         message = stringResource(R.string.offline_disabled_message),
         icon = Icons.Default.Block,
-        actions = { RefreshButton(onRefresh) }
+        actions = { RefreshButton(onRefresh) },
+        onlyFooterVisible = onlyFooterVisible
     )
 }
 
 @Composable
-internal fun EmptyOnDemandOfflineAreas(onAdd: () -> Unit) {
+internal fun EmptyOnDemandOfflineAreas(onlyFooterVisible: Boolean = false, onAdd: () -> Unit) {
     ContentUnavailable(
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.empty_on_demand_message),
         icon = Icons.Default.ArrowDownward,
-        actions = { Button(onClick = onAdd) { Text(stringResource(R.string.map_areas)) } }
+        actions = { Button(onClick = onAdd) { Text(stringResource(R.string.map_areas)) } },
+        onlyFooterVisible = onlyFooterVisible
     )
 }
 
@@ -137,6 +165,16 @@ private fun NoInternetNoAreasPreview() {
     MaterialTheme {
         Surface {
             NoInternetNoAreas { }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NoInternetNoAreasFooterPreview() {
+    MaterialTheme {
+        Surface {
+            NoInternetNoAreas(onlyFooterVisible = true) { }
         }
     }
 }
@@ -166,7 +204,7 @@ private fun PreplannedErrorPreview() {
 private fun OfflineDisabledPreview() {
     MaterialTheme {
         Surface {
-            OfflineDisabled({})
+            OfflineDisabled { }
         }
     }
 }
