@@ -44,7 +44,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
  * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. Sign-out is currently only supported
- * IAP. The behavior for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
+ * for IAP. The behavior for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
  * for user interaction and processes the result upon completion.
  *
  * This activity must be registered in your application's manifest. There are two ways to configure
@@ -52,7 +52,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  *
  * When completing an authentication challenge by signing in or signing out, the Custom Tabs should redirect back to
  * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
- * This applies to both OAuth and IAP sign-in and sign-out flows.
+ * This applies to both OAuth and IAP flows.
  * In this case, the activity should be declared in the manifest using `launchMode="singleTop"` and an
  * `intent-filter` should be specified:
  *
@@ -101,7 +101,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  * ```
  *
  * Currently, IAP sign-out does not support a redirect URI, so the `OAuthUserSignInActivity` must be used to handle the
- * sign-out flow. This can be done by intercepting the `close` event in the Custom Tabs.
+ * sign-out flow. This can be done by intercepting when the user presses the back button or the close button in the Custom Tab.
  * @since 200.2.0
  */
 public class OAuthUserSignInActivity : ComponentActivity() {
