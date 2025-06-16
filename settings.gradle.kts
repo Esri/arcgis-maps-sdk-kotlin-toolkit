@@ -99,6 +99,7 @@ dependencyResolutionManagement {
 // fixes https://issuetracker.google.com/issues/315023802
 gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
 
+include(":mapsSdk")
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
 include(":kdoc")

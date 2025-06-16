@@ -84,7 +84,7 @@ android {
 
 dependencies {
     implementation(project(":geoview-compose"))
-    implementation(arcgis.mapsSdk)
+    implementation(project(":mapsSdk"))
     implementation(project(":popup"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

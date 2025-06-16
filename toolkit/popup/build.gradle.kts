@@ -84,7 +84,7 @@ apiValidation {
 }
 
 dependencies {
-    api(arcgis.mapsSdk)
+    api(project(":mapsSdk"))
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))

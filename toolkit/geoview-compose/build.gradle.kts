@@ -74,7 +74,7 @@ android {
 }
 
 dependencies {
-    api(arcgis.mapsSdk)
+    api(project(":mapsSdk"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
@@ -84,4 +84,20 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
+
+    implementation(libs.kotlin.std.lib)
+    implementation(libs.ktx.core)
+    implementation(libs.coroutines.android)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.security)
+    implementation(libs.serialization)
+
+    // dependencies that need to be in the aar consumer's classpath.
+    implementation(libs.lifecycle.common)
+    implementation(libs.coroutines.core)
+
+    // OkHttp dependencies
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp.url.connection)
+    implementation(libs.okhttp)
 }

@@ -35,8 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.GeometryType
@@ -51,6 +53,9 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.mapping.view.geometryeditor.VertexTool
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 // line symbol of the graphic sketched on the map
 private val lineSymbol: SimpleLineSymbol by lazy {
@@ -79,6 +84,9 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val mapViewProxy = remember { MapViewProxy() }
+    val coroutineScope = rememberCoroutineScope()
+
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     // the list of graphics overlays used by the MapView
     var graphicsOverlays by remember { mutableStateOf(emptyList<GraphicsOverlay>()) }
@@ -143,7 +151,18 @@ fun MainScreen() {
                 .padding(innerPadding)
                 .fillMaxSize(),
             geometryEditor = geometryEditor,
-            graphicsOverlays = graphicsOverlays
+            graphicsOverlays = graphicsOverlays,
+            mapViewProxy = mapViewProxy,
+            onDoubleTap = {
+                coroutineScope.launch {
+                    val result = mapViewProxy.identifyGeometryEditor(it.screenCoordinate, 15.dp)
+                    result.onSuccess {
+                        result.getOrNull()?.elements?.firstOrNull()?.let {
+                            mapViewProxy.setViewpointGeometry(it.extent as Geometry)
+                        }
+                    }
+                }
+            }
         )
     }
 }

@@ -89,7 +89,7 @@ dependencies {
     // Puts the version in the KDoc
     dokkaPlugin(libs.dokka.versioning)
     // put exposed dependencies in dokka's classpath
-    implementation(arcgis.mapsSdk)
+    implementation(project(":mapsSdk"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
 }
