@@ -119,7 +119,7 @@ public class OfflineMapState(
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
             // check if the error is due to network connection
-            if (error.message?.contains("Unable to resolve host") == false) {
+            if (error.message?.contains("Unable to resolve host") == true) {
                 // enable offline only mode
                 isShowingOnlyOfflineModels = true
             } else {
