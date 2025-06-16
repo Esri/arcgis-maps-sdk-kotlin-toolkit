@@ -18,10 +18,12 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
+import com.arcgismaps.mapping.view.IdentifyGeometryEditorResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -101,6 +103,33 @@ public class MapViewProxy : GeoViewProxy("MapView") {
         } catch (t: Throwable) {
             null
         }
+    }
+
+    /**
+     * Initiate an Identify operation on the mapView's [geometryEditor], if any, to return GeometryEditor elements.
+     *
+     * The [tolerance] parameter determines the extent of the region used during the identify operation. This overload
+     * will return the visible topmost graphic. A tolerance of 0 tests just the physical pixel at [screenCoordinate].
+     * Tolerance values above 0 are in DIPs and specify a circular region centered on [screenCoordinate], with radius equal
+     * to [tolerance]. The maximum allowed tolerance value is 100 DIPs, resulting in an identify circle of diameter
+     * 200 DIPs.
+     *
+     * GeometryEditorElement results are returned in the same order as on the [geometryEditor] display; that is top-first order,
+     * for example with GeometryEditorVertex first.
+     *
+     * @param screenCoordinate location at which to run identify in screen coordinates
+     * @param tolerance extent of the region used during the identify operation
+     * @return A [Result] containing an [IdentifyGeometryEditorResult], or failure if there is no [geometryEditor]
+     * @since 200.8.0
+     */
+    public suspend fun identifyGeometryEditor(
+        screenCoordinate: ScreenCoordinate,
+        tolerance: Dp
+    ): Result<IdentifyGeometryEditorResult> {
+        return mapView?.identifyGeometryEditor(
+            screenCoordinate,
+            tolerance.value.toDouble(),
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
     /**
