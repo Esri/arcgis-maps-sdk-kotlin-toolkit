@@ -85,4 +85,3 @@ internal fun OAuthAuthenticator(
         }
     }
 }
-
