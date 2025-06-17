@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.times
  * @since 200.5.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class CalloutShapes internal constructor(
     public val cornerRadius: Dp,
     public val leaderSize: DpSize,
@@ -56,6 +57,7 @@ public data class CalloutShapes internal constructor(
  * @since 200.5.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class CalloutColors internal constructor(
     public val backgroundColor: Color,
     public val borderColor: Color

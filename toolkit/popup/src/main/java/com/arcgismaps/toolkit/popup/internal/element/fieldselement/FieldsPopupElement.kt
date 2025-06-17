@@ -50,6 +50,7 @@ import com.arcgismaps.toolkit.popup.internal.ui.expandablecard.theme.LocalExpand
  * @since 200.5.0
  */
 @Composable
+@Suppress("DEPRECATION")
 internal fun FieldsPopupElement(
     state: FieldsElementState,
     refreshed: Long

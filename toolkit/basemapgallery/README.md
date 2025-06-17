@@ -32,11 +32,12 @@ Column {
                 is BasemapStyleInfo -> {
                     Log.d("BasemapGallery", "Item clicked: ${tag.styleName}")
                     viewModel.arcGISMap.setBasemap(Basemap(tag.style))
-                } else -> Log.d("BaseMapGalley", "Item clicked: tag type is not handled")
+                } else -> Log.d("BasemapGallery", "Item clicked: tag type is not handled")
             }
         })
     }
 ```
+To do the same for a 3D scene, simply replace the `MapView` with a `SceneView` and the `ArcGISMap` with an `ArcGISScene`.
 
 ## Example
 To see it in action, try out the [Basemap Gallery micro-app](../../microapps/BasemapGalleryApp) and refer to [MainScreen.kt](../../microapps/BasemapGalleryApp/app/src/main/java/com/arcgismaps/toolkit/basemapgalleryapp/screens/MainScreen.kt) in the project.

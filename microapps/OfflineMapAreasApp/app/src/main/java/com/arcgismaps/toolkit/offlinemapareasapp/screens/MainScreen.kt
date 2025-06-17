@@ -18,54 +18,104 @@
 
 package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.offline.OfflineMapAreas
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    var showBottomSheet by remember { mutableStateOf(false) }
+fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
+    val coroutineScope = rememberCoroutineScope()
 
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
-                )
-            }
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
         )
-    }
-    Column {
+    )
+
+    // Radio options
+    val options = listOf("Go Online", "Offline Maps")
+    var selectedOption by remember { mutableStateOf(options[0]) }
+    var expanded by remember { mutableStateOf(false) }
+
+    BottomSheetScaffold(
+        sheetContent = {
+            OfflineMapAreas(
+                viewModel.offlineMapState,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        },
+        modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 100.dp,
+        sheetSwipeEnabled = true,
+        topBar = {
+            TopAppBar(
+                title = { Text("OfflineMapAreasApp") },
+                actions = {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        options.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedOption = option
+                                    expanded = false
+                                    if (option == "Go Online") {
+                                        viewModel.selectedMap.value = null
+                                        viewModel.offlineMapState.resetSelectedMapArea()
+                                        coroutineScope.launch {
+                                            scaffoldState.bottomSheetState.partialExpand()
+                                        }
+                                    } else if (option == "Offline Maps") {
+                                        coroutineScope.launch {
+                                            scaffoldState.bottomSheetState.expand()
+                                        }
+                                    }
+                                },
+                                enabled = option == "Offline Maps" || viewModel.selectedMap.value != null
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    ) { padding ->
         MapView(
+            arcGISMap = viewModel.arcGISMap,
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-            arcGISMap = arcGISMap
+                .padding(padding)
+                .fillMaxSize(),
         )
-
-        Button(
-            modifier = Modifier.padding(12.dp),
-            onClick = {
-                showBottomSheet = true
-            }) { Text(text = "Show overlay sheet") }
     }
-
-
-    OfflineMapAreas(currentMap= arcGISMap,showBottomSheet = showBottomSheet, onDismiss = { showBottomSheet = false })
 }

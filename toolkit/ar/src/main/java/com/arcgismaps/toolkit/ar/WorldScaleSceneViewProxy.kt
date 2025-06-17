@@ -23,6 +23,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -30,7 +31,11 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
+import com.google.ar.core.VpsAvailability
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Used to perform operations on a [WorldScaleSceneView].
@@ -52,6 +57,19 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
         sceneViewProxy.setManualRenderingEnabled(true)
     }
 
+    private var _sessionWrapper: ArSessionWrapper? = null
+
+    internal fun setSessionWrapper(sessionWrapper: ArSessionWrapper?) {
+        _sessionWrapper = sessionWrapper
+    }
+
+
+    private var _currentCamera : Camera? = null
+
+    internal fun setCurrentCamera(camera: Camera?){
+        _currentCamera = camera
+    }
+
     /**
      * True if continuous panning across the international date line is enabled in the WorldScaleSceneView, false otherwise.
      * A null value represents that it is currently undetermined.
@@ -60,6 +78,52 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public val isWrapAroundEnabled: Boolean?
         get() = sceneViewProxy.isWrapAroundEnabled
+
+    /**
+     * Query the availability of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
+     * at the current location. Where VPS is available, the accuracy of [WorldScaleTrackingMode.Geospatial] will be improved.
+     *
+     * @return A [Result] containing a [WorldScaleVpsAvailability], or failure
+     * @since 200.8.0
+     */
+    public suspend fun checkVpsAvailability(): Result<WorldScaleVpsAvailability> =
+        _currentCamera?.let {
+            it.location.let { point ->
+                checkVpsAvailability(point.y, point.x)
+            }
+        } ?: Result.failure(IllegalStateException("Unknown VPS availability"))
+
+
+    /**
+     * Query the availability of [VPS](https://developers.google.com/ar/develop/geospatial#global_localization_with_vps)
+     * at the provided location. Where VPS is available, the accuracy of [WorldScaleTrackingMode.Geospatial] will be improved.
+     * @param latitude latitude of the location to query
+     * @param longitude longitude of the location to query
+     * @return A [Result] containing a [WorldScaleVpsAvailability], or failure
+     * @since 200.8.0
+     */
+    public suspend fun checkVpsAvailability(latitude: Double, longitude: Double): Result<WorldScaleVpsAvailability> =
+        _sessionWrapper?.let { sessionWrapper ->
+            suspendCancellableCoroutine { continuation ->
+                sessionWrapper.withLock { wrappedSession, _ ->
+                    wrappedSession?.let { session ->
+                        session.checkVpsAvailabilityAsync(
+                            latitude,
+                            longitude
+                        ) { availability: VpsAvailability ->
+                            val result = when (availability) {
+                                VpsAvailability.AVAILABLE -> Result.success(WorldScaleVpsAvailability.Available)
+                                VpsAvailability.UNAVAILABLE -> Result.success(WorldScaleVpsAvailability.Unavailable)
+                                VpsAvailability.ERROR_NOT_AUTHORIZED -> Result.success(WorldScaleVpsAvailability.NotAuthorized)
+                                VpsAvailability.ERROR_RESOURCE_EXHAUSTED -> Result.success(WorldScaleVpsAvailability.ResourceExhausted)
+                                else -> Result.failure(IllegalStateException("Unknown VPS availability"))
+                            }
+                            continuation.resume(result)
+                        }
+                    }
+                }
+            }
+        } ?: Result.failure(IllegalStateException("ARCore session not initialized"))
 
     /**
      * Exports an image snapshot of the current WorldScaleSceneView.

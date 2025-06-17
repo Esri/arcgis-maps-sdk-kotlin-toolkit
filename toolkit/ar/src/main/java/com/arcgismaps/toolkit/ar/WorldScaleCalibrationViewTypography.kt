@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class WorldScaleCalibrationViewTypography internal constructor(
     val titleTextStyle: TextStyle,
     val subtitleTextStyle: TextStyle,

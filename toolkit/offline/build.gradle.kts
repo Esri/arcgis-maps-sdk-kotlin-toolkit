@@ -23,6 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.serialization) apply true
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 android {
@@ -61,6 +62,9 @@ android {
             }
         }
     }
+    lint {
+        disable += "MissingTranslation"
+    }
 
     /**
      * Configures the test report for connected (instrumented) tests to be copied to a central
@@ -78,8 +82,11 @@ apiValidation {
     // TODO: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
     // compose compiler generates public singletons for internal compose functions.
     // this may be resolved in the compose compiler.
-    // val composableSingletons = listOf("com.arcgismaps.toolkit.offline.<TODO>")
-    // ignoredClasses.addAll(composableSingletons)
+     val composableSingletons = listOf(
+             "com.arcgismaps.toolkit.offline.preplanned.ComposableSingletons\$PreplannedMapAreasKt",
+             "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$MapAreaDetailsScreenKt"
+     )
+     ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {
@@ -90,6 +97,9 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.material.icons)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)

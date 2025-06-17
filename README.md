@@ -11,6 +11,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
+  * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - a small, secondary Map View which shows a representation of the main view's current viewpoint.
 * **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
 * **[OfflineMapAreas](toolkit/offline)** - Allows you to take a web map offline by downloading map areas.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
