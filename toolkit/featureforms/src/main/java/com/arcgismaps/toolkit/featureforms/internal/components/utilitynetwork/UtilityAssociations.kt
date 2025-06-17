@@ -209,7 +209,7 @@ private fun AssociationItem(
     }
     val trailingText = when {
         terminal != null -> {
-            stringResource(R.string.terminal, terminal.name)
+            stringResource(R.string.terminal_with_value, terminal.name)
         }
 
         fractionAlongEdge != null -> {
