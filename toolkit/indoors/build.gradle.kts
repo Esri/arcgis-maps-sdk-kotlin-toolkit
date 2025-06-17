@@ -53,10 +53,11 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        // remove this disable when strings.xml lint error is fixed via localization
-        disable += "MissingTranslation"
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 

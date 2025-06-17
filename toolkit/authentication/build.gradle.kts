@@ -80,8 +80,15 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
+
     lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+        // TODO: Remove this when strings.xml lint is fixed via localization
         disable += "MissingTranslation"
     }
 }

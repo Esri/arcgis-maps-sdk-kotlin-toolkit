@@ -28,4 +28,36 @@
     <string name="feature_results">Objekti tulemused</string>
     <string name="function_results">Funktsiooni tulemused</string>
     <string name="clear_all_results">Kustuta kõik tulemused</string>
+    <string name="delete">Kustuta</string>
+    <string name="not_available">Pole saadaval</string>
+    <string name="zoom_to">Suumi</string>
+    <string name="zoom_in">Suurenda</string>
+    <string name="fraction_along_edge">Murdosa mööda serva</string>
+    <string name="attributes">Atribuudid</string>
+    <string name="terminal_configuration">Terminali konfiguratsioon</string>
+    <string name="an_error_has_occurred">Tekkis tõrge</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Tühista</string>
+    <string name="clear_all_results_confirmation">Kõik jälgimistulemused lähevad kaotsi.</string>
+    <string name="object_id">Objekti ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Utility Networki ei leitud.</string>
+    <string name="no_trace_configurations_found">Jälgimiskonfiguratsioone ei leitud.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Pole piisavalt alguskohti. Valige vähemalt üks alguskoht.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Pole piisavalt alguskohti. Valige vähemalt kaks alguskohta.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">ArcGISFeature\'ist ei saanud utiliidi elementi luua.</string>
+    <string name="one_or_more_starting_points_already_exists">Vähemalt üks alguskoht on juba olemas.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Objekti sümbolist ei saanud joonistatavat luua.</string>
+    <string name="no_configuration_selected">Ühtegi konfiguratsiooni pole valitud</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Jälgimiskomponent</string>
+    <string name="more_options">Rohkem valikuid</string>
+    <string name="go_back">Mine tagasi</string>
+    <string name="edit_terminal_configuration">Muuda terminali konfiguratsiooni</string>
+    <string name="selected">Valitud</string>
+    <string name="feature_icon">Objekti ikoon</string>
+    <string name="zoom_to_result_description">Luba/keela suum tulemuse saamiseks</string>
+    <string name="select_previous_result">Vali eelmine tulemus</string>
+    <string name="select_next_result">Vali järgmine tulemus</string>
+    <string name="error">Viga</string>
 </resources>

@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Въведете %1$d символ</item>
         <item quantity="one">Въведете %1$d символ</item>
+        <item quantity="two">Въведете %1$d символа</item>
+        <item quantity="few">Въведете %1$d символа</item>
+        <item quantity="many">Въведете %1$d символа</item>
         <item quantity="other">Въведете %1$d символа</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Стойността трябва да бъде %1$d символ</item>
         <item quantity="one">Стойността трябва да бъде %1$d символ</item>
+        <item quantity="two">Стойността трябва да бъде %1$d символа</item>
+        <item quantity="few">Стойността трябва да бъде %1$d символа</item>
+        <item quantity="many">Стойността трябва да бъде %1$d символа</item>
         <item quantity="other">Стойността трябва да бъде %1$d символа</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Въведете от %1$d до %2$d символа</string>
-    <string name="value_must_be_from_to_characters">Стойността трябва да бъде от %1$d до %2$d символа</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Максимум %1$d символ</item>
         <item quantity="one">Максимум %1$d символ</item>
+        <item quantity="two">Максимум %1$d символа</item>
+        <item quantity="few">Максимум %1$d символа</item>
+        <item quantity="many">Максимум %1$d символа</item>
         <item quantity="other">Максимум %1$d символа</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Въведете от %1$d до %2$d символа</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Стойността трябва да бъде от %1$d до %2$d символа</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Максимум %1$d символа</string>
     <string name="no_value">Без стойност</string>
     <string name="enter_value">Въведете стойност</string>
@@ -39,6 +60,7 @@
     <string name="ok">Добре</string>
     <string name="done">Готово</string>
     <string name="filter">Филтър %1$s</string>
+    <string name="search">Търсене</string>
     <string name="numeric_range_helper_text">Въведете стойност от %1$s до %2$s</string>
     <string name="value_must_be_from_to">Стойността трябва да бъде от %1$s до %2$s</string>
     <string name="less_than_min_value">По-малко от минималната стойност %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Преди обяд</string>
     <string name="ff_time_picker_hour">Час</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d часа</string>
     <string name="ff_time_picker_hour_selection">Изберете час</string>
     <string name="ff_time_picker_hour_suffix">%1$d часа</string>
     <string name="ff_time_picker_hour_text_field">за час</string>
     <string name="ff_time_picker_minute">Минута</string>
     <string name="ff_time_picker_minute_selection">Изберете минути</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d минути</string>
     <string name="ff_time_picker_minute_text_field">за минути</string>
     <string name="ff_time_picker_period_toggle_description">Изберете AM (преди обяд) или PM (следобед)</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Празни файлове не могат да бъдат свалени</string>
     <string name="attachment_deleted">%1s беше изтрит успешно</string>
     <string name="attachment_size_limit_exceeded">Прикачени файлове, по-големи от %1$s не могат да бъдат изтеглени</string>
+    <string name="barcode_tooltip">Насочете камерата си към баркод</string>
+    <string name="barcode_permission_denied">Изискват се разрешения за камерата, за да се сканират баркодове. Моля, активирайте разрешенията за камерата в настройките на Вашето устройство.</string>
+    <string name="unsupported_value">Неподдържана стойност</string>
+    <string name="tap_to_scan">Докоснете, за да сканирате</string>
+    <string name="unable_to_open_the_camera">Не може да отвори камерата</string>
+    <string name="value_must_be_a_guid">Стойността трябва да бъде валиден GUID</string>
 </resources>

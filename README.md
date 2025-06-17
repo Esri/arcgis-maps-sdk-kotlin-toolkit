@@ -11,6 +11,8 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
+  * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - a small, secondary Map View which shows a representation of the main view's current viewpoint.
+* **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
@@ -47,12 +49,13 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.6.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.8.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-legend")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-scalebar")

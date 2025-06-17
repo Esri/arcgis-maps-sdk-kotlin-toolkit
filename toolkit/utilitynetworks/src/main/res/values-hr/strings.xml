@@ -28,4 +28,36 @@
     <string name="feature_results">Rezultati geoobjekata</string>
     <string name="function_results">Rezultati funkcije</string>
     <string name="clear_all_results">Očisti sve rezultate</string>
+    <string name="delete">Izbriši</string>
+    <string name="not_available">Nije dostupno</string>
+    <string name="zoom_to">Povećaj na</string>
+    <string name="zoom_in">Povećaj</string>
+    <string name="fraction_along_edge">Frakcija uz rub</string>
+    <string name="attributes">Atributi</string>
+    <string name="terminal_configuration">Konfiguracija terminala</string>
+    <string name="an_error_has_occurred">Došlo je do pogreške</string>
+    <string name="ok">U redu</string>
+    <string name="cancel">Odustani</string>
+    <string name="clear_all_results_confirmation">Izgubit će se svi rezultati praćenja.</string>
+    <string name="object_id">ID objekta: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nije pronađena niti jedna pomoćna mreža.</string>
+    <string name="no_trace_configurations_found">Nisu pronađene konfiguracije praćenja.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Nema dovoljno početnih točaka. Postavite barem 1 početnu lokaciju.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Nema dovoljno početnih točaka. Postavite barem 2 početne lokacije.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Nije moguće kreirati pomoćni element za ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Jedna ili više početnih točki već postoji.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Nije moguće kreirati crtež iz simbola geoobjekta.</string>
+    <string name="no_configuration_selected">Konfiguracija nije odabrana</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Komponenta praćenja</string>
+    <string name="more_options">Više opcija</string>
+    <string name="go_back">Idi natrag</string>
+    <string name="edit_terminal_configuration">Uredi konfiguraciju terminala</string>
+    <string name="selected">Odabrano</string>
+    <string name="feature_icon">Ikona geoobjekta</string>
+    <string name="zoom_to_result_description">Aktiviraj ili deaktiviraj povećanje rezultata</string>
+    <string name="select_previous_result">Odaberi prethodni rezultat</string>
+    <string name="select_next_result">Odaberi idući rezultat</string>
+    <string name="error">Pogreška</string>
 </resources>

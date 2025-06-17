@@ -71,8 +71,11 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 

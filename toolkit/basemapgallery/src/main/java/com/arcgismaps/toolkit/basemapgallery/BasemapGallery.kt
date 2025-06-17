@@ -22,21 +22,24 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,13 +88,20 @@ internal fun BasemapGalleryItem(
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        Image(
-            painter = thumbnail.value,
-            contentDescription = basemapGalleryItem.title,
-            modifier = Modifier
-                .padding(8.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
+        Box {
+            Image(
+                painter = thumbnail.value,
+                contentDescription = basemapGalleryItem.title,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+            if (basemapGalleryItem.is3D) {
+                Badge(modifier = Modifier.align(Alignment.TopEnd)) {
+                    Text("3D")
+                }
+            }
+        }
         Text(text = basemapGalleryItem.title, textAlign = TextAlign.Center)
     }
 }
@@ -110,20 +120,20 @@ public fun BasemapGallery(
     onItemClick: (BasemapGalleryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selection: BasemapGalleryItem? by remember { mutableStateOf(null) }
+    var selection by rememberSaveable { mutableIntStateOf(-1) }
 
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 128.dp)) {
-        basemapGalleryItems.forEach { basemapGalleryItem ->
+        basemapGalleryItems.forEachIndexed { index, basemapGalleryItem ->
             item {
                 BasemapGalleryItem(
                     basemapGalleryItem,
                     modifier = Modifier
                         .padding(8.dp)
                         .clickable {
-                            selection = basemapGalleryItem
+                            selection = index
                             onItemClick(basemapGalleryItem)
                         },
-                    selection === basemapGalleryItem
+                    index == selection
                 )
             }
         }
@@ -140,12 +150,12 @@ public fun BasemapGallery(
 internal fun BasemapGalleryPreview() {
     val items = mutableListOf<BasemapGalleryItem>()
     for (i in 0..100) {
-        items.add(BasemapGalleryItem(title = "Item $i"))
+        items.add(BasemapGalleryItem(title = "Item $i", is3D = (i < 10)))
     }
     BasemapGallery(
         items,
         onItemClick = {
-            Log.d("BaseMapGallery", "Item clicked: ${it.title}")
+            Log.d("BasemapGallery", "Item clicked: ${it.title}")
         }
     )
 }

@@ -28,4 +28,36 @@
     <string name="feature_results">Resultados da Feição</string>
     <string name="function_results">Resultados da Função</string>
     <string name="clear_all_results">Apagar todos resultados</string>
+    <string name="delete">Excluir</string>
+    <string name="not_available">Não disponível</string>
+    <string name="zoom_to">Zoom para</string>
+    <string name="zoom_in">Ampliar</string>
+    <string name="fraction_along_edge">Fração ao Longo da Borda</string>
+    <string name="attributes">Atributos</string>
+    <string name="terminal_configuration">Configuração do Terminal</string>
+    <string name="an_error_has_occurred">Ocorreu um erro</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="clear_all_results_confirmation">Todos os resultados de rastreamento serão perdidos.</string>
+    <string name="object_id">Object ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Nenhuma Rede de Utilitários encontrada.</string>
+    <string name="no_trace_configurations_found">Nenhuma configuração de traçado encontrada.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Não há pontos de partida suficientes. Defina pelo menos 1 local inicial.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Não há pontos de partida suficientes. Defina pelo menos 2 locais iniciais.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Não foi possível criar o elemento de utilitário do ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Um ou mais pontos de partida já existem.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Não foi possível criar um elemento desenhávela a partir do símbolo da feição.</string>
+    <string name="no_configuration_selected">Nenhuma Configuração Selecionada</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Componente do traçado</string>
+    <string name="more_options">Mais opções</string>
+    <string name="go_back">Voltar</string>
+    <string name="edit_terminal_configuration">Editar configuração do terminal</string>
+    <string name="selected">Selecionado</string>
+    <string name="feature_icon">Ícone da feição</string>
+    <string name="zoom_to_result_description">Habilitar e desabilitar zoom no resultado</string>
+    <string name="select_previous_result">Selecionar resultado anterior</string>
+    <string name="select_next_result">Selecionar próximo resultado</string>
+    <string name="error">Erro</string>
 </resources>

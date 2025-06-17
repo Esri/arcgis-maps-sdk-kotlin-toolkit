@@ -27,9 +27,9 @@ function _display_help_dialog() {
   echo "              and publishes the build to artifactory. It will build the"
   echo "              artifacts if any build dependency is not up to date"
   echo
-  echo "              This script requires the ARTIFACTORY_USR and ARTIFACTORY_PSW "
-  echo "              environment variables to be set to the artifactory username"
-  echo "              and encrypted password"
+  echo "              This script requires the ARTIFACTORY_URL, ARTIFACTORY_USR,"
+  echo "              and ARTIFACTORY_PSW environment variables to be set to the"
+  echo "              Artifactory url, username and encrypted password"
   echo
   echo " -h      Displays this help dialog."
   echo "          Optional"
@@ -46,6 +46,11 @@ function _display_help() {
 }
 
 function _check_options_and_set_variables() {
+  if [ -z "${ARTIFACTORY_URL}" ]; then
+    echo "error: ARTIFACTORY_URL is empty but publishing is being requested"
+    exit 1
+  fi
+
   if [ -z "${ARTIFACTORY_USR}" ]; then
     echo "error: ARTIFACTORY_USR is empty but publishing is being requested"
     exit 1
@@ -70,7 +75,7 @@ function _check_options_and_set_variables() {
 function _publish() {
   _log "Publish the release build to artifactory"
 
-  if ! ${apps_path}/arcgis-maps-sdk-kotlin-toolkit/ci/run_gradle_task.sh -t publish -x "-PartifactoryUsername=${ARTIFACTORY_USR} -PartifactoryPassword=${ARTIFACTORY_PSW} -PversionNumber=${BUILDVER} -PbuildNumber=${BUILDNUM} -PfinalBuild=${FINAL_BUILD}" ; then
+  if ! ${apps_path}/arcgis-maps-sdk-kotlin-toolkit/ci/run_gradle_task.sh -t publish -x "-PartifactoryUrl=${ARTIFACTORY_URL} -PartifactoryUsername=${ARTIFACTORY_USR} -PartifactoryPassword=${ARTIFACTORY_PSW} -PversionNumber=${BUILDVER} -PbuildNumber=${BUILDNUM} -PfinalBuild=${FINAL_BUILD}" ; then
     echo "error: Running the publish gradle task failed"
     exit 1
   fi

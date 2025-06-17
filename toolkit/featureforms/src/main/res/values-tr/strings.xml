@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">%1$d karakter gir</item>
         <item quantity="one">%1$d karakter gir</item>
+        <item quantity="two">%1$d karakter girin</item>
+        <item quantity="few">%1$d karakter girin</item>
+        <item quantity="many">%1$d karakter girin</item>
         <item quantity="other">%1$d karakter girin</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Değer %1$d karakter olmalıdır</item>
         <item quantity="one">Değer %1$d karakter olmalıdır</item>
+        <item quantity="two">Değer %1$d karakter olmalıdır</item>
+        <item quantity="few">Değer %1$d karakter olmalıdır</item>
+        <item quantity="many">Değer %1$d karakter olmalıdır</item>
         <item quantity="other">Değer %1$d karakter olmalıdır</item>
     </plurals>
-    <string name="enter_min_to_max_chars">%1$d - %2$d karakter girin</string>
-    <string name="value_must_be_from_to_characters">Değer %1$d - %2$d karakter olmalıdır</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksimum %1$d karakter</item>
         <item quantity="one">Maksimum %1$d karakter</item>
+        <item quantity="two">Maksimum %1$d karakter</item>
+        <item quantity="few">Maksimum %1$d karakter</item>
+        <item quantity="many">Maksimum %1$d karakter</item>
         <item quantity="other">Maksimum %1$d karakter</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">%1$d - %2$d karakter girin</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Değer %1$d - %2$d karakter olmalıdır</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimum %1$d karakter</string>
     <string name="no_value">Değer yok</string>
     <string name="enter_value">Değer Gir</string>
@@ -39,6 +60,7 @@
     <string name="ok">Tamam</string>
     <string name="done">Bitti</string>
     <string name="filter">%1$s filtrele</string>
+    <string name="search">Ara</string>
     <string name="numeric_range_helper_text">%1$s\'den %2$s\'e değer gir</string>
     <string name="value_must_be_from_to">Değer %1$s\'den %2$s\'e olmalıdır</string>
     <string name="less_than_min_value">Minimum değerden daha küçük %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Saat</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d saat</string>
     <string name="ff_time_picker_hour_selection">Saat seç</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'saat</string>
     <string name="ff_time_picker_hour_text_field">saat için</string>
     <string name="ff_time_picker_minute">Dakika</string>
     <string name="ff_time_picker_minute_selection">Dakika seç</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d dakika</string>
     <string name="ff_time_picker_minute_text_field">dakika için</string>
     <string name="ff_time_picker_period_toggle_description">AM veya PM olarak seç</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Boş dosyalar indirilemez</string>
     <string name="attachment_deleted">%1s başarıyla silindi</string>
     <string name="attachment_size_limit_exceeded">%1$s\'den büyük ekler indirilemez</string>
+    <string name="barcode_tooltip">Kamerayı barkoda doğru tutun</string>
+    <string name="barcode_permission_denied">Barkod taramak için kamera izinleri gerekli. Lütfen cihaz ayarlarınızdan kamera izinlerini etkinleştirin.</string>
+    <string name="unsupported_value">Desteklenmeyen Değer</string>
+    <string name="tap_to_scan">Taramak için dokun</string>
+    <string name="unable_to_open_the_camera">Kamera açılamıyor</string>
+    <string name="value_must_be_a_guid">Değer geçerli bir GUID olmalıdır</string>
 </resources>

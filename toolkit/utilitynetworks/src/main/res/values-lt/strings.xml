@@ -28,4 +28,36 @@
     <string name="feature_results">Elemento rezultatai</string>
     <string name="function_results">Funkcijos rezultatai</string>
     <string name="clear_all_results">Išvalyti rezultatus</string>
+    <string name="delete">Ištrinti</string>
+    <string name="not_available">Negalimas</string>
+    <string name="zoom_to">Parodyti visą</string>
+    <string name="zoom_in">Artinti</string>
+    <string name="fraction_along_edge">Trumpena išilgai krašto</string>
+    <string name="attributes">Atributai</string>
+    <string name="terminal_configuration">Terminalo konfigūracija</string>
+    <string name="an_error_has_occurred">Įvyko klaida</string>
+    <string name="ok">Gerai</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="clear_all_results_confirmation">Visi sekimo rezultatai bus prarasti.</string>
+    <string name="object_id">Objekto ID: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Komunalinių tinklų nerasta.</string>
+    <string name="no_trace_configurations_found">Sekimo konfigūracijų nerasta.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Nepakanka pradžios taškų. Nustatykite bent vieną pradžios vietą.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Nepakanka pradžios taškų. Nustatykite bent dvi pradžios vietas.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Nepavyko sukurti komunalinio elemento iš ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Vienas ar daugiau pražios taškų jau yra.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Nepavyko sukurti braižytino elemento iš elemento simbolio.</string>
+    <string name="no_configuration_selected">Konfigūracija nepasirinkta</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Sekimo komponentas</string>
+    <string name="more_options">Daugiau parinkčių</string>
+    <string name="go_back">Grįžti</string>
+    <string name="edit_terminal_configuration">Redaguoti terminalo konfigūraciją</string>
+    <string name="selected">Pažymėta</string>
+    <string name="feature_icon">Elemento piktograma</string>
+    <string name="zoom_to_result_description">Įjungti ar išjungti pritraukimą prie rezultato</string>
+    <string name="select_previous_result">Pasirinkti ankstesnį rezultatą</string>
+    <string name="select_next_result">Pasirinkti kitą rezultatą</string>
+    <string name="error">Klaida</string>
 </resources>

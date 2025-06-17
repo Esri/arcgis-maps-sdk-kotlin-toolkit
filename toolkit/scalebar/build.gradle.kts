@@ -16,7 +16,6 @@
  *
  */
 
-
 plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
@@ -24,6 +23,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
 }
+
 android {
     namespace = "com.arcgismaps.toolkit.scalebar"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -71,8 +71,11 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 

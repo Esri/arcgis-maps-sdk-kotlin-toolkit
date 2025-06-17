@@ -38,9 +38,6 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormElement
-import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -449,7 +446,13 @@ class MapViewModel @Inject constructor(
      */
     private fun validateEdits(featureForm: FeatureForm) {
         _uiState.value = UIState.Validating(featureForm)
-        val validationErrors = filterErrors(featureForm)
+        // map the validation errors to the ErrorInfo class
+        val validationErrors = featureForm.validationErrors.value.flatMap { entry ->
+            // each field can have multiple validation errors
+            entry.value.map { error ->
+                ErrorInfo(entry.key, error as FeatureFormValidationException)
+            }
+        }
         if (validationErrors.isNotEmpty()) {
             val errorText = validationErrors.joinToString(separator = "\n\n") { "$it" }
             _uiState.value = UIState.Error(
@@ -532,39 +535,6 @@ class MapViewModel @Inject constructor(
         // set the UI state to not editing
         _uiState.value = UIState.NotEditing
     }
-
-    /**
-     * Filters the validation errors in the [featureForm] to show only the errors for the editable
-     * fields and fields with value expressions.
-     */
-    private fun filterErrors(featureForm: FeatureForm): List<ErrorInfo> = buildList {
-        featureForm.validationErrors.value.forEach { entry ->
-            entry.value.forEach { error ->
-                featureForm.elements.getFieldFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value || formElement.hasValueExpression) {
-                        add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
- * null is returned.
- */
-fun List<FormElement>.getFieldFormElement(fieldName: String): FieldFormElement? {
-    for (element in this) {
-        when (element) {
-            is FieldFormElement -> if (element.fieldName == fieldName) return element
-            is GroupFormElement -> element.elements.getFieldFormElement(fieldName)
-                ?.let { return it }
-
-            else -> continue
-        }
-    }
-    return null
 }
 
 /**
@@ -597,13 +567,13 @@ fun Map<String, List<ArcGISFeature>>.getFeatureCount(): Int {
 }
 
 /**
- * Returns the additional message if present or the message of the exception. If the exception is
- * a [FeatureFormValidationException.RequiredException] then the message is "Field is required".
+ * Returns the message of the exception. If the exception is a
+ * [FeatureFormValidationException.RequiredException] then the message is "Field is required".
  */
 fun FeatureFormValidationException.getMessage(): String {
     return when (this) {
         is FeatureFormValidationException.RequiredException -> "Field is required"
-        else -> additionalMessage ?: message
+        else -> message
     }
 }
 

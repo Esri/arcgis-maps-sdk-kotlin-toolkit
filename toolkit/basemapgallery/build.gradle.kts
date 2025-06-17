@@ -61,19 +61,28 @@ android {
         }
     }
 
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
+}
+
+apiValidation {
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.basemapgallery.ComposableSingletons\$BasemapGalleryKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {

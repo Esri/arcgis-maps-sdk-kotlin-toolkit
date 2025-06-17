@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Pasirinkti įrenginį</string>
     <string name="floor_filter_no_results">Nieko nerasta.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel neturi į aukštus atsižvelgiančių duomenų</string>
+    <string name="an_error_has_occurred">Įvyko klaida</string>
     <string name="not_available">Nėra</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Sklypas - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Valyti paiešką</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Uždaryti</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Suglausti</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Grįžti į sklypo išrinkiklį</string>
 </resources>

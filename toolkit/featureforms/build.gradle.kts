@@ -32,6 +32,13 @@ secrets {
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
+
+    // Lint crashes on the latest Android studio
+    // (Bug with Android Studio Meerkat | 2024.3.1)
+    // TODO: Remove this when Android Studio lint checker is fixed
+    lint {
+        disable.add("SuspiciousModifierThen")
+    }
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -51,6 +58,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -78,12 +87,10 @@ android {
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
 
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        // remove these disables when strings.xml lint is fixed via localization
-        disable += "MissingTranslation"
-        disable += "MissingQuantity"
-        baseline = file("lint-baseline.xml")
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 

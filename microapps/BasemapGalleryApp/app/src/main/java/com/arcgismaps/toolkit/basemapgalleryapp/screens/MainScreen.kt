@@ -47,11 +47,11 @@ import com.arcgismaps.mapping.Item
 import com.arcgismaps.toolkit.basemapgallery.BasemapGallery
 import com.arcgismaps.toolkit.basemapgallery.BasemapGalleryItem
 import com.arcgismaps.toolkit.basemapgalleryapp.ViewModel
-import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 
 /**
- * The main screen of the application consisting of a [MapView] and a [BasemapGallery]. Clicking on
- * an item in the gallery will set that basemap in the map view.
+ * The main screen of the application consisting of a [SceneView] and a [BasemapGallery]. Clicking on
+ * an item in the gallery will set that basemap in the SceneView.
  *
  * @since 200.7.0
  */
@@ -74,7 +74,7 @@ fun MainScreen() {
             when (val tag = it.tag) {
                 is BasemapStyleInfo -> viewModel.changeBasemap(Basemap(basemapStyle = tag.style))
                 is Item -> viewModel.changeBasemap(Basemap(item = tag))
-                else -> Log.d("BaseMapGallery", "Item clicked: tag type is not handled")
+                else -> Log.d("BasemapGallery", "Item clicked: tag type is not handled")
             }
         }
     }
@@ -116,9 +116,9 @@ fun MainScreen() {
             TopAppBar(title = { Text("Basemap Gallery App") })
         },
     ) { paddingValues ->
-        MapView(
+        SceneView(
             modifier = Modifier.padding(paddingValues),
-            arcGISMap = viewModel.arcGISMap
+            arcGISScene = viewModel.arcGISScene
         )
     }
 }
