@@ -27,10 +27,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
@@ -97,43 +99,37 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.wrapContentSize()) {
         var currentSelectedColor by remember { mutableStateOf(selectedColor) }
-
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
+                .weight(weight = 1f, fill = false),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
-                TraceConfigurations(
-                    configurations,
-                    selectedConfig,
-                ) { newConfig ->
-                    onConfigSelected(newConfig)
-                }
+            TraceConfigurations(
+                configurations,
+                selectedConfig,
+            ) { newConfig ->
+                onConfigSelected(newConfig)
             }
-            item {
-                StartingPoints(
-                    startingPoints,
-                    onAddStartingPointButtonClicked,
-                    onStartingPointRemoved,
-                    onStartingPointSelected,
-                )
-            }
-            item {
-                AdvancedOptions(
-                    onNameChange = onNameChange,
-                    onColorChanged = {
-                        currentSelectedColor = it
-                        onColorChanged(it)
-                    },
-                    defaultTraceName = defaultTraceName,
-                    selectedColor = currentSelectedColor,
-                    zoomToResult = zoomToResult,
-                    onZoomRequested = onZoomRequested
-                )
-            }
+            StartingPoints(
+                startingPoints,
+                onAddStartingPointButtonClicked,
+                onStartingPointRemoved,
+                onStartingPointSelected,
+            )
+            AdvancedOptions(
+                onNameChange = onNameChange,
+                onColorChanged = {
+                    currentSelectedColor = it
+                    onColorChanged(it)
+                },
+                defaultTraceName = defaultTraceName,
+                selectedColor = currentSelectedColor,
+                zoomToResult = zoomToResult,
+                onZoomRequested = onZoomRequested
+            )
         }
         TraceButton(
             enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not(),
@@ -150,7 +146,8 @@ private fun TraceConfigurations(
 ) {
     TraceConfigurations(
         configs = configs.map { it.name },
-        selectedConfigName = selectedConfig?.name ?: LocalContext.current.getString(R.string.no_configuration_selected)
+        selectedConfigName = selectedConfig?.name
+            ?: LocalContext.current.getString(R.string.no_configuration_selected)
     ) { index ->
         onTraceSelected(configs[index])
     }
@@ -163,7 +160,13 @@ private fun TraceConfigurations(
     onTraceSelected: (Int) -> Unit
 ) {
     val expandableCardState = rememberExpandableCardState(false)
-    var selectedConfigIndex by remember(selectedConfigName) { mutableIntStateOf(configs.indexOf(selectedConfigName)) }
+    var selectedConfigIndex by remember(selectedConfigName) {
+        mutableIntStateOf(
+            configs.indexOf(
+                selectedConfigName
+            )
+        )
+    }
     ExpandableCardWithLabel(
         expandableCardState = expandableCardState,
         labelText = stringResource(id = R.string.trace_configuration),

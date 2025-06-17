@@ -16,11 +16,8 @@
 
 package com.arcgismaps.toolkit.utilitynetworktraceapp.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,10 +30,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.Trace
 import kotlinx.coroutines.launch
 
@@ -48,36 +43,20 @@ fun MainScreen(viewModel: TraceViewModel) {
     val coroutineScope = rememberCoroutineScope()
 
     val addStartingPointMode by viewModel.traceState.addStartingPointMode
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = true
-        )
-    )
+    val scaffoldState = rememberBottomSheetScaffoldState()
 
-    LaunchedEffect(key1 = addStartingPointMode) {
-        if (addStartingPointMode == AddStartingPointMode.Started) {
-            scaffoldState.bottomSheetState.partialExpand()
-        } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
+    LaunchedEffect(key1 = loadState) {
+        if (loadState == LoadStatus.Loaded) {
+            Log.e("EXPAND","EXPAND")
             scaffoldState.bottomSheetState.expand()
         }
     }
 
     BottomSheetScaffold(
         sheetContent = {
-            AnimatedVisibility(
-                visible = loadState is LoadStatus.Loaded,
-                enter = slideInVertically { h -> h },
-                exit = slideOutVertically { h -> h },
-                label = "trace tool",
-                modifier = Modifier.heightIn(min = 0.dp, max = 350.dp)
-            ) {
-                Trace(traceState = viewModel.traceState)
-            }
+            Trace(traceState = viewModel.traceState)
         },
-        modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 100.dp,
         sheetSwipeEnabled = true,
         topBar = null
     ) { padding ->

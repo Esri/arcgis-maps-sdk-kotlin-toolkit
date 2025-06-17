@@ -16,6 +16,13 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,7 +50,16 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
         navController.navigateTo(it)
     }
 
-    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
+    NavHost(
+        navController = navController,
+        startDestination = TraceNavRoute.TraceOptions.name,
+        popEnterTransition = {
+            slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+        },
+        popExitTransition = {
+            slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+        },
+    ) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs by traceState.traceConfigurations
             val coroutineScope = rememberCoroutineScope()
@@ -158,7 +174,7 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
             )
         }
         dialog(TraceNavRoute.ClearResults.name) {
-            ClearAllResultsDialog (
+            ClearAllResultsDialog(
                 onConfirmation = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.clearAllResults()

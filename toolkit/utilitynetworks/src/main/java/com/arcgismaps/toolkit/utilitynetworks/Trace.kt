@@ -16,13 +16,15 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
@@ -104,20 +106,20 @@ private fun TraceScaffold(
 ) {
     val localContext = LocalContext.current
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.background,
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         Column(
-            modifier = modifier,
+            modifier = modifier.wrapContentSize().animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (initializationStatus) {
                 is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                     Box(
-                        modifier = modifier.fillMaxSize(),
+                        modifier = modifier.size(125.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()

@@ -27,7 +27,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -56,11 +55,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.utilitynetworks.ui.gestures.anchoredDraggable
-import com.arcgismaps.toolkit.utilitynetworks.R
-import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -151,7 +150,6 @@ internal fun StartingPointRow(
         }
         Box(
             modifier = modifier
-                .fillMaxSize()
                 .align(Alignment.CenterVertically)
                 .clickable {
                     if (!deleteActive) {
