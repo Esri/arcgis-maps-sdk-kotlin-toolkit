@@ -7,7 +7,7 @@
 
     <application android:requestLegacyExternalStorage="true">
         <activity
-            android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+            android:name="com.arcgismaps.toolkit.authentication.WebAuthenticationActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTop" >

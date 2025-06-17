@@ -32,12 +32,12 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 /**
  * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
  *
- * @see OAuthUserSignInActivity
+ * @see WebAuthenticationActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
  * @param authenticatorState an [AuthenticatorState].
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [OAuthUserSignInActivity].
+ * activity rather than using the [WebAuthenticationActivity].
  * @since 200.2.0
  */
 @Composable
@@ -61,7 +61,7 @@ internal fun OAuthAuthenticator(
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
         var didLaunch by rememberSaveable(key = oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
-            rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+            rememberLauncherForActivityResult(contract = WebAuthenticationActivity.Contract()) { redirectUrl ->
                 redirectUrl?.let {
                     oAuthPendingSignIn.complete(redirectUrl)
                 } ?: run {
