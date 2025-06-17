@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaSelector
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
@@ -62,6 +63,7 @@ public fun OfflineMapAreas(
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
+    var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
@@ -108,8 +110,10 @@ public fun OfflineMapAreas(
                                         onlyFooterVisible = offlineMapState.preplannedMapAreaStates.isNotEmpty(),
                                         onRefresh = { isRefreshEnabled = true }
                                     )
-                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()){
-                                    EmptyPreplannedOfflineAreas(onRefresh = { isRefreshEnabled = true })
+                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()) {
+                                    EmptyPreplannedOfflineAreas(onRefresh = {
+                                        isRefreshEnabled = true
+                                    })
                                 }
                             }
                         }
@@ -118,7 +122,13 @@ public fun OfflineMapAreas(
                             // TODO: Init OnDemand screen...
                             EmptyOnDemandOfflineAreas(onAdd = {
                                 // TODO: Add new on demand map area
+                                isOnDemandMapAreaSelectorVisible = true
                             })
+                            OnDemandMapAreaSelector(
+                                currentMap = offlineMapState.arcGISMap,
+                                showBottomSheet = isOnDemandMapAreaSelectorVisible,
+                                onDismiss = { isOnDemandMapAreaSelectorVisible = false }
+                            )
                         }
                     }
                 }

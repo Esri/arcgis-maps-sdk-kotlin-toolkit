@@ -46,7 +46,7 @@ import java.io.File
  */
 @Stable
 public class OfflineMapState(
-    private val arcGISMap: ArcGISMap,
+    internal val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     /**

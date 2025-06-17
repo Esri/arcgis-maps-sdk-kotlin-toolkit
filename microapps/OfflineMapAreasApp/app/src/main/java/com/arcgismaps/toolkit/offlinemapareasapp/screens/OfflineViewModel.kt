@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class OfflineViewModel : ViewModel() {
 
-    private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
+    private val napervilleWaterNetwork = "3da658f2492f4cfd8494970ef489d2c5"
     private val onlineMap = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
