@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +54,7 @@ import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import com.arcgismaps.mapping.view.geometryeditor.ProgrammaticReticleTool
 import com.arcgismaps.mapping.view.geometryeditor.VertexTool
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
@@ -83,15 +87,13 @@ private val fillSymbol: SimpleFillSymbol by lazy {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(geometryEditor: GeometryEditor) {
     val mapViewProxy = remember { MapViewProxy() }
     val coroutineScope = rememberCoroutineScope()
 
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     // the list of graphics overlays used by the MapView
     var graphicsOverlays by remember { mutableStateOf(emptyList<GraphicsOverlay>()) }
-    // the geometry editor used to manage the editing session
-    val geometryEditor = remember { GeometryEditor() }
     // track the status if geometry editor is started or stopped
     var isDrawingEnabled by remember { mutableStateOf(false) }
 
@@ -120,10 +122,21 @@ fun MainScreen() {
                             } else {
                                 // on checked change, start the geometry editor
                                 startGeometryEditor(geometryEditor)
+                                geometryEditor.tool = ProgrammaticReticleTool()
                                 // set isDrawingEnabled to true
                                 true
                             }
                         })
+
+                    Button(enabled = isDrawingEnabled,
+                        onClick = {
+                        if (geometryEditor.hoveredElement.value != null && geometryEditor.pickedUpElement.value == null) {
+                            (geometryEditor.tool as ProgrammaticReticleTool).selectElementAtReticle()
+                            (geometryEditor.tool as ProgrammaticReticleTool).pickUpSelectedElement()
+                        } else if (geometryEditor.hoveredElement.value == null)
+                            (geometryEditor.tool as ProgrammaticReticleTool).placeElementAtReticle()
+                    })
+                    { Text("Do Action") }
 
                     var actionsExpanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
@@ -153,7 +166,10 @@ fun MainScreen() {
             geometryEditor = geometryEditor,
             graphicsOverlays = graphicsOverlays,
             mapViewProxy = mapViewProxy,
-            onDoubleTap = {
+            onSingleTapConfirmed = {
+                (geometryEditor.tool as ProgrammaticReticleTool).placeElementAtReticle()
+            },
+            onLongPress = {
                 coroutineScope.launch {
                     val result = mapViewProxy.identifyGeometryEditor(it.screenCoordinate, 15.dp)
                     result.onSuccess {
@@ -179,7 +195,7 @@ fun GeometryEditorDropDownMenu(
     onResetAllGraphics: () -> Unit = {}
 ) {
     val items = remember {
-        listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
+        listOf("Cancel move", "Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
     }
     DropdownMenu(
         expanded = expanded,
@@ -191,6 +207,10 @@ fun GeometryEditorDropDownMenu(
                 text = { Text(text = it) },
                 onClick = {
                     when {
+                        it.contains("Cancel move") -> {
+                            geometryEditor.cancelCurrentAction()
+                        }
+
                         it.contains("Clear sketch") -> {
                             clearGeometryEditor(geometryEditor)
                         }
