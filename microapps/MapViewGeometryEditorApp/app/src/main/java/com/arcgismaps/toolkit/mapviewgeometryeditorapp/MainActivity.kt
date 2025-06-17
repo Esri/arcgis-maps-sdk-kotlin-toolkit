@@ -22,9 +22,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import com.arcgismaps.mapping.view.geometryeditor.ProgrammaticReticleTool
 import com.arcgismaps.toolkit.mapviewgeometryeditorapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
@@ -43,7 +46,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MapViewGeometryEditorApp() {
-    MainScreen()
+    // the geometry editor used to manage the editing session
+    val geometryEditor = remember { GeometryEditor() }
+    MainScreen(geometryEditor)
 }
 
 @Preview(showBackground = true)

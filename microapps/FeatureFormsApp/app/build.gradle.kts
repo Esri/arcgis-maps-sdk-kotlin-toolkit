@@ -81,7 +81,7 @@ dependencies {
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
     // sdk
-    implementation(arcgis.mapsSdk)
+    implementation(project(":mapsSdk"))
     // hilt
     implementation(libs.hilt.android.core)
     implementation(libs.androidx.hilt.navigation.compose)

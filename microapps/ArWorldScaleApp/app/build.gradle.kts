@@ -82,7 +82,7 @@ dependencies {
     implementation(project(":microapps-lib"))
     implementation(project(":ar"))
     implementation(libs.arcore)
-    implementation(arcgis.mapsSdk)
+    implementation(project(":mapsSdk"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

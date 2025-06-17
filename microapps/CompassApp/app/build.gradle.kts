@@ -79,7 +79,7 @@ dependencies {
     implementation(project(":compass"))
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
-    implementation(arcgis.mapsSdk)
+    implementation(project(":mapsSdk"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

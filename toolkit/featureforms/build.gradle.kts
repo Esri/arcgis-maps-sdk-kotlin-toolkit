@@ -113,7 +113,7 @@ apiValidation {
 
 
 dependencies {
-    api(arcgis.mapsSdk)
+    api(project(":mapsSdk"))
     implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
