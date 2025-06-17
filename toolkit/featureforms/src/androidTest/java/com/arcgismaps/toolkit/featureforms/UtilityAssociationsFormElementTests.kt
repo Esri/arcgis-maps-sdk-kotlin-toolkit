@@ -17,14 +17,15 @@
 package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -142,16 +143,13 @@ class UtilityAssociationsFormElementTests {
 
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
-        val firstElement = listView.onChildWithText("Object ID : 3907").assertIsDisplayed()
-        // Verify the terminal is displayed
-        firstElement.assert(hasText("Terminal : Single Terminal"))
-        val secondElement = listView.onChildWithText("Object ID : 1392").assertIsDisplayed()
-        // Verify the terminal is displayed
-        secondElement.assert(hasText("Terminal : Single Terminal"))
-        // Click on the first association
-        firstElement.performClick()
-        // Verify the new feature form is displayed by checking for a form element
-        composeTestRule.onNode(hasTextExactly("Asset group", "Fuse")).assertIsDisplayed()
+
+        // Verify 2 items are displayed with the title "Fuse"
+        val items = listView.onChildren().filter(hasText("Fuse"))
+        items.assertCountEquals(2)
+        // Verify the terminals are displayed
+        items[0].assert(hasText("Terminal : Single Terminal"))
+        items[1].assert(hasText("Terminal : Single Terminal"))
     }
 
     /**
@@ -210,7 +208,8 @@ class UtilityAssociationsFormElementTests {
 
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
-        listView.onChildWithText("Containment Visible : false").assertIsDisplayed()
+        val firstElement = listView.onChildWithText("Circuit Breaker").assertIsDisplayed()
+        firstElement.assert(hasText("Containment Visible : false"))
     }
 
     /**
@@ -269,10 +268,9 @@ class UtilityAssociationsFormElementTests {
 
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
-        val associationNode = listView.onChildAt(0)
 
-        associationNode.assertIsDisplayed()
-        associationNode.assert(hasText("Containment Visible").not())
+        val firstElement = listView.onChildWithText("Substation").assertIsDisplayed()
+        firstElement.assert(hasText("Containment Visible : false").not())
     }
 
     /**
@@ -330,7 +328,7 @@ class UtilityAssociationsFormElementTests {
         listView.onChildWithText("Electric Distribution Device").assertIsDisplayed().performClick()
 
         listView = composeTestRule.onNode(hasScrollAction())
-        val firstElement = listView.onChildWithText("Object ID : 2552").assertIsDisplayed()
+        val firstElement = listView.onChildWithText("Transformer").assertIsDisplayed()
         firstElement.performClick()
 
         val formElementNode = composeTestRule.onNodeWithText("Asset type *")

@@ -18,11 +18,12 @@ package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.label
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
         groupNode.assertIsDisplayed()
         groupNode.performClick()
-        val associationNode = composeTestRule.onNodeWithText(text = associationResult.associatedFeature.label)
+        val associationNode = composeTestRule.onAllNodesWithText(text = associationResult.title).onFirst()
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
