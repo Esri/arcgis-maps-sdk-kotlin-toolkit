@@ -40,7 +40,7 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      * Displays a Callout at the specified geographical location on the [FlyoverSceneView]. The Callout
      * is a composable that can be used to display additional information about a location on the
      * scene. The additional information is passed as a content composable that contains text and/or
-     * other content. It has a leader that points to the location that Callout refers to. The body of
+     * other content. It has a leader that points to the location that the Callout refers to. The body of
      * the Callout is a rectangular area with curved corners that contains the content lambda provided
      * by the application. A thin border line is drawn around the entire Callout.
      *
@@ -48,7 +48,6 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      *
      * @param location the geographical location at which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout
-     * @param content the content of the Callout
      * @param offset the offset in screen coordinates from the geographical location at which to
      *        place the callout
      * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the
@@ -57,9 +56,9 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      *        symbology that does rotate with the [FlyoverSceneView]
      * @param colorScheme the styling options for the Callout's color properties
      * @param shapes the styling options for the Callout's container shape
+     * @param content the content of the Callout
      * @since 200.8.0
      */
-
     @Composable
     public fun Callout(
         location: Point,
@@ -84,7 +83,7 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      * [FlyoverSceneView]. The Callout is a composable that can be used to display additional
      * information about a location on the scene. The additional information is passed as a [content]
      * composable that contains text and/or other content. It has a leader that points to the location
-     * that Callout refers to. The body of the Callout is a rectangular area with curved corners that
+     * that the Callout refers to. The body of the Callout is a rectangular area with curved corners that
      * contains the [content] lambda provided by the application. A thin border line is drawn around
      * the entire Callout.
      *
