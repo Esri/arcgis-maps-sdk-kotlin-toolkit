@@ -98,9 +98,9 @@ internal fun PreplannedMapAreas(
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
-            thumbnail = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(), /* your default image */
-            title = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.title,
-            description = selectedPreplannedMapAreaState.preplannedMapArea.portalItem.description,
+            thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
+            title = selectedPreplannedMapAreaState.title,
+            description = selectedPreplannedMapAreaState.description,
             size = selectedPreplannedMapAreaState.directorySize,
             isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
             onStartDownload = {
@@ -141,7 +141,7 @@ internal fun PreplannedMapAreas(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Display the thumbnail image if available, otherwise show a placeholder icon
-                    val thumbnail = state.preplannedMapArea.portalItem.thumbnail?.image?.bitmap?.asImageBitmap()
+                    val thumbnail = state.thumbnail?.asImageBitmap()
                     Box(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
@@ -169,7 +169,7 @@ internal fun PreplannedMapAreas(
                     Column(modifier = Modifier.weight(1f)) {
                         // Display the title with a maximum of one line
                         Text(
-                            text = state.preplannedMapArea.portalItem.title,
+                            text = state.title,
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(top = 6.dp),
                             maxLines = 1, // Restrict to one line
@@ -177,7 +177,7 @@ internal fun PreplannedMapAreas(
                         )
                         // Display the description with a maximum of two lines
                         Text(
-                            text = state.preplannedMapArea.portalItem.description,
+                            text = state.description,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
@@ -209,11 +209,13 @@ internal fun PreplannedMapAreas(
                                 }
                             }
                         }
+
                         state.status == Status.Downloading -> {
                             CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }
+
                         state.status.isDownloaded -> {
                             OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
