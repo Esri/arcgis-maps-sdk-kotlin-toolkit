@@ -35,14 +35,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,10 +56,11 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
+import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
