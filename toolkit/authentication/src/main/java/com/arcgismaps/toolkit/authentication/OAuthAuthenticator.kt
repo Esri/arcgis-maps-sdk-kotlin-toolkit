@@ -61,7 +61,7 @@ internal fun OAuthAuthenticator(
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
         var didLaunch by rememberSaveable(key = oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
-            rememberLauncherForActivityResult(contract = WebAuthenticationActivity.Contract()) { redirectUrl ->
+            rememberLauncherForActivityResult(contract = WebAuthenticationActivity.OAuthUserSignInContract()) { redirectUrl ->
                 redirectUrl?.let {
                     oAuthPendingSignIn.complete(redirectUrl)
                 } ?: run {

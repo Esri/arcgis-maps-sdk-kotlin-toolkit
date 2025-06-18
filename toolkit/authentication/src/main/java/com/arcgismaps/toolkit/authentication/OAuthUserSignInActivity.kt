@@ -92,7 +92,6 @@ private const val RESULT_CODE_CANCELED = 2
  * ```
  *
  * @since 200.2.0
- *
  */
 @Deprecated(
     message = "This class is deprecated and will be removed in a future release. " +

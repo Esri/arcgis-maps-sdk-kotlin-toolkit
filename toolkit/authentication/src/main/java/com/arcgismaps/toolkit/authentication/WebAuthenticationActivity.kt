@@ -25,7 +25,7 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
-private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
+private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 
@@ -36,17 +36,18 @@ private const val RESULT_CODE_CANCELED = 2
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
- * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in and sign-out flows. The behavior
- * for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
+ * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. The behavior
+ * for IAP sign-in is similar to OAuth, where the activity launches a CustomTabs browser
  * for user interaction and processes the result upon completion.
  *
  * This activity must be registered in your application's manifest. There are two ways to configure
  * the manifest entry for [WebAuthenticationActivity]:
  *
- * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
- * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
- * immediately handle the completion of the challenge. In this case, the activity should be declared
- * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ * When completing an authentication challenge by signing in, the Custom Tabs should redirect back to
+ * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
+ * This applies to both OAuth and IAP flows.
+ * In this case, the activity should be declared in the manifest using `launchMode="singleTop"` and an
+ * `intent-filter` should be specified:
  *
  * ```
  * <activity
@@ -92,7 +93,7 @@ private const val RESULT_CODE_CANCELED = 2
  * startActivity(newIntent)
  * ```
  *
- * @since 200.2.0
+ * @since 200.8.0
  */
 public class WebAuthenticationActivity : ComponentActivity() {
 
@@ -138,13 +139,13 @@ public class WebAuthenticationActivity : ComponentActivity() {
      * Finishes this activity with a response containing a success code and the redirect intent's uri
      * or a canceled code if no uri can be found.
      *
-     * @since 200.2.0
+     * @since 200.8.0
      */
     public fun handleRedirectIntent(intent: Intent?) {
         intent?.data?.let { uri ->
             val uriString = uri.toString()
             val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uriString)
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
             finish()
@@ -162,9 +163,9 @@ public class WebAuthenticationActivity : ComponentActivity() {
      * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
      * for more details.
      *
-     * @since 200.2.0
+     * @since 200.8.0
      */
-    public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, WebAuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
@@ -174,7 +175,7 @@ public class WebAuthenticationActivity : ComponentActivity() {
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
             return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
             } else {
                 null
             }
@@ -191,7 +192,7 @@ public class WebAuthenticationActivity : ComponentActivity() {
      *
      * @since 200.8.0
      */
-    public class IapSignInContract : ActivityResultContract<String, String?>() {
+    internal class IapSignInContract : ActivityResultContract<String, String?>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, WebAuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
@@ -200,7 +201,7 @@ public class WebAuthenticationActivity : ComponentActivity() {
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
             return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
             } else {
                 null
             }
