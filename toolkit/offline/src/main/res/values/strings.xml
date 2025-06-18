@@ -16,6 +16,7 @@
 
 <resources>
     <string name="map_areas">Map Areas</string>
+    <string name="add_map_area">Add Map Area</string>
     <string name="thumbnail_description">PortalItem Thumbnail</string>
     <string name="download">Download</string>
     <string name="open">Open</string>
@@ -33,4 +34,15 @@
     <string name="download_map_area">Download Map Area</string>
     <string name="remove_download">Remove Download</string>
     <string name="no_image_available">No Image Available</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_internet_connection_error_message">No Internet Connection</string>
+    <string name="no_internet_error_message">No internet connection. Showing downloaded areas only.</string>
+    <string name="no_map_areas_error_message">Could not retrieve map areas for this map.</string>
+    <string name="no_offline_map_areas_error_message">There are no map areas for this map.</string>
+    <string name="error_fetching_areas">Error Fetching Map Areas</string>
+    <string name="error_fetching_areas_message">An error occurred while fetching map areas.</string>
+    <string name="no_map_areas">No Map Areas</string>
+    <string name="empty_on_demand_message">There are no map areas for this map. Tap the button below to get started.</string>
+    <string name="offline_disabled">Offline Disabled</string>
+    <string name="offline_disabled_message">The map is not enabled for offline use.</string>
 </resources>

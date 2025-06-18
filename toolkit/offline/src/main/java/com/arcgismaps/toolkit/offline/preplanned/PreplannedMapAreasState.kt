@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.offline.preplanned
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Item
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.DownloadPreplannedOfflineMapJob
@@ -34,10 +36,10 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
-import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,11 +55,12 @@ import java.util.UUID
  */
 internal class PreplannedMapAreaState(
     private val context: Context,
-    internal val preplannedMapArea: PreplannedMapArea,
-    private val offlineMapTask: OfflineMapTask,
-    private val portalItem: PortalItem,
+    private val item: Item,
+    internal val preplannedMapArea: PreplannedMapArea? = null,
+    private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
+
     private lateinit var workerUUID: UUID
 
     private lateinit var mobileMapPackage: MobileMapPackage
@@ -83,6 +86,12 @@ internal class PreplannedMapAreaState(
 
     private lateinit var scope: CoroutineScope
 
+    internal val title = item.title
+    internal val description = item.description
+
+    private var _thumbnail by mutableStateOf<Bitmap?>(null)
+    internal val thumbnail: Bitmap? get() = _thumbnail ?: item.thumbnail?.image?.bitmap
+
     /**
      * Loads and initializes the associated preplanned map area.
      *
@@ -96,8 +105,8 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal suspend fun initialize() = runCatchingCancellable {
-        preplannedMapArea.load()
-            .onSuccess {
+        preplannedMapArea?.retryLoad()
+            ?.onSuccess {
                 _status = try {
                     Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
                 } catch (illegalStateException: IllegalStateException) {
@@ -108,8 +117,13 @@ internal class PreplannedMapAreaState(
                     Status.Packaged
                 }
                 // Load the thumbnail
-                preplannedMapArea.portalItem.thumbnail?.load()
-            }
+                _thumbnail = preplannedMapArea.portalItem.thumbnail?.let { loadableImage ->
+                    runCatching { loadableImage.load() }
+                    loadableImage.image?.bitmap
+                }
+            } ?: {
+            // preplannedMapArea is null.
+        }
     }
 
     /**
@@ -117,24 +131,30 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-    internal fun downloadPreplannedMapArea() = runCatchingCancellable {
-        scope = CoroutineScope(Dispatchers.IO)
-        scope.launch {
-            _status = Status.Downloading
-            val offlineWorkerUUID = startOfflineMapJob(
-                downloadPreplannedOfflineMapJob = createOfflineMapJob(
-                    preplannedMapArea = preplannedMapArea
+    internal fun downloadPreplannedMapArea() =
+        runCatchingCancellable {
+            scope = CoroutineScope(Dispatchers.IO)
+            val area = preplannedMapArea ?: return@runCatchingCancellable
+            val task = offlineMapTask ?: return@runCatchingCancellable
+            val portalItem = item as? PortalItem ?: return@runCatchingCancellable
+
+            scope.launch {
+                _status = Status.Downloading
+                val offlineWorkerUUID = startOfflineMapJob(
+                    downloadPreplannedOfflineMapJob = createOfflineMapJob(
+                        preplannedMapArea = area,
+                        offlineMapTask = task
+                    )
                 )
-            )
-            OfflineRepository.observeStatusForPreplannedWork(
-                context = context,
-                onWorkInfoStateChanged = ::logWorkInfo,
-                preplannedMapAreaState = this@PreplannedMapAreaState,
-                portalItem = portalItem,
-                offlineWorkerUUID = offlineWorkerUUID
-            )
+                OfflineRepository.observeStatusForPreplannedWork(
+                    context = context,
+                    onWorkInfoStateChanged = ::logWorkInfo,
+                    preplannedMapAreaState = this@PreplannedMapAreaState,
+                    portalItem = portalItem,
+                    offlineWorkerUUID = offlineWorkerUUID
+                )
+            }
         }
-    }
 
     /**
      * Cancels the current coroutine scope.
@@ -155,13 +175,14 @@ internal class PreplannedMapAreaState(
      * Defines a directory path where map data will be stored and creates a download job using these configurations.
      *
      * @param preplannedMapArea The target [PreplannedMapArea] to be downloaded offline.
-     *
+     * @param offlineMapTask The target [OfflineMapTask] to create the params & the job.
      * @return An instance of [DownloadPreplannedOfflineMapJob] configured with download parameters.
      *
      * @since 200.8.0
      */
     private suspend fun createOfflineMapJob(
-        preplannedMapArea: PreplannedMapArea
+        preplannedMapArea: PreplannedMapArea,
+        offlineMapTask: OfflineMapTask
     ): DownloadPreplannedOfflineMapJob {
 
         // Create default download parameters from the offline map task
@@ -176,7 +197,7 @@ internal class PreplannedMapAreaState(
         // Define the path where the map will be saved
         val preplannedMapAreaDownloadDirectory = OfflineRepository.createPendingPreplannedJobPath(
             context = context,
-            portalItemID = portalItem.itemId,
+            portalItemID = item.itemId,
             preplannedMapAreaID = preplannedMapArea.portalItem.itemId
         )
 
@@ -210,7 +231,7 @@ internal class PreplannedMapAreaState(
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
             jsonJobPath = jsonJobFile.path,
-            preplannedMapAreaTitle = preplannedMapArea.portalItem.title
+            preplannedMapAreaTitle = item.title
         )
 
         return workerUUID
@@ -235,7 +256,7 @@ internal class PreplannedMapAreaState(
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
-                    portalItemID = portalItem.itemId
+                    portalItemID = item.itemId
                 )
             }
             val localScope = CoroutineScope(Dispatchers.IO)

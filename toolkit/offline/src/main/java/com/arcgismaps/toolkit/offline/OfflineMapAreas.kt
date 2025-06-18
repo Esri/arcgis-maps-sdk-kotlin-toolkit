@@ -18,26 +18,26 @@
 
 package com.arcgismaps.toolkit.offline
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
+import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
+import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
+import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
+import com.arcgismaps.toolkit.offline.ui.OfflineDisabled
+import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
 
 /**
  * Take a web map offline by downloading map areas.
@@ -51,14 +51,17 @@ public fun OfflineMapAreas(
 ) {
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
+    var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(offlineMapState) {
+    LaunchedEffect(offlineMapState, isRefreshEnabled) {
+        if (isRefreshEnabled) {
+            offlineMapState.resetInitialize()
+        }
         offlineMapState.initialize(context)
+        isRefreshEnabled = false
     }
 
-    Surface(
-        modifier = modifier
-    ) {
+    Surface(modifier = modifier) {
         when (initializationStatus) {
             is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
@@ -70,36 +73,46 @@ public fun OfflineMapAreas(
             }
 
             is InitializationStatus.FailedToInitialize -> {
-                (initializationStatus as InitializationStatus.FailedToInitialize).error.message?.let {
-                    NonRecoveredErrorIndicator(
-                        it
-                    )
-                }
+                OfflineMapAreasError(
+                    onRefresh = { isRefreshEnabled = true },
+                    error = (initializationStatus as InitializationStatus.FailedToInitialize).error
+                )
             }
 
-            else -> {
-                if (offlineMapState.mode == OfflineMapMode.Preplanned) {
-                    PreplannedMapAreas(
-                        preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                        modifier = modifier
-                    )
+            is InitializationStatus.Initialized -> {
+                // Check if the map has offline mode disabled
+                if (offlineMapState.mapIsOfflineDisabled) {
+                    OfflineDisabled(onRefresh = { isRefreshEnabled = true })
+                } else {
+                    // If offline mode is enabled, display the offline modes
+                    when (offlineMapState.mode) {
+                        // For preplanned, display online & offline map areas.
+                        OfflineMapMode.Preplanned -> {
+                            Column {
+                                PreplannedMapAreas(
+                                    preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
+                                    modifier = modifier
+                                )
+                                if (offlineMapState.isShowingOnlyOfflineModels) {
+                                    NoInternetNoAreas(
+                                        onlyFooterVisible = offlineMapState.preplannedMapAreaStates.isNotEmpty(),
+                                        onRefresh = { isRefreshEnabled = true }
+                                    )
+                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()){
+                                    EmptyPreplannedOfflineAreas(onRefresh = { isRefreshEnabled = true })
+                                }
+                            }
+                        }
+                        // If not preplanned state & map has offline mode enabled, display the on demand areas
+                        OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
+                            // TODO: Init OnDemand screen...
+                            EmptyOnDemandOfflineAreas(onAdd = {
+                                // TODO: Add new on demand map area
+                            })
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun NonRecoveredErrorIndicator(errorMessage: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(
-            Icons.Default.Info,
-            contentDescription = stringResource(id = R.string.error),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Text(
-            text = errorMessage,
-            color = MaterialTheme.colorScheme.error
-        )
     }
 }
