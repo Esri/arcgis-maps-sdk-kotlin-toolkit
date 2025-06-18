@@ -254,7 +254,12 @@ public fun FlyoverSceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         content = {
-            content?.invoke(FlyoverSceneViewScope(this))
+            content?.let { content ->
+                val flyoverSceneViewScope = remember {
+                    FlyoverSceneViewScope(this)
+                }
+                content.invoke(flyoverSceneViewScope)
+            }
         }
     )
 }
