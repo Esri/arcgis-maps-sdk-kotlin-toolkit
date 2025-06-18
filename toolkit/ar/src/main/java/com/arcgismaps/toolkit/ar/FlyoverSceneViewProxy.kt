@@ -42,7 +42,6 @@ import com.google.ar.core.Config
  *
  * @param location the camera's origin location.
  * @param heading the camera heading.
- * as the device moves.
  *
  * @since 200.8.0
  */
