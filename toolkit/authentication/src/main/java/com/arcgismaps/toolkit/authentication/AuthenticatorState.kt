@@ -234,7 +234,8 @@ private class AuthenticatorStateImpl(
      *
      * @param requestUrl the URL that issued the IAP challenge.
      * @return an [ArcGISAuthenticationChallengeResponse] with an [IapCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
-     * if the user cancelled.
+     * if the user cancelled. If the IAP configuration cannot be used for the URL, it will return
+     * [ArcGISAuthenticationChallengeResponse.ContinueAndFail].
      * @since 200.8.0
      */
     private suspend fun handleIapChallenge(requestUrl: String): ArcGISAuthenticationChallengeResponse {
