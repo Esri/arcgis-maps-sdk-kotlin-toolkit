@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications 2025: Esri Inc. Removed experimental annotations
+ * Modifications 2025: Esri Inc. Made functions internal and explicitly specified return types
+ * Modifications 2025: Esri Inc. Add sheetGesturesEnabled
  */
 
 package com.arcgismaps.toolkit.offline.ui.material3
