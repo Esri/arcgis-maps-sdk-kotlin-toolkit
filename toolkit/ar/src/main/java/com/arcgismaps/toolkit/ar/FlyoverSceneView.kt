@@ -78,7 +78,6 @@ import java.time.Instant
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry].
  * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
- * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this FlyoverSceneView.
  * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
  * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
  * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
@@ -117,7 +116,6 @@ public fun FlyoverSceneView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
-    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
@@ -224,7 +222,7 @@ public fun FlyoverSceneView(
         onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         graphicsOverlays = graphicsOverlays,
-        sceneViewInteractionOptions = sceneViewInteractionOptions,
+        sceneViewInteractionOptions = remember { SceneViewInteractionOptions(isEnabled = false) },
         viewLabelProperties = viewLabelProperties,
         selectionProperties = selectionProperties,
         isAttributionBarVisible = isAttributionBarVisible,
