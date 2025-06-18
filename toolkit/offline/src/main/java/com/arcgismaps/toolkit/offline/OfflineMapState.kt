@@ -46,7 +46,7 @@ import java.io.File
  */
 @Stable
 public class OfflineMapState(
-    internal val arcGISMap: ArcGISMap,
+    private val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     /**
@@ -269,8 +269,9 @@ public class OfflineMapState(
             preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                 mobileMapPackagePath = preplannedPath
             )
-        }
-        return preplannedMapAreaState
+            return preplannedMapAreaState
+        } else
+            return null
     }
 
     /**
