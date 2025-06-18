@@ -77,7 +77,6 @@ fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
                     .animateContentSize()
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface,
         sheetContainerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
