@@ -95,7 +95,7 @@ private const val RESULT_CODE_CANCELED = 2
  *
  * @since 200.8.0
  */
-public class WebAuthenticationActivity : ComponentActivity() {
+public class WebAuthenticationActivity internal constructor(): ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,7 +141,7 @@ public class WebAuthenticationActivity : ComponentActivity() {
      *
      * @since 200.8.0
      */
-    public fun handleRedirectIntent(intent: Intent?) {
+    private fun handleRedirectIntent(intent: Intent?) {
         intent?.data?.let { uri ->
             val uriString = uri.toString()
             val newIntent = Intent().apply {
