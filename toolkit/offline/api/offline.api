@@ -79,23 +79,14 @@ public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public final fun removeDownloadsForWebmap (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
-public final class com/arcgismaps/toolkit/offline/ui/ComposableSingletons$OfflineMapAreasStatusScreenKt {
-	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/ui/ComposableSingletons$OfflineMapAreasStatusScreenKt;
+public final class com/arcgismaps/toolkit/offline/ondemand/ComposableSingletons$OnDemandMapAreaSelectorKt {
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/ondemand/ComposableSingletons$OnDemandMapAreaSelectorKt;
 	public fun <init> ()V
-	public final fun getLambda$-1094547781$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1287580256$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1445843172$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1698195191$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1787592928$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-1876134971$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-520693156$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-686159615$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-887752594$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1824889706$offline_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$1944045702$offline_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$227649284$offline_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$299921591$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$57279093$offline_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$77200048$offline_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1469945973$offline_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2056361755$offline_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/arcgismaps/toolkit/offline/ondemand/OnDemandMapAreaSelectorKt {
+	public static final fun OnDemandMapAreaSelector (Lcom/arcgismaps/mapping/ArcGISMap;ZLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
 }
 

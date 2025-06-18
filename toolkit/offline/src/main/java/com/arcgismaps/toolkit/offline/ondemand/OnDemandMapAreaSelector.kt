@@ -20,15 +20,16 @@ package com.arcgismaps.toolkit.offline.ondemand
 
 import android.util.Log
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,20 +48,22 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheetProperties
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
@@ -70,31 +73,38 @@ import kotlin.math.roundToInt
  */
 @Composable
 public fun OnDemandMapAreaSelector(
-    currentMap: ArcGISMap,
+    localMap: ArcGISMap,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
-
-    val localMap = currentMap.clone()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+
     if (showBottomSheet) {
         ModalBottomSheet(
-            modifier = Modifier,
-            onDismissRequest = onDismiss,
+            modifier = Modifier.systemBarsPadding(),
+            onDismissRequest = {
+                scope.launch {
+                    sheetState.hide()
+                }.invokeOnCompletion {
+                    onDismiss.invoke()
+                }
+            },
             sheetState = sheetState,
             sheetGesturesEnabled = false,
             properties = ModalBottomSheetProperties(),
             dragHandle = {}
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                text = "Pan and zoom to define the area"
-            )
-            OnDemandOptions(localMap,onDismiss)
+            OnDemandOptions(
+                localMap = localMap,
+                onDismiss = {
+                    scope.launch {
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        onDismiss.invoke()
+                    }
+                })
         }
     }
 }
@@ -103,14 +113,14 @@ public fun OnDemandMapAreaSelector(
 private fun OnDemandOptions(localMap: ArcGISMap, onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        Text(text = "Pan and zoom to define the area")
         MapViewWithAreaSelector(
             modifier = Modifier.weight(1f),
-            localMap=localMap,
+            localMap = localMap,
             onRectChanged = {
                 Log.e("MapWithAreaSelector", "RECT CHANGE: ${it.size}")
             }
@@ -130,7 +140,7 @@ private fun MapViewWithAreaSelector(
     Box(modifier.fillMaxWidth()) {
         MapView(
             modifier = Modifier.matchParentSize(),
-            arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets)
+            arcGISMap = localMap
         )
         OnDemandMapAreaSelector(
             modifier = Modifier.matchParentSize(),
@@ -143,15 +153,19 @@ private fun MapViewWithAreaSelector(
 @Composable
 private fun OnDemandMapAreaSelector(
     modifier: Modifier = Modifier,
-    minWidthDp: Dp = 50.dp,
-    minHeightDp: Dp = 50.dp,
-    cornerRadiusDp: Dp = 16.dp,
-    handleSizeDp: Dp = 24.dp,
+    minWidthDp: Dp = 100.dp,
+    minHeightDp: Dp = 100.dp,
+    cornerRadiusDp: Dp = 24.dp,
+    handleSizeDp: Dp = 42.dp,
+    borderWidthDp: Dp = 4.dp,
+    cornerHandleThicknessDp: Dp = 12.dp,
     onRectChange: (Rect) -> Unit
 ) {
     val density = LocalDensity.current
     var parentSize by remember { mutableStateOf(Size.Zero) }
     var rect by remember { mutableStateOf(Rect(Offset.Zero, Size.Zero)) }
+    val borderWidthPx = with(density) { borderWidthDp.toPx() }
+    val handleThicknessPx = with(density) { cornerHandleThicknessDp.toPx() }
 
     val minWidthPx = with(density) { minWidthDp.toPx() }
     val minHeightPx = with(density) { minHeightDp.toPx() }
@@ -159,6 +173,11 @@ private fun OnDemandMapAreaSelector(
     val handleSizePx = with(density) { handleSizeDp.toPx() }
     val halfHandle = handleSizePx / 2f
     val defaultInset = with(density) { 50.dp.toPx() }
+
+    val topLeftCenter = rect.topLeft + Offset(cornerRadiusPx, cornerRadiusPx)
+    val topRightCenter = rect.topRight + Offset(-cornerRadiusPx, cornerRadiusPx)
+    val bottomRightCenter = rect.bottomRight + Offset(-cornerRadiusPx, -cornerRadiusPx)
+    val bottomLeftCenter = rect.bottomLeft + Offset(cornerRadiusPx, -cornerRadiusPx)
 
     fun clampRect(l: Float, t: Float, r: Float, b: Float): Rect {
         val left = l.coerceIn(0f, r - minWidthPx)
@@ -188,19 +207,43 @@ private fun OnDemandMapAreaSelector(
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val full = size
-            val p = Path().apply {
+            val mask = Path().apply {
                 fillType = PathFillType.EvenOdd
                 addRect(Rect(Offset.Zero, full))
                 addRoundRect(RoundRect(rect, cornerRadiusPx, cornerRadiusPx))
             }
-            drawPath(p, Color.Black.copy(alpha = 0.5f))
+            drawPath(mask, Color.Black.copy(alpha = 0.5f))
             drawRoundRect(
                 color = Color.White,
                 topLeft = rect.topLeft,
                 size = rect.size,
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 4.dp.toPx())
+                style = Stroke(width = borderWidthPx)
             )
+            val arcStyle = Stroke(
+                width = handleThicknessPx,
+                cap = StrokeCap.Round
+            )
+
+            val arcDiameter = cornerRadiusPx * 2f
+
+            fun drawCornerArc(center: Offset, startAngle: Float) {
+                val topLeft = center - Offset(cornerRadiusPx, cornerRadiusPx)
+                drawArc(
+                    color = Color.White,
+                    startAngle = startAngle,
+                    sweepAngle = 90f,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = Size(arcDiameter, arcDiameter),
+                    style = arcStyle
+                )
+            }
+
+            drawCornerArc(topLeftCenter, 180f)
+            drawCornerArc(topRightCenter, 270f)
+            drawCornerArc(bottomRightCenter, 0f)
+            drawCornerArc(bottomLeftCenter, 90f)
         }
 
         @Composable
@@ -263,5 +306,16 @@ private fun OnDemandMapAreaSelector(
             )
             onRectChange(rect)
         }
+    }
+}
+
+@Preview
+@Composable
+private fun OnDemandMapAreaSelectorPreview() {
+    Box(Modifier.fillMaxSize()) {
+        OnDemandMapAreaSelector(
+            modifier = Modifier.matchParentSize(),
+            onRectChange = { }
+        )
     }
 }

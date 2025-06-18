@@ -119,15 +119,17 @@ public fun OfflineMapAreas(
                         }
                         // If not preplanned state & map has offline mode enabled, display the on demand areas
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
-                            // TODO: Init OnDemand screen...
-                            EmptyOnDemandOfflineAreas(onAdd = {
-                                // TODO: Add new on demand map area
-                                isOnDemandMapAreaSelectorVisible = true
-                            })
+                            EmptyOnDemandOfflineAreas(
+                                onAdd = {
+                                    isOnDemandMapAreaSelectorVisible = true
+                                }
+                            )
                             OnDemandMapAreaSelector(
-                                currentMap = offlineMapState.arcGISMap,
+                                localMap = offlineMapState.arcGISMap.clone(),
                                 showBottomSheet = isOnDemandMapAreaSelectorVisible,
-                                onDismiss = { isOnDemandMapAreaSelectorVisible = false }
+                                onDismiss = {
+                                    isOnDemandMapAreaSelectorVisible = false
+                                }
                             )
                         }
                     }
