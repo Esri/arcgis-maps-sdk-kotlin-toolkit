@@ -5,7 +5,7 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 
 public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
 	public abstract fun dismissAll ()V
-	public abstract fun getIapConfigurations ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getIapConfigurations ()Ljava/util/List;
 	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
 	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingIapSignIn ()Lkotlinx/coroutines/flow/StateFlow;
@@ -13,8 +13,8 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun setIapConfigurations (Ljava/util/List;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
-	public abstract fun updateIapConfigurations (Ljava/util/List;)V
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
