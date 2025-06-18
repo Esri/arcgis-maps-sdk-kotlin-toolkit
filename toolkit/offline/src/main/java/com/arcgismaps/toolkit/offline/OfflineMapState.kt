@@ -269,8 +269,9 @@ public class OfflineMapState(
             preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                 mobileMapPackagePath = preplannedPath
             )
-        }
-        return preplannedMapAreaState
+            return preplannedMapAreaState
+        } else
+            return null
     }
 
     /**
