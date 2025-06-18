@@ -84,7 +84,8 @@ apiValidation {
     // this may be resolved in the compose compiler.
      val composableSingletons = listOf(
              "com.arcgismaps.toolkit.offline.preplanned.ComposableSingletons\$PreplannedMapAreasKt",
-             "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$MapAreaDetailsScreenKt"
+             "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$MapAreaDetailsScreenKt",
+             "com.arcgismaps.toolkit.offline.ui.material3.ComposableSingletons\$ModalBottomSheetKt"
      )
      ignoredClasses.addAll(composableSingletons)
 }
