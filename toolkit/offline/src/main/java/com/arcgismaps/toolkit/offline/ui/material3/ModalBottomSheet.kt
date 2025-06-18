@@ -40,6 +40,7 @@ import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
@@ -146,6 +147,7 @@ import java.util.UUID
  * @param sheetState The state of the bottom sheet.
  * @param sheetMaxWidth [Dp] that defines what the maximum width the sheet will take. Pass in
  *   [Dp.Unspecified] for a sheet that spans the entire screen width.
+ * @param sheetGesturesEnabled Whether the bottom sheet can be interacted with by gestures.
  * @param shape The shape of the bottom sheet.
  * @param containerColor The color used for the background of this bottom sheet
  * @param contentColor The preferred color for content inside this bottom sheet. Defaults to either
@@ -168,6 +170,7 @@ internal fun ModalBottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
     sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
+    sheetGesturesEnabled: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
     contentColor: Color = contentColorFor(containerColor),
@@ -227,6 +230,7 @@ internal fun ModalBottomSheet(
                 modifier,
                 sheetState,
                 sheetMaxWidth,
+                sheetGesturesEnabled,
                 shape,
                 containerColor,
                 contentColor,
@@ -251,6 +255,7 @@ internal fun BoxScope.ModalBottomSheetContent(
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
     sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
+    sheetGesturesEnabled: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
     contentColor: Color = contentColorFor(containerColor),
@@ -267,14 +272,18 @@ internal fun BoxScope.ModalBottomSheetContent(
                 .align(Alignment.TopCenter)
                 .widthIn(max = sheetMaxWidth)
                 .fillMaxWidth()
-                .nestedScroll(
-                    remember(sheetState) {
-                        ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
-                            sheetState = sheetState,
-                            orientation = Orientation.Vertical,
-                            onFling = settleToDismiss
+                .then(
+                    if (sheetGesturesEnabled)
+                        Modifier.nestedScroll(
+                            remember(sheetState) {
+                                ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
+                                    sheetState = sheetState,
+                                    orientation = Orientation.Vertical,
+                                    onFling = settleToDismiss
+                                )
+                            }
                         )
-                    }
+                    else Modifier
                 )
                 .draggableAnchors(sheetState.anchoredDraggableState, Orientation.Vertical) {
                         sheetSize,
@@ -309,7 +318,7 @@ internal fun BoxScope.ModalBottomSheetContent(
                 .draggable(
                     state = sheetState.anchoredDraggableState.draggableState,
                     orientation = Orientation.Vertical,
-                    enabled = sheetState.isVisible,
+                    enabled = sheetGesturesEnabled && sheetState.isVisible,
                     startDragImmediately = sheetState.anchoredDraggableState.isAnimationRunning,
                     onDragStopped = { settleToDismiss(it) }
                 )
@@ -351,35 +360,50 @@ internal fun BoxScope.ModalBottomSheetContent(
                 val dismissActionLabel = "Dismiss bottom sheet"
                 val expandActionLabel = "Expand bottom sheet"
                 Box(
-                    Modifier.align(Alignment.CenterHorizontally).semantics(
-                        mergeDescendants = true
-                    ) {
-                        // Provides semantics to interact with the bottomsheet based on its
-                        // current value.
-                        with(sheetState) {
-                            dismiss(dismissActionLabel) {
-                                animateToDismiss()
-                                true
-                            }
-                            if (currentValue == PartiallyExpanded) {
-                                expand(expandActionLabel) {
-                                    if (anchoredDraggableState.confirmValueChange(Expanded)) {
-                                        scope.launch { sheetState.expand() }
-                                    }
-                                    true
-                                }
-                            } else if (hasPartiallyExpandedState) {
-                                collapse(collapseActionLabel) {
-                                    if (
-                                        anchoredDraggableState.confirmValueChange(PartiallyExpanded)
-                                    ) {
-                                        scope.launch { partialExpand() }
-                                    }
-                                    true
+                    modifier =
+                        Modifier.align(Alignment.CenterHorizontally)
+                            .clickable {
+                                when (sheetState.currentValue) {
+                                    Expanded -> animateToDismiss()
+                                    PartiallyExpanded -> scope.launch { sheetState.expand() }
+                                    else -> scope.launch { sheetState.show() }
                                 }
                             }
-                        }
-                    }
+                            .semantics(mergeDescendants = true) {
+                                // Provides semantics to interact with the bottomsheet based on its
+                                // current value.
+                                if (sheetGesturesEnabled) {
+                                    with(sheetState) {
+                                        dismiss(dismissActionLabel) {
+                                            animateToDismiss()
+                                            true
+                                        }
+                                        if (currentValue == PartiallyExpanded) {
+                                            expand(expandActionLabel) {
+                                                if (
+                                                    anchoredDraggableState.confirmValueChange(
+                                                        Expanded
+                                                    )
+                                                ) {
+                                                    scope.launch { sheetState.expand() }
+                                                }
+                                                true
+                                            }
+                                        } else if (hasPartiallyExpandedState) {
+                                            collapse(collapseActionLabel) {
+                                                if (
+                                                    anchoredDraggableState.confirmValueChange(
+                                                        PartiallyExpanded
+                                                    )
+                                                ) {
+                                                    scope.launch { partialExpand() }
+                                                }
+                                                true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                 ) {
                     dragHandle()
                 }

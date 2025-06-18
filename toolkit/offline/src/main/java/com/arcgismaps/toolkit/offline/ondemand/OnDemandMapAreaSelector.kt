@@ -81,12 +81,12 @@ public fun OnDemandMapAreaSelector(
     val scope = rememberCoroutineScope()
     if (showBottomSheet) {
         ModalBottomSheet(
-            modifier = Modifier
-                .heightIn(max = configuration.screenHeightDp.dp)
-                .padding(vertical = 12.dp),
+            modifier = Modifier,
             onDismissRequest = onDismiss,
             sheetState = sheetState,
+            sheetGesturesEnabled = false,
             properties = ModalBottomSheetProperties(),
+            dragHandle = {}
         ) {
             Text(
                 modifier = Modifier
