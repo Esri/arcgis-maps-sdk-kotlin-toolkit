@@ -73,7 +73,7 @@ fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
                 viewModel.offlineMapState,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = 32.dp)
+                    .padding(bottom = 16.dp)
                     .animateContentSize()
             )
         },
