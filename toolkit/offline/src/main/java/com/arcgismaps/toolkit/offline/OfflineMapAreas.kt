@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaSelector
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
@@ -52,6 +53,7 @@ public fun OfflineMapAreas(
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
+    var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
@@ -105,10 +107,18 @@ public fun OfflineMapAreas(
                         }
                         // If not preplanned state & map has offline mode enabled, display the on demand areas
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
-                            // TODO: Init OnDemand screen...
-                            EmptyOnDemandOfflineAreas(onAdd = {
-                                // TODO: Add new on demand map area
-                            })
+                            EmptyOnDemandOfflineAreas(
+                                onAdd = {
+                                    isOnDemandMapAreaSelectorVisible = true
+                                }
+                            )
+                            OnDemandMapAreaSelector(
+                                localMap = offlineMapState.arcGISMap.clone(),
+                                showBottomSheet = isOnDemandMapAreaSelectorVisible,
+                                onDismiss = {
+                                    isOnDemandMapAreaSelectorVisible = false
+                                }
+                            )
                         }
                     }
                 }
