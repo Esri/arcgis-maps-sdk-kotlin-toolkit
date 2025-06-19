@@ -22,6 +22,7 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,6 +72,8 @@ import java.time.Instant
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param translationFactor the translation factor that defines how much the scene view translates
+ * as the device moves.
  * @param modifier Modifier to be applied to the FlyoverSceneView.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
@@ -111,6 +114,7 @@ import java.time.Instant
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
+    translationFactor: Double,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -190,6 +194,10 @@ public fun FlyoverSceneView(
         onDispose {
             flyoverSceneViewProxy.setSessionWrapper(null)
         }
+    }
+
+    SideEffect {
+        flyoverSceneViewProxy.setTranslationFactor(translationFactor)
     }
 
     Box(modifier = Modifier) {
