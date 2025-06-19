@@ -22,6 +22,7 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -197,7 +198,9 @@ public fun FlyoverSceneView(
         }
     }
 
-    flyoverSceneViewProxy.setTranslationFactor(translationFactor)
+    SideEffect {
+        flyoverSceneViewProxy.setTranslationFactor(translationFactor)
+    }
 
     Box(modifier = Modifier) {
         // Use rememberUpdatedState so that the lambda used below always sees the latest proxy. Without
