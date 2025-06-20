@@ -107,6 +107,7 @@ import java.time.Instant
  * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
+ * @param content the content of the FlyoverSceneView.
  *
  * @since 200.8.0
  */
@@ -147,7 +148,8 @@ public fun FlyoverSceneView(
     onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
-    onPan: ((PanChangeEvent) -> Unit)? = null
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    content: (@Composable FlyoverSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberFlyoverSceneViewStatus()
 
@@ -256,6 +258,14 @@ public fun FlyoverSceneView(
         onDoubleTap = onDoubleTap,
         onLongPress = onLongPress,
         onTwoPointerTap = onTwoPointerTap,
-        onPan = onPan
+        onPan = onPan,
+        content = {
+            content?.let { content ->
+                val flyoverSceneViewScope = remember {
+                    FlyoverSceneViewScope(this)
+                }
+                content.invoke(flyoverSceneViewScope)
+            }
+        }
     )
 }
