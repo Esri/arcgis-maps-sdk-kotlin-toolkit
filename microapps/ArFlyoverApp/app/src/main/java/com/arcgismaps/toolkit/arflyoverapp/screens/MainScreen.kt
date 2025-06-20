@@ -119,8 +119,7 @@ fun MainScreen() {
                 230.0,
                 SpatialReference.wgs84()
             ),
-            heading = 160.0,
-            translationFactor = 1000.0
+            heading = 160.0
         )
 
         Box {
