@@ -221,7 +221,7 @@ internal class OnDemandMapAreasState(
      * @since 200.8.0
      */
     internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
-        if (OfflineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
+        if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
             Log.d(TAG, "Deleted on-demand map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
             _status = Status.NotLoaded
