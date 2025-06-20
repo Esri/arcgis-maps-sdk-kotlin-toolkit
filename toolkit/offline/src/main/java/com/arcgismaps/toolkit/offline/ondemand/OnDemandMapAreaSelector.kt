@@ -111,7 +111,7 @@ private fun calculateEnvelope(fullSize: IntSize): Envelope? {
  * @since 200.8.0
  */
 @Composable
-public fun OnDemandMapAreaSelector(
+internal fun OnDemandMapAreaSelector(
     localMap: ArcGISMap? = null,
     uniqueMapAreaTitle: String,
     showBottomSheet: Boolean,

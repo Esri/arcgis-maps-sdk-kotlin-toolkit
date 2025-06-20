@@ -573,6 +573,7 @@ public object OfflineRepository {
                                     }
                                 }
                             } ?: run {
+                                // TODO: Wire in status handler
                                 /*
                                 onDemandMapAreasState.updateStatus(
                                     Status.MmpkLoadFailure(
@@ -589,6 +590,7 @@ public object OfflineRepository {
                             // otherwise, the observer will emit the WorkInfo on every launch
                             // until WorkManager auto-prunes
                             workManager.pruneWork()
+                            // TODO: Wire in status handler
                             /*
                             preplannedMapAreaState.updateStatus(
                                 Status.DownloadFailure(
@@ -603,6 +605,7 @@ public object OfflineRepository {
                         }
                         // if the work is currently in progress
                         WorkInfo.State.RUNNING -> {
+                            // TODO: Wire in status handler
                             // preplannedMapAreaState.updateStatus(Status.Downloading)
                         }
                         // don't have to handle other states

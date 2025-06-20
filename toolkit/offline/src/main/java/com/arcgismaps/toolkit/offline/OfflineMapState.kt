@@ -49,7 +49,7 @@ import java.util.UUID
  */
 @Stable
 public class OfflineMapState(
-    internal val arcGISMap: ArcGISMap,
+    private val arcGISMap: ArcGISMap,
     private val onSelectionChanged: (ArcGISMap) -> Unit = { }
 ) {
     /**
@@ -68,6 +68,8 @@ public class OfflineMapState(
     private var _mode: OfflineMapMode = OfflineMapMode.Unknown
     internal val mode: OfflineMapMode
         get() = _mode
+
+    internal lateinit var localMap: ArcGISMap
 
     private lateinit var offlineMapTask: OfflineMapTask
 
@@ -137,6 +139,7 @@ public class OfflineMapState(
                 throw error
             }
         }
+        localMap = arcGISMap.clone()
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItem = (arcGISMap.item as? PortalItem)
             ?: throw IllegalStateException("Item not found")

@@ -118,7 +118,7 @@ public fun OfflineMapAreas(
                                 }
                             )
                             OnDemandMapAreaSelector(
-                                localMap = offlineMapState.arcGISMap.clone(),
+                                localMap = offlineMapState.localMap,
                                 showBottomSheet = isOnDemandMapAreaSelectorVisible,
                                 uniqueMapAreaTitle = "Area 1", // TODO: Ensure this is a unique area title
                                 onDismiss = {
