@@ -114,12 +114,11 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      * to [tolerance]. The maximum allowed tolerance value is 100 DIPs, resulting in an identify circle of diameter
      * 200 DIPs.
      *
-     * GeometryEditorElement results are returned in the same order as on the [geometryEditor] display; that is top-first order,
-     * for example with GeometryEditorVertex first.
-     *
      * @param screenCoordinate location at which to run identify in screen coordinates
      * @param tolerance extent of the region used during the identify operation
-     * @return A [Result] containing an [IdentifyGeometryEditorResult], or failure if there is no [geometryEditor]
+     * @return A [Result] containing an [IdentifyGeometryEditorResult], or failure if there is no [geometryEditor].
+     * GeometryEditorElement results are returned in the same order as on the [geometryEditor] display; that is top-first order,
+     * for example with GeometryEditorVertex first.
      * @since 200.8.0
      */
     public suspend fun identifyGeometryEditor(
