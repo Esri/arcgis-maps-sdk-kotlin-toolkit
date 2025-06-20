@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class OfflineViewModel : ViewModel() {
 
-    // TODO: Update microapp UI to switch between preplanned & on-demand web-maps
+    // TODO: Update to use napervilleWaterNetwork and remove USBreweriesforOfflineTesting
     // private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
     private val USBreweriesforOfflineTesting = "3da658f2492f4cfd8494970ef489d2c5"
 
