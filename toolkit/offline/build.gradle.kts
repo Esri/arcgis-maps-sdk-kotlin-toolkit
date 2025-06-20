@@ -86,13 +86,15 @@ apiValidation {
              "com.arcgismaps.toolkit.offline.preplanned.ComposableSingletons\$PreplannedMapAreasKt",
              "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$MapAreaDetailsScreenKt",
              "com.arcgismaps.toolkit.offline.ui.material3.ComposableSingletons\$ModalBottomSheetKt",
-             "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$OfflineMapAreasStatusScreenKt"
+             "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$OfflineMapAreasStatusScreenKt",
+             "com.arcgismaps.toolkit.offline.ondemand.ComposableSingletons\$OnDemandMapAreaSelectorKt"
      )
      ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

@@ -28,16 +28,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
+import java.util.UUID
 
 /**
  * Represents the state of the offline map.
@@ -66,6 +69,8 @@ public class OfflineMapState(
     internal val mode: OfflineMapMode
         get() = _mode
 
+    internal lateinit var localMap: ArcGISMap
+
     private lateinit var offlineMapTask: OfflineMapTask
 
     private lateinit var portalItem: PortalItem
@@ -74,6 +79,12 @@ public class OfflineMapState(
         mutableStateListOf()
     internal val preplannedMapAreaStates: List<PreplannedMapAreaState>
         get() = _preplannedMapAreaStates
+
+
+    private var _onDemandMapAreaStates: SnapshotStateList<OnDemandMapAreasState> =
+        mutableStateListOf()
+    internal val onDemandMapAreaStates: List<OnDemandMapAreasState>
+        get() = _onDemandMapAreaStates
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
@@ -128,6 +139,7 @@ public class OfflineMapState(
                 throw error
             }
         }
+        localMap = arcGISMap.clone()
         offlineMapTask = OfflineMapTask(arcGISMap)
         portalItem = (arcGISMap.item as? PortalItem)
             ?: throw IllegalStateException("Item not found")
@@ -228,6 +240,25 @@ public class OfflineMapState(
             makeOfflinePreplannedMapAreaState(context, itemId)
                 ?.let { _preplannedMapAreaStates.add(it) }
         }
+    }
+
+    // TODO: Should this be wired to call OnDemandMapAreasState.initialize?
+    internal fun createOnDemandMapAreasState(
+        context: Context,
+        envelope: Envelope,
+        mapAreaTitle: String
+    ): OnDemandMapAreasState {
+        val onDemandMapAreasState = OnDemandMapAreasState(
+            context = context,
+            item = portalItem,
+            onDemandAreaID = UUID.randomUUID().toString(),
+            title = mapAreaTitle,
+            mapAreaEnvelope = envelope,
+            offlineMapTask = offlineMapTask,
+            onSelectionChanged = onSelectionChanged
+        )
+        _onDemandMapAreaStates.add(onDemandMapAreasState)
+        return onDemandMapAreasState
     }
 
     /**

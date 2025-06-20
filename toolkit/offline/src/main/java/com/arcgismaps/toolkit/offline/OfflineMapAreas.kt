@@ -27,17 +27,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaSelector
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
 import com.arcgismaps.toolkit.offline.ui.OfflineDisabled
 import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
+import kotlinx.coroutines.launch
 
 /**
  * Take a web map offline by downloading map areas.
@@ -50,8 +53,10 @@ public fun OfflineMapAreas(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
+    var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
@@ -98,17 +103,41 @@ public fun OfflineMapAreas(
                                         onlyFooterVisible = offlineMapState.preplannedMapAreaStates.isNotEmpty(),
                                         onRefresh = { isRefreshEnabled = true }
                                     )
-                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()){
-                                    EmptyPreplannedOfflineAreas(onRefresh = { isRefreshEnabled = true })
+                                } else if (offlineMapState.preplannedMapAreaStates.isEmpty()) {
+                                    EmptyPreplannedOfflineAreas(onRefresh = {
+                                        isRefreshEnabled = true
+                                    })
                                 }
                             }
                         }
                         // If not preplanned state & map has offline mode enabled, display the on demand areas
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
-                            // TODO: Init OnDemand screen...
-                            EmptyOnDemandOfflineAreas(onAdd = {
-                                // TODO: Add new on demand map area
-                            })
+                            EmptyOnDemandOfflineAreas(
+                                onAdd = {
+                                    isOnDemandMapAreaSelectorVisible = true
+                                }
+                            )
+                            OnDemandMapAreaSelector(
+                                localMap = offlineMapState.localMap,
+                                showBottomSheet = isOnDemandMapAreaSelectorVisible,
+                                uniqueMapAreaTitle = "Area 1", // TODO: Ensure this is a unique area title
+                                onDismiss = {
+                                    isOnDemandMapAreaSelectorVisible = false
+                                },
+                                onDownloadMapAreaSelected = { envelope, mapAreaTitle ->
+                                    scope.launch {
+                                        // TODO: This should be triggered from the area state
+                                        val onDemandMapAreaState = offlineMapState.createOnDemandMapAreasState(
+                                            context = context,
+                                            envelope = envelope,
+                                            mapAreaTitle = mapAreaTitle
+                                        )
+                                        // Start the on-demand download
+                                        onDemandMapAreaState.downloadOnDemandMapArea()
+
+                                    }
+                                }
+                            )
                         }
                     }
                 }
