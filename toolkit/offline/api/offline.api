@@ -79,3 +79,7 @@ public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public final fun removeDownloadsForWebmap (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
+public final class com/arcgismaps/toolkit/offline/ondemand/OnDemandMapAreaSelectorKt {
+	public static final fun OnDemandMapAreaSelector (Lcom/arcgismaps/mapping/ArcGISMap;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
