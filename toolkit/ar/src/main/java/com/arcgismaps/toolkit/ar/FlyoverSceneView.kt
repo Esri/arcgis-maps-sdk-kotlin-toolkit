@@ -22,6 +22,7 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,6 +72,8 @@ import java.time.Instant
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
  * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param translationFactor the translation factor that defines how much the scene view translates
+ * as the device moves.
  * @param modifier Modifier to be applied to the FlyoverSceneView.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
@@ -78,7 +81,6 @@ import java.time.Instant
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry].
  * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
- * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this FlyoverSceneView.
  * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
  * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
  * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
@@ -113,12 +115,12 @@ import java.time.Instant
 public fun FlyoverSceneView(
     arcGISScene: ArcGISScene,
     flyoverSceneViewProxy: FlyoverSceneViewProxy,
+    translationFactor: Double,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
-    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
@@ -196,6 +198,10 @@ public fun FlyoverSceneView(
         }
     }
 
+    SideEffect {
+        flyoverSceneViewProxy.setTranslationFactor(translationFactor)
+    }
+
     Box(modifier = Modifier) {
         // Use rememberUpdatedState so that the lambda used below always sees the latest proxy. Without
         // this if we changed the proxy argument updating and rendering would stop.
@@ -226,7 +232,7 @@ public fun FlyoverSceneView(
         onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         graphicsOverlays = graphicsOverlays,
-        sceneViewInteractionOptions = sceneViewInteractionOptions,
+        sceneViewInteractionOptions = remember { SceneViewInteractionOptions(isEnabled = false) },
         viewLabelProperties = viewLabelProperties,
         selectionProperties = selectionProperties,
         isAttributionBarVisible = isAttributionBarVisible,

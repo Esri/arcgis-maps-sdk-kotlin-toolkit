@@ -110,13 +110,13 @@ fun MainScreen() {
                 230.0,
                 SpatialReference.wgs84()
             ),
-            heading = 160.0,
-            translationFactor = 1000.0
+            heading = 160.0
         )
 
         FlyoverSceneView(
             arcGISScene = arcGISScene,
-            flyoverSceneViewProxy = flyoverSceneViewProxy
+            flyoverSceneViewProxy = flyoverSceneViewProxy,
+            translationFactor = 1000.0
         )
     } else {
         // otherwise display a message and a button that causes the privacy info dialog to be shown

@@ -9,12 +9,12 @@ public final class com/arcgismaps/toolkit/ar/ArCoreResourceExhaustedException : 
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewKt {
-	public static final fun FlyoverSceneView-63MYszw (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final fun FlyoverSceneView-63MYszw (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;DLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy {
 	public static final field $stable I
-	public fun <init> (Lcom/arcgismaps/geometry/Point;DD)V
+	public fun <init> (Lcom/arcgismaps/geometry/Point;D)V
 	public final fun exportImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getFieldOfView ()Ljava/lang/Double;
 	public final fun getFieldOfViewDistortionRatio ()Ljava/lang/Double;
@@ -32,11 +32,10 @@ public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy {
 	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setLocationAndHeading (Lcom/arcgismaps/geometry/Point;D)V
-	public final fun setTranslationFactor (D)V
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewProxyKt {
-	public static final fun rememberFlyoverSceneViewProxy (Lcom/arcgismaps/geometry/Point;DDLandroidx/compose/runtime/Composer;I)Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;
+	public static final fun rememberFlyoverSceneViewProxy (Lcom/arcgismaps/geometry/Point;DLandroidx/compose/runtime/Composer;I)Lcom/arcgismaps/toolkit/ar/FlyoverSceneViewProxy;
 }
 
 public final class com/arcgismaps/toolkit/ar/FlyoverSceneViewScope {
