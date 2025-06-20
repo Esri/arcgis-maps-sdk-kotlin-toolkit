@@ -27,9 +27,11 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
+import com.arcgismaps.toolkit.offline.workmanager.OnDemandMapAreaJobWorker
 import com.arcgismaps.toolkit.offline.workmanager.PreplannedMapAreaJobWorker
 import com.arcgismaps.toolkit.offline.workmanager.downloadJobJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
@@ -134,6 +136,25 @@ public object OfflineRepository {
     }
 
     /**
+     * Creates and returns the directory file for a pending on-demand job.
+     *
+     * @param portalItemID The ID of the portal item for which to create a pending job folder.
+     * @param onDemandMapAreaID The ID of the specific on-demand map area.
+     * @return A [File] instance pointing to the created `<portalItemID>/<onDemandMapAreaID>` directory.
+     * @since 200.8.0
+     */
+    internal fun createPendingOnDemandJobPath(
+        context: Context,
+        portalItemID: String,
+        onDemandMapAreaID: String
+    ): File {
+        return File(
+            OfflineURLs.pendingJobInfoDirectoryPath(context, portalItemID),
+            onDemandMapAreaID
+        ).also { it.mkdirs() }
+    }
+
+    /**
      * Saves a serialized offline map job as a JSON file on disk. Ensures directories are created
      * and writes the provided JSON content to the specified path.
      *
@@ -204,7 +225,38 @@ public object OfflineRepository {
             val target = File(destDir, child.name)
             child.copyRecursively(target, overwrite = true)
         }
-        movePreplannedOfflineMapInfoToDestination(context, portalItemID)
+        moveOfflineMapInfoToDestination(context, portalItemID)
+        cacheAreaDir.deleteRecursively()
+        return destDir
+    }
+
+    /**
+     * Returns the path to the final “OnDemand/<areaItemID>” folder.
+     *
+     * - Moves all contents from: `<your-app-files-dir>/PendingJobs/<portalItemID>/<areaItemID>`
+     * - into: `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/OnDemand/<areaItemID>`
+     *
+     * @since 200.8.0
+     */
+    private fun moveOnDemandJobResultToDestination(
+        context: Context,
+        offlineMapCacheDownloadPath: String
+    ): File {
+        val cacheAreaDir = File(offlineMapCacheDownloadPath)
+        val areaItemID = cacheAreaDir.name
+        val portalDir = cacheAreaDir.parentFile
+        val portalItemID = portalDir?.name.toString()
+        val destDirPath = OfflineURLs.onDemandDirectoryPath(
+            context = context,
+            portalItemID = portalItemID,
+            onDemandMapAreaID = areaItemID
+        )
+        val destDir = File(destDirPath)
+        cacheAreaDir.listFiles()?.forEach { child ->
+            val target = File(destDir, child.name)
+            child.copyRecursively(target, overwrite = true)
+        }
+        moveOfflineMapInfoToDestination(context, portalItemID)
         cacheAreaDir.deleteRecursively()
         return destDir
     }
@@ -244,7 +296,7 @@ public object OfflineRepository {
      *
      * @since 200.8.0
      */
-    private fun movePreplannedOfflineMapInfoToDestination(context: Context, portalItemID: String) {
+    private fun moveOfflineMapInfoToDestination(context: Context, portalItemID: String) {
         val pendingDir = File(OfflineURLs.pendingMapInfoDirectoryPath(context, portalItemID))
         val destDir = File(OfflineURLs.portalItemDirectoryPath(context, portalItemID))
         // use pending map info file only if it exists
@@ -311,6 +363,47 @@ public object OfflineRepository {
                 workDataOf(
                     jsonJobPathKey to jsonJobPath,
                     jobAreaTitleKey to preplannedMapAreaTitle
+                )
+            ).build()
+
+        // enqueue the work request to run as a unique work with the uniqueWorkName, so that
+        // only one instance of OfflineJobWorker is running at any time
+        // if any new work request with the uniqueWorkName is enqueued, it replaces any existing
+        // ones that are active
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            uniqueWorkName = jobWorkerUuidKey + workRequest.id,
+            existingWorkPolicy = ExistingWorkPolicy.KEEP,
+            request = workRequest
+        )
+        return workRequest.id
+    }
+
+    /**
+     * Creates and enqueues a one-time WorkManager request for downloading an offline map area
+     * using [OnDemandMapAreaJobWorker]. Sets up expedited work with input data containing
+     * notification and job details. Ensures only one worker instance runs at any time by
+     * replacing active workers with the same unique name as per the defined policy.
+     *
+     * @param jsonJobPath The file path to the serialized JSON representation of the job.
+     * @param onDemandMapAreaTitle The title of the on-demand map area being downloaded.
+     * @return A [UUID] representing the identifier of the enqueued WorkManager request.
+     * @since 200.8.0
+     */
+    internal fun createOnDemandMapAreaRequestAndQueueDownload(
+        context: Context,
+        jsonJobPath: String,
+        onDemandMapAreaTitle: String
+    ): UUID {
+        // create a one-time work request with an instance of OfflineJobWorker
+        val workRequest = OneTimeWorkRequestBuilder<OnDemandMapAreaJobWorker>()
+            // run it as an expedited work
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the input data
+            .setInputData(
+                // add the notificationId and the json file path as a key/value pair
+                workDataOf(
+                    jsonJobPathKey to jsonJobPath,
+                    jobAreaTitleKey to onDemandMapAreaTitle
                 )
             ).build()
 
@@ -412,6 +505,105 @@ public object OfflineRepository {
                         // if the work is currently in progress
                         WorkInfo.State.RUNNING -> {
                             preplannedMapAreaState.updateStatus(Status.Downloading)
+                        }
+                        // don't have to handle other states
+                        else -> {}
+                    }
+                }
+            }
+    }
+
+    /**
+     * Observes updates on a specific WorkManager task identified by its UUID and
+     * handles status changes for on-demand map areas. Monitors task states to update
+     * corresponding statuses in [OnDemandMapAreasState]. Finally, prunes completed tasks
+     * from WorkManager's database when necessary.
+     *
+     *
+     * @param offlineWorkerUUID The unique identifier associated with the specific task being observed in WorkManager.
+     * @param onDemandMapAreasState The [onDemandMapAreasState] instance to update based on task progress or completion.
+     * @param onWorkInfoStateChanged A callback function triggered when work state changes occur.
+     * @since 200.8.0
+     */
+    internal suspend fun observeStatusForOnDemandWork(
+        context: Context,
+        offlineWorkerUUID: UUID,
+        onDemandMapAreasState: OnDemandMapAreasState,
+        portalItem: PortalItem,
+        onWorkInfoStateChanged: (WorkInfo) -> Unit,
+    ) {
+        val workManager = WorkManager.getInstance(context)
+        savePendingMapInfo(context, portalItem)
+        // collect the flow to get the latest work info list
+        workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
+            .collect { workInfo ->
+                if (workInfo != null) {
+                    // Report progress
+                    val progress = workInfo.progress.getInt("Progress", 0)
+                    onDemandMapAreasState.updateDownloadProgress(progress)
+
+                    // emit changes in the work info state
+                    onWorkInfoStateChanged(workInfo)
+                    // check the current state of the work request
+                    when (workInfo.state) {
+                        // if work completed successfully
+                        WorkInfo.State.SUCCEEDED -> {
+                            // TODO: Wire in status handler
+                            // onDemandMapAreasState.updateStatus(Status.Downloaded)
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
+                                // using the pending path, move the result to final destination path
+                                val destDir = moveOnDemandJobResultToDestination(context, path)
+                                // create & load the downloaded map
+                                onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
+                                    mobileMapPackagePath = destDir.absolutePath
+                                )
+                                // skip adding map info if it already exists in the list
+                                if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
+                                    // create offline map information from local directory
+                                    OfflineMapInfo.createFromDirectory(
+                                        directory = File(
+                                            OfflineURLs.portalItemDirectoryPath(
+                                                context = context,
+                                                portalItemID = portalItem.itemId
+                                            )
+                                        )
+                                    )?.let {
+                                        // if non-null info was created, add it to the list
+                                        _offlineMapInfos.add(it)
+                                    }
+                                }
+                            } ?: run {
+                                /*
+                                onDemandMapAreasState.updateStatus(
+                                    Status.MmpkLoadFailure(
+                                        Exception("Mobile Map Package path is null")
+                                    )
+                                )
+                                 */
+                            }
+                            onDemandMapAreasState.disposeScope()
+                        }
+                        // if the work failed or was cancelled
+                        WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                            // this removes the completed WorkInfo from the WorkManager's database
+                            // otherwise, the observer will emit the WorkInfo on every launch
+                            // until WorkManager auto-prunes
+                            workManager.pruneWork()
+                            /*
+                            preplannedMapAreaState.updateStatus(
+                                Status.DownloadFailure(
+                                    Exception(
+                                        "${workInfo.tags}: FAILED. Reason: " +
+                                                "${workInfo.outputData.getString("Error")}"
+                                    )
+                                )
+                            )
+                             */
+                            onDemandMapAreasState.disposeScope()
+                        }
+                        // if the work is currently in progress
+                        WorkInfo.State.RUNNING -> {
+                            // preplannedMapAreaState.updateStatus(Status.Downloading)
                         }
                         // don't have to handle other states
                         else -> {}
