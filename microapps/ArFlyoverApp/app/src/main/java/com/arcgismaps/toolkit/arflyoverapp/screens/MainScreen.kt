@@ -40,6 +40,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,13 +62,13 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
-import com.arcgismaps.mapping.Basemap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.layers.IntegratedMeshLayer
 import com.arcgismaps.toolkit.ar.FlyoverSceneView
 import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.arflyoverapp.R
+import kotlinx.coroutines.launch
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -77,15 +78,13 @@ fun MainScreen() {
     val elevationSource =
         ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
 
-    val meshLayer =
+    val integratedMeshLayer =
         IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
 
-    val basemap = Basemap(BasemapStyle.ArcGISImagery)
-
     val arcGISScene = remember {
-        ArcGISScene(/*BasemapStyle.ArcGISImagery*/basemap).apply {
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
             baseSurface.elevationSources.add(elevationSource)
-            operationalLayers.add(meshLayer)
+            operationalLayers.add(integratedMeshLayer)
         }
     }
 
@@ -127,16 +126,15 @@ fun MainScreen() {
                 mutableStateOf(FlyoverSceneViewStatus.Initializing)
             }
 
+            val coroutineScope = rememberCoroutineScope()
+
             FlyoverSceneView(
                 arcGISScene = arcGISScene,
                 flyoverSceneViewProxy = flyoverSceneViewProxy,
                 onInitializationStatusChanged = {
                     initializationStatus.value = it
-                    Log.d("Blah", "$it")
                 },
-                onLayerViewStateChanged = {
-                    Log.d("Blah", "${it.layer} : ${it.layerViewState.status}")
-                }
+                translationFactor = 1000.0,
             )
 
             val sceneLoadStatus =
