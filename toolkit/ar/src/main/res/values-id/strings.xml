@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Izin kamera tidak diberikan</string>
-    <string name="arcore_not_installed_message">ng_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ny</string>
-    <string name="location_data_source_failed_to_start">ng_Location Data Source failed to start: %1$s______________________ny</string>
-    <string name="location_permission_not_granted">ng_Location permission not granted_________________ny</string>
-    <string name="permissions_not_granted_message">ng_"The following permissions are required, but not granted: %1$s"_________________________________ny</string>
-    <string name="close_calibration">ng_Close calibration__________________ny</string>
-    <string name="heading_title">ng_Heading_______________ny</string>
-    <string name="decrease_heading">ng_Decrease Heading_________________ny</string>
-    <string name="increase_heading">ng_Increase Heading_________________ny</string>
-    <string name="reset_heading">ng_Reset Heading______________ny</string>
-    <string name="heading_slider_description">ng_Heading slider_______________ny</string>
-    <string name="elevation_title">ng_Elevation___________________ny</string>
-    <string name="decrease_elevation">ng_Decrease Elevation___________________ny</string>
-    <string name="increase_elevation">ng_Increase Elevation___________________ny</string>
-    <string name="reset_elevation">ng_Reset Elevation________________ny</string>
-    <string name="elevation_slider_description">ng_Elevation slider_________________ny</string>
+    <string name="arcore_not_installed_message">ARCore harus diinstal untuk menggunakan komponen ini. Ketersediaan ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Sumber Data Lokasi gagal dimulai: %1$s</string>
+    <string name="location_permission_not_granted">Izin lokasi tidak diberikan</string>
+    <string name="permissions_not_granted_message">"Izin berikut diperlukan tetapi tidak diberikan: %1$s"</string>
+    <string name="close_calibration">Tutup kalibras</string>
+    <string name="heading_title">Heading</string>
+    <string name="decrease_heading">Turunkan Heading</string>
+    <string name="increase_heading">Naikkan Heading</string>
+    <string name="reset_heading">Atur Ulang Heading</string>
+    <string name="heading_slider_description">Panel geser heading</string>
+    <string name="elevation_title">Elevasi</string>
+    <string name="decrease_elevation">Turunkan Elevasi</string>
+    <string name="increase_elevation">Naikkan Elevasi</string>
+    <string name="reset_elevation">Atur Ulang Elevasi</string>
+    <string name="elevation_slider_description">Panel geser elevasi</string>
 </resources>

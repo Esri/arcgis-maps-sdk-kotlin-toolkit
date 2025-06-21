@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">í_Legend_____________ő</string>
-    <string name="symbol_description">í_symbol of a legend item________________________ő</string>
-    <string name="error">í_Error___________ő</string>
-    <string name="legend_component">í_Legend component_________________ő</string>
+    <string name="title">Jelmagyarázat</string>
+    <string name="symbol_description">jelmagyarázat-elem szimbóluma</string>
+    <string name="error">Hiba</string>
+    <string name="legend_component">Jelmagyarázat-komponens</string>
 </resources>

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Права на использование камеры не предоставлены</string>
-    <string name="arcore_not_installed_message">Ж_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________Я</string>
-    <string name="location_data_source_failed_to_start">Ж_Location Data Source failed to start: %1$s______________________Я</string>
-    <string name="location_permission_not_granted">Ж_Location permission not granted_________________Я</string>
-    <string name="permissions_not_granted_message">Ж_"The following permissions are required, but not granted: %1$s"_________________________________Я</string>
-    <string name="close_calibration">Ж_Close calibration__________________Я</string>
-    <string name="heading_title">Ж_Heading_______________Я</string>
-    <string name="decrease_heading">Ж_Decrease Heading_________________Я</string>
-    <string name="increase_heading">Ж_Increase Heading_________________Я</string>
-    <string name="reset_heading">Ж_Reset Heading______________Я</string>
-    <string name="heading_slider_description">Ж_Heading slider_______________Я</string>
-    <string name="elevation_title">Ж_Elevation___________________Я</string>
-    <string name="decrease_elevation">Ж_Decrease Elevation___________________Я</string>
-    <string name="increase_elevation">Ж_Increase Elevation___________________Я</string>
-    <string name="reset_elevation">Ж_Reset Elevation________________Я</string>
-    <string name="elevation_slider_description">Ж_Elevation slider_________________Я</string>
+    <string name="arcore_not_installed_message">Для использования этого компонента необходимо установить ARCore. Доступность ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Не удалось запустить источник данных о местоположении: %1$s</string>
+    <string name="location_permission_not_granted">Права доступа к местоположению не предоставлены</string>
+    <string name="permissions_not_granted_message">"Следующие права доступа требуются, но не предоставлены: %1$s"</string>
+    <string name="close_calibration">Закрыть калибровку</string>
+    <string name="heading_title">Курс</string>
+    <string name="decrease_heading">Уменьшить курс</string>
+    <string name="increase_heading">Увеличить курс</string>
+    <string name="reset_heading">Сбросить курс</string>
+    <string name="heading_slider_description">Бегунок курса</string>
+    <string name="elevation_title">Высота</string>
+    <string name="decrease_elevation">Уменьшить высоту</string>
+    <string name="increase_elevation">Увеличить высоту</string>
+    <string name="reset_elevation">Сбросить высоту</string>
+    <string name="elevation_slider_description">Бегунок высоты</string>
 </resources>

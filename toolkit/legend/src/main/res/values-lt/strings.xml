@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">Į_Legend_____________š</string>
-    <string name="symbol_description">Į_symbol of a legend item________________________š</string>
-    <string name="error">Į_Error___________š</string>
-    <string name="legend_component">Į_Legend component_________________š</string>
+    <string name="title">Legenda</string>
+    <string name="symbol_description">legendos elemento simbolis</string>
+    <string name="error">Klaida</string>
+    <string name="legend_component">Legendos komponentas</string>
 </resources>

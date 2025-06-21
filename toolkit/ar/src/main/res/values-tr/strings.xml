@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kamera izni verilmedi</string>
-    <string name="arcore_not_installed_message">ı_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________İ</string>
-    <string name="location_data_source_failed_to_start">ı_Location Data Source failed to start: %1$s______________________İ</string>
-    <string name="location_permission_not_granted">ı_Location permission not granted_________________İ</string>
-    <string name="permissions_not_granted_message">ı_"The following permissions are required, but not granted: %1$s"_________________________________İ</string>
-    <string name="close_calibration">ı_Close calibration__________________İ</string>
-    <string name="heading_title">ı_Heading_______________İ</string>
-    <string name="decrease_heading">ı_Decrease Heading_________________İ</string>
-    <string name="increase_heading">ı_Increase Heading_________________İ</string>
-    <string name="reset_heading">ı_Reset Heading______________İ</string>
-    <string name="heading_slider_description">ı_Heading slider_______________İ</string>
-    <string name="elevation_title">ı_Elevation___________________İ</string>
-    <string name="decrease_elevation">ı_Decrease Elevation___________________İ</string>
-    <string name="increase_elevation">ı_Increase Elevation___________________İ</string>
-    <string name="reset_elevation">ı_Reset Elevation________________İ</string>
-    <string name="elevation_slider_description">ı_Elevation slider_________________İ</string>
+    <string name="arcore_not_installed_message">Bu bileşeni kullanmak için ARCore yüklü olmalıdır. ARCore kullanılabilirliği: %1$s</string>
+    <string name="location_data_source_failed_to_start">Konum Veri Kaynağı başlatılamadı: %1$s</string>
+    <string name="location_permission_not_granted">Konum izni verilmedi</string>
+    <string name="permissions_not_granted_message">"Şu izinler gereklidir ancak verilmemiştir: %1$s"</string>
+    <string name="close_calibration">Kalibrasyonu kapat</string>
+    <string name="heading_title">Bakış Yönü</string>
+    <string name="decrease_heading">Bakış Yönü açısını Azalt</string>
+    <string name="increase_heading">Bakış Yönü açısını Arttır</string>
+    <string name="reset_heading">Bakış Yönü Sıfırla</string>
+    <string name="heading_slider_description">Bakış Yönü Kaydırıcı</string>
+    <string name="elevation_title">Yükselti</string>
+    <string name="decrease_elevation">Yükseltiyi Azalt</string>
+    <string name="increase_elevation">Yükseltiyi Artır</string>
+    <string name="reset_elevation">Yükseltiyi Sıfırla</string>
+    <string name="elevation_slider_description">Yükselti kaydırıcı</string>
 </resources>

@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">بيت_Legend_____________لاحقة</string>
-    <string name="symbol_description">بيت_symbol of a legend item________________________لاحقة</string>
-    <string name="error">بيت_Error___________لاحقة</string>
-    <string name="legend_component">بيت_Legend component_________________لاحقة</string>
+    <string name="title">وسيلة الإيضاح</string>
+    <string name="symbol_description">رمز لعنصر مفتاح الخريطة</string>
+    <string name="error">خطأ</string>
+    <string name="legend_component">مكون مفتاح الخريطة</string>
 </resources>

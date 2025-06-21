@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">לא ניתנו הרשאות מצלמה</string>
-    <string name="arcore_not_installed_message">כן_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ש</string>
-    <string name="location_data_source_failed_to_start">כן_Location Data Source failed to start: %1$s______________________ש</string>
-    <string name="location_permission_not_granted">כן_Location permission not granted_________________ש</string>
-    <string name="permissions_not_granted_message">כן_"The following permissions are required, but not granted: %1$s"_________________________________ש</string>
-    <string name="close_calibration">כן_Close calibration__________________ש</string>
-    <string name="heading_title">כן_Heading_______________ש</string>
-    <string name="decrease_heading">כן_Decrease Heading_________________ש</string>
-    <string name="increase_heading">כן_Increase Heading_________________ש</string>
-    <string name="reset_heading">כן_Reset Heading______________ש</string>
-    <string name="heading_slider_description">כן_Heading slider_______________ש</string>
-    <string name="elevation_title">כן_Elevation___________________ש</string>
-    <string name="decrease_elevation">כן_Decrease Elevation___________________ש</string>
-    <string name="increase_elevation">כן_Increase Elevation___________________ש</string>
-    <string name="reset_elevation">כן_Reset Elevation________________ש</string>
-    <string name="elevation_slider_description">כן_Elevation slider_________________ש</string>
+    <string name="arcore_not_installed_message">ARCore חייב להיות מותקן כדי להשתמש ברכיב זה. זמינות ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">הפעלת מקור הנתונים של מיקום נכשלה: %1$s</string>
+    <string name="location_permission_not_granted">לא ניתנה הרשאת מיקום</string>
+    <string name="permissions_not_granted_message">"ההרשאות הבאות נדרשות, אך לא ניתנו: %1$s"</string>
+    <string name="close_calibration">סגור כיול</string>
+    <string name="heading_title">כותרת</string>
+    <string name="decrease_heading">הקטן כיוון</string>
+    <string name="increase_heading">הגדל כיוון</string>
+    <string name="reset_heading">איפוס כיוון</string>
+    <string name="heading_slider_description">מחוון כיוון</string>
+    <string name="elevation_title">גובה</string>
+    <string name="decrease_elevation">הקטן גובה</string>
+    <string name="increase_elevation">הגדל גובה</string>
+    <string name="reset_elevation">איפוס גובה</string>
+    <string name="elevation_slider_description">מחוון גובה</string>
 </resources>

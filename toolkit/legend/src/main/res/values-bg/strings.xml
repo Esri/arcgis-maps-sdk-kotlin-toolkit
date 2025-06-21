@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">й_Legend_____________й</string>
-    <string name="symbol_description">й_symbol of a legend item________________________й</string>
-    <string name="error">й_Error___________й</string>
-    <string name="legend_component">й_Legend component_________________й</string>
+    <string name="title">Легенда</string>
+    <string name="symbol_description">символ на елемент на легенда</string>
+    <string name="error">Грешка</string>
+    <string name="legend_component">Компонент на легенда</string>
 </resources>

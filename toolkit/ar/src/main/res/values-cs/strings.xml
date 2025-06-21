@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Oprávnění k fotoaparátu nebylo uděleno</string>
-    <string name="arcore_not_installed_message">Ř_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ů</string>
-    <string name="location_data_source_failed_to_start">Ř_Location Data Source failed to start: %1$s______________________ů</string>
-    <string name="location_permission_not_granted">Ř_Location permission not granted_________________ů</string>
-    <string name="permissions_not_granted_message">Ř_"The following permissions are required, but not granted: %1$s"_________________________________ů</string>
-    <string name="close_calibration">Ř_Close calibration__________________ů</string>
-    <string name="heading_title">Ř_Heading_______________ů</string>
-    <string name="decrease_heading">Ř_Decrease Heading_________________ů</string>
-    <string name="increase_heading">Ř_Increase Heading_________________ů</string>
-    <string name="reset_heading">Ř_Reset Heading______________ů</string>
-    <string name="heading_slider_description">Ř_Heading slider_______________ů</string>
-    <string name="elevation_title">Ř_Elevation___________________ů</string>
-    <string name="decrease_elevation">Ř_Decrease Elevation___________________ů</string>
-    <string name="increase_elevation">Ř_Increase Elevation___________________ů</string>
-    <string name="reset_elevation">Ř_Reset Elevation________________ů</string>
-    <string name="elevation_slider_description">Ř_Elevation slider_________________ů</string>
+    <string name="arcore_not_installed_message">K použití této komponenty je nutné nainstalovat ARCore. Dostupnost ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Nepodařilo se spustit zdroj dat polohy: %1$s</string>
+    <string name="location_permission_not_granted">Oprávnění k poloze nebylo uděleno</string>
+    <string name="permissions_not_granted_message">Jsou vyžadována následující oprávnění, ale nebyla udělena: %1$s</string>
+    <string name="close_calibration">Zavřít kalibraci</string>
+    <string name="heading_title">Záhlaví</string>
+    <string name="decrease_heading">Zmenšit záhlaví</string>
+    <string name="increase_heading">Zvětšit záhlaví</string>
+    <string name="reset_heading">Resetovat záhlaví</string>
+    <string name="heading_slider_description">Posuvník záhlaví</string>
+    <string name="elevation_title">Nadmořská výška</string>
+    <string name="decrease_elevation">Snížit nadmořskou výšku</string>
+    <string name="increase_elevation">Zvýšit nadmořskou výšku</string>
+    <string name="reset_elevation">Resetovat nadmořskou výšku</string>
+    <string name="elevation_slider_description">Posuvník nadmořské výšky</string>
 </resources>

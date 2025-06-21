@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">ng_Legend_____________ny</string>
-    <string name="symbol_description">ng_symbol of a legend item________________________ny</string>
-    <string name="error">ng_Error___________ny</string>
-    <string name="legend_component">ng_Legend component_________________ny</string>
+    <string name="title">Legenda</string>
+    <string name="symbol_description">simbol item legenda</string>
+    <string name="error">Kesalahan</string>
+    <string name="legend_component">Komponen legenda</string>
 </resources>

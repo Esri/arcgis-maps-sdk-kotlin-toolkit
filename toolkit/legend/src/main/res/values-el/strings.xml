@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">π_Legend_____________Ω</string>
-    <string name="symbol_description">π_symbol of a legend item________________________Ω</string>
-    <string name="error">π_Error___________Ω</string>
-    <string name="legend_component">π_Legend component_________________Ω</string>
+    <string name="title">Υπόμνημα</string>
+    <string name="symbol_description">σύμβολο αντικειμένου υπομνήματος</string>
+    <string name="error">Σφάλμα</string>
+    <string name="legend_component">Στοιχείο υπομνήματος</string>
 </resources>

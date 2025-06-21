@@ -21,8 +21,8 @@
     <string name="allow_connection">Επιτρέψτε τη σύνδεση</string>
     <string name="username_password_login_title">Απαιτείται εξουσιοδότηση</string>
     <string name="username_password_login_message">Χρειάζεται να πραγματοποιήσετε είσοδο για να αποκτήσετε πρόσβαση στο %1$s</string>
-    <string name="incorrect_credentials">π_The credentials were incorrect for %1$s. Please try again______________________________Ω.</string>
-    <string name="sign_in_error_occurred">π_An error occurred signing in to %1$s. Please try again_____________________________Ω.</string>
+    <string name="incorrect_credentials">Τα στοιχεία σύνδεσης ήταν εσφαλμένα για %1$s. Δοκιμάστε ξανά.</string>
+    <string name="sign_in_error_occurred">Παρουσιάστηκε σφάλμα κατά τη σύνδεση στο %1$s. Δοκιμάστε ξανά.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Όνομα χρήστη</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

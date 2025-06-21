@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Dopuštenje za kameru nije odobreno</string>
-    <string name="arcore_not_installed_message">Č_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ž</string>
-    <string name="location_data_source_failed_to_start">Č_Location Data Source failed to start: %1$s______________________ž</string>
-    <string name="location_permission_not_granted">Č_Location permission not granted_________________ž</string>
-    <string name="permissions_not_granted_message">Č_"The following permissions are required, but not granted: %1$s"_________________________________ž</string>
-    <string name="close_calibration">Č_Close calibration__________________ž</string>
-    <string name="heading_title">Č_Heading_______________ž</string>
-    <string name="decrease_heading">Č_Decrease Heading_________________ž</string>
-    <string name="increase_heading">Č_Increase Heading_________________ž</string>
-    <string name="reset_heading">Č_Reset Heading______________ž</string>
-    <string name="heading_slider_description">Č_Heading slider_______________ž</string>
-    <string name="elevation_title">Č_Elevation___________________ž</string>
-    <string name="decrease_elevation">Č_Decrease Elevation___________________ž</string>
-    <string name="increase_elevation">Č_Increase Elevation___________________ž</string>
-    <string name="reset_elevation">Č_Reset Elevation________________ž</string>
-    <string name="elevation_slider_description">Č_Elevation slider_________________ž</string>
+    <string name="arcore_not_installed_message">ARCore treba biti instalirano za korištenje ove komponente. ARCore dostupnost: %1$s</string>
+    <string name="location_data_source_failed_to_start">Pokretanje izvora podataka o lokaciji nije uspjelo: %1$s</string>
+    <string name="location_permission_not_granted">Dopuštenje za lokaciju nije odobreno</string>
+    <string name="permissions_not_granted_message">"Sljedeća dopuštenja su potrebna, ali nisu omogućena: %1$s"</string>
+    <string name="close_calibration">Zatvori kalibraciju</string>
+    <string name="heading_title">Zaglavlje</string>
+    <string name="decrease_heading">Smanji naslov</string>
+    <string name="increase_heading">Povećaj naslov</string>
+    <string name="reset_heading">Poništi naslov</string>
+    <string name="heading_slider_description">Klizač za naslov</string>
+    <string name="elevation_title">Visina terena</string>
+    <string name="decrease_elevation">Smanji visinu terena</string>
+    <string name="increase_elevation">Povećaj visinu terena</string>
+    <string name="reset_elevation">Poništi visinu terena</string>
+    <string name="elevation_slider_description">Klizač za visinu terena</string>
 </resources>

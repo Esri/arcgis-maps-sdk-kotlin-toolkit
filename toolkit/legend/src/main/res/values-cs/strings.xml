@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">Ř_Legend_____________ů</string>
-    <string name="symbol_description">Ř_symbol of a legend item________________________ů</string>
-    <string name="error">Ř_Error___________ů</string>
-    <string name="legend_component">Ř_Legend component_________________ů</string>
+    <string name="title">Legenda</string>
+    <string name="symbol_description">symbol položky legendy</string>
+    <string name="error">Chyba</string>
+    <string name="legend_component">Komponenta legendy</string>
 </resources>

@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">Č_Legend_____________ž</string>
-    <string name="symbol_description">Č_symbol of a legend item________________________ž</string>
-    <string name="error">Č_Error___________ž</string>
-    <string name="legend_component">Č_Legend component_________________ž</string>
+    <string name="title">Legenda</string>
+    <string name="symbol_description">simbol stavke legende</string>
+    <string name="error">Greška</string>
+    <string name="legend_component">Komponenta legende</string>
 </resources>

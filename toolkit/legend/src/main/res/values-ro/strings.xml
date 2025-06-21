@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">Ă_Legend_____________ș</string>
-    <string name="symbol_description">Ă_symbol of a legend item________________________ș</string>
-    <string name="error">Ă_Error___________ș</string>
-    <string name="legend_component">Ă_Legend component_________________ș</string>
+    <string name="title">Legendă</string>
+    <string name="symbol_description">simbolul unui element din legendă</string>
+    <string name="error">Eroare</string>
+    <string name="legend_component">Componentă legendă</string>
 </resources>
