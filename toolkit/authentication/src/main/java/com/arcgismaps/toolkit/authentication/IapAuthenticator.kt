@@ -73,7 +73,7 @@ internal fun IapSignOutAuthenticator(
 ) {
     var hasLaunched by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapSignOutContract()
+        contract = AuthenticationActivity.IapSignOutContract()
     ) { res ->
         if (res) {
             onCompleteSignOut(true)

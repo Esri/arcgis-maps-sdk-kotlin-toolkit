@@ -1,3 +1,19 @@
+public final class com/arcgismaps/toolkit/authentication/AuthenticationActivity : androidx/activity/ComponentActivity {
+	public static final field $stable I
+	public final fun handleRedirectIntent (Landroid/content/Intent;)V
+	public fun onCreate (Landroid/os/Bundle;)V
+	public fun onWindowFocusChanged (Z)V
+}
+
+public final class com/arcgismaps/toolkit/authentication/AuthenticationActivity$IapSignOutContract : androidx/activity/result/contract/ActivityResultContract {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
+	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/Boolean;
+	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
+}
+
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
@@ -5,8 +21,11 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 
 public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
 	public abstract fun dismissAll ()V
+	public abstract fun getIapConfigurations ()Ljava/util/List;
 	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
 	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingIapSignIn ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingIapSignOut ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingOAuthUserSignIn ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
@@ -14,7 +33,6 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 	public abstract fun setIapConfigurations (Ljava/util/List;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
 	public abstract fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updateIapConfigurations (Ljava/util/List;)V
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
@@ -66,24 +84,6 @@ public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity
 	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
 	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
-}
-
-public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSignInContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public fun <init> ()V
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
-}
-
-public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSignOutContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public fun <init> ()V
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
-	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/Boolean;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 }
 
 public final class com/arcgismaps/toolkit/authentication/ServerTrustChallenge {

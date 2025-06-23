@@ -278,28 +278,6 @@ private class AuthenticatorStateImpl(
      *
      * @param requestUrl the URL that issued the IAP challenge.
      * @return an [ArcGISAuthenticationChallengeResponse] with an [IapCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
-     * if the user cancelled.
-     * @since 200.8.0
-     */
-    private suspend fun handleIapChallenge(requestUrl: String): ArcGISAuthenticationChallengeResponse {
-        val iapConfigurations = iapConfigurations.value
-        val matchingIapConfiguration = iapConfigurations.firstOrNull {
-            it.canBeUsedForUrl(requestUrl)
-        }
-        return matchingIapConfiguration?.let {
-            val iapCredential = it.handleIapChallenge { onPendingSignIn -> _pendingIapSignIn.value = onPendingSignIn }
-                .also { _pendingIapSignIn.value = null }
-                .getOrThrow()
-
-            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(iapCredential)
-        } ?: ArcGISAuthenticationChallengeResponse.Cancel
-    }
-
-    /**
-     * Handles an IAP-based sign in by suspending until the user has completed the sign in or cancelled it.
-     *
-     * @param requestUrl the URL that issued the IAP challenge.
-     * @return an [ArcGISAuthenticationChallengeResponse] with an [IapCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
      * if the user cancelled. If the IAP configuration cannot be used for the URL, it will return
      * [ArcGISAuthenticationChallengeResponse.ContinueAndFail].
      * @since 200.8.0
