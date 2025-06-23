@@ -34,81 +34,79 @@ private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
 private const val SIGN_OUT = "SIGN_OUT"
+// * For OAuth and Identity-Aware Proxy (IAP) sign-in, this activity launches a Custom Tab for user interaction and
+// * processes the redirect intent when the sign-in is complete.
+// * For IAP sign-out, this activity also launches a Custom Tab. When the user presses the back button or the Custom Tab's
+// * close button, the sign-out process is considered complete.
+// * Cancellation of the sign-out flow is not possible, so the IAPCredential may be left in an invalid state if the
+// * user attempts to cancel the sign-out request.
 
 /**
- * An activity that is responsible for launching a CustomTabs activity and to receive and process
- * the redirect intent as a result of a user completing the CustomTabs prompt.
+ * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
+ * a Custom Tab for user interaction.
  *
- * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. The behavior
- * for IAP sign-in is similar to OAuth, where the activity launches a CustomTabs browser
- * for user interaction and processes the result upon completion.
+ * This activity must be registered in the application's manifest.
+ * Configuration depends on the app's requirements:
  *
- * This activity must be registered in your application's manifest. There are two ways to configure
- * the manifest entry for [AuthenticationActivity]:
+ * 1. For authentication challenges where the Custom Tab redirects back to this activity:
+ *    - Declare the activity with `launchMode="singleTop"` and include an `intent-filter`:
  *
- * When completing an authentication challenge by signing in or signing out, the Custom Tabs should redirect back to
- * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
- * This applies to both OAuth and IAP flows.
- * In this case, the activity should be declared in the manifest using `launchMode="singleTop"` and an
- * `intent-filter` should be specified:
+ *    ```
+ *    <activity
+ *    android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
+ *    android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ *    android:exported="true"
+ *    android:launchMode="singleTop" >
+ *      <intent-filter>
+ *        <action android:name="android.intent.action.VIEW" />
  *
- * ```
- * <activity
- * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
- * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
- * android:exported="true"
- * android:launchMode="singleTop" >
- *   <intent-filter>
- *     <action android:name="android.intent.action.VIEW" />
+ *        <category android:name="android.intent.category.DEFAULT" />
+ *        <category android:name="android.intent.category.BROWSABLE" />
  *
- *     <category android:name="android.intent.category.DEFAULT" />
- *     <category android:name="android.intent.category.BROWSABLE" />
+ *        <data
+ *          android:host="auth"
+ *          android:scheme="my-ags-app" />
+ *      </intent-filter>
+ *    </activity>
+ *    ```
  *
- *     <data
- *       android:host="auth"
- *       android:scheme="my-ags-app" />
- *     </intent-filter>
- * </activity>
- * ```
+ * 1. If the redirect intent should be handled by another activity:
+ *    - Remove the intent-filter from [AuthenticationActivity] and add it to the target activity.
+ *    - Optionally, set `launchMode="singleInstance"` for the target activity, but note that this exposes the browser
+ *    as a separate task in the recent tasks list.
  *
- * Should your app require that the redirect intent from the browser is handled by another activity,
- * then you should remove the intent filter from the `AuthenticationActivity` and put it in the activity
- * that you want the browser to redirect to. Depending on your app's configuration, you may need to
- * change the launch mode to `singleInstance`, but be aware that this will expose the browser as a
- * separate task in the recent tasks list.
+ *    ```
+ *    <activity
+ *    android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
+ *    android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ *    android:exported="true"
+ *    android:launchMode="singleInstance" >
+ *    </activity>
+ *    ```
+ *    - In the target activity, forward the redirect intent to AuthenticationActivity:
+ *    ```
+ *    val newIntent = Intent(this, AuthenticationActivity::class.java).apply {
+ *      data = uri
+ *    }
+ *    startActivity(newIntent)
+ *    ```
  *
- * ```
- * <activity
- * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
- * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
- * android:exported="true"
- * android:launchMode="singleInstance" >
- * </activity>
- * ```
- *
- * Then, in the activity that receives the intent as a result of completing the CustomTab, you can pass that on to the
- * `AuthenticationActivity` by copying the `intent.data` and starting the activity directly:
- *
- * ```
- * val newIntent = Intent(this, AuthenticationActivity::class.java).apply {
- *   data = uri
- * }
- * startActivity(newIntent)
- * ```
- * Currently, IAP sign-out does not support a redirect URI, so the `AuthenticationActivity` must be used to handle the
- * sign-out flow. This can be done by intercepting when the user presses the back button or the close button in the Custom Tab.
- *
+ * Note: Currently, IAP sign-out works differently because there is no redirect URI.
+ * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
+ * Cancellation of the sign-out flow is not possible, so the IAPCredential may remain in an invalid state if the user\
+ * attempts to cancel the IAP sign-out request.
+ * 
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
 
-    private var signOutRequest = false
+    private var isSignOutRequest = false
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         if (intent.getStringExtra(KEY_INTENT_EXTRA_PROMPT_TYPE) == SIGN_OUT) {
-            signOutRequest = true
+            isSignOutRequest = true
         }
         url?.let {
             val shouldUseIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
@@ -128,16 +126,14 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
         if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            if (signOutRequest) {
+            if (isSignOutRequest) {
                 // As of now, we don't have a way to get the sign-out response from the browser so we assume if the user
                 // returns to this activity by pressing the back button or the "x" button, the sign out was successful.
-                setResult(
-                    RESULT_CODE_SUCCESS,
-                    Intent().apply {
-                        putExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, true)
-                    }
-                )
-                signOutRequest = false
+                val newIntent = Intent().apply {
+                    putExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, true)
+                }
+                setResult(RESULT_CODE_SUCCESS, newIntent)
+                isSignOutRequest = false
             } else {
                 // if we got here the user must have pressed the back button or the x button while the
                 // custom tab was visible
