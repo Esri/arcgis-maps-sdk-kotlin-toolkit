@@ -284,6 +284,16 @@ The `FlyoverSceneView` provides an augmented reality fly over experience.
 
 ### Features
 
+- A composable [FlyoverSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneView.kt)
+  that displays a `SceneView`.
+- Uses device movement to position the camera viewing the scene.
+- Provides parameters to configure and interact with the `SceneView`, such as specifying an
+  `ArcGISScene` and the camera origin.
+- A `FlyoverSceneViewProxy` can be passed to the `FlyoverSceneView` composable function to perform
+  operations such as identify.
+- A `FlyoverSceneViewScope` provided as the receiver by the `FlyoverSceneView`'s `content` lambda
+  can be used to display a callout.
+
 ### Prerequisites
 
 ### Usage
