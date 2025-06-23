@@ -41,7 +41,7 @@ private const val RESULT_CODE_CANCELED = 2
  * for user interaction and processes the result upon completion.
  *
  * This activity must be registered in your application's manifest. There are two ways to configure
- * the manifest entry for [WebAuthenticationActivity]:
+ * the manifest entry for [AuthenticationActivity]:
  *
  * When completing an authentication challenge by signing in, the Custom Tabs should redirect back to
  * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
@@ -51,7 +51,7 @@ private const val RESULT_CODE_CANCELED = 2
  *
  * ```
  * <activity
- * android:name="com.arcgismaps.toolkit.authentication.WebAuthenticationActivity"
+ * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
  * android:launchMode="singleTop" >
@@ -69,14 +69,14 @@ private const val RESULT_CODE_CANCELED = 2
  * ```
  *
  * Should your app require that the redirect intent from the browser is handled by another activity,
- * then you should remove the intent filter from the `WebAuthenticationActivity` and put it in the activity
+ * then you should remove the intent filter from the `AuthenticationActivity` and put it in the activity
  * that you want the browser to redirect to. Depending on your app's configuration, you may need to
  * change the launch mode to `singleInstance`, but be aware that this will expose the browser as a
  * separate task in the recent tasks list.
  *
  * ```
  * <activity
- * android:name="com.arcgismaps.toolkit.authentication.WebAuthenticationActivity"
+ * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
  * android:launchMode="singleInstance" >
@@ -84,10 +84,10 @@ private const val RESULT_CODE_CANCELED = 2
  * ```
  *
  * Then, in the activity that receives the intent as a result of completing the CustomTab, you can pass that on to the
- * `WebAuthenticationActivity` by copying the `intent.data` and starting the activity directly:
+ * `AuthenticationActivity` by copying the `intent.data` and starting the activity directly:
  *
  * ```
- * val newIntent = Intent(this, WebAuthenticationActivity::class.java).apply {
+ * val newIntent = Intent(this, AuthenticationActivity::class.java).apply {
  *   data = uri
  * }
  * startActivity(newIntent)
@@ -95,7 +95,7 @@ private const val RESULT_CODE_CANCELED = 2
  *
  * @since 200.8.0
  */
-public class WebAuthenticationActivity internal constructor(): ComponentActivity() {
+public class AuthenticationActivity internal constructor(): ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -159,7 +159,7 @@ public class WebAuthenticationActivity internal constructor(): ComponentActivity
      * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
      * string as output. The output string represents a redirect URI as the result of an OAuth user
      * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [WebAuthenticationActivity] for a result.
+     * [AuthenticationActivity] for a result.
      * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
      * for more details.
      *
@@ -167,7 +167,7 @@ public class WebAuthenticationActivity internal constructor(): ComponentActivity
      */
     internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
-            Intent(context, WebAuthenticationActivity::class.java).apply {
+            Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
@@ -186,7 +186,7 @@ public class WebAuthenticationActivity internal constructor(): ComponentActivity
      * An ActivityResultContract that takes a String as input and returns a nullable String as output.
      * The input string represents an IAP authorize URL, and the output string represents a redirect URI as
      * the result of an IAP sign in prompt, or null if the IAP sign in failed. This contract can be used to launch the
-     * [WebAuthenticationActivity] for a result.
+     * [AuthenticationActivity] for a result.
      * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
      * for more details.
      *
@@ -194,7 +194,7 @@ public class WebAuthenticationActivity internal constructor(): ComponentActivity
      */
     internal class IapSignInContract : ActivityResultContract<String, String?>() {
         override fun createIntent(context: Context, input: String): Intent =
-            Intent(context, WebAuthenticationActivity::class.java).apply {
+            Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
             }
