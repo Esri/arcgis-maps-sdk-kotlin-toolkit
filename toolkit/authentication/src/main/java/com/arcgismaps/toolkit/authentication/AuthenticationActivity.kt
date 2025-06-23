@@ -34,12 +34,6 @@ private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
 private const val SIGN_OUT = "SIGN_OUT"
-// * For OAuth and Identity-Aware Proxy (IAP) sign-in, this activity launches a Custom Tab for user interaction and
-// * processes the redirect intent when the sign-in is complete.
-// * For IAP sign-out, this activity also launches a Custom Tab. When the user presses the back button or the Custom Tab's
-// * close button, the sign-out process is considered complete.
-// * Cancellation of the sign-out flow is not possible, so the IAPCredential may be left in an invalid state if the
-// * user attempts to cancel the sign-out request.
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -95,7 +89,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
  * Cancellation of the sign-out flow is not possible, so the IAPCredential may remain in an invalid state if the user\
  * attempts to cancel the IAP sign-out request.
- * 
+ *
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
