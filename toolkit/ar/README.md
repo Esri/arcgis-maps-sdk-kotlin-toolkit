@@ -335,6 +335,103 @@ the [microapp](../../microapps/ArFlyoverApp)), you also need to add the followin
              to be installed, as the app does not include any non-AR features. -->
         <meta-data android:name="com.google.ar.core" android:value="required" />
 ```
+Configure an `ArcGISScene` with the data and base surface required for your table top use case:
+
+```kotlin
+@Composable
+fun MainScreen() {
+    ...
+    val elevationSource =
+        ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
+
+    val meshLayer =
+        IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
+
+    val arcGISScene by remember {
+        mutableStateOf(
+            ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+                baseSurface.elevationSources.add(elevationSource)
+                operationalLayers.add(meshLayer)
+            }
+        )
+    }
+    ...
+}
+```
+
+Define a camera origin point and heading for your scene that serves as the starting point for
+navigating:
+
+```kotlin
+val location = Point(
+  2.82407,
+  41.99101,
+  230.0,
+  SpatialReference.wgs84()
+)
+val heading = 160.0
+```
+
+Create a `FlyoverSceneViewProxy` with this state:
+
+```kotlin
+val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(location, heading)
+```
+
+Determine a translation factor as described above. Call the `FlyoverSceneView` composable function
+with these parameters:
+
+```kotlin
+FlyoverSceneView(
+  arcGISScene = arcGISScene,
+  flyoverSceneViewProxy = flyoverSceneViewProxy,
+  translationFactor = 1000.0,
+  ...  
+)
+```
+
+Pass an `onInitializationStatusChanged` callback to the `FlyoverSceneView` composable function to
+get notified about initialization status changes:
+
+```kotlin
+FlyoverSceneView(
+  arcGISScene = arcGISScene,
+  flyoverSceneViewProxy = flyoverSceneViewProxy,
+  translationFactor = 1000.0,
+  onInitializationStatusChanged = { status ->
+    updateStatus(status)
+  }
+  ...  
+)
+```
+
+Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` events and
+display a `Callout` at the tapped location:
+
+```kotlin
+var tappedLocation by remember { 
+    mutableStateOf<Point?>(null) 
+}
+
+FlyoverSceneView(
+  arcGISScene = arcGISScene,
+  flyoverSceneViewProxy = flyoverSceneViewProxy,
+  translationFactor = 1000.0,
+  onInitializationStatusChanged = { status ->
+    updateStatus(status)
+  },
+  onSingleTapConfirmed = { singleTapConfirmedEvent ->
+    tappedLocation = flyoverSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+  }
+  ...
+) {
+  tappedLocation?.let {
+    Callout(location) {
+      Text("${it.x} ${it.y} ${it.z}")
+    }
+  }
+}
+```
 
 ### Behaviour
 
