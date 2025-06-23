@@ -279,3 +279,15 @@ WorldScaleSceneView(
 To see it in action, check out the [microapp](../../microapps/ArWorldScaleApp).
 
 ## FlyoverSceneView
+
+The `FlyoverSceneView` provides an augmented reality fly over experience.
+
+### Features
+
+### Prerequisites
+
+### Usage
+
+### Behaviour
+
+To see it in action, check out the [microapp](../../microapps/ArFlyoverApp).
