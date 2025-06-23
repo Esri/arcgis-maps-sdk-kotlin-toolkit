@@ -26,7 +26,6 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
-private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE"
@@ -34,7 +33,6 @@ private const val KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_SIGN_OU
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
-private const val SIGN_IN = "SIGN_IN"
 private const val SIGN_OUT = "SIGN_OUT"
 
 /**
@@ -99,9 +97,10 @@ private const val SIGN_OUT = "SIGN_OUT"
  * ```
  * Currently, IAP sign-out does not support a redirect URI, so the `AuthenticationActivity` must be used to handle the
  * sign-out flow. This can be done by intercepting when the user presses the back button or the close button in the Custom Tab.
- *  @since 200.8.0
+ *
+ * @since 200.8.0
  */
-public class AuthenticationActivity internal constructor(): ComponentActivity() {
+public class AuthenticationActivity internal constructor() : ComponentActivity() {
 
     private var signOutRequest = false
 
@@ -112,7 +111,8 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
             signOutRequest = true
         }
         url?.let {
-            launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+            val shouldUseIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+            launchCustomTabs(it, shouldUseIncognito)
         }
     }
 
@@ -188,7 +188,6 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
@@ -215,7 +214,6 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {

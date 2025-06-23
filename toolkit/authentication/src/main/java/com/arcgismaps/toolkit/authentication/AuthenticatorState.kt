@@ -85,12 +85,14 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
 
     /**
      * The current [IapSignIn] awaiting completion. Use this to complete or cancel the IAP authentication challenge.
+     *
      * @since 200.8.0
      */
     public val pendingIapSignIn: StateFlow<IapSignIn?>
 
     /**
      * The current [IapSignOut] awaiting completion. Use this to complete the IAP sign out challenge.
+     *
      * @since 200.8.0
      */
     public val pendingIapSignOut: StateFlow<IapSignOut?>
@@ -134,9 +136,9 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     public fun dismissAll()
 
     /**
-     * Revokes OAuth tokens and all credentials from the [AuthenticationManager.arcGISCredentialStore]
-     * and [AuthenticationManager.networkCredentialStore]. If an IAP credential exists in
-     * the [AuthenticationManager.arcGISCredentialStore], it will display a custom tab for the user to invalidate
+     * Revokes OAuth tokens and all credentials from the AuthenticationManager.arcGISCredentialStore`
+     * and `AuthenticationManager.networkCredentialStore`. If an IAP credential exists in
+     * the `AuthenticationManager.arcGISCredentialStore`, this function will launch a custom tab for the user to invalidate
      * the IAP session.
      *
      * @since 200.8.0
