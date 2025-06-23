@@ -160,7 +160,7 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
      *
      * @since 200.8.0
      */
-    public fun handleRedirectIntent(intent: Intent?) {
+    private fun handleRedirectIntent(intent: Intent?) {
         val uri = intent?.data
         if (uri != null) {
             val uriString = uri.toString()
