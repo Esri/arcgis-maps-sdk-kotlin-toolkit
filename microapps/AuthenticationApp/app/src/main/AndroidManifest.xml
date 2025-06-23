@@ -44,7 +44,7 @@
         </activity>
 
         <activity
-            android:name="com.arcgismaps.toolkit.authentication.WebAuthenticationActivity"
+            android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTop" >
