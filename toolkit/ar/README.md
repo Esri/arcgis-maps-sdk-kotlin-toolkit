@@ -6,12 +6,12 @@ The Augmented Reality (AR) toolkit module allows quick and easy integration of A
 
 View the API Reference for the AR module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.ar/index.html). 
 
-The AR toolkit module provides two composable functions to render `ArcGISScene` content in AR:
+The AR toolkit module provides three composable functions to render `ArcGISScene` content in AR:
 
-| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         |
-|-----------------------------------------------------------------|---------------------------------------------------------------------|
-| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 |
-| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. |
+| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         | [FlyoverSceneView](#FlyoverSceneView)
+|-----------------------------------------------------------------|---------------------------------------------------------------------|----------------------------------------|
+| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 | ![flyover-screenshot](flyover-screenshot.png)
+| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | In flyover the content is navigated by moving the device
 
 ## TableTopSceneView
 
@@ -278,3 +278,4 @@ WorldScaleSceneView(
 
 To see it in action, check out the [microapp](../../microapps/ArWorldScaleApp).
 
+## FlyoverSceneView
