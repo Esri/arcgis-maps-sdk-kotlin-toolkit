@@ -18,8 +18,12 @@
 
 package com.arcgismaps.toolkit.offline.internal.utils
 
+import android.content.Context
 import java.io.File
 import android.text.Html
+import androidx.core.content.ContextCompat.getString
+import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.preplanned.Status
 
 internal fun getDirectorySize(path: String): Int {
     val file = File(path)
@@ -39,4 +43,25 @@ internal fun formatSize(size: Int): String {
 
 internal fun htmlToPlainText(html: String): String {
     return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).toString()
+}
+
+/**
+ * Retrieves a user-friendly status string for a map area based on its current status.
+ *
+ * @param context The `Context` used to access application-specific resources like strings.
+ * @param status  The current state of the map area, represented by an instance of `Status`.
+ * @return A localized string corresponding to the given status.
+ * @since 200.8.0
+ */
+internal fun getMapAreaStatusString(context: Context, status: Status): String {
+    return when (status) {
+        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
+        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is Status.DownloadFailure -> getString(context, R.string.download_failed)
+        Status.Downloaded -> getString(context, R.string.downloaded)
+        Status.Downloading -> getString(context, R.string.downloading)
+        Status.PackageFailure -> getString(context, R.string.packaging_failed)
+        Status.Packaged -> getString(context, R.string.ready_to_download)
+        Status.Packaging -> getString(context, R.string.packaging)
+    }
 }
