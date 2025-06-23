@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
+import com.arcgismaps.toolkit.offline.internal.utils.CacheScale
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.Status
@@ -246,7 +247,8 @@ public class OfflineMapState(
     internal fun createOnDemandMapAreasState(
         context: Context,
         envelope: Envelope,
-        mapAreaTitle: String
+        mapAreaTitle: String,
+        maxScale: CacheScale
     ): OnDemandMapAreasState {
         val onDemandMapAreasState = OnDemandMapAreasState(
             context = context,
@@ -254,6 +256,7 @@ public class OfflineMapState(
             onDemandAreaID = UUID.randomUUID().toString(),
             title = mapAreaTitle,
             mapAreaEnvelope = envelope,
+            maxScale = maxScale,
             offlineMapTask = offlineMapTask,
             onSelectionChanged = onSelectionChanged
         )

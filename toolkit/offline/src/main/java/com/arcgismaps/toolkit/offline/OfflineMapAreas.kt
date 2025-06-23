@@ -124,13 +124,14 @@ public fun OfflineMapAreas(
                                 onDismiss = {
                                     isOnDemandMapAreaSelectorVisible = false
                                 },
-                                onDownloadMapAreaSelected = { envelope, mapAreaTitle ->
+                                onDownloadMapAreaSelected = { envelope, mapAreaTitle, maxScale ->
                                     scope.launch {
                                         // TODO: This should be triggered from the area state
                                         val onDemandMapAreaState = offlineMapState.createOnDemandMapAreasState(
                                             context = context,
                                             envelope = envelope,
-                                            mapAreaTitle = mapAreaTitle
+                                            mapAreaTitle = mapAreaTitle,
+                                            maxScale = maxScale
                                         )
                                         // Start the on-demand download
                                         onDemandMapAreaState.downloadOnDemandMapArea()
