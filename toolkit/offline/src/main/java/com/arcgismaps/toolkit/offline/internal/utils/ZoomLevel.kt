@@ -30,7 +30,7 @@ import com.arcgismaps.toolkit.offline.R
  * @param levelOfDetail The [LevelOfDetail] object containing the level, resolution, and scale.
  * @since 200.8.0
  */
-internal enum class CacheScale(
+internal enum class ZoomLevel(
     @StringRes val descriptionResId: Int,
     private val levelOfDetail: LevelOfDetail? = null
 ) {

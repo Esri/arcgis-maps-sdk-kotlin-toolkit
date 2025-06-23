@@ -35,7 +35,7 @@ import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapUpdateMode
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.toolkit.offline.OfflineRepository
-import com.arcgismaps.toolkit.offline.internal.utils.CacheScale
+import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
 import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
@@ -66,7 +66,7 @@ internal class OnDemandMapAreasState(
     private val item: Item,
     internal val onDemandAreaID: String,
     internal val title: String,
-    private val maxScale: CacheScale = CacheScale.STREET,
+    private val zoomLevel: ZoomLevel = ZoomLevel.STREET,
     internal val mapAreaEnvelope: Envelope? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
@@ -174,7 +174,7 @@ internal class OnDemandMapAreasState(
         val params = offlineMapTask.createDefaultGenerateOfflineMapParameters(
             areaOfInterest = downloadMapArea,
             minScale = 0.0,
-            maxScale = maxScale.scale
+            maxScale = zoomLevel.scale
         ).getOrThrow().apply {
             // Set the update mode to receive no updates
             updateMode = GenerateOfflineMapUpdateMode.NoUpdates

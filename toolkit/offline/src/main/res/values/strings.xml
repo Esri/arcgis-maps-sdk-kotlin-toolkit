@@ -45,6 +45,7 @@
     <string name="empty_on_demand_message">There are no map areas for this map. Tap the button below to get started.</string>
     <string name="offline_disabled">Offline Disabled</string>
     <string name="offline_disabled_message">The map is not enabled for offline use.</string>
+    <string name="level_of_details">Level of details</string>
     <string name="room">Room</string>
     <string name="rooms">Rooms</string>
     <string name="house_property">House Property</string>
