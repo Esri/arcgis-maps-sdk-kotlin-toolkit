@@ -5,15 +5,6 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticationActivity 
 	public fun onWindowFocusChanged (Z)V
 }
 
-public final class com/arcgismaps/toolkit/authentication/AuthenticationActivity$IapSignOutContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public fun <init> ()V
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
-	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/Boolean;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
