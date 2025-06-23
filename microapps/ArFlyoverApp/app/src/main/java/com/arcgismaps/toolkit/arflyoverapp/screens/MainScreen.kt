@@ -160,6 +160,7 @@ fun MainScreen() {
                             )
                         }
 
+                        // successfully loaded so nothing more to do
                         LoadStatus.Loaded -> {}
                     }
                 }
