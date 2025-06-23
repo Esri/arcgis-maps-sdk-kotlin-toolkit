@@ -69,7 +69,7 @@ internal fun IapSignInAuthenticator(
 internal fun IapSignOutAuthenticator(
     iapSignOutUrl: String,
     onCompleteSignOut: (Boolean) -> Unit,
-    onCancelSignOut: (Exception) -> Unit
+    onCancelSignOut: () -> Unit
 ) {
     var hasLaunched by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
@@ -78,7 +78,7 @@ internal fun IapSignOutAuthenticator(
         if (res) {
             onCompleteSignOut(true)
         } else {
-            onCancelSignOut(Exception("IAP sign out cancelled"))
+            onCancelSignOut()
         }
     }
 
