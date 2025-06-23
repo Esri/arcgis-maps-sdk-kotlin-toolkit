@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.play.services.location)
     testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
