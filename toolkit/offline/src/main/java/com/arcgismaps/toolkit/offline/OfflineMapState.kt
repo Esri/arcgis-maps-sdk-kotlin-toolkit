@@ -36,7 +36,7 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
-import com.arcgismaps.toolkit.offline.preplanned.Status
+import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
@@ -209,7 +209,7 @@ public class OfflineMapState(
                             preplannedMapAreaID = mapArea.portalItem.itemId
                         )
                         if (preplannedPath != null) {
-                            preplannedMapAreaState.updateStatus(Status.Downloaded)
+                            preplannedMapAreaState.updateStatus(PreplannedStatus.Downloaded)
                             preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                                 mobileMapPackagePath = preplannedPath
                             )
@@ -296,7 +296,7 @@ public class OfflineMapState(
             preplannedMapAreaID = areaItemId
         )
         if (preplannedPath != null) {
-            preplannedMapAreaState.updateStatus(Status.Downloaded)
+            preplannedMapAreaState.updateStatus(PreplannedStatus.Downloaded)
             preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
                 mobileMapPackagePath = preplannedPath
             )

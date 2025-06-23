@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaSelector
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreas
-import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
@@ -118,7 +117,7 @@ public fun OfflineMapAreas(
                                 OnDemandMapAreas(
                                     onDemandMapAreasStates = offlineMapState.onDemandMapAreaStates,
                                     modifier = modifier,
-                                    onDownloadnewMapArea = {
+                                    onDownloadNewMapArea = {
                                         isOnDemandMapAreaSelectorVisible = true
                                     }
                                 )

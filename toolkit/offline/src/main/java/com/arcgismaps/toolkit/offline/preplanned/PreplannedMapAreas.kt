@@ -204,7 +204,7 @@ internal fun PreplannedMapAreas(
                             }
                         }
 
-                        state.status == Status.Downloading -> {
+                        state.status == PreplannedStatus.Downloading -> {
                             CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
@@ -235,15 +235,15 @@ internal fun PreplannedMapAreas(
  * @return A localized string corresponding to the given status.
  * @since 200.8.0
  */
-private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
+private fun getPreplannedMapAreaStatusString(context: Context, status: PreplannedStatus): String {
     return when (status) {
-        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
-        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
-        is Status.DownloadFailure -> getString(context, R.string.download_failed)
-        Status.Downloaded -> getString(context, R.string.downloaded)
-        Status.Downloading -> getString(context, R.string.downloading)
-        Status.PackageFailure -> getString(context, R.string.packaging_failed)
-        Status.Packaged -> getString(context, R.string.ready_to_download)
-        Status.Packaging -> getString(context, R.string.packaging)
+        PreplannedStatus.NotLoaded, PreplannedStatus.Loading -> getString(context, R.string.loading)
+        is PreplannedStatus.LoadFailure, is PreplannedStatus.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is PreplannedStatus.DownloadFailure -> getString(context, R.string.download_failed)
+        PreplannedStatus.Downloaded -> getString(context, R.string.downloaded)
+        PreplannedStatus.Downloading -> getString(context, R.string.downloading)
+        PreplannedStatus.PackageFailure -> getString(context, R.string.packaging_failed)
+        PreplannedStatus.Packaged -> getString(context, R.string.ready_to_download)
+        PreplannedStatus.Packaging -> getString(context, R.string.packaging)
     }
 }

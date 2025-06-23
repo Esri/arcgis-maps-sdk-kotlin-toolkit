@@ -81,8 +81,8 @@ internal class OnDemandMapAreasState(
         get() = _isSelectedToOpen
 
     // The status of the on-demand map area.
-    private var _status by mutableStateOf<Status>(Status.NotLoaded)
-    internal val status: Status
+    private var _status by mutableStateOf<OnDemandStatus>(OnDemandStatus.NotLoaded)
+    internal val status: OnDemandStatus
         get() = _status
 
     // The download progress of the on-demand map area.
@@ -122,7 +122,7 @@ internal class OnDemandMapAreasState(
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
 
             scope.launch {
-                _status = Status.Downloading
+                _status = OnDemandStatus.Downloading
                 val offlineWorkerUUID = startOfflineMapJob(
                     downloadOnDemandOfflineMapJob = createOfflineMapJob(
                         downloadMapArea = area,
@@ -241,7 +241,7 @@ internal class OnDemandMapAreasState(
         if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
             Log.d(TAG, "Deleted on-demand map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
-            _status = Status.NotLoaded
+            _status = OnDemandStatus.NotLoaded
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
@@ -261,11 +261,11 @@ internal class OnDemandMapAreasState(
     /**
      * Updates the current state of this on-demand map area instance.
      *
-     * @param newStatus The updated [Status] value representing this area's current state.
+     * @param newStatus The updated [OnDemandStatus] value representing this area's current state.
      *
      * @since 200.8.0
      */
-    internal fun updateStatus(newStatus: Status) {
+    internal fun updateStatus(newStatus: OnDemandStatus) {
         _status = newStatus
     }
 
@@ -288,13 +288,13 @@ internal class OnDemandMapAreasState(
                     Log.d(TAG, "Mobile map package loaded successfully")
                 }.onFailure { exception ->
                     Log.e(TAG, "Error loading mobile map package", exception)
-                    _status = Status.MmpkLoadFailure(exception)
+                    _status = OnDemandStatus.MmpkLoadFailure(exception)
                 }
             map = mobileMapPackage.maps.firstOrNull()
                 ?: throw IllegalStateException("No maps found in the mobile map package")
         }.onFailure { exception ->
             Log.e(TAG, "Error loading mobile map package", exception)
-            _status = Status.MmpkLoadFailure(exception)
+            _status = OnDemandStatus.MmpkLoadFailure(exception)
         }
     }
 
@@ -313,57 +313,57 @@ internal class OnDemandMapAreasState(
  */
 // TODO: Refine status as not all the status values are being used in onDemand
 //  compared to Preplanned in Swift implementation.
-internal sealed class Status {
+internal sealed class OnDemandStatus {
 
     /**
      * On-Demand map area not loaded.
      */
-    data object NotLoaded : Status()
+    data object NotLoaded : OnDemandStatus()
 
     /**
      * On-Demand map area is loading.
      */
-    data object Loading : Status()
+    data object Loading : OnDemandStatus()
 
     /**
      * On-Demand map area failed to load.
      */
-    data class LoadFailure(val error: Throwable) : Status()
+    data class LoadFailure(val error: Throwable) : OnDemandStatus()
 
     /**
      * On-Demand map area is packaging.
      */
-    data object Packaging : Status()
+    data object Packaging : OnDemandStatus()
 
     /**
      * On-Demand map area is packaged and ready for download.
      */
-    data object Packaged : Status()
+    data object Packaged : OnDemandStatus()
 
     /**
      * On-Demand map area packaging failed.
      */
-    data object PackageFailure : Status()
+    data object PackageFailure : OnDemandStatus()
 
     /**
      * On-Demand map area is being downloaded.
      */
-    data object Downloading : Status()
+    data object Downloading : OnDemandStatus()
 
     /**
      * On-Demand map area is downloaded.
      */
-    data object Downloaded : Status()
+    data object Downloaded : OnDemandStatus()
 
     /**
      * On-Demand map area failed to download.
      */
-    data class DownloadFailure(val error: Throwable) : Status()
+    data class DownloadFailure(val error: Throwable) : OnDemandStatus()
 
     /**
      * Downloaded mobile map package failed to load.
      */
-    data class MmpkLoadFailure(val error: Throwable) : Status()
+    data class MmpkLoadFailure(val error: Throwable) : OnDemandStatus()
 
     /**
      * Indicates whether the model can load the on-demand map area.

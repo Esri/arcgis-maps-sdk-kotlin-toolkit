@@ -76,7 +76,7 @@ import kotlinx.coroutines.launch
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
     modifier: Modifier,
-    onDownloadnewMapArea: () -> Unit
+    onDownloadNewMapArea: () -> Unit
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
@@ -200,7 +200,7 @@ internal fun OnDemandMapAreas(
                             }
                         }
 
-                        state.status == Status.Downloading -> {
+                        state.status == OnDemandStatus.Downloading -> {
                             CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
@@ -222,7 +222,7 @@ internal fun OnDemandMapAreas(
         }
         Spacer(Modifier.height(12.dp))
         // add a button to add a new on demand map area
-        Button(onClick = onDownloadnewMapArea) {
+        Button(onClick = onDownloadNewMapArea) {
             Text(
                 text = stringResource(R.string.add_map_area),
                 style = MaterialTheme.typography.labelSmall
@@ -239,15 +239,15 @@ internal fun OnDemandMapAreas(
  * @return A localized string corresponding to the given status.
  * @since 200.8.0
  */
-private fun getOnDemandMapAreaStatusString(context: Context, status: Status): String {
+private fun getOnDemandMapAreaStatusString(context: Context, status: OnDemandStatus): String {
     return when (status) {
-        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
-        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
-        is Status.DownloadFailure -> getString(context, R.string.download_failed)
-        Status.Downloaded -> getString(context, R.string.downloaded)
-        Status.Downloading -> getString(context, R.string.downloading)
-        Status.PackageFailure -> getString(context, R.string.packaging_failed)
-        Status.Packaged -> getString(context, R.string.ready_to_download)
-        Status.Packaging -> getString(context, R.string.packaging)
+        OnDemandStatus.NotLoaded, OnDemandStatus.Loading -> getString(context, R.string.loading)
+        is OnDemandStatus.LoadFailure, is OnDemandStatus.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is OnDemandStatus.DownloadFailure -> getString(context, R.string.download_failed)
+        OnDemandStatus.Downloaded -> getString(context, R.string.downloaded)
+        OnDemandStatus.Downloading -> getString(context, R.string.downloading)
+        OnDemandStatus.PackageFailure -> getString(context, R.string.packaging_failed)
+        OnDemandStatus.Packaged -> getString(context, R.string.ready_to_download)
+        OnDemandStatus.Packaging -> getString(context, R.string.packaging)
     }
 }
