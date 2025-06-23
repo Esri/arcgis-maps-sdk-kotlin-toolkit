@@ -237,7 +237,7 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
      */
     public class IapSignOutContract : ActivityResultContract<String, Boolean>() {
         override fun createIntent(context: Context, input: String): Intent =
-            Intent(context, OAuthUserSignInActivity::class.java).apply {
+            Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, SIGN_OUT)
             }
