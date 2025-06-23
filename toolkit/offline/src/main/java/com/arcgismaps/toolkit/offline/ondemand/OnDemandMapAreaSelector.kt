@@ -239,7 +239,7 @@ private fun OnDemandMapAreaSelectorOptions(
         ) {
             DropDownMenuBox(
                 textFieldValue = stringResource(zoomLevel.descriptionResId),
-                textFieldLabel = stringResource(R.string.level_of_details),
+                textFieldLabel = stringResource(R.string.level_of_detail),
                 dropDownItemList = ZoomLevel.entries.map { stringResource(it.descriptionResId) },
                 onIndexSelected = { zoomLevel = ZoomLevel.entries[it] }
             )

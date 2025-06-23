@@ -136,10 +136,4 @@ internal enum class ZoomLevel(
      */
     val scale: Double
         get() = this.levelOfDetail?.scale ?: 0.0
-
-    /**
-     * A string representation of the scale, formatted as "1:<scale>".
-     */
-    val scaleDescription: String
-        get() = "1:${scale.toInt()}"
 }
