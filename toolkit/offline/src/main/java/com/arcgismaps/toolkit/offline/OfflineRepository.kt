@@ -548,8 +548,7 @@ public object OfflineRepository {
                     when (workInfo.state) {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
-                            // TODO: Wire in status handler
-                            // onDemandMapAreasState.updateStatus(Status.Downloaded)
+                            onDemandMapAreasState.updateStatus(com.arcgismaps.toolkit.offline.ondemand.Status.Downloaded)
                             workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 // using the pending path, move the result to final destination path
                                 val destDir = moveOnDemandJobResultToDestination(context, path)
@@ -573,14 +572,11 @@ public object OfflineRepository {
                                     }
                                 }
                             } ?: run {
-                                // TODO: Wire in status handler
-                                /*
                                 onDemandMapAreasState.updateStatus(
-                                    Status.MmpkLoadFailure(
+                                    com.arcgismaps.toolkit.offline.ondemand.Status.MmpkLoadFailure(
                                         Exception("Mobile Map Package path is null")
                                     )
                                 )
-                                 */
                             }
                             onDemandMapAreasState.disposeScope()
                         }
@@ -590,23 +586,19 @@ public object OfflineRepository {
                             // otherwise, the observer will emit the WorkInfo on every launch
                             // until WorkManager auto-prunes
                             workManager.pruneWork()
-                            // TODO: Wire in status handler
-                            /*
-                            preplannedMapAreaState.updateStatus(
-                                Status.DownloadFailure(
+                            onDemandMapAreasState.updateStatus(
+                                com.arcgismaps.toolkit.offline.ondemand.Status.DownloadFailure(
                                     Exception(
                                         "${workInfo.tags}: FAILED. Reason: " +
                                                 "${workInfo.outputData.getString("Error")}"
                                     )
                                 )
                             )
-                             */
                             onDemandMapAreasState.disposeScope()
                         }
                         // if the work is currently in progress
                         WorkInfo.State.RUNNING -> {
-                            // TODO: Wire in status handler
-                            // preplannedMapAreaState.updateStatus(Status.Downloading)
+                            onDemandMapAreasState.updateStatus(com.arcgismaps.toolkit.offline.ondemand.Status.Downloading)
                         }
                         // don't have to handle other states
                         else -> {}

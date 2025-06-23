@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline.preplanned
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,11 +56,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
-import com.arcgismaps.toolkit.offline.internal.utils.getMapAreaStatusString
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
@@ -179,7 +180,7 @@ internal fun PreplannedMapAreas(
                         val statusString = if (state.isSelectedToOpen) {
                             stringResource(R.string.currently_open)
                         } else {
-                            getMapAreaStatusString(
+                            getPreplannedMapAreaStatusString(
                                 context = LocalContext.current,
                                 status = state.status
                             )
@@ -223,5 +224,26 @@ internal fun PreplannedMapAreas(
                 }
             }
         }
+    }
+}
+
+/**
+ * Retrieves a user-friendly status string for a preplanned map area based on its current status.
+ *
+ * @param context The `Context` used to access application-specific resources like strings.
+ * @param status  The current state of the preplanned map area, represented by an instance of `Status`.
+ * @return A localized string corresponding to the given status.
+ * @since 200.8.0
+ */
+private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
+    return when (status) {
+        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
+        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is Status.DownloadFailure -> getString(context, R.string.download_failed)
+        Status.Downloaded -> getString(context, R.string.downloaded)
+        Status.Downloading -> getString(context, R.string.downloading)
+        Status.PackageFailure -> getString(context, R.string.packaging_failed)
+        Status.Packaged -> getString(context, R.string.ready_to_download)
+        Status.Packaging -> getString(context, R.string.packaging)
     }
 }
