@@ -20,6 +20,9 @@
                 <data
                     android:host="auth"
                     android:scheme="kotlin-authentication-test-1" />
+                <data
+                    android:host="auth"
+                    android:scheme="kotlin-iap-test-1" />
             </intent-filter>
         </activity>
 

@@ -5,12 +5,15 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 
 public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
 	public abstract fun dismissAll ()V
+	public abstract fun getIapConfigurations ()Ljava/util/List;
 	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
 	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingIapSignIn ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingOAuthUserSignIn ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun setIapConfigurations (Ljava/util/List;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
 }
 
@@ -52,6 +55,15 @@ public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity
 	public fun <init> ()V
 	public fun createIntent (Landroid/content/Context;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)Landroid/content/Intent;
 	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
+	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSignInContract : androidx/activity/result/contract/ActivityResultContract {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
 	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
 }

@@ -126,17 +126,19 @@ private fun AuthenticatorDelegate(
         authenticatorState.dismissAll()
     }
 
-    val pendingOAuthUserSignIn =
-        authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
-
-    pendingOAuthUserSignIn?.let {
+    authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
         OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
-    val pendingServerTrustChallenge =
-        authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
+    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
+        IapSignInAuthenticator(
+            authorizedUrl = it.authorizeUrl,
+            onComplete = it::complete,
+            onCancel = it::cancel
+        )
+    }
 
-    pendingServerTrustChallenge?.let {
+    authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value?.let {
         if (useDialog) {
             ServerTrustAuthenticatorDialog(it, modifier)
         } else {
@@ -144,10 +146,7 @@ private fun AuthenticatorDelegate(
         }
     }
 
-    val pendingUsernamePasswordChallenge =
-        authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
-
-    pendingUsernamePasswordChallenge?.let {
+    authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value?.let {
         if (useDialog) {
             UsernamePasswordAuthenticatorDialog(it, modifier)
         } else {
@@ -155,9 +154,7 @@ private fun AuthenticatorDelegate(
         }
     }
 
-    val pendingClientCertificateChallenge =
-        authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
-    pendingClientCertificateChallenge?.let {
+    authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value?.let {
         KeyChain.choosePrivateKeyAlias(
             LocalContext.current.findActivity(), it.keyChainAliasCallback, null, null, null, null
         )
