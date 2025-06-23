@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kaamerale juurepääsu luba ei ole antud</string>
-    <string name="arcore_not_installed_message">Š_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ä</string>
-    <string name="location_data_source_failed_to_start">Š_Location Data Source failed to start: %1$s______________________ä</string>
-    <string name="location_permission_not_granted">Š_Location permission not granted_________________ä</string>
-    <string name="permissions_not_granted_message">Š_"The following permissions are required, but not granted: %1$s"_________________________________ä</string>
-    <string name="close_calibration">Š_Close calibration__________________ä</string>
-    <string name="heading_title">Š_Heading_______________ä</string>
-    <string name="decrease_heading">Š_Decrease Heading_________________ä</string>
-    <string name="increase_heading">Š_Increase Heading_________________ä</string>
-    <string name="reset_heading">Š_Reset Heading______________ä</string>
-    <string name="heading_slider_description">Š_Heading slider_______________ä</string>
-    <string name="elevation_title">Š_Elevation___________________ä</string>
-    <string name="decrease_elevation">Š_Decrease Elevation___________________ä</string>
-    <string name="increase_elevation">Š_Increase Elevation___________________ä</string>
-    <string name="reset_elevation">Š_Reset Elevation________________ä</string>
-    <string name="elevation_slider_description">Š_Elevation slider_________________ä</string>
+    <string name="arcore_not_installed_message">Selle komponendi kasutamiseks peab olema installitud ARCore. ARCore\'i saadavus: %1$s</string>
+    <string name="location_data_source_failed_to_start">Asukohaandmete allika käivitamine ebaõnnestus: %1$s</string>
+    <string name="location_permission_not_granted">Asukohaluba ei antud</string>
+    <string name="permissions_not_granted_message">"Järgmised õigused on nõutavad, kuid neid ei ole antud: %1$s"</string>
+    <string name="close_calibration">Sulge kalibreerimine</string>
+    <string name="heading_title">Suund</string>
+    <string name="decrease_heading">Vähenda pealkirja</string>
+    <string name="increase_heading">Suurenda pealkirja</string>
+    <string name="reset_heading">Lähtesta pealkiri</string>
+    <string name="heading_slider_description">Pealkirja liugur</string>
+    <string name="elevation_title">Kõrgus</string>
+    <string name="decrease_elevation">Vähenda kõrgust</string>
+    <string name="increase_elevation">Suurenda kõrgust</string>
+    <string name="reset_elevation">Lähtesta kõrgus</string>
+    <string name="elevation_slider_description">Kõrguse liugur</string>
 </resources>

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">ไม่ได้อนุมัติสิทธิ์การเข้าถึงกล้อง</string>
-    <string name="arcore_not_installed_message">ก้_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ษฺ</string>
-    <string name="location_data_source_failed_to_start">ก้_Location Data Source failed to start: %1$s______________________ษฺ</string>
-    <string name="location_permission_not_granted">ก้_Location permission not granted_________________ษฺ</string>
-    <string name="permissions_not_granted_message">ก้_"The following permissions are required, but not granted: %1$s"_________________________________ษฺ</string>
-    <string name="close_calibration">ก้_Close calibration__________________ษฺ</string>
-    <string name="heading_title">ก้_Heading_______________ษฺ</string>
-    <string name="decrease_heading">ก้_Decrease Heading_________________ษฺ</string>
-    <string name="increase_heading">ก้_Increase Heading_________________ษฺ</string>
-    <string name="reset_heading">ก้_Reset Heading______________ษฺ</string>
-    <string name="heading_slider_description">ก้_Heading slider_______________ษฺ</string>
-    <string name="elevation_title">ก้_Elevation___________________ษฺ</string>
-    <string name="decrease_elevation">ก้_Decrease Elevation___________________ษฺ</string>
-    <string name="increase_elevation">ก้_Increase Elevation___________________ษฺ</string>
-    <string name="reset_elevation">ก้_Reset Elevation________________ษฺ</string>
-    <string name="elevation_slider_description">ก้_Elevation slider_________________ษฺ</string>
+    <string name="arcore_not_installed_message">ต้องติดตั้ง ARCore เพื่อใช้ส่วนประกอบนี้ ความพร้อมใช้งานของ ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">แหล่งข้อมูลตำแหน่งที่ตั้งเริ่มต้นไม่สำเร็จ: %1$s</string>
+    <string name="location_permission_not_granted">ไม่ได้อนุมัติสิทธิ์ในตำแหน่งที่ตั้ง</string>
+    <string name="permissions_not_granted_message">"จำเป็นต้องใช้สิทธิ์ต่อไปนี้ แต่ยังไม่ได้อนุมัติ: %1$s"</string>
+    <string name="close_calibration">ปิดการปรับเทียบ</string>
+    <string name="heading_title">หัวเรื่อง</string>
+    <string name="decrease_heading">ลดส่วนหัว</string>
+    <string name="increase_heading">เพิ่มส่วนหัว</string>
+    <string name="reset_heading">รีเซ็ตส่วนหัว</string>
+    <string name="heading_slider_description">แถบเลื่อนส่วนหัว</string>
+    <string name="elevation_title">ความสูง</string>
+    <string name="decrease_elevation">ลดความสูง</string>
+    <string name="increase_elevation">เพิ่มความสูง</string>
+    <string name="reset_elevation">รีเซ็ตความสูง</string>
+    <string name="elevation_slider_description">แถบเคลื่อนความสูง</string>
 </resources>

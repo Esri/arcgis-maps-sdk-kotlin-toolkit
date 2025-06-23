@@ -21,8 +21,8 @@
     <string name="allow_connection">Bağlantıya izin ver</string>
     <string name="username_password_login_title">Kimlik doğrulaması gerekiyor</string>
     <string name="username_password_login_message">%1$s\'ye erişmek için oturum açmanız gerekiyor</string>
-    <string name="incorrect_credentials">ı_The credentials were incorrect for %1$s. Please try again______________________________İ.</string>
-    <string name="sign_in_error_occurred">ı_An error occurred signing in to %1$s. Please try again_____________________________İ.</string>
+    <string name="incorrect_credentials">%1$s için kimlik bilgileri yanlıştı. Yeniden deneyin.</string>
+    <string name="sign_in_error_occurred">%1$s oturumu açılırken bir hata oluştu. Yeniden deneyin.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kullanıcı adı</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

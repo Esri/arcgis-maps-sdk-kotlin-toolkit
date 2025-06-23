@@ -21,8 +21,8 @@
     <string name="allow_connection">הרשה חיבור</string>
     <string name="username_password_login_title">נדרש אימות</string>
     <string name="username_password_login_message">עליך להתחבר כדי לגשת אל %1$s</string>
-    <string name="incorrect_credentials">כן_The credentials were incorrect for %1$s. Please try again______________________________ש.</string>
-    <string name="sign_in_error_occurred">כן_An error occurred signing in to %1$s. Please try again_____________________________ש.</string>
+    <string name="incorrect_credentials">האישורים לא נכונים עבור %1$s. נסה שוב.</string>
+    <string name="sign_in_error_occurred">אירעה שגיאה בהתחברות אל %1$s. נסה שוב.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">שם משתמש</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

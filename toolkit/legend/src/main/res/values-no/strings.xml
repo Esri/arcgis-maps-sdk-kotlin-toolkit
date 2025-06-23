@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">å_Legend_____________ø</string>
-    <string name="symbol_description">å_symbol of a legend item________________________ø</string>
-    <string name="error">å_Error___________ø</string>
-    <string name="legend_component">å_Legend component_________________ø</string>
+    <string name="title">Tegnforklaring</string>
+    <string name="symbol_description">symbol for et element i tegnforklaringen</string>
+    <string name="error">Feil</string>
+    <string name="legend_component">Tegnforklaringkomponent</string>
 </resources>

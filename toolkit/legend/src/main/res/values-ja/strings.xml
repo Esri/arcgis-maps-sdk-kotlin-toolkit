@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">須_Legend_____________鷗</string>
-    <string name="symbol_description">須_symbol of a legend item________________________鷗</string>
-    <string name="error">須_Error___________鷗</string>
-    <string name="legend_component">須_Legend component_________________鷗</string>
+    <string name="title">凡例</string>
+    <string name="symbol_description">凡例項目のシンボル</string>
+    <string name="error">エラー</string>
+    <string name="legend_component">凡例コンポーネント</string>
 </resources>

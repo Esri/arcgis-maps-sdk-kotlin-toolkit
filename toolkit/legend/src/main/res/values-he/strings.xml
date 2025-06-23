@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">כן_Legend_____________ש</string>
-    <string name="symbol_description">כן_symbol of a legend item________________________ש</string>
-    <string name="error">כן_Error___________ש</string>
-    <string name="legend_component">כן_Legend component_________________ש</string>
+    <string name="title">מקרא</string>
+    <string name="symbol_description">סמל של פריט מקרא</string>
+    <string name="error">שגיאה</string>
+    <string name="legend_component">רכיב מקרא</string>
 </resources>

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Autorizzazione fotocamera non concessa</string>
-    <string name="arcore_not_installed_message">é_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________È</string>
-    <string name="location_data_source_failed_to_start">é_Location Data Source failed to start: %1$s______________________È</string>
-    <string name="location_permission_not_granted">é_Location permission not granted_________________È</string>
-    <string name="permissions_not_granted_message">é_"The following permissions are required, but not granted: %1$s"_________________________________È</string>
-    <string name="close_calibration">é_Close calibration__________________È</string>
-    <string name="heading_title">é_Heading_______________È</string>
-    <string name="decrease_heading">é_Decrease Heading_________________È</string>
-    <string name="increase_heading">é_Increase Heading_________________È</string>
-    <string name="reset_heading">é_Reset Heading______________È</string>
-    <string name="heading_slider_description">é_Heading slider_______________È</string>
-    <string name="elevation_title">é_Elevation___________________È</string>
-    <string name="decrease_elevation">é_Decrease Elevation___________________È</string>
-    <string name="increase_elevation">é_Increase Elevation___________________È</string>
-    <string name="reset_elevation">é_Reset Elevation________________È</string>
-    <string name="elevation_slider_description">é_Elevation slider_________________È</string>
+    <string name="arcore_not_installed_message">Per utilizzare questo componente si deve installare ARCore. Disponibilità ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">L\'origine dati di posizione non si è avviata: %1$s</string>
+    <string name="location_permission_not_granted">Autorizzazione posizione non garantita</string>
+    <string name="permissions_not_granted_message">"I seguenti permessi sono richiesti ma non garantiti: %1$s"</string>
+    <string name="close_calibration">Chiudi calibrazione</string>
+    <string name="heading_title">Intestazione</string>
+    <string name="decrease_heading">Diminuisci intestazione</string>
+    <string name="increase_heading">Aumenta intestazione</string>
+    <string name="reset_heading">Ripristina intestazione</string>
+    <string name="heading_slider_description">Cursore intestazione</string>
+    <string name="elevation_title">Elevazione</string>
+    <string name="decrease_elevation">Diminuisci elevazione</string>
+    <string name="increase_elevation">Aumenta elevazione</string>
+    <string name="reset_elevation">Ripristina elevazione</string>
+    <string name="elevation_slider_description">Cursore elevazione</string>
 </resources>

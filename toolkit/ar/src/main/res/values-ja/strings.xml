@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">カメラの権限が付与されていません</string>
-    <string name="arcore_not_installed_message">須_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________鷗</string>
-    <string name="location_data_source_failed_to_start">須_Location Data Source failed to start: %1$s______________________鷗</string>
-    <string name="location_permission_not_granted">須_Location permission not granted_________________鷗</string>
-    <string name="permissions_not_granted_message">須_"The following permissions are required, but not granted: %1$s"_________________________________鷗</string>
-    <string name="close_calibration">須_Close calibration__________________鷗</string>
-    <string name="heading_title">須_Heading_______________鷗</string>
-    <string name="decrease_heading">須_Decrease Heading_________________鷗</string>
-    <string name="increase_heading">須_Increase Heading_________________鷗</string>
-    <string name="reset_heading">須_Reset Heading______________鷗</string>
-    <string name="heading_slider_description">須_Heading slider_______________鷗</string>
-    <string name="elevation_title">須_Elevation___________________鷗</string>
-    <string name="decrease_elevation">須_Decrease Elevation___________________鷗</string>
-    <string name="increase_elevation">須_Increase Elevation___________________鷗</string>
-    <string name="reset_elevation">須_Reset Elevation________________鷗</string>
-    <string name="elevation_slider_description">須_Elevation slider_________________鷗</string>
+    <string name="arcore_not_installed_message">このコンポーネントを使用するには、ARCore をインストールする必要があります。 ARCore の利用可否: %1$s</string>
+    <string name="location_data_source_failed_to_start">位置情報データ ソースを開始できませんでした: %1$s</string>
+    <string name="location_permission_not_granted">ロケーションの権限が付与されていません</string>
+    <string name="permissions_not_granted_message">"次の権限が必要ですが、付与されていません: %1$s"</string>
+    <string name="close_calibration">キャリブレーションの終了</string>
+    <string name="heading_title">見出し</string>
+    <string name="decrease_heading">見出しを減らす</string>
+    <string name="increase_heading">見出しを増やす</string>
+    <string name="reset_heading">見出しのリセット</string>
+    <string name="heading_slider_description">見出しスライダー</string>
+    <string name="elevation_title">標高</string>
+    <string name="decrease_elevation">標高を下げる</string>
+    <string name="increase_elevation">標高を上げる</string>
+    <string name="reset_elevation">標高のリセット</string>
+    <string name="elevation_slider_description">標高スライダー</string>
 </resources>

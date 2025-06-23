@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">한_Legend_____________빠</string>
-    <string name="symbol_description">한_symbol of a legend item________________________빠</string>
-    <string name="error">한_Error___________빠</string>
-    <string name="legend_component">한_Legend component_________________빠</string>
+    <string name="title">범례</string>
+    <string name="symbol_description">범례 항목의 심볼</string>
+    <string name="error">오류</string>
+    <string name="legend_component">범례 구성 요소</string>
 </resources>

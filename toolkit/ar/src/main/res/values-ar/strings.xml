@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">لم يتم منح إذن الكاميرا</string>
-    <string name="arcore_not_installed_message">بيت_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________لاحقة</string>
-    <string name="location_data_source_failed_to_start">بيت_Location Data Source failed to start: %1$s______________________لاحقة</string>
-    <string name="location_permission_not_granted">بيت_Location permission not granted_________________لاحقة</string>
-    <string name="permissions_not_granted_message">بيت_"The following permissions are required, but not granted: %1$s"_________________________________لاحقة</string>
-    <string name="close_calibration">بيت_Close calibration__________________لاحقة</string>
-    <string name="heading_title">بيت_Heading_______________لاحقة</string>
-    <string name="decrease_heading">بيت_Decrease Heading_________________لاحقة</string>
-    <string name="increase_heading">بيت_Increase Heading_________________لاحقة</string>
-    <string name="reset_heading">بيت_Reset Heading______________لاحقة</string>
-    <string name="heading_slider_description">بيت_Heading slider_______________لاحقة</string>
-    <string name="elevation_title">بيت_Elevation___________________لاحقة</string>
-    <string name="decrease_elevation">بيت_Decrease Elevation___________________لاحقة</string>
-    <string name="increase_elevation">بيت_Increase Elevation___________________لاحقة</string>
-    <string name="reset_elevation">بيت_Reset Elevation________________لاحقة</string>
-    <string name="elevation_slider_description">بيت_Elevation slider_________________لاحقة</string>
+    <string name="arcore_not_installed_message">يجب تثبيت ARCore لاستخدام هذا المكون. توفر ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">فشل بدء تشغيل مصدر بيانات الموقع: %1$s</string>
+    <string name="location_permission_not_granted">لم يتم منح إذن الموقع</string>
+    <string name="permissions_not_granted_message">الأذونات التالية مطلوبة ولكن لم يتم منحها: %1$s</string>
+    <string name="close_calibration">إغلاق المعايرة</string>
+    <string name="heading_title">عنوان</string>
+    <string name="decrease_heading">تقليل العنوان</string>
+    <string name="increase_heading">زيادة العنوان</string>
+    <string name="reset_heading">إعادة تعيين العنوان</string>
+    <string name="heading_slider_description">شريط تمرير العنوان</string>
+    <string name="elevation_title">الارتفاع</string>
+    <string name="decrease_elevation">تقليل الارتفاع</string>
+    <string name="increase_elevation">زيادة الارتفاع</string>
+    <string name="reset_elevation">إعادة تعيين الارتفاع</string>
+    <string name="elevation_slider_description">شريط تمرير الارتفاع</string>
 </resources>

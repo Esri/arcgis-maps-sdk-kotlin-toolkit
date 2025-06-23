@@ -21,8 +21,8 @@
     <string name="allow_connection">Permet la connexió</string>
     <string name="username_password_login_title">Es necessita autenticació</string>
     <string name="username_password_login_message">Heu d\'iniciar la sessió per accedir a %1$s</string>
-    <string name="incorrect_credentials">ó_The credentials were incorrect for %1$s. Please try again______________________________à.</string>
-    <string name="sign_in_error_occurred">ó_An error occurred signing in to %1$s. Please try again_____________________________à.</string>
+    <string name="incorrect_credentials">Les credencials no eren correctes per a "%1$s". Torneu-ho a provar.</string>
+    <string name="sign_in_error_occurred">Hi ha hagut un error en iniciar la sessió a %1$s. Torneu-ho a provar.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nom d\'usuari</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

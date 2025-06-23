@@ -21,8 +21,8 @@
     <string name="allow_connection">Luba ühendus</string>
     <string name="username_password_login_title">Autentimine on nõutav</string>
     <string name="username_password_login_message">Üksusele %1$s juurdepääsemiseks peate sisse logima</string>
-    <string name="incorrect_credentials">Š_The credentials were incorrect for %1$s. Please try again______________________________ä.</string>
-    <string name="sign_in_error_occurred">Š_An error occurred signing in to %1$s. Please try again_____________________________ä.</string>
+    <string name="incorrect_credentials">Üksuse %1$s sisselogimisandmed olid valed. Proovige uuesti.</string>
+    <string name="sign_in_error_occurred">Üksusesse %1$s sisselogimisel ilmnes viga. Proovige uuesti.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kasutajanimi</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

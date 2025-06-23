@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Dovoljenje za kamero ni odobreno</string>
-    <string name="arcore_not_installed_message">Š_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________č</string>
-    <string name="location_data_source_failed_to_start">Š_Location Data Source failed to start: %1$s______________________č</string>
-    <string name="location_permission_not_granted">Š_Location permission not granted_________________č</string>
-    <string name="permissions_not_granted_message">Š_"The following permissions are required, but not granted: %1$s"_________________________________č</string>
-    <string name="close_calibration">Š_Close calibration__________________č</string>
-    <string name="heading_title">Š_Heading_______________č</string>
-    <string name="decrease_heading">Š_Decrease Heading_________________č</string>
-    <string name="increase_heading">Š_Increase Heading_________________č</string>
-    <string name="reset_heading">Š_Reset Heading______________č</string>
-    <string name="heading_slider_description">Š_Heading slider_______________č</string>
-    <string name="elevation_title">Š_Elevation___________________č</string>
-    <string name="decrease_elevation">Š_Decrease Elevation___________________č</string>
-    <string name="increase_elevation">Š_Increase Elevation___________________č</string>
-    <string name="reset_elevation">Š_Reset Elevation________________č</string>
-    <string name="elevation_slider_description">Š_Elevation slider_________________č</string>
+    <string name="arcore_not_installed_message">ARCore mora biti nameščen za uporabo te komponente. Razpoložljivost ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Zagon vira podatkov o lokaciji je bil neuspešen: %1$s</string>
+    <string name="location_permission_not_granted">Dovoljenje za lokacijo ni odobreno</string>
+    <string name="permissions_not_granted_message">"Naslednja dovoljenja so potrebna, vendar niso odobrena: %1$s"</string>
+    <string name="close_calibration">Zapri kalibracijo</string>
+    <string name="heading_title">Glava</string>
+    <string name="decrease_heading">Zmanjšaj glavo</string>
+    <string name="increase_heading">Povečaj glavo</string>
+    <string name="reset_heading">Ponastavi glavo</string>
+    <string name="heading_slider_description">Drsnik glave</string>
+    <string name="elevation_title">Višina</string>
+    <string name="decrease_elevation">Zmanjšaj višino</string>
+    <string name="increase_elevation">Povečaj višino</string>
+    <string name="reset_elevation">Ponastavi višino</string>
+    <string name="elevation_slider_description">Drsnik višine</string>
 </resources>

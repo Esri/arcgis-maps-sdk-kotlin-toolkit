@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">試_Legend_____________驗</string>
-    <string name="symbol_description">試_symbol of a legend item________________________驗</string>
-    <string name="error">試_Error___________驗</string>
-    <string name="legend_component">試_Legend component_________________驗</string>
+    <string name="title">圖例</string>
+    <string name="symbol_description">圖例項目的符號</string>
+    <string name="error">錯誤</string>
+    <string name="legend_component">圖例元件</string>
 </resources>

@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">Ĳ_Legend_____________ä</string>
-    <string name="symbol_description">Ĳ_symbol of a legend item________________________ä</string>
-    <string name="error">Ĳ_Error___________ä</string>
-    <string name="legend_component">Ĳ_Legend component_________________ä</string>
+    <string name="title">Legenda</string>
+    <string name="symbol_description">symbool voor een item in de legenda</string>
+    <string name="error">Fout</string>
+    <string name="legend_component">Legendacomponent</string>
 </resources>

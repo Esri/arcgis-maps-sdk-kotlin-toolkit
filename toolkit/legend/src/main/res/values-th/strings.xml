@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">ก้_Legend_____________ษฺ</string>
-    <string name="symbol_description">ก้_symbol of a legend item________________________ษฺ</string>
-    <string name="error">ก้_Error___________ษฺ</string>
-    <string name="legend_component">ก้_Legend component_________________ษฺ</string>
+    <string name="title">คำอธิบายสัญลักษณ์</string>
+    <string name="symbol_description">สัญลักษณ์ของรายการคำอธิบายสัญลักษณ์</string>
+    <string name="error">ข้อผิดพลาด</string>
+    <string name="legend_component">ส่วนประกอบคำอธิบายสัญลักษณ์</string>
 </resources>

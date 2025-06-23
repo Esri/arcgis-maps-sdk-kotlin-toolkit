@@ -21,8 +21,8 @@
     <string name="allow_connection">السماح بالاتصال</string>
     <string name="username_password_login_title">المصادقة مطلوبة</string>
     <string name="username_password_login_message">يتعين عليك تسجيل الدخول للوصول إلى %1$s</string>
-    <string name="incorrect_credentials">بيت_The credentials were incorrect for %1$s. Please try again______________________________لاحقة.</string>
-    <string name="sign_in_error_occurred">بيت_An error occurred signing in to %1$s. Please try again_____________________________لاحقة.</string>
+    <string name="incorrect_credentials">بيانات الاعتماد المقدمة غير صحيحة بالنسبة لـ %1$s. الرجاء المحاولة مرة أخرى.</string>
+    <string name="sign_in_error_occurred">حدث خطأ أثناء تسجيل الدخول إلى %1$s. الرجاء المحاولة مرة أخرى.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">اسم المستخدم</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

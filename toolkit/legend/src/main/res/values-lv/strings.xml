@@ -13,8 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="title">ķ_Legend_____________ū</string>
-    <string name="symbol_description">ķ_symbol of a legend item________________________ū</string>
-    <string name="error">ķ_Error___________ū</string>
-    <string name="legend_component">ķ_Legend component_________________ū</string>
+    <string name="title">Apzīmējumi</string>
+    <string name="symbol_description">apzīmējumu vienības simbols</string>
+    <string name="error">Kļūda</string>
+    <string name="legend_component">Apzīmējumu komponents</string>
 </resources>

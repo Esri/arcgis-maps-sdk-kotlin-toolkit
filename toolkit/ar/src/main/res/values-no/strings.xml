@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameratillatelse ikke gitt</string>
-    <string name="arcore_not_installed_message">å_ARCore must be installed to use this component. ARCore availability: %1$s______________________________________ø</string>
-    <string name="location_data_source_failed_to_start">å_Location Data Source failed to start: %1$s______________________ø</string>
-    <string name="location_permission_not_granted">å_Location permission not granted_________________ø</string>
-    <string name="permissions_not_granted_message">å_"The following permissions are required, but not granted: %1$s"_________________________________ø</string>
-    <string name="close_calibration">å_Close calibration__________________ø</string>
-    <string name="heading_title">å_Heading_______________ø</string>
-    <string name="decrease_heading">å_Decrease Heading_________________ø</string>
-    <string name="increase_heading">å_Increase Heading_________________ø</string>
-    <string name="reset_heading">å_Reset Heading______________ø</string>
-    <string name="heading_slider_description">å_Heading slider_______________ø</string>
-    <string name="elevation_title">å_Elevation___________________ø</string>
-    <string name="decrease_elevation">å_Decrease Elevation___________________ø</string>
-    <string name="increase_elevation">å_Increase Elevation___________________ø</string>
-    <string name="reset_elevation">å_Reset Elevation________________ø</string>
-    <string name="elevation_slider_description">å_Elevation slider_________________ø</string>
+    <string name="arcore_not_installed_message">ARCore må være installert for å bruke denne komponenten. ARCore-tilgjengelighet: %1$s</string>
+    <string name="location_data_source_failed_to_start">Posisjonsdatakilden startet ikke: %1$s</string>
+    <string name="location_permission_not_granted">Posisjonstillatelse ikke gitt</string>
+    <string name="permissions_not_granted_message">«Følgende tillatelser er påkrevd, men ikke gitt: %1$s»</string>
+    <string name="close_calibration">Lukk kalibrering</string>
+    <string name="heading_title">Topptekst</string>
+    <string name="decrease_heading">Reduser topptekst</string>
+    <string name="increase_heading">Øk topptekst</string>
+    <string name="reset_heading">Tilbakestill topptekst</string>
+    <string name="heading_slider_description">Topptekstglidebryter</string>
+    <string name="elevation_title">Høyde</string>
+    <string name="decrease_elevation">Senk høyde</string>
+    <string name="increase_elevation">Øk høyde</string>
+    <string name="reset_elevation">Tilbakestill høyde</string>
+    <string name="elevation_slider_description">Høydeglidebryter</string>
 </resources>
