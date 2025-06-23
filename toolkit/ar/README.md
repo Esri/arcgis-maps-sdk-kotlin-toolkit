@@ -288,15 +288,53 @@ The `FlyoverSceneView` provides an augmented reality fly over experience.
   that displays a `SceneView`.
 - Uses device movement to position the camera viewing the scene.
 - Provides parameters to configure and interact with the `SceneView`, such as specifying an
-  `ArcGISScene` and the camera origin.
-- A `FlyoverSceneViewProxy` can be passed to the `FlyoverSceneView` composable function to perform
-  operations such as identify.
+  `ArcGISScene` and a translation factor that defines how much the scene view translates as the
+  device moves.
+- A `FlyoverSceneViewProxy` can be passed to the `FlyoverSceneView` composable function to define
+  state such as the camera origin and perform operations such as identify.
 - A `FlyoverSceneViewScope` provided as the receiver by the `FlyoverSceneView`'s `content` lambda
   can be used to display a callout.
 
 ### Prerequisites
 
+`FlyoverSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported
+device that has installed Google Play Services for AR. An application must
+call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed)
+before using the `FlyoverSceneView`. For an example, see how it is done in the micro
+app's [MainActivity](../../microapps/ArFlyoverApp/app/src/main/java/com/arcgismaps/toolkit/arflyoverapp/MainActivity.kt).
+Note - the `FlyoverSceneView` checks for availability of ARCore when it enters the composition. If
+ARCore is not supported by the device or not installed, the `FlyoverSceneView` will fail to
+initialize with `FlyoverSceneViewStatus.FailedToInitialize`.
+
+Note that apps using ARCore must comply with ARCore's user privacy requirements.
+See [this page](https://developers.google.com/ar/develop/privacy-requirements) for more information.
+
 ### Usage
+
+The `FlyoverSceneView` requires camera permissions, which are requested by default when the
+`FlyoverSceneView` enters composition. The following camera-related settings need to be specified in
+the `AndroidManifest.xml`:
+
+```xml
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Limits app visibility in the Google Play Store to ARCore supported devices
+         (https://developers.google.com/ar/devices). -->
+    <uses-feature android:name="android.hardware.camera.ar" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+```
+
+If ARCore is not optional for your application to function (as is the case with
+the [microapp](../../microapps/ArFlyoverApp)), you also need to add the following to your
+`AndroidManifest.xml`:
+
+```xml
+        <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
+             to be installed, as the app does not include any non-AR features. -->
+        <meta-data android:name="com.google.ar.core" android:value="required" />
+```
 
 ### Behaviour
 
