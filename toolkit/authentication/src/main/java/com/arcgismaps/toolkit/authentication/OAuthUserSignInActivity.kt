@@ -43,10 +43,6 @@ private const val SIGN_OUT = "SIGN_OUT"
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
- * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. Sign-out is currently only supported
- * for IAP. The behavior for IAP sign-in and sign-out is similar to OAuth, where the activity launches a CustomTabs browser
- * for user interaction and processes the result upon completion.
- *
  * This activity must be registered in your application's manifest. There are two ways to configure
  * the manifest entry for [OAuthUserSignInActivity]:
  *
@@ -104,6 +100,12 @@ private const val SIGN_OUT = "SIGN_OUT"
  * sign-out flow. This can be done by intercepting when the user presses the back button or the close button in the Custom Tab.
  * @since 200.2.0
  */
+@Deprecated(
+    message = "This class is deprecated and will be removed in a future release. " +
+            "If Identity Aware Proxy (IAP) support is needed, use `AuthenticationActivity` instead. ",
+    replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
+    level = DeprecationLevel.WARNING
+)
 public class OAuthUserSignInActivity : ComponentActivity() {
 
     private var signOutRequest = false

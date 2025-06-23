@@ -134,15 +134,6 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     public fun dismissAll()
 
     /**
-     * Updates the list of IAP configurations that can be used for IAP-based sign ins.
-     * This will replace the current list of IAP configurations.
-     *
-     * @param iapConfigurations the list of [IapConfiguration]s to use for IAP-based sign ins.
-     * @since 200.8.0
-     */
-    public fun updateIapConfigurations(iapConfigurations: List<IapConfiguration>)
-
-    /**
      * Revokes OAuth tokens and all credentials from the [AuthenticationManager.arcGISCredentialStore]
      * and [AuthenticationManager.networkCredentialStore]. If an IAP credential exists in
      * the [AuthenticationManager.arcGISCredentialStore], it will display a custom tab for the user to invalidate
@@ -216,6 +207,7 @@ private class AuthenticatorStateImpl(
         pendingUsernamePasswordChallenge.value?.cancel()
         pendingClientCertificateChallenge.value?.onCancel?.invoke()
         pendingServerTrustChallenge.value?.distrust()
+        pendingIapSignIn.value?.cancel()
         pendingIapSignOut.value?.cancel()
     }
 
