@@ -18,8 +18,8 @@
 
 package com.arcgismaps.toolkit.offline.internal.utils
 
-import java.io.File
 import android.text.Html
+import java.io.File
 
 internal fun getDirectorySize(path: String): Int {
     val file = File(path)

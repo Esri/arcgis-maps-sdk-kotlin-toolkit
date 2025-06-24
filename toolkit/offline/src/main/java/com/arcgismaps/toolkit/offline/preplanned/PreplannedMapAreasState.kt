@@ -72,8 +72,8 @@ internal class PreplannedMapAreaState(
         get() = _isSelectedToOpen
 
     // The status of the preplanned map area.
-    private var _status by mutableStateOf<Status>(Status.NotLoaded)
-    internal val status: Status
+    private var _status by mutableStateOf<PreplannedStatus>(PreplannedStatus.NotLoaded)
+    internal val status: PreplannedStatus
         get() = _status
 
     // The download progress of the preplanned map area.
@@ -108,13 +108,13 @@ internal class PreplannedMapAreaState(
         preplannedMapArea?.retryLoad()
             ?.onSuccess {
                 _status = try {
-                    Status.fromPackagingStatus(preplannedMapArea.packagingStatus)
+                    PreplannedStatus.fromPackagingStatus(preplannedMapArea.packagingStatus)
                 } catch (illegalStateException: IllegalStateException) {
                     // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
                     // that have incomplete metadata. We throw an illegalStateException when Package
                     // Status is unknown. We can safely assume that the preplanned map area is packaged.
                     // If the area loads, then we know for certain the status is complete.
-                    Status.Packaged
+                    PreplannedStatus.Packaged
                 }
                 // Load the thumbnail
                 _thumbnail = preplannedMapArea.portalItem.thumbnail?.let { loadableImage ->
@@ -139,7 +139,7 @@ internal class PreplannedMapAreaState(
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
 
             scope.launch {
-                _status = Status.Downloading
+                _status = PreplannedStatus.Downloading
                 val offlineWorkerUUID = startOfflineMapJob(
                     downloadPreplannedOfflineMapJob = createOfflineMapJob(
                         preplannedMapArea = area,
@@ -252,7 +252,7 @@ internal class PreplannedMapAreaState(
         if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
             Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
-            _status = Status.NotLoaded
+            _status = PreplannedStatus.NotLoaded
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
@@ -272,11 +272,11 @@ internal class PreplannedMapAreaState(
     /**
      * Updates the current state of this preplanned map area instance.
      *
-     * @param newStatus The updated [Status] value representing this area's current state.
+     * @param newStatus The updated [PreplannedStatus] value representing this area's current state.
      *
      * @since 200.8.0
      */
-    internal fun updateStatus(newStatus: Status) {
+    internal fun updateStatus(newStatus: PreplannedStatus) {
         _status = newStatus
     }
 
@@ -299,13 +299,13 @@ internal class PreplannedMapAreaState(
                     Log.d(TAG, "Mobile map package loaded successfully")
                 }.onFailure { exception ->
                     Log.e(TAG, "Error loading mobile map package", exception)
-                    _status = Status.MmpkLoadFailure(exception)
+                    _status = PreplannedStatus.MmpkLoadFailure(exception)
                 }
             map = mobileMapPackage.maps.firstOrNull()
                 ?: throw IllegalStateException("No maps found in the mobile map package")
         }.onFailure { exception ->
             Log.e(TAG, "Error loading mobile map package", exception)
-            _status = Status.MmpkLoadFailure(exception)
+            _status = PreplannedStatus.MmpkLoadFailure(exception)
         }
     }
 
@@ -322,69 +322,69 @@ internal class PreplannedMapAreaState(
  *
  * @since 200.8.0
  */
-internal sealed class Status {
+internal sealed class PreplannedStatus {
 
     /**
      * Preplanned map area not loaded.
      */
-    data object NotLoaded : Status()
+    data object NotLoaded : PreplannedStatus()
 
     /**
      * Preplanned map area is loading.
      */
-    data object Loading : Status()
+    data object Loading : PreplannedStatus()
 
     /**
      * Preplanned map area failed to load.
      */
-    data class LoadFailure(val error: Throwable) : Status()
+    data class LoadFailure(val error: Throwable) : PreplannedStatus()
 
     /**
      * Preplanned map area is packaging.
      */
-    data object Packaging : Status()
+    data object Packaging : PreplannedStatus()
 
     /**
      * Preplanned map area is packaged and ready for download.
      */
-    data object Packaged : Status()
+    data object Packaged : PreplannedStatus()
 
     /**
      * Preplanned map area packaging failed.
      */
-    data object PackageFailure : Status()
+    data object PackageFailure : PreplannedStatus()
 
     /**
      * Preplanned map area is being downloaded.
      */
-    data object Downloading : Status()
+    data object Downloading : PreplannedStatus()
 
     /**
      * Preplanned map area is downloaded.
      */
-    data object Downloaded : Status()
+    data object Downloaded : PreplannedStatus()
 
     /**
      * Preplanned map area failed to download.
      */
-    data class DownloadFailure(val error: Throwable) : Status()
+    data class DownloadFailure(val error: Throwable) : PreplannedStatus()
 
     /**
      * Downloaded mobile map package failed to load.
      */
-    data class MmpkLoadFailure(val error: Throwable) : Status()
+    data class MmpkLoadFailure(val error: Throwable) : PreplannedStatus()
 
     companion object {
         /**
-         * Maps a given packaging status to the corresponding [Status] type.
+         * Maps a given packaging status to the corresponding [PreplannedStatus] type.
          *
-         * @param packagingStatus The packaging status to translate into a [Status].
-         * @return A [Status] object representing the translated state of the preplanned map area.
+         * @param packagingStatus The packaging status to translate into a [PreplannedStatus].
+         * @return A [PreplannedStatus] object representing the translated state of the preplanned map area.
          * @throws IllegalStateException if the status is unknown or unrecognized.
          *
          * @since 200.8.0
          */
-        fun fromPackagingStatus(packagingStatus: PreplannedPackagingStatus): Status {
+        fun fromPackagingStatus(packagingStatus: PreplannedPackagingStatus): PreplannedStatus {
             return when (packagingStatus) {
                 PreplannedPackagingStatus.Processing -> Packaging
                 PreplannedPackagingStatus.Failed -> PackageFailure
