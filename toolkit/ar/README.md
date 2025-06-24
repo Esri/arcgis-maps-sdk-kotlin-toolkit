@@ -11,7 +11,7 @@ The AR toolkit module provides three composable functions to render `ArcGISScene
 | [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         | [FlyoverSceneView](#FlyoverSceneView)
 |-----------------------------------------------------------------|---------------------------------------------------------------------|----------------------------------------|
 | ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 | ![flyover-screenshot](flyover-screenshot.png)
-| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | In flyover the content is navigated by moving the device
+| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | In flyover the content is navigated by moving the device.
 
 ## TableTopSceneView
 
@@ -19,7 +19,7 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
 
 ### Features
 
-- A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
+- A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlaid by a `SceneView`.
 - Detects physical horizontal surfaces in the camera feed, which a user can select by tapping on the screen. The tap location determines where the scene data is anchored on the detected surface.
 - Provides parameters specific to table top scenarios to configure the placement and visualization of scene data:
     - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
@@ -160,7 +160,7 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s:
 
 ### Features
 
-- A composable function [WorldScaleSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
+- A composable function [WorldScaleSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleSceneView.kt) that displays a camera feed overlaid by a `SceneView`.
 - Uses the device's location depending on the [WorldScaleTrackingMode](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleTrackingMode.kt) to position the scene camera so that the scene overlays the real-world features in the camera feed:
   - using GPS in `WorldScaleTrackingMode.World`
   - using Google's visual positioning service in `WorldScaleTrackingMode.Geospatial` 
@@ -290,7 +290,7 @@ The `FlyoverSceneView` provides an augmented reality fly over experience.
 - Provides parameters to configure and interact with the `SceneView`, such as specifying an
   `ArcGISScene` and a translation factor that defines how much the scene view translates as the
   device moves.
-- A `FlyoverSceneViewProxy` can be passed to the `FlyoverSceneView` composable function to define
+- A `FlyoverSceneViewProxy` is passed to the `FlyoverSceneView` composable function to define
   state such as the camera origin and perform operations such as identify.
 - A `FlyoverSceneViewScope` provided as the receiver by the `FlyoverSceneView`'s `content` lambda
   can be used to display a callout.
