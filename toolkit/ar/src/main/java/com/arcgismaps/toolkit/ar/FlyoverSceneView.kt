@@ -218,7 +218,8 @@ public fun FlyoverSceneView(
             },
             onTapWithHitResult = {},
             onFirstPlaneDetected = {},
-            visualizePlanes = false
+            visualizePlanes = false,
+            visualizeCamera = false
         )
 
         SceneView(
