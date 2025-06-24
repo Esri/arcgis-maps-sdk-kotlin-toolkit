@@ -35,14 +35,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,10 +56,11 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
+import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
@@ -72,7 +69,7 @@ internal fun MapAreaDetailsBottomSheet(
     onDismiss: () -> Unit,
     thumbnail: ImageBitmap?,
     title: String,
-    description: String,
+    description: String?,
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
@@ -106,7 +103,7 @@ internal fun MapAreaDetailsBottomSheet(
 internal fun MapAreaDetailsScreen(
     thumbnail: ImageBitmap?,
     title: String,
-    description: String,
+    description: String?,
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
@@ -117,6 +114,7 @@ internal fun MapAreaDetailsScreen(
     Column(
         modifier = Modifier
             .padding(16.dp)
+            .fillMaxWidth()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -155,30 +153,32 @@ internal fun MapAreaDetailsScreen(
         if (size != 0) {
             Text(text = "Size: ${formatSize(size)}", style = MaterialTheme.typography.bodyMedium)
         }
-        // Description label
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(id = R.string.description),
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 14.dp)
-        )
-        // Description
-        Spacer(modifier = Modifier.height(4.dp))
-        Box(
-            modifier = Modifier
-                .background(
-                    MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(10.dp)
-                )
-                .padding(12.dp)
-                .fillMaxWidth()
-        ) {
+
+        if (description != null) {
+            // Description label
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = htmlToPlainText(description),
-                style = MaterialTheme.typography.bodyMedium
+                text = stringResource(id = R.string.description),
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 14.dp)
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .padding(12.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = htmlToPlainText(description),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

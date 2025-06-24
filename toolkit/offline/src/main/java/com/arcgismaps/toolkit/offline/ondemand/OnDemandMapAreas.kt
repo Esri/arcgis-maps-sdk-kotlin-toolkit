@@ -1,22 +1,21 @@
 /*
+ * Copyright 2025 Esri
  *
- *  Copyright 2025 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package com.arcgismaps.toolkit.offline.preplanned
+package com.arcgismaps.toolkit.offline.ondemand
 
 import android.content.Context
 import androidx.compose.foundation.Image
@@ -25,8 +24,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageNotSupported
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,19 +68,20 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
 
 /**
- * Displays a list of preplanned map areas.
+ * Displays a list of on-demand map areas.
  *
  * @since 200.8.0
  */
 @Composable
-internal fun PreplannedMapAreas(
-    preplannedMapAreaStates: List<PreplannedMapAreaState>,
-    modifier: Modifier
+internal fun OnDemandMapAreas(
+    onDemandMapAreasStates: List<OnDemandMapAreasState>,
+    modifier: Modifier,
+    onDownloadNewMapArea: () -> Unit
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
-    val selectedPreplannedMapAreaState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
-        ?.let { preplannedMapAreaStates[it] }
+    val selectedOnDemandMapAreaState = selectedIndex.takeIf { it in onDemandMapAreasStates.indices }
+        ?.let { onDemandMapAreasStates[it] }
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -86,19 +89,19 @@ internal fun PreplannedMapAreas(
     val scope = rememberCoroutineScope()
 
     // Show the modal bottom sheet if needed
-    if (showSheet && selectedPreplannedMapAreaState != null) {
+    if (showSheet && selectedOnDemandMapAreaState != null) {
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
-            thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
-            title = selectedPreplannedMapAreaState.title,
-            description = selectedPreplannedMapAreaState.description,
-            size = selectedPreplannedMapAreaState.directorySize,
-            isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
+            thumbnail = selectedOnDemandMapAreaState.thumbnail?.asImageBitmap(),
+            title = selectedOnDemandMapAreaState.title,
+            description = null,
+            size = selectedOnDemandMapAreaState.directorySize,
+            isAvailableToDownload = selectedOnDemandMapAreaState.status.allowsDownload,
             onStartDownload = {
-                selectedPreplannedMapAreaState.downloadPreplannedMapArea()
+                selectedOnDemandMapAreaState.downloadOnDemandMapArea()
                 scope
                     .launch { sheetState.hide() }
                     .invokeOnCompletion {
@@ -107,9 +110,9 @@ internal fun PreplannedMapAreas(
                         }
                     }
             },
-            isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
+            isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
-                selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+                selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
             }
         )
     }
@@ -124,7 +127,7 @@ internal fun PreplannedMapAreas(
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
-            itemsIndexed(preplannedMapAreaStates) { index, state ->
+            itemsIndexed(onDemandMapAreasStates) { index, state ->
                 Row(
                     modifier = Modifier
                         .clickable {
@@ -169,18 +172,11 @@ internal fun PreplannedMapAreas(
                             maxLines = 1, // Restrict to one line
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
-                        // Display the description with a maximum of two lines
-                        Text(
-                            text = state.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, // Restrict to two lines
-                            overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
-                        )
                         // Display the status string
                         val statusString = if (state.isSelectedToOpen) {
                             stringResource(R.string.currently_open)
                         } else {
-                            getPreplannedMapAreaStatusString(
+                            getOnDemandMapAreaStatusString(
                                 context = LocalContext.current,
                                 status = state.status
                             )
@@ -199,12 +195,12 @@ internal fun PreplannedMapAreas(
                         state.status.allowsDownload -> {
                             DownloadButton {
                                 if (state.status.allowsDownload) {
-                                    state.downloadPreplannedMapArea()
+                                    state.downloadOnDemandMapArea()
                                 }
                             }
                         }
 
-                        state.status == PreplannedStatus.Downloading -> {
+                        state.status == OnDemandStatus.Downloading -> {
                             CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
@@ -213,37 +209,45 @@ internal fun PreplannedMapAreas(
                         state.status.isDownloaded -> {
                             OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
-                                preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
+                                onDemandMapAreasStates.forEach { it.setSelectedToOpen(false) }
                                 state.setSelectedToOpen(true)
                             }
                         }
                     }
                 }
-                if (state.preplannedMapArea != preplannedMapAreaStates.last().preplannedMapArea) {
+                if (state.onDemandAreaID != onDemandMapAreasStates.last().onDemandAreaID) {
                     HorizontalDivider(modifier = Modifier.padding(start = 80.dp))
                 }
             }
+        }
+        Spacer(Modifier.height(12.dp))
+        // add a button to add a new on demand map area
+        Button(onClick = onDownloadNewMapArea) {
+            Text(
+                text = stringResource(R.string.add_map_area),
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }
 
 /**
- * Retrieves a user-friendly status string for a preplanned map area based on its current status.
+ * Retrieves a user-friendly status string for a on demand map area based on its current status.
  *
  * @param context The `Context` used to access application-specific resources like strings.
- * @param status  The current state of the preplanned map area, represented by an instance of `Status`.
+ * @param status  The current state of the on demand map area, represented by an instance of `Status`.
  * @return A localized string corresponding to the given status.
  * @since 200.8.0
  */
-private fun getPreplannedMapAreaStatusString(context: Context, status: PreplannedStatus): String {
+private fun getOnDemandMapAreaStatusString(context: Context, status: OnDemandStatus): String {
     return when (status) {
-        PreplannedStatus.NotLoaded, PreplannedStatus.Loading -> getString(context, R.string.loading)
-        is PreplannedStatus.LoadFailure, is PreplannedStatus.MmpkLoadFailure -> getString(context, R.string.loading_failed)
-        is PreplannedStatus.DownloadFailure -> getString(context, R.string.download_failed)
-        PreplannedStatus.Downloaded -> getString(context, R.string.downloaded)
-        PreplannedStatus.Downloading -> getString(context, R.string.downloading)
-        PreplannedStatus.PackageFailure -> getString(context, R.string.packaging_failed)
-        PreplannedStatus.Packaged -> getString(context, R.string.ready_to_download)
-        PreplannedStatus.Packaging -> getString(context, R.string.packaging)
+        OnDemandStatus.NotLoaded, OnDemandStatus.Loading -> getString(context, R.string.loading)
+        is OnDemandStatus.LoadFailure, is OnDemandStatus.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is OnDemandStatus.DownloadFailure -> getString(context, R.string.download_failed)
+        OnDemandStatus.Downloaded -> getString(context, R.string.downloaded)
+        OnDemandStatus.Downloading -> getString(context, R.string.downloading)
+        OnDemandStatus.PackageFailure -> getString(context, R.string.packaging_failed)
+        OnDemandStatus.Packaged -> getString(context, R.string.ready_to_download)
+        OnDemandStatus.Packaging -> getString(context, R.string.packaging)
     }
 }
