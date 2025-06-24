@@ -29,11 +29,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -66,9 +78,11 @@ import com.arcgismaps.toolkit.ar.FlyoverSceneView
 import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.arflyoverapp.R
+import com.arcgismaps.toolkit.arflyoverapp.pointsOfInterestList
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
 
@@ -84,6 +98,8 @@ fun MainScreen() {
             operationalLayers.add(integratedMeshLayer)
         }
     }
+
+    var currentPoiIndex by remember { mutableStateOf(0) }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
@@ -106,68 +122,8 @@ fun MainScreen() {
         )
     }
 
-    // Display FlyoverSceneView only if user has accepted the privacy info
-    if (acceptedPrivacyInfo) {
-        val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-            location = Point(
-                2.82407,
-                41.99101,
-                230.0,
-                SpatialReference.wgs84()
-            ),
-            heading = 160.0
-        )
-
-        Box {
-            val initializationStatus: MutableState<FlyoverSceneViewStatus> = remember {
-                mutableStateOf(FlyoverSceneViewStatus.Initializing)
-            }
-
-            FlyoverSceneView(
-                arcGISScene = arcGISScene,
-                flyoverSceneViewProxy = flyoverSceneViewProxy,
-                onInitializationStatusChanged = {
-                    initializationStatus.value = it
-                },
-                translationFactor = 1000.0,
-            )
-
-            val sceneLoadStatus =
-                arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-
-            when (val status = initializationStatus.value) {
-                is FlyoverSceneViewStatus.Initializing -> {
-                    TextWithScrim(text = stringResource(R.string.setting_up_ar))
-                }
-
-                is FlyoverSceneViewStatus.FailedToInitialize -> {
-                    val message = status.error.message ?: status.error
-                    TextWithScrim(text = stringResource(R.string.failed_to_initialize_ar, message))
-                }
-
-                else -> {
-                    when (sceneLoadStatus) {
-                        is LoadStatus.NotLoaded, LoadStatus.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        // successfully loaded so nothing more to do
-                        LoadStatus.Loaded -> {}
-                    }
-                }
-            }
-        }
-    } else {
-        // otherwise display a message and a button that causes the privacy info dialog to be shown
+    if (!acceptedPrivacyInfo) {
+        // Display a message and a button that causes the privacy info dialog to be shown
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -178,6 +134,107 @@ fun MainScreen() {
                 onClick = { showPrivacyInfo = true }
             ) {
                 Text(stringResource(R.string.show_privacy_info))
+            }
+        }
+    } else {
+        val snackbarHostState = remember { SnackbarHostState() }
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                    actions = {
+                        var actionsExpanded by remember { mutableStateOf(false) }
+                        IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                            Icon(Icons.Default.MoreVert, "More")
+                        }
+                        DropdownMenu(
+                            expanded = actionsExpanded,
+                            onDismissRequest = { actionsExpanded = false },
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Text("Select a new location:")
+                            HorizontalDivider(thickness = 2.dp)
+                            pointsOfInterestList.forEachIndexed { index, poi ->
+                                DropdownMenuItem(
+                                    text = { Text(poi.name) },
+                                    onClick = {
+                                        currentPoiIndex = index
+                                        actionsExpanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
+                location = Point(
+                    2.82407,
+                    41.99101,
+                    230.0,
+                    SpatialReference.wgs84()
+                ),
+                heading = 160.0
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                val initializationStatus: MutableState<FlyoverSceneViewStatus> = remember {
+                    mutableStateOf(FlyoverSceneViewStatus.Initializing)
+                }
+
+                FlyoverSceneView(
+                    arcGISScene = arcGISScene,
+                    flyoverSceneViewProxy = flyoverSceneViewProxy,
+                    onInitializationStatusChanged = {
+                        initializationStatus.value = it
+                    },
+                    translationFactor = 1000.0, // DOES THIS NEED SET HERE OR ON PROXY?
+                )
+
+                val sceneLoadStatus =
+                    arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+
+                when (val status = initializationStatus.value) {
+                    is FlyoverSceneViewStatus.Initializing -> {
+                        TextWithScrim(text = stringResource(R.string.setting_up_ar))
+                    }
+
+                    is FlyoverSceneViewStatus.FailedToInitialize -> {
+                        val message = status.error.message ?: status.error
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_initialize_ar,
+                                message
+                            )
+                        )
+                    }
+
+                    else -> {
+                        when (sceneLoadStatus) {
+                            is LoadStatus.NotLoaded, LoadStatus.Loading -> {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+
+                            is LoadStatus.FailedToLoad -> {
+                                TextWithScrim(
+                                    text = stringResource(
+                                        R.string.failed_to_load_scene,
+                                        sceneLoadStatus.error
+                                    )
+                                )
+                            }
+
+                            // successfully loaded so nothing more to do
+                            LoadStatus.Loaded -> {}
+                        }
+                    }
+                }
             }
         }
     }
