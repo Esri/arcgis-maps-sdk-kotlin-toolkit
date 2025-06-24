@@ -94,8 +94,8 @@ private const val RESULT_CODE_CANCELED = 2
  * @since 200.2.0
  */
 @Deprecated(
-    message = "This class is deprecated and will be removed in a future release. " +
-            "If Identity Aware Proxy (IAP) support is needed, use `AuthenticationActivity` instead. ",
+    message = "As of 200.8.0, this class is deprecated and will be removed in a future release. " +
+            "Use `AuthenticationActivity` instead.",
     replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
     level = DeprecationLevel.WARNING
 )
@@ -175,32 +175,6 @@ public class OAuthUserSignInActivity : ComponentActivity() {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
-            }
-
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
-            } else {
-                null
-            }
-        }
-    }
-
-    /**
-     * An ActivityResultContract that takes a String as input and returns a nullable String as output.
-     * The input string represents an IAP authorize URL, and the output string represents a redirect URI as
-     * the result of an IAP sign in prompt, or null if the IAP sign in failed. This contract can be used to launch the
-     * [OAuthUserSignInActivity] for a result.
-     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
-     * for more details.
-     *
-     * @since 200.8.0
-     */
-    public class IapSignInContract : ActivityResultContract<String, String?>() {
-        override fun createIntent(context: Context, input: String): Intent =
-            Intent(context, OAuthUserSignInActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {

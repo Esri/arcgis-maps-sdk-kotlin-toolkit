@@ -67,15 +67,6 @@ public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity
 	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
 }
 
-public final class com/arcgismaps/toolkit/authentication/OAuthUserSignInActivity$IapSignInContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public fun <init> ()V
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun createIntent (Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-	public fun parseResult (ILandroid/content/Intent;)Ljava/lang/String;
-}
-
 public final class com/arcgismaps/toolkit/authentication/ServerTrustChallenge {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/httpcore/authentication/NetworkAuthenticationChallenge;Lkotlin/jvm/functions/Function1;)V
