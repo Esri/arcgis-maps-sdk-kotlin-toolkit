@@ -28,16 +28,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
@@ -54,7 +53,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +70,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -82,6 +83,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheetProperties
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
@@ -116,7 +119,7 @@ internal fun OnDemandMapAreaSelector(
     uniqueMapAreaTitle: String,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
-    onDownloadMapAreaSelected: (Envelope, String) -> Unit
+    onDownloadMapAreaSelected: (Envelope, String, ZoomLevel) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -144,13 +147,11 @@ internal fun OnDemandMapAreaSelector(
                     }
                 },
                 currentAreaName = uniqueMapAreaTitle,
-                onDownloadMapAreaSelected = { mapViewSize, mapAreaName ->
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
+                onDownloadMapAreaSelected = { mapViewSize, mapAreaName, zoomLevel ->
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
                         onDismiss.invoke()
-                        calculateEnvelope(mapViewSize)?.let { downloadEnvelope ->
-                            onDownloadMapAreaSelected.invoke(downloadEnvelope, mapAreaName)
+                        calculateEnvelope(mapViewSize)?.let { downloadArea ->
+                            onDownloadMapAreaSelected.invoke(downloadArea, mapAreaName, zoomLevel)
                         }
                     }
                 }
@@ -164,14 +165,15 @@ private fun OnDemandMapAreaSelectorOptions(
     currentAreaName: String,
     localMap: ArcGISMap? = null,
     onDismiss: () -> Unit,
-    onDownloadMapAreaSelected: (IntSize, String) -> Unit
+    onDownloadMapAreaSelected: (IntSize, String, ZoomLevel) -> Unit
 ) {
     var isShowingAreaNameDialog by rememberSaveable { mutableStateOf(false) }
     var mapAreaName by rememberSaveable { mutableStateOf(currentAreaName) }
     var mapViewSize = IntSize(0, 0)
+    var zoomLevel by rememberSaveable { mutableStateOf(ZoomLevel.STREET) }
     if (isShowingAreaNameDialog) {
         AreaNameDialog(
-            currentAreaName = currentAreaName,
+            currentAreaName = mapAreaName,
             onDismiss = { isShowingAreaNameDialog = false },
             onConfirm = { newAreaName ->
                 mapAreaName = newAreaName
@@ -208,7 +210,15 @@ private fun OnDemandMapAreaSelectorOptions(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(mapAreaName, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = mapAreaName,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
             OutlinedButton(onClick = { isShowingAreaNameDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.Create,
@@ -227,22 +237,18 @@ private fun OnDemandMapAreaSelectorOptions(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Level of Detail", style = MaterialTheme.typography.titleMedium)
-            // TODO: Wire level of detail to drop down:
-            val levelOfDetails = listOf("Streets", "City", "Country")
-            var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
             DropDownMenuBox(
-                modifier = Modifier,
-                textFieldValue = levelOfDetails[selectedIndex],
-                dropDownItemList = levelOfDetails,
-                onIndexSelected = { selectedIndex = it }
+                textFieldValue = stringResource(zoomLevel.descriptionResId),
+                textFieldLabel = stringResource(R.string.level_of_detail),
+                dropDownItemList = ZoomLevel.entries.map { stringResource(it.descriptionResId) },
+                onIndexSelected = { zoomLevel = ZoomLevel.entries[it] }
             )
         }
         Button(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .fillMaxWidth(),
-            onClick = { onDownloadMapAreaSelected.invoke(mapViewSize, mapAreaName) }
+            onClick = { onDownloadMapAreaSelected.invoke(mapViewSize, mapAreaName, zoomLevel) }
         ) { Text("Download") }
     }
 }
@@ -345,7 +351,7 @@ private fun AreaNameDialog(
 private fun DropDownMenuBox(
     modifier: Modifier = Modifier,
     textFieldValue: String,
-    textFieldLabel: String = "Choose level of detail",
+    textFieldLabel: String,
     dropDownItemList: List<String>,
     onIndexSelected: (Int) -> Unit
 ) {
@@ -354,7 +360,7 @@ private fun DropDownMenuBox(
     val onDropDownTapped by interactionSource.collectIsPressedAsState()
     LaunchedEffect(onDropDownTapped) { if (onDropDownTapped) expanded = true }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
         OutlinedTextField(
             value = textFieldValue,
             onValueChange = {},
@@ -371,12 +377,11 @@ private fun DropDownMenuBox(
                     contentDescription = null,
                     modifier = Modifier.clickable { expanded = !expanded })
             },
-            modifier = Modifier.width(175.dp)
+            modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth()
         )
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.width(175.dp)
+            onDismissRequest = { expanded = false }
         ) {
             dropDownItemList.forEachIndexed { index, text ->
                 DropdownMenuItem(
@@ -384,7 +389,18 @@ private fun DropDownMenuBox(
                         onIndexSelected(index)
                         expanded = false
                     },
-                    text = { Text(text) }
+                    text = {
+                        if (text == textFieldValue)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(Icons.Default.Check, null, Modifier.size(16.dp))
+                                Text(text, fontWeight = FontWeight.ExtraBold)
+                            }
+                        else
+                            Text(text)
+                    }
                 )
                 if (index < dropDownItemList.lastIndex) {
                     HorizontalDivider()
@@ -403,17 +419,3 @@ private fun AreaNameDialogPreview() {
         onConfirm = { }
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun OnDemandMapAreaSelectorPreview() {
-    Box(Modifier.fillMaxSize()) {
-        OnDemandMapAreaSelectorOptions(
-            onDismiss = { },
-            currentAreaName = "Area 1",
-            onDownloadMapAreaSelected = { _, _ -> }
-        )
-    }
-}
-
-
