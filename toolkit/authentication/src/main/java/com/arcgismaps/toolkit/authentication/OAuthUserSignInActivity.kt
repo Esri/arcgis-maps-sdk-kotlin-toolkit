@@ -94,8 +94,8 @@ private const val RESULT_CODE_CANCELED = 2
  * @since 200.2.0
  */
 @Deprecated(
-    message = "since 200.8.0. This class is deprecated and will be removed in a future release. " +
-            "Use `AuthenticationActivity` instead. ",
+    message = "As of 200.8.0, this class is deprecated and will be removed in a future release. " +
+            "Use `AuthenticationActivity` instead.",
     replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
     level = DeprecationLevel.WARNING
 )
