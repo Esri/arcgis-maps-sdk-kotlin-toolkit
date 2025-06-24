@@ -87,7 +87,9 @@ apiValidation {
              "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$MapAreaDetailsScreenKt",
              "com.arcgismaps.toolkit.offline.ui.material3.ComposableSingletons\$ModalBottomSheetKt",
              "com.arcgismaps.toolkit.offline.ui.ComposableSingletons\$OfflineMapAreasStatusScreenKt",
-             "com.arcgismaps.toolkit.offline.ondemand.ComposableSingletons\$OnDemandMapAreaSelectorKt"
+             "com.arcgismaps.toolkit.offline.ondemand.ComposableSingletons\$OnDemandMapAreaSelectorKt",
+             "com.arcgismaps.toolkit.offline.internal.utils.ComposableSingletons\$ButtonsKt",
+             "com.arcgismaps.toolkit.offline.ondemand.ComposableSingletons\$OnDemandMapAreasKt"
      )
      ignoredClasses.addAll(composableSingletons)
 }

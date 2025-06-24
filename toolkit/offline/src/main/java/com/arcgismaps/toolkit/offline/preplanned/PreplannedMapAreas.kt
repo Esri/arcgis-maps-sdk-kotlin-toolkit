@@ -20,35 +20,31 @@ package com.arcgismaps.toolkit.offline.preplanned
 
 import android.content.Context
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ImageNotSupported
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,13 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.R
-import androidx.compose.ui.graphics.RectangleShape
+import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
+import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
+import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
 
 /**
@@ -210,7 +204,7 @@ internal fun PreplannedMapAreas(
                             }
                         }
 
-                        state.status == Status.Downloading -> {
+                        state.status == PreplannedStatus.Downloading -> {
                             CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
@@ -241,67 +235,15 @@ internal fun PreplannedMapAreas(
  * @return A localized string corresponding to the given status.
  * @since 200.8.0
  */
-private fun getPreplannedMapAreaStatusString(context: Context, status: Status): String {
+private fun getPreplannedMapAreaStatusString(context: Context, status: PreplannedStatus): String {
     return when (status) {
-        Status.NotLoaded, Status.Loading -> getString(context, R.string.loading)
-        is Status.LoadFailure, is Status.MmpkLoadFailure -> getString(context, R.string.loading_failed)
-        is Status.DownloadFailure -> getString(context, R.string.download_failed)
-        Status.Downloaded -> getString(context, R.string.downloaded)
-        Status.Downloading -> getString(context, R.string.downloading)
-        Status.PackageFailure -> getString(context, R.string.packaging_failed)
-        Status.Packaged -> getString(context, R.string.ready_to_download)
-        Status.Packaging -> getString(context, R.string.packaging)
-    }
-}
-
-@Composable
-private fun DownloadButton(onClick: () -> Unit) {
-    IconButton(
-        modifier = Modifier.size(30.dp),
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Download,
-            contentDescription = stringResource(R.string.download),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-@Composable
-internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(30.dp)
-            .clickable { onClick.invoke() }
-    ) {
-        // Circular Progress Indicator
-        CircularProgressIndicator(
-            progress = { progress / 100f },
-        )
-        // Square Button to cancel the download
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(RectangleShape)
-                .background(ButtonDefaults.buttonColors().containerColor),
-        )
-    }
-}
-
-@Composable
-private fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
-    Button(
-        modifier = Modifier.widthIn(max = 80.dp), // restricts max width
-        contentPadding = PaddingValues(horizontal = 10.dp),
-        enabled = isEnabled,
-        onClick = onClick
-    ) {
-        Text(
-            text = stringResource(R.string.open),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        PreplannedStatus.NotLoaded, PreplannedStatus.Loading -> getString(context, R.string.loading)
+        is PreplannedStatus.LoadFailure, is PreplannedStatus.MmpkLoadFailure -> getString(context, R.string.loading_failed)
+        is PreplannedStatus.DownloadFailure -> getString(context, R.string.download_failed)
+        PreplannedStatus.Downloaded -> getString(context, R.string.downloaded)
+        PreplannedStatus.Downloading -> getString(context, R.string.downloading)
+        PreplannedStatus.PackageFailure -> getString(context, R.string.packaging_failed)
+        PreplannedStatus.Packaged -> getString(context, R.string.ready_to_download)
+        PreplannedStatus.Packaging -> getString(context, R.string.packaging)
     }
 }

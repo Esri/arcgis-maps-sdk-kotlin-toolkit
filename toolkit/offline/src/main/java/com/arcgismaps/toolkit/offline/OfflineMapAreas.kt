@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaSelector
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreas
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
@@ -112,11 +113,22 @@ public fun OfflineMapAreas(
                         }
                         // If not preplanned state & map has offline mode enabled, display the on demand areas
                         OfflineMapMode.OnDemand, OfflineMapMode.Unknown -> {
-                            EmptyOnDemandOfflineAreas(
-                                onAdd = {
-                                    isOnDemandMapAreaSelectorVisible = true
-                                }
-                            )
+                            if (!isOnDemandMapAreaSelectorVisible && offlineMapState.onDemandMapAreaStates.isNotEmpty()) {
+                                OnDemandMapAreas(
+                                    onDemandMapAreasStates = offlineMapState.onDemandMapAreaStates,
+                                    modifier = modifier,
+                                    onDownloadNewMapArea = {
+                                        isOnDemandMapAreaSelectorVisible = true
+                                    }
+                                )
+                            }
+                            if (offlineMapState.onDemandMapAreaStates.isEmpty()) {
+                                EmptyOnDemandOfflineAreas(
+                                    onAdd = {
+                                        isOnDemandMapAreaSelectorVisible = true
+                                    }
+                                )
+                            }
                             OnDemandMapAreaSelector(
                                 localMap = offlineMapState.localMap,
                                 showBottomSheet = isOnDemandMapAreaSelectorVisible,
