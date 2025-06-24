@@ -65,6 +65,7 @@ import com.arcgismaps.mapping.layers.IntegratedMeshLayer
 import com.arcgismaps.toolkit.ar.FlyoverSceneView
 import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
+import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
@@ -119,15 +120,13 @@ fun MainScreen() {
         )
 
         Box {
-            val initializationStatus: MutableState<FlyoverSceneViewStatus> = remember {
-                mutableStateOf(FlyoverSceneViewStatus.Initializing)
-            }
+            var initializationStatus by rememberFlyoverSceneViewStatus()
 
             FlyoverSceneView(
                 arcGISScene = arcGISScene,
                 flyoverSceneViewProxy = flyoverSceneViewProxy,
                 onInitializationStatusChanged = {
-                    initializationStatus.value = it
+                    initializationStatus = it
                 },
                 translationFactor = 1000.0,
             )
@@ -135,7 +134,7 @@ fun MainScreen() {
             val sceneLoadStatus =
                 arcGISScene.loadStatus.collectAsStateWithLifecycle().value
 
-            when (val status = initializationStatus.value) {
+            when (val status = initializationStatus) {
                 is FlyoverSceneViewStatus.Initializing -> {
                     TextWithScrim(text = stringResource(R.string.setting_up_ar))
                 }
