@@ -220,7 +220,7 @@ internal class OnDemandMapAreasState(
         workerUUID = OfflineRepository.createOnDemandMapAreaRequestAndQueueDownload(
             context = context,
             jsonJobPath = jsonJobFile.path,
-            onDemandMapAreaTitle = item.title
+            onDemandMapAreaTitle = configuration?.title ?: item.title
         )
 
         return workerUUID

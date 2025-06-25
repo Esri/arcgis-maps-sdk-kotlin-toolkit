@@ -37,7 +37,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -60,14 +59,11 @@ import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.SheetState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
     sheetState: SheetState,
-    scope: CoroutineScope,
     onDismiss: () -> Unit,
     offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
@@ -82,7 +78,7 @@ internal fun MapAreaDetailsBottomSheet(
     if (showSheet) {
         // Launch expanded when shown
         LaunchedEffect(Unit) {
-            scope.launch { sheetState.expand() }
+            sheetState.expand()
         }
         ModalBottomSheet(
             onDismissRequest = onDismiss,

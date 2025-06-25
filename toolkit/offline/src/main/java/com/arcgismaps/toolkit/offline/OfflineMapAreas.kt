@@ -203,7 +203,7 @@ internal fun OnDemandLayoutContainer(
     // Map area selection bottom sheet
     OnDemandMapAreaSelector(
         localMap = localMap,
-        showBottomSheet = isOnDemandMapAreaSelectorVisible,
+        showSheet = isOnDemandMapAreaSelectorVisible,
         uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },
