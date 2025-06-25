@@ -41,6 +41,7 @@ import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
+import com.arcgismaps.toolkit.offline.workmanager.onDemandAreas
 import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
 import java.io.File
 import java.util.UUID
@@ -332,6 +333,28 @@ public object OfflineRepository {
         val destDir = File(
             File(OfflineURLs.portalItemDirectoryPath(context, portalItemID), preplannedMapAreas),
             preplannedMapAreaID
+        )
+        return if (destDir.exists())
+            destDir.path
+        else null
+    }
+
+    /**
+     * Checks whether a given [onDemandMapAreaID] associated with a [portalItemID]
+     * has already been downloaded locally.
+     *
+     * @return The path to the on-demand area’s local folder if it exists,
+     *         otherwise `null`.
+     * @since 200.8.0
+     */
+    internal fun isOnDemandAreaDownloaded(
+        context: Context,
+        portalItemID: String,
+        onDemandMapAreaID: String
+    ): String? {
+        val destDir = File(
+            File(OfflineURLs.portalItemDirectoryPath(context, portalItemID), onDemandAreas),
+            onDemandMapAreaID
         )
         return if (destDir.exists())
             destDir.path

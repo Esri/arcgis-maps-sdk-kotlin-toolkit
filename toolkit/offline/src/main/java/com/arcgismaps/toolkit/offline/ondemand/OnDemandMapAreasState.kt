@@ -47,13 +47,18 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
-private data class OnDemandMapAreaConfiguration(
-    private val areaID: String,
-    private val title: String,
-    private val minScale: Double,
-    private val maxScale: Double,
-    private val areaOfInterest: Envelope,
-    private val thumbnail: Bitmap?
+/**
+ * A data class to hold configuration for an on-demand map area.
+ *
+ * @since 200.8.0
+ */
+internal data class OnDemandMapAreaConfiguration(
+    internal val areaID: String,
+    internal val title: String,
+    internal val minScale: Double,
+    internal val maxScale: Double,
+    internal val areaOfInterest: Envelope,
+    internal val thumbnail: Bitmap?
 )
 
 /**
@@ -64,10 +69,7 @@ private data class OnDemandMapAreaConfiguration(
 internal class OnDemandMapAreasState(
     private val context: Context,
     private val item: Item,
-    internal val onDemandAreaID: String,
-    internal val title: String,
-    private val zoomLevel: ZoomLevel = ZoomLevel.STREET,
-    internal val mapAreaEnvelope: Envelope? = null,
+    private val configuration: OnDemandMapAreaConfiguration? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
@@ -97,49 +99,41 @@ internal class OnDemandMapAreasState(
 
     private lateinit var scope: CoroutineScope
 
-    private var _thumbnail by mutableStateOf<Bitmap?>(null)
-    internal val thumbnail: Bitmap? get() = _thumbnail ?: item.thumbnail?.image?.bitmap
+    internal val title = configuration?.title ?: item.title
 
-    private var configuration: OnDemandMapAreaConfiguration? = null
-
-    /**
-     * Loads and initializes the associated on demand map area.
-     *
-     * @since 200.8.0
-     */
-    internal suspend fun initialize() = runCatchingCancellable {
-        // TODO
-    }
+    internal val thumbnail: Bitmap?
+        get() = configuration?.thumbnail ?: item.thumbnail?.image?.bitmap
 
     /**
      * Initiates downloading of the associated on-demand map area for offline use.
      *
      * @since 200.8.0
      */
-    internal fun downloadOnDemandMapArea() =
-        runCatchingCancellable {
-            scope = CoroutineScope(Dispatchers.IO)
-            val area = mapAreaEnvelope ?: return@runCatchingCancellable
-            val task = offlineMapTask ?: return@runCatchingCancellable
-            val portalItem = item as? PortalItem ?: return@runCatchingCancellable
+    internal fun downloadOnDemandMapArea() = runCatchingCancellable {
+        scope = CoroutineScope(Dispatchers.IO)
+        val task = offlineMapTask ?: return@runCatchingCancellable
+        val portalItem = item as? PortalItem ?: return@runCatchingCancellable
+        val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
+        val downloadMapArea = configuration.areaOfInterest
 
-            scope.launch {
-                _status = OnDemandStatus.Downloading
-                val offlineWorkerUUID = startOfflineMapJob(
-                    downloadOnDemandOfflineMapJob = createOfflineMapJob(
-                        downloadMapArea = area,
-                        offlineMapTask = task
-                    )
+        scope.launch {
+            _status = OnDemandStatus.Downloading
+            val offlineWorkerUUID = startOfflineMapJob(
+                downloadOnDemandOfflineMapJob = createOfflineMapJob(
+                    onDemandMapAreaID = onDemandMapAreaID,
+                    downloadMapArea = downloadMapArea,
+                    offlineMapTask = task
                 )
-                OfflineRepository.observeStatusForOnDemandWork(
-                    context = context,
-                    onWorkInfoStateChanged = ::logWorkInfo,
-                    onDemandMapAreasState = this@OnDemandMapAreasState,
-                    portalItem = portalItem,
-                    offlineWorkerUUID = offlineWorkerUUID
-                )
-            }
+            )
+            OfflineRepository.observeStatusForOnDemandWork(
+                context = context,
+                onWorkInfoStateChanged = ::logWorkInfo,
+                onDemandMapAreasState = this@OnDemandMapAreasState,
+                portalItem = portalItem,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
         }
+    }
 
     /**
      * Cancels the current coroutine scope.
@@ -159,6 +153,7 @@ internal class OnDemandMapAreasState(
      * Generates default parameters for downloading, including no updates mode and error handling settings.
      * Defines a directory path where map data will be stored and creates a download job using these configurations.
      *
+     * @param onDemandMapAreaID The String ID of the map area to download on demand.
      * @param downloadMapArea The target selected map area to be downloaded offline.
      * @param offlineMapTask The target [OfflineMapTask] to create the params & the job.
      * @return An instance of [GenerateOfflineMapJob] configured with download parameters.
@@ -166,6 +161,7 @@ internal class OnDemandMapAreasState(
      * @since 200.8.0
      */
     private suspend fun createOfflineMapJob(
+        onDemandMapAreaID: String,
         downloadMapArea: Envelope,
         offlineMapTask: OfflineMapTask
     ): GenerateOfflineMapJob {
@@ -174,7 +170,7 @@ internal class OnDemandMapAreasState(
         val params = offlineMapTask.createDefaultGenerateOfflineMapParameters(
             areaOfInterest = downloadMapArea,
             minScale = 0.0,
-            maxScale = zoomLevel.scale
+            maxScale = configuration?.maxScale ?: ZoomLevel.STREET.scale
         ).getOrThrow().apply {
             // Set the update mode to receive no updates
             updateMode = GenerateOfflineMapUpdateMode.NoUpdates
@@ -189,7 +185,7 @@ internal class OnDemandMapAreasState(
         val onDemandMapAreaDownloadDirectory = OfflineRepository.createPendingOnDemandJobPath(
             context = context,
             portalItemID = item.itemId,
-            onDemandMapAreaID = onDemandAreaID
+            onDemandMapAreaID = onDemandMapAreaID
         )
 
         // Create a job to download the on-demand offline map
@@ -249,11 +245,6 @@ internal class OnDemandMapAreasState(
                     context = context,
                     portalItemID = item.itemId
                 )
-            }
-            val localScope = CoroutineScope(Dispatchers.IO)
-            localScope.launch {
-                initialize()
-                localScope.cancel()
             }
         } else {
             Log.e(TAG, "Failed to delete on-demand map area: ${mobileMapPackage.path}")
