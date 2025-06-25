@@ -55,7 +55,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val element = featureForm.elements.first() as? UtilityAssociationsFormElement
         assertThat(element).isNotNull()
         // Wait for the associations to load
-        composeTestRule.waitUntil(timeoutMillis = 30_000,) {
+        composeTestRule.waitUntil(timeoutMillis = 30_000) {
             element!!.associationsFilterResults.isNotEmpty()
         }
         val filter = element!!.associationsFilterResults.first().filter

@@ -223,11 +223,7 @@ private fun AssociationItem(
 
         else -> ""
     }
-    Column(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 8.dp)
-    ) {
+    Column(modifier = modifier.clickable(onClick = onClick)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
