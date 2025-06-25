@@ -39,10 +39,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,7 +64,6 @@ import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
-import kotlinx.coroutines.launch
 
 /**
  * Displays a list of preplanned map areas.
@@ -82,18 +81,24 @@ internal fun PreplannedMapAreas(
     val selectedPreplannedMapAreaState = selectedIndex.takeIf { it in preplannedMapAreaStates.indices }
         ?.let { preplannedMapAreaStates[it] }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var onHideSheet by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(onHideSheet, sheetState.isVisible) {
+        if (onHideSheet) {
+            sheetState.hide()
+            onHideSheet = false
+        }
+        if (!sheetState.isVisible) {
+            showSheet = false
+        }
+    }
 
     // Show the modal bottom sheet if needed
     if (showSheet && selectedPreplannedMapAreaState != null) {
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
-            scope = scope,
-            onDismiss = { showSheet = false },
+            onDismiss = { onHideSheet = true },
             offlineMapMode = OfflineMapMode.Preplanned,
             thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
             title = selectedPreplannedMapAreaState.title,
@@ -102,18 +107,13 @@ internal fun PreplannedMapAreas(
             isAvailableToDownload = selectedPreplannedMapAreaState.status.allowsDownload,
             onStartDownload = {
                 selectedPreplannedMapAreaState.downloadPreplannedMapArea()
-                scope
-                    .launch { sheetState.hide() }
-                    .invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showSheet = false
-                        }
-                    }
+                onHideSheet = true
             },
             isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
                 onDownloadDeleted(selectedPreplannedMapAreaState)
+                onHideSheet = true
             }
         )
     }

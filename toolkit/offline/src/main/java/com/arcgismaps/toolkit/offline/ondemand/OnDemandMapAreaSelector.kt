@@ -101,7 +101,7 @@ private val mapViewProxy = MapViewProxy()
 internal fun OnDemandMapAreaSelector(
     localMap: ArcGISMap,
     uniqueMapAreaTitle: String,
-    showBottomSheet: Boolean,
+    showSheet: Boolean,
     onDismiss: () -> Unit,
     isProposedTitleChangeUnique: Boolean,
     onProposedTitleChange: (String) -> Unit,
@@ -118,7 +118,7 @@ internal fun OnDemandMapAreaSelector(
             onDismiss()
         }
     }
-    if (showBottomSheet) {
+    if (showSheet) {
         ModalBottomSheet(
             modifier = Modifier.systemBarsPadding(),
             onDismissRequest = { onHideSheet = true },

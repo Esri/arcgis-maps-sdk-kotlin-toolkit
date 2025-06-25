@@ -38,10 +38,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,7 +64,6 @@ import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
-import kotlinx.coroutines.launch
 
 /**
  * Displays a list of on-demand map areas.
@@ -78,21 +77,27 @@ internal fun OnDemandMapAreas(
     modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var onHideSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
     val selectedOnDemandMapAreaState = selectedIndex.takeIf { it in onDemandMapAreasStates.indices }
         ?.let { onDemandMapAreasStates[it] }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-    val scope = rememberCoroutineScope()
+    LaunchedEffect(onHideSheet, sheetState.isVisible) {
+        if (onHideSheet) {
+            sheetState.hide()
+            onHideSheet = false
+        }
+        if (!sheetState.isVisible) {
+            showSheet = false
+        }
+    }
 
     // Show the modal bottom sheet if needed
     if (showSheet && selectedOnDemandMapAreaState != null) {
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
-            scope = scope,
             onDismiss = { showSheet = false },
             offlineMapMode = OfflineMapMode.OnDemand,
             thumbnail = selectedOnDemandMapAreaState.thumbnail?.asImageBitmap(),
@@ -102,18 +107,13 @@ internal fun OnDemandMapAreas(
             isAvailableToDownload = selectedOnDemandMapAreaState.status.allowsDownload,
             onStartDownload = {
                 selectedOnDemandMapAreaState.downloadOnDemandMapArea()
-                scope
-                    .launch { sheetState.hide() }
-                    .invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showSheet = false
-                        }
-                    }
+                onHideSheet = true
             },
             isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
                 onDownloadDeleted(selectedOnDemandMapAreaState)
+                onHideSheet = true
             }
         )
     }
