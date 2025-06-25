@@ -139,18 +139,22 @@ internal fun PreplannedLayoutContainer(
     onRefresh: () -> Unit
 ) {
     Column {
+        // Show "No Internet" message if offline models are displayed
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
                 preplannedMapAreaStates = preplannedMapAreaStates,
                 modifier = modifier
             )
         }
+        // Show "No Internet" message if offline models are displayed
         if (isShowingOnlyOfflineModels) {
             NoInternetNoAreas(
                 onlyFooterVisible = preplannedMapAreaStates.isNotEmpty(),
                 onRefresh = onRefresh
             )
-        } else if (preplannedMapAreaStates.isEmpty()) {
+        }
+        // Show empty state message if no preplanned areas and online mode
+        else if (preplannedMapAreaStates.isEmpty()) {
             EmptyPreplannedOfflineAreas(onRefresh = onRefresh)
         }
     }
@@ -166,28 +170,36 @@ internal fun OnDemandLayoutContainer(
     onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
     onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit
 ) {
+    // Track visibility of the map area selector
     var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
-    var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(false) }
+    // Track if the proposed map area title is unique
+    var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(true) }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Show on-demand map areas if available
         if (onDemandMapAreaStates.isNotEmpty()) {
             OnDemandMapAreas(
                 onDemandMapAreasStates = onDemandMapAreaStates,
                 onDownloadDeleted = onDownloadDeleted,
                 modifier = modifier
             )
+            // Show "Add Map Area" button if not in offline-only mode
             if (!isShowingOnlyOfflineModels) {
                 AddMapAreaButton { isOnDemandMapAreaSelectorVisible = true }
             }
         }
+        // Show "No Internet" message if offline models are displayed
         if (isShowingOnlyOfflineModels) {
             NoInternetNoAreas(
                 onlyFooterVisible = onDemandMapAreaStates.isNotEmpty(),
                 onRefresh = onRefresh
             )
-        } else if (onDemandMapAreaStates.isEmpty()) {
+        }
+        // Show empty state message if no on-demand areas and online mode
+        else if (onDemandMapAreaStates.isEmpty()) {
             EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
         }
     }
+    // Map area selection bottom sheet
     OnDemandMapAreaSelector(
         localMap = localMap,
         showBottomSheet = isOnDemandMapAreaSelectorVisible,
