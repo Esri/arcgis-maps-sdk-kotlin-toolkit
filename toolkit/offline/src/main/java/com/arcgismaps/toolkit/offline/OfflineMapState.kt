@@ -353,6 +353,11 @@ public class OfflineMapState(
             return null
     }
 
+    /**
+     * Creates and adds a new [OnDemandMapAreasState] instance based on the provided [configuration].
+     *
+     * @since 200.8.0
+     */
     internal fun makeOnDemandMapAreaState(
         context: Context,
         configuration: OnDemandMapAreaConfiguration
@@ -387,18 +392,25 @@ public class OfflineMapState(
         _initializationStatus.value = InitializationStatus.NotInitialized
     }
 
-    internal fun removeOnDemandMapArea(state: OnDemandMapAreasState) {
-        if (state.isSelectedToOpen){
-            resetSelectedMapArea()
-        }
-        _onDemandMapAreaStates.remove(state)
-    }
-
+    /**
+     * Removes a specific [PreplannedMapAreaState] from the list of preplanned map areas.
+     */
     internal fun removePreplannedMapArea(state: PreplannedMapAreaState) {
-        if (state.isSelectedToOpen){
+        if (state.isSelectedToOpen) {
             resetSelectedMapArea()
         }
         _preplannedMapAreaStates.remove(state)
+    }
+
+    /**
+     * Removes a specific [OnDemandMapAreasState] from the list of on-demand map areas.
+     * @since 200.8.0
+     */
+    internal fun removeOnDemandMapArea(state: OnDemandMapAreasState) {
+        if (state.isSelectedToOpen) {
+            resetSelectedMapArea()
+        }
+        _onDemandMapAreaStates.remove(state)
     }
 }
 

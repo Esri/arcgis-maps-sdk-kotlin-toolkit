@@ -26,6 +26,11 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import java.io.File
 
+/**
+ * Calculates the total size of a [path] recursively.
+ *
+ * @since 200.8.0
+ */
 internal fun getDirectorySize(path: String): Int {
     val file = File(path)
     if (!file.exists()) return 0
@@ -33,6 +38,12 @@ internal fun getDirectorySize(path: String): Int {
     return file.walkTopDown().filter { it.isFile }.map { it.length() }.sum().toInt()
 }
 
+/**
+ * Formats a given [size] in bytes into readable string.
+ * (e.g., `123 B`, `1.2 KB`, `5.6 MB`, `2.3 GB`)
+ *
+ * @since 200.8.0
+ */
 internal fun formatSize(size: Int): String {
     return when {
         size < 1000 -> "$size B"
@@ -42,10 +53,21 @@ internal fun formatSize(size: Int): String {
     }
 }
 
+
+/**
+ * Converts an [html] string to a plain text string.
+ *
+ * @since 200.8.0
+ */
 internal fun htmlToPlainText(html: String): String {
     return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).toString()
 }
 
+/**
+ * Returns a unique default map area title: "Area 1","Area 2"...
+ *
+ * @since 200.8.0
+ */
 internal fun getDefaultMapAreaTitle(onDemandMapAreaStates: List<OnDemandMapAreasState>): String {
     for (i in 1..Int.MAX_VALUE) {
         val title = "Area $i"
@@ -56,6 +78,11 @@ internal fun getDefaultMapAreaTitle(onDemandMapAreaStates: List<OnDemandMapAreas
     return ""
 }
 
+/**
+ * Returns true if the [mapAreaTitle] is unique title among all [onDemandMapAreaStates].
+ *
+ * @since 200.8.0
+ */
 internal fun isValidMapAreaTitle(
     mapAreaTitle: String,
     onDemandMapAreaStates: List<OnDemandMapAreasState>
@@ -67,11 +94,17 @@ internal fun isValidMapAreaTitle(
     return true
 }
 
-internal fun calculateEnvelope(fullSize: IntSize, mapViewProxy: MapViewProxy): Envelope? {
-    val inh = fullSize.width * 0.2 / 2
-    val inv = fullSize.height * 0.2 / 2
+/**
+ * Returns an [Envelope] which is equal to 80% of the ratio of [mapViewSize]
+ * at the current viewpoint, to be treated as the area of interest.
+ *
+ * @since 200.8.0
+ */
+internal fun calculateEnvelope(mapViewSize: IntSize, mapViewProxy: MapViewProxy): Envelope? {
+    val inh = mapViewSize.width * 0.2 / 2
+    val inv = mapViewSize.height * 0.2 / 2
     val minScreen = ScreenCoordinate(x = inh, y = inv)
-    val maxScreen = ScreenCoordinate(x = fullSize.width - inh, y = fullSize.height - inv)
+    val maxScreen = ScreenCoordinate(x = mapViewSize.width - inh, y = mapViewSize.height - inv)
     val minResult = mapViewProxy.screenToLocationOrNull(minScreen)
     val maxResult = mapViewProxy.screenToLocationOrNull(maxScreen)
     return if (minResult != null && maxResult != null) {

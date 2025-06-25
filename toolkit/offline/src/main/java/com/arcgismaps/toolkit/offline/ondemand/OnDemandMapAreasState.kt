@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.graphics.drawable.toDrawable
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Item
@@ -178,6 +179,7 @@ internal class OnDemandMapAreasState(
             itemInfo?.apply {
                 title = this@OnDemandMapAreasState.title
                 description = ""
+                thumbnail = configuration?.thumbnail?.toDrawable(context.resources)
             }
         }
 
@@ -397,7 +399,7 @@ internal sealed class OnDemandStatus {
     val allowsDownload: Boolean
         get() = when (this) {
             is Packaged -> true
-            is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is DownloadCancelled, is DownloadFailure,is Downloaded, is MmpkLoadFailure -> false
+            is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is DownloadCancelled, is DownloadFailure, is Downloaded, is MmpkLoadFailure -> false
         }
 
     /**
