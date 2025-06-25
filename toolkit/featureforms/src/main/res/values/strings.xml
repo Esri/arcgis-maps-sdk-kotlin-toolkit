@@ -159,7 +159,8 @@
     <string name="the_form_has_edits">The form has edits</string>
     <string name="do_you_want_to_save_your_changes">Do you want to save your changes?</string>
     <string name="no_associations_found">No associations found</string>
-    <string name="terminal">Terminal : %1$s</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
     <string name="containment_visible">Containment Visible</string>
     <string name="containment_visible_value">Containment Visible : %1$s</string>
     <string name="fraction_along_edge">Fraction Along Edge</string>

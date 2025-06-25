@@ -182,7 +182,7 @@ private fun Filters(
                         }
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 )
                 if (i < filterResults.size - 1) {

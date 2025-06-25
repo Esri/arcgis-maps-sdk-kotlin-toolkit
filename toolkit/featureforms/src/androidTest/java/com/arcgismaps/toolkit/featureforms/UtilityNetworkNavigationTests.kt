@@ -17,16 +17,15 @@
 package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.label
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,7 +39,6 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val scope = CoroutineScope(Dispatchers.Main)
 
     @Test
@@ -57,7 +55,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val element = featureForm.elements.first() as? UtilityAssociationsFormElement
         assertThat(element).isNotNull()
         // Wait for the associations to load
-        composeTestRule.waitUntil(timeoutMillis = 20_000,) {
+        composeTestRule.waitUntil(timeoutMillis = 30_000) {
             element!!.associationsFilterResults.isNotEmpty()
         }
         val filter = element!!.associationsFilterResults.first().filter
@@ -70,7 +68,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
         groupNode.assertIsDisplayed()
         groupNode.performClick()
-        val associationNode = composeTestRule.onNodeWithText(text = associationResult.associatedFeature.label)
+        val associationNode = composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
