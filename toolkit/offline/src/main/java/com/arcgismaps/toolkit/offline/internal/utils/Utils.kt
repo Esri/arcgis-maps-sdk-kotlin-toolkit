@@ -19,6 +19,11 @@
 package com.arcgismaps.toolkit.offline.internal.utils
 
 import android.text.Html
+import androidx.compose.ui.unit.IntSize
+import com.arcgismaps.geometry.Envelope
+import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import java.io.File
 
 internal fun getDirectorySize(path: String): Int {
@@ -39,4 +44,37 @@ internal fun formatSize(size: Int): String {
 
 internal fun htmlToPlainText(html: String): String {
     return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).toString()
+}
+
+internal fun getDefaultMapAreaTitle(onDemandMapAreaStates: List<OnDemandMapAreasState>): String {
+    for (i in 1..Int.MAX_VALUE) {
+        val title = "Area $i"
+        if (onDemandMapAreaStates.none { it.title == title }) {
+            return title
+        }
+    }
+    return ""
+}
+
+internal fun isValidMapAreaTitle(
+    mapAreaTitle: String,
+    onDemandMapAreaStates: List<OnDemandMapAreasState>
+): Boolean {
+    if (mapAreaTitle.isBlank())
+        return false
+    if (onDemandMapAreaStates.any { it.title == mapAreaTitle })
+        return false
+    return true
+}
+
+internal fun calculateEnvelope(fullSize: IntSize, mapViewProxy: MapViewProxy): Envelope? {
+    val inh = fullSize.width * 0.2 / 2
+    val inv = fullSize.height * 0.2 / 2
+    val minScreen = ScreenCoordinate(x = inh, y = inv)
+    val maxScreen = ScreenCoordinate(x = fullSize.width - inh, y = fullSize.height - inv)
+    val minResult = mapViewProxy.screenToLocationOrNull(minScreen)
+    val maxResult = mapViewProxy.screenToLocationOrNull(maxScreen)
+    return if (minResult != null && maxResult != null) {
+        Envelope(min = minResult, max = maxResult)
+    } else null
 }

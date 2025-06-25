@@ -41,6 +41,7 @@ import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
+import com.arcgismaps.toolkit.offline.workmanager.onDemandAreas
 import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
 import java.io.File
 import java.util.UUID
@@ -339,6 +340,28 @@ public object OfflineRepository {
     }
 
     /**
+     * Checks whether a given [onDemandMapAreaID] associated with a [portalItemID]
+     * has already been downloaded locally.
+     *
+     * @return The path to the on-demand area’s local folder if it exists,
+     *         otherwise `null`.
+     * @since 200.8.0
+     */
+    internal fun isOnDemandAreaDownloaded(
+        context: Context,
+        portalItemID: String,
+        onDemandMapAreaID: String
+    ): String? {
+        val destDir = File(
+            File(OfflineURLs.portalItemDirectoryPath(context, portalItemID), onDemandAreas),
+            onDemandMapAreaID
+        )
+        return if (destDir.exists())
+            destDir.path
+        else null
+    }
+
+    /**
      * Creates and enqueues a one-time WorkManager request for downloading an offline map area
      * using [PreplannedMapAreaJobWorker]. Sets up expedited work with input data containing
      * notification and job details. Ensures only one worker instance runs at any time by
@@ -581,12 +604,8 @@ public object OfflineRepository {
                             }
                             onDemandMapAreasState.disposeScope()
                         }
-                        // if the work failed or was cancelled
-                        WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                            // this removes the completed WorkInfo from the WorkManager's database
-                            // otherwise, the observer will emit the WorkInfo on every launch
-                            // until WorkManager auto-prunes
-                            workManager.pruneWork()
+                        // if the work failed
+                        WorkInfo.State.FAILED -> {
                             onDemandMapAreasState.updateStatus(
                                 OnDemandStatus.DownloadFailure(
                                     Exception(
@@ -595,6 +614,11 @@ public object OfflineRepository {
                                     )
                                 )
                             )
+                            onDemandMapAreasState.disposeScope()
+                        }
+                        // if the work was cancelled
+                        WorkInfo.State.CANCELLED -> {
+                            onDemandMapAreasState.updateStatus(OnDemandStatus.DownloadCancelled)
                             onDemandMapAreasState.disposeScope()
                         }
                         // if the work is currently in progress

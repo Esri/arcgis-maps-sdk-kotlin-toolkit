@@ -78,35 +78,19 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
+import com.arcgismaps.toolkit.offline.internal.utils.calculateEnvelope
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheetProperties
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
-
-
-// TODO: Migrate these to the area state
+import java.util.UUID
 
 private val mapViewProxy = MapViewProxy()
-
-private fun calculateEnvelope(fullSize: IntSize): Envelope? {
-    val inh = fullSize.width * 0.2 / 2
-    val inv = fullSize.height * 0.2 / 2
-    val minScreen = ScreenCoordinate(x = inh, y = inv)
-    val maxScreen = ScreenCoordinate(x = fullSize.width - inh, y = fullSize.height - inv)
-    val minResult = mapViewProxy.screenToLocationOrNull(minScreen)
-    val maxResult = mapViewProxy.screenToLocationOrNull(maxScreen)
-    return if (minResult != null && maxResult != null) {
-        Envelope(min = minResult, max = maxResult)
-    } else null
-}
-
 
 /**
  * Take a web map offline by downloading map areas.
@@ -115,45 +99,43 @@ private fun calculateEnvelope(fullSize: IntSize): Envelope? {
  */
 @Composable
 internal fun OnDemandMapAreaSelector(
-    localMap: ArcGISMap? = null,
+    localMap: ArcGISMap,
     uniqueMapAreaTitle: String,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
-    onDownloadMapAreaSelected: (Envelope, String, ZoomLevel) -> Unit
+    isProposedTitleChangeUnique: Boolean,
+    onProposedTitleChange: (String) -> Unit,
+    onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-
+    var onHideSheet by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(onHideSheet, sheetState.isVisible) {
+        if (onHideSheet) {
+            sheetState.hide()
+            onHideSheet = false
+        }
+        if (!sheetState.isVisible) {
+            onDismiss()
+        }
+    }
     if (showBottomSheet) {
         ModalBottomSheet(
             modifier = Modifier.systemBarsPadding(),
-            onDismissRequest = {
-                scope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    onDismiss.invoke()
-                }
-            },
+            onDismissRequest = { onHideSheet = true },
             sheetState = sheetState,
             sheetGesturesEnabled = false,
             properties = ModalBottomSheetProperties(),
-            dragHandle = {}) {
+            dragHandle = {}
+        ) {
             OnDemandMapAreaSelectorOptions(
-                localMap = localMap, onDismiss = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        onDismiss.invoke()
-                    }
-                },
+                localMap = localMap,
                 currentAreaName = uniqueMapAreaTitle,
-                onDownloadMapAreaSelected = { mapViewSize, mapAreaName, zoomLevel ->
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        onDismiss.invoke()
-                        calculateEnvelope(mapViewSize)?.let { downloadArea ->
-                            onDownloadMapAreaSelected.invoke(downloadArea, mapAreaName, zoomLevel)
-                        }
-                    }
+                isProposedTitleChangeUnique = isProposedTitleChangeUnique,
+                onProposedTitleChange = onProposedTitleChange,
+                onDismiss = { onHideSheet = true },
+                onDownloadMapAreaSelected = { onDemandConfig ->
+                    onHideSheet = true
+                    onDownloadMapAreaSelected.invoke(onDemandConfig)
                 }
             )
         }
@@ -163,17 +145,22 @@ internal fun OnDemandMapAreaSelector(
 @Composable
 private fun OnDemandMapAreaSelectorOptions(
     currentAreaName: String,
-    localMap: ArcGISMap? = null,
-    onDismiss: () -> Unit,
-    onDownloadMapAreaSelected: (IntSize, String, ZoomLevel) -> Unit
+    localMap: ArcGISMap,
+    isProposedTitleChangeUnique: Boolean,
+    onProposedTitleChange: (String) -> Unit,
+    onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit,
+    onDismiss: () -> Unit
 ) {
     var isShowingAreaNameDialog by rememberSaveable { mutableStateOf(false) }
     var mapAreaName by rememberSaveable { mutableStateOf(currentAreaName) }
     var mapViewSize = IntSize(0, 0)
     var zoomLevel by rememberSaveable { mutableStateOf(ZoomLevel.STREET) }
+    val scope = rememberCoroutineScope()
     if (isShowingAreaNameDialog) {
         AreaNameDialog(
             currentAreaName = mapAreaName,
+            isProposedTitleChangeUnique = isProposedTitleChangeUnique,
+            onProposedTitleChange = onProposedTitleChange,
             onDismiss = { isShowingAreaNameDialog = false },
             onConfirm = { newAreaName ->
                 mapAreaName = newAreaName
@@ -200,12 +187,12 @@ private fun OnDemandMapAreaSelectorOptions(
         Text(text = "Pan and zoom to define the area", style = MaterialTheme.typography.labelSmall)
         MapViewWithAreaSelector(
             modifier = Modifier.weight(1f),
-            localMap = localMap,
+            arcGISMap = localMap,
             onMapViewSizeChanged = { newSize -> mapViewSize = newSize }
         )
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 24.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -232,7 +219,7 @@ private fun OnDemandMapAreaSelectorOptions(
         HorizontalDivider()
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 24.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -246,16 +233,32 @@ private fun OnDemandMapAreaSelectorOptions(
         }
         Button(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 24.dp)
                 .fillMaxWidth(),
-            onClick = { onDownloadMapAreaSelected.invoke(mapViewSize, mapAreaName, zoomLevel) }
+            onClick = {
+                scope.launch {
+                    val thumbnail = mapViewProxy.exportImage().getOrNull()?.bitmap
+                    calculateEnvelope(mapViewSize, mapViewProxy)?.let { downloadArea ->
+                        onDownloadMapAreaSelected.invoke(
+                            OnDemandMapAreaConfiguration(
+                                areaID = UUID.randomUUID().toString(),
+                                title = mapAreaName,
+                                minScale = 0.0,
+                                maxScale = zoomLevel.scale,
+                                areaOfInterest = downloadArea,
+                                thumbnail = thumbnail
+                            )
+                        )
+                    }
+                }
+            }
         ) { Text("Download") }
     }
 }
 
 @Composable
 private fun MapViewWithAreaSelector(
-    localMap: ArcGISMap? = null,
+    arcGISMap: ArcGISMap,
     onMapViewSizeChanged: (IntSize) -> Unit,
     modifier: Modifier
 ) {
@@ -263,13 +266,11 @@ private fun MapViewWithAreaSelector(
         modifier
             .fillMaxWidth()
             .onSizeChanged { onMapViewSizeChanged.invoke(it) }) {
-        localMap?.let { arcGISMap ->
-            MapView(
-                modifier = Modifier.matchParentSize(),
-                arcGISMap = arcGISMap,
-                mapViewProxy = mapViewProxy
-            )
-        }
+        MapView(
+            modifier = Modifier.matchParentSize(),
+            arcGISMap = arcGISMap,
+            mapViewProxy = mapViewProxy
+        )
         MapAreaSelectorOverlay(
             modifier = Modifier.matchParentSize()
         )
@@ -313,6 +314,8 @@ private fun MapAreaSelectorOverlay(
 @Composable
 private fun AreaNameDialog(
     currentAreaName: String,
+    isProposedTitleChangeUnique: Boolean,
+    onProposedTitleChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
@@ -336,11 +339,17 @@ private fun AreaNameDialog(
                 label = { Text("The name for the map area must be unique") },
                 value = areaName,
                 singleLine = true,
-                onValueChange = { newValue -> areaName = newValue },
+                onValueChange = { newValue ->
+                    areaName = newValue
+                    onProposedTitleChange(areaName)
+                },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = onDismiss) { Text("Cancel") }
-                TextButton(onClick = { onConfirm.invoke(areaName) }) { Text("Ok") }
+                TextButton(
+                    onClick = { onConfirm.invoke(areaName) },
+                    enabled = isProposedTitleChangeUnique
+                ) { Text("Ok") }
             }
 
         }
@@ -377,7 +386,9 @@ private fun DropDownMenuBox(
                     contentDescription = null,
                     modifier = Modifier.clickable { expanded = !expanded })
             },
-            modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth()
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .fillMaxWidth()
         )
         DropdownMenu(
             expanded = expanded,
@@ -415,6 +426,8 @@ private fun DropDownMenuBox(
 private fun AreaNameDialogPreview() {
     AreaNameDialog(
         currentAreaName = "Area 1",
+        isProposedTitleChangeUnique = true,
+        onProposedTitleChange = { },
         onDismiss = { },
         onConfirm = { }
     )

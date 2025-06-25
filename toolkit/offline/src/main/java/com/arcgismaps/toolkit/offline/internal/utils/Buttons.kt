@@ -23,11 +23,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +42,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,6 +80,9 @@ internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: (
     ) {
         // Circular Progress Indicator
         CircularProgressIndicator(
+            modifier = Modifier
+                .size(30.dp)
+                .align(Alignment.Center),
             progress = { progress / 100f },
         )
         // Square Button to cancel the download
@@ -79,7 +90,22 @@ internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: (
             modifier = Modifier
                 .size(10.dp)
                 .clip(RectangleShape)
-                .background(ButtonDefaults.buttonColors().containerColor),
+                .background(ButtonDefaults.buttonColors().containerColor)
+                .align(Alignment.Center),
+        )
+    }
+}
+
+@Composable
+internal fun CancelButton(onClick: () -> Unit) {
+    IconButton(
+        modifier = Modifier.size(30.dp),
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = stringResource(R.string.cancelled),
+            tint = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -95,7 +121,24 @@ internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
         Text(
             text = stringResource(R.string.open),
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+}
+
+@Composable
+internal fun AddMapAreaButton(onAdd: () -> Unit) {
+    Button(onClick = onAdd) {
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.Default.Add,
+            contentDescription = "Icon to add map area"
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.add_map_area),
+            style = MaterialTheme.typography.labelSmall
         )
     }
 }
@@ -105,26 +148,28 @@ internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
 private fun ButtonsPreview() {
     MaterialTheme {
         Surface {
-            Row(
+            LazyVerticalGrid(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(12.dp),
+                columns = GridCells.Fixed(2),
             ) {
-                DownloadButton(
-                    onClick = { }
-                )
-                CancelDownloadButtonWithProgressIndicator(
-                    progress = 55,
-                    onClick = { }
-                )
-                OpenButton(
-                    isEnabled = true,
-                    onClick = { }
-                )
-                OpenButton(
-                    isEnabled = false,
-                    onClick = { }
-                )
+                item {
+                    DownloadButton { }
+                }
+                item {
+                    CancelDownloadButtonWithProgressIndicator(55) { }
+                }
+                item {
+                    OpenButton(true) { }
+                }
+                item {
+                    AddMapAreaButton { }
+                }
+                item {
+                    CancelButton { }
+                }
             }
         }
     }

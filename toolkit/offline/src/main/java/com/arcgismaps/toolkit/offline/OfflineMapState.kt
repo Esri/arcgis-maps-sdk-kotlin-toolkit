@@ -28,20 +28,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
-import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaConfiguration
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
+import com.arcgismaps.toolkit.offline.ondemand.OnDemandStatus
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
-import java.util.UUID
 
 /**
  * Represents the state of the offline map.
@@ -164,7 +163,7 @@ public class OfflineMapState(
 
         // check if preplanned for loaded
         if (_mode != OfflineMapMode.Preplanned || _mode == OfflineMapMode.Unknown) {
-            // TODO: Load OnDemandMapAresState
+            loadOfflineOnDemandMapAreas(context)
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
@@ -243,25 +242,27 @@ public class OfflineMapState(
         }
     }
 
-    // TODO: Should this be wired to call OnDemandMapAreasState.initialize?
-    internal fun createOnDemandMapAreasState(
-        context: Context,
-        envelope: Envelope,
-        mapAreaTitle: String,
-        zoomLevel: ZoomLevel
-    ): OnDemandMapAreasState {
-        val onDemandMapAreasState = OnDemandMapAreasState(
-            context = context,
-            item = portalItem,
-            onDemandAreaID = UUID.randomUUID().toString(),
-            title = mapAreaTitle,
-            mapAreaEnvelope = envelope,
-            zoomLevel = zoomLevel,
-            offlineMapTask = offlineMapTask,
-            onSelectionChanged = onSelectionChanged
+    /**
+     * Scans the local on-demand directory for downloaded maps and creates [OnDemandMapAreasState]s.
+     * Sets the [OfflineMapMode.OnDemand] when any local areas are found.
+     *
+     * @since 200.8.0
+     */
+    private suspend fun loadOfflineOnDemandMapAreas(context: Context) {
+        _onDemandMapAreaStates.clear()
+        val onDemandDirectory = File(
+            OfflineURLs.onDemandDirectoryPath(context, portalItem.itemId)
         )
-        _onDemandMapAreaStates.add(onDemandMapAreasState)
-        return onDemandMapAreasState
+        val onDemandMapAreaItemIds = onDemandDirectory.listFiles()?.map { it.name.toString() }
+            ?: emptyList()
+        if (onDemandMapAreaItemIds.isNotEmpty())
+            _mode = OfflineMapMode.OnDemand
+
+        onDemandMapAreaItemIds.forEach { itemId ->
+            makeOfflineOnDemandMapAreaState(context, itemId)?.let {
+                _onDemandMapAreaStates.add(it)
+            }
+        }
     }
 
     /**
@@ -309,6 +310,65 @@ public class OfflineMapState(
     }
 
     /**
+     * Attempts to create a [OnDemandMapAreasState] for a given area ID by loading
+     * its [MobileMapPackage] from disk. Returns null if the directory is missing
+     * or the package fails to load; otherwise initializes status and map.
+     *
+     * @since 200.8.0
+     */
+    private suspend fun makeOfflineOnDemandMapAreaState(
+        context: Context,
+        areaItemId: String
+    ): OnDemandMapAreasState? {
+        val areaDir = File(
+            OfflineURLs.onDemandDirectoryPath(
+                context = context,
+                portalItemID = portalItem.itemId,
+                onDemandMapAreaID = areaItemId
+            )
+        )
+        if (!areaDir.exists() || !areaDir.isDirectory) return null
+        val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
+            load().getOrElse { return null }
+        }
+        val item = mmpk.item ?: return null
+
+        val onDemandMapAreasState = OnDemandMapAreasState(
+            context = context,
+            item = item,
+            onSelectionChanged = onSelectionChanged
+        )
+        val onDemandPath = OfflineRepository.isOnDemandAreaDownloaded(
+            context = context,
+            portalItemID = portalItem.itemId,
+            onDemandMapAreaID = areaItemId
+        )
+        if (onDemandPath != null) {
+            onDemandMapAreasState.updateStatus(OnDemandStatus.Downloaded)
+            onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
+                mobileMapPackagePath = onDemandPath
+            )
+            return onDemandMapAreasState
+        } else
+            return null
+    }
+
+    internal fun makeOnDemandMapAreaState(
+        context: Context,
+        configuration: OnDemandMapAreaConfiguration
+    ): OnDemandMapAreasState {
+        val onDemandMapAreasState = OnDemandMapAreasState(
+            context = context,
+            item = portalItem,
+            configuration = configuration,
+            offlineMapTask = offlineMapTask,
+            onSelectionChanged = onSelectionChanged
+        )
+        _onDemandMapAreaStates.add(onDemandMapAreasState)
+        return onDemandMapAreasState
+    }
+
+    /**
      * Resets the current selection of preplanned map areas.
      *
      * @since 200.8.0
@@ -325,6 +385,20 @@ public class OfflineMapState(
      */
     internal fun resetInitialize() {
         _initializationStatus.value = InitializationStatus.NotInitialized
+    }
+
+    internal fun removeOnDemandMapArea(state: OnDemandMapAreasState) {
+        if (state.isSelectedToOpen){
+            resetSelectedMapArea()
+        }
+        _onDemandMapAreaStates.remove(state)
+    }
+
+    internal fun removePreplannedMapArea(state: PreplannedMapAreaState) {
+        if (state.isSelectedToOpen){
+            resetSelectedMapArea()
+        }
+        _preplannedMapAreaStates.remove(state)
     }
 }
 

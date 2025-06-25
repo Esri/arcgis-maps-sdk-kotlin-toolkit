@@ -37,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -53,6 +54,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
@@ -67,6 +69,7 @@ internal fun MapAreaDetailsBottomSheet(
     sheetState: SheetState,
     scope: CoroutineScope,
     onDismiss: () -> Unit,
+    offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
     title: String,
     description: String?,
@@ -86,6 +89,7 @@ internal fun MapAreaDetailsBottomSheet(
             sheetState = sheetState
         ) {
             MapAreaDetailsScreen(
+                offlineMapMode = offlineMapMode,
                 thumbnail = thumbnail,
                 title = title,
                 description = description,
@@ -101,6 +105,7 @@ internal fun MapAreaDetailsBottomSheet(
 
 @Composable
 internal fun MapAreaDetailsScreen(
+    offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
     title: String,
     description: String?,
@@ -190,7 +195,12 @@ internal fun MapAreaDetailsScreen(
             }
             if (isDeletable) {
                 Button(onClick = { onDeleteDownload() }) {
-                    Text(stringResource(id = R.string.remove_download))
+                    Text(
+                        if (offlineMapMode == OfflineMapMode.Preplanned)
+                            stringResource(id = R.string.remove_download)
+                        else
+                            stringResource(R.string.delete_download)
+                    )
                 }
             }
         }
@@ -203,6 +213,7 @@ private fun PreviewMapAreaDetailsScreen() {
     MaterialTheme {
         Surface {
             MapAreaDetailsScreen(
+                offlineMapMode = OfflineMapMode.Preplanned,
                 thumbnail = null,
                 title = "City Hall Area",
                 description = "A map that contains stormwater network within...",
