@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
@@ -92,6 +93,7 @@ internal fun PreplannedMapAreas(
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
+            offlineMapMode = OfflineMapMode.Preplanned,
             thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
             title = selectedPreplannedMapAreaState.title,
             description = selectedPreplannedMapAreaState.description,

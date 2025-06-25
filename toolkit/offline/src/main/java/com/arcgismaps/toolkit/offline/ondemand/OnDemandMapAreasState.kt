@@ -252,6 +252,25 @@ internal class OnDemandMapAreasState(
     }
 
     /**
+     * Removes the cancelled on-demand map area from the device.
+     * If specified, it also removes the offline map information from the repository.
+     *
+     * @param shouldRemoveOfflineMapInfo A lambda function that determines whether to remove offline map info.
+     *
+     * @since 200.8.0
+     */
+    internal fun removeCancelledMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
+        // Reset the status to reflect the deletion
+        _status = OnDemandStatus.NotLoaded
+        if (shouldRemoveOfflineMapInfo()) {
+            OfflineRepository.removeOfflineMapInfo(
+                context = context,
+                portalItemID = item.itemId
+            )
+        }
+    }
+
+    /**
      * Updates the current state of this on-demand map area instance.
      *
      * @param newStatus The updated [OnDemandStatus] value representing this area's current state.
@@ -349,6 +368,11 @@ internal sealed class OnDemandStatus {
     data object Downloaded : OnDemandStatus()
 
     /**
+     * On-Demand map area download is cancelled.
+     */
+    data object DownloadCancelled : OnDemandStatus()
+
+    /**
      * On-Demand map area failed to download.
      */
     data class DownloadFailure(val error: Throwable) : OnDemandStatus()
@@ -364,7 +388,7 @@ internal sealed class OnDemandStatus {
     val canLoadOnDemandMapArea: Boolean
         get() = when (this) {
             is NotLoaded, is LoadFailure, is PackageFailure -> true
-            is Loading, is Packaging, is Packaged, is Downloading, is Downloaded, is MmpkLoadFailure, is DownloadFailure -> false
+            is Loading, is Packaging, is Packaged, is Downloading, is DownloadCancelled, is Downloaded, is MmpkLoadFailure, is DownloadFailure -> false
         }
 
     /**
@@ -372,8 +396,8 @@ internal sealed class OnDemandStatus {
      */
     val allowsDownload: Boolean
         get() = when (this) {
-            is Packaged, is DownloadFailure -> true
-            is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is Downloaded, is MmpkLoadFailure -> false
+            is Packaged -> true
+            is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is DownloadCancelled, is DownloadFailure,is Downloaded, is MmpkLoadFailure -> false
         }
 
     /**

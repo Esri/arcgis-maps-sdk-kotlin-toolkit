@@ -386,6 +386,20 @@ public class OfflineMapState(
     internal fun resetInitialize() {
         _initializationStatus.value = InitializationStatus.NotInitialized
     }
+
+    internal fun removeOnDemandMapArea(state: OnDemandMapAreasState) {
+        if (state.isSelectedToOpen){
+            resetSelectedMapArea()
+        }
+        _onDemandMapAreaStates.remove(state)
+    }
+
+    internal fun removePreplannedMapArea(state: PreplannedMapAreaState) {
+        if (state.isSelectedToOpen){
+            resetSelectedMapArea()
+        }
+        _preplannedMapAreaStates.remove(state)
+    }
 }
 
 /**

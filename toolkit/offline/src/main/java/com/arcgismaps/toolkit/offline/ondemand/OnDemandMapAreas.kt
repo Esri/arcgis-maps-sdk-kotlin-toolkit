@@ -24,10 +24,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,7 +33,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageNotSupported
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -59,7 +56,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.internal.utils.CancelButton
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
@@ -75,6 +74,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
+    onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
     modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
@@ -94,6 +94,7 @@ internal fun OnDemandMapAreas(
             sheetState = sheetState,
             scope = scope,
             onDismiss = { showSheet = false },
+            offlineMapMode = OfflineMapMode.OnDemand,
             thumbnail = selectedOnDemandMapAreaState.thumbnail?.asImageBitmap(),
             title = selectedOnDemandMapAreaState.title,
             description = null,
@@ -112,6 +113,7 @@ internal fun OnDemandMapAreas(
             isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
+                onDownloadDeleted(selectedOnDemandMapAreaState)
             }
         )
     }
@@ -205,6 +207,13 @@ internal fun OnDemandMapAreas(
                             }
                         }
 
+                        state.status == OnDemandStatus.DownloadCancelled || state.status is OnDemandStatus.DownloadFailure -> {
+                            CancelButton {
+                                state.removeCancelledMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
+                                onDownloadDeleted(state)
+                            }
+                        }
+
                         state.status.isDownloaded -> {
                             OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
@@ -237,6 +246,7 @@ private fun getOnDemandMapAreaStatusString(context: Context, status: OnDemandSta
         is OnDemandStatus.DownloadFailure -> getString(context, R.string.download_failed)
         OnDemandStatus.Downloaded -> getString(context, R.string.downloaded)
         OnDemandStatus.Downloading -> getString(context, R.string.downloading)
+        OnDemandStatus.DownloadCancelled -> getString(context, R.string.cancelled)
         OnDemandStatus.PackageFailure -> getString(context, R.string.packaging_failed)
         OnDemandStatus.Packaged -> getString(context, R.string.ready_to_download)
         OnDemandStatus.Packaging -> getString(context, R.string.packaging)

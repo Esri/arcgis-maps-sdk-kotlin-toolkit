@@ -101,6 +101,7 @@ public fun OfflineMapAreas(
                                 modifier = modifier,
                                 preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
                                 isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
+                                onDownloadDeleted = offlineMapState::removePreplannedMapArea,
                                 onRefresh = { isRefreshEnabled = true }
                             )
                         }
@@ -112,6 +113,7 @@ public fun OfflineMapAreas(
                                 isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
                                 localMap = offlineMapState.localMap,
                                 onRefresh = { isRefreshEnabled = true },
+                                onDownloadDeleted = offlineMapState::removeOnDemandMapArea,
                                 onDownloadMapAreaSelected = { onDemandConfig ->
                                     // Create the on-demand state and start the download
                                     offlineMapState.makeOnDemandMapAreaState(
@@ -133,13 +135,16 @@ internal fun PreplannedLayoutContainer(
     modifier: Modifier,
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     isShowingOnlyOfflineModels: Boolean,
+    onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     onRefresh: () -> Unit
 ) {
     Column {
-        PreplannedMapAreas(
-            preplannedMapAreaStates = preplannedMapAreaStates,
-            modifier = modifier
-        )
+        if (preplannedMapAreaStates.isNotEmpty()) {
+            PreplannedMapAreas(
+                preplannedMapAreaStates = preplannedMapAreaStates,
+                modifier = modifier
+            )
+        }
         if (isShowingOnlyOfflineModels) {
             NoInternetNoAreas(
                 onlyFooterVisible = preplannedMapAreaStates.isNotEmpty(),
@@ -158,6 +163,7 @@ internal fun OnDemandLayoutContainer(
     isShowingOnlyOfflineModels: Boolean,
     localMap: ArcGISMap,
     onRefresh: () -> Unit,
+    onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
     onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit
 ) {
     var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
@@ -166,26 +172,20 @@ internal fun OnDemandLayoutContainer(
         if (onDemandMapAreaStates.isNotEmpty()) {
             OnDemandMapAreas(
                 onDemandMapAreasStates = onDemandMapAreaStates,
+                onDownloadDeleted = onDownloadDeleted,
                 modifier = modifier
             )
             if (!isShowingOnlyOfflineModels) {
                 AddMapAreaButton { isOnDemandMapAreaSelectorVisible = true }
-            } else {
-                NoInternetNoAreas(
-                    onlyFooterVisible = true,
-                    onRefresh = onRefresh
-                )
             }
         }
-        if (isShowingOnlyOfflineModels && onDemandMapAreaStates.isEmpty()) {
+        if (isShowingOnlyOfflineModels) {
             NoInternetNoAreas(
-                onlyFooterVisible = false,
+                onlyFooterVisible = onDemandMapAreaStates.isNotEmpty(),
                 onRefresh = onRefresh
             )
-        } else if (!isShowingOnlyOfflineModels && onDemandMapAreaStates.isEmpty()) {
-            EmptyOnDemandOfflineAreas(
-                onAdd = { isOnDemandMapAreaSelectorVisible = true }
-            )
+        } else if (onDemandMapAreaStates.isEmpty()) {
+            EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
         }
     }
     OnDemandMapAreaSelector(

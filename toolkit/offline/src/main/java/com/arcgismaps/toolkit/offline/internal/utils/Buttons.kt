@@ -33,6 +33,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -95,6 +97,20 @@ internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: (
 }
 
 @Composable
+internal fun CancelButton(onClick: () -> Unit) {
+    IconButton(
+        modifier = Modifier.size(30.dp),
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = stringResource(R.string.cancelled),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
 internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
     Button(
         modifier = Modifier.widthIn(max = 80.dp), // restricts max width
@@ -140,22 +156,19 @@ private fun ButtonsPreview() {
                 columns = GridCells.Fixed(2),
             ) {
                 item {
-                    DownloadButton(onClick = { })
+                    DownloadButton { }
                 }
                 item {
-                    CancelDownloadButtonWithProgressIndicator(
-                        progress = 55,
-                        onClick = { }
-                    )
+                    CancelDownloadButtonWithProgressIndicator(55) { }
                 }
                 item {
-                    OpenButton(
-                        isEnabled = true,
-                        onClick = { }
-                    )
+                    OpenButton(true) { }
                 }
                 item {
-                    AddMapAreaButton(onAdd = { })
+                    AddMapAreaButton { }
+                }
+                item {
+                    CancelButton { }
                 }
             }
         }
