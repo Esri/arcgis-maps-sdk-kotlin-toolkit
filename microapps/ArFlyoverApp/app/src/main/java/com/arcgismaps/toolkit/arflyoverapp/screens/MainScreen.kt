@@ -19,7 +19,9 @@
 package com.arcgismaps.toolkit.arflyoverapp.screens
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,6 +53,8 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -57,7 +62,9 @@ import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.layers.IntegratedMeshLayer
 import com.arcgismaps.toolkit.ar.FlyoverSceneView
+import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
+import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
@@ -68,16 +75,14 @@ fun MainScreen() {
     val elevationSource =
         ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
 
-    val meshLayer =
+    val integratedMeshLayer =
         IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
 
-    val arcGISScene by remember {
-        mutableStateOf(
-            ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-                baseSurface.elevationSources.add(elevationSource)
-                operationalLayers.add(meshLayer)
-            }
-        )
+    val arcGISScene = remember {
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+            baseSurface.elevationSources.add(elevationSource)
+            operationalLayers.add(integratedMeshLayer)
+        }
     }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
@@ -113,11 +118,52 @@ fun MainScreen() {
             heading = 160.0
         )
 
-        FlyoverSceneView(
-            arcGISScene = arcGISScene,
-            flyoverSceneViewProxy = flyoverSceneViewProxy,
-            translationFactor = 1000.0
-        )
+        Box {
+            var initializationStatus by rememberFlyoverSceneViewStatus()
+
+            FlyoverSceneView(
+                arcGISScene = arcGISScene,
+                flyoverSceneViewProxy = flyoverSceneViewProxy,
+                onInitializationStatusChanged = {
+                    initializationStatus = it
+                },
+                translationFactor = 1000.0,
+            )
+
+            val sceneLoadStatus =
+                arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+
+            when (val status = initializationStatus) {
+                is FlyoverSceneViewStatus.Initializing -> {
+                    TextWithScrim(text = stringResource(R.string.setting_up_ar))
+                }
+
+                is FlyoverSceneViewStatus.FailedToInitialize -> {
+                    val message = status.error.message ?: status.error
+                    TextWithScrim(text = stringResource(R.string.failed_to_initialize_ar, message))
+                }
+
+                else -> {
+                    when (sceneLoadStatus) {
+                        is LoadStatus.NotLoaded, LoadStatus.Loading -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        // successfully loaded so nothing more to do
+                        LoadStatus.Loaded -> {}
+                    }
+                }
+            }
+        }
     } else {
         // otherwise display a message and a button that causes the privacy info dialog to be shown
         Column(
@@ -208,4 +254,23 @@ private fun LegalTextArCore() {
             }
         }
     )
+}
+
+/**
+ * Displays the provided [text] on top of a half-transparent gray background.
+ *
+ * @param text the text to display
+ * @since 200.8.0
+ */
+@Composable
+fun TextWithScrim(text: String) {
+    Column(
+        modifier = Modifier
+            .background(Color.Gray.copy(alpha = 0.5f))
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = text)
+    }
 }
