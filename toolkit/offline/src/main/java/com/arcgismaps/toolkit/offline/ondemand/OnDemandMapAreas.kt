@@ -75,9 +75,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
-    isNetworkConnectionAvailable: Boolean,
-    modifier: Modifier,
-    onConfigureNewOnDemandMapArea: () -> Unit
+    modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
@@ -219,16 +217,6 @@ internal fun OnDemandMapAreas(
                 if (state != onDemandMapAreasStates.last()) {
                     HorizontalDivider(modifier = Modifier.padding(start = 80.dp))
                 }
-            }
-        }
-        if (isNetworkConnectionAvailable) {
-            Spacer(Modifier.height(12.dp))
-            // add a button to add a new on demand map area
-            Button(onClick = onConfigureNewOnDemandMapArea) {
-                Text(
-                    text = stringResource(R.string.add_map_area),
-                    style = MaterialTheme.typography.labelSmall
-                )
             }
         }
     }

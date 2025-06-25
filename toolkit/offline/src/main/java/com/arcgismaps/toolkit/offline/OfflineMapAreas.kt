@@ -27,13 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
 import com.arcgismaps.toolkit.offline.internal.utils.isValidMapAreaTitle
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaConfiguration
@@ -59,7 +59,6 @@ public fun OfflineMapAreas(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
 
@@ -163,23 +162,27 @@ internal fun OnDemandLayoutContainer(
 ) {
     var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
     var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(false) }
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (onDemandMapAreaStates.isNotEmpty()) {
             OnDemandMapAreas(
                 onDemandMapAreasStates = onDemandMapAreaStates,
-                modifier = modifier,
-                isNetworkConnectionAvailable = !isShowingOnlyOfflineModels,
-                onConfigureNewOnDemandMapArea = {
-                    isOnDemandMapAreaSelectorVisible = true
-                }
+                modifier = modifier
             )
+            if (!isShowingOnlyOfflineModels) {
+                AddMapAreaButton { isOnDemandMapAreaSelectorVisible = true }
+            } else {
+                NoInternetNoAreas(
+                    onlyFooterVisible = true,
+                    onRefresh = onRefresh
+                )
+            }
         }
-        if (isShowingOnlyOfflineModels) {
+        if (isShowingOnlyOfflineModels && onDemandMapAreaStates.isEmpty()) {
             NoInternetNoAreas(
                 onlyFooterVisible = false,
                 onRefresh = onRefresh
             )
-        } else if (onDemandMapAreaStates.isEmpty()) {
+        } else if (!isShowingOnlyOfflineModels && onDemandMapAreaStates.isEmpty()) {
             EmptyOnDemandOfflineAreas(
                 onAdd = { isOnDemandMapAreaSelectorVisible = true }
             )

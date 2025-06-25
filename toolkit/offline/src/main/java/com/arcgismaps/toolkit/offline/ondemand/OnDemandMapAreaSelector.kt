@@ -108,18 +108,20 @@ internal fun OnDemandMapAreaSelector(
     onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-
+    var onHideSheet by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(onHideSheet, sheetState.isVisible) {
+        if (onHideSheet) {
+            sheetState.hide()
+            onHideSheet = false
+        }
+        if (!sheetState.isVisible) {
+            onDismiss()
+        }
+    }
     if (showBottomSheet) {
         ModalBottomSheet(
             modifier = Modifier.systemBarsPadding(),
-            onDismissRequest = {
-                scope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    onDismiss.invoke()
-                }
-            },
+            onDismissRequest = { onHideSheet = true },
             sheetState = sheetState,
             sheetGesturesEnabled = false,
             properties = ModalBottomSheetProperties(),
@@ -130,18 +132,10 @@ internal fun OnDemandMapAreaSelector(
                 currentAreaName = uniqueMapAreaTitle,
                 isProposedTitleChangeUnique = isProposedTitleChangeUnique,
                 onProposedTitleChange = onProposedTitleChange,
-                onDismiss = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        onDismiss.invoke()
-                    }
-                },
+                onDismiss = { onHideSheet = true },
                 onDownloadMapAreaSelected = { onDemandConfig ->
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        onDismiss.invoke()
-                        onDownloadMapAreaSelected.invoke(onDemandConfig)
-                    }
+                    onHideSheet = true
+                    onDownloadMapAreaSelected.invoke(onDemandConfig)
                 }
             )
         }
