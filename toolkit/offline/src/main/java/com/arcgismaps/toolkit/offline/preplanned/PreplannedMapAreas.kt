@@ -74,6 +74,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
+    onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
@@ -112,6 +113,7 @@ internal fun PreplannedMapAreas(
             isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
+                onDownloadDeleted(selectedPreplannedMapAreaState)
             }
         )
     }
