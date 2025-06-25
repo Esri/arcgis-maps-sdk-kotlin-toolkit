@@ -348,13 +348,11 @@ fun MainScreen() {
     val meshLayer =
         IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
 
-    val arcGISScene by remember {
-        mutableStateOf(
-            ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-                baseSurface.elevationSources.add(elevationSource)
-                operationalLayers.add(meshLayer)
-            }
-        )
+    val arcGISScene by remember { 
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply { 
+            baseSurface.elevationSources.add(elevationSource)
+            operationalLayers.add(meshLayer)
+        }
     }
     ...
 }
@@ -365,10 +363,10 @@ navigating:
 
 ```kotlin
 val location = Point(
-  2.82407,
-  41.99101,
-  230.0,
-  SpatialReference.wgs84()
+   2.82407,
+   41.99101,
+   230.0,
+   SpatialReference.wgs84()
 )
 val heading = 160.0
 ```
@@ -384,10 +382,10 @@ with these parameters:
 
 ```kotlin
 FlyoverSceneView(
-  arcGISScene = arcGISScene,
-  flyoverSceneViewProxy = flyoverSceneViewProxy,
-  translationFactor = 1000.0,
-  ...  
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    ...  
 )
 ```
 
@@ -396,12 +394,12 @@ get notified about initialization status changes:
 
 ```kotlin
 FlyoverSceneView(
-  arcGISScene = arcGISScene,
-  flyoverSceneViewProxy = flyoverSceneViewProxy,
-  translationFactor = 1000.0,
-  onInitializationStatusChanged = { status ->
-    updateStatus(status)
-  }
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    onInitializationStatusChanged = { status ->
+        updateStatus(status)
+    }
   ...  
 )
 ```
@@ -415,21 +413,21 @@ var tappedLocation by remember {
 }
 
 FlyoverSceneView(
-  arcGISScene = arcGISScene,
-  flyoverSceneViewProxy = flyoverSceneViewProxy,
-  translationFactor = 1000.0,
-  onInitializationStatusChanged = { status ->
-    updateStatus(status)
-  },
-  onSingleTapConfirmed = { singleTapConfirmedEvent ->
-    tappedLocation = flyoverSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
-  }
-  ...
-) {
-  tappedLocation?.let {
-    Callout(location) {
-      Text("${it.x} ${it.y} ${it.z}")
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    onInitializationStatusChanged = { status ->
+      updateStatus(status)
+    },
+    onSingleTapConfirmed = { singleTapConfirmedEvent ->
+        tappedLocation = flyoverSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
     }
+    ...
+) {
+    tappedLocation?.let {
+        Callout(location) {
+            Text("${it.x} ${it.y} ${it.z}")
+      }
   }
 }
 ```
