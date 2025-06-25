@@ -290,8 +290,9 @@ The `FlyoverSceneView` provides an augmented reality fly over experience.
 - Provides parameters to configure and interact with the `SceneView`, such as specifying an
   `ArcGISScene` and a translation factor that defines how much the scene view translates as the
   device moves.
-- A `FlyoverSceneViewProxy` is passed to the `FlyoverSceneView` composable function to define
-  state such as the camera origin and perform operations such as identify.
+- A [FlyoverSceneViewProxy](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy.kt)
+  is passed to the `FlyoverSceneView` composable function to define state such as the camera origin
+  and perform operations such as identify.
 - A `FlyoverSceneViewScope` provided as the receiver by the `FlyoverSceneView`'s `content` lambda
   can be used to display a callout.
 
