@@ -68,8 +68,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
@@ -186,15 +184,13 @@ fun MainScreen() {
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                val initializationStatus: MutableState<FlyoverSceneViewStatus> = remember {
-                    mutableStateOf(FlyoverSceneViewStatus.Initializing)
-                }
+                var initializationStatus by rememberFlyoverSceneViewStatus()
 
                 FlyoverSceneView(
                     arcGISScene = arcGISScene,
                     flyoverSceneViewProxy = flyoverSceneViewProxy,
                     onInitializationStatusChanged = {
-                        initializationStatus.value = it
+                        initializationStatus = it
                     },
                     translationFactor = currentTranslationFactor
                 )
@@ -202,7 +198,7 @@ fun MainScreen() {
                 val sceneLoadStatus =
                     arcGISScene.loadStatus.collectAsStateWithLifecycle().value
 
-                when (val status = initializationStatus.value) {
+                when (val status = initializationStatus) {
                     is FlyoverSceneViewStatus.Initializing -> {
                         TextWithScrim(text = stringResource(R.string.setting_up_ar))
                     }
