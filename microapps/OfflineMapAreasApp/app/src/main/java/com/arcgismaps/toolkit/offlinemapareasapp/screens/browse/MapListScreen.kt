@@ -213,6 +213,7 @@ fun MapListScreen(
                     }
                 } else {
                     // Showing on device maps
+                    OfflineRepository.refreshOfflineMapInfos(LocalContext.current)
                     OnDeviceMapInfo(
                         offlineMapInfos = OfflineRepository.offlineMapInfos,
                         onClick = { itemId -> onItemClick(itemId) }
