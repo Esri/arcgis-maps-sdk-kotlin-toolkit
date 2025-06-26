@@ -171,6 +171,11 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      *
      * @since 200.2.0
      */
+    @Deprecated(
+        message = "This class is deprecated and will be removed in a future release." +
+                "Use WebAuthenticationActivity for OAuth user sign in support.",
+        level = DeprecationLevel.WARNING
+    )
     public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
