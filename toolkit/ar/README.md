@@ -280,7 +280,9 @@ To see it in action, check out the [microapp](../../microapps/ArWorldScaleApp).
 
 ## FlyoverSceneView
 
-The `FlyoverSceneView` provides an augmented reality fly over experience.
+The `FlyoverSceneView` provides an augmented reality fly over experience. In flyover the content is
+navigated by moving the device, allowing the scene to be explored more naturally than with a touch
+or mouse interface.
 
 ### Features
 
