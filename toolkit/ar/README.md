@@ -339,7 +339,7 @@ the [microapp](../../microapps/ArFlyoverApp)), you also need to add the followin
              to be installed, as the app does not include any non-AR features. -->
         <meta-data android:name="com.google.ar.core" android:value="required" />
 ```
-Configure an `ArcGISScene` with the data and base surface required for your table top use case:
+Configure an `ArcGISScene` with the data and base surface required for your flyover use case:
 
 ```kotlin
 @Composable
