@@ -126,7 +126,8 @@ fun MainScreen() {
     }
 
     if (!acceptedPrivacyInfo) {
-        // Display a message and a button that causes the privacy info dialog to be shown
+        // Privacy info must have been declined, so display a message to that effect and a button
+        // that causes the privacy info dialog to be shown again
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -142,6 +143,8 @@ fun MainScreen() {
     } else {
         val snackbarHostState = remember { SnackbarHostState() }
 
+        // In the Scaffold, declare a TopAppBar that includes a DropdownMenu containing Points of
+        // Interest for the user to select from
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
@@ -163,6 +166,8 @@ fun MainScreen() {
                                 DropdownMenuItem(
                                     text = { Text(poi.name) },
                                     onClick = {
+                                        // User has clicked on a Point of Interest; set the location,
+                                        // heading and translationFactor for that POI
                                         currentPoiIndex = index
                                         actionsExpanded = false
                                         flyoverSceneViewProxy.setLocationAndHeading(
@@ -185,6 +190,7 @@ fun MainScreen() {
             ) {
                 var initializationStatus by rememberFlyoverSceneViewStatus()
 
+                // Display the scene in a FlyoverSceneView
                 FlyoverSceneView(
                     arcGISScene = arcGISScene,
                     flyoverSceneViewProxy = flyoverSceneViewProxy,
@@ -198,10 +204,12 @@ fun MainScreen() {
                     arcGISScene.loadStatus.collectAsStateWithLifecycle().value
 
                 when (val status = initializationStatus) {
+                    // Display a message while the FlyoverSceneView initializes
                     is FlyoverSceneViewStatus.Initializing -> {
                         TextWithScrim(text = stringResource(R.string.setting_up_ar))
                     }
 
+                    // Display an error message if initialization failed
                     is FlyoverSceneViewStatus.FailedToInitialize -> {
                         val message = status.error.message ?: status.error
                         TextWithScrim(
@@ -214,10 +222,12 @@ fun MainScreen() {
 
                     else -> {
                         when (sceneLoadStatus) {
+                            // Display a progress indicator while the scene loads
                             is LoadStatus.NotLoaded, LoadStatus.Loading -> {
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                             }
 
+                            // Display an error message if scene loading failed
                             is LoadStatus.FailedToLoad -> {
                                 TextWithScrim(
                                     text = stringResource(
@@ -227,7 +237,7 @@ fun MainScreen() {
                                 )
                             }
 
-                            // successfully loaded so nothing more to do
+                            // Successfully loaded so nothing more to do
                             LoadStatus.Loaded -> {}
                         }
                     }
