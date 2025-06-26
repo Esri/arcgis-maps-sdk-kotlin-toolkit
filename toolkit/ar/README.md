@@ -8,10 +8,10 @@ View the API Reference for the AR module [here](https://developers.arcgis.com/ko
 
 The AR toolkit module provides three composable functions to render `ArcGISScene` content in AR:
 
-| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         | [FlyoverSceneView](#FlyoverSceneView) |
-|-----------------------------------------------------------------|---------------------------------------------------------------------|----------------------------------------|
-| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 | ![flyover-screenshot](flyover-screenshot.png) |
-| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | In flyover the content is navigated by moving the device. |
+| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         | [FlyoverSceneView](#FlyoverSceneView)                                         |
+|-----------------------------------------------------------------|---------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 | ![flyover-screenshot](flyover-screenshot.png)                                 |
+| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | On screen, flyover is visually indistinguishable from normal scene rendering. |
 
 ## TableTopSceneView
 
