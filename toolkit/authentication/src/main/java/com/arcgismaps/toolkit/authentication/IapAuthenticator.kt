@@ -40,7 +40,7 @@ internal fun IapSignInAuthenticator(
 ) {
     var hasLaunched by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
-        contract = OAuthUserSignInActivity.IapSignInContract()
+        contract = AuthenticationActivity.IapSignInContract()
     ) { redirectUrl ->
         if (!redirectUrl.isNullOrEmpty()) {
             onComplete(redirectUrl)
