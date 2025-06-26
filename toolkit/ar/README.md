@@ -295,8 +295,9 @@ or mouse interface.
 - A [FlyoverSceneViewProxy](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy.kt)
   is passed to the `FlyoverSceneView` composable function to define state such as the camera origin
   and perform operations such as identify.
-- A `FlyoverSceneViewScope` provided as the receiver by the `FlyoverSceneView`'s `content` lambda
-  can be used to display a callout.
+-
+A [FlyoverSceneViewScope](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneViewScope.kt)
+provided as the receiver by the `FlyoverSceneView`'s `content` lambda can be used to display a callout.
 
 ### Prerequisites
 
