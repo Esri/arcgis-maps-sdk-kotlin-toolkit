@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -203,8 +202,6 @@ public fun TableTopSceneView(
     }
     var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
     var visualizePlanes by remember { mutableStateOf(true) }
-
-    rememberTextFieldState()
 
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
