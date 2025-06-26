@@ -194,10 +194,10 @@ fun MainScreen() {
                 FlyoverSceneView(
                     arcGISScene = arcGISScene,
                     flyoverSceneViewProxy = flyoverSceneViewProxy,
+                    translationFactor = currentTranslationFactor,
                     onInitializationStatusChanged = {
                         initializationStatus = it
-                    },
-                    translationFactor = currentTranslationFactor
+                    }
                 )
 
                 val sceneLoadStatus =
