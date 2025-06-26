@@ -271,7 +271,7 @@ private class AuthenticatorStateImpl(
         val maxRetryCount = 5
         var error: Throwable? = null
         repeat(maxRetryCount) {
-            val credential = awaitUsernamePassword(challenge.requestUrl, error).firstOrNull()
+            val credential = usernamePasswordFlow(challenge.requestUrl, error).firstOrNull()
                 ?: return ArcGISAuthenticationChallengeResponse.Cancel
             TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
                 .onSuccess {
@@ -313,7 +313,7 @@ private class AuthenticatorStateImpl(
     ): NetworkAuthenticationChallengeResponse {
         // Invalid credentials are checked internally and result in a new challenge, so we only need
         // the first value emitted into the flow.
-        val usernamePassword = awaitUsernamePassword(challenge.hostname).firstOrNull()
+        val usernamePassword = usernamePasswordFlow(challenge.hostname).firstOrNull()
         return usernamePassword?.let {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
                 PasswordCredential(
@@ -398,7 +398,7 @@ private class AuthenticatorStateImpl(
      * @return a [Flow] with a [UsernamePassword] provided by the user, or null if the user cancelled.
      * @since 200.2.0
      */
-    private fun awaitUsernamePassword(url: String, exception: Throwable? = null): Flow<UsernamePassword?> =
+    private fun usernamePasswordFlow(url: String, exception: Throwable? = null): Flow<UsernamePassword?> =
         callbackFlow {
             _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
                 url = url,

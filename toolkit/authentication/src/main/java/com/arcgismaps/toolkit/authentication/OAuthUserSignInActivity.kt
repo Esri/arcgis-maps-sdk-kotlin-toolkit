@@ -94,11 +94,9 @@ private const val RESULT_CODE_CANCELED = 2
  * @since 200.2.0
  */
 @Deprecated(
-    message = "This class is deprecated and will be removed in a future release. " +
-            "If Identity Aware Proxy (IAP) support is needed, use `WebAuthenticationActivity` instead. ",
-    replaceWith = ReplaceWith(
-        expression = "com.arcgismaps.toolkit.authentication.WebAuthenticationActivity",
-        imports = ["com.arcgismaps.toolkit.authentication.OAuthWebView"]),
+    message = "As of 200.8.0, this class is deprecated and will be removed in a future release. " +
+            "Use `AuthenticationActivity` instead.",
+    replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
     level = DeprecationLevel.WARNING
 )
 public class OAuthUserSignInActivity : ComponentActivity() {
