@@ -46,9 +46,9 @@ val pointsOfInterestList = listOf(
     PointOfInterest("On the city walls",
         "xxx",
         Point(2.828377064683506, 41.98670727904231, 147.3971471907571, SpatialReference.wgs84()),
-        175.8728875641343, 10.0),
+        175.8728875641343, 50.0),
     PointOfInterest("By the river",
         "xxx",
         Point(2.824210487810305, 41.98506243493622, 98.24900419544429, SpatialReference.wgs84()),
-        202.36680611861564, 10.0),
+        202.36680611861564, 20.0),
 )
