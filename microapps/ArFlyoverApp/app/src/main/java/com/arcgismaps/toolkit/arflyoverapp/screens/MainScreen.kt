@@ -68,8 +68,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
@@ -100,6 +98,11 @@ fun MainScreen() {
     }
 
     var currentPoiIndex by remember { mutableStateOf(0) }
+
+    val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
+        pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
+
+    var currentTranslationFactor by remember { mutableStateOf(pointsOfInterestList[currentPoiIndex].translationFactor) }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
@@ -138,6 +141,7 @@ fun MainScreen() {
         }
     } else {
         val snackbarHostState = remember { SnackbarHostState() }
+
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
@@ -161,6 +165,11 @@ fun MainScreen() {
                                     onClick = {
                                         currentPoiIndex = index
                                         actionsExpanded = false
+                                        flyoverSceneViewProxy.setLocationAndHeading(
+                                            pointsOfInterestList[currentPoiIndex].location,
+                                            pointsOfInterestList[currentPoiIndex].heading)
+                                        currentTranslationFactor =
+                                            pointsOfInterestList[currentPoiIndex].translationFactor
                                     },
                                 )
                             }
@@ -169,16 +178,6 @@ fun MainScreen() {
                 )
             }
         ) { innerPadding ->
-            val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-                location = Point(
-                    2.82407,
-                    41.99101,
-                    230.0,
-                    SpatialReference.wgs84()
-                ),
-                heading = 160.0
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -194,7 +193,7 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus.value = it
                     },
-                    translationFactor = 1000.0, // DOES THIS NEED SET HERE OR ON PROXY?
+                    translationFactor = currentTranslationFactor
                 )
 
                 val sceneLoadStatus =
