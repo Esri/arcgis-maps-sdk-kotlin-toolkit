@@ -170,7 +170,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * @since 200.2.0
      */
     @Deprecated(
-        message = "This class is deprecated and will be removed in a future release." +
+        message = "As of 200.8.0 this class is deprecated and will be removed in a future release." +
                 "Use WebAuthenticationActivity for OAuth user sign in support.",
         level = DeprecationLevel.WARNING
     )
