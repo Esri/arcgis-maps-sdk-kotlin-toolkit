@@ -68,6 +68,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
@@ -75,6 +77,7 @@ import com.arcgismaps.mapping.layers.IntegratedMeshLayer
 import com.arcgismaps.toolkit.ar.FlyoverSceneView
 import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
+import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
 import com.arcgismaps.toolkit.arflyoverapp.pointsOfInterestList
 
