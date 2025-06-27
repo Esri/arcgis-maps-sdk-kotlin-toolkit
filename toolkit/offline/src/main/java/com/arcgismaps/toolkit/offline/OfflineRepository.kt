@@ -25,6 +25,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import androidx.work.workDataOf
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
@@ -43,6 +44,8 @@ import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
 import com.arcgismaps.toolkit.offline.workmanager.onDemandAreas
 import com.arcgismaps.toolkit.offline.workmanager.preplannedMapAreas
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -374,6 +377,8 @@ public object OfflineRepository {
      */
     internal fun createPreplannedMapAreaRequestAndQueueDownload(
         context: Context,
+        portalItemId: String,
+        mapAreaId: String,
         jsonJobPath: String,
         preplannedMapAreaTitle: String
     ): UUID {
@@ -381,6 +386,9 @@ public object OfflineRepository {
         val workRequest = OneTimeWorkRequestBuilder<PreplannedMapAreaJobWorker>()
             // run it as an expedited work
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the worker tags
+            .addTag(portalItemId)
+            .addTag(mapAreaId)
             // add the input data
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
@@ -415,6 +423,8 @@ public object OfflineRepository {
      */
     internal fun createOnDemandMapAreaRequestAndQueueDownload(
         context: Context,
+        portalItemId: String,
+        mapAreaId: String,
         jsonJobPath: String,
         onDemandMapAreaTitle: String
     ): UUID {
@@ -422,6 +432,9 @@ public object OfflineRepository {
         val workRequest = OneTimeWorkRequestBuilder<OnDemandMapAreaJobWorker>()
             // run it as an expedited work
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            // add the worker tags
+            .addTag(portalItemId)
+            .addTag(mapAreaId)
             // add the input data
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
@@ -626,10 +639,61 @@ public object OfflineRepository {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloading)
                         }
                         // don't have to handle other states
-                        else -> {}
+                        else -> {
+
+                        }
                     }
                 }
             }
+    }
+
+    /**
+     * Returns preplanned/on-demand map area ID using the corresponding job [UUID].
+     *
+     * @since 200.8.0
+     */
+    internal suspend fun getMapAreaForOfflineJob(
+        context: Context,
+        uuid: UUID,
+        portalItemId: String
+    ): String? {
+        val workManager = WorkManager.getInstance(context)
+        val workQuery = WorkQuery.Builder
+            .fromIds(listOf(uuid))
+            .build()
+        val workInfos = withContext(Dispatchers.IO) {
+            workManager.getWorkInfos(workQuery).get()
+        }
+        val workerTags = workInfos.firstOrNull()?.tags ?: return null
+        workerTags.forEach { tag ->
+            // Skip non relevant tags, like: com.arcgismaps.toolkit.offline.workmanager.
+            if (tag != portalItemId && tag.length < 42) {
+                return tag
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns the list of [UUID] for active running/enqueued jobs for the given [portalItemId].
+     *
+     * @since 200.8.0
+     */
+    internal suspend fun getActiveOfflineJobs(
+        context: Context,
+        portalItemId: String
+    ): List<UUID> {
+        val workManager = WorkManager.getInstance(context)
+        val workQuery = WorkQuery.Builder
+            .fromTags(listOf(portalItemId))
+            .build()
+        val workInfos = withContext(Dispatchers.IO) {
+            workManager.getWorkInfos(workQuery).get()
+        }
+        val activePortalItemWorkers = workInfos.filter { workInfo ->
+            (workInfo.state == WorkInfo.State.ENQUEUED || workInfo.state == WorkInfo.State.RUNNING)
+        }
+        return activePortalItemWorkers.map { it.id }
     }
 
     /**

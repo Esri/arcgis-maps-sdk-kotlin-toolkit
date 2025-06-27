@@ -216,6 +216,8 @@ public class OfflineMapState(
                         }
                         _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
+                // restore any running download job state
+                restoreJobsAndUpdateState(context)
             }
         }
     }
@@ -263,6 +265,8 @@ public class OfflineMapState(
                 _onDemandMapAreaStates.add(it)
             }
         }
+        // restore any running download job state
+        restoreJobsAndUpdateState(context)
     }
 
     /**
@@ -394,6 +398,8 @@ public class OfflineMapState(
 
     /**
      * Removes a specific [PreplannedMapAreaState] from the list of preplanned map areas.
+     *
+     * @since 200.8.0
      */
     internal fun removePreplannedMapArea(state: PreplannedMapAreaState) {
         if (state.isSelectedToOpen) {
@@ -404,6 +410,7 @@ public class OfflineMapState(
 
     /**
      * Removes a specific [OnDemandMapAreasState] from the list of on-demand map areas.
+     *
      * @since 200.8.0
      */
     internal fun removeOnDemandMapArea(state: OnDemandMapAreasState) {
@@ -411,6 +418,41 @@ public class OfflineMapState(
             resetSelectedMapArea()
         }
         _onDemandMapAreaStates.remove(state)
+    }
+
+    /**
+     * Restores the current preplanned & on-demand job state from preferences.
+     *
+     * @since 200.8.0
+     */
+    private suspend fun restoreJobsAndUpdateState(context: Context) {
+        OfflineRepository.getActiveOfflineJobs(context, portalItem.itemId)
+            .forEach { workerUuid ->
+                val mapAreaId = OfflineRepository.getMapAreaForOfflineJob(
+                    context = context,
+                    uuid = workerUuid,
+                    portalItemId = portalItem.itemId
+                )
+                if (mode == OfflineMapMode.Preplanned) {
+                    val preplannedMapAreaState = PreplannedMapAreaState(
+                        context = context,
+                        item = portalItem,
+                        onSelectionChanged = onSelectionChanged
+                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    val duplicateMapAreaStates = _preplannedMapAreaStates.filter {
+                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaId)
+                    }
+                    _preplannedMapAreaStates.removeAll(duplicateMapAreaStates)
+                    _preplannedMapAreaStates.add(preplannedMapAreaState)
+                } else if (mode == OfflineMapMode.OnDemand) {
+                    val onDemandMapAreasState = OnDemandMapAreasState(
+                        context = context,
+                        item = portalItem,
+                        onSelectionChanged = onSelectionChanged
+                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    _onDemandMapAreaStates.add(onDemandMapAreasState)
+                }
+            }
     }
 }
 

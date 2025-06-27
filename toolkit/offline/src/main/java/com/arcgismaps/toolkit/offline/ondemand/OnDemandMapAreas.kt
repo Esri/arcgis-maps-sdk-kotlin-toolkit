@@ -38,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -91,6 +92,10 @@ internal fun OnDemandMapAreas(
         if (!sheetState.isVisible) {
             showSheet = false
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { onDemandMapAreasStates.forEach { it.disposeScope() } }
     }
 
     // Show the modal bottom sheet if needed
