@@ -237,7 +237,7 @@ public class OfflineMapState(
             _mode = OfflineMapMode.Preplanned
 
         preplannedMapAreaItemIds.forEach { itemId ->
-            makeOfflinePreplannedMapAreaState(context, itemId)
+            createOfflinePreplannedMapAreaState(context, itemId)
                 ?.let { _preplannedMapAreaStates.add(it) }
         }
     }
@@ -259,7 +259,7 @@ public class OfflineMapState(
             _mode = OfflineMapMode.OnDemand
 
         onDemandMapAreaItemIds.forEach { itemId ->
-            makeOfflineOnDemandMapAreaState(context, itemId)?.let {
+            createOfflineOnDemandMapAreaState(context, itemId)?.let {
                 _onDemandMapAreaStates.add(it)
             }
         }
@@ -272,7 +272,7 @@ public class OfflineMapState(
      *
      * @since 200.8.0
      */
-    private suspend fun makeOfflinePreplannedMapAreaState(
+    private suspend fun createOfflinePreplannedMapAreaState(
         context: Context,
         areaItemId: String
     ): PreplannedMapAreaState? {
@@ -316,7 +316,7 @@ public class OfflineMapState(
      *
      * @since 200.8.0
      */
-    private suspend fun makeOfflineOnDemandMapAreaState(
+    private suspend fun createOfflineOnDemandMapAreaState(
         context: Context,
         areaItemId: String
     ): OnDemandMapAreasState? {
@@ -349,8 +349,9 @@ public class OfflineMapState(
                 mobileMapPackagePath = onDemandPath
             )
             return onDemandMapAreasState
-        } else
+        } else {
             return null
+        }
     }
 
     /**
@@ -358,7 +359,7 @@ public class OfflineMapState(
      *
      * @since 200.8.0
      */
-    internal fun makeOnDemandMapAreaState(
+    internal fun createOnDemandMapAreaState(
         context: Context,
         configuration: OnDemandMapAreaConfiguration
     ): OnDemandMapAreasState {

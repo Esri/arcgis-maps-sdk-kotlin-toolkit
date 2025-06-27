@@ -116,7 +116,7 @@ public fun OfflineMapAreas(
                                 onDownloadDeleted = offlineMapState::removeOnDemandMapArea,
                                 onDownloadMapAreaSelected = { onDemandConfig ->
                                     // Create the on-demand state and start the download
-                                    offlineMapState.makeOnDemandMapAreaState(
+                                    offlineMapState.createOnDemandMapAreaState(
                                         context = context,
                                         configuration = onDemandConfig
                                     ).downloadOnDemandMapArea()
@@ -139,7 +139,7 @@ internal fun PreplannedLayoutContainer(
     onRefresh: () -> Unit
 ) {
     Column {
-        // Show "No Internet" message if offline models are displayed
+        // Show preplanned map areas if available
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
                 preplannedMapAreaStates = preplannedMapAreaStates,
@@ -200,11 +200,12 @@ internal fun OnDemandLayoutContainer(
             EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
         }
     }
+    val context = LocalContext.current
     // Map area selection bottom sheet
     OnDemandMapAreaSelector(
         localMap = localMap,
         showSheet = isOnDemandMapAreaSelectorVisible,
-        uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
+        uniqueMapAreaTitle = getDefaultMapAreaTitle(context, onDemandMapAreaStates),
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },
         onProposedTitleChange = { mapAreaTitle ->
