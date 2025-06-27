@@ -526,10 +526,6 @@ public object OfflineRepository {
                         }
                         // if the work failed or was cancelled
                         WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                            // this removes the completed WorkInfo from the WorkManager's database
-                            // otherwise, the observer will emit the WorkInfo on every launch
-                            // until WorkManager auto-prunes
-                            workManager.pruneWork()
                             preplannedMapAreaState.updateStatus(
                                 PreplannedStatus.DownloadFailure(
                                     Exception(

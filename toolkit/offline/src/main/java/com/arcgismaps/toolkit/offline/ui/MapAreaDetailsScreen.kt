@@ -152,7 +152,10 @@ internal fun MapAreaDetailsScreen(
 
         // Size of the map area
         if (size != 0) {
-            Text(text = "Size: ${formatSize(size)}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.directory_size, formatSize(size)),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         if (description != null) {

@@ -37,6 +37,15 @@
     <string name="no_image_available">No Image Available</string>
     <string name="refresh">Refresh</string>
     <string name="cancelled">Cancelled</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Rename</string>
+    <string name="enter_a_name">Enter a name</string>
+    <string name="select_area">Select area</string>
+    <string name="pan_and_zoom_text">Pan and zoom to define the area</string>
+    <string name="unique_name_text">The name for the map area must be unique</string>
+    <string name="next_on_demand_area_title">Area %1$s</string>
+    <string name="directory_size">Size: %1$s</string>
     <string name="no_internet_connection_error_message">No Internet Connection</string>
     <string name="no_internet_error_message">No internet connection. Showing downloaded areas only.</string>
     <string name="no_map_areas_error_message">Could not retrieve map areas for this map.</string>

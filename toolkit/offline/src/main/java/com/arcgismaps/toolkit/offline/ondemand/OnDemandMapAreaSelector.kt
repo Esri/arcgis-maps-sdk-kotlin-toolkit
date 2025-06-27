@@ -135,7 +135,7 @@ internal fun OnDemandMapAreaSelector(
                 onDismiss = { onHideSheet = true },
                 onDownloadMapAreaSelected = { onDemandConfig ->
                     onHideSheet = true
-                    onDownloadMapAreaSelected.invoke(onDemandConfig)
+                    onDownloadMapAreaSelected(onDemandConfig)
                 }
             )
         }
@@ -175,7 +175,7 @@ private fun OnDemandMapAreaSelectorOptions(
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Text(
-                "Select area",
+                stringResource(R.string.select_area),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -184,7 +184,7 @@ private fun OnDemandMapAreaSelectorOptions(
             }
         }
         HorizontalDivider()
-        Text(text = "Pan and zoom to define the area", style = MaterialTheme.typography.labelSmall)
+        Text(text = stringResource(R.string.pan_and_zoom_text), style = MaterialTheme.typography.labelSmall)
         MapViewWithAreaSelector(
             modifier = Modifier.weight(1f),
             arcGISMap = localMap,
@@ -213,7 +213,7 @@ private fun OnDemandMapAreaSelectorOptions(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.size(4.dp))
-                Text("Rename", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.rename), style = MaterialTheme.typography.labelSmall)
             }
         }
         HorizontalDivider()
@@ -252,7 +252,7 @@ private fun OnDemandMapAreaSelectorOptions(
                     }
                 }
             }
-        ) { Text("Download") }
+        ) { Text(stringResource(R.string.download)) }
     }
 }
 
@@ -333,10 +333,10 @@ private fun AreaNameDialog(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Enter a name", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.enter_a_name), style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("The name for the map area must be unique") },
+                label = { Text(stringResource(R.string.unique_name_text)) },
                 value = areaName,
                 singleLine = true,
                 onValueChange = { newValue ->
@@ -345,11 +345,11 @@ private fun AreaNameDialog(
                 },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
                 TextButton(
                     onClick = { onConfirm.invoke(areaName) },
                     enabled = isProposedTitleChangeUnique
-                ) { Text("Ok") }
+                ) { Text(stringResource(R.string.confirm)) }
             }
 
         }
