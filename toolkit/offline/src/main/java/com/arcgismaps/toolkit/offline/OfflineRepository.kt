@@ -223,8 +223,9 @@ public object OfflineRepository {
         val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
-            preplannedMapAreaID = areaItemID
-        )
+            preplannedMapAreaID = areaItemID,
+            isMakeDirsEnabled = true
+        ).toString()
         val destDir = File(destDirPath)
         cacheAreaDir.listFiles()?.forEach { child ->
             val target = File(destDir, child.name)
@@ -525,10 +526,6 @@ public object OfflineRepository {
                         }
                         // if the work failed or was cancelled
                         WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                            // this removes the completed WorkInfo from the WorkManager's database
-                            // otherwise, the observer will emit the WorkInfo on every launch
-                            // until WorkManager auto-prunes
-                            workManager.pruneWork()
                             preplannedMapAreaState.updateStatus(
                                 PreplannedStatus.DownloadFailure(
                                     Exception(

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,9 +66,13 @@ public fun OfflineMapAreas(
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
             offlineMapState.resetInitialize()
-        }
+            }
         offlineMapState.initialize(context)
         isRefreshEnabled = false
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { isRefreshEnabled = true }
     }
 
     Surface(modifier = modifier) {
@@ -116,7 +121,7 @@ public fun OfflineMapAreas(
                                 onDownloadDeleted = offlineMapState::removeOnDemandMapArea,
                                 onDownloadMapAreaSelected = { onDemandConfig ->
                                     // Create the on-demand state and start the download
-                                    offlineMapState.makeOnDemandMapAreaState(
+                                    offlineMapState.createOnDemandMapAreaState(
                                         context = context,
                                         configuration = onDemandConfig
                                     ).downloadOnDemandMapArea()
@@ -139,7 +144,7 @@ internal fun PreplannedLayoutContainer(
     onRefresh: () -> Unit
 ) {
     Column {
-        // Show "No Internet" message if offline models are displayed
+        // Show preplanned map areas if available
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
                 preplannedMapAreaStates = preplannedMapAreaStates,
@@ -200,11 +205,12 @@ internal fun OnDemandLayoutContainer(
             EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
         }
     }
+    val context = LocalContext.current
     // Map area selection bottom sheet
     OnDemandMapAreaSelector(
         localMap = localMap,
         showSheet = isOnDemandMapAreaSelectorVisible,
-        uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
+        uniqueMapAreaTitle = getDefaultMapAreaTitle(context, onDemandMapAreaStates),
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },
         onProposedTitleChange = { mapAreaTitle ->
