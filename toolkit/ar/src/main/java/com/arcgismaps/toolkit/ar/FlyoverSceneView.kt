@@ -202,7 +202,7 @@ public fun FlyoverSceneView(
         flyoverSceneViewProxy.setTranslationFactor(translationFactor)
     }
 
-    Box(modifier = Modifier) {
+    Box(modifier = modifier) {
         // Use rememberUpdatedState so that the lambda used below always sees the latest proxy. Without
         // this if we changed the proxy argument updating and rendering would stop.
         val proxy by rememberUpdatedState(flyoverSceneViewProxy)
@@ -218,54 +218,55 @@ public fun FlyoverSceneView(
             },
             onTapWithHitResult = {},
             onFirstPlaneDetected = {},
-            visualizePlanes = false
+            visualizePlanes = false,
+            visualizeCamera = false
+        )
+
+        SceneView(
+            arcGISScene = arcGISScene,
+            sceneViewProxy = flyoverSceneViewProxy.sceneViewProxy,
+            cameraController = flyoverSceneViewProxy.cameraController,
+            atmosphereEffect = atmosphereEffect,
+            spaceEffect = spaceEffect,
+            modifier = modifier,
+            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+            graphicsOverlays = graphicsOverlays,
+            sceneViewInteractionOptions = remember { SceneViewInteractionOptions(isEnabled = false) },
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = onSpatialReferenceChanged,
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+            onPan = onPan,
+            content = {
+                content?.let { content ->
+                    val flyoverSceneViewScope = remember {
+                        FlyoverSceneViewScope(this)
+                    }
+                    content.invoke(flyoverSceneViewScope)
+                }
+            }
         )
     }
-
-    SceneView(
-        arcGISScene = arcGISScene,
-        sceneViewProxy = flyoverSceneViewProxy.sceneViewProxy,
-        cameraController = flyoverSceneViewProxy.cameraController,
-        atmosphereEffect = atmosphereEffect,
-        spaceEffect = spaceEffect,
-        modifier = modifier,
-        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-        graphicsOverlays = graphicsOverlays,
-        sceneViewInteractionOptions = remember { SceneViewInteractionOptions(isEnabled = false) },
-        viewLabelProperties = viewLabelProperties,
-        selectionProperties = selectionProperties,
-        isAttributionBarVisible = isAttributionBarVisible,
-        onAttributionTextChanged = onAttributionTextChanged,
-        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-        analysisOverlays = analysisOverlays,
-        imageOverlays = imageOverlays,
-        timeExtent = timeExtent,
-        onTimeExtentChanged = onTimeExtentChanged,
-        sunTime = sunTime,
-        sunLighting = sunLighting,
-        ambientLightColor = ambientLightColor,
-        onNavigationChanged = onNavigationChanged,
-        onSpatialReferenceChanged = onSpatialReferenceChanged,
-        onLayerViewStateChanged = onLayerViewStateChanged,
-        onInteractingChanged = onInteractingChanged,
-        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-        onRotate = onRotate,
-        onScale = onScale,
-        onUp = onUp,
-        onDown = onDown,
-        onSingleTapConfirmed = onSingleTapConfirmed,
-        onDoubleTap = onDoubleTap,
-        onLongPress = onLongPress,
-        onTwoPointerTap = onTwoPointerTap,
-        onPan = onPan,
-        content = {
-            content?.let { content ->
-                val flyoverSceneViewScope = remember {
-                    FlyoverSceneViewScope(this)
-                }
-                content.invoke(flyoverSceneViewScope)
-            }
-        }
-    )
 }
