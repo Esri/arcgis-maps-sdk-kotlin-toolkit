@@ -84,7 +84,7 @@ internal class PreplannedMapAreaState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private lateinit var scope: CoroutineScope
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     internal val title = item.title
     internal val description = item.description
@@ -133,7 +133,6 @@ internal class PreplannedMapAreaState(
      */
     internal fun downloadPreplannedMapArea() =
         runCatchingCancellable {
-            scope = CoroutineScope(Dispatchers.IO)
             val area = preplannedMapArea ?: return@runCatchingCancellable
             val task = offlineMapTask ?: return@runCatchingCancellable
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
@@ -144,7 +143,7 @@ internal class PreplannedMapAreaState(
                     downloadPreplannedOfflineMapJob = createOfflineMapJob(
                         preplannedMapArea = area,
                         offlineMapTask = task
-                    )
+                    ), preplannedMapAreaId = area.portalItem.itemId
                 )
                 OfflineRepository.observeStatusForPreplannedWork(
                     context = context,
@@ -222,14 +221,18 @@ internal class PreplannedMapAreaState(
      *
      * @since 200.8.0
      */
-    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
+    private fun startOfflineMapJob(
+        downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob,
+        preplannedMapAreaId: String
+    ): UUID {
         val jsonJobFile = OfflineRepository.saveJobToDisk(
             jobPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
-
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
+            portalItemId = item.itemId,
+            mapAreaId = preplannedMapAreaId,
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = item.title
         )
@@ -313,6 +316,19 @@ internal class PreplannedMapAreaState(
         _isSelectedToOpen = selected
         if (selected) {
             onSelectionChanged(map)
+        }
+    }
+
+    fun restoreOfflineMapJobState(offlineWorkerUUID: UUID) {
+        scope.launch {
+            _status = PreplannedStatus.Downloading
+            OfflineRepository.observeStatusForPreplannedWork(
+                context = context,
+                onWorkInfoStateChanged = ::logWorkInfo,
+                preplannedMapAreaState = this@PreplannedMapAreaState,
+                portalItem = item as PortalItem,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
         }
     }
 }

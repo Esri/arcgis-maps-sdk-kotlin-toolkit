@@ -98,7 +98,7 @@ internal class OnDemandMapAreasState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private lateinit var scope: CoroutineScope
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     internal val title = configuration?.title ?: item.title
 
@@ -111,7 +111,6 @@ internal class OnDemandMapAreasState(
      * @since 200.8.0
      */
     internal fun downloadOnDemandMapArea() = runCatchingCancellable {
-        scope = CoroutineScope(Dispatchers.IO)
         val task = offlineMapTask ?: return@runCatchingCancellable
         val portalItem = item as? PortalItem ?: return@runCatchingCancellable
         val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
@@ -124,7 +123,7 @@ internal class OnDemandMapAreasState(
                     onDemandMapAreaID = onDemandMapAreaID,
                     downloadMapArea = downloadMapArea,
                     offlineMapTask = task
-                )
+                ), onDemandMapAreaId = onDemandMapAreaID
             )
             OfflineRepository.observeStatusForOnDemandWork(
                 context = context,
@@ -211,7 +210,10 @@ internal class OnDemandMapAreasState(
      *
      * @since 200.8.0
      */
-    private fun startOfflineMapJob(downloadOnDemandOfflineMapJob: GenerateOfflineMapJob): UUID {
+    private fun startOfflineMapJob(
+        downloadOnDemandOfflineMapJob: GenerateOfflineMapJob,
+        onDemandMapAreaId: String
+    ): UUID {
         val jsonJobFile = OfflineRepository.saveJobToDisk(
             jobPath = downloadOnDemandOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadOnDemandOfflineMapJob.toJson()
@@ -219,6 +221,8 @@ internal class OnDemandMapAreasState(
 
         workerUUID = OfflineRepository.createOnDemandMapAreaRequestAndQueueDownload(
             context = context,
+            portalItemId = item.itemId,
+            mapAreaId = onDemandMapAreaId,
             jsonJobPath = jsonJobFile.path,
             onDemandMapAreaTitle = configuration?.title ?: item.title
         )
@@ -318,6 +322,20 @@ internal class OnDemandMapAreasState(
             onSelectionChanged(map)
         }
     }
+
+    fun restoreOfflineMapJobState(offlineWorkerUUID: UUID) {
+        scope.launch {
+            _status = OnDemandStatus.Downloading
+            OfflineRepository.observeStatusForOnDemandWork(
+                context = context,
+                onWorkInfoStateChanged = ::logWorkInfo,
+                onDemandMapAreasState = this@OnDemandMapAreasState,
+                portalItem = item as PortalItem,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
+        }
+    }
+
 }
 
 /**
