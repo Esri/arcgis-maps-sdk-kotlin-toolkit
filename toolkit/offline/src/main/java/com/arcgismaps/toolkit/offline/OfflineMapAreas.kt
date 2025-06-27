@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,9 +66,13 @@ public fun OfflineMapAreas(
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
             offlineMapState.resetInitialize()
-        }
+            }
         offlineMapState.initialize(context)
         isRefreshEnabled = false
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { isRefreshEnabled = true }
     }
 
     Surface(modifier = modifier) {

@@ -223,8 +223,9 @@ public object OfflineRepository {
         val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
-            preplannedMapAreaID = areaItemID
-        )
+            preplannedMapAreaID = areaItemID,
+            isMakeDirsEnabled = true
+        ).toString()
         val destDir = File(destDirPath)
         cacheAreaDir.listFiles()?.forEach { child ->
             val target = File(destDir, child.name)

@@ -44,6 +44,7 @@ import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -98,7 +99,7 @@ internal class OnDemandMapAreasState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     internal val title = configuration?.title ?: item.title
 
@@ -115,7 +116,8 @@ internal class OnDemandMapAreasState(
         val portalItem = item as? PortalItem ?: return@runCatchingCancellable
         val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
         val downloadMapArea = configuration.areaOfInterest
-
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
             _status = OnDemandStatus.Downloading
             val offlineWorkerUUID = startOfflineMapJob(
@@ -324,7 +326,10 @@ internal class OnDemandMapAreasState(
     }
 
     fun restoreOfflineMapJobState(offlineWorkerUUID: UUID) {
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
+            workerUUID = offlineWorkerUUID
             _status = OnDemandStatus.Downloading
             OfflineRepository.observeStatusForOnDemandWork(
                 context = context,

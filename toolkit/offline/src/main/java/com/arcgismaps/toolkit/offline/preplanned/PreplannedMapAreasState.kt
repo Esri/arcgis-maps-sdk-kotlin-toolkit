@@ -44,6 +44,8 @@ import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -84,7 +86,7 @@ internal class PreplannedMapAreaState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     internal val title = item.title
     internal val description = item.description
@@ -136,7 +138,8 @@ internal class PreplannedMapAreaState(
             val area = preplannedMapArea ?: return@runCatchingCancellable
             val task = offlineMapTask ?: return@runCatchingCancellable
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
-
+            if (!scope.isActive)
+                scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
                 _status = PreplannedStatus.Downloading
                 val offlineWorkerUUID = startOfflineMapJob(
@@ -320,7 +323,10 @@ internal class PreplannedMapAreaState(
     }
 
     fun restoreOfflineMapJobState(offlineWorkerUUID: UUID) {
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
+            workerUUID = offlineWorkerUUID
             _status = PreplannedStatus.Downloading
             OfflineRepository.observeStatusForPreplannedWork(
                 context = context,
