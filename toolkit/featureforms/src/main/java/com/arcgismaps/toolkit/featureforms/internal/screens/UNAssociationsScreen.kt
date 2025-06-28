@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 internal fun UNAssociationsScreen(
     formStateData: FormStateData,
     route: NavigationRoute.UNAssociationsView,
+    isNavigationEnabled: Boolean,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
@@ -92,6 +93,7 @@ internal fun UNAssociationsScreen(
     }
     UtilityAssociations(
         groupResult = groupResult,
+        isNavigationEnabled = isNavigationEnabled,
         onItemClick = { index ->
             if (hasEdits) {
                 pendingNavigationAction = NavigationAction.NavigateToFeature(index)

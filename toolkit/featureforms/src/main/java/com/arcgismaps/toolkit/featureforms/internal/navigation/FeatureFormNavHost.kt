@@ -44,6 +44,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
 internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: FeatureFormState,
+    isNavigationEnabled: Boolean,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
@@ -95,6 +96,7 @@ internal fun FeatureFormNavHost(
             UNAssociationsScreen(
                 formStateData = formData,
                 route = route,
+                isNavigationEnabled = isNavigationEnabled,
                 onSave = onSaveForm,
                 onDiscard = onDiscardForm,
                 onNavigateToFeature = { feature ->
