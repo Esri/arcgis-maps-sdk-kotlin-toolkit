@@ -33,7 +33,7 @@ private const val KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_SIGN_OU
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
-private const val SIGN_OUT = "SIGN_OUT"
+private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -44,27 +44,26 @@ private const val SIGN_OUT = "SIGN_OUT"
  *
  * 1. For authentication challenges where the Custom Tab redirects back to this activity:
  *    - Declare the activity with `launchMode="singleTop"` and include an `intent-filter`:
+ *    ```
+ *    <activity
+ *    android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
+ *    android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ *    android:exported="true"
+ *    android:launchMode="singleTop" >
+ *      <intent-filter>
+ *        <action android:name="android.intent.action.VIEW" />
  *
- * ```
- * <activity
- * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
- * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
- * android:exported="true"
- * android:launchMode="singleTop" >
- *   <intent-filter>
- *     <action android:name="android.intent.action.VIEW" />
+ *        <category android:name="android.intent.category.DEFAULT" />
+ *        <category android:name="android.intent.category.BROWSABLE" />
  *
- *     <category android:name="android.intent.category.DEFAULT" />
- *     <category android:name="android.intent.category.BROWSABLE" />
+ *        <data
+ *          android:host="auth"
+ *          android:scheme="my-ags-app" />
+ *        </intent-filter>
+ *    </activity>
+ *    ```
  *
- *     <data
- *       android:host="auth"
- *       android:scheme="my-ags-app" />
- *     </intent-filter>
- * </activity>
- * ```
- *
- * 1. If the redirect intent should be handled by another activity:
+ * 2. If the redirect intent should be handled by another activity:
  *    - Remove the intent-filter from [AuthenticationActivity] and add it to the target activity.
  *    - Optionally, set `launchMode="singleInstance"` for the target activity, but note that this exposes the browser
  *    as a separate task in the recent tasks list.
@@ -94,14 +93,9 @@ private const val SIGN_OUT = "SIGN_OUT"
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
 
-    private var isSignOutRequest = false
-
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
-        if (intent.getStringExtra(KEY_INTENT_EXTRA_PROMPT_TYPE) == SIGN_OUT) {
-            isSignOutRequest = true
-        }
         url?.let {
             val shouldUseIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
             launchCustomTabs(it, shouldUseIncognito)
@@ -120,14 +114,13 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
         if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            if (isSignOutRequest) {
+            if (intent.getStringExtra(KEY_INTENT_EXTRA_PROMPT_TYPE) == VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT) {
                 // As of now, we don't have a way to get the sign-out response from the browser so we assume if the user
                 // returns to this activity by pressing the back button or the "x" button, the sign out was successful.
                 val newIntent = Intent().apply {
                     putExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, true)
                 }
                 setResult(RESULT_CODE_SUCCESS, newIntent)
-                isSignOutRequest = false
             } else {
                 // if we got here the user must have pressed the back button or the x button while the
                 // custom tab was visible
@@ -227,7 +220,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, SIGN_OUT)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): Boolean {

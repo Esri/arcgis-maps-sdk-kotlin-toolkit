@@ -106,6 +106,8 @@ class IapAuthenticatorTest {
      * And the user presses back,
      * Then it should complete the sign-out process without cancellation.
      *
+     * Note: Currently, IAP sign-out works differently because there is no redirect URI.
+     * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
      * @since 200.8.0
      */
     @Test
