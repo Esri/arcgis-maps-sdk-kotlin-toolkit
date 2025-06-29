@@ -16,6 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -68,7 +71,8 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
         groupNode.assertIsDisplayed()
         groupNode.performClick()
-        val associationNode = composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+        val associationNode =
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
@@ -91,5 +95,56 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         assertThat(state.activeFeatureForm).isEqualTo(featureForm)
         // The association node should be displayed again
         associationNode.assertIsDisplayed()
+    }
+
+    /**
+     * Given a FeatureForm with a UtilityAssociationsFormElement
+     * When the navigation is disabled
+     * Then the user should not be able to navigate to a new form
+     */
+    @Test
+    fun testNavigationIsDisabled() {
+        val state = FeatureFormState(
+            featureForm,
+            coroutineScope = scope
+        )
+        var isNavigationEnabled by mutableStateOf(false)
+        composeTestRule.setContent {
+            FeatureForm(
+                featureFormState = state,
+                isNavigationEnabled = isNavigationEnabled
+            )
+        }
+        val element = featureForm.elements.first() as? UtilityAssociationsFormElement
+        assertThat(element).isNotNull()
+        // Wait for the associations to load
+        composeTestRule.waitUntil(timeoutMillis = 30_000) {
+            element!!.associationsFilterResults.isNotEmpty()
+        }
+        val filter = element!!.associationsFilterResults.first().filter
+        val groupResult = element.associationsFilterResults.first().groupResults.first()
+        // Check that the filter, group, and association results are displayed
+        val filterNode = composeTestRule.onNodeWithText(text = filter.title)
+        filterNode.assertIsDisplayed()
+        filterNode.performClick()
+        val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
+        groupNode.assertIsDisplayed()
+        groupNode.performClick()
+        val associationNode =
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+        associationNode.assertIsDisplayed()
+        // Navigate to a new Form
+        associationNode.performClick()
+        // Check that the navigation is disabled
+        assertThat(state.activeFeatureForm).isEqualTo(featureForm)
+        // Enable navigation
+        isNavigationEnabled = true
+        // Perform the click again
+        associationNode.performClick()
+        composeTestRule.waitUntil {
+            state.activeFeatureForm != featureForm
+        }
+        // Assert that the navigation was successful
+        assertThat(state.activeFeatureForm).isNotEqualTo(featureForm)
     }
 }

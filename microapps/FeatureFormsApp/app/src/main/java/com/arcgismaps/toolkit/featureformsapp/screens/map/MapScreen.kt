@@ -475,7 +475,7 @@ fun TopFormBar(
                 DropdownMenuItem(
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Navigation")
+                            Text(stringResource(R.string.navigation))
                             Checkbox(checked = isNavigationEnabled, onCheckedChange = {
                                 onToggleNavigation()
                             })
