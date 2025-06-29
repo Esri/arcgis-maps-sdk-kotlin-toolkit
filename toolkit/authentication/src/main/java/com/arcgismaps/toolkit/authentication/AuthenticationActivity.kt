@@ -45,24 +45,24 @@ private const val SIGN_OUT = "SIGN_OUT"
  * 1. For authentication challenges where the Custom Tab redirects back to this activity:
  *    - Declare the activity with `launchMode="singleTop"` and include an `intent-filter`:
  *
- *    ```
- *    <activity
- *    android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
- *    android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
- *    android:exported="true"
- *    android:launchMode="singleTop" >
- *      <intent-filter>
- *        <action android:name="android.intent.action.VIEW" />
+ * ```
+ * <activity
+ * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
+ * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ * android:exported="true"
+ * android:launchMode="singleTop" >
+ *   <intent-filter>
+ *     <action android:name="android.intent.action.VIEW" />
  *
- *        <category android:name="android.intent.category.DEFAULT" />
- *        <category android:name="android.intent.category.BROWSABLE" />
+ *     <category android:name="android.intent.category.DEFAULT" />
+ *     <category android:name="android.intent.category.BROWSABLE" />
  *
- *        <data
- *          android:host="auth"
- *          android:scheme="my-ags-app" />
- *      </intent-filter>
- *    </activity>
- *    ```
+ *     <data
+ *       android:host="auth"
+ *       android:scheme="my-ags-app" />
+ *     </intent-filter>
+ * </activity>
+ * ```
  *
  * 1. If the redirect intent should be handled by another activity:
  *    - Remove the intent-filter from [AuthenticationActivity] and add it to the target activity.
@@ -92,7 +92,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  *
  * @since 200.8.0
  */
-public class AuthenticationActivity internal constructor() : ComponentActivity() {
+public class AuthenticationActivity internal constructor(): ComponentActivity() {
 
     private var isSignOutRequest = false
 
@@ -160,8 +160,8 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
             setResult(RESULT_CODE_CANCELED)
-        }
-        finish()
+            }
+        finish()}
     }
 
     /**
