@@ -92,7 +92,7 @@ private const val SIGN_OUT = "SIGN_OUT"
  *
  * @since 200.8.0
  */
-public class AuthenticationActivity internal constructor(): ComponentActivity() {
+public class AuthenticationActivity internal constructor() : ComponentActivity() {
 
     private var isSignOutRequest = false
 
@@ -160,8 +160,8 @@ public class AuthenticationActivity internal constructor(): ComponentActivity() 
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
             setResult(RESULT_CODE_CANCELED)
-            }
-        finish()}
+        }
+        finish()
     }
 
     /**
