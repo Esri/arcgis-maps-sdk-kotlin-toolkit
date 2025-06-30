@@ -94,10 +94,6 @@ internal fun OnDemandMapAreas(
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose { onDemandMapAreasStates.forEach { it.disposeScope() } }
-    }
-
     // Show the modal bottom sheet if needed
     if (showSheet && selectedOnDemandMapAreaState != null) {
         MapAreaDetailsBottomSheet(

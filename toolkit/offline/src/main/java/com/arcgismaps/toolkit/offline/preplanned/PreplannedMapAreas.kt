@@ -94,10 +94,6 @@ internal fun PreplannedMapAreas(
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose { preplannedMapAreaStates.forEach { it.disposeScope() } }
-    }
-
     // Show the modal bottom sheet if needed
     if (showSheet && selectedPreplannedMapAreaState != null) {
         MapAreaDetailsBottomSheet(

@@ -27,6 +27,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arcgismaps.tasks.JobStatus
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapJob
+import com.arcgismaps.toolkit.offline.OfflineRepository.moveOnDemandJobResultToDestination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -160,11 +161,12 @@ internal class OnDemandMapAreaJobWorker(
             if (jobResult.isSuccess) {
                 workerNotification.showStatusNotification("The download for $jobAreaTitle has completed successfully.")
                 val downloadOnDemandOfflineMapResult = jobResult.getOrNull()
-                val outputData = workDataOf(
-                    mobileMapPackagePathKey to (downloadOnDemandOfflineMapResult?.mobileMapPackage?.path
-                        ?: ""),
+                // using the pending path, move the result to final destination path
+                val mmpkDestDir = moveOnDemandJobResultToDestination(
+                    context = context,
+                    offlineMapCacheDownloadPath = downloadOnDemandOfflineMapResult?.mobileMapPackage?.path.toString()
                 )
-                Result.success(outputData)
+                Result.success(workDataOf(mobileMapPackagePathKey to mmpkDestDir.absolutePath))
             } else {
                 val errorMessage = jobResult.exceptionOrNull()?.message
                     ?: "Unknown error during job execution"

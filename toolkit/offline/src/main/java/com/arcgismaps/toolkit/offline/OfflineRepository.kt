@@ -187,7 +187,7 @@ public object OfflineRepository {
      *
      * @since 200.8.0
      */
-    private fun loadOfflineMapInfos(context: Context): List<OfflineMapInfo> {
+    internal fun loadOfflineMapInfos(context: Context): List<OfflineMapInfo> {
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfos = mutableListOf<OfflineMapInfo>()
         if (!baseDir.exists() || !baseDir.isDirectory) {
@@ -212,7 +212,7 @@ public object OfflineRepository {
      *
      * @since 200.8.0
      */
-    private fun movePreplannedJobResultToDestination(
+    internal fun movePreplannedJobResultToDestination(
         context: Context,
         offlineMapCacheDownloadPath: String
     ): File {
@@ -244,7 +244,7 @@ public object OfflineRepository {
      *
      * @since 200.8.0
      */
-    private fun moveOnDemandJobResultToDestination(
+    internal fun moveOnDemandJobResultToDestination(
         context: Context,
         offlineMapCacheDownloadPath: String
     ): File {
@@ -493,12 +493,10 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(PreplannedStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
-                                // using the pending path, move the result to final destination path
-                                val destDir = movePreplannedJobResultToDestination(context, path)
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { mmpkPath ->
                                 // create & load the downloaded map
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                                    mobileMapPackagePath = destDir.absolutePath
+                                    mobileMapPackagePath = mmpkPath
                                 )
                                 // skip adding map info if it already exists in the list
                                 if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
@@ -583,12 +581,10 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
-                                // using the pending path, move the result to final destination path
-                                val destDir = moveOnDemandJobResultToDestination(context, path)
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { mmpkPath ->
                                 // create & load the downloaded map
                                 onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
-                                    mobileMapPackagePath = destDir.absolutePath
+                                    mobileMapPackagePath = mmpkPath
                                 )
                                 // skip adding map info if it already exists in the list
                                 if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
