@@ -65,7 +65,7 @@ public class OfflineMapState(
         onSelectionChanged = onSelectionChanged
     )
 
-    private var _mode: OfflineMapMode = OfflineMapMode.Unknown
+    private var _mode: OfflineMapMode by mutableStateOf(OfflineMapMode.Unknown)
     internal val mode: OfflineMapMode
         get() = _mode
 
@@ -446,7 +446,7 @@ public class OfflineMapState(
                     // replace the loaded duplicate preplanned area, with the in-progress job state
                     _preplannedMapAreaStates[duplicateMapAreaStateIndex] = restoredState
 
-                } else if (mode == OfflineMapMode.OnDemand) {
+                } else {
                     val restoredState = OnDemandMapAreasState(
                         context = context,
                         item = portalItem,
