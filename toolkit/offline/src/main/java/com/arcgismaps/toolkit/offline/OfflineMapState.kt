@@ -427,19 +427,19 @@ public class OfflineMapState(
     private suspend fun restoreJobsAndUpdateState(context: Context) {
         OfflineRepository.getActiveOfflineJobs(context, portalItem.itemId)
             .forEach { workerUuid ->
-                val mapAreaId = OfflineRepository.getMapAreaForOfflineJob(
+                val mapAreaMetadata = OfflineRepository.getMapAreaMetadataForOfflineJob(
                     context = context,
                     uuid = workerUuid,
                     portalItemId = portalItem.itemId
-                )
+                ) ?: return@forEach
                 if (mode == OfflineMapMode.Preplanned) {
                     val restoredState = PreplannedMapAreaState(
                         context = context,
                         item = portalItem,
                         onSelectionChanged = onSelectionChanged
-                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                     val duplicateMapAreaStateIndex = _preplannedMapAreaStates.indexOfFirst {
-                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaId)
+                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaMetadata.areaId)
                     }
                     // replace the loaded duplicate preplanned area, with the in-progress job state
                     _preplannedMapAreaStates[duplicateMapAreaStateIndex] = restoredState
@@ -449,7 +449,7 @@ public class OfflineMapState(
                         context = context,
                         item = portalItem,
                         onSelectionChanged = onSelectionChanged
-                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                     // add the in-progress job states after loading on-demand map areas
                     _onDemandMapAreaStates.add(restoredState)
                 }

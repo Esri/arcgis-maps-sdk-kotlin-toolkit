@@ -157,6 +157,26 @@ internal object OfflineURLs {
     }
 
     /**
+     * Returns the path to the map area's metadata directory from the external cache,
+     * creates the directory if it doesn’t already exist:
+     *
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/<mapAreaID>/`
+     *
+     * @since 200.8.0
+     */
+    internal fun pendingAreaMetadataDirectoryPath(
+        context: Context,
+        portalItemID: String,
+        mapAreaID: String
+    ): String {
+        val caches = getOfflineCacheDirPath(context)
+        val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
+        val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
+        val areaPendingDir = File(itemPendingDir, mapAreaID).makeDirectoryIfItDoesNotExist()
+        return areaPendingDir.absolutePath
+    }
+
+    /**
      * Returns the path to the “PendingMapInfo” directory from the external cache,
      * creates the directory if it doesn’t already exist:
      *

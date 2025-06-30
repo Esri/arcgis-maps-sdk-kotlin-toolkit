@@ -37,6 +37,7 @@ internal const val onDemandAreas = "OnDemand"
 
 // Offline Map Info constants
 internal const val offlineMapInfoJsonFile = "info.json"
+internal const val offlineAreaMetadataJsonFile = "metadata.json"
 internal const val offlineMapInfoThumbnailFile = "thumbnail.png"
 
 // Notification constants

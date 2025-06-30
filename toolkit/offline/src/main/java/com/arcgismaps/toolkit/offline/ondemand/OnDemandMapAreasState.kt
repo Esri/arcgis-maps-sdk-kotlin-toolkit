@@ -35,6 +35,7 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapUpdateMode
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
+import com.arcgismaps.toolkit.offline.OfflineMapAreaMetadata
 import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
@@ -71,7 +72,7 @@ internal data class OnDemandMapAreaConfiguration(
 internal class OnDemandMapAreasState(
     private val context: Context,
     private val item: Item,
-    private val configuration: OnDemandMapAreaConfiguration? = null,
+    internal val configuration: OnDemandMapAreaConfiguration? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
@@ -101,10 +102,13 @@ internal class OnDemandMapAreasState(
 
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-    internal val title = configuration?.title ?: item.title
+    private var _title by mutableStateOf(configuration?.title ?: item.title)
+    internal val title get() = _title
 
-    internal val thumbnail: Bitmap?
-        get() = configuration?.thumbnail ?: item.thumbnail?.image?.bitmap
+    private var _thumbnail by mutableStateOf(
+        configuration?.thumbnail ?: item.thumbnail?.image?.bitmap
+    )
+    internal val thumbnail: Bitmap? get() = _thumbnail
 
     /**
      * Initiates downloading of the associated on-demand map area for offline use.
@@ -325,7 +329,13 @@ internal class OnDemandMapAreasState(
         }
     }
 
-    fun restoreOfflineMapJobState(offlineWorkerUUID: UUID) {
+    fun restoreOfflineMapJobState(
+        offlineWorkerUUID: UUID,
+        offlineMapAreaMetadata: OfflineMapAreaMetadata
+    ) {
+        _title = offlineMapAreaMetadata.title
+        _thumbnail = offlineMapAreaMetadata.thumbnailImage
+
         if (!scope.isActive)
             scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
