@@ -204,3 +204,5 @@ project(":overviewmap-app").projectDir = File(rootDir, "microapps/OverviewMapApp
 include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
 
+include(":tinyglobe-app")
+project(":tinyglobe-app").projectDir = File(rootDir, "microapps/TinyGlobeApp/app")
