@@ -40,6 +40,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -136,14 +137,14 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     public fun dismissAll()
 
     /**
-     * Revokes OAuth tokens and all credentials from the AuthenticationManager.arcGISCredentialStore`
+     * Revokes OAuth tokens and all credentials from the `AuthenticationManager.arcGISCredentialStore`
      * and `AuthenticationManager.networkCredentialStore`. If an IAP credential exists in
      * the `AuthenticationManager.arcGISCredentialStore`, this function will launch a custom tab for the user to invalidate
      * the IAP session.
      *
      * @since 200.8.0
      */
-    public suspend fun signOut()
+    public suspend fun signOut(): Result<Unit>
 }
 
 /**
@@ -252,7 +253,7 @@ private class AuthenticatorStateImpl(
         }
     }
 
-    override suspend fun signOut() {
+    override suspend fun signOut(): Result<Unit> = runCatchingCancellable {
         val arcGISCredentialStore = ArcGISEnvironment.authenticationManager.arcGISCredentialStore
         val networkCredentialStore = ArcGISEnvironment.authenticationManager.networkCredentialStore
 
@@ -271,8 +272,8 @@ private class AuthenticatorStateImpl(
                 }
             }
         }
-        arcGISCredentialStore.removeAll()
         networkCredentialStore.removeAll()
+        arcGISCredentialStore.removeAll()
     }
 
     /**
@@ -529,3 +530,22 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
  * @since 200.2.0
  */
 private data class UsernamePassword(val username: String, val password: String)
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ * @since 200.8.0
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ *
+ * @since 200.8.0
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()

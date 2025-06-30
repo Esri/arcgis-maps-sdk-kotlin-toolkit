@@ -63,7 +63,10 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
 
     fun signOut() = viewModelScope.launch {
         _isLoading.value = true
-        ArcGISEnvironment.authenticationManager.signOut()
+        authenticatorState.signOut()
+            .onFailure {
+                _infoText.value = it.toString()
+            }
         _infoText.value = startInfoText
         _isLoading.value = false
     }
