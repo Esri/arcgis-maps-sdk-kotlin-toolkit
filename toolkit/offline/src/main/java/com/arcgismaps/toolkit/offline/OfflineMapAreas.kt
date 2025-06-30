@@ -71,10 +71,6 @@ public fun OfflineMapAreas(
         isRefreshEnabled = false
     }
 
-    DisposableEffect(Unit) {
-        onDispose { isRefreshEnabled = true }
-    }
-
     Surface(modifier = modifier) {
         when (initializationStatus) {
             is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
