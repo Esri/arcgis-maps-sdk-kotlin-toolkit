@@ -1,23 +1,20 @@
 /*
+ * Copyright 2025 Esri
  *
- *  Copyright 2023 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.arcgismaps.toolkit.authentication
-
 
 import android.content.Context
 import android.content.Intent
@@ -28,7 +25,7 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
-private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
+private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 
@@ -39,17 +36,22 @@ private const val RESULT_CODE_CANCELED = 2
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
- * This activity must be registered in your application's manifest. There are two ways to configure
- * the manifest entry for [OAuthUserSignInActivity]:
+ * This activity handles both OAuth and IAP (Identity-Aware Proxy) sign-in flows. The behavior
+ * for IAP sign-in is similar to OAuth, where the activity launches a CustomTabs browser
+ * for user interaction and processes the result upon completion.
  *
- * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
- * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
- * immediately handle the completion of the challenge. In this case, the activity should be declared
- * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ * This activity must be registered in your application's manifest. There are two ways to configure
+ * the manifest entry for [AuthenticationActivity]:
+ *
+ * When completing an authentication challenge by signing in, the Custom Tabs should redirect back to
+ * this activity immediately and allow the appropriate authenticator to handle the completion of the challenge.
+ * This applies to both OAuth and IAP flows.
+ * In this case, the activity should be declared in the manifest using `launchMode="singleTop"` and an
+ * `intent-filter` should be specified:
  *
  * ```
  * <activity
- * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
  * android:launchMode="singleTop" >
@@ -67,39 +69,33 @@ private const val RESULT_CODE_CANCELED = 2
  * ```
  *
  * Should your app require that the redirect intent from the browser is handled by another activity,
- * then you should remove the intent filter from the `OAuthUserSignInActivity` and put it in the activity
+ * then you should remove the intent filter from the `AuthenticationActivity` and put it in the activity
  * that you want the browser to redirect to. Depending on your app's configuration, you may need to
  * change the launch mode to `singleInstance`, but be aware that this will expose the browser as a
  * separate task in the recent tasks list.
  *
  * ```
  * <activity
- * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
  * android:launchMode="singleInstance" >
  * </activity>
  * ```
  *
- * Then, in the activity that receives the intent as a result of completing the CustomTab, you can pass that on to the `OAuthUserSignInActivity`
- * by copying the `intent.data` and starting the activity directly:
+ * Then, in the activity that receives the intent as a result of completing the CustomTab, you can pass that on to the
+ * `AuthenticationActivity` by copying the `intent.data` and starting the activity directly:
  *
  * ```
- * val newIntent = Intent(this, OAuthUserSignInActivity::class.java).apply {
+ * val newIntent = Intent(this, AuthenticationActivity::class.java).apply {
  *   data = uri
  * }
  * startActivity(newIntent)
  * ```
  *
- * @since 200.2.0
+ * @since 200.8.0
  */
-@Deprecated(
-    message = "As of 200.8.0, this class is deprecated and will be removed in a future release. " +
-            "Use `AuthenticationActivity` instead.",
-    replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
-    level = DeprecationLevel.WARNING
-)
-public class OAuthUserSignInActivity : ComponentActivity() {
+public class AuthenticationActivity internal constructor(): ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,13 +139,13 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * Finishes this activity with a response containing a success code and the redirect intent's uri
      * or a canceled code if no uri can be found.
      *
-     * @since 200.2.0
+     * @since 200.8.0
      */
-    public fun handleRedirectIntent(intent: Intent?) {
+    private fun handleRedirectIntent(intent: Intent?) {
         intent?.data?.let { uri ->
             val uriString = uri.toString()
             val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uriString)
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
             finish()
@@ -163,20 +159,15 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
      * string as output. The output string represents a redirect URI as the result of an OAuth user
      * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [OAuthUserSignInActivity] for a result.
+     * [AuthenticationActivity] for a result.
      * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
      * for more details.
      *
-     * @since 200.2.0
+     * @since 200.8.0
      */
-    @Deprecated(
-        message = "As of 200.8.0 this class is deprecated and will be removed in a future release." +
-                "Use AuthenticationActivity for OAuth user sign in support.",
-        level = DeprecationLevel.WARNING
-    )
-    public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
-            Intent(context, OAuthUserSignInActivity::class.java).apply {
+            Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
@@ -184,7 +175,33 @@ public class OAuthUserSignInActivity : ComponentActivity() {
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
             return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            } else {
+                null
+            }
+        }
+    }
+
+    /**
+     * An ActivityResultContract that takes a String as input and returns a nullable String as output.
+     * The input string represents an IAP authorize URL, and the output string represents a redirect URI as
+     * the result of an IAP sign in prompt, or null if the IAP sign in failed. This contract can be used to launch the
+     * [AuthenticationActivity] for a result.
+     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
+     * for more details.
+     *
+     * @since 200.8.0
+     */
+    internal class IapSignInContract : ActivityResultContract<String, String?>() {
+        override fun createIntent(context: Context, input: String): Intent =
+            Intent(context, AuthenticationActivity::class.java).apply {
+                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input)
+                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
+            }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): String? {
+            return if (resultCode == RESULT_CODE_SUCCESS) {
+                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
             } else {
                 null
             }
