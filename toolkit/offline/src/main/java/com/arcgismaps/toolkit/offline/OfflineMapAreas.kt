@@ -200,12 +200,11 @@ internal fun OnDemandLayoutContainer(
             EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
         }
     }
-    val context = LocalContext.current
     // Map area selection bottom sheet
     OnDemandMapAreaSelector(
         localMap = localMap,
         showSheet = isOnDemandMapAreaSelectorVisible,
-        uniqueMapAreaTitle = getDefaultMapAreaTitle(context, onDemandMapAreaStates),
+        uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },
         onProposedTitleChange = { mapAreaTitle ->
