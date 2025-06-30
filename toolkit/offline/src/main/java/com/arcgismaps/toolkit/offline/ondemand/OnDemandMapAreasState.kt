@@ -211,6 +211,7 @@ internal class OnDemandMapAreasState(
      * in WorkManager.
      *
      * @param downloadOnDemandOfflineMapJob The on-demand offline map job to execute using WorkManager.
+     * @param onDemandMapAreaId The map area ID of used to track the job state.
      *
      * @return A unique identifier ([UUID]) associated with this task within WorkManager's queue system.
      *
@@ -329,13 +330,19 @@ internal class OnDemandMapAreasState(
         }
     }
 
+    /**
+     * Restores and observes the state of a given offline map download job.
+     *
+     * @since 200.8.0
+     */
     fun restoreOfflineMapJobState(
         offlineWorkerUUID: UUID,
         offlineMapAreaMetadata: OfflineMapAreaMetadata
     ) {
+        // restore the UI state
         _title = offlineMapAreaMetadata.title
         _thumbnail = offlineMapAreaMetadata.thumbnailImage
-
+        // observe the active job
         if (!scope.isActive)
             scope = CoroutineScope(Dispatchers.IO)
         scope.launch {

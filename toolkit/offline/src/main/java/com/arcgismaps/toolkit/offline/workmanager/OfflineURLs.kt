@@ -81,7 +81,6 @@ internal object OfflineURLs {
 
     /**
      * Returns the path to the “Preplanned” subdirectory for a portal item,
-     * creates the directory if it doesn’t already exist:
      *
      * - `<your-app-files-dir>/com.esri.toolkit.offline/<portalItemID>/Preplanned/<preplannedMapAreaID>`
      *
@@ -95,21 +94,14 @@ internal object OfflineURLs {
         context: Context,
         portalItemID: String,
         preplannedMapAreaID: String? = null,
-        isMakeDirsEnabled: Boolean = false,
-    ): String? {
+    ): String {
         val itemDir = File(portalItemDirectoryPath(context, portalItemID))
-        val preplannedDir = File(itemDir, preplannedMapAreas)
+        val preplannedDir = File(itemDir, preplannedMapAreas).makeDirectoryIfItDoesNotExist()
         return if (preplannedMapAreaID != null) {
-            val areaDir = File(preplannedDir, preplannedMapAreaID)
-            if (isMakeDirsEnabled) {
-                areaDir.makeDirectoryIfItDoesNotExist()
-            }
-            if (areaDir.exists()) areaDir.absolutePath else null
+            val areaDir = File(preplannedDir, preplannedMapAreaID).makeDirectoryIfItDoesNotExist()
+            areaDir.absolutePath
         } else {
-            if (isMakeDirsEnabled) {
-                preplannedDir.makeDirectoryIfItDoesNotExist()
-            }
-            if (preplannedDir.exists()) preplannedDir.absolutePath else null
+            preplannedDir.absolutePath
         }
     }
 

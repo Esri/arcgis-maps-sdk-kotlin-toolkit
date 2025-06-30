@@ -306,8 +306,7 @@ public object OfflineRepository {
         val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
-            preplannedMapAreaID = areaItemID,
-            isMakeDirsEnabled = true
+            preplannedMapAreaID = areaItemID
         ).toString()
         val destDir = File(destDirPath)
         cacheAreaDir.listFiles()?.forEach { child ->
@@ -583,28 +582,27 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(PreplannedStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)
-                                ?.let { mmpkPath ->
-                                    // create & load the downloaded map
-                                    preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                                        mobileMapPackagePath = mmpkPath
-                                    )
-                                    // skip adding map info if it already exists in the list
-                                    if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
-                                        // create offline map information from local directory
-                                        OfflineMapInfo.createFromDirectory(
-                                            directory = File(
-                                                OfflineURLs.portalItemDirectoryPath(
-                                                    context = context,
-                                                    portalItemID = portalItem.itemId
-                                                )
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
+                                // create & load the downloaded map
+                                preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
+                                    mobileMapPackagePath = path
+                                )
+                                // skip adding map info if it already exists in the list
+                                if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
+                                    // create offline map information from local directory
+                                    OfflineMapInfo.createFromDirectory(
+                                        directory = File(
+                                            OfflineURLs.portalItemDirectoryPath(
+                                                context = context,
+                                                portalItemID = portalItem.itemId
                                             )
-                                        )?.let {
-                                            // if non-null info was created, add it to the list
-                                            _offlineMapInfos.add(it)
-                                        }
+                                        )
+                                    )?.let {
+                                        // if non-null info was created, add it to the list
+                                        _offlineMapInfos.add(it)
                                     }
-                                } ?: run {
+                                }
+                            } ?: run {
                                 preplannedMapAreaState.updateStatus(
                                     PreplannedStatus.MmpkLoadFailure(
                                         Exception("Mobile Map Package path is null")
@@ -679,28 +677,27 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)
-                                ?.let { mmpkPath ->
-                                    // create & load the downloaded map
-                                    onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
-                                        mobileMapPackagePath = mmpkPath
-                                    )
-                                    // skip adding map info if it already exists in the list
-                                    if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
-                                        // create offline map information from local directory
-                                        OfflineMapInfo.createFromDirectory(
-                                            directory = File(
-                                                OfflineURLs.portalItemDirectoryPath(
-                                                    context = context,
-                                                    portalItemID = portalItem.itemId
-                                                )
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
+                                // create & load the downloaded map
+                                onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
+                                    mobileMapPackagePath = path
+                                )
+                                // skip adding map info if it already exists in the list
+                                if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
+                                    // create offline map information from local directory
+                                    OfflineMapInfo.createFromDirectory(
+                                        directory = File(
+                                            OfflineURLs.portalItemDirectoryPath(
+                                                context = context,
+                                                portalItemID = portalItem.itemId
                                             )
-                                        )?.let {
-                                            // if non-null info was created, add it to the list
-                                            _offlineMapInfos.add(it)
-                                        }
+                                        )
+                                    )?.let {
+                                        // if non-null info was created, add it to the list
+                                        _offlineMapInfos.add(it)
                                     }
-                                } ?: run {
+                                }
+                            } ?: run {
                                 onDemandMapAreasState.updateStatus(
                                     OnDemandStatus.MmpkLoadFailure(
                                         Exception("Mobile Map Package path is null")
@@ -731,9 +728,7 @@ public object OfflineRepository {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloading)
                         }
                         // don't have to handle other states
-                        else -> {
-
-                        }
+                        else -> {}
                     }
                 }
             }

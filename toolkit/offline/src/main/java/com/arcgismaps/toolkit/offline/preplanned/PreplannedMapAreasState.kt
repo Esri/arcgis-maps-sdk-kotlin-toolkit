@@ -225,6 +225,7 @@ internal class PreplannedMapAreaState(
      * in WorkManager.
      *
      * @param downloadPreplannedOfflineMapJob The prepared offline map job to execute using WorkManager.
+     * @param preplannedMapAreaId The map area ID of used to track the job state.
      *
      * @return A unique identifier ([UUID]) associated with this task within WorkManager's queue system.
      *
@@ -328,14 +329,20 @@ internal class PreplannedMapAreaState(
         }
     }
 
+    /**
+     * Restores and observes the state of a given offline map download job.
+     *
+     * @since 200.8.0
+     */
     fun restoreOfflineMapJobState(
         offlineWorkerUUID: UUID,
         offlineMapAreaMetadata: OfflineMapAreaMetadata
     ) {
+        // restore the UI state
         _title = offlineMapAreaMetadata.title
         _description = offlineMapAreaMetadata.description
         _thumbnail = offlineMapAreaMetadata.thumbnailImage
-
+        // observe the active job
         if (!scope.isActive)
             scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
