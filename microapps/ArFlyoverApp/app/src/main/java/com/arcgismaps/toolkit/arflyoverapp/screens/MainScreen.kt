@@ -78,7 +78,7 @@ import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
-import com.arcgismaps.toolkit.arflyoverapp.pointsOfInterestList
+import com.arcgismaps.toolkit.arflyoverapp.rememberPointsOfInterest
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -96,6 +96,8 @@ fun MainScreen() {
     }
 
     var currentPoiIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val pointsOfInterestList = rememberPointsOfInterest().value
 
     val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
         pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
