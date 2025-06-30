@@ -86,16 +86,12 @@ private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 @Composable
 fun MainScreen() {
 
-    val elevationSource =
-        ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
-
-    val integratedMeshLayer =
-        IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
-
     val arcGISScene = remember {
         ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            baseSurface.elevationSources.add(elevationSource)
-            operationalLayers.add(integratedMeshLayer)
+            baseSurface.elevationSources.add(ArcGISTiledElevationSource(
+                "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"))
+            operationalLayers.add(IntegratedMeshLayer(
+                "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer"))
         }
     }
 
