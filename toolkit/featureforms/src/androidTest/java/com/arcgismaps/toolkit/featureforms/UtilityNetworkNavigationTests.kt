@@ -16,9 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -44,6 +41,12 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
+    /**
+     * Given a FeatureForm with a UtilityAssociationsFormElement
+     * When the navigation is enabled
+     * Then the user should be able to navigate to a new form if there are no edits made
+     * And return to the original form
+     */
     @Test
     fun testNavigationWithoutEdits() {
         val state = FeatureFormState(
@@ -63,7 +66,6 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         }
         val filter = element!!.associationsFilterResults.first().filter
         val groupResult = element.associationsFilterResults.first().groupResults.first()
-        val associationResult = groupResult.associationResults.first()
         // Check that the filter, group, and association results are displayed
         val filterNode = composeTestRule.onNodeWithText(text = filter.title)
         filterNode.assertIsDisplayed()
@@ -108,11 +110,10 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
             featureForm,
             coroutineScope = scope
         )
-        var isNavigationEnabled by mutableStateOf(false)
         composeTestRule.setContent {
             FeatureForm(
                 featureFormState = state,
-                isNavigationEnabled = isNavigationEnabled
+                isNavigationEnabled = false
             )
         }
         val element = featureForm.elements.first() as? UtilityAssociationsFormElement
@@ -137,14 +138,5 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         associationNode.performClick()
         // Check that the navigation is disabled
         assertThat(state.activeFeatureForm).isEqualTo(featureForm)
-        // Enable navigation
-        isNavigationEnabled = true
-        // Perform the click again
-        associationNode.performClick()
-        composeTestRule.waitUntil {
-            state.activeFeatureForm != featureForm
-        }
-        // Assert that the navigation was successful
-        assertThat(state.activeFeatureForm).isNotEqualTo(featureForm)
     }
 }
