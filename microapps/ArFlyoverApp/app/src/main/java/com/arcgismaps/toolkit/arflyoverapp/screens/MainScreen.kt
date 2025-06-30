@@ -99,7 +99,7 @@ fun MainScreen() {
         }
     }
 
-    var currentPoiIndex by remember { mutableIntStateOf(0) }
+    var currentPoiIndex by rememberSaveable { mutableIntStateOf(0) }
 
     val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
         pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
