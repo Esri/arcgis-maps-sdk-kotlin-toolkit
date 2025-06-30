@@ -234,12 +234,13 @@ public class OfflineMapState(
         )
         val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
             ?: emptyList()
+
         if (preplannedMapAreaItemIds.isNotEmpty())
             _mode = OfflineMapMode.Preplanned
+
         preplannedMapAreaItemIds.forEach { itemId ->
             createOfflinePreplannedMapAreaState(context, itemId)
                 ?.let { _preplannedMapAreaStates.add(it) }
-
         }
     }
 
@@ -352,8 +353,9 @@ public class OfflineMapState(
                 mobileMapPackagePath = onDemandPath
             )
             return onDemandMapAreasState
-        } else
+        } else {
             return null
+        }
     }
 
     /**

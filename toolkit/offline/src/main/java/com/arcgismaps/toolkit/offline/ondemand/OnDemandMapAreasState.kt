@@ -357,7 +357,6 @@ internal class OnDemandMapAreasState(
             )
         }
     }
-
 }
 
 /**
