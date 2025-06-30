@@ -22,7 +22,7 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun setIapConfigurations (Ljava/util/List;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
-	public abstract fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun signOut-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
