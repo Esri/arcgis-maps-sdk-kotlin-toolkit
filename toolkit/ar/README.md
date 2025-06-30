@@ -381,7 +381,7 @@ val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(location, heading)
 
 Determine a translation factor that suits the scene and camera origin point. For example, a
 relatively high translation factor is probably suitable when flying high above the scene, but a low
-value maybe be more suitable when exploring the scene at ground level. Call the `FlyoverSceneView`
+value may be more suitable when exploring the scene at ground level. Call the `FlyoverSceneView`
 composable function specifying the parameters you chose:
 
 ```kotlin
