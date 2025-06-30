@@ -53,20 +53,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.SheetState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
     sheetState: SheetState,
-    scope: CoroutineScope,
     onDismiss: () -> Unit,
+    offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
     title: String,
     description: String?,
@@ -79,13 +78,14 @@ internal fun MapAreaDetailsBottomSheet(
     if (showSheet) {
         // Launch expanded when shown
         LaunchedEffect(Unit) {
-            scope.launch { sheetState.expand() }
+            sheetState.expand()
         }
         ModalBottomSheet(
             onDismissRequest = onDismiss,
             sheetState = sheetState
         ) {
             MapAreaDetailsScreen(
+                offlineMapMode = offlineMapMode,
                 thumbnail = thumbnail,
                 title = title,
                 description = description,
@@ -101,6 +101,7 @@ internal fun MapAreaDetailsBottomSheet(
 
 @Composable
 internal fun MapAreaDetailsScreen(
+    offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
     title: String,
     description: String?,
@@ -151,7 +152,10 @@ internal fun MapAreaDetailsScreen(
 
         // Size of the map area
         if (size != 0) {
-            Text(text = "Size: ${formatSize(size)}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.directory_size, formatSize(size)),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         if (description != null) {
@@ -190,7 +194,12 @@ internal fun MapAreaDetailsScreen(
             }
             if (isDeletable) {
                 Button(onClick = { onDeleteDownload() }) {
-                    Text(stringResource(id = R.string.remove_download))
+                    Text(
+                        if (offlineMapMode == OfflineMapMode.Preplanned)
+                            stringResource(id = R.string.remove_download)
+                        else
+                            stringResource(R.string.delete_download)
+                    )
                 }
             }
         }
@@ -203,6 +212,7 @@ private fun PreviewMapAreaDetailsScreen() {
     MaterialTheme {
         Surface {
             MapAreaDetailsScreen(
+                offlineMapMode = OfflineMapMode.Preplanned,
                 thumbnail = null,
                 title = "City Hall Area",
                 description = "A map that contains stormwater network within...",

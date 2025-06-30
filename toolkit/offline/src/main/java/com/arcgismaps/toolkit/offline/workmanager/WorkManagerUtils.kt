@@ -31,27 +31,27 @@ import java.io.File
 internal fun logWorkInfo(workInfo: WorkInfo) {
     when (workInfo.state) {
         WorkInfo.State.ENQUEUED -> {
-            Log.e(TAG, "${workInfo.tags}: ENQUEUED")
+            Log.d(TAG, "${workInfo.tags}: Enqueued")
         }
 
         WorkInfo.State.SUCCEEDED -> {
-            Log.e(TAG, "${workInfo.tags}: SUCCEEDED")
+            Log.d(TAG, "${workInfo.tags}: Succeeded")
         }
 
         WorkInfo.State.BLOCKED -> {
-            Log.e(TAG, "${workInfo.tags}: BLOCKED")
+            Log.d(TAG, "${workInfo.tags}: Blocked")
         }
 
         WorkInfo.State.RUNNING -> {
-            Log.e(TAG, "${workInfo.tags}: RUNNING ${workInfo.progress.getInt("Progress", 0)}")
+            Log.d(TAG, "${workInfo.tags}: Running - Progress: ${workInfo.progress.getInt("Progress", 0)}")
         }
 
         WorkInfo.State.FAILED -> {
-            Log.e(TAG, "${workInfo.tags}: FAILED: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
+            Log.e(TAG, "${workInfo.tags}: Failed: ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
         }
 
         WorkInfo.State.CANCELLED -> {
-            Log.e(TAG, "${workInfo.tags}: CANCELLED - Stop reason: ${workInfo.stopReason.toStopReasonString()}, ${workInfo.outputData.getString("Error")} - Details: ${workInfo.outputData.keyValueMap}")
+            Log.e(TAG, "${workInfo.tags}: Cancelled - Stop reason: ${workInfo.stopReason.toStopReasonString()}}")
         }
     }
 }

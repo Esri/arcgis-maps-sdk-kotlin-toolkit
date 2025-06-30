@@ -24,10 +24,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,16 +33,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageNotSupported
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,13 +56,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.internal.utils.CancelButton
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
-import kotlinx.coroutines.launch
 
 /**
  * Displays a list of on-demand map areas.
@@ -75,26 +73,33 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
-    modifier: Modifier,
-    onDownloadNewMapArea: () -> Unit
+    onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
+    modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var onHideSheet by rememberSaveable { mutableStateOf(false) }
     var selectedIndex by rememberSaveable { mutableIntStateOf(-1) }
     val selectedOnDemandMapAreaState = selectedIndex.takeIf { it in onDemandMapAreasStates.indices }
         ?.let { onDemandMapAreasStates[it] }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-    val scope = rememberCoroutineScope()
+    LaunchedEffect(onHideSheet, sheetState.isVisible) {
+        if (onHideSheet) {
+            sheetState.hide()
+            onHideSheet = false
+        }
+        if (!sheetState.isVisible) {
+            showSheet = false
+        }
+    }
 
     // Show the modal bottom sheet if needed
     if (showSheet && selectedOnDemandMapAreaState != null) {
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
-            scope = scope,
             onDismiss = { showSheet = false },
+            offlineMapMode = OfflineMapMode.OnDemand,
             thumbnail = selectedOnDemandMapAreaState.thumbnail?.asImageBitmap(),
             title = selectedOnDemandMapAreaState.title,
             description = null,
@@ -102,17 +107,13 @@ internal fun OnDemandMapAreas(
             isAvailableToDownload = selectedOnDemandMapAreaState.status.allowsDownload,
             onStartDownload = {
                 selectedOnDemandMapAreaState.downloadOnDemandMapArea()
-                scope
-                    .launch { sheetState.hide() }
-                    .invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showSheet = false
-                        }
-                    }
+                onHideSheet = true
             },
             isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
+                onDownloadDeleted(selectedOnDemandMapAreaState)
+                onHideSheet = true
             }
         )
     }
@@ -206,6 +207,13 @@ internal fun OnDemandMapAreas(
                             }
                         }
 
+                        state.status == OnDemandStatus.DownloadCancelled || state.status is OnDemandStatus.DownloadFailure -> {
+                            CancelButton {
+                                state.removeCancelledMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
+                                onDownloadDeleted(state)
+                            }
+                        }
+
                         state.status.isDownloaded -> {
                             OpenButton(!state.isSelectedToOpen) {
                                 // Unselect all, then select this one
@@ -215,18 +223,10 @@ internal fun OnDemandMapAreas(
                         }
                     }
                 }
-                if (state.onDemandAreaID != onDemandMapAreasStates.last().onDemandAreaID) {
+                if (state != onDemandMapAreasStates.last()) {
                     HorizontalDivider(modifier = Modifier.padding(start = 80.dp))
                 }
             }
-        }
-        Spacer(Modifier.height(12.dp))
-        // add a button to add a new on demand map area
-        Button(onClick = onDownloadNewMapArea) {
-            Text(
-                text = stringResource(R.string.add_map_area),
-                style = MaterialTheme.typography.labelSmall
-            )
         }
     }
 }
@@ -246,6 +246,7 @@ private fun getOnDemandMapAreaStatusString(context: Context, status: OnDemandSta
         is OnDemandStatus.DownloadFailure -> getString(context, R.string.download_failed)
         OnDemandStatus.Downloaded -> getString(context, R.string.downloaded)
         OnDemandStatus.Downloading -> getString(context, R.string.downloading)
+        OnDemandStatus.DownloadCancelled -> getString(context, R.string.cancelled)
         OnDemandStatus.PackageFailure -> getString(context, R.string.packaging_failed)
         OnDemandStatus.Packaged -> getString(context, R.string.ready_to_download)
         OnDemandStatus.Packaging -> getString(context, R.string.packaging)

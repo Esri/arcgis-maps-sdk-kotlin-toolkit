@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Error
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
 
 @Composable
 internal fun OfflineMapAreasStatusContent(
@@ -69,10 +69,11 @@ internal fun OfflineMapAreasStatusContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(
                     modifier = Modifier.wrapContentSize(),
                     text = message,
@@ -160,20 +161,7 @@ internal fun EmptyOnDemandOfflineAreas(onlyFooterVisible: Boolean = false, onAdd
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.empty_on_demand_message),
         icon = Icons.Default.ArrowDownward,
-        actions = {
-            Button(onClick = onAdd) {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Icon to add map area"
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = stringResource(R.string.add_map_area),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        },
+        actions = { AddMapAreaButton(onAdd) },
         onlyFooterVisible = onlyFooterVisible
     )
 }
