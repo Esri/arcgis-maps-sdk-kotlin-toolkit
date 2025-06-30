@@ -94,22 +94,15 @@ internal object OfflineURLs {
     internal fun prePlannedDirectoryPath(
         context: Context,
         portalItemID: String,
-        preplannedMapAreaID: String? = null,
-        isMakeDirsEnabled: Boolean = false,
-    ): String? {
+        preplannedMapAreaID: String? = null
+    ): String {
         val itemDir = File(portalItemDirectoryPath(context, portalItemID))
-        val preplannedDir = File(itemDir, preplannedMapAreas)
+        val preplannedDir = File(itemDir, preplannedMapAreas).makeDirectoryIfItDoesNotExist()
         return if (preplannedMapAreaID != null) {
-            val areaDir = File(preplannedDir, preplannedMapAreaID)
-            if (isMakeDirsEnabled) {
-                areaDir.makeDirectoryIfItDoesNotExist()
-            }
-            if (areaDir.exists()) areaDir.absolutePath else null
+            val areaDir = File(preplannedDir, preplannedMapAreaID).makeDirectoryIfItDoesNotExist()
+            areaDir.absolutePath
         } else {
-            if (isMakeDirsEnabled) {
-                preplannedDir.makeDirectoryIfItDoesNotExist()
-            }
-            if (preplannedDir.exists()) preplannedDir.absolutePath else null
+            preplannedDir.absolutePath
         }
     }
 
@@ -154,6 +147,26 @@ internal object OfflineURLs {
         val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
         return itemPendingDir.absolutePath
+    }
+
+    /**
+     * Returns the path to the map area's metadata directory from the external cache,
+     * creates the directory if it doesn’t already exist:
+     *
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/<mapAreaID>/`
+     *
+     * @since 200.8.0
+     */
+    internal fun pendingAreaMetadataDirectoryPath(
+        context: Context,
+        portalItemID: String,
+        mapAreaID: String
+    ): String {
+        val caches = getOfflineCacheDirPath(context)
+        val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
+        val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
+        val areaPendingDir = File(itemPendingDir, mapAreaID).makeDirectoryIfItDoesNotExist()
+        return areaPendingDir.absolutePath
     }
 
     /**

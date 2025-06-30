@@ -40,6 +40,7 @@ import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.workmanager.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
+import com.arcgismaps.toolkit.offline.workmanager.offlineAreaMetadataJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
 import com.arcgismaps.toolkit.offline.workmanager.onDemandAreas
@@ -110,6 +111,10 @@ public object OfflineRepository {
     /**
      * Saves the [OfflineMapInfo] to the pending folder for a particular web map's portal item.
      * The info will stay in that folder until the job completes.
+     *
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/info.json`
+     *
+     * @since 200.8.0
      */
     private fun savePendingMapInfo(context: Context, portalItem: PortalItem) {
         val pendingMapInfoDir = File(
@@ -119,6 +124,84 @@ public object OfflineRepository {
             val info = OfflineMapInfo(portalItem)
             info.saveToDirectory(pendingMapInfoDir)
         }
+    }
+
+    /**
+     * Saves the [OfflineMapAreaMetadata] to the pending folder for map area of a web map's portal item.
+     * The info will stay in this folder until the job completes.
+     *
+     * - `<your-app-files-dir>/OfflineMapAreasCache/PendingMapInfo/<portalItemID>/<areaItemID>/metadata.json`
+     *
+     * @since 200.8.0
+     */
+    private fun savePendingMapAreaMetadata(
+        context: Context,
+        portalItem: PortalItem,
+        areaMetadata: OfflineMapAreaMetadata
+    ) {
+        val pendingAreaMetadataDir = File(
+            OfflineURLs.pendingAreaMetadataDirectoryPath(
+                context, portalItem.itemId, areaMetadata.areaId
+            )
+        )
+        if (!OfflineMapAreaMetadata.isSerializedFilePresent(pendingAreaMetadataDir)) {
+            areaMetadata.saveToDirectory(pendingAreaMetadataDir)
+        }
+    }
+    /**
+     * Returns preplanned/on-demand map area [OfflineMapAreaMetadata] using the corresponding job [UUID].
+     *
+     * @since 200.8.0
+     */
+    internal suspend fun getMapAreaMetadataForOfflineJob(
+        context: Context,
+        uuid: UUID,
+        portalItemId: String
+    ): OfflineMapAreaMetadata? {
+        val workManager = WorkManager.getInstance(context)
+        val workQuery = WorkQuery.Builder
+            .fromIds(listOf(uuid))
+            .build()
+        val workInfos = withContext(Dispatchers.IO) {
+            workManager.getWorkInfos(workQuery).get()
+        }
+        val workerTags = workInfos.firstOrNull()?.tags ?: return null
+        workerTags.forEach { tag ->
+            // Skip non relevant tags, like: com.arcgismaps.toolkit.offline.workmanager.
+            if (tag != portalItemId && tag.length < 42) {
+                val areaMetadataDir = File(
+                    OfflineURLs.pendingAreaMetadataDirectoryPath(
+                        context, portalItemId, tag
+                    )
+                )
+                if (OfflineMapAreaMetadata.isSerializedFilePresent(areaMetadataDir)) {
+                    return OfflineMapAreaMetadata.createFromDirectory(areaMetadataDir)
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns the list of [UUID] for active running/enqueued jobs for the given [portalItemId].
+     *
+     * @since 200.8.0
+     */
+    internal suspend fun getActiveOfflineJobs(
+        context: Context,
+        portalItemId: String
+    ): List<UUID> {
+        val workManager = WorkManager.getInstance(context)
+        val workQuery = WorkQuery.Builder
+            .fromTags(listOf(portalItemId))
+            .build()
+        val workInfos = withContext(Dispatchers.IO) {
+            workManager.getWorkInfos(workQuery).get()
+        }
+        val activePortalItemWorkers = workInfos.filter { workInfo ->
+            (workInfo.state == WorkInfo.State.ENQUEUED || workInfo.state == WorkInfo.State.RUNNING)
+        }
+        return activePortalItemWorkers.map { it.id }
     }
 
     /**
@@ -223,9 +306,8 @@ public object OfflineRepository {
         val destDirPath = OfflineURLs.prePlannedDirectoryPath(
             context = context,
             portalItemID = portalItemID,
-            preplannedMapAreaID = areaItemID,
-            isMakeDirsEnabled = true
-        ).toString()
+            preplannedMapAreaID = areaItemID
+        )
         val destDir = File(destDirPath)
         cacheAreaDir.listFiles()?.forEach { child ->
             val target = File(destDir, child.name)
@@ -476,8 +558,15 @@ public object OfflineRepository {
         portalItem: PortalItem,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        val workManager = WorkManager.getInstance(context)
         savePendingMapInfo(context, portalItem)
+        preplannedMapAreaState.preplannedMapArea?.let { mapArea ->
+            savePendingMapAreaMetadata(
+                context = context,
+                portalItem = portalItem,
+                areaMetadata = OfflineMapAreaMetadata.createPreplannedMetadata(mapArea)
+            )
+        }
+        val workManager = WorkManager.getInstance(context)
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
@@ -493,10 +582,10 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             preplannedMapAreaState.updateStatus(PreplannedStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { mmpkPath ->
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 // create & load the downloaded map
                                 preplannedMapAreaState.createAndLoadMMPKAndOfflineMap(
-                                    mobileMapPackagePath = mmpkPath
+                                    mobileMapPackagePath = path
                                 )
                                 // skip adding map info if it already exists in the list
                                 if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
@@ -564,8 +653,15 @@ public object OfflineRepository {
         portalItem: PortalItem,
         onWorkInfoStateChanged: (WorkInfo) -> Unit,
     ) {
-        val workManager = WorkManager.getInstance(context)
         savePendingMapInfo(context, portalItem)
+        onDemandMapAreasState.configuration?.let { mapArea ->
+            savePendingMapAreaMetadata(
+                context = context,
+                portalItem = portalItem,
+                areaMetadata = OfflineMapAreaMetadata.createOnDemandMetadata(mapArea)
+            )
+        }
+        val workManager = WorkManager.getInstance(context)
         // collect the flow to get the latest work info list
         workManager.getWorkInfoByIdFlow(offlineWorkerUUID)
             .collect { workInfo ->
@@ -581,10 +677,10 @@ public object OfflineRepository {
                         // if work completed successfully
                         WorkInfo.State.SUCCEEDED -> {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloaded)
-                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { mmpkPath ->
+                            workInfo.outputData.getString(mobileMapPackagePathKey)?.let { path ->
                                 // create & load the downloaded map
                                 onDemandMapAreasState.createAndLoadMMPKAndOfflineMap(
-                                    mobileMapPackagePath = mmpkPath
+                                    mobileMapPackagePath = path
                                 )
                                 // skip adding map info if it already exists in the list
                                 if (_offlineMapInfos.find { it.id == portalItem.itemId } == null) {
@@ -632,61 +728,10 @@ public object OfflineRepository {
                             onDemandMapAreasState.updateStatus(OnDemandStatus.Downloading)
                         }
                         // don't have to handle other states
-                        else -> {
-
-                        }
+                        else -> {}
                     }
                 }
             }
-    }
-
-    /**
-     * Returns preplanned/on-demand map area ID using the corresponding job [UUID].
-     *
-     * @since 200.8.0
-     */
-    internal suspend fun getMapAreaForOfflineJob(
-        context: Context,
-        uuid: UUID,
-        portalItemId: String
-    ): String? {
-        val workManager = WorkManager.getInstance(context)
-        val workQuery = WorkQuery.Builder
-            .fromIds(listOf(uuid))
-            .build()
-        val workInfos = withContext(Dispatchers.IO) {
-            workManager.getWorkInfos(workQuery).get()
-        }
-        val workerTags = workInfos.firstOrNull()?.tags ?: return null
-        workerTags.forEach { tag ->
-            // Skip non relevant tags, like: com.arcgismaps.toolkit.offline.workmanager.
-            if (tag != portalItemId && tag.length < 42) {
-                return tag
-            }
-        }
-        return null
-    }
-
-    /**
-     * Returns the list of [UUID] for active running/enqueued jobs for the given [portalItemId].
-     *
-     * @since 200.8.0
-     */
-    internal suspend fun getActiveOfflineJobs(
-        context: Context,
-        portalItemId: String
-    ): List<UUID> {
-        val workManager = WorkManager.getInstance(context)
-        val workQuery = WorkQuery.Builder
-            .fromTags(listOf(portalItemId))
-            .build()
-        val workInfos = withContext(Dispatchers.IO) {
-            workManager.getWorkInfos(workQuery).get()
-        }
-        val activePortalItemWorkers = workInfos.filter { workInfo ->
-            (workInfo.state == WorkInfo.State.ENQUEUED || workInfo.state == WorkInfo.State.RUNNING)
-        }
-        return activePortalItemWorkers.map { it.id }
     }
 
     /**

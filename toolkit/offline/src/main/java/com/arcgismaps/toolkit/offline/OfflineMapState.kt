@@ -229,18 +229,18 @@ public class OfflineMapState(
      * @since 200.8.0
      */
     private suspend fun loadOfflinePreplannedMapAreas(context: Context) {
-        OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)?.let { preplannedDirPath ->
-            val preplannedMapAreaItemIds =
-                File(preplannedDirPath).listFiles()?.map { it.name.toString() }
-                    ?: emptyList()
+        val preplannedDirectory = File(
+            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)
+        )
+        val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
+            ?: emptyList()
 
-            if (preplannedMapAreaItemIds.isNotEmpty())
-                _mode = OfflineMapMode.Preplanned
+        if (preplannedMapAreaItemIds.isNotEmpty())
+            _mode = OfflineMapMode.Preplanned
 
-            preplannedMapAreaItemIds.forEach { itemId ->
-                createOfflinePreplannedMapAreaState(context, itemId)
-                    ?.let { _preplannedMapAreaStates.add(it) }
-            }
+        preplannedMapAreaItemIds.forEach { itemId ->
+            createOfflinePreplannedMapAreaState(context, itemId)
+                ?.let { _preplannedMapAreaStates.add(it) }
         }
     }
 
@@ -284,7 +284,7 @@ public class OfflineMapState(
             context = context,
             portalItemID = portalItem.itemId,
             preplannedMapAreaID = areaItemId
-        ) ?: return null
+        )
         val areaDir = File(preplannedDirPath)
         if (!areaDir.exists() || !areaDir.isDirectory) return null
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
@@ -308,8 +308,9 @@ public class OfflineMapState(
                 mobileMapPackagePath = preplannedPath
             )
             return preplannedMapAreaState
-        } else
+        } else {
             return null
+        }
     }
 
     /**
@@ -352,8 +353,9 @@ public class OfflineMapState(
                 mobileMapPackagePath = onDemandPath
             )
             return onDemandMapAreasState
-        } else
+        } else {
             return null
+        }
     }
 
     /**
@@ -427,19 +429,19 @@ public class OfflineMapState(
     private suspend fun restoreJobsAndUpdateState(context: Context) {
         OfflineRepository.getActiveOfflineJobs(context, portalItem.itemId)
             .forEach { workerUuid ->
-                val mapAreaId = OfflineRepository.getMapAreaForOfflineJob(
+                val mapAreaMetadata = OfflineRepository.getMapAreaMetadataForOfflineJob(
                     context = context,
                     uuid = workerUuid,
                     portalItemId = portalItem.itemId
-                )
+                ) ?: return@forEach
                 if (mode == OfflineMapMode.Preplanned) {
                     val restoredState = PreplannedMapAreaState(
                         context = context,
                         item = portalItem,
                         onSelectionChanged = onSelectionChanged
-                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                     val duplicateMapAreaStateIndex = _preplannedMapAreaStates.indexOfFirst {
-                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaId)
+                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaMetadata.areaId)
                     }
                     // replace the loaded duplicate preplanned area, with the in-progress job state
                     _preplannedMapAreaStates[duplicateMapAreaStateIndex] = restoredState
@@ -449,7 +451,7 @@ public class OfflineMapState(
                         context = context,
                         item = portalItem,
                         onSelectionChanged = onSelectionChanged
-                    ).apply { restoreOfflineMapJobState(workerUuid) }
+                    ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                     // add the in-progress job states after loading on-demand map areas
                     _onDemandMapAreaStates.add(restoredState)
                 }
