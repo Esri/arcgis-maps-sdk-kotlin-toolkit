@@ -28,7 +28,7 @@ private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
-private const val KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE"
+private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -118,7 +118,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
                 // As of now, we don't have a way to get the sign-out response from the browser so we assume if the user
                 // returns to this activity by pressing the back button or the "x" button, the sign out was successful.
                 val newIntent = Intent().apply {
-                    putExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, true)
+                    putExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, true)
                 }
                 setResult(RESULT_CODE_SUCCESS, newIntent)
             } else {
@@ -225,7 +225,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
         override fun parseResult(resultCode: Int, intent: Intent?): Boolean {
             return if (resultCode == RESULT_CODE_SUCCESS)
-                intent?.getBooleanExtra(KEY_INTENT_EXTRA_SIGN_OUT_RESPONSE, false) ?: false
+                intent?.getBooleanExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, false) ?: false
             else
                 false
         }
