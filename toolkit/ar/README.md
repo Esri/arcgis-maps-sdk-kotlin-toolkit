@@ -429,7 +429,7 @@ FlyoverSceneView(
     ...
 ) {
     tappedLocation?.let {
-        Callout(location) {
+        Callout(it) {
             Text("${it.x} ${it.y} ${it.z}")
       }
   }
