@@ -174,12 +174,11 @@ fun MainScreen() {
                                         // heading and translationFactor for that POI
                                         currentPoiIndex = index
                                         actionsExpanded = false
-                                        val pointOfInterest = pointsOfInterestList[currentPoiIndex]
                                         flyoverSceneViewProxy.setLocationAndHeading(
-                                            pointOfInterest.location,
-                                            pointOfInterest.heading
+                                            poi.location,
+                                            poi.heading
                                         )
-                                        currentTranslationFactor = pointOfInterest.translationFactor
+                                        currentTranslationFactor = poi.translationFactor
                                     },
                                 )
                             }
