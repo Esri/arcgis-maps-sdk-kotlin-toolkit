@@ -32,23 +32,32 @@ import com.arcgismaps.geometry.SpatialReference
  */
 data class PointOfInterest(
     val name: String, val description: String, val location: Point,
-    val heading: Double, val translationFactor: Double)
+    val heading: Double, val translationFactor: Double
+)
 
 val pointsOfInterestList = listOf(
-    PointOfInterest("Flying over the city",
+    PointOfInterest(
+        "Flying over the city",
         "xxx",
-        Point(2.82407, 41.99101,230.0, SpatialReference.wgs84()),
-        160.0, 1000.0),
-    PointOfInterest("Girona Cathedral",
+        Point(2.82407, 41.99101, 230.0, SpatialReference.wgs84()),
+        160.0, 1000.0
+    ),
+    PointOfInterest(
+        "Girona Cathedral",
         "xxx",
-        Point(2.8246561632960923,41.987190133522844, 110.50172981619835, SpatialReference.wgs84()),
-        80.87130465869643, 10.0),
-    PointOfInterest("On the city walls",
+        Point(2.8246561632960923, 41.987190133522844, 110.50172981619835, SpatialReference.wgs84()),
+        80.87130465869643, 10.0
+    ),
+    PointOfInterest(
+        "On the city walls",
         "xxx",
         Point(2.828377064683506, 41.98670727904231, 147.3971471907571, SpatialReference.wgs84()),
-        175.8728875641343, 50.0),
-    PointOfInterest("By the river",
+        175.8728875641343, 50.0
+    ),
+    PointOfInterest(
+        "By the river",
         "xxx",
         Point(2.824210487810305, 41.98506243493622, 98.24900419544429, SpatialReference.wgs84()),
-        202.36680611861564, 20.0),
+        202.36680611861564, 20.0
+    ),
 )

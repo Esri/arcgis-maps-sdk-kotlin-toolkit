@@ -48,6 +48,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -97,12 +99,14 @@ fun MainScreen() {
         }
     }
 
-    var currentPoiIndex by remember { mutableStateOf(0) }
+    var currentPoiIndex by remember { mutableIntStateOf(0) }
 
     val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
         pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
 
-    var currentTranslationFactor by remember { mutableStateOf(pointsOfInterestList[currentPoiIndex].translationFactor) }
+    var currentTranslationFactor by remember {
+        mutableDoubleStateOf(pointsOfInterestList[currentPoiIndex].translationFactor)
+    }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
@@ -153,14 +157,14 @@ fun MainScreen() {
                     actions = {
                         var actionsExpanded by remember { mutableStateOf(false) }
                         IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
-                            Icon(Icons.Default.MoreVert, "More")
+                            Icon(Icons.Default.MoreVert, stringResource(R.string.more))
                         }
                         DropdownMenu(
                             expanded = actionsExpanded,
                             onDismissRequest = { actionsExpanded = false },
                             modifier = Modifier.padding(10.dp)
                         ) {
-                            Text("Select a new location:")
+                            Text(stringResource(R.string.select_new_location))
                             HorizontalDivider(thickness = 2.dp)
                             pointsOfInterestList.forEachIndexed { index, poi ->
                                 DropdownMenuItem(
@@ -170,11 +174,12 @@ fun MainScreen() {
                                         // heading and translationFactor for that POI
                                         currentPoiIndex = index
                                         actionsExpanded = false
+                                        val pointOfInterest = pointsOfInterestList[currentPoiIndex]
                                         flyoverSceneViewProxy.setLocationAndHeading(
-                                            pointsOfInterestList[currentPoiIndex].location,
-                                            pointsOfInterestList[currentPoiIndex].heading)
-                                        currentTranslationFactor =
-                                            pointsOfInterestList[currentPoiIndex].translationFactor
+                                            pointOfInterest.location,
+                                            pointOfInterest.heading
+                                        )
+                                        currentTranslationFactor = pointOfInterest.translationFactor
                                     },
                                 )
                             }

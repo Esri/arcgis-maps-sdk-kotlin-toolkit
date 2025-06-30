@@ -26,4 +26,6 @@
     <string name="setting_up_ar">Setting up AR...</string>
     <string name="failed_to_initialize_ar">Failed to initialize: %1$s</string>
     <string name="failed_to_load_scene">Failed to load scene: %1$s</string>
+    <string name="more">More</string>
+    <string name="select_new_location">Select a new location:</string>
 </resources>
