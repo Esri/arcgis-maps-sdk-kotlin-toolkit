@@ -50,14 +50,13 @@ class MapViewProxyTests {
      * @since 200.8.0
      */
     @Test
-    fun testIdentifyGeometryEditorErrorResult() {
+    fun testIdentifyGeometryEditorErrorResult() = runTest {
 
         val mapViewProxy = setupMapView(geometryEditor = null)
-        runTest {
-            val result = mapViewProxy.identifyGeometryEditor(ScreenCoordinate(0.0, 0.0), 15.dp)
-            assertTrue(result.isFailure)
-            assertNotNull(result.exceptionOrNull())
-        }
+
+        val result = mapViewProxy.identifyGeometryEditor(ScreenCoordinate(0.0, 0.0), 15.dp)
+        assertTrue(result.isFailure)
+        assertNotNull(result.exceptionOrNull())
     }
 
     /**
@@ -68,17 +67,15 @@ class MapViewProxyTests {
      * @since 200.8.0
      */
     @Test
-    fun testIdentifyGeometryEditorEmptyResult() {
+    fun testIdentifyGeometryEditorEmptyResult() = runTest {
 
         val geometryEditor = GeometryEditor()
         geometryEditor.start(GeometryType.Point)
         val mapViewProxy = setupMapView(geometryEditor)
 
-        runTest {
-            val result = mapViewProxy.identifyGeometryEditor(ScreenCoordinate(0.0, 0.0), 15.dp)
-            assertTrue(result.isSuccess)
-            assertNull(result.exceptionOrNull())
-        }
+        val result = mapViewProxy.identifyGeometryEditor(ScreenCoordinate(0.0, 0.0), 15.dp)
+        assertTrue(result.isSuccess)
+        assertNull(result.exceptionOrNull())
     }
 
     private fun setupMapView(geometryEditor: GeometryEditor?): MapViewProxy {
