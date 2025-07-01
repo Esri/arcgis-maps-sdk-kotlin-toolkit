@@ -33,7 +33,7 @@ import androidx.core.net.toUri
  * @since 200.2.0
  */
 @Deprecated(
-    message = "It is recommended to use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
+    message = "since 200.8.0. Use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
     replaceWith = ReplaceWith("AuthenticatorState.signOut()")
 )
 public suspend fun AuthenticationManager.signOut() {

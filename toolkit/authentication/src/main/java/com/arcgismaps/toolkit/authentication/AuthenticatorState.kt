@@ -137,10 +137,12 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
     public fun dismissAll()
 
     /**
-     * Revokes OAuth tokens and all credentials from the `AuthenticationManager.arcGISCredentialStore`
-     * and `AuthenticationManager.networkCredentialStore`. If an IAP credential exists in
-     * the `AuthenticationManager.arcGISCredentialStore`, this function will launch a custom tab for the user to invalidate
-     * the IAP session.
+     * Revokes authentication state by:
+     * - revoking OAuth tokens
+     * - invalidating IAP credentials (which will launch a custom tab for the user to invalidate
+     * the IAP session)
+     * - removing all credentials from the `AuthenticationManager.arcGISCredentialStore`
+     * - removing all credentials from the `AuthenticationManager.networkCredentialStore`
      *
      * @since 200.8.0
      */
