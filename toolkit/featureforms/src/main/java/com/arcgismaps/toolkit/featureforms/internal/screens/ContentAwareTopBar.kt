@@ -206,7 +206,6 @@ internal fun ContentAwareTopBar(
     }
 }
 
-
 @Composable
 private fun getTopBarTitleAndSubtitle(
     backStackEntry: NavBackStackEntry,
@@ -367,7 +366,6 @@ private fun FeatureFormTitle(
         }
     }
 }
-
 
 @Composable
 private fun InitializingExpressions(

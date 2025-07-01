@@ -65,13 +65,6 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 
-/**
- * The "property" determines the behavior of when the validation errors are visible.
- */
-@Deprecated(
-    message = "Deprecated without replacement. This property has no effect.",
-    level = DeprecationLevel.WARNING
-)
 @Immutable
 public sealed class ValidationErrorVisibility {
 
@@ -79,14 +72,12 @@ public sealed class ValidationErrorVisibility {
      * Indicates that the validation errors are only visible for editable fields that have
      * received focus.
      */
-    @Suppress("DEPRECATION")
     public object Automatic : ValidationErrorVisibility()
 
     /**
      * Indicates the validation is run for all the editable fields regardless of their focus state,
      * and any errors are shown.
      */
-    @Suppress("DEPRECATION")
     public object Visible : ValidationErrorVisibility()
 }
 
@@ -177,7 +168,9 @@ public fun FeatureForm(
  *
  * @param featureForm the [FeatureForm] object to use
  * @param modifier the modifier to apply to this layout.
- * @param validationErrorVisibility This property is deprecated and has no effect.
+ * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
+ * indicates errors are only visible once the respective field gains focus.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
@@ -231,6 +224,7 @@ public fun FeatureForm(
         // Hide the close and action bar in the form since it is not supported via this API
         showCloseIcon = false,
         showFormActions = false,
+        validationErrorVisibility = validationErrorVisibility,
         onBarcodeButtonClick = onBarcodeButtonClick,
         colorScheme = colorScheme,
         typography = typography,
@@ -301,6 +295,9 @@ public fun FeatureForm(
  * callback will be invoked when the close icon is clicked. Default is true.
  * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
  * Default is true.
+ * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
+ * indicates errors are only visible once the respective field gains focus.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
@@ -321,6 +318,7 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
@@ -354,7 +352,9 @@ public fun FeatureForm(
         } else {
             // Show a dialog with the validation errors if they exist
             val errorDialog = DialogType.ValidationErrorsDialog(
-                onDismiss = { },
+                onDismiss = {
+                    state.validateAllFields()
+                },
                 title = context.getString(R.string.the_form_has_validation_errors),
                 body = context.resources.getQuantityString(
                     R.plurals.you_have_errors_that_must_be_fixed_before_saving,
@@ -408,6 +408,7 @@ public fun FeatureForm(
             FeatureFormNavHost(
                 navController = navController,
                 state = state,
+                validationErrorVisibility = validationErrorVisibility,
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,

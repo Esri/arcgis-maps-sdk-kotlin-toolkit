@@ -34,6 +34,7 @@ import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
@@ -44,6 +45,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
 internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: FeatureFormState,
+    validationErrorVisibility: ValidationErrorVisibility,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
@@ -72,6 +74,14 @@ internal fun FeatureFormNavHost(
             LaunchedEffect(formData) {
                 // Update the active feature form if we navigate back to this screen from another form.
                 state.updateActiveFeatureForm()
+            }
+            // launch a new side effect in a launched effect when validationErrorVisibility changes
+            // for a given form
+            LaunchedEffect(validationErrorVisibility, formData) {
+                // if it set to always show errors validate all fields
+                if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
+                    state.validateAllFields()
+                }
             }
         }
 

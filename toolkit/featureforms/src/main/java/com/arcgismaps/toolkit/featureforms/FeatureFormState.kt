@@ -51,6 +51,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldProperties
@@ -280,6 +281,26 @@ public class FeatureFormState private constructor(
      */
     internal fun getActiveFormStateData(): FormStateData {
         return store.last()
+    }
+
+    /**
+     * Validates all the fields in the current form. This will force validation of all the fields,
+     * including those that have not been focused on or interacted with.
+     */
+    internal fun validateAllFields() {
+        // Force validation of all the states in the current form.
+        getActiveFormStateData().stateCollection.forEach { entry ->
+            // validate all fields
+            if (entry.formElement is FieldFormElement) {
+                entry.getState<BaseFieldState<*>>().forceValidation()
+            }
+            // validate any fields that are within a group
+            if (entry.formElement is GroupFormElement) {
+                entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                    childEntry.getState<BaseFieldState<*>>().forceValidation()
+                }
+            }
+        }
     }
 }
 
