@@ -120,6 +120,7 @@ internal class OnDemandMapAreasState(
         val portalItem = item as? PortalItem ?: return@runCatchingCancellable
         val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
         val downloadMapArea = configuration.areaOfInterest
+
         if (!scope.isActive)
             scope = CoroutineScope(Dispatchers.IO)
         scope.launch {

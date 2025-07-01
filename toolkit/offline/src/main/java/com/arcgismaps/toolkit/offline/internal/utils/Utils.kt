@@ -18,8 +18,9 @@
 
 package com.arcgismaps.toolkit.offline.internal.utils
 
-import android.content.Context
 import android.text.Html
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -70,12 +71,10 @@ internal fun htmlToPlainText(html: String): String {
  *
  * @since 200.8.0
  */
-internal fun getDefaultMapAreaTitle(
-    context: Context,
-    onDemandMapAreaStates: List<OnDemandMapAreasState>
-): String {
+@Composable
+internal fun getDefaultMapAreaTitle(onDemandMapAreaStates: List<OnDemandMapAreasState>): String {
     for (i in 1..Int.MAX_VALUE) {
-        val title = context.getString(R.string.next_on_demand_area_title, i.toString())
+        val title = stringResource(R.string.next_on_demand_area_title, i.toString())
         if (onDemandMapAreaStates.none { it.title == title }) {
             return title
         }

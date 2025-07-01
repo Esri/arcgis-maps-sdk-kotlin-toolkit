@@ -144,6 +144,7 @@ internal class PreplannedMapAreaState(
             val area = preplannedMapArea ?: return@runCatchingCancellable
             val task = offlineMapTask ?: return@runCatchingCancellable
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
+
             if (!scope.isActive)
                 scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
