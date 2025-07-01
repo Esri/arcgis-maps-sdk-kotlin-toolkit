@@ -280,12 +280,13 @@ public class OfflineMapState(
         context: Context,
         areaItemId: String
     ): PreplannedMapAreaState? {
-        val preplannedDirPath = OfflineURLs.prePlannedDirectoryPath(
-            context = context,
-            portalItemID = portalItem.itemId,
-            preplannedMapAreaID = areaItemId
+        val areaDir = File(
+            OfflineURLs.prePlannedDirectoryPath(
+                context = context,
+                portalItemID = portalItem.itemId,
+                preplannedMapAreaID = areaItemId
+            )
         )
-        val areaDir = File(preplannedDirPath)
         if (!areaDir.exists() || !areaDir.isDirectory) return null
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
