@@ -36,6 +36,7 @@ import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedMapArea
 import com.arcgismaps.tasks.offlinemaptask.PreplannedPackagingStatus
 import com.arcgismaps.tasks.offlinemaptask.PreplannedUpdateMode
+import com.arcgismaps.toolkit.offline.OfflineMapAreaMetadata
 import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
 import com.arcgismaps.toolkit.offline.runCatchingCancellable
@@ -44,6 +45,7 @@ import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -84,10 +86,15 @@ internal class PreplannedMapAreaState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private lateinit var scope: CoroutineScope
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-    internal val title = item.title
-    internal val description = item.description
+    private var _title by mutableStateOf(preplannedMapArea?.portalItem?.title ?: item.title)
+    internal val title get() = _title
+
+    private var _description by mutableStateOf(
+        preplannedMapArea?.portalItem?.description ?: item.description
+    )
+    internal val description get() = _description
 
     private var _thumbnail by mutableStateOf<Bitmap?>(null)
     internal val thumbnail: Bitmap? get() = _thumbnail ?: item.thumbnail?.image?.bitmap
@@ -133,18 +140,19 @@ internal class PreplannedMapAreaState(
      */
     internal fun downloadPreplannedMapArea() =
         runCatchingCancellable {
-            scope = CoroutineScope(Dispatchers.IO)
             val area = preplannedMapArea ?: return@runCatchingCancellable
             val task = offlineMapTask ?: return@runCatchingCancellable
             val portalItem = item as? PortalItem ?: return@runCatchingCancellable
 
+            if (!scope.isActive)
+                scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
                 _status = PreplannedStatus.Downloading
                 val offlineWorkerUUID = startOfflineMapJob(
                     downloadPreplannedOfflineMapJob = createOfflineMapJob(
                         preplannedMapArea = area,
                         offlineMapTask = task
-                    )
+                    ), preplannedMapAreaId = area.portalItem.itemId
                 )
                 OfflineRepository.observeStatusForPreplannedWork(
                     context = context,
@@ -217,19 +225,24 @@ internal class PreplannedMapAreaState(
      * in WorkManager.
      *
      * @param downloadPreplannedOfflineMapJob The prepared offline map job to execute using WorkManager.
+     * @param preplannedMapAreaId The map area ID of used to track the job state.
      *
      * @return A unique identifier ([UUID]) associated with this task within WorkManager's queue system.
      *
      * @since 200.8.0
      */
-    private fun startOfflineMapJob(downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob): UUID {
+    private fun startOfflineMapJob(
+        downloadPreplannedOfflineMapJob: DownloadPreplannedOfflineMapJob,
+        preplannedMapAreaId: String
+    ): UUID {
         val jsonJobFile = OfflineRepository.saveJobToDisk(
             jobPath = downloadPreplannedOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadPreplannedOfflineMapJob.toJson()
         )
-
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
+            portalItemId = item.itemId,
+            mapAreaItemId = preplannedMapAreaId,
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = item.title
         )
@@ -313,6 +326,35 @@ internal class PreplannedMapAreaState(
         _isSelectedToOpen = selected
         if (selected) {
             onSelectionChanged(map)
+        }
+    }
+
+    /**
+     * Restores and observes the state of a given offline map download job.
+     *
+     * @since 200.8.0
+     */
+    fun restoreOfflineMapJobState(
+        offlineWorkerUUID: UUID,
+        offlineMapAreaMetadata: OfflineMapAreaMetadata
+    ) {
+        // restore the UI state
+        _title = offlineMapAreaMetadata.title
+        _description = offlineMapAreaMetadata.description
+        _thumbnail = offlineMapAreaMetadata.thumbnailImage
+        // observe the active job
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            workerUUID = offlineWorkerUUID
+            _status = PreplannedStatus.Downloading
+            OfflineRepository.observeStatusForPreplannedWork(
+                context = context,
+                onWorkInfoStateChanged = ::logWorkInfo,
+                preplannedMapAreaState = this@PreplannedMapAreaState,
+                portalItem = item as PortalItem,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
         }
     }
 }

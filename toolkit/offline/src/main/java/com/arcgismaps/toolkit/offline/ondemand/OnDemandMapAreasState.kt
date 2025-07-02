@@ -35,6 +35,7 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapJob
 import com.arcgismaps.tasks.offlinemaptask.GenerateOfflineMapUpdateMode
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
+import com.arcgismaps.toolkit.offline.OfflineMapAreaMetadata
 import com.arcgismaps.toolkit.offline.OfflineRepository
 import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.internal.utils.getDirectorySize
@@ -44,6 +45,7 @@ import com.arcgismaps.toolkit.offline.workmanager.logWorkInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -54,7 +56,7 @@ import java.util.UUID
  * @since 200.8.0
  */
 internal data class OnDemandMapAreaConfiguration(
-    internal val areaID: String,
+    internal val itemId: String,
     internal val title: String,
     internal val minScale: Double,
     internal val maxScale: Double,
@@ -70,7 +72,7 @@ internal data class OnDemandMapAreaConfiguration(
 internal class OnDemandMapAreasState(
     private val context: Context,
     private val item: Item,
-    private val configuration: OnDemandMapAreaConfiguration? = null,
+    internal val configuration: OnDemandMapAreaConfiguration? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
 ) {
@@ -98,12 +100,15 @@ internal class OnDemandMapAreasState(
     internal val directorySize: Int
         get() = _directorySize
 
-    private lateinit var scope: CoroutineScope
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-    internal val title = configuration?.title ?: item.title
+    private var _title by mutableStateOf(configuration?.title ?: item.title)
+    internal val title get() = _title
 
-    internal val thumbnail: Bitmap?
-        get() = configuration?.thumbnail ?: item.thumbnail?.image?.bitmap
+    private var _thumbnail by mutableStateOf(
+        configuration?.thumbnail ?: item.thumbnail?.image?.bitmap
+    )
+    internal val thumbnail: Bitmap? get() = _thumbnail
 
     /**
      * Initiates downloading of the associated on-demand map area for offline use.
@@ -111,12 +116,13 @@ internal class OnDemandMapAreasState(
      * @since 200.8.0
      */
     internal fun downloadOnDemandMapArea() = runCatchingCancellable {
-        scope = CoroutineScope(Dispatchers.IO)
         val task = offlineMapTask ?: return@runCatchingCancellable
         val portalItem = item as? PortalItem ?: return@runCatchingCancellable
-        val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
+        val onDemandMapAreaID = configuration?.itemId ?: return@runCatchingCancellable
         val downloadMapArea = configuration.areaOfInterest
 
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
             _status = OnDemandStatus.Downloading
             val offlineWorkerUUID = startOfflineMapJob(
@@ -124,7 +130,7 @@ internal class OnDemandMapAreasState(
                     onDemandMapAreaID = onDemandMapAreaID,
                     downloadMapArea = downloadMapArea,
                     offlineMapTask = task
-                )
+                ), onDemandMapAreaId = onDemandMapAreaID
             )
             OfflineRepository.observeStatusForOnDemandWork(
                 context = context,
@@ -206,12 +212,16 @@ internal class OnDemandMapAreasState(
      * in WorkManager.
      *
      * @param downloadOnDemandOfflineMapJob The on-demand offline map job to execute using WorkManager.
+     * @param onDemandMapAreaId The map area ID of used to track the job state.
      *
      * @return A unique identifier ([UUID]) associated with this task within WorkManager's queue system.
      *
      * @since 200.8.0
      */
-    private fun startOfflineMapJob(downloadOnDemandOfflineMapJob: GenerateOfflineMapJob): UUID {
+    private fun startOfflineMapJob(
+        downloadOnDemandOfflineMapJob: GenerateOfflineMapJob,
+        onDemandMapAreaId: String
+    ): UUID {
         val jsonJobFile = OfflineRepository.saveJobToDisk(
             jobPath = downloadOnDemandOfflineMapJob.downloadDirectoryPath,
             jobJson = downloadOnDemandOfflineMapJob.toJson()
@@ -219,6 +229,8 @@ internal class OnDemandMapAreasState(
 
         workerUUID = OfflineRepository.createOnDemandMapAreaRequestAndQueueDownload(
             context = context,
+            portalItemId = item.itemId,
+            mapAreaItemId = onDemandMapAreaId,
             jsonJobPath = jsonJobFile.path,
             onDemandMapAreaTitle = configuration?.title ?: item.title
         )
@@ -316,6 +328,34 @@ internal class OnDemandMapAreasState(
         _isSelectedToOpen = selected
         if (selected) {
             onSelectionChanged(map)
+        }
+    }
+
+    /**
+     * Restores and observes the state of a given offline map download job.
+     *
+     * @since 200.8.0
+     */
+    fun restoreOfflineMapJobState(
+        offlineWorkerUUID: UUID,
+        offlineMapAreaMetadata: OfflineMapAreaMetadata
+    ) {
+        // restore the UI state
+        _title = offlineMapAreaMetadata.title
+        _thumbnail = offlineMapAreaMetadata.thumbnailImage
+        // observe the active job
+        if (!scope.isActive)
+            scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            workerUUID = offlineWorkerUUID
+            _status = OnDemandStatus.Downloading
+            OfflineRepository.observeStatusForOnDemandWork(
+                context = context,
+                onWorkInfoStateChanged = ::logWorkInfo,
+                onDemandMapAreasState = this@OnDemandMapAreasState,
+                portalItem = item as PortalItem,
+                offlineWorkerUUID = offlineWorkerUUID
+            )
         }
     }
 }
