@@ -40,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -100,11 +101,13 @@ fun MainScreen() {
     val pointsOfInterestList = rememberPointsOfInterest()
 
     val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-        pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
+        pointsOfInterestList[currentPoiIndex].poiLocation, pointsOfInterestList[currentPoiIndex].heading)
 
     var currentTranslationFactor by remember {
         mutableDoubleStateOf(pointsOfInterestList[currentPoiIndex].translationFactor)
     }
+
+    var displayCallout by remember { mutableStateOf(false) }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
@@ -173,10 +176,15 @@ fun MainScreen() {
                                         currentPoiIndex = index
                                         actionsExpanded = false
                                         flyoverSceneViewProxy.setLocationAndHeading(
-                                            poi.location,
+                                            poi.poiLocation,
                                             poi.heading
                                         )
                                         currentTranslationFactor = poi.translationFactor
+
+                                        // Display a Callout if this POI has one
+                                        if (poi.calloutLocation != null) {//TODO
+                                            displayCallout = true
+                                        }
                                     },
                                 )
                             }
@@ -200,7 +208,27 @@ fun MainScreen() {
                     onInitializationStatusChanged = {
                         initializationStatus = it
                     }
-                )
+                ) {
+                    //TODO add a comment...
+                    val pointOfInterest = pointsOfInterestList[currentPoiIndex]
+                    if (displayCallout && pointOfInterest.calloutLocation != null) {
+                        Callout(pointOfInterest.calloutLocation) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = pointOfInterest.name,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(pointOfInterest.description)
+                                Button(
+                                    onClick = {
+                                        displayCallout = false
+                                    }
+                                ) {
+                                    Text(text = "Dismiss")
+                                }
+                            }
+                        }
+                    }
+                }
 
                 val sceneLoadStatus =
                     arcGISScene.loadStatus.collectAsStateWithLifecycle().value
