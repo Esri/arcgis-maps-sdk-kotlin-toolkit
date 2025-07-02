@@ -436,17 +436,10 @@ public class OfflineMapState(
                     portalItemId = portalItem.itemId
                 ) ?: return@forEach
                 if (mode == OfflineMapMode.Preplanned) {
-                    val restoredState = PreplannedMapAreaState(
-                        context = context,
-                        item = portalItem,
-                        onSelectionChanged = onSelectionChanged
-                    ).apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
-                    val duplicateMapAreaStateIndex = _preplannedMapAreaStates.indexOfFirst {
+                    // update the loaded preplanned area, to restore with the in-progress job state
+                    _preplannedMapAreaStates.first {
                         it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaMetadata.areaId)
-                    }
-                    // replace the loaded duplicate preplanned area, with the in-progress job state
-                    _preplannedMapAreaStates[duplicateMapAreaStateIndex] = restoredState
-
+                    }.apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                 } else {
                     val restoredState = OnDemandMapAreasState(
                         context = context,
