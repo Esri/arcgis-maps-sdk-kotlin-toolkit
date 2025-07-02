@@ -27,18 +27,18 @@ import androidx.compose.runtime.setValue
 /**
  * Composable function that handles launching a browser for IAP authentication.
  *
- * @param authorizedUrl The authorized URL to load in the browser for IAP authentication.
+ * @param authorizeUrl The authorization URL to load in the browser for IAP authentication.
  * @param onComplete Callback function that gets invoked with the redirect URL upon successful authentication.
  * @param onCancel Callback function that gets invoked when the authentication is cancelled.
  * @since 200.8.0
  */
 @Composable
 internal fun IapSignInAuthenticator(
-    authorizedUrl: String,
+    authorizeUrl: String,
     onComplete : (String) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    var hasLaunched by rememberSaveable(authorizeUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignInContract()
     ) { redirectUrl ->
@@ -49,10 +49,43 @@ internal fun IapSignInAuthenticator(
         }
     }
 
-    LaunchedEffect(authorizedUrl) {
+    LaunchedEffect(authorizeUrl) {
         if (!hasLaunched) {
             hasLaunched = true
-            launcher.launch(authorizedUrl)
+            launcher.launch(authorizeUrl)
+        }
+    }
+}
+
+/**
+ * Composable function that handles invalidating an IAP session by launching the provided [iapSignOutUrl] in a browser.
+ *
+ * @param iapSignOutUrl The URL that will be launched guiding the user to sign-out of the IAP session.
+ * @param onCompleteSignOut Callback function that gets invoked with a boolean indicating success or failure of the sign-out.
+ * @param onCancelSignOut Callback function that gets invoked with an exception if the sign-out is cancelled.
+ * @since 200.8.0
+ */
+@Composable
+internal fun IapSignOutAuthenticator(
+    iapSignOutUrl: String,
+    onCompleteSignOut: (Boolean) -> Unit,
+    onCancelSignOut: () -> Unit
+) {
+    var hasLaunched by rememberSaveable(iapSignOutUrl) { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = AuthenticationActivity.IapSignOutContract()
+    ) { res ->
+        if (res) {
+            onCompleteSignOut(true)
+        } else {
+            onCancelSignOut()
+        }
+    }
+
+    LaunchedEffect(iapSignOutUrl) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(iapSignOutUrl)
         }
     }
 }

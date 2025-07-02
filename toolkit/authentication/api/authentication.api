@@ -15,12 +15,14 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 	public abstract fun getOAuthUserConfiguration ()Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;
 	public abstract fun getPendingClientCertificateChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingIapSignIn ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getPendingIapSignOut ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingOAuthUserSignIn ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingServerTrustChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getPendingUsernamePasswordChallenge ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun isDisplayed ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun setIapConfigurations (Ljava/util/List;)V
 	public abstract fun setOAuthUserConfiguration (Lcom/arcgismaps/httpcore/authentication/OAuthUserConfiguration;)V
+	public abstract fun signOut-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {

@@ -52,7 +52,7 @@ class IapAuthenticatorTest {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
-                authorizedUrl = "https://www.arcgis.com/index.html",
+                authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { receivedRedirectUri = it },
                 onCancel = { cancellationHandled= true }
             )
@@ -85,7 +85,7 @@ class IapAuthenticatorTest {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
-                authorizedUrl = "https://www.arcgis.com/index.html",
+                authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { onCompleteCalled = true },
                 onCancel = { cancellationHandled = true }
             )
@@ -98,5 +98,39 @@ class IapAuthenticatorTest {
         // Verify that the cancellation was handled
         assertThat(cancellationHandled).isTrue()
         assertThat(onCompleteCalled).isFalse()
+    }
+
+    /**
+     * Given an [IapSignOutAuthenticator] composable,
+     * When it is launched with a sign-out URL,
+     * And the user presses back,
+     * Then it should complete the sign-out process without cancellation.
+     *
+     * Note: Currently, IAP sign-out works differently because there is no redirect URI.
+     * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
+     * @since 200.8.0
+     */
+    @Test
+    fun verifyIapSignOutAuthenticatorCompletesOnBackPress() {
+        var signOutCompleted = false
+        var signOutCancelled = false
+        val expectedSignOutUrl = "https://www.arcgis.com/index.html"
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        composeTestRule.setContent {
+            IapSignOutAuthenticator(
+                iapSignOutUrl = expectedSignOutUrl,
+                onCompleteSignOut = { signOutCompleted = it },
+                onCancelSignOut = { signOutCancelled = true }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        // Verify that the Custom Tab is launched with the correct URL
+        uiDevice.awaitViewVisible("com.android.chrome")
+        uiDevice.pressBack()
+        composeTestRule.waitForIdle()
+        // Verify that the sign out was completed
+        assertThat(signOutCompleted).isTrue()
+        assertThat(signOutCancelled).isFalse()
     }
 }
