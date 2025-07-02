@@ -20,6 +20,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
@@ -85,12 +86,14 @@ fun AppNavigation(
             enterTransition = { fadeIn() },
             exitTransition = { fadeOut() }
         ) {
-            MapListScreen { uri ->
-                // encode the uri since it is equivalent to a navigation route
-                val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-                val route = "mapview/$encodedUri"
-                // navigate to the mapview
-                navController.navigate(route)
+            Surface {
+                MapListScreen { uri ->
+                    // encode the uri since it is equivalent to a navigation route
+                    val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+                    val route = "mapview/$encodedUri"
+                    // navigate to the mapview
+                    navController.navigate(route)
+                }
             }
 
         }

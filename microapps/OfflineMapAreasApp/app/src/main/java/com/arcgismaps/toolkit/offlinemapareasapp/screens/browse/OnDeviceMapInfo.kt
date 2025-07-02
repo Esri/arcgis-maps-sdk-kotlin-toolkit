@@ -2,8 +2,12 @@ package com.arcgismaps.toolkit.offlinemapareasapp.screens.browse
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.OfflineMapInfo
@@ -40,34 +43,31 @@ import com.arcgismaps.toolkit.offline.OfflineRepository
 
 @Composable
 fun OnDeviceMapInfo(
-    onClick: (String) -> Unit,
-    offlineMapInfos: List<OfflineMapInfo>
+    onClick: (String) -> Unit, offlineMapInfos: List<OfflineMapInfo>
 ) {
     val context = LocalContext.current
 
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.animateContentSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         item {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(horizontal = 32.dp),
                 enabled = offlineMapInfos.isNotEmpty(),
-                onClick = {
-                    OfflineRepository.removeAllDownloads(context)
-                }) {
+                onClick = { OfflineRepository.removeAllDownloads(context) }) {
                 Text("Remove all downloads")
             }
         }
         offlineMapInfos.forEach { offlineMapInfo ->
             item {
-                OfflineMapInfoCard(
-                    info = offlineMapInfo,
-                    onOpen = {
-                        onClick.invoke(offlineMapInfo.id)
-                    },
-                    onDelete = {
-                        OfflineRepository.removeDownloadsForWebmap(context,offlineMapInfo)
-                    })
+                OfflineMapInfoCard(info = offlineMapInfo, onOpen = {
+                    onClick.invoke(offlineMapInfo.id)
+                }, onDelete = {
+                    OfflineRepository.removeDownloadsForWebmap(context, offlineMapInfo)
+                })
             }
         }
     }
@@ -76,25 +76,23 @@ fun OnDeviceMapInfo(
 @Composable
 fun OfflineMapInfoCard(
     info: OfflineMapInfo,
-    modifier: Modifier = Modifier,
     placeholder: Bitmap = rememberInfoPlaceholderBitmap(),
     onOpen: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Card(
-        modifier = modifier
+    Box(
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable { onOpen.invoke() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(4.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             val bmp = info.thumbnail ?: placeholder
             Image(
@@ -102,40 +100,56 @@ fun OfflineMapInfoCard(
                 contentDescription = "Map thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(75.dp)
                     .clip(RoundedCornerShape(4.dp))
             )
 
-            Spacer(Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+            Spacer(Modifier.width(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 Text(
                     text = info.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = info.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (info.description.isNotBlank()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = info.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
-
             Spacer(Modifier.width(8.dp))
-
-            IconButton(onClick = onDelete) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier
+                    .size(24.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete map"
+                    contentDescription = "Delete map",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(24.dp)
                 )
             }
-            IconButton(onClick = {}) {
+            IconButton(
+                onClick = {},
+                modifier = Modifier
+                    .size(24.dp)
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Open map"
+                    contentDescription = "Open map",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(24.dp)
                 )
             }
         }
@@ -148,8 +162,7 @@ fun rememberInfoPlaceholderBitmap(): Bitmap {
     val resources = LocalContext.current.resources
     return remember {
         BitmapFactory.decodeResource(
-            resources,
-            android.R.drawable.ic_dialog_info
+            resources, android.R.drawable.ic_dialog_info
         )
     }
 }
