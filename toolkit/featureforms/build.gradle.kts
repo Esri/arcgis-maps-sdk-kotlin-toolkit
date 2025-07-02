@@ -63,6 +63,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -88,6 +90,12 @@ android {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 
@@ -116,8 +124,10 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToFeature\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",

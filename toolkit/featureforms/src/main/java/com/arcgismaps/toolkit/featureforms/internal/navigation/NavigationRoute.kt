@@ -55,4 +55,15 @@ internal sealed class NavigationRoute {
     data class UNAssociationsView(
         val stateId: Int
     ) : NavigationRoute()
+
+    /**
+     * Represents a view for the details of a specific association.
+     *
+     * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
+     * selected association.
+     */
+    @Serializable
+    data class UNAssociationDetailView(
+        val stateId: Int
+    ) : NavigationRoute()
 }
