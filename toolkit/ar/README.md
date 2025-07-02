@@ -6,12 +6,12 @@ The Augmented Reality (AR) toolkit module allows quick and easy integration of A
 
 View the API Reference for the AR module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.ar/index.html). 
 
-The AR toolkit module provides two composable functions to render `ArcGISScene` content in AR:
+The AR toolkit module provides three composable functions to render `ArcGISScene` content in AR:
 
-| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         |
-|-----------------------------------------------------------------|---------------------------------------------------------------------|
-| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 |
-| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. |
+| [TableTopSceneView](#TableTopSceneView)                         | [WorldScaleSceneView](#WorldScaleSceneView)                         | [FlyoverSceneView](#FlyoverSceneView)                                           |
+|-----------------------------------------------------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| ![screenshot](screenshot.png)                                   | ![worldscale-screenshot](worldscale-screenshot.png)                 | ![flyover-screenshot](flyover-screenshot.png)                                   |
+| In tabletop, scene content is anchored to a real-world surface. | In world-scale AR, scene content is integrated with the real world. | In flyover AR, scene content at a remote location responds to device movements. |
 
 ## TableTopSceneView
 
@@ -19,7 +19,7 @@ The `TableTopSceneView` composable function renders `ArcGISScene` content anchor
 
 ### Features
 
-- A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
+- A composable function [TableTopSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/TableTopSceneView.kt) that displays a camera feed overlaid by a `SceneView`.
 - Detects physical horizontal surfaces in the camera feed, which a user can select by tapping on the screen. The tap location determines where the scene data is anchored on the detected surface.
 - Provides parameters specific to table top scenarios to configure the placement and visualization of scene data:
     - `arcGISSceneAnchor` - A point in the `SceneView` to use as the anchor point of the scene data on the selected physical surface
@@ -160,7 +160,7 @@ The `WorldScaleSceneView` has two `WorldScaleTrackingMode`s:
 
 ### Features
 
-- A composable function [WorldScaleSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleSceneView.kt) that displays a camera feed overlayed by a `SceneView`.
+- A composable function [WorldScaleSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleSceneView.kt) that displays a camera feed overlaid by a `SceneView`.
 - Uses the device's location depending on the [WorldScaleTrackingMode](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/WorldScaleTrackingMode.kt) to position the scene camera so that the scene overlays the real-world features in the camera feed:
   - using GPS in `WorldScaleTrackingMode.World`
   - using Google's visual positioning service in `WorldScaleTrackingMode.Geospatial` 
@@ -278,3 +278,164 @@ WorldScaleSceneView(
 
 To see it in action, check out the [microapp](../../microapps/ArWorldScaleApp).
 
+## FlyoverSceneView
+
+The `FlyoverSceneView` provides an augmented reality fly over experience. In flyover the content is
+navigated by moving the device, allowing the scene to be explored more naturally than with a touch
+or mouse interface.
+
+### Features
+
+- A composable [FlyoverSceneView](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneView.kt)
+  that displays a `SceneView`.
+- Uses device movement to position the camera viewing the scene.
+- Provides parameters to configure and interact with the `SceneView`, such as specifying an
+  `ArcGISScene` and a translation factor that defines how much the scene view translates as the
+  device moves.
+- A [FlyoverSceneViewProxy](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneViewProxy.kt)
+  is passed to the `FlyoverSceneView` composable function to define state such as the camera origin
+  and perform operations such as identify.
+- A [FlyoverSceneViewScope](../../toolkit/ar/src/main/java/com/arcgismaps/toolkit/ar/FlyoverSceneViewScope.kt)
+  provided as the receiver by the `FlyoverSceneView`'s `content` lambda can be used to display a callout.
+
+### Prerequisites
+
+`FlyoverSceneView` requires an [ARCore](https://github.com/google-ar/arcore-android-sdk) supported
+device that has installed Google Play Services for AR. An application must
+call [ArCoreApk.requestInstall](https://developers.google.com/ar/develop/java/enable-arcore#check_if_google_play_services_for_ar_is_installed)
+before using the `FlyoverSceneView`. For an example, see how it is done in the micro
+app's [MainActivity](../../microapps/ArFlyoverApp/app/src/main/java/com/arcgismaps/toolkit/arflyoverapp/MainActivity.kt).
+Note - the `FlyoverSceneView` checks for availability of ARCore when it enters the composition. If
+ARCore is not supported by the device or not installed, the `FlyoverSceneView` will fail to
+initialize with `FlyoverSceneViewStatus.FailedToInitialize`.
+
+Note that apps using ARCore must comply with ARCore's user privacy requirements.
+See [this page](https://developers.google.com/ar/develop/privacy-requirements) for more information.
+
+### Usage
+
+The `FlyoverSceneView` requires camera permissions, which are requested by default when the
+`FlyoverSceneView` enters composition. The following camera-related settings need to be specified in
+the `AndroidManifest.xml`:
+
+```xml
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Limits app visibility in the Google Play Store to ARCore supported devices
+         (https://developers.google.com/ar/devices). -->
+    <uses-feature android:name="android.hardware.camera.ar" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+```
+
+If ARCore is not optional for your application to function (as is the case with
+the [microapp](../../microapps/ArFlyoverApp)), you also need to add the following to your
+`AndroidManifest.xml`:
+
+```xml
+        <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
+             to be installed, as the app does not include any non-AR features. -->
+        <meta-data android:name="com.google.ar.core" android:value="required" />
+```
+Configure an `ArcGISScene` with the data and base surface required for your flyover use case:
+
+```kotlin
+@Composable
+fun MainScreen() {
+    ...
+    val elevationSource =
+        ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
+
+    val meshLayer =
+        IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
+
+    val arcGISScene by remember { 
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply { 
+            baseSurface.elevationSources.add(elevationSource)
+            operationalLayers.add(meshLayer)
+        }
+    }
+    ...
+}
+```
+
+Define a camera origin point and heading for your scene that serves as the starting point for
+navigating:
+
+```kotlin
+val location = Point(
+   2.82407,
+   41.99101,
+   230.0,
+   SpatialReference.wgs84()
+)
+val heading = 160.0
+```
+
+Create a `FlyoverSceneViewProxy` with this state:
+
+```kotlin
+val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(location, heading)
+```
+
+Determine a translation factor that suits the scene and camera origin point. For example, a
+relatively high translation factor is probably suitable when flying high above the scene, but a low
+value may be more suitable when exploring the scene at ground level. Call the `FlyoverSceneView`
+composable function specifying the parameters you chose:
+
+```kotlin
+FlyoverSceneView(
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    ...  
+)
+```
+
+Pass an `onInitializationStatusChanged` callback to the `FlyoverSceneView` composable function to
+get notified about initialization status changes:
+
+```kotlin
+FlyoverSceneView(
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    onInitializationStatusChanged = { status ->
+        updateStatus(status)
+    }
+  ...  
+)
+```
+
+Make use of other features of a SceneView, for example handle `onSingleTapConfirmed` events and
+display a `Callout` at the tapped location:
+
+```kotlin
+var tappedLocation by remember { 
+    mutableStateOf<Point?>(null) 
+}
+
+FlyoverSceneView(
+    arcGISScene = arcGISScene,
+    flyoverSceneViewProxy = flyoverSceneViewProxy,
+    translationFactor = 1000.0,
+    onInitializationStatusChanged = { status ->
+      updateStatus(status)
+    },
+    onSingleTapConfirmed = { singleTapConfirmedEvent ->
+        tappedLocation = flyoverSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+    }
+    ...
+) {
+    tappedLocation?.let {
+        Callout(it) {
+            Text("${it.x} ${it.y} ${it.z}")
+      }
+  }
+}
+```
+
+### Behaviour
+
+To see it in action, check out the [microapp](../../microapps/ArFlyoverApp).
