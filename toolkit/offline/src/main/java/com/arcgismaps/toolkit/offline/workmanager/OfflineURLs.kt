@@ -160,12 +160,12 @@ internal object OfflineURLs {
     internal fun pendingAreaMetadataDirectoryPath(
         context: Context,
         portalItemID: String,
-        mapAreaID: String
+        mapAreaItemID: String
     ): String {
         val caches = getOfflineCacheDirPath(context)
         val pendingBase = File(caches, pendingMapInfoDir).makeDirectoryIfItDoesNotExist()
         val itemPendingDir = File(pendingBase, portalItemID).makeDirectoryIfItDoesNotExist()
-        val areaPendingDir = File(itemPendingDir, mapAreaID).makeDirectoryIfItDoesNotExist()
+        val areaPendingDir = File(itemPendingDir, mapAreaItemID).makeDirectoryIfItDoesNotExist()
         return areaPendingDir.absolutePath
     }
 

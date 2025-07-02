@@ -40,7 +40,6 @@ import com.arcgismaps.toolkit.offline.workmanager.jobAreaTitleKey
 import com.arcgismaps.toolkit.offline.workmanager.jobWorkerUuidKey
 import com.arcgismaps.toolkit.offline.workmanager.jsonJobPathKey
 import com.arcgismaps.toolkit.offline.workmanager.mobileMapPackagePathKey
-import com.arcgismaps.toolkit.offline.workmanager.offlineAreaMetadataJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoJsonFile
 import com.arcgismaps.toolkit.offline.workmanager.offlineMapInfoThumbnailFile
 import com.arcgismaps.toolkit.offline.workmanager.onDemandAreas
@@ -137,15 +136,15 @@ public object OfflineRepository {
     private fun savePendingMapAreaMetadata(
         context: Context,
         portalItem: PortalItem,
-        areaMetadata: OfflineMapAreaMetadata
+        mapAreaMetadata: OfflineMapAreaMetadata
     ) {
         val pendingAreaMetadataDir = File(
             OfflineURLs.pendingAreaMetadataDirectoryPath(
-                context, portalItem.itemId, areaMetadata.areaId
+                context, portalItem.itemId, mapAreaMetadata.itemId
             )
         )
         if (!OfflineMapAreaMetadata.isSerializedFilePresent(pendingAreaMetadataDir)) {
-            areaMetadata.saveToDirectory(pendingAreaMetadataDir)
+            mapAreaMetadata.saveToDirectory(pendingAreaMetadataDir)
         }
     }
     /**
@@ -461,7 +460,7 @@ public object OfflineRepository {
     internal fun createPreplannedMapAreaRequestAndQueueDownload(
         context: Context,
         portalItemId: String,
-        mapAreaId: String,
+        mapAreaItemId: String,
         jsonJobPath: String,
         preplannedMapAreaTitle: String
     ): UUID {
@@ -471,7 +470,7 @@ public object OfflineRepository {
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             // add the worker tags
             .addTag(portalItemId)
-            .addTag(mapAreaId)
+            .addTag(mapAreaItemId)
             // add the input data
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
@@ -507,7 +506,7 @@ public object OfflineRepository {
     internal fun createOnDemandMapAreaRequestAndQueueDownload(
         context: Context,
         portalItemId: String,
-        mapAreaId: String,
+        mapAreaItemId: String,
         jsonJobPath: String,
         onDemandMapAreaTitle: String
     ): UUID {
@@ -517,7 +516,7 @@ public object OfflineRepository {
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             // add the worker tags
             .addTag(portalItemId)
-            .addTag(mapAreaId)
+            .addTag(mapAreaItemId)
             // add the input data
             .setInputData(
                 // add the notificationId and the json file path as a key/value pair
@@ -563,7 +562,7 @@ public object OfflineRepository {
             savePendingMapAreaMetadata(
                 context = context,
                 portalItem = portalItem,
-                areaMetadata = OfflineMapAreaMetadata.createPreplannedMetadata(mapArea)
+                mapAreaMetadata = OfflineMapAreaMetadata.createPreplannedMetadata(mapArea)
             )
         }
         val workManager = WorkManager.getInstance(context)
@@ -658,7 +657,7 @@ public object OfflineRepository {
             savePendingMapAreaMetadata(
                 context = context,
                 portalItem = portalItem,
-                areaMetadata = OfflineMapAreaMetadata.createOnDemandMetadata(mapArea)
+                mapAreaMetadata = OfflineMapAreaMetadata.createOnDemandMetadata(mapArea)
             )
         }
         val workManager = WorkManager.getInstance(context)

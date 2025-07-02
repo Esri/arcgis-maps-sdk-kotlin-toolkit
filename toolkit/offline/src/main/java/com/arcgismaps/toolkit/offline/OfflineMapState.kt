@@ -217,7 +217,7 @@ public class OfflineMapState(
                         _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
                 // restore any running download job state
-                restoreJobsAndUpdateState(context)
+                restoreActiveJobsAndUpdateStates(context)
             }
         }
     }
@@ -266,7 +266,7 @@ public class OfflineMapState(
             }
         }
         // restore any running download job state
-        restoreJobsAndUpdateState(context)
+        restoreActiveJobsAndUpdateStates(context)
     }
 
     /**
@@ -423,11 +423,11 @@ public class OfflineMapState(
     }
 
     /**
-     * Restores the current preplanned & on-demand job state from preferences.
+     * Restores the current preplanned & on-demand job state from cached metadata.
      *
      * @since 200.8.0
      */
-    private suspend fun restoreJobsAndUpdateState(context: Context) {
+    private suspend fun restoreActiveJobsAndUpdateStates(context: Context) {
         OfflineRepository.getActiveOfflineJobs(context, portalItem.itemId)
             .forEach { workerUuid ->
                 val mapAreaMetadata = OfflineRepository.getMapAreaMetadataForOfflineJob(
@@ -438,7 +438,7 @@ public class OfflineMapState(
                 if (mode == OfflineMapMode.Preplanned) {
                     // update the loaded preplanned area, to restore with the in-progress job state
                     _preplannedMapAreaStates.first {
-                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaMetadata.areaId)
+                        it.preplannedMapArea?.portalItem?.itemId.equals(mapAreaMetadata.itemId)
                     }.apply { restoreOfflineMapJobState(workerUuid, mapAreaMetadata) }
                 } else {
                     val restoredState = OnDemandMapAreasState(
