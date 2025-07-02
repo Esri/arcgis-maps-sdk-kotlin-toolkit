@@ -184,7 +184,8 @@ public class OfflineMapState(
             preplannedMapAreas.addAll(
                 elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // an exception will be thrown in offline mode
             preplannedMapAreas.clear()
         }
         if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {

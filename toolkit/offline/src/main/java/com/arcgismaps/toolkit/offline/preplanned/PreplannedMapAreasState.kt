@@ -116,7 +116,7 @@ internal class PreplannedMapAreaState(
             ?.onSuccess {
                 _status = try {
                     PreplannedStatus.fromPackagingStatus(preplannedMapArea.packagingStatus)
-                } catch (illegalStateException: IllegalStateException) {
+                } catch (_: IllegalStateException) {
                     // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
                     // that have incomplete metadata. We throw an illegalStateException when Package
                     // Status is unknown. We can safely assume that the preplanned map area is packaged.
