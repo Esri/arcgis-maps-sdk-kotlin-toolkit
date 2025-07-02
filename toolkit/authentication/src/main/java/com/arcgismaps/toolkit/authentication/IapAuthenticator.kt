@@ -38,7 +38,7 @@ internal fun IapSignInAuthenticator(
     onComplete : (String) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    var hasLaunched by rememberSaveable(authorizedUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignInContract()
     ) { redirectUrl ->
@@ -71,7 +71,7 @@ internal fun IapSignOutAuthenticator(
     onCompleteSignOut: (Boolean) -> Unit,
     onCancelSignOut: () -> Unit
 ) {
-    var hasLaunched by rememberSaveable { mutableStateOf(false) }
+    var hasLaunched by rememberSaveable(iapSignOutUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignOutContract()
     ) { res ->

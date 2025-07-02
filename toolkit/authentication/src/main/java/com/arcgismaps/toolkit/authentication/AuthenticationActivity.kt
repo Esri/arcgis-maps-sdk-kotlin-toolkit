@@ -86,7 +86,7 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *
  * Note: Currently, IAP sign-out works differently because there is no redirect URI.
  * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
- * Cancellation of the sign-out flow is not possible, so the IAPCredential may remain in an invalid state if the user\
+ * Cancellation of the sign-out flow is not possible, so the IAPCredential may remain in an invalid state if the user
  * attempts to cancel the IAP sign-out request.
  *
  * @since 200.8.0
