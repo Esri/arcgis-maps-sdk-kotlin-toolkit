@@ -183,7 +183,7 @@ fun MainScreen() {
                                         currentTranslationFactor = poi.translationFactor
 
                                         // Display a Callout if this POI has one
-                                        if (poi.calloutLocation != null) {//TODO
+                                        if (poi.calloutLocation != null) {
                                             displayCallout = true
                                         }
                                     },
