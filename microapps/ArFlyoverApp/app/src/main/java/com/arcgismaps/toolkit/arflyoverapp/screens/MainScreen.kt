@@ -29,13 +29,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,8 +69,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
@@ -66,23 +78,32 @@ import com.arcgismaps.toolkit.ar.FlyoverSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
+import com.arcgismaps.toolkit.arflyoverapp.rememberPointsOfInterest
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
 
-    val elevationSource =
-        ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer")
-
-    val integratedMeshLayer =
-        IntegratedMeshLayer("https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer")
-
     val arcGISScene = remember {
         ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            baseSurface.elevationSources.add(elevationSource)
-            operationalLayers.add(integratedMeshLayer)
+            baseSurface.elevationSources.add(ArcGISTiledElevationSource(
+                "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"))
+            operationalLayers.add(IntegratedMeshLayer(
+                "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer"))
         }
+    }
+
+    var currentPoiIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val pointsOfInterestList = rememberPointsOfInterest()
+
+    val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
+        pointsOfInterestList[currentPoiIndex].location, pointsOfInterestList[currentPoiIndex].heading)
+
+    var currentTranslationFactor by remember {
+        mutableDoubleStateOf(pointsOfInterestList[currentPoiIndex].translationFactor)
     }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
@@ -106,66 +127,9 @@ fun MainScreen() {
         )
     }
 
-    // Display FlyoverSceneView only if user has accepted the privacy info
-    if (acceptedPrivacyInfo) {
-        val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-            location = Point(
-                2.82407,
-                41.99101,
-                230.0,
-                SpatialReference.wgs84()
-            ),
-            heading = 160.0
-        )
-
-        Box {
-            var initializationStatus by rememberFlyoverSceneViewStatus()
-
-            FlyoverSceneView(
-                arcGISScene = arcGISScene,
-                flyoverSceneViewProxy = flyoverSceneViewProxy,
-                onInitializationStatusChanged = {
-                    initializationStatus = it
-                },
-                translationFactor = 1000.0,
-            )
-
-            val sceneLoadStatus =
-                arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-
-            when (val status = initializationStatus) {
-                is FlyoverSceneViewStatus.Initializing -> {
-                    TextWithScrim(text = stringResource(R.string.setting_up_ar))
-                }
-
-                is FlyoverSceneViewStatus.FailedToInitialize -> {
-                    val message = status.error.message ?: status.error
-                    TextWithScrim(text = stringResource(R.string.failed_to_initialize_ar, message))
-                }
-
-                else -> {
-                    when (sceneLoadStatus) {
-                        is LoadStatus.NotLoaded, LoadStatus.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        // successfully loaded so nothing more to do
-                        LoadStatus.Loaded -> {}
-                    }
-                }
-            }
-        }
-    } else {
-        // otherwise display a message and a button that causes the privacy info dialog to be shown
+    if (!acceptedPrivacyInfo) {
+        // Privacy info must have been declined, so display a message to that effect and a button
+        // that causes the privacy info dialog to be shown again
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -176,6 +140,110 @@ fun MainScreen() {
                 onClick = { showPrivacyInfo = true }
             ) {
                 Text(stringResource(R.string.show_privacy_info))
+            }
+        }
+    } else {
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        // In the Scaffold, declare a TopAppBar that includes a DropdownMenu containing Points of
+        // Interest for the user to select from
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                    actions = {
+                        var actionsExpanded by remember { mutableStateOf(false) }
+                        IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                            Icon(Icons.Default.MoreVert, stringResource(R.string.more))
+                        }
+                        DropdownMenu(
+                            expanded = actionsExpanded,
+                            onDismissRequest = { actionsExpanded = false },
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Text(stringResource(R.string.select_new_location))
+                            HorizontalDivider(thickness = 2.dp)
+                            pointsOfInterestList.forEachIndexed { index, poi ->
+                                DropdownMenuItem(
+                                    text = { Text(poi.name) },
+                                    onClick = {
+                                        // User has clicked on a Point of Interest; set the location,
+                                        // heading and translationFactor for that POI
+                                        currentPoiIndex = index
+                                        actionsExpanded = false
+                                        flyoverSceneViewProxy.setLocationAndHeading(
+                                            poi.location,
+                                            poi.heading
+                                        )
+                                        currentTranslationFactor = poi.translationFactor
+                                    },
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                var initializationStatus by rememberFlyoverSceneViewStatus()
+
+                // Display the scene in a FlyoverSceneView
+                FlyoverSceneView(
+                    arcGISScene = arcGISScene,
+                    flyoverSceneViewProxy = flyoverSceneViewProxy,
+                    translationFactor = currentTranslationFactor,
+                    onInitializationStatusChanged = {
+                        initializationStatus = it
+                    }
+                )
+
+                val sceneLoadStatus =
+                    arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+
+                when (val status = initializationStatus) {
+                    // Display a message while the FlyoverSceneView initializes
+                    is FlyoverSceneViewStatus.Initializing -> {
+                        TextWithScrim(text = stringResource(R.string.setting_up_ar))
+                    }
+
+                    // Display an error message if initialization failed
+                    is FlyoverSceneViewStatus.FailedToInitialize -> {
+                        val message = status.error.message ?: status.error
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_initialize_ar,
+                                message
+                            )
+                        )
+                    }
+
+                    else -> {
+                        when (sceneLoadStatus) {
+                            // Display a progress indicator while the scene loads
+                            is LoadStatus.NotLoaded, LoadStatus.Loading -> {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+
+                            // Display an error message if scene loading failed
+                            is LoadStatus.FailedToLoad -> {
+                                TextWithScrim(
+                                    text = stringResource(
+                                        R.string.failed_to_load_scene,
+                                        sceneLoadStatus.error
+                                    )
+                                )
+                            }
+
+                            // Successfully loaded so nothing more to do
+                            LoadStatus.Loaded -> {}
+                        }
+                    }
+                }
             }
         }
     }
