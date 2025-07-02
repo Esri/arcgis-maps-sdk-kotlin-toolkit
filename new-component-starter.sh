@@ -93,6 +93,9 @@
 	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/g {} \; > /dev/null 2>&1
 	# replace the string "Template" in the contents of any file	
 	find "${componentName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/g {} \; > /dev/null 2>&1	
+
+	current_year=$(date +%Y)
+	find "${componentName}" -type f -exec perl -i -pe s/2024/$current_year/g {} \; > /dev/null 2>&1
 	
 	popd > /dev/null
     }
