@@ -241,7 +241,7 @@ private fun OnDemandMapAreaSelectorOptions(
                     calculateEnvelope(mapViewSize, mapViewProxy)?.let { downloadArea ->
                         onDownloadMapAreaSelected.invoke(
                             OnDemandMapAreaConfiguration(
-                                areaID = UUID.randomUUID().toString(),
+                                itemId = UUID.randomUUID().toString(),
                                 title = mapAreaName,
                                 minScale = 0.0,
                                 maxScale = zoomLevel.scale,

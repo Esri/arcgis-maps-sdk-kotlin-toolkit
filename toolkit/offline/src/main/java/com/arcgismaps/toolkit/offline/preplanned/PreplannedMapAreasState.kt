@@ -242,7 +242,7 @@ internal class PreplannedMapAreaState(
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
             portalItemId = item.itemId,
-            mapAreaId = preplannedMapAreaId,
+            mapAreaItemId = preplannedMapAreaId,
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = item.title
         )

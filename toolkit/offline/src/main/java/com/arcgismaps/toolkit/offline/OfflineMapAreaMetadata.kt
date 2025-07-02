@@ -37,7 +37,7 @@ import java.io.FileOutputStream
  */
 @Serializable
 internal data class OfflineMapAreaMetadata(
-    val areaId: String,
+    val itemId: String,
     val title: String,
     val description: String,
     @Transient val thumbnailImage: Bitmap? = null
@@ -51,7 +51,7 @@ internal data class OfflineMapAreaMetadata(
          */
         internal fun createPreplannedMetadata(preplannedMapArea: PreplannedMapArea): OfflineMapAreaMetadata {
             return OfflineMapAreaMetadata(
-                areaId = preplannedMapArea.portalItem.itemId,
+                itemId = preplannedMapArea.portalItem.itemId,
                 title = preplannedMapArea.portalItem.title,
                 thumbnailImage = preplannedMapArea.portalItem.thumbnail?.image?.bitmap,
                 description = preplannedMapArea.portalItem.description
@@ -65,7 +65,7 @@ internal data class OfflineMapAreaMetadata(
          */
         internal fun createOnDemandMetadata(onDemandMapAreaConfiguration: OnDemandMapAreaConfiguration): OfflineMapAreaMetadata {
             return OfflineMapAreaMetadata(
-                areaId = onDemandMapAreaConfiguration.areaID,
+                itemId = onDemandMapAreaConfiguration.itemId,
                 title = onDemandMapAreaConfiguration.title,
                 thumbnailImage = onDemandMapAreaConfiguration.thumbnail,
                 description = ""
@@ -94,7 +94,7 @@ internal data class OfflineMapAreaMetadata(
                 null
             }
             return OfflineMapAreaMetadata(
-                areaId = baseMetadata.areaId,
+                itemId = baseMetadata.itemId,
                 thumbnailImage = thumbnail,
                 title = baseMetadata.title,
                 description = baseMetadata.description

@@ -56,7 +56,7 @@ import java.util.UUID
  * @since 200.8.0
  */
 internal data class OnDemandMapAreaConfiguration(
-    internal val areaID: String,
+    internal val itemId: String,
     internal val title: String,
     internal val minScale: Double,
     internal val maxScale: Double,
@@ -118,7 +118,7 @@ internal class OnDemandMapAreasState(
     internal fun downloadOnDemandMapArea() = runCatchingCancellable {
         val task = offlineMapTask ?: return@runCatchingCancellable
         val portalItem = item as? PortalItem ?: return@runCatchingCancellable
-        val onDemandMapAreaID = configuration?.areaID ?: return@runCatchingCancellable
+        val onDemandMapAreaID = configuration?.itemId ?: return@runCatchingCancellable
         val downloadMapArea = configuration.areaOfInterest
 
         if (!scope.isActive)
@@ -230,7 +230,7 @@ internal class OnDemandMapAreasState(
         workerUUID = OfflineRepository.createOnDemandMapAreaRequestAndQueueDownload(
             context = context,
             portalItemId = item.itemId,
-            mapAreaId = onDemandMapAreaId,
+            mapAreaItemId = onDemandMapAreaId,
             jsonJobPath = jsonJobFile.path,
             onDemandMapAreaTitle = configuration?.title ?: item.title
         )
