@@ -52,7 +52,7 @@ class IapAuthenticatorTest {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
-                authorizedUrl = "https://www.arcgis.com/index.html",
+                authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { receivedRedirectUri = it },
                 onCancel = { cancellationHandled= true }
             )
@@ -85,7 +85,7 @@ class IapAuthenticatorTest {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
-                authorizedUrl = "https://www.arcgis.com/index.html",
+                authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { onCompleteCalled = true },
                 onCancel = { cancellationHandled = true }
             )

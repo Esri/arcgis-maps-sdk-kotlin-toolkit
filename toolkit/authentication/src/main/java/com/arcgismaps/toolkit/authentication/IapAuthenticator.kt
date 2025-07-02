@@ -27,18 +27,18 @@ import androidx.compose.runtime.setValue
 /**
  * Composable function that handles launching a browser for IAP authentication.
  *
- * @param authorizedUrl The authorized URL to load in the browser for IAP authentication.
+ * @param authorizeUrl The authorization URL to load in the browser for IAP authentication.
  * @param onComplete Callback function that gets invoked with the redirect URL upon successful authentication.
  * @param onCancel Callback function that gets invoked when the authentication is cancelled.
  * @since 200.8.0
  */
 @Composable
 internal fun IapSignInAuthenticator(
-    authorizedUrl: String,
+    authorizeUrl: String,
     onComplete : (String) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var hasLaunched by rememberSaveable(authorizedUrl) { mutableStateOf(false) }
+    var hasLaunched by rememberSaveable(authorizeUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignInContract()
     ) { redirectUrl ->
@@ -49,10 +49,10 @@ internal fun IapSignInAuthenticator(
         }
     }
 
-    LaunchedEffect(authorizedUrl) {
+    LaunchedEffect(authorizeUrl) {
         if (!hasLaunched) {
             hasLaunched = true
-            launcher.launch(authorizedUrl)
+            launcher.launch(authorizeUrl)
         }
     }
 }
