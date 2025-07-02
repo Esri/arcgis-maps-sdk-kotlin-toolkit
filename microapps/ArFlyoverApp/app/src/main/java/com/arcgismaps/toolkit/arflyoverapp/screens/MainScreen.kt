@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
@@ -209,15 +210,15 @@ fun MainScreen() {
                         initializationStatus = it
                     }
                 ) {
-                    //TODO add a comment...
                     val pointOfInterest = pointsOfInterestList[currentPoiIndex]
                     if (displayCallout && pointOfInterest.calloutLocation != null) {
+                        // Display a Callout containing information about the current POI
                         Callout(pointOfInterest.calloutLocation) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(text = pointOfInterest.name,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                                Text(pointOfInterest.description)
+                                Text(pointOfInterest.description, Modifier.width(300.dp))
                                 Button(
                                     onClick = {
                                         displayCallout = false
