@@ -157,9 +157,8 @@ private fun AuthenticatorDelegate(
     modifier: Modifier = Modifier,
     useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
-    onPendingBrowserAuthChallenge: BrowserChallengeHandler? = null
+    onPendingBrowserAuthChallenge: ((BrowserAuthChallenge) -> Unit)? = null
 ) {
-
     val hasActivePrompt =
         authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
@@ -170,9 +169,10 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
         if (onPendingBrowserAuthChallenge != null) {
             OAuthAuthenticator(
-                it, authenticatorState
+                oAuthPendingSignIn = it,
+                authenticatorState = authenticatorState
             ) { oAuthUserSignIn ->
-                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
+                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
             }
         } else {
             OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
@@ -182,7 +182,7 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let { iapSignIn ->
         if (onPendingBrowserAuthChallenge != null) {
             IapSignInAuthenticator {
-                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.IapSignInChallenge(iapSignIn))
+                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.IapSignInChallenge(iapSignIn))
             }
         } else {
             IapSignInAuthenticator(
@@ -196,7 +196,7 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
         if (onPendingBrowserAuthChallenge != null) {
             IapSignOutAuthenticator {
-                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.IapSignOutChallenge(it))
+                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.IapSignOutChallenge(it))
             }
         } else {
             IapSignOutAuthenticator(
@@ -253,8 +253,4 @@ public sealed class BrowserAuthChallenge {
         BrowserAuthChallenge()
 
     public data class IapSignOutChallenge internal constructor(val iapSignOut: IapSignOut) : BrowserAuthChallenge()
-}
-
-internal fun interface BrowserChallengeHandler {
-    fun challenge(browserAuthChallenge: BrowserAuthChallenge)
 }
