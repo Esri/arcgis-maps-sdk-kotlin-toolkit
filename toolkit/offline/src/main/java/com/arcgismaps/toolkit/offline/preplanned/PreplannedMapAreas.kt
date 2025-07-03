@@ -62,6 +62,7 @@ import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
+import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 
@@ -179,7 +180,7 @@ internal fun PreplannedMapAreas(
                         )
                         // Display the description with a maximum of two lines
                         Text(
-                            text = state.description,
+                            text = htmlToPlainText(state.description),
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
