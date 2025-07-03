@@ -526,6 +526,32 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     } ?: pendingOAuthUserSignIn.value?.cancel()
 }
 
+public fun AuthenticatorState.completeBrowserAuthChallenge(intent: Intent?) {
+    when {
+        pendingOAuthUserSignIn.value != null -> {
+            intent?.data?.let { uri ->
+                pendingOAuthUserSignIn.value?.complete(uri.toString())
+            } ?: pendingOAuthUserSignIn.value?.cancel()
+        }
+
+        pendingIapSignIn.value != null -> {
+            intent?.data?.let { uri ->
+                pendingIapSignIn.value?.complete(uri.toString())
+            } ?: pendingIapSignIn.value?.cancel()
+        }
+
+        pendingIapSignOut.value != null -> {
+            // Currently the IAP sign out does not return any data, so we just check if the intent is not null
+            // to determine if the sign out was successful.
+            if (intent != null) {
+                pendingIapSignOut.value?.complete(true)
+            } else {
+                pendingIapSignOut.value?.cancel()
+            }
+        }
+    }
+}
+
 /**
  * Represents a username and password pair.
  *

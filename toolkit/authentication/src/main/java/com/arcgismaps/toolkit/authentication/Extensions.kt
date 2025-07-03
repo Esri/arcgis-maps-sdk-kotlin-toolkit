@@ -66,7 +66,8 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
 
 public fun Activity.launchCustomTabs(pendingBrowserAuthChallenge: BrowserAuthChallenge) {
     val (url, useIncognito) = when (pendingBrowserAuthChallenge) {
-        is BrowserAuthChallenge.OAuthUserSignInChallenge -> pendingBrowserAuthChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+        is BrowserAuthChallenge.OAuthUserSignInChallenge ->
+            pendingBrowserAuthChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
         is BrowserAuthChallenge.IapSignInChallenge -> pendingBrowserAuthChallenge.iapSignIn.authorizeUrl to false
         is BrowserAuthChallenge.IapSignOutChallenge -> pendingBrowserAuthChallenge.iapSignOut.signOutUrl to false
     }

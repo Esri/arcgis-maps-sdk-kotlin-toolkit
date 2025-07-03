@@ -55,7 +55,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
     replaceWith = ReplaceWith(
         ""
     ),
-    level = DeprecationLevel.HIDDEN
+    level = DeprecationLevel.WARNING
 )
 @Composable
 public fun Authenticator(
