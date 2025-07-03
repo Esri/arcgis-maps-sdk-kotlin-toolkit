@@ -143,7 +143,8 @@ internal fun PreplannedLayoutContainer(
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
                 preplannedMapAreaStates = preplannedMapAreaStates,
-                onDownloadDeleted = { if (isShowingOnlyOfflineModels) onDownloadDeleted(it) },
+                isShowingOnlyOfflineModels = isShowingOnlyOfflineModels,
+                onDownloadDeleted = onDownloadDeleted,
                 modifier = modifier
             )
         }

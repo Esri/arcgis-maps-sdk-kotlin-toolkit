@@ -73,6 +73,7 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 @Composable
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
+    isShowingOnlyOfflineModels: Boolean,
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
@@ -112,8 +113,11 @@ internal fun PreplannedMapAreas(
             isDeletable = selectedPreplannedMapAreaState.status.isDownloaded && !selectedPreplannedMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedPreplannedMapAreaState.removeDownloadedMapArea { !preplannedMapAreaStates.any { it.status.isDownloaded } }
-                onDownloadDeleted(selectedPreplannedMapAreaState)
-                onHideSheet = true
+                // Dismiss the sheet and update the map areas list only in offline mode
+                if (isShowingOnlyOfflineModels) {
+                    onDownloadDeleted(selectedPreplannedMapAreaState)
+                    onHideSheet = true
+                }
             }
         )
     }
