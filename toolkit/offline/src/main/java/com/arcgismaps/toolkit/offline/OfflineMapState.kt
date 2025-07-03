@@ -117,8 +117,6 @@ public class OfflineMapState(
         _initializationStatus.value = InitializationStatus.Initializing
         // initialize the offline repository
         OfflineRepository.refreshOfflineMapInfos(context)
-//        // reset to check if map has offline enabled
-//        isShowingOnlyOfflineModels = false
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
             // check if the error is due to network connection
