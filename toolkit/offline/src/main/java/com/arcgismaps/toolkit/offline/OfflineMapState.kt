@@ -97,14 +97,6 @@ public class OfflineMapState(
     public val initializationStatus: State<InitializationStatus> = _initializationStatus
 
     /**
-     * A Boolean value indicating if only offline models are being shown.
-     *
-     * @since 200.8.0
-     */
-    internal var isShowingOnlyOfflineModels by mutableStateOf(false)
-        private set
-
-    /**
      * A Boolean value indicating whether the web map is offline disabled.
      *
      * @since 200.8.0
@@ -118,22 +110,16 @@ public class OfflineMapState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.8.0
      */
-    internal suspend fun initialize(context: Context): Result<Unit> = runCatchingCancellable {
+    internal suspend fun initialize(context: Context, isDeviceOffline: Boolean): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
         _initializationStatus.value = InitializationStatus.Initializing
         // initialize the offline repository
         OfflineRepository.refreshOfflineMapInfos(context)
-        // reset to check if map has offline enabled
-        isShowingOnlyOfflineModels = false
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
-            // check if the error is due to network connection
-            if (error.message?.contains("Unable to resolve host") == true) {
-                // enable offline only mode
-                isShowingOnlyOfflineModels = true
-            } else {
+            if (!isDeviceOffline) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
@@ -146,8 +132,7 @@ public class OfflineMapState(
 
         // load the task, and ignore network error if device is offline
         offlineMapTask.retryLoad().getOrElse { error ->
-            // check if the error is not due to network connection
-            if (error.message?.contains("Unable to resolve host") == false) {
+            if (!isDeviceOffline) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
@@ -159,7 +144,7 @@ public class OfflineMapState(
             (arcGISMap.loadStatus.value == LoadStatus.Loaded) && (arcGISMap.offlineSettings == null)
 
         // load the preplanned map area states
-        loadPreplannedMapAreas(context)
+        loadPreplannedMapAreas(context, isDeviceOffline)
 
         // check if preplanned for loaded
         if (_mode != OfflineMapMode.Preplanned || _mode == OfflineMapMode.Unknown) {
@@ -177,7 +162,7 @@ public class OfflineMapState(
      *
      * @since 200.8.0
      */
-    private suspend fun loadPreplannedMapAreas(context: Context) {
+    private suspend fun loadPreplannedMapAreas(context: Context, isDeviceOffline: Boolean) {
         _preplannedMapAreaStates.clear()
         val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
         try {
@@ -188,7 +173,7 @@ public class OfflineMapState(
             // an exception will be thrown in offline mode
             preplannedMapAreas.clear()
         }
-        if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
+        if (isDeviceOffline || preplannedMapAreas.isEmpty()) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
             _mode = OfflineMapMode.Preplanned
