@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
+import com.arcgismaps.toolkit.offline.internal.utils.connectivityState
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
 import com.arcgismaps.toolkit.offline.internal.utils.isValidMapAreaTitle
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaConfiguration
@@ -61,6 +63,12 @@ public fun OfflineMapAreas(
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
+
+    val internetConnectionState by connectivityState()
+    LaunchedEffect(internetConnectionState) {
+        isRefreshEnabled = true
+        Log.e("CONNECTION ***","Current connection: ${internetConnectionState.javaClass.simpleName}")
+    }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
