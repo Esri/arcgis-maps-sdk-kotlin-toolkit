@@ -57,6 +57,20 @@ internal fun IapSignInAuthenticator(
     }
 }
 
+@Composable
+internal fun IapSignInAuthenticator(
+    browserChallengeHandler : () -> Unit
+) {
+    var hasLaunched by rememberSaveable(browserChallengeHandler) { mutableStateOf(false) }
+    LaunchedEffect(browserChallengeHandler) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            browserChallengeHandler.invoke()
+        }
+    }
+}
+
+
 /**
  * Composable function that handles invalidating an IAP session by launching the provided [iapSignOutUrl] in a browser.
  *
@@ -86,6 +100,20 @@ internal fun IapSignOutAuthenticator(
         if (!hasLaunched) {
             hasLaunched = true
             launcher.launch(iapSignOutUrl)
+        }
+    }
+}
+
+
+@Composable
+internal fun IapSignOutAuthenticator(
+    browserChallengeHandler : () -> Unit
+) {
+    var hasLaunched by rememberSaveable(browserChallengeHandler) { mutableStateOf(false) }
+    LaunchedEffect(browserChallengeHandler) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            browserChallengeHandler.invoke()
         }
     }
 }

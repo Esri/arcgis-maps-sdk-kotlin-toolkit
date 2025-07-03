@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.IapSignIn
+import com.arcgismaps.httpcore.authentication.IapSignOut
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
@@ -48,6 +50,13 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * @see DialogAuthenticator
  * @since 200.2.0
  */
+@Deprecated(
+    message = "Authenticator with onPendingOAuthUserSignIn instead.",
+    replaceWith = ReplaceWith(
+        ""
+    ),
+    level = DeprecationLevel.HIDDEN
+)
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
@@ -62,6 +71,37 @@ public fun Authenticator(
         )
     }
 }
+
+@JvmName("AuthenticatorWithBrowserAuthChallenge")
+@Composable
+public fun Authenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
+    onBrowserChallengeRequested: ((BrowserAuthChallenge) -> Unit)
+) {
+    Surface {
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingBrowserAuthChallenge = onBrowserChallengeRequested,
+        )
+    }
+}
+
+@Composable
+public fun Authenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier
+) {
+    Surface {
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingBrowserAuthChallenge = null
+        )
+    }
+}
+
 
 /**
  * Displays appropriate Authentication UI when an authentication challenge is issued.
@@ -117,6 +157,7 @@ private fun AuthenticatorDelegate(
     modifier: Modifier = Modifier,
     useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
+    onPendingBrowserAuthChallenge: BrowserChallengeHandler? = null
 ) {
 
     val hasActivePrompt =
@@ -127,23 +168,43 @@ private fun AuthenticatorDelegate(
     }
 
     authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
-        OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
+        if (onPendingBrowserAuthChallenge != null) {
+            OAuthAuthenticator(
+                it, authenticatorState
+            ) { oAuthUserSignIn ->
+                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
+            }
+        } else {
+            OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
+        }
     }
 
-    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
-        IapSignInAuthenticator(
-            authorizeUrl = it.authorizeUrl,
-            onComplete = it::complete,
-            onCancel = it::cancel
-        )
+    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let { iapSignIn ->
+        if (onPendingBrowserAuthChallenge != null) {
+            IapSignInAuthenticator {
+                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.IapSignInChallenge(iapSignIn))
+            }
+        } else {
+            IapSignInAuthenticator(
+                authorizeUrl = iapSignIn.authorizeUrl,
+                onComplete = iapSignIn::complete,
+                onCancel = iapSignIn::cancel
+            )
+        }
     }
 
     authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
-        IapSignOutAuthenticator(
-            iapSignOutUrl = it.signOutUrl,
-            onCompleteSignOut = it::complete,
-            onCancelSignOut = it::cancel
-        )
+        if (onPendingBrowserAuthChallenge != null) {
+            IapSignOutAuthenticator {
+                onPendingBrowserAuthChallenge.challenge(BrowserAuthChallenge.IapSignOutChallenge(it))
+            }
+        } else {
+            IapSignOutAuthenticator(
+                iapSignOutUrl = it.signOutUrl,
+                onCompleteSignOut = it::complete,
+                onCancelSignOut = it::cancel
+            )
+        }
     }
 
     authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value?.let {
@@ -184,4 +245,16 @@ private fun Context.findActivity(): Activity {
         context = context.baseContext
     }
     throw IllegalStateException("Could not find an activity from which to launch client certificate picker.")
+}
+
+public sealed class BrowserAuthChallenge {
+    public data class IapSignInChallenge internal constructor(val iapSignIn: IapSignIn) : BrowserAuthChallenge()
+    public data class OAuthUserSignInChallenge internal constructor(val oAuthUserSignIn: OAuthUserSignIn) :
+        BrowserAuthChallenge()
+
+    public data class IapSignOutChallenge internal constructor(val iapSignOut: IapSignOut) : BrowserAuthChallenge()
+}
+
+internal fun interface BrowserChallengeHandler {
+    fun challenge(browserAuthChallenge: BrowserAuthChallenge)
 }
