@@ -35,7 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
-import com.arcgismaps.toolkit.offline.internal.utils.connectivityState
+import com.arcgismaps.toolkit.offline.internal.utils.NetworkConnectionState
+import com.arcgismaps.toolkit.offline.internal.utils.networkConnectivityState
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
 import com.arcgismaps.toolkit.offline.internal.utils.isValidMapAreaTitle
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaConfiguration
@@ -64,17 +65,19 @@ public fun OfflineMapAreas(
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
 
-    val internetConnectionState by connectivityState()
+    val internetConnectionState by networkConnectivityState()
     LaunchedEffect(internetConnectionState) {
         isRefreshEnabled = true
-        Log.e("CONNECTION ***","Current connection: ${internetConnectionState.javaClass.simpleName}")
     }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
             offlineMapState.resetInitialize()
         }
-        offlineMapState.initialize(context)
+        offlineMapState.initialize(
+            context,
+            isDeviceOffline = internetConnectionState == NetworkConnectionState.Unavailable
+        )
         isRefreshEnabled = false
     }
 
@@ -108,7 +111,7 @@ public fun OfflineMapAreas(
                             PreplannedLayoutContainer(
                                 modifier = modifier,
                                 preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
-                                isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
+                                isShowingOnlyOfflineModels = internetConnectionState == NetworkConnectionState.Unavailable,
                                 onDownloadDeleted = offlineMapState::removePreplannedMapArea,
                                 onRefresh = { isRefreshEnabled = true }
                             )
@@ -118,7 +121,7 @@ public fun OfflineMapAreas(
                             OnDemandLayoutContainer(
                                 modifier = modifier,
                                 onDemandMapAreaStates = offlineMapState.onDemandMapAreaStates,
-                                isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
+                                isShowingOnlyOfflineModels = internetConnectionState == NetworkConnectionState.Unavailable,
                                 localMap = offlineMapState.localMap,
                                 onRefresh = { isRefreshEnabled = true },
                                 onDownloadDeleted = offlineMapState::removeOnDemandMapArea,

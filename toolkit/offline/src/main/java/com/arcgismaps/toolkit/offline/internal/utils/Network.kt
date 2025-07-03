@@ -30,10 +30,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import androidx.compose.runtime.State
 
 @Composable
-internal fun connectivityState(): State<ConnectionState> {
+internal fun networkConnectivityState(): State<NetworkConnectionState> {
     val context = LocalContext.current
 
-    // Creates a State<ConnectionState> with current connectivity state as initial value
+    // Creates a State<NetworkConnectionState> with current connectivity state as initial value
     return produceState(initialValue = context.currentConnectivityState) {
         // In a coroutine, can make suspend calls
         context.observeConnectivityAsFlow().collect { value = it }
@@ -43,7 +43,7 @@ internal fun connectivityState(): State<ConnectionState> {
 internal fun Context.observeConnectivityAsFlow() = callbackFlow {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    val callback = NetworkCallback { connectionState -> trySend(connectionState) }
+    val callback = NetworkCallback(connectivityManager) { networkConnectionState -> trySend(networkConnectionState) }
 
     val networkRequest = NetworkRequest.Builder()
         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -62,40 +62,67 @@ internal fun Context.observeConnectivityAsFlow() = callbackFlow {
     }
 }
 
-internal fun NetworkCallback(callback: (ConnectionState) -> Unit): ConnectivityManager.NetworkCallback {
+internal fun NetworkCallback(
+    connectivityManager: ConnectivityManager,
+    callback: (NetworkConnectionState) -> Unit
+): ConnectivityManager.NetworkCallback {
     return object : ConnectivityManager.NetworkCallback() {
+        /**
+         * This callback is triggered when a network is available.
+         * It indicates that the device has internet connectivity.
+         */
         override fun onAvailable(network: Network) {
-            callback(ConnectionState.Available)
+            callback(NetworkConnectionState.Available)
         }
 
+        /**
+         * This callback is triggered when a network is temporarily unavailable.
+         * It does not necessarily mean that there is no internet connectivity,
+         * but rather that the network is in a transient state (e.g., switching networks).
+         */
         override fun onLost(network: Network) {
-            callback(ConnectionState.Unavailable)
+            // This callback is triggered when any previously available network is lost,
+            // not just when all internet connectivity is lost. If the device switches
+            // between networks (e.g., from Wi-Fi to mobile data), onLost is called for
+            // the old network, even if another network is still available.
+            val state = getCurrentConnectivityState(connectivityManager)
+            callback(state)
         }
     }
 }
+
 /**
  * Network utility to get current state of internet connection
  */
-internal val Context.currentConnectivityState: ConnectionState
+internal val Context.currentConnectivityState: NetworkConnectionState
     get() {
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return getCurrentConnectivityState(connectivityManager)
     }
 
+/**
+ * Helper function to determine the current connectivity state.
+ */
 private fun getCurrentConnectivityState(
     connectivityManager: ConnectivityManager
-): ConnectionState {
+): NetworkConnectionState {
     val connected = connectivityManager.allNetworks.any { network ->
         connectivityManager.getNetworkCapabilities(network)
             ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             ?: false
     }
 
-    return if (connected) ConnectionState.Available else ConnectionState.Unavailable
+    return if (connected) NetworkConnectionState.Available else NetworkConnectionState.Unavailable
 }
 
-internal sealed class ConnectionState {
-    object Available : ConnectionState()
-    object Unavailable : ConnectionState()
+/**
+ * Represents the state of network connectivity.
+ *
+ * - [Available]: Indicates that the device has internet connectivity.
+ * - [Unavailable]: Indicates that the device does not have internet connectivity.
+ */
+internal sealed class NetworkConnectionState {
+    object Available : NetworkConnectionState()
+    object Unavailable : NetworkConnectionState()
 }
