@@ -25,9 +25,11 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.IdentifyGeometryEditorResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditorElement
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditorVertex
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
-import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 
 /**
  * Used to perform operations on a composable [MapView].
