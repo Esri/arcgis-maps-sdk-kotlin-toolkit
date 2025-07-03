@@ -119,8 +119,7 @@ public class OfflineMapState(
         OfflineRepository.refreshOfflineMapInfos(context)
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
-            // check if the error is due to network connection
-            if (!isDeviceOffline || error.message?.contains("Unable to resolve host") == false) {
+            if (!isDeviceOffline) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
@@ -133,8 +132,7 @@ public class OfflineMapState(
 
         // load the task, and ignore network error if device is offline
         offlineMapTask.retryLoad().getOrElse { error ->
-            // check if the error is not due to network connection
-            if (!isDeviceOffline || error.message?.contains("Unable to resolve host") == false) {
+            if (!isDeviceOffline) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error

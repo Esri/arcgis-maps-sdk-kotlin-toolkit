@@ -109,8 +109,7 @@ private fun getCurrentConnectivityState(
 ): NetworkConnectionState {
     val connected = connectivityManager.allNetworks.any { network ->
         connectivityManager.getNetworkCapabilities(network)
-            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            ?: false
+            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
     }
 
     return if (connected) NetworkConnectionState.Available else NetworkConnectionState.Unavailable
