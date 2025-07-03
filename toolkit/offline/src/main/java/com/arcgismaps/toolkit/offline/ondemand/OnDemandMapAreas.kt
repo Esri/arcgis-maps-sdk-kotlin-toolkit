@@ -105,10 +105,6 @@ internal fun OnDemandMapAreas(
             description = null,
             size = selectedOnDemandMapAreaState.directorySize,
             isAvailableToDownload = selectedOnDemandMapAreaState.status.allowsDownload,
-            onStartDownload = {
-                selectedOnDemandMapAreaState.downloadOnDemandMapArea()
-                onHideSheet = true
-            },
             isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }

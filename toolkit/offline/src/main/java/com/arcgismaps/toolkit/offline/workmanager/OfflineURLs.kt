@@ -94,12 +94,17 @@ internal object OfflineURLs {
     internal fun prePlannedDirectoryPath(
         context: Context,
         portalItemID: String,
-        preplannedMapAreaID: String? = null
+        preplannedMapAreaID: String? = null,
+        makeDirsEnabled: Boolean = true
     ): String {
         val itemDir = File(portalItemDirectoryPath(context, portalItemID))
-        val preplannedDir = File(itemDir, preplannedMapAreas).makeDirectoryIfItDoesNotExist()
+        val preplannedDir = File(itemDir, preplannedMapAreas).apply {
+            if (makeDirsEnabled) makeDirectoryIfItDoesNotExist()
+        }
         return if (preplannedMapAreaID != null) {
-            val areaDir = File(preplannedDir, preplannedMapAreaID).makeDirectoryIfItDoesNotExist()
+            val areaDir = File(preplannedDir, preplannedMapAreaID).apply {
+                if (makeDirsEnabled) makeDirectoryIfItDoesNotExist()
+            }
             areaDir.absolutePath
         } else {
             preplannedDir.absolutePath

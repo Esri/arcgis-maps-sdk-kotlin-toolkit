@@ -72,7 +72,7 @@ internal fun MapAreaDetailsBottomSheet(
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
-    onStartDownload: () -> Unit,
+    onStartDownload: () -> Unit = {},
     onDeleteDownload: () -> Unit
 ) {
     if (showSheet) {

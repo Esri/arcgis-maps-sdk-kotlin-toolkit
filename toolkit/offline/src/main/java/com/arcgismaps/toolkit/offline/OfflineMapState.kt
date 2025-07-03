@@ -231,7 +231,7 @@ public class OfflineMapState(
      */
     private suspend fun loadOfflinePreplannedMapAreas(context: Context) {
         val preplannedDirectory = File(
-            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)
+            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId,null,false)
         )
         val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
             ?: emptyList()
