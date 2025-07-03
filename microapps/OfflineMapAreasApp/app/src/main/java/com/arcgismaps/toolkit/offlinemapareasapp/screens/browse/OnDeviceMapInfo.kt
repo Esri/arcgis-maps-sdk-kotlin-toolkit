@@ -21,10 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -34,7 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.OfflineMapInfo
@@ -51,16 +53,6 @@ fun OnDeviceMapInfo(
         modifier = Modifier.animateContentSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                enabled = offlineMapInfos.isNotEmpty(),
-                onClick = { OfflineRepository.removeAllDownloads(context) }) {
-                Text("Remove all downloads")
-            }
-        }
         offlineMapInfos.forEach { offlineMapInfo ->
             item {
                 OfflineMapInfoCard(info = offlineMapInfo, onOpen = {
@@ -68,6 +60,37 @@ fun OnDeviceMapInfo(
                 }, onDelete = {
                     OfflineRepository.removeDownloadsForWebmap(context, offlineMapInfo)
                 })
+            }
+        }
+        item {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Offline map infos will be displayed here when downloads have completed.",
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center
+            )
+        }
+        item {
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                onClick = { OfflineRepository.refreshOfflineMapInfos(context) }) {
+                Icon(Icons.Default.Refresh, null)
+                Spacer(Modifier.width(4.dp))
+                Text("Refresh: Offline map infos")
+            }
+        }
+        item {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                enabled = offlineMapInfos.isNotEmpty(),
+                onClick = { OfflineRepository.removeAllDownloads(context) }) {
+                Icon(Icons.Default.Delete, null)
+                Spacer(Modifier.width(4.dp))
+                Text("Remove all downloads")
             }
         }
     }
@@ -100,8 +123,8 @@ fun OfflineMapInfoCard(
                 contentDescription = "Map thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(75.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .width(100.dp)
+                    .clip(RoundedCornerShape(16.dp))
             )
 
             Spacer(Modifier.width(8.dp))
