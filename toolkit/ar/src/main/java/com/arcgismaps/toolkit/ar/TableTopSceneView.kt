@@ -310,7 +310,12 @@ public fun TableTopSceneView(
                 onTwoPointerTap = onTwoPointerTap,
                 onPan = onPan,
                 content = {
-                    content?.invoke(TableTopSceneViewScope(this))
+                    content?.let { content ->
+                        val tableTopSceneViewScope = remember {
+                            TableTopSceneViewScope(this)
+                        }
+                        content.invoke(tableTopSceneViewScope)
+                    }
                 }
             )
         }
