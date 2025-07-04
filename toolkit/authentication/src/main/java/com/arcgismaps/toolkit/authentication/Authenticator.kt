@@ -201,6 +201,7 @@ public fun DialogAuthenticator(
  * @see Authenticator
  * @since 200.2.0
  */
+@JvmName("DialogAuthenticatorWithBrowserAuthChallenge")
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,

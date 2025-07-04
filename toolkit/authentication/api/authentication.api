@@ -8,7 +8,9 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
 	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun AuthenticatorWithBrowserAuthChallenge (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DialogAuthenticatorWithBrowserAuthChallenge (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
