@@ -526,6 +526,25 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     } ?: pendingOAuthUserSignIn.value?.cancel()
 }
 
+/**
+ * Completes the current browser-based authentication challenge for the [AuthenticatorState].
+ *
+ * This method handles the completion of pending authentication challenges that required interaction with the browser.
+ * It checks the type of challenge currently pending (OAuth sign-in, IAP sign-in, or IAP sign-out) and
+ * processes the provided [Intent] accordingly.
+ *
+ * - For OAuth sign-in, the method extracts the redirect URI from the [Intent] and completes the sign-in.
+ *   If the [Intent] is null, the sign-in is canceled.
+ * - For IAP sign-in, the method extracts the redirect URI from the [Intent] and completes the sign-in.
+ *   If the [Intent] is null, the sign-in is canceled.
+ * - For IAP sign-out, the method checks if the [Intent] is not null to determine if the sign-out was successful.
+ *   If the [Intent] is null, the sign-out is canceled.
+ *
+ * Note: Currently, the IAP sign-out does not return a redirect URI, so the method only checks if the [Intent] is not null.
+ *
+ * @param intent The [Intent] containing data from the browser authentication flow. If null, the challenge is canceled.
+ * @since 200.8.0
+ */
 public fun AuthenticatorState.completeBrowserAuthChallenge(intent: Intent?) {
     when {
         pendingOAuthUserSignIn.value != null -> {

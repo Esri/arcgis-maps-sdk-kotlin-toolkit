@@ -64,6 +64,18 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
     )
 }
 
+/**
+ * Launches the custom tabs activity with the provided browser authentication challenge.
+ *
+ * This method determines the appropriate URL and whether to use Incognito mode based on the type of
+ * [BrowserAuthChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
+ *
+ * @receiver an [Activity] used to launch the [CustomTabsIntent].
+ * @param pendingBrowserAuthChallenge the [BrowserAuthChallenge] containing the necessary information
+ * to complete the authentication process.
+ *
+ * @since 200.8.0
+ */
 public fun Activity.launchCustomTabs(pendingBrowserAuthChallenge: BrowserAuthChallenge) {
     val (url, useIncognito) = when (pendingBrowserAuthChallenge) {
         is BrowserAuthChallenge.OAuthUserSignInChallenge ->

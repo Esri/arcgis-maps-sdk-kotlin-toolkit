@@ -27,6 +27,10 @@ import androidx.compose.runtime.setValue
 /**
  * Composable function that handles launching a browser for IAP authentication.
  *
+ * This function is responsible for initiating the authentication process by launching a browser
+ * with the provided authorization URL. It uses an activity result launcher to handle the redirect
+ * URL upon successful authentication or cancellation.
+ *
  * @param authorizeUrl The authorization URL to load in the browser for IAP authentication.
  * @param onComplete Callback function that gets invoked with the redirect URL upon successful authentication.
  * @param onCancel Callback function that gets invoked when the authentication is cancelled.
@@ -57,6 +61,13 @@ internal fun IapSignInAuthenticator(
     }
 }
 
+/**
+ * Composable function that handles launching a browser challenge for IAP authentication.
+ *
+ * @param browserChallengeHandler A lambda function that executes the browser challenge for signing in to the IAP session.
+ * The function is invoked only once during the lifecycle of the composable.
+ * @since 200.8.0
+ */
 @Composable
 internal fun IapSignInAuthenticator(
     browserChallengeHandler : () -> Unit
@@ -104,7 +115,12 @@ internal fun IapSignOutAuthenticator(
     }
 }
 
-
+/**
+ * Composable function that handles invalidating an IAP session by launching the provided browser challenge handler.
+ *
+ * @param browserChallengeHandler A lambda function that executes the browser challenge for signing out of the IAP session.
+ * @since 200.8.0
+ */
 @Composable
 internal fun IapSignOutAuthenticator(
     browserChallengeHandler : () -> Unit
