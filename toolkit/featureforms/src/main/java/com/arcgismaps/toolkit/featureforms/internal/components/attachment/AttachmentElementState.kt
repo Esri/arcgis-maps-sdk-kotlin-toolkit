@@ -56,15 +56,14 @@ import java.io.File
 import java.util.Objects
 
 /**
- * The maximum attachment size in bytes that can be added
+ * The maximum attachment size in bytes that can be added.
  */
-internal const val maxAttachmentUploadSize = 999_999_999L
+internal const val maxAttachmentUploadSize = 50_000_000L
 
 /**
  * The maximum attachment size in bytes that can be downloaded.
  */
 internal const val maxAttachmentsDownloadSize = 999_999_999L
-
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -318,7 +317,7 @@ internal class FormAttachmentState(
                 formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
                 formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
                 formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize))
-                else -> formAttachment.load().onSuccess {
+                else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
             }
@@ -340,7 +339,7 @@ internal class FormAttachmentState(
     }
 
     override fun cancelLoad() {
-        // cancel op not supported
+        formAttachment?.cancelLoad()
     }
 
     override suspend fun retryLoad(): Result<Unit> {
