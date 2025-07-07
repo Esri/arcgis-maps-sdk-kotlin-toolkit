@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.offline
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,11 +32,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
 import com.arcgismaps.toolkit.offline.internal.utils.NetworkConnectionState
-import com.arcgismaps.toolkit.offline.internal.utils.networkConnectivityState
+import com.arcgismaps.toolkit.offline.internal.utils.NetworkConnectionStateSaver
+import com.arcgismaps.toolkit.offline.internal.utils.ObserveNetworkSwitching
+import com.arcgismaps.toolkit.offline.internal.utils.currentConnectivityState
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
 import com.arcgismaps.toolkit.offline.internal.utils.isValidMapAreaTitle
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreaConfiguration
@@ -49,6 +53,7 @@ import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
 import com.arcgismaps.toolkit.offline.ui.OfflineDisabled
 import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
+import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 
 /**
  * Take a web map offline by downloading map areas.
@@ -64,19 +69,27 @@ public fun OfflineMapAreas(
     val initializationStatus by offlineMapState.initializationStatus
     var isRefreshEnabled by rememberSaveable { mutableStateOf(false) }
 
-    val internetConnectionState by networkConnectivityState()
-    LaunchedEffect(internetConnectionState) {
+    var internetConnectionState by rememberSaveable(stateSaver = NetworkConnectionStateSaver) {
+        mutableStateOf(context.currentConnectivityState)
+    }
+    ObserveNetworkSwitching { networkConnectionState ->
+        Log.e(LOG_TAG,"SWITCHED TO: ${networkConnectionState.javaClass.simpleName}")
+        internetConnectionState = networkConnectionState
         isRefreshEnabled = true
     }
 
     LaunchedEffect(offlineMapState, isRefreshEnabled) {
         if (isRefreshEnabled) {
+            Log.e(LOG_TAG,"Setting resetInitialize")
             offlineMapState.resetInitialize()
         }
+
+        Log.e(LOG_TAG,"Initialize with isDeviceOffline = ${internetConnectionState == NetworkConnectionState.Unavailable}")
         offlineMapState.initialize(
             context,
             isDeviceOffline = internetConnectionState == NetworkConnectionState.Unavailable
         )
+        Log.e(LOG_TAG,"Initialize completed")
         isRefreshEnabled = false
     }
 

@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.offline
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -38,6 +39,7 @@ import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandStatus
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
+import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
@@ -50,7 +52,7 @@ import java.io.File
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
-    private val onSelectionChanged: (ArcGISMap) -> Unit = { }
+    private val onSelectionChanged: (ArcGISMap?) -> Unit = { }
 ) {
     /**
      * Represents the state of the offline map with a given [OfflineMapInfo].
@@ -59,7 +61,7 @@ public class OfflineMapState(
      */
     public constructor(
         offlineMapInfo: OfflineMapInfo,
-        onSelectionChanged: (ArcGISMap) -> Unit = { }
+        onSelectionChanged: (ArcGISMap?) -> Unit = { }
     ) : this(
         arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
         onSelectionChanged = onSelectionChanged
@@ -117,6 +119,7 @@ public class OfflineMapState(
         _initializationStatus.value = InitializationStatus.Initializing
         // initialize the offline repository
         OfflineRepository.refreshOfflineMapInfos(context)
+        Log.e(LOG_TAG,"Loading map")
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
             if (!isDeviceOffline) {
@@ -131,6 +134,7 @@ public class OfflineMapState(
             ?: throw IllegalStateException("Item not found")
 
         // load the task, and ignore network error if device is offline
+        Log.e(LOG_TAG,"Loading task")
         offlineMapTask.retryLoad().getOrElse { error ->
             if (!isDeviceOffline) {
                 // unexpected error, report failed status
@@ -144,6 +148,7 @@ public class OfflineMapState(
             (arcGISMap.loadStatus.value == LoadStatus.Loaded) && (arcGISMap.offlineSettings == null)
 
         // load the preplanned map area states
+        Log.e(LOG_TAG,"Loading preplanned")
         loadPreplannedMapAreas(context, isDeviceOffline)
 
         // check if preplanned for loaded
@@ -152,6 +157,8 @@ public class OfflineMapState(
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
+        // reset the selected map on initialize
+        onSelectionChanged(null)
         _initializationStatus.value = InitializationStatus.Initialized
     }
 
@@ -165,17 +172,19 @@ public class OfflineMapState(
     private suspend fun loadPreplannedMapAreas(context: Context, isDeviceOffline: Boolean) {
         _preplannedMapAreaStates.clear()
         val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
-        try {
-            preplannedMapAreas.addAll(
-                elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
-            )
-        } catch (e: Exception) {
-            preplannedMapAreas.clear()
-        }
-        if (isDeviceOffline || preplannedMapAreas.isEmpty()) {
+        if (isDeviceOffline) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
-            _mode = OfflineMapMode.Preplanned
+            try {
+                Log.e(LOG_TAG,"Calling getPreplannedMapAreas")
+                preplannedMapAreas.addAll(
+                    elements = offlineMapTask.getPreplannedMapAreas().getOrThrow()
+                )
+                Log.e(LOG_TAG,"Done loading getPreplannedMapAreas")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                preplannedMapAreas.clear()
+            }
             preplannedMapAreas.let { preplannedMapArea ->
                 preplannedMapArea
                     .sortedBy { it.portalItem.title }
@@ -199,6 +208,7 @@ public class OfflineMapState(
                                 mobileMapPackagePath = preplannedPath
                             )
                         }
+                        _mode = OfflineMapMode.Preplanned
                         _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
                 // restore any running download job state
@@ -372,6 +382,7 @@ public class OfflineMapState(
     public fun resetSelectedMapArea() {
         _preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
         _onDemandMapAreaStates.forEach { it.setSelectedToOpen(false) }
+        onSelectionChanged(null)
     }
 
     /**

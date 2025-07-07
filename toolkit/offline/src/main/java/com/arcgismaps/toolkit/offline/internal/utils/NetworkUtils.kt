@@ -23,70 +23,126 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import androidx.compose.runtime.State
+// Add imports:
+import android.util.Log
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+
+// Custom state saver for NetworkConnectionState
+internal val NetworkConnectionStateSaver = Saver<NetworkConnectionState, Boolean>(
+    save = { state -> state is NetworkConnectionState.Available },
+    restore = { isAvailable ->
+        if (isAvailable) NetworkConnectionState.Available else NetworkConnectionState.Unavailable
+    }
+)
 
 @Composable
-internal fun networkConnectivityState(): State<NetworkConnectionState> {
+internal fun ObserveNetworkSwitching(onNetworkChanged: (NetworkConnectionState) -> Unit) {
     val context = LocalContext.current
-
-    // Creates a State<NetworkConnectionState> with current connectivity state as initial value
-    return produceState(initialValue = context.currentConnectivityState) {
-        // In a coroutine, can make suspend calls
-        context.observeConnectivityAsFlow().collect { value = it }
+    var previousState = rememberSaveable(saver = NetworkConnectionStateSaver) {
+        context.currentConnectivityState
+    }
+    val currentOnNetworkChanged by rememberUpdatedState(onNetworkChanged)
+    LaunchedEffect(Unit) {
+        context.observeConnectivityAsFlow().collect { currentState ->
+            Log.e(
+                LOG_TAG,
+                "ObserveNetworkSwitching: currentState: ${currentState.javaClass.simpleName}"
+            )
+            Log.e(
+                LOG_TAG,
+                "ObserveNetworkSwitching: previousState: ${previousState.javaClass.simpleName}"
+            )
+            if (previousState != currentState) {
+                currentOnNetworkChanged(currentState)
+                previousState = currentState
+            }
+        }
     }
 }
 
-internal fun Context.observeConnectivityAsFlow() = callbackFlow {
+private fun Context.observeConnectivityAsFlow() = callbackFlow {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    val callback = NetworkCallback(connectivityManager) { networkConnectionState -> trySend(networkConnectionState) }
+    var onLostJob: Job? = null
+    val scope = CoroutineScope(Dispatchers.IO)
+    val callback = NetworkCallback(
+        connectivityManager = connectivityManager,
+        scope = scope,
+        onLost = { onLostJob = it },
+        onCancelJob = { onLostJob?.cancel() }
+    ) { networkConnectionState -> trySend(networkConnectionState) }
 
     val networkRequest = NetworkRequest.Builder()
         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         .build()
 
+    Log.e(LOG_TAG, "Registering network callback.")
     connectivityManager.registerNetworkCallback(networkRequest, callback)
 
-    // Set current state
-    val currentState = getCurrentConnectivityState(connectivityManager)
-    trySend(currentState)
-
-    // Remove callback when not used
+    // Unregister the callback when the flow is cancelled
     awaitClose {
         // Remove listeners
+        Log.e(LOG_TAG, "Un-registering network callback.")
         connectivityManager.unregisterNetworkCallback(callback)
+        onLostJob?.cancel()
     }
-}
+}.distinctUntilChanged() // Only emit when the state actually changes
 
-internal fun NetworkCallback(
+private fun NetworkCallback(
     connectivityManager: ConnectivityManager,
+    scope: CoroutineScope,
+    onLost: (Job) -> Unit,
+    onCancelJob: () -> Unit,
     callback: (NetworkConnectionState) -> Unit
 ): ConnectivityManager.NetworkCallback {
+    // A delay in milliseconds to wait before confirming network loss.
+    val networkLostDelayMs = 2000L
     return object : ConnectivityManager.NetworkCallback() {
         /**
          * This callback is triggered when a network is available.
          * It indicates that the device has internet connectivity.
          */
         override fun onAvailable(network: Network) {
-            callback(NetworkConnectionState.Available)
+            super.onAvailable(network)
+            // A new network is available, so cancel any pending "lost" job.
+            onCancelJob()
+            val currentState = getCurrentConnectivityState(connectivityManager)
+            Log.e(LOG_TAG, "onAvailable: currentState = ${currentState.javaClass.simpleName}")
+            callback(currentState)
         }
 
         /**
-         * This callback is triggered when a network is temporarily unavailable.
-         * It does not necessarily mean that there is no internet connectivity,
-         * but rather that the network is in a transient state (e.g., switching networks).
+         * This callback is triggered when a network is lost.
+         * Awaits NETWORK_LOST_DELAY_MS before declaring unavailable.
          */
         override fun onLost(network: Network) {
-            // This callback is triggered when any previously available network is lost,
-            // not just when all internet connectivity is lost. If the device switches
-            // between networks (e.g., from Wi-Fi to mobile data), onLost is called for
-            // the old network, even if another network is still available.
-            val state = getCurrentConnectivityState(connectivityManager)
-            callback(state)
+            super.onLost(network)
+            Log.e(
+                LOG_TAG,
+                "Network lost: ${network.networkHandle}. Waiting for ${networkLostDelayMs}ms before declaring unavailable."
+            )
+            // A network was lost. Launch a delayed job to confirm it's not a temporary switch.
+            onLost(scope.launch {
+                delay(networkLostDelayMs)
+                // If the job wasn't cancelled, it means no new network appeared in time.
+                val currentState = getCurrentConnectivityState(connectivityManager)
+                Log.e(LOG_TAG, "onLost: currentState = ${currentState.javaClass.simpleName}")
+                callback(currentState)
+            })
         }
     }
 }
@@ -107,12 +163,20 @@ internal val Context.currentConnectivityState: NetworkConnectionState
 private fun getCurrentConnectivityState(
     connectivityManager: ConnectivityManager
 ): NetworkConnectionState {
-    val connected = connectivityManager.allNetworks.any { network ->
-        connectivityManager.getNetworkCapabilities(network)
-            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    val activeNetwork = connectivityManager.activeNetwork
+    return if (activeNetwork != null) {
+        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        if (capabilities != null &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        ) {
+            NetworkConnectionState.Available
+        } else {
+            NetworkConnectionState.Unavailable
+        }
+    } else {
+        NetworkConnectionState.Unavailable
     }
-
-    return if (connected) NetworkConnectionState.Available else NetworkConnectionState.Unavailable
 }
 
 /**
