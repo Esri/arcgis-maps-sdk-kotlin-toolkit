@@ -108,7 +108,7 @@ fun MainScreen() {
         mutableDoubleStateOf(pointsOfInterestList[currentPoiIndex].translationFactor)
     }
 
-    var displayCallout by remember { mutableStateOf(false) }
+    var displayCallout by rememberSaveable { mutableStateOf(false) }
 
     // Display privacy info dialog if user has not already accepted Google's privacy info
     val sharedPreferences = LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
