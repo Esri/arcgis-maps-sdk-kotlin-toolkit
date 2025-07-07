@@ -53,9 +53,9 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  */
 @Deprecated(
     message = "as of 200.8.0 and will be removed in an upcoming release, use the Authenticator composable with " +
-            "onBrowserChallengeRequested instead.",
+            "onPendingBrowserAuthenticationChallenge instead.",
     replaceWith = ReplaceWith(
-        "Authenticator(authenticatorState, modifier, onBrowserChallengeRequested = onBrowserChallengeRequested::invoke)"
+        "Authenticator(authenticatorState, modifier, onPendingBrowserAuthenticationChallenge)"
     ),
     level = DeprecationLevel.WARNING
 )
@@ -85,25 +85,25 @@ public fun Authenticator(
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
- * @param onBrowserChallengeRequested if not null, this will be called when a authentication challenge is pending
+ * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a authentication challenge is pending
  * and the browser should be launched. Use this if you wish to handle browser challenges from your own
  * activity rather than using the [AuthenticationActivity], more information can be found in the
  * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
  * @see DialogAuthenticator
  * @since 200.8.0
  */
-@JvmName("AuthenticatorWithBrowserAuthChallenge")
+@JvmName("AuthenticatorWithBrowserAuthenticationChallenge")
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
-    onBrowserChallengeRequested: ((BrowserAuthChallenge) -> Unit)
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)
 ) {
     Surface {
         AuthenticatorDelegate(
             authenticatorState = authenticatorState,
             modifier = modifier,
-            onPendingBrowserAuthChallenge = onBrowserChallengeRequested,
+            onPendingBrowserAuthenticationChallenge = onPendingBrowserAuthenticationChallenge,
         )
     }
 }
@@ -159,9 +159,8 @@ public fun Authenticator(
  */
 @Deprecated(
     message = "as of 200.8.0 and will be removed in an upcoming release, use the DialogAuthenticator composable with " +
-            "onBrowserChallengeRequested instead.",
-    replaceWith = ReplaceWith(
-        "DialogAuthenticator(authenticatorState, modifier, onPendingBrowserAuthChallenge = onPendingOAuthUserSignIn::invoke)"
+            "onPendingBrowserAuthenticationChallenge instead.",
+    replaceWith = ReplaceWith("DialogAuthenticator(authenticatorState, modifier, onPendingBrowserAuthenticationChallenge)"
     ),
     level = DeprecationLevel.WARNING
 )
@@ -194,24 +193,24 @@ public fun DialogAuthenticator(
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
- * @param onBrowserChallengeRequested if not null, this will be called when a authentication challenge is pending
+ * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a authentication challenge is pending
  * and the browser should be launched. Use this if you wish to handle browser challenges from your own
  * activity rather than using the [AuthenticationActivity], more information can be found in the
  * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
  * @see Authenticator
  * @since 200.2.0
  */
-@JvmName("DialogAuthenticatorWithBrowserAuthChallenge")
+@JvmName("DialogAuthenticatorWithBrowserAuthenticationChallenge")
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
-    onBrowserChallengeRequested: ((BrowserAuthChallenge) -> Unit)
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)
 ) {
     AuthenticatorDelegate(
         authenticatorState = authenticatorState,
         modifier = modifier,
-        onPendingBrowserAuthChallenge = onBrowserChallengeRequested,
+        onPendingBrowserAuthenticationChallenge = onPendingBrowserAuthenticationChallenge,
         useDialog = true
     )
 }
@@ -257,7 +256,7 @@ public fun DialogAuthenticator(
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. This will be used to handle OAuth challenges from a different activity rather
  * than using the [AuthenticationActivity].
- * @param onPendingBrowserAuthChallenge if not null, this will be called when a browser authentication challenge is
+ * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a browser authentication challenge is
  * pending and the browser should be launched. This will be used to handle browser challenges from a different activity
  * rather than using the [AuthenticationActivity].
  * @since 200.8.0
@@ -269,7 +268,7 @@ private fun AuthenticatorDelegate(
     modifier: Modifier = Modifier,
     useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
-    onPendingBrowserAuthChallenge: ((BrowserAuthChallenge) -> Unit)? = null
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)? = null
 ) {
     val hasActivePrompt =
         authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
@@ -279,12 +278,12 @@ private fun AuthenticatorDelegate(
     }
 
     authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
-        if (onPendingBrowserAuthChallenge != null) {
+        if (onPendingBrowserAuthenticationChallenge != null) {
             OAuthAuthenticator(
                 oAuthPendingSignIn = it,
                 authenticatorState = authenticatorState
             ) { oAuthUserSignIn ->
-                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
             }
         } else {
             OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
@@ -292,9 +291,9 @@ private fun AuthenticatorDelegate(
     }
 
     authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let { iapSignIn ->
-        if (onPendingBrowserAuthChallenge != null) {
+        if (onPendingBrowserAuthenticationChallenge != null) {
             IapSignInAuthenticator {
-                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.IapSignInChallenge(iapSignIn))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignInChallenge(iapSignIn))
             }
         } else {
             IapSignInAuthenticator(
@@ -305,16 +304,16 @@ private fun AuthenticatorDelegate(
         }
     }
 
-    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
-        if (onPendingBrowserAuthChallenge != null) {
+    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let { iapSignOut ->
+        if (onPendingBrowserAuthenticationChallenge != null) {
             IapSignOutAuthenticator {
-                onPendingBrowserAuthChallenge.invoke(BrowserAuthChallenge.IapSignOutChallenge(it))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignOutChallenge(iapSignOut))
             }
         } else {
             IapSignOutAuthenticator(
-                iapSignOutUrl = it.signOutUrl,
-                onCompleteSignOut = it::complete,
-                onCancelSignOut = it::cancel
+                iapSignOutUrl = iapSignOut.signOutUrl,
+                onCompleteSignOut = iapSignOut::complete,
+                onCancelSignOut = iapSignOut::cancel
             )
         }
     }
@@ -367,14 +366,14 @@ private fun Context.findActivity(): Activity {
  *
  * @since 200.8.0
  */
-public sealed class BrowserAuthChallenge {
+public sealed class BrowserAuthenticationChallenge {
     /**
      * Represents an Identity-Aware Proxy (IAP) sign-in challenge.
      *
      * @param iapSignIn The IAP sign-in object containing the necessary configuration.
      * @since 200.8.0
      */
-    public data class IapSignInChallenge internal constructor(val iapSignIn: IapSignIn) : BrowserAuthChallenge()
+    public data class IapSignInChallenge internal constructor(val iapSignIn: IapSignIn) : BrowserAuthenticationChallenge()
 
     /**
      * Represents an OAuth user sign-in challenge.
@@ -383,7 +382,7 @@ public sealed class BrowserAuthChallenge {
      * @since 200.8.0
      */
     public data class OAuthUserSignInChallenge internal constructor(val oAuthUserSignIn: OAuthUserSignIn) :
-        BrowserAuthChallenge()
+        BrowserAuthenticationChallenge()
 
     /**
      * Represents an Identity-Aware Proxy (IAP) sign-out challenge.
@@ -391,5 +390,5 @@ public sealed class BrowserAuthChallenge {
      * @param iapSignOut The IAP sign-out object containing the sign-out URL and other configuration.
      * @since 200.8.0
      */
-    public data class IapSignOutChallenge internal constructor(val iapSignOut: IapSignOut) : BrowserAuthChallenge()
+    public data class IapSignOutChallenge internal constructor(val iapSignOut: IapSignOut) : BrowserAuthenticationChallenge()
 }

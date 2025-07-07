@@ -545,7 +545,7 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
  * @param intent The [Intent] containing data from the browser authentication flow. If null, the challenge is canceled.
  * @since 200.8.0
  */
-public fun AuthenticatorState.completeBrowserAuthChallenge(intent: Intent?) {
+public fun AuthenticatorState.completeBrowserAuthenticationChallenge(intent: Intent?) {
     when {
         pendingOAuthUserSignIn.value != null -> {
             intent?.data?.let { uri ->

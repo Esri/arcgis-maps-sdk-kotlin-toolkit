@@ -62,7 +62,7 @@ internal fun IapSignInAuthenticator(
 }
 
 /**
- * Composable function that handles launching a browser challenge for IAP authentication.
+ * Composable function that delegates launching a browser challenge for IAP authentication to the calling code.
  *
  * @param browserChallengeHandler A lambda function that executes the browser challenge for signing in to the IAP session.
  * The function is invoked only once during the lifecycle of the composable.
@@ -116,7 +116,7 @@ internal fun IapSignOutAuthenticator(
 }
 
 /**
- * Composable function that handles invalidating an IAP session by launching the provided browser challenge handler.
+ * Composable function that delegates invalidating an IAP session by invoking the provided browser challenge handler.
  *
  * @param browserChallengeHandler A lambda function that executes the browser challenge for signing out of the IAP session.
  * @since 200.8.0

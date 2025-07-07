@@ -57,6 +57,11 @@ public suspend fun AuthenticationManager.signOut() {
  *
  * @since 200.2.0
  */
+@Deprecated (
+    message = "since 200.8.0. Use AuthenticatorState.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) " +
+            "instead as it provides support for IAP sign-in/sign-out.",
+    replaceWith = ReplaceWith("AuthenticatorState.launchCustomTabs(pendingBrowserAuthenticationChallenge)")
+)
 public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
     launchCustomTabs(
         pendingSignIn?.authorizeUrl ?: return,
@@ -68,20 +73,20 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
  * Launches the custom tabs activity with the provided browser authentication challenge.
  *
  * This method determines the appropriate URL and whether to use Incognito mode based on the type of
- * [BrowserAuthChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
+ * [BrowserAuthenticationChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
  *
  * @receiver an [Activity] used to launch the [CustomTabsIntent].
- * @param pendingBrowserAuthChallenge the [BrowserAuthChallenge] containing the necessary information
+ * @param pendingBrowserAuthenticationChallenge the [BrowserAuthenticationChallenge] containing the necessary information
  * to complete the authentication process.
  *
  * @since 200.8.0
  */
-public fun Activity.launchCustomTabs(pendingBrowserAuthChallenge: BrowserAuthChallenge) {
-    val (url, useIncognito) = when (pendingBrowserAuthChallenge) {
-        is BrowserAuthChallenge.OAuthUserSignInChallenge ->
-            pendingBrowserAuthChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-        is BrowserAuthChallenge.IapSignInChallenge -> pendingBrowserAuthChallenge.iapSignIn.authorizeUrl to false
-        is BrowserAuthChallenge.IapSignOutChallenge -> pendingBrowserAuthChallenge.iapSignOut.signOutUrl to false
+public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
+    val (url, useIncognito) = when (pendingBrowserAuthenticationChallenge) {
+        is BrowserAuthenticationChallenge.OAuthUserSignInChallenge ->
+            pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+        is BrowserAuthenticationChallenge.IapSignInChallenge -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
+        is BrowserAuthenticationChallenge.IapSignOutChallenge -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
     }
     launchCustomTabs(url, useIncognito)
 }
