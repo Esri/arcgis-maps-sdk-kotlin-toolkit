@@ -27,13 +27,15 @@ import com.arcgismaps.geometry.SpatialReference
  *
  * @property name the name of this POI
  * @property description a description of the POI, for display in a Callout
- * @property location the location of this POI
+ * @property poiLocation the location of this POI
+ * @property calloutLocation the location at which to display the Callout for this POI, or null if
+ * there is no Callout for this POI
  * @property heading the initial Camera heading for this POI
  * @property translationFactor the translation factor to use for this POI
  * @since 200.8.0
  */
 data class PointOfInterest(
-    val name: String, val description: String, val location: Point,
+    val name: String, val description: String, val poiLocation: Point, val calloutLocation: Point?,
     val heading: Double, val translationFactor: Double
 )
 
@@ -46,43 +48,45 @@ data class PointOfInterest(
 fun rememberPointsOfInterest(): List<PointOfInterest> = remember {
     listOf(
         PointOfInterest(
-            "Flying over the city",
-            "xxx",
-            Point(2.82407, 41.99101, 230.0, SpatialReference.wgs84()),
-            160.0, 1000.0
+            name = "Flying over the city",
+            description = "",
+            poiLocation = Point(2.82407, 41.99101, 230.0, SpatialReference.wgs84()),
+            calloutLocation = null,
+            heading = 160.0,
+            translationFactor = 1000.0
         ),
         PointOfInterest(
-            "Girona Cathedral",
-            "xxx",
-            Point(
-                2.8246561632960923,
-                41.987190133522844,
-                110.50172981619835,
-                SpatialReference.wgs84()
-            ),
-            80.87130465869643, 10.0
+            name = "Girona Cathedral",
+            description =
+                "Here we see Girona Cathedral, parts of which date back to the 12th Century.",
+            poiLocation = Point(2.8246561632960923, 41.987190133522844, 110.50172981619835,
+                SpatialReference.wgs84()),
+            calloutLocation = Point(2.8260033615157907, 41.98737627492155, 90.67858890071511,
+                SpatialReference.wgs84()),
+            heading = 80.87130465869643,
+            translationFactor = 10.0
         ),
         PointOfInterest(
-            "On the city walls",
-            "xxx",
-            Point(
-                2.828377064683506,
-                41.98670727904231,
-                147.3971471907571,
-                SpatialReference.wgs84()
-            ),
-            175.8728875641343, 50.0
+            name = "On the city walls",
+            description =
+                "Here you can explore Girona's city walls, built in Roman and medieval times, starting at the old fortress of Torre Gironella.",
+            poiLocation = Point(2.828377064683506, 41.98670727904231, 147.3971471907571,
+                SpatialReference.wgs84()),
+            calloutLocation = Point(2.828444350938064, 41.98619391066322, 110.8261399846524,
+                SpatialReference.wgs84()),
+            heading = 175.8728875641343,
+            translationFactor = 50.0
         ),
         PointOfInterest(
-            "By the river",
-            "xxx",
-            Point(
-                2.824210487810305,
-                41.98506243493622,
-                98.24900419544429,
-                SpatialReference.wgs84()
-            ),
-            202.36680611861564, 20.0
+            name = "By the river",
+            description =
+                "Initially, looking South, you'll see the Pont de les Peixateries Velles, an iron bridge built by Gustave Eiffel's company in 1876. Turn to look North and you'll see the colourful Cases de l'Onyar on your right and the historic old town behind them.",
+            poiLocation = Point(2.824210487810305, 41.98506243493622, 98.24900419544429,
+                SpatialReference.wgs84()),
+            calloutLocation = Point(2.823699820709328, 41.98434765729695, 64.07990946341306,
+                SpatialReference.wgs84()),
+            heading = 202.36680611861564,
+            translationFactor = 20.0
         )
     )
 }
