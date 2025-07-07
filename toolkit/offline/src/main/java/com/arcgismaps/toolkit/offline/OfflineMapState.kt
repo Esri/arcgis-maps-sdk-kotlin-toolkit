@@ -41,6 +41,7 @@ import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
+import java.io.IOException
 
 /**
  * Represents the state of the offline map.
@@ -130,7 +131,7 @@ public class OfflineMapState(
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
             // check if the error is due to network connection
-            if (error.message?.contains("Unable to resolve host") == true) {
+            if (error is IOException) {
                 // enable offline only mode
                 isShowingOnlyOfflineModels = true
             } else {
@@ -147,7 +148,7 @@ public class OfflineMapState(
         // load the task, and ignore network error if device is offline
         offlineMapTask.retryLoad().getOrElse { error ->
             // check if the error is not due to network connection
-            if (error.message?.contains("Unable to resolve host") == false) {
+            if (error is IOException) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
