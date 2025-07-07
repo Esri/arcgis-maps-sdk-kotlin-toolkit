@@ -148,7 +148,7 @@ public class OfflineMapState(
         // load the task, and ignore network error if device is offline
         offlineMapTask.retryLoad().getOrElse { error ->
             // check if the error is not due to network connection
-            if (error is IOException) {
+            if (error !is IOException) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
