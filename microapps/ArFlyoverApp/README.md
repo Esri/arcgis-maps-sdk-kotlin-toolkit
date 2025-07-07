@@ -2,8 +2,8 @@
 
 This micro-app demonstrates the use of the `FlyoverSceneView` toolkit component to render an `ArcGISScene` containing an `IntegratedMeshLayer` with realistic textures for the city of Girona in Spain.
 
-| Flying over the city | Selecting a new location | On the city walls |
-|----------|----------|----------|
+| Flying over the city                         | Selecting a new location                     | On the city walls                            |
+|----------------------------------------------|----------------------------------------------|----------------------------------------------|
 | ![screenshot1](ArFlyoverApp-screenshot1.png) | ![screenshot2](ArFlyoverApp-screenshot2.png) | ![screenshot3](ArFlyoverApp-screenshot3.png) |
 
 ## Prerequisites
