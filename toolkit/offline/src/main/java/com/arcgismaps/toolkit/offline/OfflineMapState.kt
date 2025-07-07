@@ -42,6 +42,11 @@ import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
 import com.arcgismaps.toolkit.offline.workmanager.LOG_TAG
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -107,6 +112,11 @@ public class OfflineMapState(
         private set
 
     /**
+     * Track the job for an ongoing initialization
+     */
+    private var initializeJob: Job? = null
+
+    /**
      * Initializes the state object by loading the map, creating and loading the offline map task.
      *
      * @return the [Result] indicating if the initialization was successful or not
@@ -116,50 +126,54 @@ public class OfflineMapState(
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
-        _initializationStatus.value = InitializationStatus.Initializing
-        // initialize the offline repository
-        OfflineRepository.refreshOfflineMapInfos(context)
-        Log.e(LOG_TAG,"Loading map")
-        // load the map, and ignore network error if device is offline
-        arcGISMap.retryLoad().getOrElse { error ->
-            if (!isDeviceOffline) {
-                // unexpected error, report failed status
-                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-                throw error
+        // Cancel previous job if it's still active before starting a new one.
+        initializeJob?.cancelAndJoin()
+        initializeJob = CoroutineScope(Dispatchers.IO).launch {
+            _initializationStatus.value = InitializationStatus.Initializing
+            // initialize the offline repository
+            OfflineRepository.refreshOfflineMapInfos(context)
+            Log.e(LOG_TAG, "Loading map")
+            // load the map, and ignore network error if device is offline
+            arcGISMap.retryLoad().getOrElse { error ->
+                if (!isDeviceOffline) {
+                    // unexpected error, report failed status
+                    _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                    throw error
+                }
             }
-        }
-        localMap = arcGISMap.clone()
-        offlineMapTask = OfflineMapTask(arcGISMap)
-        portalItem = (arcGISMap.item as? PortalItem)
-            ?: throw IllegalStateException("Item not found")
+            localMap = arcGISMap.clone()
+            offlineMapTask = OfflineMapTask(arcGISMap)
+            portalItem = (arcGISMap.item as? PortalItem)
+                ?: throw IllegalStateException("Item not found")
 
-        // load the task, and ignore network error if device is offline
-        Log.e(LOG_TAG,"Loading task")
-        offlineMapTask.retryLoad().getOrElse { error ->
-            if (!isDeviceOffline) {
-                // unexpected error, report failed status
-                _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-                throw error
+            // load the task, and ignore network error if device is offline
+            Log.e(LOG_TAG, "Loading task")
+            offlineMapTask.retryLoad().getOrElse { error ->
+                if (!isDeviceOffline) {
+                    // unexpected error, report failed status
+                    _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+                    throw error
+                }
             }
+
+            // determine if offline is disabled for the map
+            mapIsOfflineDisabled =
+                (arcGISMap.loadStatus.value == LoadStatus.Loaded) && (arcGISMap.offlineSettings == null)
+
+            // load the preplanned map area states
+            Log.e(LOG_TAG, "Loading preplanned")
+            loadPreplannedMapAreas(context, isDeviceOffline)
+
+            // check if preplanned for loaded
+            if (_mode != OfflineMapMode.Preplanned || _mode == OfflineMapMode.Unknown) {
+                loadOfflineOnDemandMapAreas(context)
+                if (_mode == OfflineMapMode.Unknown)
+                    _mode = OfflineMapMode.OnDemand
+            }
+            // reset the selected map on initialize
+            onSelectionChanged(null)
+            _initializationStatus.value = InitializationStatus.Initialized
         }
-
-        // determine if offline is disabled for the map
-        mapIsOfflineDisabled =
-            (arcGISMap.loadStatus.value == LoadStatus.Loaded) && (arcGISMap.offlineSettings == null)
-
-        // load the preplanned map area states
-        Log.e(LOG_TAG,"Loading preplanned")
-        loadPreplannedMapAreas(context, isDeviceOffline)
-
-        // check if preplanned for loaded
-        if (_mode != OfflineMapMode.Preplanned || _mode == OfflineMapMode.Unknown) {
-            loadOfflineOnDemandMapAreas(context)
-            if (_mode == OfflineMapMode.Unknown)
-                _mode = OfflineMapMode.OnDemand
-        }
-        // reset the selected map on initialize
-        onSelectionChanged(null)
-        _initializationStatus.value = InitializationStatus.Initialized
     }
 
     /**
