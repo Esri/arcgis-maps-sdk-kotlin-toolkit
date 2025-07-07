@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.LocalItem
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapTask
@@ -291,7 +292,9 @@ public class OfflineMapState(
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = mmpk.item ?: return null
+        val item = (mmpk.item as? LocalItem)?.apply {
+            itemId = portalItem.itemId
+        } ?: return null
 
         val preplannedMapAreaState = PreplannedMapAreaState(
             context = context,
@@ -336,7 +339,9 @@ public class OfflineMapState(
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = mmpk.item ?: return null
+        val item = (mmpk.item as? LocalItem)?.apply {
+            itemId = portalItem.itemId
+        } ?: return null
 
         val onDemandMapAreasState = OnDemandMapAreasState(
             context = context,
