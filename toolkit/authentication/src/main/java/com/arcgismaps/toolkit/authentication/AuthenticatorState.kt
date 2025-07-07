@@ -321,13 +321,20 @@ private class AuthenticatorStateImpl(
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        val credential = usernamePasswordFlow(challenge.requestUrl, challenge.cause).firstOrNull()
-            ?: return ArcGISAuthenticationChallengeResponse.Cancel
-        return TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
-            .fold(
-                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
-                onFailure = { ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it) }
-            )
+        val credential = usernamePasswordFlow(
+            challenge.requestUrl,
+            if (challenge.previousFailureCount == 0) null else challenge.cause
+        ).firstOrNull()
+
+        return if (credential == null) {
+            ArcGISAuthenticationChallengeResponse.Cancel
+        } else {
+            TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
+                .fold(
+                    onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                    onFailure = { ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it) }
+                )
+        }
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
