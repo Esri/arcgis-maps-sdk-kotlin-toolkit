@@ -210,21 +210,24 @@ fun MainScreen() {
                         initializationStatus = it
                     }
                 ) {
-                    val pointOfInterest = pointsOfInterestList[currentPoiIndex]
-                    if (displayCallout && pointOfInterest.calloutLocation != null) {
-                        // Display a Callout containing information about the current POI
-                        Callout(pointOfInterest.calloutLocation) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = pointOfInterest.name,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(pointOfInterest.description, Modifier.width(300.dp))
-                                Button(
-                                    onClick = {
-                                        displayCallout = false
+                    if (displayCallout) {
+                        val pointOfInterest = pointsOfInterestList[currentPoiIndex]
+                        pointOfInterest.calloutLocation?.let { calloutLocation ->
+                            // Display a Callout containing information about the current POI
+                            Callout(calloutLocation) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = pointOfInterest.name,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(pointOfInterest.description, Modifier.width(300.dp))
+                                    Button(
+                                        onClick = {
+                                            displayCallout = false
+                                        }
+                                    ) {
+                                        Text(text = "Dismiss")
                                     }
-                                ) {
-                                    Text(text = "Dismiss")
                                 }
                             }
                         }
