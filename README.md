@@ -67,6 +67,33 @@ The template and TemplateApp modules are for bootstrapping new modules.
 
 Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
 
+## Accessing Esri location services
+
+Some tookit components may require access to Esri location services, including basemaps, routing,
+and geocoding, which requires authentication using either an API Key or an ArcGIS identity:
+
+### API key
+
+A long-lived access token that gives your application access to ArcGIS location services. Go to
+the [Create an API key](https://links.esri.com/create-an-api-key) tutorial to obtain a new API key
+access token. Ensure that the following privileges are enabled:
+
+* **Location services** > **Basemaps**
+* **Location services** > **Geocoding**
+* **Location services** > **Routing**
+
+The components in this repository have been structured to use an access token, set once.
+Set your access token in the `local.properties` in the same folder as the
+`secrets.defaults.properties` as shown below.
+
+```gradle
+API_KEY=YOUR_ACCESS_TOKEN
+```
+
+### ArcGIS identity
+
+An ArcGIS named user account that is a member of an organization in ArcGIS Online or ArcGIS Enterprise.
+
 ## Issues
 
 Find a bug or want to request a new feature enhancement? Please let us know by [submitting an issue](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/issues/new).
