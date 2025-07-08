@@ -33,9 +33,10 @@ import io.mockk.mockk
  * @since 200.5.0
  */
 fun makeMockArcGISAuthenticationChallenge(
+    mocRequestUrl: String = "https://arcgis.com",
     challengeType: ArcGISAuthenticationChallengeType = ArcGISAuthenticationChallengeType.OAuthOrToken
 ) = mockk<ArcGISAuthenticationChallenge>().apply {
-    every { requestUrl } returns "https://arcgis.com"
+    every { requestUrl } returns mocRequestUrl
     every { cause } returns Throwable()
     every { type } returns challengeType
 }

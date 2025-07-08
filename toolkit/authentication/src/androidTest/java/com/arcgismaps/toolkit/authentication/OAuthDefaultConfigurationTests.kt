@@ -123,6 +123,87 @@ class OAuthDefaultConfigurationTests {
     }
 
     /**
+     * Given an [AuthenticatorState] configured with multiple [OAuthUserConfiguration]s,
+     * When an [ArcGISAuthenticationChallenge] is received for each configuration,
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
+     * for each configuration with the correct [OAuthUserConfiguration].
+     *
+     * @since 200.8.0
+     */
+    @Test
+    fun testMultipleOAuthConfigurations() = runTest {
+        val url1 = "https://arcgis.com"
+        val url2 = "https://www.arcgisonline.com/"
+
+        ArcGISEnvironment.configureArcGISHttpClient {
+            setupOAuthTokenRequestInterceptor()
+        }
+
+        val firstOAuthConfig = OAuthUserConfiguration(
+            url1,
+            "uITYQG1POJsrluOP",
+            "kotlin-authentication-test-1://auth"
+        )
+        val secondOAuthConfig = OAuthUserConfiguration(
+            url2,
+            "abc1234567890def",
+            "kotlin-auth-local-test-2://auth"
+        )
+
+        val authenticatorState = AuthenticatorState().apply {
+            oAuthUserConfigurations = listOf(firstOAuthConfig, secondOAuthConfig)
+        }
+
+        composeTestRule.setContent {
+            Authenticator(
+                authenticatorState,
+                modifier = Modifier.testTag("Authenticator")
+            )
+        }
+        performOAuthChallenge(url1, "kotlin-authentication-test-1://auth", firstOAuthConfig, authenticatorState)
+        performOAuthChallenge(url2, "kotlin-auth-local-test-2://auth", secondOAuthConfig, authenticatorState)
+    }
+
+    /**
+     * Performs an OAuth challenge with the given [url] and [redirectUri].
+     * The [expectedConfig] is should be used to create the [OAuthUserCredential].
+     *
+     * @param url The URL to use for the OAuth challenge.
+     * @param redirectUri The redirect URI to use for the OAuth challenge.
+     * @param expectedConfig The expected [OAuthUserConfiguration] to be used for the OAuth challenge.
+     * @param authenticatorState The [AuthenticatorState] to use for the OAuth challenge.
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun performOAuthChallenge(
+        url: String,
+        redirectUri: String,
+        expectedConfig: OAuthUserConfiguration,
+        authenticatorState: AuthenticatorState
+    ) = runTest {
+        val challengeResponse = async {
+            runCatching {
+                authenticatorState.handleArcGISAuthenticationChallenge(
+                    makeMockArcGISAuthenticationChallenge(mocRequestUrl = url)
+                )
+            }
+        }
+        advanceUntilIdle()
+        composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+        composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        uiDevice.awaitViewVisible("com.android.chrome")
+        uiDevice.setOrientationLandscape()
+        uiDevice.setOrientationPortrait()
+        InstrumentationRegistry.getInstrumentation().context.startActivity(createSuccessfulRedirectIntent(redirectUri))
+        val response = challengeResponse.await().getOrNull()
+        assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
+        val credential = (response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential
+        assert(credential is OAuthUserCredential)
+        assert((credential as OAuthUserCredential).configuration == expectedConfig)
+    }
+
+    /**
      * Places an [Authenticator] in the composition and issues an OAuth challenge.
      * Once the browser is launched, [userInputOnDialog] will be called to simulate user input.
      * Also, the device will be rotated to ensure that the Authenticator can handle configuration changes
