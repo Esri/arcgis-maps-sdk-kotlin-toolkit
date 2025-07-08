@@ -51,6 +51,60 @@ import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
 /**
  * Take a web map offline by downloading map areas.
  *
+ * #### Features
+ *
+ * Supports both ahead-of-time (preplanned) and on-demand map areas for an offline enabled web map. This [OfflineMapAreas] composable:
+ *
+ * - Displays a list of map areas.
+ *
+ * - Shows download progress and status for map areas.
+ *
+ * - Opens a map area for viewing when selected.
+ *
+ * - Provides options to view details about downloaded map areas.
+ *
+ * - Supports removing downloaded offline map areas files from the device.
+ *
+ * For preplanned workflows, this composable:
+ *
+ * - Displays a list of available preplanned map areas from an offline-enabled web map that contains preplanned map areas when the network is connected.
+ *
+ * - Downloads preplanned map areas in the list.
+ *
+ * - Displays a list of downloaded preplanned map areas on the device when the network is disconnected.
+ *
+ * For on-demand workflows, this composable:
+ *
+ * - Allows users to add and download on-demand map areas to the device by specifying an area of interest and level of detail.
+ *
+ * - Displays a list of on-demand map areas available on the device that are tied to a specific web map.
+ *
+ * _Workflow example:_
+ *
+ * ```
+ * val selectedMap = mutableStateOf<ArcGISMap?>(null)
+ *
+ * val displayedMap get() = selectedMap.value ?: onlineMap
+ *
+ * val offlineMapState = OfflineMapState(
+ *     arcGISMap = displayedMap,
+ *     onSelectionChanged = { offlineMap ->
+ *         selectedMap.value = offlineMap
+ *     }
+ * )
+ *
+ * @Composable
+ * fun SheetContent() {
+ *     OfflineMapAreas(
+ *         offlineMapState = offlineMapState,
+ *         modifier = Modifier
+ *             .padding(horizontal = 16.dp)
+ *             .animateContentSize()
+ *     )
+ * }
+ *
+ *```
+ *
  * @since 200.8.0
  */
 @Composable

@@ -30,7 +30,12 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Represents the information of an offline map.
+ * Represents the information for an online map that has been taken offline.
+ *
+ * When a map is taken offline, map information needs to be saved on device so that the map can be reloaded later when the device is offline.
+ * It provides access to and also enables display locally saved map information about downloaded map areas.
+ *
+ * This type is typically used when there is no network connection.
  *
  * @since 200.8.0
  */
