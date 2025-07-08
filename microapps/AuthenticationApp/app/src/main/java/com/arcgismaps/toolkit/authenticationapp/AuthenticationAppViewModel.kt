@@ -59,6 +59,14 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     val url: StateFlow<String> = _url.asStateFlow()
     fun setUrl(newUrl: String) { _url.value = newUrl }
 
+    private val oAuthUserConfigurations: List<OAuthUserConfiguration>
+        get() =
+            if (useOAuth.value) {
+                listOf(oAuthUserConfiguration)
+            } else {
+                emptyList()
+            }
+
     fun signOut() = viewModelScope.launch {
         _isLoading.value = true
         authenticatorState.signOut()
@@ -71,8 +79,7 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
 
     public fun loadPortal() = viewModelScope.launch {
         _isLoading.value = true
-        authenticatorState.oAuthUserConfiguration =
-            if (useOAuth.value) oAuthUserConfiguration else null
+        authenticatorState.oAuthUserConfigurations = oAuthUserConfigurations
         val portal = Portal(url.value, Portal.Connection.Authenticated)
         portal.load().also {
             _isLoading.value = false
