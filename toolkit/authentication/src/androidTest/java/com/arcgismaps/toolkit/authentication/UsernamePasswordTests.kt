@@ -435,7 +435,7 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun arcGISTokenAuthentication() = runTest {
+    fun testInvalidCredentialsWithArcGISTokenAuthentication() = runTest {
         with(StateRestorationTester(composeTestRule)) {
             setContent {
                 DialogAuthenticator(authenticatorState = authenticatorState)
@@ -464,21 +464,60 @@ class UsernamePasswordTests {
                 setupFailingArcGISTokenRequestInterceptor()
             }
 
-            // simulate incorrect username/password 5 times
-            repeat(5) {
-                composeTestRule.enterUsernamePasswordAndLogin()
-                advanceUntilIdle()
-            }
+            // simulate incorrect username/password
+            composeTestRule.enterUsernamePasswordAndLogin()
+            advanceUntilIdle()
 
-            // ensure the dialog has disappeared after last attempt
+            // ensure the dialog has disappeared
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
             assert(challengeResponse.await() is ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError)
 
-            // clear out the credentials
-            signOut()
+            val mockArcGISAuthenticationException = mockk<ArcGISAuthenticationException>()
+            val challenge2 = makeMockArcGISAuthenticationChallenge(
+                mockedCause = mockArcGISAuthenticationException,
+                mockPreviousFailureCount = 4
+            )
+            val challengeResponse2 = async {
+                authenticatorState.handleArcGISAuthenticationChallenge(challenge2)
+            }
+            // ensure the dialog prompt is displayed as expected
+            advanceUntilIdle()
 
+            val incorrectCredentialsMessage = composeTestRule.activity.getString(
+                R.string.incorrect_credentials,
+                hostname
+            )
+
+            assert(authenticatorState.pendingUsernamePasswordChallenge.value != null)
+            composeTestRule.onNodeWithText(incorrectCredentialsMessage).assertIsDisplayed()
+
+            // simulate incorrect username/password
+            composeTestRule.enterUsernamePasswordAndLogin()
+            advanceUntilIdle()
+
+            assert(challengeResponse2.await() is ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError)
+        }
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user enters a correct username and password
+     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
+     *
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testValidCredentialsWithArcGISTokenAuthentication() = runTest {
+        with(StateRestorationTester(composeTestRule)) {
+            setContent {
+                DialogAuthenticator(authenticatorState = authenticatorState)
+            }
             // ensure all responses succeed to test that we can login
             ArcGISEnvironment.configureArcGISHttpClient {
                 setupSuccessfulArcGISTokenRequestInterceptor()
@@ -494,11 +533,17 @@ class UsernamePasswordTests {
                     allAny()
                 )
             } returns Result.success(mockk<TokenCredential>())
-
-            // issue another challenge
-            val challengeResponse2 = async {
+            val hostname = "arcgis.com"
+            val challenge = makeMockArcGISAuthenticationChallenge()
+            // issue challenge
+            val challengeResponse = async {
                 authenticatorState.handleArcGISAuthenticationChallenge(challenge)
             }
+
+            val usernamePasswordMessage = composeTestRule.activity.getString(
+                R.string.username_password_login_message,
+                hostname
+            )
 
             // ensure the dialog prompt is displayed as expected
             advanceUntilIdle()
@@ -511,12 +556,12 @@ class UsernamePasswordTests {
             advanceUntilIdle()
 
             // verify we get the expected response
-            val response2 = challengeResponse2.await()
+            val response2 = challengeResponse.await()
             assert(response2 is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
 
             // assert the dialog has been dismissed
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
-            composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
+            composeTestRule.onNodeWithText(usernamePasswordMessage).assertIsDisplayed()
         }
     }
 }
