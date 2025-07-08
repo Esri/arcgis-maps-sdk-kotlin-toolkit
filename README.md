@@ -92,7 +92,8 @@ API_KEY=YOUR_ACCESS_TOKEN
 
 ### ArcGIS identity
 
-An ArcGIS named user account that is a member of an organization in ArcGIS Online or ArcGIS Enterprise.
+An ArcGIS named user account that is a member of an organization in ArcGIS Online or ArcGIS
+Enterprise.
 
 ## Issues
 
