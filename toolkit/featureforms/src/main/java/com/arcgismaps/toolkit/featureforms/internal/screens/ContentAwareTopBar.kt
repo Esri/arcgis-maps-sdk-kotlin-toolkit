@@ -93,6 +93,7 @@ internal fun ContentAwareTopBar(
     hasBackStack: Boolean,
     showFormActions: Boolean,
     showCloseIcon: Boolean,
+    isNavigationEnabled: Boolean,
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
@@ -125,7 +126,7 @@ internal fun ContentAwareTopBar(
             }
         }
     }
-    val onBackAction : (NavBackStackEntry) -> Unit = { entry ->
+    val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
             entry.destination.hasRoute<NavigationRoute.FormView>() -> {
                 // Run the navigation action if the current view is the form view
@@ -140,6 +141,14 @@ internal fun ContentAwareTopBar(
     }
     // Get the title and subtitle for the top bar based on the current navigation state
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
+    val navigationEnabled = when {
+        // If the current destination is the form view, only then check if navigation is enabled
+        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            isNavigationEnabled
+        }
+        // For other destinations, always enable back navigation
+        else -> true
+    }
     Column {
         FeatureFormTitle(
             title = title,
@@ -147,6 +156,7 @@ internal fun ContentAwareTopBar(
             hasEdits = if (showFormActions) hasEdits else false,
             showCloseIcon = showCloseIcon,
             showBackIcon = hasBackStack,
+            isNavigationEnabled = navigationEnabled,
             onBackPressed = {
                 onBackAction(backStackEntry)
             },
@@ -289,6 +299,7 @@ private fun FeatureFormTitle(
     hasEdits: Boolean,
     showCloseIcon: Boolean,
     showBackIcon: Boolean,
+    isNavigationEnabled: Boolean,
     onBackPressed: () -> Unit,
     onClose: () -> Unit,
     onSave: () -> Unit,
@@ -301,7 +312,7 @@ private fun FeatureFormTitle(
             horizontalArrangement = Arrangement.Start,
         ) {
             if (showBackIcon) {
-                IconButton(onClick = onBackPressed) {
+                IconButton(onClick = onBackPressed, enabled = isNavigationEnabled) {
                     Icon(
                         Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = "Navigate back"
@@ -394,6 +405,7 @@ private fun FeatureFormTitlePreview() {
         hasEdits = true,
         showCloseIcon = true,
         showBackIcon = false,
+        isNavigationEnabled = true,
         onBackPressed = {},
         onClose = {},
         onSave = {},

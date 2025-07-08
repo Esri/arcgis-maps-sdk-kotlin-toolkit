@@ -295,6 +295,11 @@ public fun FeatureForm(
  * callback will be invoked when the close icon is clicked. Default is true.
  * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
  * Default is true.
+ * @param isNavigationEnabled Indicates if the navigation is enabled for the form when there are
+ * [UtilityAssociationsFormElement]s present. When true, the user can navigate to associated features
+ * and back. If false, this navigation is disabled. If there are geometry edits on the feature,
+ * this flag can be set to false to prevent navigation until the geometry edits are saved or discarded.
+ * Default is true.
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
@@ -318,6 +323,7 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     showCloseIcon: Boolean = true,
     showFormActions: Boolean = true,
+    isNavigationEnabled : Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
     onDismiss: () -> Unit = {},
@@ -395,6 +401,7 @@ public fun FeatureForm(
                     hasBackStack = hasBackStack,
                     showFormActions = showFormActions,
                     showCloseIcon = showCloseIcon,
+                    isNavigationEnabled = isNavigationEnabled,
                     modifier = Modifier
                         .padding(
                             vertical = 8.dp,
@@ -408,6 +415,7 @@ public fun FeatureForm(
             FeatureFormNavHost(
                 navController = navController,
                 state = state,
+                isNavigationEnabled = isNavigationEnabled,
                 validationErrorVisibility = validationErrorVisibility,
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,

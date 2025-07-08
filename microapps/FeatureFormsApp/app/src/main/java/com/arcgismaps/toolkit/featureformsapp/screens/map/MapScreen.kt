@@ -33,6 +33,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,12 +52,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -143,6 +148,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 TopFormBar(
                     title = title,
                     isEditing = uiState is UIState.Editing,
+                    isNavigationEnabled = mapViewModel.navigationEnabled,
+                    onToggleNavigation = {
+                        mapViewModel.toggleNavigationEnabled()
+                    },
                     onBackPressed = onBackPressed
                 )
                 if (uiState is UIState.Loading) {
@@ -205,6 +214,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 }
                 FeatureFormSheet(
                     state = rememberedForm,
+                    isNavigationEnabled = mapViewModel.navigationEnabled,
                     onDismiss = {
                         mapViewModel.setDefaultState()
                     },
@@ -388,6 +398,7 @@ fun FeatureItem(
 @Composable
 fun FeatureFormSheet(
     state: FeatureFormState,
+    isNavigationEnabled: Boolean,
     onDismiss: () -> Unit,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -416,6 +427,7 @@ fun FeatureFormSheet(
             FeatureForm(
                 featureFormState = state,
                 modifier = Modifier.fillMaxSize(),
+                isNavigationEnabled = isNavigationEnabled,
                 onDismiss = onDismiss,
                 onEditingEvent = onEditingEvent
             )
@@ -428,8 +440,11 @@ fun FeatureFormSheet(
 fun TopFormBar(
     title: String,
     isEditing: Boolean,
+    isNavigationEnabled: Boolean,
+    onToggleNavigation : () -> Unit = {},
     onBackPressed: () -> Unit = {}
 ) {
+    var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
             Text(
@@ -447,6 +462,27 @@ fun TopFormBar(
                         contentDescription = "Back"
                     )
                 }
+            }
+        },
+        actions = {
+            IconButton(onClick = { expanded = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "menu")
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.navigation))
+                            Checkbox(checked = isNavigationEnabled, onCheckedChange = {
+                                onToggleNavigation()
+                            })
+                        }
+                    },
+                    onClick = onToggleNavigation
+                )
             }
         }
     )
@@ -566,5 +602,5 @@ val ArcGISFeature.sublayer: ArcGISSublayer?
 @Preview
 @Composable
 private fun TopFormBarPreview() {
-    TopFormBar("Map", false)
+    TopFormBar("Map", false, true)
 }

@@ -178,6 +178,18 @@ class MapViewModel @Inject constructor(
         get() = _identifyTaskLocation
 
     /**
+     * Backing state for [navigationEnabled].
+     */
+    private val _isNavigationEnabled: MutableState<Boolean> = mutableStateOf(true)
+
+    /**
+     * Indicates if navigation is enabled. This is used to control the navigation between features
+     * through the feature form.
+     */
+    val navigationEnabled: Boolean
+        get() = _isNavigationEnabled.value
+
+    /**
      * A flow that emits the active feature form in the editing state, or null if not editing.
      */
     private var activeFeatureFormFlow = snapshotFlow {
@@ -311,6 +323,10 @@ class MapViewModel @Inject constructor(
 
             else -> return
         }
+    }
+
+    fun toggleNavigationEnabled() {
+        _isNavigationEnabled.value = !_isNavigationEnabled.value
     }
 
     /**
