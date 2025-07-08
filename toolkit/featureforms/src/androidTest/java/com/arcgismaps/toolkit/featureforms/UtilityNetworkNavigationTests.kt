@@ -41,6 +41,12 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
+    /**
+     * Given a FeatureForm with a UtilityAssociationsFormElement
+     * When the navigation is enabled
+     * Then the user should be able to navigate to a new form if there are no edits made
+     * And return to the original form
+     */
     @Test
     fun testNavigationWithoutEdits() {
         val state = FeatureFormState(
@@ -60,7 +66,6 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         }
         val filter = element!!.associationsFilterResults.first().filter
         val groupResult = element.associationsFilterResults.first().groupResults.first()
-        val associationResult = groupResult.associationResults.first()
         // Check that the filter, group, and association results are displayed
         val filterNode = composeTestRule.onNodeWithText(text = filter.title)
         filterNode.assertIsDisplayed()
@@ -68,7 +73,8 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
         groupNode.assertIsDisplayed()
         groupNode.performClick()
-        val associationNode = composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+        val associationNode =
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
@@ -91,5 +97,46 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         assertThat(state.activeFeatureForm).isEqualTo(featureForm)
         // The association node should be displayed again
         associationNode.assertIsDisplayed()
+    }
+
+    /**
+     * Given a FeatureForm with a UtilityAssociationsFormElement
+     * When the navigation is disabled
+     * Then the user should not be able to navigate to a new form
+     */
+    @Test
+    fun testNavigationIsDisabled() {
+        val state = FeatureFormState(
+            featureForm,
+            coroutineScope = scope
+        )
+        composeTestRule.setContent {
+            FeatureForm(
+                featureFormState = state,
+                isNavigationEnabled = false
+            )
+        }
+        val element = featureForm.elements.first() as? UtilityAssociationsFormElement
+        assertThat(element).isNotNull()
+        // Wait for the associations to load
+        composeTestRule.waitUntil(timeoutMillis = 30_000) {
+            element!!.associationsFilterResults.isNotEmpty()
+        }
+        val filter = element!!.associationsFilterResults.first().filter
+        val groupResult = element.associationsFilterResults.first().groupResults.first()
+        // Check that the filter, group, and association results are displayed
+        val filterNode = composeTestRule.onNodeWithText(text = filter.title)
+        filterNode.assertIsDisplayed()
+        filterNode.performClick()
+        val groupNode = composeTestRule.onNodeWithText(text = groupResult.name)
+        groupNode.assertIsDisplayed()
+        groupNode.performClick()
+        val associationNode =
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+        associationNode.assertIsDisplayed()
+        // Navigate to a new Form
+        associationNode.performClick()
+        // Check that the navigation is disabled
+        assertThat(state.activeFeatureForm).isEqualTo(featureForm)
     }
 }

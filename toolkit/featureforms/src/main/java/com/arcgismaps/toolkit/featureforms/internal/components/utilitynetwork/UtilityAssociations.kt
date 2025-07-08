@@ -36,10 +36,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Composition
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -122,6 +125,7 @@ internal fun UtilityAssociationFilter(
 @Composable
 internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
+    isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -144,6 +148,7 @@ internal fun UtilityAssociations(
                         title = info.title,
                         association = info.association,
                         associatedFeature = info.associatedFeature,
+                        enabled = isNavigationEnabled,
                         onClick = {
                             onItemClick(index)
                         },
@@ -182,6 +187,7 @@ private fun AssociationItem(
     title: String,
     association: UtilityAssociation,
     associatedFeature: ArcGISFeature,
+    enabled: Boolean,
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -223,7 +229,12 @@ private fun AssociationItem(
 
         else -> ""
     }
-    Column(modifier = modifier.clickable(onClick = onClick)) {
+    val contentColor = if (enabled) {
+        LocalContentColor.current
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    }
+    Column(modifier = modifier.clickable(enabled = enabled, onClick = onClick)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -246,11 +257,12 @@ private fun AssociationItem(
                 Text(
                     text = title,
                     modifier = Modifier.padding(
-                        top = 6.dp
+                        top = if (trailingText.isNotEmpty()) 6.dp else 0.dp,
                     ),
                     style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
+                    maxLines = 1,
+                    color = contentColor
                 )
                 if (trailingText.isNotEmpty()) {
                     Text(
@@ -261,7 +273,8 @@ private fun AssociationItem(
                             ),
                         style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                        maxLines = 1,
+                        color = contentColor
                     )
                 }
             }
