@@ -425,11 +425,8 @@ class UsernamePasswordTests {
      * When a username and password challenge is issued
      * Then the dialog prompt should be displayed
      *
-     * When the user enters an incorrect username and password 5 times
+     * When the user enters an incorrect username and password
      * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
-     *
-     * When the user enters a correct username and password
-     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
      *
      * @since 200.5.0
      */
