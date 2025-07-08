@@ -29,8 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.IapSignIn
-import com.arcgismaps.httpcore.authentication.IapSignOut
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
@@ -53,9 +51,9 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  */
 @Deprecated(
     message = "as of 200.8.0 and will be removed in an upcoming release, use the Authenticator composable with " +
-            "onPendingBrowserAuthenticationChallenge instead.",
+            "BrowserAuthenticationChallenge instead.",
     replaceWith = ReplaceWith(
-        "Authenticator(authenticatorState, modifier, onPendingBrowserAuthenticationChallenge)"
+        "Authenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
     ),
     level = DeprecationLevel.WARNING
 )
@@ -159,8 +157,8 @@ public fun Authenticator(
  */
 @Deprecated(
     message = "as of 200.8.0 and will be removed in an upcoming release, use the DialogAuthenticator composable with " +
-            "onPendingBrowserAuthenticationChallenge instead.",
-    replaceWith = ReplaceWith("DialogAuthenticator(authenticatorState, modifier, onPendingBrowserAuthenticationChallenge)"
+            "BrowserAuthenticationChallenge instead.",
+    replaceWith = ReplaceWith("DialogAuthenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
     ),
     level = DeprecationLevel.WARNING
 )
@@ -283,7 +281,7 @@ private fun AuthenticatorDelegate(
                 oAuthPendingSignIn = it,
                 authenticatorState = authenticatorState
             ) { oAuthUserSignIn ->
-                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.OAuthUserSignInChallenge(oAuthUserSignIn))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.OAuthUserSignIn(oAuthUserSignIn))
             }
         } else {
             OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
@@ -293,7 +291,7 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let { iapSignIn ->
         if (onPendingBrowserAuthenticationChallenge != null) {
             IapSignInAuthenticator {
-                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignInChallenge(iapSignIn))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignIn(iapSignIn))
             }
         } else {
             IapSignInAuthenticator(
@@ -307,7 +305,7 @@ private fun AuthenticatorDelegate(
     authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let { iapSignOut ->
         if (onPendingBrowserAuthenticationChallenge != null) {
             IapSignOutAuthenticator {
-                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignOutChallenge(iapSignOut))
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignOut(iapSignOut))
             }
         } else {
             IapSignOutAuthenticator(
@@ -373,7 +371,9 @@ public sealed class BrowserAuthenticationChallenge {
      * @param iapSignIn The IAP sign-in object containing the necessary configuration.
      * @since 200.8.0
      */
-    public data class IapSignInChallenge internal constructor(val iapSignIn: IapSignIn) : BrowserAuthenticationChallenge()
+    public data class IapSignIn internal constructor(
+        val iapSignIn: com.arcgismaps.httpcore.authentication.IapSignIn
+    ) : BrowserAuthenticationChallenge()
 
     /**
      * Represents an OAuth user sign-in challenge.
@@ -381,8 +381,9 @@ public sealed class BrowserAuthenticationChallenge {
      * @param oAuthUserSignIn The OAuth user sign-in object containing the necessary configuration.
      * @since 200.8.0
      */
-    public data class OAuthUserSignInChallenge internal constructor(val oAuthUserSignIn: OAuthUserSignIn) :
-        BrowserAuthenticationChallenge()
+    public data class OAuthUserSignIn internal constructor(
+        val oAuthUserSignIn: com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+    ) : BrowserAuthenticationChallenge()
 
     /**
      * Represents an Identity-Aware Proxy (IAP) sign-out challenge.
@@ -390,5 +391,7 @@ public sealed class BrowserAuthenticationChallenge {
      * @param iapSignOut The IAP sign-out object containing the sign-out URL and other configuration.
      * @since 200.8.0
      */
-    public data class IapSignOutChallenge internal constructor(val iapSignOut: IapSignOut) : BrowserAuthenticationChallenge()
+    public data class IapSignOut internal constructor(
+        val iapSignOut: com.arcgismaps.httpcore.authentication.IapSignOut
+    ) : BrowserAuthenticationChallenge()
 }
