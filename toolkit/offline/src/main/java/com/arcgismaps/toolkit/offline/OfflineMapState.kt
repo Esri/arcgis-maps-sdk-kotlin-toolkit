@@ -42,6 +42,7 @@ import com.arcgismaps.toolkit.offline.preplanned.PreplannedStatus
 import com.arcgismaps.toolkit.offline.workmanager.OfflineURLs
 import kotlinx.coroutines.CancellationException
 import java.io.File
+import java.io.IOException
 
 /**
  * Represents the state of the offline map.
@@ -51,7 +52,7 @@ import java.io.File
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
-    private val onSelectionChanged: (ArcGISMap) -> Unit = { }
+    private val onSelectionChanged: (ArcGISMap?) -> Unit = { }
 ) {
     /**
      * Represents the state of the offline map with a given [OfflineMapInfo].
@@ -60,7 +61,7 @@ public class OfflineMapState(
      */
     public constructor(
         offlineMapInfo: OfflineMapInfo,
-        onSelectionChanged: (ArcGISMap) -> Unit = { }
+        onSelectionChanged: (ArcGISMap?) -> Unit = { }
     ) : this(
         arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
         onSelectionChanged = onSelectionChanged
@@ -131,7 +132,7 @@ public class OfflineMapState(
         // load the map, and ignore network error if device is offline
         arcGISMap.retryLoad().getOrElse { error ->
             // check if the error is due to network connection
-            if (error.message?.contains("Unable to resolve host") == true) {
+            if (error is IOException) {
                 // enable offline only mode
                 isShowingOnlyOfflineModels = true
             } else {
@@ -148,7 +149,7 @@ public class OfflineMapState(
         // load the task, and ignore network error if device is offline
         offlineMapTask.retryLoad().getOrElse { error ->
             // check if the error is not due to network connection
-            if (error.message?.contains("Unable to resolve host") == false) {
+            if (error !is IOException) {
                 // unexpected error, report failed status
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 throw error
@@ -168,6 +169,8 @@ public class OfflineMapState(
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
+        // reset the selected map on initialize
+        onSelectionChanged(null)
         _initializationStatus.value = InitializationStatus.Initialized
     }
 
@@ -181,18 +184,16 @@ public class OfflineMapState(
     private suspend fun loadPreplannedMapAreas(context: Context) {
         _preplannedMapAreaStates.clear()
         val preplannedMapAreas = mutableListOf<PreplannedMapArea>()
-        try {
-            preplannedMapAreas.addAll(
-                elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
-            )
-        } catch (_: Exception) {
-            // an exception will be thrown in offline mode
-            preplannedMapAreas.clear()
-        }
-        if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
+        if (isShowingOnlyOfflineModels) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
-            _mode = OfflineMapMode.Preplanned
+            try {
+                preplannedMapAreas.addAll(
+                    elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
+                )
+            } catch (e: Exception) {
+                preplannedMapAreas.clear()
+            }
             preplannedMapAreas.let { preplannedMapArea ->
                 preplannedMapArea
                     .sortedBy { it.portalItem.title }
@@ -216,6 +217,7 @@ public class OfflineMapState(
                                 mobileMapPackagePath = preplannedPath
                             )
                         }
+                        _mode = OfflineMapMode.Preplanned
                         _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
                 // restore any running download job state
@@ -393,6 +395,7 @@ public class OfflineMapState(
     public fun resetSelectedMapArea() {
         _preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
         _onDemandMapAreaStates.forEach { it.setSelectedToOpen(false) }
+        onSelectionChanged(null)
     }
 
     /**
