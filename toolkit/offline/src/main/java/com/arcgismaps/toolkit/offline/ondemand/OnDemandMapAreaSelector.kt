@@ -42,9 +42,9 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -179,11 +179,16 @@ private fun OnDemandMapAreaSelectorOptions(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Center)
             )
-            IconButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterEnd)) {
+            FilledTonalIconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp)
+            ) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon")
             }
+            HorizontalDivider(Modifier.align(Alignment.BottomCenter))
         }
-        HorizontalDivider()
         Text(text = stringResource(R.string.pan_and_zoom_text), style = MaterialTheme.typography.labelSmall)
         MapViewWithAreaSelector(
             modifier = Modifier.weight(1f),

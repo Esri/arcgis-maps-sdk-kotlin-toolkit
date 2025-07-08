@@ -105,10 +105,6 @@ internal fun OnDemandMapAreas(
             description = null,
             size = selectedOnDemandMapAreaState.directorySize,
             isAvailableToDownload = selectedOnDemandMapAreaState.status.allowsDownload,
-            onStartDownload = {
-                selectedOnDemandMapAreaState.downloadOnDemandMapArea()
-                onHideSheet = true
-            },
             isDeletable = selectedOnDemandMapAreaState.status.isDownloaded && !selectedOnDemandMapAreaState.isSelectedToOpen,
             onDeleteDownload = {
                 selectedOnDemandMapAreaState.removeDownloadedMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
@@ -247,8 +243,5 @@ private fun getOnDemandMapAreaStatusString(context: Context, status: OnDemandSta
         OnDemandStatus.Downloaded -> getString(context, R.string.downloaded)
         OnDemandStatus.Downloading -> getString(context, R.string.downloading)
         OnDemandStatus.DownloadCancelled -> getString(context, R.string.cancelled)
-        OnDemandStatus.PackageFailure -> getString(context, R.string.packaging_failed)
-        OnDemandStatus.Packaged -> getString(context, R.string.ready_to_download)
-        OnDemandStatus.Packaging -> getString(context, R.string.packaging)
     }
 }

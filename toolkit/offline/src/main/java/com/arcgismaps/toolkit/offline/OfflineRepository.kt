@@ -353,10 +353,7 @@ public object OfflineRepository {
      *
      * @since 200.8.0
      */
-    internal fun deleteContentsForDirectory(
-        context: Context,
-        offlineMapDirectoryPath: String
-    ): Boolean {
+    internal fun deleteContentsForDirectory(offlineMapDirectoryPath: String): Boolean {
         return File(offlineMapDirectoryPath).deleteRecursively()
     }
 

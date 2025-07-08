@@ -250,7 +250,7 @@ internal class OnDemandMapAreasState(
      * @since 200.8.0
      */
     internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
-        if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
+        if (OfflineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
             Log.d(TAG, "Deleted on-demand map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
             _status = OnDemandStatus.NotLoaded
@@ -365,8 +365,6 @@ internal class OnDemandMapAreasState(
  *
  * @since 200.8.0
  */
-// TODO: Refine status as not all the status values are being used in onDemand
-//  compared to Preplanned in Swift implementation.
 internal sealed class OnDemandStatus {
 
     /**
@@ -383,21 +381,6 @@ internal sealed class OnDemandStatus {
      * On-Demand map area failed to load.
      */
     data class LoadFailure(val error: Throwable) : OnDemandStatus()
-
-    /**
-     * On-Demand map area is packaging.
-     */
-    data object Packaging : OnDemandStatus()
-
-    /**
-     * On-Demand map area is packaged and ready for download.
-     */
-    data object Packaged : OnDemandStatus()
-
-    /**
-     * On-Demand map area packaging failed.
-     */
-    data object PackageFailure : OnDemandStatus()
 
     /**
      * On-Demand map area is being downloaded.
@@ -425,21 +408,12 @@ internal sealed class OnDemandStatus {
     data class MmpkLoadFailure(val error: Throwable) : OnDemandStatus()
 
     /**
-     * Indicates whether the model can load the on-demand map area.
-     */
-    val canLoadOnDemandMapArea: Boolean
-        get() = when (this) {
-            is NotLoaded, is LoadFailure, is PackageFailure -> true
-            is Loading, is Packaging, is Packaged, is Downloading, is DownloadCancelled, is Downloaded, is MmpkLoadFailure, is DownloadFailure -> false
-        }
-
-    /**
      * Indicates if download is allowed for this status.
      */
     val allowsDownload: Boolean
         get() = when (this) {
-            is Packaged -> true
-            is NotLoaded, is Loading, is LoadFailure, is Packaging, is PackageFailure, is Downloading, is DownloadCancelled, is DownloadFailure, is Downloaded, is MmpkLoadFailure -> false
+            is NotLoaded -> true
+            is Loading, is LoadFailure, is Downloading, is DownloadCancelled, is DownloadFailure, is Downloaded, is MmpkLoadFailure -> false
         }
 
     /**

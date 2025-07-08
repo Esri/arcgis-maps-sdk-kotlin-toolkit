@@ -19,8 +19,6 @@
 package com.arcgismaps.toolkit.offlinemapareasapp.screens
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring.StiffnessMediumLow
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -64,7 +62,6 @@ fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
 
     // Radio options
     val options = listOf("Go Online", "Offline Maps")
-    var selectedOption by remember { mutableStateOf(options[0]) }
     var expanded by remember { mutableStateOf(false) }
 
     BottomSheetScaffold(
@@ -97,7 +94,6 @@ fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
                             DropdownMenuItem(
                                 text = { Text(option) },
                                 onClick = {
-                                    selectedOption = option
                                     expanded = false
                                     if (option == "Go Online") {
                                         viewModel.offlineMapState.resetSelectedMapArea()
