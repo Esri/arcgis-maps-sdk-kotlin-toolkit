@@ -40,33 +40,33 @@ public abstract class com/arcgismaps/toolkit/authentication/BrowserAuthenticatio
 	public static final field $stable I
 }
 
-public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignInChallenge : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
 	public static final field $stable I
 	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/IapSignIn;
-	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignInChallenge;
-	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignInChallenge;Lcom/arcgismaps/httpcore/authentication/IapSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignInChallenge;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;Lcom/arcgismaps/httpcore/authentication/IapSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIapSignIn ()Lcom/arcgismaps/httpcore/authentication/IapSignIn;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOutChallenge : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
 	public static final field $stable I
 	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/IapSignOut;
-	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignOut;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOutChallenge;
-	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOutChallenge;Lcom/arcgismaps/httpcore/authentication/IapSignOut;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOutChallenge;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignOut;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;Lcom/arcgismaps/httpcore/authentication/IapSignOut;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIapSignOut ()Lcom/arcgismaps/httpcore/authentication/IapSignOut;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignInChallenge : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
 	public static final field $stable I
 	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;
-	public final fun copy (Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignInChallenge;
-	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignInChallenge;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignInChallenge;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOAuthUserSignIn ()Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;
 	public fun hashCode ()I
