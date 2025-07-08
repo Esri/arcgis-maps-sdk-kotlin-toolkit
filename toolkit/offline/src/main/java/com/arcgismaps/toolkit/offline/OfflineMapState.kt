@@ -51,7 +51,7 @@ import java.io.IOException
 @Stable
 public class OfflineMapState(
     private val arcGISMap: ArcGISMap,
-    private val onSelectionChanged: (ArcGISMap) -> Unit = { }
+    private val onSelectionChanged: (ArcGISMap?) -> Unit = { }
 ) {
     /**
      * Represents the state of the offline map with a given [OfflineMapInfo].
@@ -60,7 +60,7 @@ public class OfflineMapState(
      */
     public constructor(
         offlineMapInfo: OfflineMapInfo,
-        onSelectionChanged: (ArcGISMap) -> Unit = { }
+        onSelectionChanged: (ArcGISMap?) -> Unit = { }
     ) : this(
         arcGISMap = ArcGISMap(offlineMapInfo.portalItemUrl),
         onSelectionChanged = onSelectionChanged
@@ -168,6 +168,8 @@ public class OfflineMapState(
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
+        // reset the selected map on initialize
+        onSelectionChanged(null)
         _initializationStatus.value = InitializationStatus.Initialized
     }
 
@@ -191,7 +193,6 @@ public class OfflineMapState(
         if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
             loadOfflinePreplannedMapAreas(context = context)
         } else {
-            _mode = OfflineMapMode.Preplanned
             preplannedMapAreas.let { preplannedMapArea ->
                 preplannedMapArea
                     .sortedBy { it.portalItem.title }
@@ -215,6 +216,7 @@ public class OfflineMapState(
                                 mobileMapPackagePath = preplannedPath
                             )
                         }
+                        _mode = OfflineMapMode.Preplanned
                         _preplannedMapAreaStates.add(preplannedMapAreaState)
                     }
                 // restore any running download job state
@@ -388,6 +390,7 @@ public class OfflineMapState(
     public fun resetSelectedMapArea() {
         _preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
         _onDemandMapAreaStates.forEach { it.setSelectedToOpen(false) }
+        onSelectionChanged(null)
     }
 
     /**
