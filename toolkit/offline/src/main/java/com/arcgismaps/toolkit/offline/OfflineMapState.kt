@@ -184,7 +184,8 @@ public class OfflineMapState(
             preplannedMapAreas.addAll(
                 elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // an exception will be thrown in offline mode
             preplannedMapAreas.clear()
         }
         if (isShowingOnlyOfflineModels || preplannedMapAreas.isEmpty()) {
@@ -230,7 +231,7 @@ public class OfflineMapState(
      */
     private suspend fun loadOfflinePreplannedMapAreas(context: Context) {
         val preplannedDirectory = File(
-            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId)
+            OfflineURLs.prePlannedDirectoryPath(context, portalItem.itemId,null,false)
         )
         val preplannedMapAreaItemIds = preplannedDirectory.listFiles()?.map { it.name.toString() }
             ?: emptyList()

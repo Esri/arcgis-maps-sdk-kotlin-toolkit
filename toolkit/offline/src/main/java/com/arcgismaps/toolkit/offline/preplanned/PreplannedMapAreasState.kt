@@ -116,7 +116,7 @@ internal class PreplannedMapAreaState(
             ?.onSuccess {
                 _status = try {
                     PreplannedStatus.fromPackagingStatus(preplannedMapArea.packagingStatus)
-                } catch (illegalStateException: IllegalStateException) {
+                } catch (_: IllegalStateException) {
                     // Note: Packaging status is `Unknown` for compatibility with legacy webmaps
                     // that have incomplete metadata. We throw an illegalStateException when Package
                     // Status is unknown. We can safely assume that the preplanned map area is packaged.
@@ -262,7 +262,7 @@ internal class PreplannedMapAreaState(
      * @since 200.8.0
      */
     internal fun removeDownloadedMapArea(shouldRemoveOfflineMapInfo: () -> Boolean) {
-        if (OfflineRepository.deleteContentsForDirectory(context, mobileMapPackage.path)) {
+        if (OfflineRepository.deleteContentsForDirectory(mobileMapPackage.path)) {
             Log.d(TAG, "Deleted preplanned map area: ${mobileMapPackage.path}")
             // Reset the status to reflect the deletion
             _status = PreplannedStatus.NotLoaded

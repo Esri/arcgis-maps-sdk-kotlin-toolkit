@@ -29,14 +29,12 @@ import kotlinx.coroutines.launch
 
 class OfflineViewModel : ViewModel() {
 
-    // TODO: Update to use napervilleWaterNetwork and remove USBreweriesforOfflineTesting
-    // private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
-    private val USBreweriesforOfflineTesting = "3da658f2492f4cfd8494970ef489d2c5"
+    private val napervilleWaterNetwork = "acc027394bc84c2fb04d1ed317aac674"
 
     private val onlineMap = ArcGISMap(
-        PortalItem(
-            Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
-            USBreweriesforOfflineTesting
+        item = PortalItem(
+            portal = Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
+            itemId = napervilleWaterNetwork
         )
     )
     val selectedMap = mutableStateOf<ArcGISMap?>(null)
