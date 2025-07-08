@@ -561,7 +561,7 @@ class UsernamePasswordTests {
 
             // assert the dialog has been dismissed
             assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
-            composeTestRule.onNodeWithText(usernamePasswordMessage).assertIsDisplayed()
+            composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
         }
     }
 }
