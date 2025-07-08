@@ -190,7 +190,7 @@ class OAuthUserLauncherTestActivity : ComponentActivity() {
         setContent {
             Authenticator(
                 authenticatorState = viewModel.authenticatorState,
-                onPendingBrowserAuthenticationChallenge = {
+                onPendingOAuthUserSignIn = {
                     launchCustomTabs(it)
                 }
             )
