@@ -77,8 +77,8 @@ import java.io.File
  */
 @Stable
 public class OfflineMapState {
-    private var arcGISMap: ArcGISMap
-    private var onSelectionChanged: ((ArcGISMap) -> Unit)
+    private val arcGISMap: ArcGISMap
+    private val onSelectionChanged: ((ArcGISMap) -> Unit)
 
     /**
      * Represents the state of the offline map with a given [ArcGISMap].

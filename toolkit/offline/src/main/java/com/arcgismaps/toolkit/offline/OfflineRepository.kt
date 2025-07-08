@@ -98,7 +98,7 @@ public object OfflineRepository {
      * @param offlineMapInfo The [OfflineMapInfo] to remove.
      * @since 200.8.0
      */
-    public fun removeDownloadsForWebmap(context: Context, offlineMapInfo: OfflineMapInfo) {
+    public fun removeDownloadsForOfflineMapInfo(context: Context, offlineMapInfo: OfflineMapInfo) {
         _offlineMapInfos.remove(offlineMapInfo)
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)
@@ -147,6 +147,7 @@ public object OfflineRepository {
             mapAreaMetadata.saveToDirectory(pendingAreaMetadataDir)
         }
     }
+
     /**
      * Returns preplanned/on-demand map area [OfflineMapAreaMetadata] using the corresponding job [UUID].
      *
