@@ -16,7 +16,6 @@
  */
 package com.arcgismaps.toolkit.authentication
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -49,7 +48,7 @@ import org.junit.Test
 class OAuthDefaultConfigurationTests {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<AuthenticatorStateActivity>()
 
     @Before
     fun signOutBefore() = signOut()
@@ -59,7 +58,7 @@ class OAuthDefaultConfigurationTests {
 
     private fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.authenticatorState.signOut()
         }
         // reset the ArcGISHttpClient to remove any custom interceptors
         ArcGISEnvironment.configureArcGISHttpClient()
