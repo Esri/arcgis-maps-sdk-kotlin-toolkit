@@ -100,7 +100,6 @@ fun MainScreen(viewModel: OfflineViewModel = viewModel()) {
                                     selectedOption = option
                                     expanded = false
                                     if (option == "Go Online") {
-                                        viewModel.selectedMap.value = null
                                         viewModel.offlineMapState.resetSelectedMapArea()
                                         coroutineScope.launch {
                                             scaffoldState.bottomSheetState.partialExpand()
