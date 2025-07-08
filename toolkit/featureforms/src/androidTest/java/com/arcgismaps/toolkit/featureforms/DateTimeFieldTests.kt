@@ -98,7 +98,7 @@ class DateTimeFieldTests : FeatureFormTestRunner(
         }
         dateTimeField.assertIsDisplayed()
         val helper = dateTimeField.onChildWithContentDescription("supporting text")
-        val helperMatcher = hasText("Required")
+        val helperMatcher = hasText("Date Entry is Required")
         assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
             "expected helper text: Date Entry is Required"
 
