@@ -302,9 +302,10 @@ public fun FeatureForm(
  * @param showFormActions Indicates if the form actions (save and discard buttons) should be displayed.
  * Default is true.
  * @param isNavigationEnabled Indicates if the navigation is enabled for the form when there are
- * [UtilityAssociationsFormElement]s present. If true, the user can navigate to associated features
+ * [UtilityAssociationsFormElement]s present. When true, the user can navigate to associated features
  * and back. If false, this navigation is disabled. If there are geometry edits on the feature,
  * this flag can be set to false to prevent navigation until the geometry edits are saved or discarded.
+ * Default is true.
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
