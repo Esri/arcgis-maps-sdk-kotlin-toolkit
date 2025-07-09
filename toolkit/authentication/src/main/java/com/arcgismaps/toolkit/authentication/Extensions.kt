@@ -19,12 +19,12 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
-import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import androidx.core.net.toUri
 
 /**
  * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
@@ -32,6 +32,10 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  *
  * @since 200.2.0
  */
+@Deprecated(
+    message = "since 200.8.0. Use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
+    replaceWith = ReplaceWith("AuthenticatorState.signOut()")
+)
 public suspend fun AuthenticationManager.signOut() {
     arcGISCredentialStore.getCredentials().forEach {
         if (it is OAuthUserCredential) {
@@ -76,5 +80,5 @@ internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boole
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
-    }.launchUrl(this, Uri.parse(authorizeUrl))
+    }.launchUrl(this, authorizeUrl.toUri())
 }

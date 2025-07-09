@@ -74,14 +74,29 @@
 
     function convertTemplate {
 	pushd toolkit > /dev/null
-	# replace the string "template" in any directory names
-	find "${componentName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
+        # replace the string "template" in any directory names
+        find "${componentName}" -type d -name "*template*" | while read dir; do
+           mv "$dir" "${dir//template/$componentName}"
+        done
+	
 	# replace the string "Template" in any file names
-	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	find "${componentName}" -type f -name "*Template*" | while read file; do
+           mv "$file" "${file//Template/$composableFunctionName}"
+        done
+
+	# replace the string "template" in any file names
+	find "${componentName}" -type f -name "*template*" | while read file; do
+           mv "$file" "${file//template/$componentName}"
+        done
+	
 	# replace the string "template" in the contents of any file
 	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/g {} \; > /dev/null 2>&1
 	# replace the string "Template" in the contents of any file	
 	find "${componentName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/g {} \; > /dev/null 2>&1	
+
+	# replace the CURRENT_YEAR placeholder with the actual current year in the contents of any file
+	current_year=$(date +%Y)
+	find "${componentName}" -type f -exec perl -i -pe s/CURRENT_YEAR/$current_year/g {} \; > /dev/null 2>&1
 	
 	popd > /dev/null
     }

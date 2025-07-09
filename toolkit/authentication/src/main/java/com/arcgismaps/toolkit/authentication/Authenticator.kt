@@ -44,7 +44,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [OAuthUserSignInActivity].
+ * activity rather than using the [AuthenticationActivity].
  * @see DialogAuthenticator
  * @since 200.2.0
  */
@@ -78,7 +78,7 @@ public fun Authenticator(
  * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [OAuthUserSignInActivity].
+ * activity rather than using the [AuthenticationActivity].
  * @see Authenticator
  * @since 200.2.0
  */
@@ -106,7 +106,7 @@ public fun DialogAuthenticator(
  * in full screen.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [OAuthUserSignInActivity].
+ * activity rather than using the [AuthenticationActivity].
  * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
@@ -126,17 +126,27 @@ private fun AuthenticatorDelegate(
         authenticatorState.dismissAll()
     }
 
-    val pendingOAuthUserSignIn =
-        authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
-
-    pendingOAuthUserSignIn?.let {
+    authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
         OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
-    val pendingServerTrustChallenge =
-        authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
+    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
+        IapSignInAuthenticator(
+            authorizeUrl = it.authorizeUrl,
+            onComplete = it::complete,
+            onCancel = it::cancel
+        )
+    }
 
-    pendingServerTrustChallenge?.let {
+    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
+        IapSignOutAuthenticator(
+            iapSignOutUrl = it.signOutUrl,
+            onCompleteSignOut = it::complete,
+            onCancelSignOut = it::cancel
+        )
+    }
+
+    authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value?.let {
         if (useDialog) {
             ServerTrustAuthenticatorDialog(it, modifier)
         } else {
@@ -144,10 +154,7 @@ private fun AuthenticatorDelegate(
         }
     }
 
-    val pendingUsernamePasswordChallenge =
-        authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
-
-    pendingUsernamePasswordChallenge?.let {
+    authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value?.let {
         if (useDialog) {
             UsernamePasswordAuthenticatorDialog(it, modifier)
         } else {
@@ -155,9 +162,7 @@ private fun AuthenticatorDelegate(
         }
     }
 
-    val pendingClientCertificateChallenge =
-        authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
-    pendingClientCertificateChallenge?.let {
+    authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value?.let {
         KeyChain.choosePrivateKeyAlias(
             LocalContext.current.findActivity(), it.keyChainAliasCallback, null, null, null, null
         )

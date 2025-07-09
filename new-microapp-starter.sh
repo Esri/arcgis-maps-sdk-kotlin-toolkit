@@ -47,14 +47,19 @@ function copyTemplateApp {
 function convertTemplateApp {
     pushd microapps > /dev/null
     # replace the string "template" in any directory names
-    find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
-    # replace the string "Template" in any file names
-    find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+    find "${appDirName}" -type d -name "*template*" | while read dir; do
+       mv "$dir" "${dir//template/$componentName}"
+    done
+    
     # replace the string "template" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
     # replace the string "TemplateApp" in the contents of any file
     find "${appDirName}" -type f -exec perl -i -pe s/TemplateApp/$composableFunctionName/ {} \; > /dev/null 2>&1
 
+    # replace the CURRENT_YEAR placeholder with the actual current year in the contents of any file
+    current_year=$(date +%Y)
+    find "${appDirName}" -type f -exec perl -i -pe s/CURRENT_YEAR/$current_year/g {} \; > /dev/null 2>&1
+    
     popd > /dev/null
 }
 

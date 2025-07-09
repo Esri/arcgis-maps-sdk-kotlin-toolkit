@@ -86,11 +86,6 @@ android {
             // This is the default variant.
         }
     }
-
-    lint {
-        // TODO: Remove this when strings.xml lint is fixed via localization
-        disable += "MissingTranslation"
-    }
 }
 
 apiValidation {

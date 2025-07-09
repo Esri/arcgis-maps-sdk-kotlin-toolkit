@@ -63,7 +63,7 @@ class OAuthUserLauncherTests {
 
     private fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.viewModel.authenticatorState.signOut()
         }
         // reset the ArcGISHttpClient to remove any custom interceptors
         ArcGISEnvironment.configureArcGISHttpClient()
