@@ -90,10 +90,16 @@ fun MainScreen() {
 
     val arcGISScene = remember {
         ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            baseSurface.elevationSources.add(ArcGISTiledElevationSource(
-                "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"))
-            operationalLayers.add(IntegratedMeshLayer(
-                "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer"))
+            baseSurface.elevationSources.add(
+                ArcGISTiledElevationSource(
+                    "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+                )
+            )
+            operationalLayers.add(
+                IntegratedMeshLayer(
+                    "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/Girona_Spain/SceneServer"
+                )
+            )
         }
     }
 
@@ -102,7 +108,9 @@ fun MainScreen() {
     val pointsOfInterestList = rememberPointsOfInterest()
 
     val flyoverSceneViewProxy = rememberFlyoverSceneViewProxy(
-        pointsOfInterestList[currentPoiIndex].poiLocation, pointsOfInterestList[currentPoiIndex].heading)
+        pointsOfInterestList[currentPoiIndex].poiLocation,
+        pointsOfInterestList[currentPoiIndex].heading
+    )
 
     var currentTranslationFactor by remember {
         mutableDoubleStateOf(pointsOfInterestList[currentPoiIndex].translationFactor)
