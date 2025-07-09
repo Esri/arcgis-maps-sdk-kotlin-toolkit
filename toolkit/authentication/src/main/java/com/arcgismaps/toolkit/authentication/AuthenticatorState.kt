@@ -533,7 +533,7 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
 /**
  * Completes the current browser-based authentication challenge for the [AuthenticatorState].
  *
- * This method handles the completion of pending authentication challenges that required interaction with the browser.
+ * This method handles the completion of pending authentication challenges that require interaction with the browser.
  * It checks the type of challenge currently pending (OAuth sign-in, IAP sign-in, or IAP sign-out) and
  * processes the provided [Intent] accordingly.
  *

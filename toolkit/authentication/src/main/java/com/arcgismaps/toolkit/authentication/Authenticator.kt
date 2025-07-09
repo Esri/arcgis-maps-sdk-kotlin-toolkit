@@ -83,7 +83,7 @@ public fun Authenticator(
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
- * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a authentication challenge is pending
+ * @param onPendingBrowserAuthenticationChallenge this will be called when an authentication challenge is pending
  * and the browser should be launched. Use this if you wish to handle browser challenges from your own
  * activity rather than using the [AuthenticationActivity], more information can be found in the
  * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
@@ -191,12 +191,12 @@ public fun DialogAuthenticator(
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
- * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a authentication challenge is pending
+ * @param onPendingBrowserAuthenticationChallenge this will be called when an authentication challenge is pending
  * and the browser should be launched. Use this if you wish to handle browser challenges from your own
  * activity rather than using the [AuthenticationActivity], more information can be found in the
  * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
  * @see Authenticator
- * @since 200.2.0
+ * @since 200.8.0
  */
 @JvmName("DialogAuthenticatorWithBrowserAuthenticationChallenge")
 @Composable
