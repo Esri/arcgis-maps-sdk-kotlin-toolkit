@@ -98,7 +98,7 @@ public object OfflineRepository {
      * @param offlineMapInfo The [OfflineMapInfo] to remove.
      * @since 200.8.0
      */
-    public fun removeDownloadsForOfflineMapInfo(context: Context, offlineMapInfo: OfflineMapInfo) {
+    public fun removeDownloads(context: Context, offlineMapInfo: OfflineMapInfo) {
         _offlineMapInfos.remove(offlineMapInfo)
         val baseDir = File(OfflineURLs.offlineRepositoryDirectoryPath(context))
         val offlineMapInfoDir = File(baseDir, offlineMapInfo.id)

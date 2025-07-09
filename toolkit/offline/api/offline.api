@@ -68,6 +68,6 @@ public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public final fun getOfflineMapInfos ()Ljava/util/List;
 	public final fun refreshOfflineMapInfos (Landroid/content/Context;)V
 	public final fun removeAllDownloads (Landroid/content/Context;)V
-	public final fun removeDownloadsForOfflineMapInfo (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
+	public final fun removeDownloads (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
