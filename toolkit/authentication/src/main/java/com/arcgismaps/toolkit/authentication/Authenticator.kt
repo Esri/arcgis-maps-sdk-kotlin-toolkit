@@ -38,7 +38,8 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * All Authentication components will be displayed in full screen. See [DialogAuthenticator] for alternate behavior.
+ * This Composable will adapt to the size of its container, allowing flexible layout usage. For alternate behavior,
+ * see [DialogAuthenticator].
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
@@ -48,6 +49,14 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * @see DialogAuthenticator
  * @since 200.2.0
  */
+@Deprecated(
+    message = "as of 200.8.0 and will be removed in an upcoming release, use the Authenticator composable with " +
+            "BrowserAuthenticationChallenge instead.",
+    replaceWith = ReplaceWith(
+        "Authenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
+    ),
+    level = DeprecationLevel.WARNING
+)
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
@@ -69,8 +78,72 @@ public fun Authenticator(
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
+ * This Composable will adapt to the size of its container, allowing flexible layout usage. For alternate behavior,
+ * see [DialogAuthenticator].
+ *
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to apply to this Authenticator.
+ * @param onPendingBrowserAuthenticationChallenge this will be called when an authentication challenge is pending
+ * and the browser should be launched. Use this if you wish to handle browser challenges from your own
+ * activity rather than using the [AuthenticationActivity], more information can be found in the
+ * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
+ * @see DialogAuthenticator
+ * @since 200.8.0
+ */
+@JvmName("AuthenticatorWithBrowserAuthenticationChallenge")
+@Composable
+public fun Authenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)
+) {
+    Surface {
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingBrowserAuthenticationChallenge = onPendingBrowserAuthenticationChallenge,
+        )
+    }
+}
+
+/**
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
+ *
+ * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
+ * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
+ *
+ * This Composable will adapt to the size of its container, allowing flexible layout usage. For alternate behavior,
+ * see [DialogAuthenticator].
+ *
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to apply to this Authenticator.
+ * @see DialogAuthenticator
+ * @since 200.8.0
+ */
+@Composable
+public fun Authenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier
+) {
+    Surface {
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier
+        )
+    }
+}
+
+
+/**
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
+ *
+ * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
+ * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
+ *
  * Server trust prompts and username/password prompts will be displayed in a dialog.
- * All other prompts are displayed in full screen.
+ * All other prompts will be displayed differently based on their type:
+ * - OAuth and IAP challenges will be displayed in a browser.
+ * - Client certificate challenges will be displayed using the Android certificate picker.
  *
  * For alternate behavior, see the [Authenticator] component.
  *
@@ -82,6 +155,13 @@ public fun Authenticator(
  * @see Authenticator
  * @since 200.2.0
  */
+@Deprecated(
+    message = "as of 200.8.0 and will be removed in an upcoming release, use the DialogAuthenticator composable with " +
+            "BrowserAuthenticationChallenge instead.",
+    replaceWith = ReplaceWith("DialogAuthenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
+    ),
+    level = DeprecationLevel.WARNING
+)
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
@@ -97,6 +177,73 @@ public fun DialogAuthenticator(
 }
 
 /**
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
+ *
+ * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
+ * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
+ *
+ * Server trust prompts and username/password prompts will be displayed in a dialog.
+ * All other prompts will be displayed differently based on their type:
+ * - OAuth and IAP challenges will be displayed in a browser.
+ * - Client certificate challenges will be displayed using the Android certificate picker.
+ *
+ * For alternate behavior, see the [Authenticator] component.
+ *
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
+ * @param onPendingBrowserAuthenticationChallenge this will be called when an authentication challenge is pending
+ * and the browser should be launched. Use this if you wish to handle browser challenges from your own
+ * activity rather than using the [AuthenticationActivity], more information can be found in the
+ * [Authenticator Toolkit README](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/blob/main/toolkit/authentication/README.md).
+ * @see Authenticator
+ * @since 200.8.0
+ */
+@JvmName("DialogAuthenticatorWithBrowserAuthenticationChallenge")
+@Composable
+public fun DialogAuthenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)
+) {
+    AuthenticatorDelegate(
+        authenticatorState = authenticatorState,
+        modifier = modifier,
+        onPendingBrowserAuthenticationChallenge = onPendingBrowserAuthenticationChallenge,
+        useDialog = true
+    )
+}
+
+/**
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
+ *
+ * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
+ * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
+ *
+ * Server trust prompts and username/password prompts will be displayed in a dialog.
+ * All other prompts will be displayed differently based on their type:
+ * - OAuth and IAP challenges will be displayed in a browser.
+ * - Client certificate challenges will be displayed using the Android certificate picker.
+ *
+ * For alternate behavior, see the [Authenticator] component.
+ *
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to apply to this Authenticator.
+ * @see Authenticator
+ * @since 200.8.0
+ */
+@Composable
+public fun DialogAuthenticator(
+    authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
+) {
+    AuthenticatorDelegate(
+        authenticatorState = authenticatorState,
+        modifier = modifier,
+        useDialog = true
+    )
+}
+
+/**
  * Listens for [AuthenticatorState] changes and displays the corresponding authentication component on the screen.
  *
  * @sample [DialogAuthenticator]
@@ -105,10 +252,12 @@ public fun DialogAuthenticator(
  * @param useDialog if true, the prompts will be displayed in an dialog. Otherwise, the prompts will be displayed
  * in full screen.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
- * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [AuthenticationActivity].
- * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
- * @since 200.4.0
+ * and the browser should be launched. This will be used to handle OAuth challenges from a different activity rather
+ * than using the [AuthenticationActivity].
+ * @param onPendingBrowserAuthenticationChallenge if not null, this will be called when a browser authentication challenge is
+ * pending and the browser should be launched. This will be used to handle browser challenges from a different activity
+ * rather than using the [AuthenticationActivity].
+ * @since 200.8.0
  */
 @Composable
 @Suppress("DEPRECATION")
@@ -117,8 +266,8 @@ private fun AuthenticatorDelegate(
     modifier: Modifier = Modifier,
     useDialog: Boolean = false,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
+    onPendingBrowserAuthenticationChallenge: ((BrowserAuthenticationChallenge) -> Unit)? = null
 ) {
-
     val hasActivePrompt =
         authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
@@ -127,23 +276,44 @@ private fun AuthenticatorDelegate(
     }
 
     authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value?.let {
-        OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
+        if (onPendingBrowserAuthenticationChallenge != null) {
+            OAuthAuthenticator(
+                oAuthPendingSignIn = it,
+                authenticatorState = authenticatorState
+            ) { oAuthUserSignIn ->
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.OAuthUserSignIn(oAuthUserSignIn))
+            }
+        } else {
+            OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
+        }
     }
 
-    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let {
-        IapSignInAuthenticator(
-            authorizeUrl = it.authorizeUrl,
-            onComplete = it::complete,
-            onCancel = it::cancel
-        )
+    authenticatorState.pendingIapSignIn.collectAsStateWithLifecycle().value?.let { iapSignIn ->
+        if (onPendingBrowserAuthenticationChallenge != null) {
+            IapSignInAuthenticator {
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignIn(iapSignIn))
+            }
+        } else {
+            IapSignInAuthenticator(
+                authorizeUrl = iapSignIn.authorizeUrl,
+                onComplete = iapSignIn::complete,
+                onCancel = iapSignIn::cancel
+            )
+        }
     }
 
-    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let {
-        IapSignOutAuthenticator(
-            iapSignOutUrl = it.signOutUrl,
-            onCompleteSignOut = it::complete,
-            onCancelSignOut = it::cancel
-        )
+    authenticatorState.pendingIapSignOut.collectAsStateWithLifecycle().value?.let { iapSignOut ->
+        if (onPendingBrowserAuthenticationChallenge != null) {
+            IapSignOutAuthenticator {
+                onPendingBrowserAuthenticationChallenge.invoke(BrowserAuthenticationChallenge.IapSignOut(iapSignOut))
+            }
+        } else {
+            IapSignOutAuthenticator(
+                iapSignOutUrl = iapSignOut.signOutUrl,
+                onCompleteSignOut = iapSignOut::complete,
+                onCancelSignOut = iapSignOut::cancel
+            )
+        }
     }
 
     authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value?.let {
@@ -184,4 +354,44 @@ private fun Context.findActivity(): Activity {
         context = context.baseContext
     }
     throw IllegalStateException("Could not find an activity from which to launch client certificate picker.")
+}
+
+/**
+ * Represents different types of browser-based authentication challenges.
+ *
+ * This sealed class is used to encapsulate specific authentication challenges that require
+ * interaction with a browser.
+ *
+ * @since 200.8.0
+ */
+public sealed class BrowserAuthenticationChallenge {
+    /**
+     * Represents an Identity-Aware Proxy (IAP) sign-in challenge.
+     *
+     * @param iapSignIn The IAP sign-in object containing the necessary configuration.
+     * @since 200.8.0
+     */
+    public data class IapSignIn internal constructor(
+        val iapSignIn: com.arcgismaps.httpcore.authentication.IapSignIn
+    ) : BrowserAuthenticationChallenge()
+
+    /**
+     * Represents an OAuth user sign-in challenge.
+     *
+     * @param oAuthUserSignIn The OAuth user sign-in object containing the necessary configuration.
+     * @since 200.8.0
+     */
+    public data class OAuthUserSignIn internal constructor(
+        val oAuthUserSignIn: com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+    ) : BrowserAuthenticationChallenge()
+
+    /**
+     * Represents an Identity-Aware Proxy (IAP) sign-out challenge.
+     *
+     * @param iapSignOut The IAP sign-out object containing the sign-out URL and other configuration.
+     * @since 200.8.0
+     */
+    public data class IapSignOut internal constructor(
+        val iapSignOut: com.arcgismaps.httpcore.authentication.IapSignOut
+    ) : BrowserAuthenticationChallenge()
 }

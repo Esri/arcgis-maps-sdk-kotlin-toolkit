@@ -57,6 +57,11 @@ public suspend fun AuthenticationManager.signOut() {
  *
  * @since 200.2.0
  */
+@Deprecated (
+    message = "since 200.8.0. Use AuthenticatorState.launchCustomTabs(BrowserAuthenticationChallenge) " +
+            "instead as it provides support for IAP sign-in/sign-out.",
+    replaceWith = ReplaceWith("AuthenticatorState.launchCustomTabs(BrowserAuthenticationChallenge)")
+)
 public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
     launchCustomTabs(
         pendingSignIn?.authorizeUrl ?: return,
@@ -64,6 +69,27 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
     )
 }
 
+/**
+ * Launches the custom tabs activity with the provided browser authentication challenge.
+ *
+ * This method determines the appropriate URL and whether to use Incognito mode based on the type of
+ * [BrowserAuthenticationChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
+ *
+ * @receiver an [Activity] used to launch the [CustomTabsIntent].
+ * @param pendingBrowserAuthenticationChallenge the [BrowserAuthenticationChallenge] containing the necessary information
+ * to complete the authentication process.
+ *
+ * @since 200.8.0
+ */
+public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
+    val (url, useIncognito) = when (pendingBrowserAuthenticationChallenge) {
+        is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+            pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+        is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
+        is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+    }
+    launchCustomTabs(url, useIncognito)
+}
 
 
 /**

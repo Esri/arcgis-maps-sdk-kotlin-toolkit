@@ -519,11 +519,60 @@ private suspend fun IapConfiguration.handleIapChallenge(
  *
  * @since 200.3.0
  */
+@Deprecated(
+    message = "since 200.8.0. Use AuthenticatorState.completeBrowserAuthenticationChallenge(Intent?) instead as it also " +
+            "supports IAP sign-in/sign-out.",
+    replaceWith = ReplaceWith("AuthenticatorState.completeBrowserAuthenticationChallenge(intent)"))
 public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     intent?.data?.let {
         val uriString = it.toString()
         pendingOAuthUserSignIn.value?.complete(uriString)
     } ?: pendingOAuthUserSignIn.value?.cancel()
+}
+
+/**
+ * Completes the current browser-based authentication challenge for the [AuthenticatorState].
+ *
+ * This method handles the completion of pending authentication challenges that require interaction with the browser.
+ * It checks the type of challenge currently pending (OAuth sign-in, IAP sign-in, or IAP sign-out) and
+ * processes the provided [Intent] accordingly.
+ *
+ * - For OAuth sign-in, the method extracts the redirect URI from the [Intent] and completes the sign-in.
+ *   If the [Intent] is null, the sign-in is canceled.
+ * - For IAP sign-in, the method extracts the redirect URI from the [Intent] and completes the sign-in.
+ *   If the [Intent] is null, the sign-in is canceled.
+ * - For IAP sign-out, the method checks if the [Intent] is not null to determine if the sign-out was successful.
+ *   If the [Intent] is null, the sign-out is canceled.
+ *
+ * Note: Currently, the IAP sign-out does not return a redirect URI, so the method only checks if the [Intent] is not null.
+ *
+ * @param intent The [Intent] containing data from the browser authentication flow. If null, the challenge is canceled.
+ * @since 200.8.0
+ */
+public fun AuthenticatorState.completeBrowserAuthenticationChallenge(intent: Intent?) {
+    when {
+        pendingOAuthUserSignIn.value != null -> {
+            intent?.data?.let { uri ->
+                pendingOAuthUserSignIn.value?.complete(uri.toString())
+            } ?: pendingOAuthUserSignIn.value?.cancel()
+        }
+
+        pendingIapSignIn.value != null -> {
+            intent?.data?.let { uri ->
+                pendingIapSignIn.value?.complete(uri.toString())
+            } ?: pendingIapSignIn.value?.cancel()
+        }
+
+        pendingIapSignOut.value != null -> {
+            // Currently the IAP sign out does not return any data, so we just check if the intent is not null
+            // to determine if the sign out was successful.
+            if (intent != null) {
+                pendingIapSignOut.value?.complete(true)
+            } else {
+                pendingIapSignOut.value?.cancel()
+            }
+        }
+    }
 }
 
 /**
