@@ -1,6 +1,6 @@
 # Authenticator
 
-The Authenticator is a ready-to-use component designed to simplify handling authentication challenges when working with the ArcGIS Maps SDK for Kotlin. It provides a user-friendly interface to manage various authentication scenarios, such as network and ArcGIS-specific challenges, ensuring seamless integration into your app.
+The `Authenticator` is a ready-to-use component designed to simplify handling authentication challenges when working with the ArcGIS Maps SDK for Kotlin. It provides a user-friendly interface to manage various authentication scenarios, such as network and ArcGIS-specific challenges, ensuring seamless integration into your app.
 
 <img src="username-password-prompt.png" alt="drawing" width="400"/>
 
@@ -26,26 +26,26 @@ To see an example of how to use the `Authenticator`, try out the microapp [here]
 The `Authenticator` is designed to be displayed over the top of your app's UI. As such, it should be called at a near-root level, for example, at the same level as a `NavHost`; and it should be called at the bottom of the function, so it draws over other content. If you call other content after you call `Authenticator()`, that content will be displayed on top of it.
 
 ```kotlin
- @Composable
- fun MyApp() {
-     val authenticatorState: AuthenticatorState = remember { AuthenticatorState() }
-     MyAppContent()
-     Authenticator(authenticatorState)
- }
+@Composable
+fun MyApp() {
+    val authenticatorState: AuthenticatorState = remember { AuthenticatorState() }
+    MyAppContent()
+    Authenticator(authenticatorState)
+}
 ```
 
 To enable OAuth or IAP authentication in your app, configure the `AuthenticatorState` with the corresponding properties:
 
 ```kotlin
- val oAuthUserConfiguration = OAuthUserConfiguration(
-     "https://www.arcgis.com/",
-     "<your-client-id>",
-     "my-ags-app://auth"
- )
- val iapConfiguration = IapConfiguration.create("Your IAP configuration JSON file path").getOrThrow()
- 
- authenticatorState.oAuthUserConfigurations = listOf(oAuthUserConfiguration)
- authenticatorState.iapConfigurations = listOf(iapConfiguration)
+val oAuthUserConfiguration = OAuthUserConfiguration(
+    "https://www.arcgis.com/",
+    "<your-client-id>",
+    "my-ags-app://auth"
+)
+val iapConfiguration = IapConfiguration.create("Your IAP configuration JSON file path").getOrThrow()
+
+authenticatorState.oAuthUserConfigurations = listOf(oAuthUserConfiguration)
+authenticatorState.iapConfigurations = listOf(iapConfiguration)
 ```
 
 To properly handle redirect intents from the browser during OAuth sign-in or IAP sign-in/sign-out, you must declare the `AuthenticationActivity` in your app's manifest as follows: 
@@ -55,7 +55,7 @@ To properly handle redirect intents from the browser during OAuth sign-in or IAP
     android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
     android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
     android:exported="true"
-    android:launchMode="singleTop" >
+    android:launchMode="singleTop">
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
 
@@ -77,20 +77,20 @@ To properly handle redirect intents from the browser during OAuth sign-in or IAP
 
 ```kotlin
 class MyAppViewModel(application: Application) : AndroidViewModel(application), ArcGISAuthenticationChallengeHandler {
-    
-	val authenticatorState = AuthenticatorState(
-		setAsArcGISAuthenticationChallengeHandler: Boolean = false,
-		setAsNetworkAuthenticationChallengeHandler: Boolean = true
-	)
+
+    val authenticatorState = AuthenticatorState(
+        setAsArcGISAuthenticationChallengeHandler: Boolean = false,
+        setAsNetworkAuthenticationChallengeHandler: Boolean = true
+    )
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse (
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-		val shouldAuthenticatorHandleChallenge = someBusinessLogic(challenge)
-		if (shouldAuthenticatorHandleChallenge) {
-			return authenticatorState.handleArcGISAuthenticationChallenge(challenge)
-		}
-	}
+        val shouldAuthenticatorHandleChallenge = someBusinessLogic(challenge)
+        if (shouldAuthenticatorHandleChallenge) {
+            return authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+        }
+    }
 }
 ```
 
@@ -102,55 +102,56 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
 
 1. Remove the `AuthenticationActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent:
 
-   ```xml
-   <activity
-           android:name="<Your-App-Activity-Name>"
-           android:exported="true"
-           android:theme="@style/Theme.AuthenticationApp">
-      <intent-filter>
-         <action android:name="android.intent.action.MAIN" />
-   
-         <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-      <!--This intent filter -->
-      <intent-filter>
-         <action android:name="android.intent.action.VIEW" />
-   
-         <category android:name="android.intent.category.DEFAULT" />
-         <category android:name="android.intent.category.BROWSABLE" />
-   
-         <data
-                 android:host="auth"
-                 android:scheme="my-ags-app" />
-      </intent-filter>
-      <!--                   -->
-   </activity>
-   ```
+    ```xml
+    <activity
+        android:name="<Your-App-Activity-Name>"
+        android:exported="true"
+        android:theme="@style/Theme.AuthenticationApp">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        <!-- This intent filter here -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data
+                android:host="auth"
+                android:scheme="my-ags-app" />
+        </intent-filter>
+        <!--    -->
+    </activity>
+    ```
+
 2. Set your activity's `launchMode` to `singleTop`, this must be done in order for OAuth or IAP redirect to work.
-         
-   ```xml
+
+    ```xml
     <activity
         android:name="<Your-App-Activity-Name>"
         android:exported="true"
         android:launchMode="singleTop"                  <--- This is important
         android:theme="@style/Theme.AuthenticationApp">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-    
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-    
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-    
-            <data
-                android:host="auth"
-                android:scheme="my-ags-app" />
-        </intent-filter>
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data
+            android:host="auth"
+            android:scheme="my-ags-app"/>
+    </intent-filter>
     </activity>
-   ```
+    ```
 3. Call the extension function `launchCustomTabs` in the lambda `onPendingBrowserAuthenticationChallenge` of the `Authenticator`, passing in the pending `BrowserAuthenticationChallenge`:
 
     ```kotlin
