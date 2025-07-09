@@ -2,8 +2,10 @@ package com.arcgismaps.toolkit.offlinemapareasapp.screens.browse
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.text.Html
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -108,6 +110,7 @@ fun OfflineMapInfoCard(
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .clickable { onOpen.invoke() },
         contentAlignment = Alignment.Center
     ) {
@@ -141,7 +144,7 @@ fun OfflineMapInfoCard(
                 if (info.description.isNotBlank()) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = info.description,
+                        text = Html.fromHtml(info.description, Html.FROM_HTML_MODE_LEGACY).toString(),
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 4,
                         overflow = TextOverflow.Ellipsis
