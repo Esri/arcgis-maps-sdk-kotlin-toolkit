@@ -55,6 +55,15 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Objects
 
+/**
+ * The maximum attachment size in bytes that can be added.
+ */
+internal const val maxAttachmentUploadSize = 50_000_000L
+
+/**
+ * The maximum attachment size in bytes that can be downloaded.
+ */
+internal const val maxAttachmentsDownloadSize = 999_999_999L
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -267,13 +276,6 @@ internal class FormAttachmentState(
     val thumbnail: State<Bitmap?> = _thumbnail
 
     /**
-     * The maximum attachment size in bytes that can be loaded. If [size] is greater than this limit,
-     * then the attachment will fail to load with an [AttachmentSizeLimitExceededException] when
-     * [load] is called.
-     */
-    val maxAttachmentSize = 50_000_000L
-
-    /**
      * The size of the thumbnail image.
      */
     private val thumbnailSize = Size(368, 300)
@@ -307,14 +309,14 @@ internal class FormAttachmentState(
      * a long-running task. This coroutine will get cancelled if the calling composable is removed
      * from the composition.
      */
-    override suspend fun load(): Result<Unit> {
+    override suspend fun load(): Result<Unit> = withContext(Dispatchers.IO) {
         _loadStatus.value = LoadStatus.Loading
         var result = Result.success(Unit)
         try {
             result = when {
                 formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
                 formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
-                formAttachment.size > maxAttachmentSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentSize))
+                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize))
                 else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
@@ -333,11 +335,11 @@ internal class FormAttachmentState(
                 onLoadErrorCallback?.invoke(error)
             }
         }
-        return result
+        return@withContext result
     }
 
     override fun cancelLoad() {
-        // cancel op not supported
+        formAttachment?.cancelLoad()
     }
 
     override suspend fun retryLoad(): Result<Unit> {
