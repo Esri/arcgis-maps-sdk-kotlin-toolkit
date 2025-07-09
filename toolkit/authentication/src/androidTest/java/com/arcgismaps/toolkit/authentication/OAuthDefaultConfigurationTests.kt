@@ -131,7 +131,7 @@ class OAuthDefaultConfigurationTests {
      * @since 200.8.0
      */
     @Test
-    fun testMultipleOAuthConfigurations() = runTest {
+    fun testMultipleOAuthUserConfigurations() = runTest {
         val url1 = "https://arcgis.com"
         val url2 = "https://www.arcgisonline.com/"
 
