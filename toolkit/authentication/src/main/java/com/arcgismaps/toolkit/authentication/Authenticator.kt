@@ -228,7 +228,7 @@ public fun DialogAuthenticator(
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
- * @see DialogAuthenticator
+ * @see Authenticator
  * @since 200.8.0
  */
 @Composable

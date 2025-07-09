@@ -519,6 +519,10 @@ private suspend fun IapConfiguration.handleIapChallenge(
  *
  * @since 200.3.0
  */
+@Deprecated(
+    message = "since 200.8.0. Use AuthenticatorState.completeBrowserAuthenticationChallenge(Intent?) instead as it also " +
+            "supports IAP sign-in/sign-out.",
+    replaceWith = ReplaceWith("AuthenticatorState.completeBrowserAuthenticationChallenge(intent)"))
 public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     intent?.data?.let {
         val uriString = it.toString()
