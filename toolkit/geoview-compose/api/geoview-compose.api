@@ -43,6 +43,7 @@ public final class com/arcgismaps/toolkit/geoviewcompose/MapViewKt {
 public final class com/arcgismaps/toolkit/geoviewcompose/MapViewProxy : com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun identifyGeometryEditor--nK_iUs (Lcom/arcgismaps/mapping/view/DoubleXY;FLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun locationToScreenOrNull (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/DoubleXY;
 	public final fun screenToLocationOrNull (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun setViewpointAnimated-JXpvp54 (Lcom/arcgismaps/mapping/Viewpoint;JLcom/arcgismaps/mapping/view/AnimationCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

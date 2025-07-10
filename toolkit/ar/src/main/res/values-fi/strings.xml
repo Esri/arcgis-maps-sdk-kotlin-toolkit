@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameran käyttöoikeutta ei myönnetty</string>
-    <string name="arcore_not_installed_message">ARCore on asennettava, jotta voit käyttää TableTopSceneView\'ta. ARCoren saatavuus: %1$s</string>
+    <string name="arcore_not_installed_message">ARCore on asennettava, jotta tätä komponenttia voi käyttää. ARCoren saatavuus: %1$s</string>
+    <string name="location_data_source_failed_to_start">Sijaintiaineistolähteen käynnistys epäonnistui: %1$s</string>
+    <string name="location_permission_not_granted">Sijainnin käyttöoikeutta ei myönnetty</string>
+    <string name="permissions_not_granted_message">"Seuraavat käyttöoikeudet ovat pakollisia, mutta niitä ei ole myönnetty: %1$s"</string>
+    <string name="close_calibration">Sulje kalibrointi</string>
+    <string name="heading_title">Otsikko</string>
+    <string name="decrease_heading">Pienennä suuntaa</string>
+    <string name="increase_heading">Suurenna suuntaa</string>
+    <string name="reset_heading">Nollaa suunta</string>
+    <string name="heading_slider_description">Suunnan liukusäädin</string>
+    <string name="elevation_title">Korkeustaso</string>
+    <string name="decrease_elevation">Vähennä korkeutta</string>
+    <string name="increase_elevation">Lisää korkeutta</string>
+    <string name="reset_elevation">Nollaa korkeus</string>
+    <string name="elevation_slider_description">Korkeustason liukusäädin</string>
 </resources>
