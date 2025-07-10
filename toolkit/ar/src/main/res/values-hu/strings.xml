@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameraengedély nincs megadva</string>
-    <string name="arcore_not_installed_message">A komponens használatához telepíteni kell az ARCore alkalmazást. ARCore rendelkezésre állása: %1$s</string>
-    <string name="location_data_source_failed_to_start">A helyadatforrás indítása nem sikerült: %1$s</string>
-    <string name="location_permission_not_granted">Helyengedély nincs megadva</string>
-    <string name="permissions_not_granted_message">"A következő jogosultságok szükségesek, de nincsenek megadva: %1$s"</string>
-    <string name="close_calibration">Kalibrálás bezárása</string>
-    <string name="heading_title">Mozgási irány</string>
-    <string name="decrease_heading">Mozgási irány csökkentése</string>
-    <string name="increase_heading">Mozgási irány növelése</string>
-    <string name="reset_heading">Mozgási irány visszaállítása</string>
-    <string name="heading_slider_description">Mozgási irány csúszka</string>
-    <string name="elevation_title">Magasság</string>
-    <string name="decrease_elevation">Magasság csökkentése</string>
-    <string name="increase_elevation">Magasság növelése</string>
-    <string name="reset_elevation">Magasság visszaállítása</string>
-    <string name="elevation_slider_description">Magasságcsúszka</string>
+    <string name="arcore_not_installed_message">A TableTopSceneView használatához telepíteni kell az ARCore alkalmazást. ARCore rendelkezésre állása: %1$s</string>
 </resources>

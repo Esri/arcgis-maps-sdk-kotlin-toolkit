@@ -21,8 +21,6 @@
     <string name="allow_connection">Atļaut savienojumu</string>
     <string name="username_password_login_title">Nepieciešama autentifikācija</string>
     <string name="username_password_login_message">Jums ir jāpierakstās, lai piekļūtu %1$s</string>
-    <string name="incorrect_credentials">%1$s paredzētie akreditācijas dati bija nepareizi. Lūdzu, mēģiniet vēlreiz.</string>
-    <string name="sign_in_error_occurred">Piesakoties %1$s, radās kļūda. Lūdzu, mēģiniet vēlreiz.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Lietotājvārds</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">لم يتم منح إذن الكاميرا</string>
-    <string name="arcore_not_installed_message">يجب تثبيت ARCore لاستخدام هذا المكون. توفر ARCore: %1$s</string>
-    <string name="location_data_source_failed_to_start">فشل بدء تشغيل مصدر بيانات الموقع: %1$s</string>
-    <string name="location_permission_not_granted">لم يتم منح إذن الموقع</string>
-    <string name="permissions_not_granted_message">الأذونات التالية مطلوبة ولكن لم يتم منحها: %1$s</string>
-    <string name="close_calibration">إغلاق المعايرة</string>
-    <string name="heading_title">عنوان</string>
-    <string name="decrease_heading">تقليل العنوان</string>
-    <string name="increase_heading">زيادة العنوان</string>
-    <string name="reset_heading">إعادة تعيين العنوان</string>
-    <string name="heading_slider_description">شريط تمرير العنوان</string>
-    <string name="elevation_title">الارتفاع</string>
-    <string name="decrease_elevation">تقليل الارتفاع</string>
-    <string name="increase_elevation">زيادة الارتفاع</string>
-    <string name="reset_elevation">إعادة تعيين الارتفاع</string>
-    <string name="elevation_slider_description">شريط تمرير الارتفاع</string>
+    <string name="arcore_not_installed_message">يجب تثبيت ARCore لاستخدام TableTopSceneView. توفر ARCore: %1$s</string>
 </resources>

@@ -21,8 +21,6 @@
     <string name="allow_connection">Verbinding toestaan</string>
     <string name="username_password_login_title">Verificatie verplicht</string>
     <string name="username_password_login_message">U moet zich aanmelden voor toegang tot %1$s</string>
-    <string name="incorrect_credentials">De aanmeldingsgegevens waren onjuist voor %1$s. Probeer het opnieuw.</string>
-    <string name="sign_in_error_occurred">Er is een fout opgetreden bij het aanmelden op %1$s. Probeer het opnieuw.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Gebruikersnaam</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

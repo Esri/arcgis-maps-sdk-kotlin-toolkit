@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Permisiunea camerei nu a fost acordată</string>
-    <string name="arcore_not_installed_message">Trebuie să fie instalat ARCore pentru a folosi această componentă. Disponibilitatea ARCore: %1$s</string>
-    <string name="location_data_source_failed_to_start">Sursa de date de localizare nu a putut fi pornită: %1$s</string>
-    <string name="location_permission_not_granted">Permisiunea pentru localizare nu a fost acordată.</string>
-    <string name="permissions_not_granted_message">"Următoarele permisiuni sunt necesare, dar nu au fost acordate: %1$s"</string>
-    <string name="close_calibration">Închide calibrarea</string>
-    <string name="heading_title">Antet</string>
-    <string name="decrease_heading">Scade antet</string>
-    <string name="increase_heading">Crește antet</string>
-    <string name="reset_heading">Resetează antet</string>
-    <string name="heading_slider_description">Glisor pentru antet</string>
-    <string name="elevation_title">Elevație</string>
-    <string name="decrease_elevation">Scade elevație</string>
-    <string name="increase_elevation">Crește elevație</string>
-    <string name="reset_elevation">Resetează elevație</string>
-    <string name="elevation_slider_description">Glisor pentru elevație</string>
+    <string name="arcore_not_installed_message">ARTCore trebuie să fie instalat pentru a utiliza TableTopSceneView. Disponibilitatea ARCore: %1$s</string>
 </resources>

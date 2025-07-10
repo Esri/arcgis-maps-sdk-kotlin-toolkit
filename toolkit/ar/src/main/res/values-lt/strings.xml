@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Leidimas naudoti kamerą nesuteiktas</string>
-    <string name="arcore_not_installed_message">Norint naudoti šį komponentą būtina įdiegti ARCore. ARCore prieinamumas: %1$s</string>
-    <string name="location_data_source_failed_to_start">Nepavyko paleisti vietos duomenų šaltinio: %1$s</string>
-    <string name="location_permission_not_granted">Leidimas naudoti vietos duomenis nesuteiktas</string>
-    <string name="permissions_not_granted_message">"Reikalingos, bet nesuteiktos šios teisės: %1$s"</string>
-    <string name="close_calibration">Uždaryti kalibravimą</string>
-    <string name="heading_title">Antraštė</string>
-    <string name="decrease_heading">Mažinti antraštę</string>
-    <string name="increase_heading">Didinti antraštę</string>
-    <string name="reset_heading">Iš naujo nustatyti antraštę</string>
-    <string name="heading_slider_description">Antraštės slankiklis</string>
-    <string name="elevation_title">Aukštis</string>
-    <string name="decrease_elevation">Mažinti aukštį</string>
-    <string name="increase_elevation">Didinti aukštį</string>
-    <string name="reset_elevation">Iš naujo nustatyti aukštį</string>
-    <string name="elevation_slider_description">Aukščiau slankiklis</string>
+    <string name="arcore_not_installed_message">Norint naudoti TableTopSceneView turi būti įdiegtas ARCore. ARCore prieinamumas: %1$s</string>
 </resources>

@@ -18,18 +18,14 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
-import com.arcgismaps.mapping.view.IdentifyGeometryEditorResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
-import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
-import com.arcgismaps.mapping.view.geometryeditor.GeometryEditorElement
-import com.arcgismaps.mapping.view.geometryeditor.GeometryEditorVertex
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+
 
 /**
  * Used to perform operations on a composable [MapView].
@@ -105,45 +101,6 @@ public class MapViewProxy : GeoViewProxy("MapView") {
         } catch (t: Throwable) {
             null
         }
-    }
-
-    /**
-     * Identifies all the elements in the [GeometryEditor], at the given screen point.
-     *
-     * As locations from user gestures are not always accurate to the exact pixel, you can define a tolerance for
-     * the identify operation. The tolerance parameter sets the radius of a circle, centered at the specified
-     * coordinates, in device-independent pixels (DIP). If the tolerance value is 0, identify performs the test at
-     * the specified coordinate. If it is greater than 0, identify tests completely within the circle. For touch
-     * displays a value of 22 is recommended to cover an average finger tap. The maximum allowed value is 100 DIPs.
-     *
-     * The default tolerance values used by the geometry editor for each input type are:
-     * * Mouse device - 5 DIPs.
-     * * Stylus device - 10 DIPs.
-     * * Touch - 15 DIPs.
-     * * Reticle tool - 5 DIPs.
-     *
-     * This operation will fail if:
-     * * No [GeometryEditor] is attached to the [MapView].
-     * * The attached [GeometryEditor] is stopped.
-     *
-     * @param screenCoordinate to identify the geometry editor elements.
-     * @param tolerance radius in device-independent pixels (DIP) that specifies how precise the identify
-     * operation should be.
-     * @return A [Result] of [IdentifyGeometryEditorResult] containing an array of [GeometryEditorElement]
-     * or failure if there is no [GeometryEditor].
-     * Results are returned in the same order as the draw order of [GeometryEditorElement]s on the
-     * [GeometryEditor] display; that is top-first order, with [GeometryEditorVertex] appearing drawn
-     * on-top of other elements.
-     * @since 200.8.0
-     */
-    public suspend fun identifyGeometryEditor(
-        screenCoordinate: ScreenCoordinate,
-        tolerance: Dp
-    ): Result<IdentifyGeometryEditorResult> {
-        return mapView?.identifyGeometryEditor(
-            screenCoordinate,
-            tolerance.value.toDouble(),
-        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
     /**

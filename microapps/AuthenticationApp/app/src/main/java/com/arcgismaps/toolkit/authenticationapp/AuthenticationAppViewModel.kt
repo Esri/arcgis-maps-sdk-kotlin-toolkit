@@ -21,9 +21,11 @@ package com.arcgismaps.toolkit.authenticationapp
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
+import com.arcgismaps.toolkit.authentication.signOut
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,10 +63,7 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
 
     fun signOut() = viewModelScope.launch {
         _isLoading.value = true
-        authenticatorState.signOut()
-            .onFailure {
-                _infoText.value = it.toString()
-            }
+        ArcGISEnvironment.authenticationManager.signOut()
         _infoText.value = startInfoText
         _isLoading.value = false
     }
