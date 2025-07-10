@@ -7,7 +7,7 @@
 
     <application android:requestLegacyExternalStorage="true">
         <activity
-            android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+            android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTop" >
@@ -20,6 +20,9 @@
                 <data
                     android:host="auth"
                     android:scheme="kotlin-authentication-test-1" />
+                <data
+                    android:host="auth"
+                    android:scheme="kotlin-iap-test-1" />
             </intent-filter>
         </activity>
 
@@ -43,5 +46,11 @@
                     android:scheme="kotlin-authentication-test-2" />
             </intent-filter>
             </activity>
+        <activity android:name="com.arcgismaps.toolkit.authentication.AuthenticatorStateActivity"
+            android:exported="true">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Права на использование камеры не предоставлены</string>
-    <string name="arcore_not_installed_message">Для использования TableTopSceneView необходимо установить ARCore. Доступность ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Для использования этого компонента необходимо установить ARCore. Доступность ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Не удалось запустить источник данных о местоположении: %1$s</string>
+    <string name="location_permission_not_granted">Права доступа к местоположению не предоставлены</string>
+    <string name="permissions_not_granted_message">"Следующие права доступа требуются, но не предоставлены: %1$s"</string>
+    <string name="close_calibration">Закрыть калибровку</string>
+    <string name="heading_title">Курс</string>
+    <string name="decrease_heading">Уменьшить курс</string>
+    <string name="increase_heading">Увеличить курс</string>
+    <string name="reset_heading">Сбросить курс</string>
+    <string name="heading_slider_description">Бегунок курса</string>
+    <string name="elevation_title">Высота</string>
+    <string name="decrease_elevation">Уменьшить высоту</string>
+    <string name="increase_elevation">Увеличить высоту</string>
+    <string name="reset_elevation">Сбросить высоту</string>
+    <string name="elevation_slider_description">Бегунок высоты</string>
 </resources>

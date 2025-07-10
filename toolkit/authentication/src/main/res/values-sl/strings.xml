@@ -21,6 +21,8 @@
     <string name="allow_connection">Dovoli povezavo</string>
     <string name="username_password_login_title">Zahtevana je avtentikacija</string>
     <string name="username_password_login_message">Za dostop do %1$s se morate prijaviti</string>
+    <string name="incorrect_credentials">Poverilnice so bile nepravilne za %1$s. Poskusite znova.</string>
+    <string name="sign_in_error_occurred">Prišlo je do napake pri prijavi v %1$s. Poskusite znova.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Uporabniško ime</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
