@@ -209,7 +209,7 @@ class UtilityAssociationsFormElementTests {
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
         val firstElement = listView.onChildWithText("Circuit Breaker").assertIsDisplayed()
-        firstElement.assert(hasText("Containment Visible : false"))
+        firstElement.assert(hasText("Content"))
     }
 
     /**

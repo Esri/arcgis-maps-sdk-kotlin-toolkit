@@ -207,6 +207,7 @@ public class FeatureFormState private constructor(
         // Check if the active feature form is different from the current form.
         if (_activeFeatureForm.value != formStateData.featureForm) {
             _activeFeatureForm.value = formStateData.featureForm
+            _activeFeatureForm.value.feature.refresh()
             if (formStateData.initialEvaluation.value.not()) {
                 formStateData.evaluateExpressions()
             }
