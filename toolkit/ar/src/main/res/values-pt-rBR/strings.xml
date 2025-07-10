@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Permissão de câmera não concedida</string>
-    <string name="arcore_not_installed_message">O ARCore deve estar instalado para usar este componente. Disponibilidade do ARCore: %1$s</string>
-    <string name="location_data_source_failed_to_start">Falha ao iniciar a Fonte de Dados de Localização: %1$s</string>
-    <string name="location_permission_not_granted">Permissão de localização não concedida</string>
-    <string name="permissions_not_granted_message">"As seguintes permissões são necessárias, mas não concedidas: %1$s"</string>
-    <string name="close_calibration">Fechar calibração</string>
-    <string name="heading_title">Direção</string>
-    <string name="decrease_heading">Diminuir Direção</string>
-    <string name="increase_heading">Aumentar Direção</string>
-    <string name="reset_heading">Redefinir Direção</string>
-    <string name="heading_slider_description">Controle deslizante de direção</string>
-    <string name="elevation_title">Elevação</string>
-    <string name="decrease_elevation">Diminuir Elevação</string>
-    <string name="increase_elevation">Aumentar Elevação</string>
-    <string name="reset_elevation">Redefinir Elevação</string>
-    <string name="elevation_slider_description">Controle deslizante de elevação</string>
+    <string name="arcore_not_installed_message">O ARCore deve estar instalado para usar o TableTopSceneView. Disponibilidade do ARCore: %1$s</string>
 </resources>

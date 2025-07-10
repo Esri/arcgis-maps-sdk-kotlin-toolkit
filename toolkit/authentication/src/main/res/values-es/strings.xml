@@ -21,8 +21,6 @@
     <string name="allow_connection">Permitir la conexión</string>
     <string name="username_password_login_title">Autenticación requerida</string>
     <string name="username_password_login_message">Debe iniciar sesión para acceder a %1$s</string>
-    <string name="incorrect_credentials">Las credenciales eran incorrectas para %1$s. Inténtelo de nuevo.</string>
-    <string name="sign_in_error_occurred">Se ha producido un error al iniciar sesión en %1$s. Inténtelo de nuevo.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nombre de usuario</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

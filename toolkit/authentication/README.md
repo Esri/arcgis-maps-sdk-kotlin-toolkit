@@ -43,10 +43,10 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
         "my-ags-app://auth"
     )
 ```
-You will also need to declare the `AuthenticationActivity` in your app's manifest like so to properly handle redirect intents from the browser where OAuth sign-in occurs.
+You will also need to declare the `OAuthUserSignInActivity` in your app's manifest like so to properly handle redirect intents from the browser where OAuth sign-in occurs.
 ```xml
 <activity
-	android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
+	android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
 	android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
 	android:exported="true"
 	android:launchMode="singleTop" >
@@ -90,11 +90,11 @@ class MyAppViewModel(application: Application) : AndroidViewModel(application), 
 
 ### Intercepting OAuth Sign-in
 
-The `Authenticator` launches a Custom Tab when an OAuth challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `AuthenticationActivity` that is declared in your app's manifest via its intent filter.
+The `Authenticator` launches a Custom Tab when an OAuth challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `OAuthUserSignInActivity` that is declared in your app's manifest via its intent filter.
 
 If you want to launch a Custom Tab from your own app's activity, these steps will allow you to do that:
 
-1. Remove the `AuthenticationActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent:
+1. Remove the `OAuthUserSignInActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent:
 
 ```xml
 <activity
@@ -175,8 +175,8 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
 
 ### Signing out
 
-The authentication toolkit library provides a `signOut` function on `AuthenticatorState` to remove any stored credentials:
+The authentication toolkit library provides an extension function on `AuthenticationManger` to remove any stored credentials:
 
 ```kotlin
-authenticatorState.signOut()
+ArcGISEnvironment.authenticationManager.signOut()
 ```

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filter situs...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filter fasilitas...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Pilih situs</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Pilih fasilitas</string>
+    <string name="floor_filter_no_results">Tidak ada hasil yang ditemukan.</string>
+    <string name="geomodel_has_no_floor_aware_data">Geomodel tidak memiliki data sadar lantai</string>
+    <string name="an_error_has_occurred">Terjadi kesalahan</string>
+    <string name="not_available">Tidak tersedia</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Situs - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Tombol situs dan fasilitas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Tombol pilihan level lantai</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Item situs</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Item fasilitas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Bersihkan pencarian</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Tutup</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Tutup</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Kembali ke pemilih situs</string>
+</resources>

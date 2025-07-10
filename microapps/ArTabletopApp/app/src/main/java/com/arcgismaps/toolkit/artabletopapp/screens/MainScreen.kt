@@ -72,9 +72,8 @@ private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
 @Composable
 fun MainScreen() {
-    // Esri 3d Buildings Scene Layer
     val arcGISSceneLayer = remember {
-        ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=b8fec5af7dfe4866b1b8ac2d2800f282")
+        ArcGISSceneLayer("https://tiles.arcgis.com/tiles/nSZVuSZjHpEZZbRo/arcgis/rest/services/Rotterdam_3D_getextureerd_WGS/SceneServer")
     }
     val arcGISScene = remember {
         ArcGISScene().apply {

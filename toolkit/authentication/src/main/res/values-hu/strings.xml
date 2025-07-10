@@ -21,8 +21,6 @@
     <string name="allow_connection">Kapcsolat engedélyezése</string>
     <string name="username_password_login_title">Hitelesítés szükséges</string>
     <string name="username_password_login_message">A(z) %1$s eléréséhez be kell jelentkeznie</string>
-    <string name="incorrect_credentials">A hitelesítő adatok a következőhöz hibásak: %1$s. Próbálja meg újra.</string>
-    <string name="sign_in_error_occurred">Hiba történt a következőbe való bejelentkezés közben: %1$s. Próbálja meg újra.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Felhasználónév</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

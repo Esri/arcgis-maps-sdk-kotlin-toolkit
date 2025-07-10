@@ -21,8 +21,6 @@
     <string name="allow_connection">Tillad forbindelse</string>
     <string name="username_password_login_title">Godkendelse kræves</string>
     <string name="username_password_login_message">Du skal logge ind for at få adgang til %1$s</string>
-    <string name="incorrect_credentials">Logonoplysningerne var forkerte for %1$s. Prøv igen.</string>
-    <string name="sign_in_error_occurred">Der er opstået en fejl ved login på %1$s. Prøv igen.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Brugernavn</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
