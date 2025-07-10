@@ -92,7 +92,7 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *             launchCustomTabs(pendingBrowserAuthenticationChallenge)
  *         }
  *     )
- *     ```
+ *    ```
  *    - Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
  *      - You can check if the `intent` was caused by an OAuth or IAP redirect because the `intent.data.toString()` will start with your OAuth or IAP configuration's redirect URI.
  *      - Currently, IAP sign-out does not redirect back to the app, so you will not receive an intent in `onNewIntent` or `onResume` for that case. Instead, this will need to be handled in `onResume` when the Custom Tab is closed.
@@ -109,7 +109,7 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *        // This gets called when the Custom Tab is closed using the close button or the phone's back button.
  *        authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(intent)
  *    }
- *     ```
+ *    ```
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
