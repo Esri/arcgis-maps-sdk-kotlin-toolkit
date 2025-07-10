@@ -191,7 +191,6 @@ private fun AssociationItem(
     modifier: Modifier = Modifier
 ) {
     val target = association.getTargetElement(associatedFeature)
-    val icon = association.getIcon()
     // Text to display at the end of the row.
     var trailingText = ""
     // Text to display below the title.
@@ -237,7 +236,7 @@ private fun AssociationItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (icon != null) {
+        association.getIcon()?.let { icon ->
             Icon(
                 painter = icon,
                 contentDescription = "feature association icon",
