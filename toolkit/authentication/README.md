@@ -15,7 +15,7 @@ The `Authenticator` is a Composable function that will display a prompt when it 
 
 The `Authenticator` works directly with the `ArcGISEnvironment.authenticationManager`, so any configuration set on the `AuthenticationManager` (for example, credential persistence, interceptors, and the http cache) will be reflected in the `Authenticator`'s behavior.
 
-A second Composable component, the `DialogAuthenticator` performs the same functionality as the `Authenticator` but presents Username/Password prompts and Server Trust prompts in an `Dialog`. In any of the code samples below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior should be identical.
+A second Composable component, the `DialogAuthenticator`, performs the same functionality as the `Authenticator` but presents Username/Password prompts and Server Trust prompts in an `Dialog`. In any of the code samples below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior should be identical.
 
 ## Usage
 
