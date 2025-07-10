@@ -76,7 +76,6 @@ import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Config.PlaneFindingMode
-import com.google.ar.core.DepthPoint
 import com.google.ar.core.Frame
 import com.google.ar.core.Plane
 import com.google.ar.core.Point
@@ -141,10 +140,8 @@ import java.time.Instant
  * @param onDown lambda invoked when the user first presses on the WorldScaleSceneView.
  * @param onSingleTapConfirmed lambda invoked when the user taps once on the WorldScaleSceneView. The
  * [SingleTapConfirmedEvent.mapPoint] passed to this lambda is calculated by performing a hit test against
- * objects in the camera feed using ARCore's Depth API. If the device does not support the Depth API,
- * the hit test will be calculated against detected planes in the camera feed. If no hits are detected
- * at the tapped point, the mapPoint will be null. For more information, see the [Depth API](https://developers.google.com/ar/develop/depth)
- * and [Hit result types](https://developers.google.com/ar/develop/hit-test#hit_result_types).
+ * detected planes in the camera feed. If no planes are detected at the tapped point, the mapPoint
+ * will be null.
  * @param onDoubleTap lambda invoked the user double taps on the WorldScaleSceneView.
  * @param onLongPress lambda invoked when a user holds a pointer on the WorldScaleSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
@@ -406,7 +403,7 @@ private fun handleOnSingleTapConfirmedEvent(
             )
             val hit = hitResult.firstOrNull {
                 when (it.trackable) {
-                    is Plane, is Point, is DepthPoint -> true
+                    is Plane, is Point -> true
                     else -> false
                 }
             }

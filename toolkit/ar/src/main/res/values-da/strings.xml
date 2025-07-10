@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameratilladelse ikke givet</string>
-    <string name="arcore_not_installed_message">ARCore skal være installeret for at bruge denne komponent. ARCore-tilgængelighed: %1$s</string>
-    <string name="location_data_source_failed_to_start">Positionsdatakilden startede ikke: %1$s</string>
-    <string name="location_permission_not_granted">Positionstilladelse ikke givet</string>
-    <string name="permissions_not_granted_message">"Følgende tilladelser er påkrævet, men ikke givet: %1$s"</string>
-    <string name="close_calibration">Luk kalibrering</string>
-    <string name="heading_title">Overskrift</string>
-    <string name="decrease_heading">Formindsk overskrift</string>
-    <string name="increase_heading">Forstør overskrift</string>
-    <string name="reset_heading">Nulstil overskrift</string>
-    <string name="heading_slider_description">Overskrift-skyder</string>
-    <string name="elevation_title">Højde</string>
-    <string name="decrease_elevation">Reducer højde</string>
-    <string name="increase_elevation">Forøg højde</string>
-    <string name="reset_elevation">Nulstil højde</string>
-    <string name="elevation_slider_description">Højdeskyder</string>
+    <string name="arcore_not_installed_message">ARCore skal være installeret for at bruge TableTopSceneView. ARCore-tilgængelighed: %1$s</string>
 </resources>

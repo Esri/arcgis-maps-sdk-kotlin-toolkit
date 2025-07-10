@@ -85,11 +85,6 @@ internal class ArSessionWrapper(
                     }
                     geospatialMode = Config.GeospatialMode.ENABLED
                 }
-                if (planeFindingMode != PlaneFindingMode.DISABLED) {
-                    if (session?.isDepthModeSupported(Config.DepthMode.AUTOMATIC) == true) {
-                        depthMode = Config.DepthMode.AUTOMATIC
-                    }
-                }
                 // We only want to detect horizontal planes.
                 setPlaneFindingMode(planeFindingMode)
             }

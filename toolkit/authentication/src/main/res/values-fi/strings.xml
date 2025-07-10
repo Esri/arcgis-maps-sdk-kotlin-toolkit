@@ -21,8 +21,6 @@
     <string name="allow_connection">Salli yhdistäminen</string>
     <string name="username_password_login_title">Todennus on pakollinen</string>
     <string name="username_password_login_message">Sinun on kirjauduttava sisään, jotta voit käyttää kohdetta %1$s.</string>
-    <string name="incorrect_credentials">Kohteen %1$s käyttäjätiedot olivat virheelliset. Yritä uudelleen.</string>
-    <string name="sign_in_error_occurred">Kohteeseen %1$s kirjautumisen aikana tapahtui virhe. Yritä uudelleen.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Käyttäjänimi:</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

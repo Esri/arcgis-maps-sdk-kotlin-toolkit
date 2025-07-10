@@ -21,8 +21,6 @@
     <string name="allow_connection">Povolit připojení</string>
     <string name="username_password_login_title">Požadováno ověření</string>
     <string name="username_password_login_message">Pro přístup k %1$s je nutné se přihlásit</string>
-    <string name="incorrect_credentials">Přihlašovací údaje byly nesprávné pro %1$s. Zkuste to prosím znovu.</string>
-    <string name="sign_in_error_occurred">Při přihlašování k %1$s došlo k chybě Zkuste to prosím znovu.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Uživatelské jméno</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

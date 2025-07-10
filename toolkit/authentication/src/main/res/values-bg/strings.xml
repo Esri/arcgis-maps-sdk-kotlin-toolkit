@@ -21,8 +21,6 @@
     <string name="allow_connection">Разрешете свързването</string>
     <string name="username_password_login_title">Изисква се автентикация</string>
     <string name="username_password_login_message">Трябва да се впишете, за да получите достъп до %1$s</string>
-    <string name="incorrect_credentials">Идентификационните данни бяха неправилни за %1$s. Моля, опитайте отново.</string>
-    <string name="sign_in_error_occurred">Възникна грешка при вписването в %1$s. Моля, опитайте отново.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Потребителско име</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

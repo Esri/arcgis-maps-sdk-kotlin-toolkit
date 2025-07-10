@@ -21,8 +21,6 @@
     <string name="allow_connection">Cho phép kết nối</string>
     <string name="username_password_login_title">Yêu cầu xác thực</string>
     <string name="username_password_login_message">Bạn cần đăng nhập để truy cập %1$s</string>
-    <string name="incorrect_credentials">Thông tin xác thực %1$s không chính xác. Vui lòng thử lại.</string>
-    <string name="sign_in_error_occurred">Đã xảy ra lỗi khi đăng nhập vào %1$s. Vui lòng thử lại.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Tên người dùng</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

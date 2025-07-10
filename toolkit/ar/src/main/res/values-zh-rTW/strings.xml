@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">未授與相機權限</string>
-    <string name="arcore_not_installed_message">必須安裝 ARCore 才能使用此元件。 ARCore 可用性: %1$s</string>
-    <string name="location_data_source_failed_to_start">位置資料來源無法啟動: %1$s</string>
-    <string name="location_permission_not_granted">未授與位置權限</string>
-    <string name="permissions_not_granted_message">"以下權限是必要的，但未授與: %1$s"</string>
-    <string name="close_calibration">關閉校正</string>
-    <string name="heading_title">標題</string>
-    <string name="decrease_heading">減少標題</string>
-    <string name="increase_heading">增加標題</string>
-    <string name="reset_heading">重設標題</string>
-    <string name="heading_slider_description">標題滑桿</string>
-    <string name="elevation_title">高程</string>
-    <string name="decrease_elevation">減少高程</string>
-    <string name="increase_elevation">增加高程</string>
-    <string name="reset_elevation">重設高程</string>
-    <string name="elevation_slider_description">高程滑桿</string>
+    <string name="arcore_not_installed_message">必須安裝 ARCore 才能使用 TableTopSceneView。 ARCore 可用性: %1$s</string>
 </resources>
