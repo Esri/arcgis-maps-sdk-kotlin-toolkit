@@ -21,6 +21,8 @@
     <string name="allow_connection">Leisti prisijungti</string>
     <string name="username_password_login_title">Reikalingas autentifikavimas</string>
     <string name="username_password_login_message">Turite prisijungti, jei norite pasiekti %1$s</string>
+    <string name="incorrect_credentials">%1$s prisijungimo duomenys neteisingi. Pabandykite dar kartą.</string>
+    <string name="sign_in_error_occurred">Prisijungiant prie %1$s įvyko klaida. Pabandykite dar kartą.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Naudotojo vardas</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
