@@ -433,7 +433,7 @@ class UsernamePasswordTests {
      * When a username and password challenge is issued
      * Then the dialog prompt should be displayed
      *
-     * When the user enters an incorrect username and password
+     * When the user enters an incorrect username and password with a previous failure count of 4
      * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
      *
      * @since 200.5.0
@@ -473,7 +473,7 @@ class UsernamePasswordTests {
             composeTestRule.enterUsernamePasswordAndLogin()
             advanceUntilIdle()
 
-            // ensure the dialog has disappeared after last attempt
+            // ensure the dialog has disappeared
             assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
