@@ -152,7 +152,7 @@ internal fun AttachmentTile(
                             )
                         }
                     },
-                    enabled = state.size <= state.maxAttachmentSize
+                    enabled = state.size <= maxAttachmentUploadSize
                 )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
