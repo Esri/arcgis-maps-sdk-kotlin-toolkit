@@ -64,31 +64,52 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *    ```
  *
  * 2. If the redirect intent should be handled by another activity:
- *    - Remove the intent-filter from [AuthenticationActivity] and add it to the target activity.
- *    - Optionally, set `launchMode="singleInstance"` for the target activity, but note that this exposes the browser
- *    as a separate task in the recent tasks list.
- *
- *    ```
+ *    - Remove the `AuthenticationActivity` from your app's manifest and put its intent filter on the activity that
+ *    you wish to receive the redirect intent.
+ *    - Set your activity's `launchMode` to `singleTop`, this must be done in order for OAuth or IAP redirect to work.
+ *    ```xml
  *    <activity
- *    android:name="com.arcgismaps.toolkit.authentication.AuthenticationActivity"
- *    android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
- *    android:exported="true"
- *    android:launchMode="singleInstance" >
- *    </activity>
+ *        ...
+ *        android:launchMode="singleTop"                  <---
+ *        ...
+ *        <intent-filter>
+ *            <action android:name="android.intent.action.VIEW" />
+ *
+ *            <category android:name="android.intent.category.DEFAULT" />
+ *            <category android:name="android.intent.category.BROWSABLE" />
+ *
+ *            <data
+ *                android:host="auth"
+ *                android:scheme="my-ags-app" />
+ *        </intent-filter>
+ *        ...
  *    ```
- *    - In the target activity, forward the redirect intent to AuthenticationActivity:
- *    ```
- *    val newIntent = Intent(this, AuthenticationActivity::class.java).apply {
- *      data = uri
+ *    - Call the extension function `launchCustomTabs` in the lambda `onPendingBrowserAuthenticationChallenge` of the `Authenticator`, passing in the pending `BrowserAuthenticationChallenge`:
+ *     ```kotlin
+ *     DialogAuthenticator(
+ *         authenticatorState = authenticatorState,
+ *         onPendingBrowserAuthenticationChallenge = { pendingBrowserAuthenticationChallenge ->
+ *             launchCustomTabs(pendingBrowserAuthenticationChallenge)
+ *         }
+ *     )
+ *     ```
+ *    - Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
+ *      - You can check if the `intent` was caused by an OAuth or IAP redirect because the `intent.data.toString()` will start with your OAuth or IAP configuration's redirect URI.
+ *      - Currently, IAP sign-out does not redirect back to the app, so you will not receive an intent in `onNewIntent` or `onResume` for that case. Instead, this will need to be handled in `onResume` when the Custom Tab is closed.
+ *        See documentation of [AuthenticatorState.completeBrowserAuthenticationChallenge](https://...TODO/html/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/complete-.html) for more details.
+ *    ```kotlin
+ *    override fun onNewIntent(intent: Intent?) {
+ *        super.onNewIntent(intent)
+ *        // This gets called first when OAuth or IAP redirects back to the app.
+ *        authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(intent)
  *    }
- *    startActivity(newIntent)
- *    ```
  *
- * Note: Currently, IAP sign-out works differently because there is no redirect URI.
- * Pressing the close or back button in the Custom Tab is interpreted as a successful sign-out.
- * Cancellation of the sign-out flow is not possible, so the IAPCredential may remain in an invalid state if the user
- * attempts to cancel the IAP sign-out request.
- *
+ *    override fun onResume() {
+ *        super.onResume()
+ *        // This gets called when the Custom Tab is closed using the close button or the phone's back button.
+ *        authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(intent)
+ *    }
+ *     ```
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
