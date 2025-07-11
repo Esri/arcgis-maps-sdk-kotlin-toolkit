@@ -42,6 +42,12 @@ import androidx.compose.ui.unit.sp
  * @param mapAreasDetailsDescription The text style for the description in map areas details.
  * @param onDemandMapAreasTitle The text style for the title of on-demand map areas.
  * @param onDemandMapAreaStatus The text style for the status of on-demand map area.
+ * @param onDemandMapAreaAddMapAreaButtonText The text style for the add map area button in on-demand map area.
+ * @param onDemandMapAreaSelectorTitle The text style for the title in on-demand map area selector.
+ * @param onDemandMapAreaSelectorMessage The text style for the message in on-demand map area selector.
+ * @param onDemandMapAreaSelectorAreaName The text style for the area name in on-demand map area selector.
+ * @param onDemandMapAreaSelectorRenameButtonTextStyle The text style for the rename button in on-demand map area selector.
+ * @param areaNameDialogTitle The text style for the title of the area name dialog in on-demand map area selector.
  *
  * @since 200.8.0
  */
@@ -71,13 +77,25 @@ public data class Typography internal constructor(
     val areaNameDialogTitle: TextStyle
 )
 
+/**
+ * Color styling properties for the OfflineMapAreas composable.
+ *
+ * This class defines the color scheme used for various buttons and dialogs in the OfflineMapAreas UI,
+ * ensuring a consistent and visually appealing design.
+ *
+ * @param downloadButtonColor The color used for the download button.
+ * @param cancelButtonColor The color used for the cancel button.
+ * @param cancelDownloadButtonColor The color used for the cancel download button.
+ * @param onDemandMapAreaSelectorAreaNameDialogBackgroundColor The background color of the area name dialog in on-demand map area selector.
+ *
+ * @since 200.8.0
+ */
 @Immutable
 @ExposedCopyVisibility
 public data class ColorScheme internal constructor(
     val downloadButtonColor: Color,
     val cancelButtonColor: Color,
     val cancelDownloadButtonColor: Color,
-
     val onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color
 )
 
@@ -102,6 +120,12 @@ public object OfflineMapAreasDefaults {
      * @param mapAreasDetailsDescription The text style for the description in map areas details.
      * @param onDemandMapAreasTitle The text style for the title of on-demand map areas.
      * @param onDemandMapAreaStatus The text style for the status of on-demand map area.
+     * @param onDemandMapAreaAddMapAreaButtonText The text style for the add map area button in on-demand map area.
+     * @param onDemandMapAreaSelectorTitle The text style for the title in on-demand map area selector.
+     * @param onDemandMapAreaSelectorMessage The text style for the message in on-demand map area selector.
+     * @param onDemandMapAreaSelectorAreaName The text style for the area name in on-demand map area selector.
+     * @param onDemandMapAreaSelectorRenameButtonTextStyle The text style for the rename button in on-demand map area selector.
+     * @param areaNameDialogTitle The text style for the title of the area name dialog in on-demand map area selector.
      *
      * @since 200.8.0
      */
@@ -148,13 +172,22 @@ public object OfflineMapAreasDefaults {
         areaNameDialogTitle = areaNameDialogTitle
     )
 
+    /**
+     * Creates default color scheme values for the OfflineMapAreas composable.
+     *
+     * @param downloadButtonColor The color used for the download button.
+     * @param cancelButtonColor The color used for the cancel button.
+     * @param cancelDownloadButtonColor The color used for the cancel download button.
+     * @param onDemandMapAreaSelectorAreaNameDialogBackgroundColor The background color of the area name dialog in on-demand map area selector.
+     *
+     * @since 200.8.0
+     */
     @Composable
     public fun colorScheme(
         downloadButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelDownloadButtonColor: Color = ButtonDefaults.buttonColors().containerColor,
         onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color = MaterialTheme.colorScheme.background
-
     ): ColorScheme = ColorScheme(
         downloadButtonColor = downloadButtonColor,
         cancelButtonColor = cancelButtonColor,
