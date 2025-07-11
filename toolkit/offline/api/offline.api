@@ -1,0 +1,73 @@
+public abstract class com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initializing : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
+	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo$CodableInfo;Landroid/graphics/Bitmap;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPortalItemUrl ()Ljava/lang/String;
+	public final fun getThumbnail ()Landroid/graphics/Bitmap;
+	public final fun getTitle ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
+	public final fun resetSelectedMapArea ()V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineRepository {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/OfflineRepository;
+	public final fun getOfflineMapInfos ()Ljava/util/List;
+	public final fun refreshOfflineMapInfos (Landroid/content/Context;)V
+	public final fun removeAllDownloads (Landroid/content/Context;)V
+	public final fun removeDownloads (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
+}
+

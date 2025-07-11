@@ -201,4 +201,8 @@ include(":basemapgallery")
 project(":basemapgallery").projectDir = File(rootDir, "toolkit/basemapgallery")
 include(":overviewmap-app")
 project(":overviewmap-app").projectDir = File(rootDir, "microapps/OverviewMapApp/app")
+include(":offline")
+project(":offline").projectDir = File(rootDir, "toolkit/offline")
+include(":offlinemapareas-app")
+project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 
