@@ -45,7 +45,25 @@
                     android:host="auth"
                     android:scheme="kotlin-authentication-test-2" />
             </intent-filter>
-            </activity>
+        </activity>
+        <activity android:name="com.arcgismaps.toolkit.authentication.BrowserUserLauncherTestActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="kotlin-authentication-test-browser" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.arcgismaps.toolkit.authentication.AuthenticatorStateActivity"
             android:exported="true">
             <intent-filter>
