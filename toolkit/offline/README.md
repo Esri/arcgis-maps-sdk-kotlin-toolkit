@@ -13,7 +13,7 @@ Users can download map areas created ahead-of-time(preplanned) by the web map au
 
 ## Features
 
-Supports both ahead-of-time (preplanned) and on-demand map areas for an offline enabled web map. This OfflineMapAreas composable:
+Supports both ahead-of-time (preplanned) and on-demand map areas for an offline enabled web map. This `OfflineMapAreas` composable:
 
 - Displays a list of map areas.
 - Shows download progress and status for map areas.
@@ -30,24 +30,22 @@ For on-demand workflows, this composable:
 - Allows users to add and download on-demand map areas to the device by specifying an area of interest and level of detail.
 - Displays a list of on-demand map areas available on the device that are tied to a specific web map.
 
-To see OfflineMapAreas in action, check out the [OfflineMapAreas microapp](../../microapps/OfflineMapAreasApp).
-
 ## Usage
 
-This state class provides two constructors to initialize the OfflineMapAreas composable using an ArcGISMap or an OfflineMapInfo. Therefore, the OfflineMapAreas composable can be used either when the device is connected to or disconnected from the network.
+To use the composable you would need to provide an `OfflineMapState`. The state object provides two constructors to initialize the `OfflineMapAreas` composable using an `ArcGISMap` or an `OfflineMapInfo`. Therefore, the composable can be used either when the device is connected to or disconnected from the network.
 
 In other words, the composable can be used in the following situations:
 - When the device is connected to the network…
   - Displays preplanned map areas from a web map that are available for download.
   - When the web map doesn’t contain preplanned map areas, users can add and download on-demand map areas by specifying a geographic area and level of detail.
-  - Use the constructor with ArcGISMap to create the state.
+  - Use the constructor with `ArcGISMap` to create the state.
 - When the device is disconnected from the network…
   - Displays only downloaded map areas by retrieving offline map info from the device.
-  - Use the constructor with OfflineMapInfo to create the state.
+  - Use the constructor with `OfflineMapInfo` to create the state.
 - When the device network connection has changed…
-  - Re-initialize the the state OfflineMapState using the desired constructor.
+  - Re-initialize the the state `OfflineMapState` using the desired constructor.
 
-#### Workflow example:
+## Workflow example:
 ```kotlin
 val selectedMap = mutableStateOf<ArcGISMap?>(null)
 
@@ -70,3 +68,5 @@ fun SheetContent() {
     )
 }
 ```
+
+To see OfflineMapAreas in action, check out the [OfflineMapAreas microapp](../../microapps/OfflineMapAreasApp).
