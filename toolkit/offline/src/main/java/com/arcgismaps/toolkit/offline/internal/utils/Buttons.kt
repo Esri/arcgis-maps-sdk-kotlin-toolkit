@@ -127,7 +127,7 @@ internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-internal fun AddMapAreaButton(onAdd: () -> Unit) {
+internal fun AddMapAreaButton(typography: Typography, onAdd: () -> Unit) {
     Button(onClick = onAdd) {
         Icon(
             modifier = Modifier.size(16.dp),
@@ -137,7 +137,7 @@ internal fun AddMapAreaButton(onAdd: () -> Unit) {
         Spacer(Modifier.width(4.dp))
         Text(
             text = stringResource(R.string.add_map_area),
-            style = MaterialTheme.typography.labelSmall
+            style = typography.onDemandMapAreaAddMapAreaButtonText
         )
     }
 }
@@ -164,7 +164,7 @@ private fun ButtonsPreview() {
                     OpenButton(true) { }
                 }
                 item {
-                    AddMapAreaButton { }
+                    AddMapAreaButton(OfflineMapAreasDefaults.typography()) { }
                 }
                 item {
                     CancelButton(OfflineMapAreasDefaults.colorScheme()) { }

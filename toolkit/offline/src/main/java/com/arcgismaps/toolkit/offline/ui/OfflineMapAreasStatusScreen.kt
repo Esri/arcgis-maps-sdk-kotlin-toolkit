@@ -49,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 
 @Composable
 internal fun OfflineMapAreasStatusContent(
@@ -156,12 +158,12 @@ internal fun OfflineDisabled(onlyFooterVisible: Boolean = false, onRefresh: () -
 }
 
 @Composable
-internal fun EmptyOnDemandOfflineAreas(onlyFooterVisible: Boolean = false, onAdd: () -> Unit) {
+internal fun EmptyOnDemandOfflineAreas(typography: Typography, onlyFooterVisible: Boolean = false, onAdd: () -> Unit) {
     OfflineMapAreasStatusContent(
         title = stringResource(R.string.no_map_areas),
         message = stringResource(R.string.empty_on_demand_message),
         icon = Icons.Default.ArrowDownward,
-        actions = { AddMapAreaButton(onAdd) },
+        actions = { AddMapAreaButton(typography, onAdd) },
         onlyFooterVisible = onlyFooterVisible
     )
 }
@@ -221,7 +223,7 @@ private fun OfflineDisabledPreview() {
 private fun EmptyOnDemandOfflineAreasPreview() {
     MaterialTheme {
         Surface {
-            EmptyOnDemandOfflineAreas { }
+            EmptyOnDemandOfflineAreas(OfflineMapAreasDefaults.typography()) { }
         }
     }
 }

@@ -61,6 +61,7 @@ public data class Typography internal constructor(
 
     val onDemandMapAreasTitle: TextStyle,
     val onDemandMapAreaStatus: TextStyle,
+    val onDemandMapAreaAddMapAreaButtonText: TextStyle,
 
     val onDemandMapAreaSelectorTitle: TextStyle,
     val onDemandMapAreaSelectorMessage: TextStyle,
@@ -75,7 +76,9 @@ public data class Typography internal constructor(
 public data class ColorScheme internal constructor(
     val downloadButtonColor: Color,
     val cancelButtonColor: Color,
-    val cancelDownloadButtonColor: Color
+    val cancelDownloadButtonColor: Color,
+
+    val onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color
 )
 
 
@@ -120,6 +123,7 @@ public object OfflineMapAreasDefaults {
             fontSize = 10.sp,
             fontWeight = FontWeight.Normal
         ),
+        onDemandMapAreaAddMapAreaButtonText:  TextStyle = MaterialTheme.typography.labelSmall,
         onDemandMapAreaSelectorTitle: TextStyle = MaterialTheme.typography.titleMedium,
         onDemandMapAreaSelectorMessage: TextStyle = MaterialTheme.typography.labelSmall,
         onDemandMapAreaSelectorAreaName: TextStyle = MaterialTheme.typography.titleLarge,
@@ -136,6 +140,7 @@ public object OfflineMapAreasDefaults {
         mapAreasDetailsDescription = mapAreasDetailsDescription,
         onDemandMapAreasTitle = onDemandMapAreasTitle,
         onDemandMapAreaStatus = onDemandMapAreaStatus,
+        onDemandMapAreaAddMapAreaButtonText = onDemandMapAreaAddMapAreaButtonText,
         onDemandMapAreaSelectorTitle = onDemandMapAreaSelectorTitle,
         onDemandMapAreaSelectorMessage = onDemandMapAreaSelectorMessage,
         onDemandMapAreaSelectorAreaName = onDemandMapAreaSelectorAreaName,
@@ -148,10 +153,13 @@ public object OfflineMapAreasDefaults {
         downloadButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelDownloadButtonColor: Color = ButtonDefaults.buttonColors().containerColor,
+        onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color = MaterialTheme.colorScheme.background
+
     ): ColorScheme = ColorScheme(
         downloadButtonColor = downloadButtonColor,
         cancelButtonColor = cancelButtonColor,
         cancelDownloadButtonColor = cancelDownloadButtonColor,
+        onDemandMapAreaSelectorAreaNameDialogBackgroundColor = onDemandMapAreaSelectorAreaNameDialogBackgroundColor
     )
 }
 

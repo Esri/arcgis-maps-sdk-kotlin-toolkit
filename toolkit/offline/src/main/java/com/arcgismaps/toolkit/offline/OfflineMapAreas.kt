@@ -257,7 +257,7 @@ internal fun OnDemandLayoutContainer(
             )
             // Show "Add Map Area" button if not in offline-only mode
             if (!isShowingOnlyOfflineModels) {
-                AddMapAreaButton { isOnDemandMapAreaSelectorVisible = true }
+                AddMapAreaButton(typography) { isOnDemandMapAreaSelectorVisible = true }
             }
         }
         // Show "No Internet" message if offline models are displayed
@@ -269,7 +269,7 @@ internal fun OnDemandLayoutContainer(
         }
         // Show empty state message if no on-demand areas and online mode
         else if (onDemandMapAreaStates.isEmpty()) {
-            EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
+            EmptyOnDemandOfflineAreas(typography) { isOnDemandMapAreaSelectorVisible = true }
         }
     }
     // Map area selection bottom sheet
@@ -277,6 +277,7 @@ internal fun OnDemandLayoutContainer(
         localMap = localMap,
         showSheet = isOnDemandMapAreaSelectorVisible,
         uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
+        colorScheme = colorScheme,
         typography = typography,
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },

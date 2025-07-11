@@ -147,7 +147,7 @@ internal fun MapAreaDetailsScreen(
                         .size(50.dp), // 1/4th the size of the image Box
                     imageVector = Icons.Default.ImageNotSupported,
                     contentDescription = stringResource(id = R.string.no_image_available),
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
