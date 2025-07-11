@@ -52,10 +52,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
@@ -63,6 +61,8 @@ import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithPro
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 
@@ -75,6 +75,8 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     isShowingOnlyOfflineModels: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
 ) {
@@ -100,6 +102,7 @@ internal fun PreplannedMapAreas(
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
+            typography = typography,
             onDismiss = { onHideSheet = true },
             offlineMapMode = OfflineMapMode.Preplanned,
             thumbnail = selectedPreplannedMapAreaState.thumbnail?.asImageBitmap(),
@@ -129,7 +132,7 @@ internal fun PreplannedMapAreas(
     ) {
         Text(
             text = stringResource(id = R.string.map_areas),
-            style = MaterialTheme.typography.titleMedium,
+            style = typography.offlineMapAreasTitle,
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
@@ -173,7 +176,7 @@ internal fun PreplannedMapAreas(
                         // Display the title with a maximum of one line
                         Text(
                             text = state.title,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = typography.preplannedMapAreaTitle,
                             modifier = Modifier.padding(top = 6.dp),
                             maxLines = 1, // Restrict to one line
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
@@ -181,7 +184,7 @@ internal fun PreplannedMapAreas(
                         // Display the description with a maximum of two lines
                         Text(
                             text = htmlToPlainText(state.description),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = typography.preplannedMapAreaDescription,
                             maxLines = 2, // Restrict to two lines
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
                         )
@@ -196,17 +199,14 @@ internal fun PreplannedMapAreas(
                         }
                         Text(
                             text = statusString,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
+                            style = typography.preplannedMapAreaStatus,
                             maxLines = 1, // Restrict to one lines
                         )
                     }
                     // Display the action button based on the status
                     when {
                         state.status.allowsDownload -> {
-                            DownloadButton {
+                            DownloadButton(colorScheme) {
                                 if (state.status.allowsDownload) {
                                     state.downloadPreplannedMapArea()
                                 }
@@ -214,7 +214,7 @@ internal fun PreplannedMapAreas(
                         }
 
                         state.status == PreplannedStatus.Downloading -> {
-                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
+                            CancelDownloadButtonWithProgressIndicator(colorScheme, state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }

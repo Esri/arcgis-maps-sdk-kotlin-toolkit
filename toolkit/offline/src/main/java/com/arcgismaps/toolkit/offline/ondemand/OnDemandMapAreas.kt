@@ -51,10 +51,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
@@ -62,6 +60,8 @@ import com.arcgismaps.toolkit.offline.internal.utils.CancelButton
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 
@@ -74,6 +74,8 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
     onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
+    colorScheme: ColorScheme,
+    typography: Typography,
     modifier: Modifier
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
@@ -98,6 +100,7 @@ internal fun OnDemandMapAreas(
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
+            typography = typography,
             onDismiss = { showSheet = false },
             offlineMapMode = OfflineMapMode.OnDemand,
             thumbnail = selectedOnDemandMapAreaState.thumbnail?.asImageBitmap(),
@@ -120,7 +123,7 @@ internal fun OnDemandMapAreas(
     ) {
         Text(
             text = stringResource(id = R.string.map_areas),
-            style = MaterialTheme.typography.titleMedium,
+            style = typography.offlineMapAreasTitle,
             modifier = Modifier.padding(16.dp)
         )
         LazyColumn(modifier = Modifier) {
@@ -164,7 +167,7 @@ internal fun OnDemandMapAreas(
                         // Display the title with a maximum of one line
                         Text(
                             text = state.title,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = typography.onDemandMapAreasTitle,
                             modifier = Modifier.padding(top = 6.dp),
                             maxLines = 1, // Restrict to one line
                             overflow = TextOverflow.Ellipsis // Add ellipses if the text overflows
@@ -180,17 +183,14 @@ internal fun OnDemandMapAreas(
                         }
                         Text(
                             text = statusString,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
+                            style = typography.onDemandMapAreaStatus,
                             maxLines = 1, // Restrict to one lines
                         )
                     }
                     // Display the action button based on the status
                     when {
                         state.status.allowsDownload -> {
-                            DownloadButton {
+                            DownloadButton(colorScheme = colorScheme) {
                                 if (state.status.allowsDownload) {
                                     state.downloadOnDemandMapArea()
                                 }
@@ -198,13 +198,13 @@ internal fun OnDemandMapAreas(
                         }
 
                         state.status == OnDemandStatus.Downloading -> {
-                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
+                            CancelDownloadButtonWithProgressIndicator(colorScheme, state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }
 
                         state.status == OnDemandStatus.DownloadCancelled || state.status is OnDemandStatus.DownloadFailure -> {
-                            CancelButton {
+                            CancelButton(colorScheme = colorScheme){
                                 state.removeCancelledMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
                                 onDownloadDeleted(state)
                             }

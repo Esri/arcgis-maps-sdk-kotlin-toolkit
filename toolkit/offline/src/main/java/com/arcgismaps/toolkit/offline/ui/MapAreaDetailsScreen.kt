@@ -57,6 +57,8 @@ import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 
@@ -64,6 +66,7 @@ import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
     sheetState: SheetState,
+    typography: Typography,
     onDismiss: () -> Unit,
     offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
@@ -92,6 +95,7 @@ internal fun MapAreaDetailsBottomSheet(
                 size = size,
                 isAvailableToDownload = isAvailableToDownload,
                 isDeletable = isDeletable,
+                typography = typography,
                 onStartDownload = onStartDownload,
                 onDeleteDownload = onDeleteDownload
             )
@@ -108,6 +112,7 @@ internal fun MapAreaDetailsScreen(
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
+    typography: Typography,
     onStartDownload: () -> Unit,
     onDeleteDownload: () -> Unit
 ) {
@@ -148,13 +153,13 @@ internal fun MapAreaDetailsScreen(
         }
         // Title
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        Text(text = title, style = typography.mapAreasDetailsTitle)
 
         // Size of the map area
         if (size != 0) {
             Text(
                 text = stringResource(R.string.directory_size, formatSize(size)),
-                style = MaterialTheme.typography.bodyMedium
+                style = typography.mapAreasDetailsSize
             )
         }
 
@@ -163,7 +168,7 @@ internal fun MapAreaDetailsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = stringResource(id = R.string.description),
-                style = MaterialTheme.typography.labelSmall,
+                style = typography.mapAreasDetailsDescriptionLabel,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(start = 14.dp)
@@ -180,7 +185,7 @@ internal fun MapAreaDetailsScreen(
             ) {
                 Text(
                     text = htmlToPlainText(description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = typography.mapAreasDetailsDescription
                 )
             }
         }
@@ -219,6 +224,7 @@ private fun PreviewMapAreaDetailsScreen() {
                 size = 40000,
                 isAvailableToDownload = false,
                 isDeletable = true,
+                typography = OfflineMapAreasDefaults.typography(),
                 onStartDownload = { },
                 onDeleteDownload = { }
             )
