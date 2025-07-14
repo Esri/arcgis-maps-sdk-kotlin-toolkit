@@ -487,11 +487,13 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
 }
 
 /**
- * Exception indicating that the attachment size exceeds the maximum limit.
+ * Exception indicating that the attachment size exceeds the limit.
  *
- * @param limit The maximum attachment size limit in bytes.
+ * @param limit The attachment size limit in bytes.
  */
-internal class AttachmentSizeLimitExceededException(val limit : Long) : Exception("Attachment size exceeds the maximum limit of $limit MB")
+internal class AttachmentSizeLimitExceededException(val limit: Long) : Exception(
+    "Attachment size exceeds the limit of ${limit/1_000_000} MB"
+)
 
 /**
  * Exception indicating that the attachment size is 0.

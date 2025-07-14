@@ -20,12 +20,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,8 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Composition
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +56,6 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
-import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 
 /**
  * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
@@ -167,13 +168,15 @@ internal fun UtilityAssociations(
 /**
  * Displays the provided [UtilityAssociation] and its associated feature.
  *
- * If the association is of type JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
- * or JunctionEdgeObjectConnectivityMidspan and the target feature is an edge, the fractionAlongEdge
- * is displayed. Otherwise, the terminal is displayed.
+ * The spec for displaying the association is based on the following rules:
  *
- * For a Connectivity association, the terminal is displayed.
+ * - If the association is of type JunctionEdgeObjectConnectivityMidspan, then only the fractionAlongEdge
+ * is displayed.
  *
- * For a Containment association, the isContainmentVisible property is displayed if the associated
+ * - If the association is of type JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
+ * or Connectivity then fractionAlongEdge and the terminal (if present) is displayed.
+ *
+ * - For a Containment association, the isContainmentVisible property is displayed if the associated
  * feature is the toElement.
  *
  */
@@ -188,90 +191,94 @@ private fun AssociationItem(
     modifier: Modifier = Modifier
 ) {
     val target = association.getTargetElement(associatedFeature)
-    val icon = association.getIcon(associatedFeature.globalId)
-    val (terminal, fractionAlongEdge) = when (association.associationType) {
-        is UtilityAssociationType.Connectivity -> {
-            Pair(target.terminal, null)
-        }
-
-        is UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
-            if (target.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
-                Pair(null, association.fractionAlongEdge)
-            } else {
-                Pair(target.terminal, null)
+    // Text to display at the end of the row.
+    var trailingText = ""
+    // Text to display below the title.
+    var supportingText = ""
+    when (association.associationType) {
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
+            trailingText = "${(association.fractionAlongEdge * 100).toInt()}%"
+            target.terminal?.let { terminal ->
+                supportingText = terminal.name
             }
         }
 
-        else -> {
-            Pair(null, null)
-        }
-    }
-    val trailingText = when {
-        terminal != null -> {
-            stringResource(R.string.terminal_with_value, terminal.name)
-        }
-
-        fractionAlongEdge != null -> {
-            "$fractionAlongEdge %"
+        is UtilityAssociationType.Connectivity,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+            target.terminal?.let { terminal ->
+                supportingText = terminal.name
+            }
         }
 
-        association.associationType is UtilityAssociationType.Containment &&
-            associatedFeature.globalId == association.toElement.globalId -> {
-            stringResource(R.string.containment_visible_value, association.isContainmentVisible)
+        is UtilityAssociationType.Containment -> {
+            if (associatedFeature.globalId == association.toElement.globalId) {
+                supportingText = if (association.isContainmentVisible) {
+                    stringResource(R.string.visible_content)
+                } else {
+                    stringResource(R.string.content)
+                }
+            }
         }
 
-        else -> ""
+        else -> {}
     }
     val contentColor = if (enabled) {
         LocalContentColor.current
     } else {
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     }
-    Column(modifier = modifier.clickable(enabled = enabled, onClick = onClick)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            if (icon != null) {
-                Icon(
-                    painter = icon,
-                    contentDescription = "feature association icon",
-                    modifier = Modifier.padding(
-                        end = 12.dp
-                    )
+    Row(
+        modifier = modifier
+            .clickable(enabled = enabled, onClick = onClick)
+            .height(56.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        association.getIcon()?.let { icon ->
+            Icon(
+                painter = icon,
+                contentDescription = "feature association icon",
+                modifier = Modifier.padding(
+                    end = 12.dp
                 )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            ) {
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier.padding(
+                    top = if (supportingText.isNotEmpty()) 6.dp else 0.dp,
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                color = contentColor
+            )
+            if (supportingText.isNotEmpty()) {
                 Text(
-                    text = title,
-                    modifier = Modifier.padding(
-                        top = if (trailingText.isNotEmpty()) 6.dp else 0.dp,
-                    ),
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = supportingText,
+                    modifier = Modifier
+                        .padding(
+                            bottom = 6.dp
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     color = contentColor
                 )
-                if (trailingText.isNotEmpty()) {
-                    Text(
-                        text = trailingText,
-                        modifier = Modifier
-                            .padding(
-                                bottom = 6.dp
-                            ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        color = contentColor
-                    )
-                }
+            }
+        }
+        if (trailingText.isNotEmpty()) {
+            Card(modifier = Modifier.wrapContentSize()) {
+                Text(text = trailingText, modifier = Modifier.padding(8.dp))
             }
         }
     }
@@ -295,22 +302,26 @@ internal val ArcGISFeature.globalId: Guid
     get() = attributes["globalid"] as Guid
 
 /**
- * Returns an icon for the association based on the association type and the GUID of the target element.
+ * Returns an icon for the association based on the association type.
  */
 @Composable
-internal fun UtilityAssociation.getIcon(targetElementGuid: Guid): Painter? {
+internal fun UtilityAssociation.getIcon(): Painter? {
     return when (this.associationType) {
+
+        is UtilityAssociationType.Connectivity -> {
+            painterResource(R.drawable.connection_to_connection)
+        }
+
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide -> {
+            painterResource(R.drawable.connection_end_left)
+        }
+
         is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
             painterResource(R.drawable.connection_mid)
         }
 
-        is UtilityAssociationType.Connectivity, UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
-            if (targetElementGuid == fromElement.globalId) {
-                painterResource(R.drawable.connection_end_left)
-            } else {
-                painterResource(R.drawable.connection_end_right)
-            }
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+            painterResource(R.drawable.connection_end_right)
         }
 
         else -> null

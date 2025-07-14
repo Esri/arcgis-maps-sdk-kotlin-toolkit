@@ -148,8 +148,8 @@ class UtilityAssociationsFormElementTests {
         val items = listView.onChildren().filter(hasText("Fuse"))
         items.assertCountEquals(2)
         // Verify the terminals are displayed
-        items[0].assert(hasText("Terminal : Single Terminal"))
-        items[1].assert(hasText("Terminal : Single Terminal"))
+        items[0].assert(hasText("Single Terminal"))
+        items[1].assert(hasText("Single Terminal"))
     }
 
     /**
@@ -209,7 +209,7 @@ class UtilityAssociationsFormElementTests {
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
         val firstElement = listView.onChildWithText("Circuit Breaker").assertIsDisplayed()
-        firstElement.assert(hasText("Containment Visible : false"))
+        firstElement.assert(hasText("Content"))
     }
 
     /**
@@ -270,7 +270,7 @@ class UtilityAssociationsFormElementTests {
         listView = composeTestRule.onNode(hasScrollAction())
 
         val firstElement = listView.onChildWithText("Substation").assertIsDisplayed()
-        firstElement.assert(hasText("Containment Visible : false").not())
+        firstElement.assert(hasText("Content").not())
     }
 
     /**
