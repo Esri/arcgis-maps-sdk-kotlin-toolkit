@@ -32,7 +32,7 @@ For on-demand workflows, this composable:
 
 To use the composable you would need to provide an `OfflineMapState`. The state object provides two constructors to initialize the `OfflineMapAreas` composable using an `ArcGISMap` or an `OfflineMapInfo`. Therefore, the composable can be used either when the device is connected to or disconnected from the network.
 
-- Online WorkFlow (device is connected to the network)
+- Online WorkFlow (Device is connected to the network)
   - Displays preplanned map areas from a web map that are available for download.
   - When the web map doesn’t contain preplanned map areas, users can add and download on-demand map areas by specifying a geographic area and level of detail.
   - Use the constructor with `ArcGISMap` to create the state.
