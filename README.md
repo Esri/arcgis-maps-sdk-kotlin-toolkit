@@ -94,8 +94,9 @@ API_KEY=YOUR_ACCESS_TOKEN
 ### ArcGIS identity
 
 An ArcGIS named user account that is a member of an organization in ArcGIS Online or ArcGIS
-Enterprise can be used as an alternative to API keys. To use this method will require code changes
-to be made. See [User authentication](https://developers.arcgis.com/kotlin/security-and-authentication/#user-authentication)
+Enterprise can be used as an alternative to API keys. Most toolkit micro apps don't make use of
+named user authentication.
+See [User authentication](https://developers.arcgis.com/kotlin/security-and-authentication/#user-authentication)
 for more information.
 
 ## Issues
