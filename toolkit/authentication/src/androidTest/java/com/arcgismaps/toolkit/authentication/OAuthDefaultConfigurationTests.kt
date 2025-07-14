@@ -184,7 +184,7 @@ class OAuthDefaultConfigurationTests {
         val challengeResponse = async {
             runCatching {
                 authenticatorState.handleArcGISAuthenticationChallenge(
-                    makeMockArcGISAuthenticationChallenge(mocRequestUrl = url)
+                    makeMockArcGISAuthenticationChallenge(mockRequestUrl = url)
                 )
             }
         }
