@@ -8,7 +8,7 @@ The `Authenticator` is a ready-to-use component designed to simplify handling au
 
 The `Authenticator` is a Composable function that will display a prompt when it is asked to handle an authentication challenge. It can handle the following types of authentication:
 
-- ArcGIS Authentication (OAuth, IAP, and Token)
+- ArcGIS Authentication (OAuth, Identity-Aware Proxy, and Token)
 - Integrated Windows Authentication (IWA)
 - Client Certificate (PKI)
 - Server Trust challenges
@@ -34,7 +34,7 @@ fun MyApp() {
 }
 ```
 
-To enable OAuth or IAP authentication in your app, configure the `AuthenticatorState` with the corresponding properties:
+To enable OAuth or Identity-Aware Proxy (IAP) authentication in your app, configure the `AuthenticatorState` with the corresponding properties:
 
 ```kotlin
 val oAuthUserConfiguration = OAuthUserConfiguration(
@@ -96,7 +96,7 @@ class MyAppViewModel(application: Application) : AndroidViewModel(application), 
 
 ### Intercepting OAuth Sign-in
 
-The `Authenticator` launches a Custom Tab when an OAuth or IAP challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `AuthenticationActivity` that is declared in your app's manifest via its intent filter.
+The `Authenticator` launches a Custom Tab when an OAuth or Identity-Aware Proxy (IAP) challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `AuthenticationActivity` that is declared in your app's manifest via its intent filter.
 
 If you want to launch a Custom Tab from your own app's activity, follow these steps:
 
@@ -127,13 +127,12 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
     </activity>
     ```
 
-2. Set your activity's `launchMode` to `singleTop`, this must be done in order for OAuth or IAP redirect to work.
-
+2. Set your activity's `launchMode` to `singleTop`. This is necessary because, when handling OAuth or IAP redirects, the Android system delivers the redirect intent to your activity. Using `singleTop` ensures that if your activity is already running at the top of the stack, a new instance is not created; instead, the existing instance receives the intent via `onNewIntent`. This allows your app to properly process authentication results without launching duplicate activities.
     ```xml
     <activity
         android:name="<Your-App-Activity-Name>"
         android:exported="true"
-        android:launchMode="singleTop"                  <--- This is important
+        android:launchMode="singleTop"                         <-------
         android:theme="@style/Theme.AuthenticationApp">
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -168,7 +167,7 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
     - You can check if the `intent` was caused by an OAuth or IAP redirect because the `intent.data.toString()` will start with your OAuth or IAP configuration's redirect URI.
 
     - Currently, IAP sign-out does not redirect back to the app, so you will not receive an intent in `onNewIntent` or `onResume` for that case. Instead, this will need to be handled in `onResume` when the Custom Tab is closed.
-     See documentation of [AuthenticatorState.completeBrowserAuthenticationChallenge](https://...TODO/html/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/complete-.html) for more details.
+     See documentation of [AuthenticatorState.completeBrowserAuthenticationChallenge](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/complete-browser-authentication-challenge.html) for more details.
     
     ```kotlin
     override fun onNewIntent(intent: Intent?) {
@@ -210,7 +209,7 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
 
 ### Signing out
 
-The authentication toolkit library provides a `signOut` function on `AuthenticatorState` to clear stored credentials, revoke OAuth Tokens, and launch the browser to invalidate the IAP session if any IAP credentials are present.
+The authentication toolkit library provides a `signOut` function on `AuthenticatorState` to clear stored credentials, revoke OAuth Tokens, and launch the browser to invalidate the Identity-Aware Proxy (IAP) session if any IAP credentials are present.
 
 ```kotlin
 authenticatorState.signOut()

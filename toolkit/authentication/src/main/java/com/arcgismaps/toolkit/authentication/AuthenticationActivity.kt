@@ -70,8 +70,8 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *    ```xml
  *    <activity
  *        ...
- *        android:launchMode="singleTop"                  <---
- *        ...
+ *        android:launchMode="singleTop"
+ *        ... >
  *        <intent-filter>
  *            <action android:name="android.intent.action.VIEW" />
  *
@@ -96,7 +96,8 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *    - Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
  *      - You can check if the `intent` was caused by an OAuth or IAP redirect because the `intent.data.toString()` will start with your OAuth or IAP configuration's redirect URI.
  *      - Currently, IAP sign-out does not redirect back to the app, so you will not receive an intent in `onNewIntent` or `onResume` for that case. Instead, this will need to be handled in `onResume` when the Custom Tab is closed.
- *        See documentation of [AuthenticatorState.completeBrowserAuthenticationChallenge](https://...TODO/html/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/complete-.html) for more details.
+ *        See documentation of [AuthenticatorState.completeBrowserAuthenticationChallenge](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/complete-browser-authentication-challenge.html)
+ *        for more details.
  *    ```kotlin
  *    override fun onNewIntent(intent: Intent?) {
  *        super.onNewIntent(intent)
@@ -110,6 +111,7 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *        authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(intent)
  *    }
  *    ```
+ *    See [README.md](../README.md) for more details.
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
