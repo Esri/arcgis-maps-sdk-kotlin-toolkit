@@ -69,7 +69,7 @@ Please see the [package structure](doc/general/developer_setup.md#package-struct
 
 ## Accessing Esri location services
 
-Some tookit components may require access to Esri location services, including basemaps, routing,
+Some toolkit components may require access to Esri location services, including basemaps, routing,
 and geocoding, which requires authentication using either an API Key or an ArcGIS identity:
 
 ### API key
