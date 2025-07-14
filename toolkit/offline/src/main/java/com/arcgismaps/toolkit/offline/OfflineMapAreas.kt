@@ -108,6 +108,11 @@ import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
  *
  *```
  *
+ * @param offlineMapState The state of the OfflineMapAreas.
+ * @param modifier The modifier to be applied to the OfflineMapAreas.
+ * @param colorScheme The color scheme to use for the OfflineMapAreas.
+ * @param typography The typography to use for the OfflineMapAreas.
+ *
  * @since 200.8.0
  */
 @Composable
