@@ -306,30 +306,35 @@ private class AuthenticatorStateImpl(
     }
 
     /**
-     * Issues a username/password challenge and returns an [ArcGISAuthenticationChallengeResponse] from
-     * the data returned by the challenge.
+     * Handles an ArcGIS token-based authentication challenge by issuing a username/password prompt to the user.
      *
-     * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
-     * @return an [ArcGISAuthenticationChallengeResponse] with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
-     * if the user cancelled.
-     * @since 200.2.0
+     * This function emits a [UsernamePasswordChallenge] and suspends until the user provides credentials or cancels the prompt.
+     * If credentials are provided, it attempts to create a [TokenCredential] using the provided username and password.
+     * If the user cancels, it returns [ArcGISAuthenticationChallengeResponse.Cancel].
+     *
+     * @param challenge the [ArcGISAuthenticationChallenge] that requires username/password authentication.
+     * @return an [ArcGISAuthenticationChallengeResponse] containing a [TokenCredential] if successful,
+     * [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError] if credential creation fails,
+     * or [ArcGISAuthenticationChallengeResponse.Cancel] if the user cancels.
+     * @since 200.8.0
      */
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        val maxRetryCount = 5
-        var error: Throwable? = null
-        repeat(maxRetryCount) {
-            val credential = usernamePasswordFlow(challenge.requestUrl, error).firstOrNull()
-                ?: return ArcGISAuthenticationChallengeResponse.Cancel
+        val credential = usernamePasswordFlow(
+            challenge.requestUrl,
+            if (challenge.previousFailureCount == 0) null else challenge.cause
+        ).firstOrNull()
+
+        return if (credential == null) {
+            ArcGISAuthenticationChallengeResponse.Cancel
+        } else {
             TokenCredential.createWithChallenge(challenge, credential.username, credential.password)
-                .onSuccess {
-                    return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it)
-                }.onFailure {
-                    error = it
-                }
+                .fold(
+                    onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                    onFailure = { ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it) }
+                )
         }
-        return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(error ?: challenge.cause)
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
