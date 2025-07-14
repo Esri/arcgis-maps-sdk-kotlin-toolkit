@@ -39,9 +39,17 @@ In other words, the composable can be used in the following situations:
   - Use the constructor with `ArcGISMap` to create the state.
 - When the device is disconnected from the network…
   - Displays only downloaded map areas by retrieving offline map info from the device.
-  - Use the constructor with `OfflineMapInfo` to create the state.
+  - Use the constructor with `OfflineMapInfo` to create the state. The list of all portal item information for web maps that have downloaded map areas can be obtained using the `OfflineRepository` singleton object. 
 - When the device network connection has changed…
   - Re-initialize the the state `OfflineMapState` using the desired constructor.
+
+The `OfflineMapAreas` toolkit component requires the following app-level permissions:
+
+- `android.permission.FOREGROUND_SERVICE_DATA_SYNC`: This permission is needed to enable the  component to perform data synchronization operations, such as downloading large map areas, as a foreground service, ensuring these downloads continue even if app is backgrounded or closed.
+
+- `android.permission.INTERNET`: This permission is needed as the component would connect to the network to display available preplanned map areas from a web map and to download both preplanned and on-demand map areas.
+
+- `android.permission.POST_NOTIFICATIONS`: This permission is used to allow the component to display notifications, to show the progress and status of map area downloads, or to notify when a download is complete.
 
 ## Workflow example:
 ```kotlin
