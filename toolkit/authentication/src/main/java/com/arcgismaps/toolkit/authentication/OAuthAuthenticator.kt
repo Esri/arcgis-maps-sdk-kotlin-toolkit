@@ -46,7 +46,7 @@ internal fun OAuthAuthenticator(
     authenticatorState: AuthenticatorState,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)?,
 ) {
-    if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
+    if (oAuthPendingSignIn.oAuthUserConfiguration.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorState)
     } else {
         // `didLaunch` prevents the OAuth activity from being launched again if a configuration change happens while
