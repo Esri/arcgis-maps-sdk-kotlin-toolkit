@@ -13,7 +13,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
   * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - a small, secondary Map View which shows a representation of the main view's current viewpoint.
 * **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
-* **[OfflineMapAreas](toolkit/offline)** - Allows you to take a web map offline by downloading map areas.
+* **[OfflineMapAreas](toolkit/offline)** - Allows you to take a web map offline by downloading map areas ahead-of-time or on-demand.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
