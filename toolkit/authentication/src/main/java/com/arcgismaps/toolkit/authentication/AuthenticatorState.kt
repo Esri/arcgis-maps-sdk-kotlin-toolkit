@@ -81,7 +81,7 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      *
      * @since 200.8.0
      */
-    public var oAuthUserConfigurations : List<OAuthUserConfiguration>
+    public var oAuthUserConfigurations: List<OAuthUserConfiguration>
 
     /**
      * The current [OAuthUserSignIn] awaiting completion. Use this to complete or cancel the OAuth authentication challenge.
@@ -267,23 +267,23 @@ private class AuthenticatorStateImpl(
      * the challenge, it will return [ArcGISAuthenticationChallengeResponse.Cancel].
      * @since 200.8.0
      */
-private suspend fun handleOAuthOrTokenChallenge(
-    challenge: ArcGISAuthenticationChallenge
-): ArcGISAuthenticationChallengeResponse {
-    oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
-        val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
-            .also {
-                // At this point we have suspended until the OAuth workflow is complete, so
-                // we can get rid of the pending OAuth sign in. Composables observing this can know
-                // to remove the OAuth prompt when this value changes.
-                _pendingOAuthUserSignIn.value = null
-            }
-            .getOrThrow()
-        return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
-    }
+    private suspend fun handleOAuthOrTokenChallenge(
+        challenge: ArcGISAuthenticationChallenge
+    ): ArcGISAuthenticationChallengeResponse {
+        oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
+            val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
+                .also {
+                    // At this point we have suspended until the OAuth workflow is complete, so
+                    // we can get rid of the pending OAuth sign in. Composables observing this can know
+                    // to remove the OAuth prompt when this value changes.
+                    _pendingOAuthUserSignIn.value = null
+                }
+                .getOrThrow()
+            return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
+        }
 
-    return handleArcGISTokenChallenge(challenge)
-}
+        return handleArcGISTokenChallenge(challenge)
+    }
 
     override suspend fun signOut(): Result<Unit> = runCatchingCancellable {
         val arcGISCredentialStore = ArcGISEnvironment.authenticationManager.arcGISCredentialStore
@@ -557,7 +557,8 @@ private suspend fun IapConfiguration.handleIapChallenge(
 @Deprecated(
     message = "since 200.8.0. Use AuthenticatorState.completeBrowserAuthenticationChallenge(Intent?) instead as it also " +
             "supports IAP sign-in/sign-out.",
-    replaceWith = ReplaceWith("AuthenticatorState.completeBrowserAuthenticationChallenge(intent)"))
+    replaceWith = ReplaceWith("AuthenticatorState.completeBrowserAuthenticationChallenge(intent)")
+)
 public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     intent?.data?.let {
         val uriString = it.toString()
