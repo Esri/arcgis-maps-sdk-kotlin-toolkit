@@ -110,8 +110,7 @@ class BrowserUserLauncherTests {
     /**
      * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
      * When an [ArcGISAuthenticationChallenge] is received and the user cancels the sign in process,
-     * Then the [ArcGISAuthenticationChallengeResponse] should be
-     * [ArcGISAuthenticationChallengeResponse.Cancel].
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
      *
      * @since 200.8.0
      */
@@ -126,8 +125,7 @@ class BrowserUserLauncherTests {
     /**
      * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
      * When an [ArcGISAuthenticationChallenge] is received and the user presses the back button,
-     * Then the [ArcGISAuthenticationChallengeResponse] should be
-     * [ArcGISAuthenticationChallengeResponse.Cancel].
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
      *
      * @since 200.8.0
      */
