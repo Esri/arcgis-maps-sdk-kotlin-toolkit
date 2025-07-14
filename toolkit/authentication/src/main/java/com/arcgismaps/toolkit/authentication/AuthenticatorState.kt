@@ -272,7 +272,12 @@ private suspend fun handleOAuthOrTokenChallenge(
 ): ArcGISAuthenticationChallengeResponse {
     oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
         val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
-            .also { _pendingOAuthUserSignIn.value = null }
+            .also {
+                // At this point we have suspended until the OAuth workflow is complete, so
+                // we can get rid of the pending OAuth sign in. Composables observing this can know
+                // to remove the OAuth prompt when this value changes.
+                _pendingOAuthUserSignIn.value = null
+            }
             .getOrThrow()
         return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
     }
