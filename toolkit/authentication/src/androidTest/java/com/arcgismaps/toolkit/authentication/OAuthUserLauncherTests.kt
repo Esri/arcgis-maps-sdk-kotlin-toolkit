@@ -188,9 +188,12 @@ class OAuthUserLauncherTestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Authenticator(authenticatorState = viewModel.authenticatorState) {
-                launchCustomTabs(it)
-            }
+            Authenticator(
+                authenticatorState = viewModel.authenticatorState,
+                onPendingOAuthUserSignIn = {
+                    launchCustomTabs(it)
+                }
+            )
         }
     }
 

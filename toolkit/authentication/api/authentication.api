@@ -5,8 +5,12 @@ public final class com/arcgismaps/toolkit/authentication/AuthenticationActivity 
 }
 
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorKt {
+	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 	public static final fun Authenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AuthenticatorWithBrowserAuthenticationChallenge (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DialogAuthenticator (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DialogAuthenticatorWithBrowserAuthenticationChallenge (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract interface class com/arcgismaps/toolkit/authentication/AuthenticatorState : com/arcgismaps/httpcore/authentication/ArcGISAuthenticationChallengeHandler, com/arcgismaps/httpcore/authentication/NetworkAuthenticationChallengeHandler {
@@ -30,7 +34,45 @@ public abstract interface class com/arcgismaps/toolkit/authentication/Authentica
 public final class com/arcgismaps/toolkit/authentication/AuthenticatorStateKt {
 	public static final fun AuthenticatorState (ZZ)Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;
 	public static synthetic fun AuthenticatorState$default (ZZILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;
+	public static final fun completeBrowserAuthenticationChallenge (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroid/content/Intent;)V
 	public static final fun completeOAuthSignIn (Lcom/arcgismaps/toolkit/authentication/AuthenticatorState;Landroid/content/Intent;)V
+}
+
+public abstract class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+	public static final field $stable I
+	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/IapSignIn;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;Lcom/arcgismaps/httpcore/authentication/IapSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignIn;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIapSignIn ()Lcom/arcgismaps/httpcore/authentication/IapSignIn;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+	public static final field $stable I
+	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/IapSignOut;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/IapSignOut;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;Lcom/arcgismaps/httpcore/authentication/IapSignOut;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$IapSignOut;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIapSignOut ()Lcom/arcgismaps/httpcore/authentication/IapSignOut;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn : com/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge {
+	public static final field $stable I
+	public final fun component1 ()Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;
+	public final fun copy (Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge$OAuthUserSignIn;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOAuthUserSignIn ()Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/arcgismaps/toolkit/authentication/ClientCertificateChallenge {
@@ -49,6 +91,7 @@ public final class com/arcgismaps/toolkit/authentication/ClientCertificateChalle
 
 public final class com/arcgismaps/toolkit/authentication/ExtensionsKt {
 	public static final fun launchCustomTabs (Landroid/app/Activity;Lcom/arcgismaps/httpcore/authentication/OAuthUserSignIn;)V
+	public static final fun launchCustomTabs (Landroid/app/Activity;Lcom/arcgismaps/toolkit/authentication/BrowserAuthenticationChallenge;)V
 	public static final fun signOut (Lcom/arcgismaps/httpcore/authentication/AuthenticationManager;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
