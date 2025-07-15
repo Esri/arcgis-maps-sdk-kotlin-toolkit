@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Chưa được cấp quyền truy cập máy ảnh</string>
-    <string name="arcore_not_installed_message">Phải cài đặt ARCore để sử dụng TableTopSceneView. Mức độ khả dụng của ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Phải cài đặt ARCore để sử dụng thành phần này. Mức độ khả dụng của ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Không thể bắt đầu Nguồn Dữ liệu Vị trí: %1$s</string>
+    <string name="location_permission_not_granted">Chưa cấp quyền truy cập vị trí</string>
+    <string name="permissions_not_granted_message">"Những quyền sau đây là bắt buộc nhưng chưa được cấp: %1$s"</string>
+    <string name="close_calibration">Đóng hiệu chuẩn</string>
+    <string name="heading_title">Tiêu đề</string>
+    <string name="decrease_heading">Giảm Đầu mục</string>
+    <string name="increase_heading">Tăng Đầu mục</string>
+    <string name="reset_heading">Thiết lập lại Đầu mục</string>
+    <string name="heading_slider_description">Thanh trượt tiêu đề</string>
+    <string name="elevation_title">Độ cao</string>
+    <string name="decrease_elevation">Giảm Độ cao</string>
+    <string name="increase_elevation">Tăng Độ cao</string>
+    <string name="reset_elevation">Thiết lập lại Độ cao</string>
+    <string name="elevation_slider_description">Thanh trượt độ cao</string>
 </resources>

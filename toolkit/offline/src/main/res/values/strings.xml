@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<resources>
+    <string name="map_areas">Map Areas</string>
+    <string name="add_map_area">Add Map Area</string>
+    <string name="thumbnail_description">PortalItem Thumbnail</string>
+    <string name="download">Download</string>
+    <string name="open">Open</string>
+    <string name="error">Error</string>
+    <string name="loading">Loading</string>
+    <string name="loading_failed">Loading failed</string>
+    <string name="ready_to_download">Ready to download</string>
+    <string name="packaging">Packaging</string>
+    <string name="packaging_failed">Packaging failed</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading</string>
+    <string name="download_failed">Download Failed</string>
+    <string name="currently_open">Currently Open</string>
+    <string name="description">Description</string>
+    <string name="download_map_area">Download Map Area</string>
+    <string name="remove_download">Remove Download</string>
+    <string name="delete_download">Delete Download</string>
+    <string name="no_image_available">No Image Available</string>
+    <string name="refresh">Refresh</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Rename</string>
+    <string name="enter_a_name">Enter a name</string>
+    <string name="select_area">Select area</string>
+    <string name="pan_and_zoom_text">Pan and zoom to define the area</string>
+    <string name="unique_name_text">The name for the map area must be unique</string>
+    <string name="next_on_demand_area_title">Area %1$s</string>
+    <string name="directory_size">Size: %1$s</string>
+    <string name="no_internet_connection_error_message">No Internet Connection</string>
+    <string name="no_internet_error_message">No internet connection. Showing downloaded areas only.</string>
+    <string name="no_map_areas_error_message">Could not retrieve map areas for this map.</string>
+    <string name="no_offline_map_areas_error_message">There are no map areas for this map.</string>
+    <string name="error_fetching_areas">Error Fetching Map Areas</string>
+    <string name="error_fetching_areas_message">An error occurred while fetching map areas.</string>
+    <string name="no_map_areas">No Map Areas</string>
+    <string name="empty_on_demand_message">There are no map areas for this map. Tap the button below to get started.</string>
+    <string name="offline_disabled">Offline Disabled</string>
+    <string name="offline_disabled_message">The map is not enabled for offline use.</string>
+    <string name="level_of_detail">Level of detail</string>
+    <string name="room">Room</string>
+    <string name="rooms">Rooms</string>
+    <string name="house_property">House Property</string>
+    <string name="houses">Houses</string>
+    <string name="small_building">Small Building</string>
+    <string name="building">Building</string>
+    <string name="buildings">Buildings</string>
+    <string name="street">Street</string>
+    <string name="streets">Streets</string>
+    <string name="neighborhood">Neighborhood</string>
+    <string name="town">Town</string>
+    <string name="city">City</string>
+    <string name="cities">Cities</string>
+    <string name="metropolitan_area">Metropolitan Area</string>
+    <string name="county">County</string>
+    <string name="counties">Counties</string>
+    <string name="state_province">State/Province</string>
+    <string name="states_provinces">States/Provinces</string>
+    <string name="countries_small">Countries (Small)</string>
+    <string name="countries_big">Countries (Big)</string>
+    <string name="continent">Continent</string>
+    <string name="world_small">World (Small)</string>
+    <string name="world_big">World (Big)</string>
+    <string name="world">World</string>
+</resources>
