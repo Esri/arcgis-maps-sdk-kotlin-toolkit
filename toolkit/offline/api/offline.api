@@ -39,7 +39,7 @@ public final class com/arcgismaps/toolkit/offline/InitializationStatus$NotInitia
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
-	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
@@ -71,27 +71,9 @@ public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public final fun removeDownloads (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
-public final class com/arcgismaps/toolkit/offline/theme/ColorScheme {
-	public static final field $stable I
-	public final fun component1-0d7_KjU ()J
-	public final fun component2-0d7_KjU ()J
-	public final fun component3-0d7_KjU ()J
-	public final fun component4-0d7_KjU ()J
-	public final fun copy-jRlVdoo (JJJJ)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
-	public static synthetic fun copy-jRlVdoo$default (Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;JJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCancelButtonColor-0d7_KjU ()J
-	public final fun getCancelDownloadButtonColor-0d7_KjU ()J
-	public final fun getDownloadButtonColor-0d7_KjU ()J
-	public final fun getOnDemandMapAreaSelectorAreaNameDialogBackgroundColor-0d7_KjU ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults;
-	public final fun colorScheme-ro_MJ88 (JJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
 	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)Lcom/arcgismaps/toolkit/offline/theme/Typography;
 }
 
