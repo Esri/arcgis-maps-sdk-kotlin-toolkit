@@ -205,4 +205,6 @@ include(":offline")
 project(":offline").projectDir = File(rootDir, "toolkit/offline")
 include(":offlinemapareas-app")
 project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
+include(":ar-flyover-app")
+project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
 
