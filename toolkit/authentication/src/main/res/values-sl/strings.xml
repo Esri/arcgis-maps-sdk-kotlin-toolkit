@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certifikata, ki ga zagotavlja \'%1$s ni podpisala zaupanja vredna ustanova.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Gostitelj ni vreden zaupanja</string>
+    <string name="server_trust_message">Certifikat strežnika za %1$s ni vreden zaupanja. Povezovanje bi lahko ogrozilo vaše podatke. Želite nadaljevati?</string>
     <string name="cancel">Prekliči</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Nevarno: Dovoli povezavo</string>
-    <string name="username_password_login_message">Prijavite se v %1$s</string>
+    <string name="allow_connection">Dovoli povezavo</string>
+    <string name="username_password_login_title">Zahtevana je avtentikacija</string>
+    <string name="username_password_login_message">Za dostop do %1$s se morate prijaviti</string>
+    <string name="incorrect_credentials">Poverilnice so bile nepravilne za %1$s. Poskusite znova.</string>
+    <string name="sign_in_error_occurred">Prišlo je do napake pri prijavi v %1$s. Poskusite znova.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Uporabniško ime</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Geslo</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Prijava</string>
+    <string name="sign_in">Prijava</string>
 </resources>

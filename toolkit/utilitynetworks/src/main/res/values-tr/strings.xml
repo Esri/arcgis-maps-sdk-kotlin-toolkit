@@ -28,4 +28,36 @@
     <string name="feature_results">Detay Sonuçları</string>
     <string name="function_results">İşlev Sonuçları</string>
     <string name="clear_all_results">Tüm sonuçları temizle</string>
+    <string name="delete">Sil</string>
+    <string name="not_available">Mevcut değil</string>
+    <string name="zoom_to">Yakınlaştır</string>
+    <string name="zoom_in">Yakınlaştır</string>
+    <string name="fraction_along_edge">Kenar Boyunca Kesir</string>
+    <string name="attributes">Öznitelikler</string>
+    <string name="terminal_configuration">Terminal Yapılandırması</string>
+    <string name="an_error_has_occurred">Bir hata oluştu</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="clear_all_results_confirmation">Tüm iz sonuçları kaybedilecek.</string>
+    <string name="object_id">Nesne Kimliği: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Utility Network bulunamadı.</string>
+    <string name="no_trace_configurations_found">İz yapılandırması bulunamadı.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Yeterli başlangıç noktası yok. Lütfen en az 1 başlangıç konumu ayarlayın.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Yeterli başlangıç noktası yok. Lütfen en az 2 başlangıç konumu ayarlayın.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">ArcGISFeature\'dan yardımcı program ögesi oluşturulamadı.</string>
+    <string name="one_or_more_starting_points_already_exists">Bir veya birkaç başlangıç noktası zaten var.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Detay simgesinden çizilebilir öge oluşturulamadı.</string>
+    <string name="no_configuration_selected">Seçilen Yapılandırma Yok</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Bileşeni izle</string>
+    <string name="more_options">Daha fazla seçenek</string>
+    <string name="go_back">Geri git</string>
+    <string name="edit_terminal_configuration">Terminal yapılandırmasını düzenle</string>
+    <string name="selected">Seçili</string>
+    <string name="feature_icon">Detay simgesi</string>
+    <string name="zoom_to_result_description">Sonuca yakınlaştırmayı etkinleştirin veya devre dışı bırakın</string>
+    <string name="select_previous_result">Önceki sonucu seç</string>
+    <string name="select_next_result">Sonraki sonucu seç</string>
+    <string name="error">Hata</string>
 </resources>

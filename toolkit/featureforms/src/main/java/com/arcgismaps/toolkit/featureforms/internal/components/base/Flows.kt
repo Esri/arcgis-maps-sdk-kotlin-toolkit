@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
@@ -83,6 +84,84 @@ internal fun FieldFormElement.mapValidationErrors(scope: CoroutineScope): StateF
 }
 
 /**
+ * Creates a [ValidationErrorState] based on the character constraints of the given [formElement].
+ */
+internal fun handleCharConstraints(
+    formElement: FieldFormElement
+): ValidationErrorState {
+    val (min, max) = when (val input = formElement.input) {
+        is TextBoxFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+        is TextAreaFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+        is BarcodeScannerFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
+        // logical edge case, should never happen
+        else -> Pair(0, 256)
+    }
+    return handleCharConstraints(min, max, formElement.hasValueExpression)
+}
+
+/**
+ * Creates a [ValidationErrorState] based on the character constraints of the given [min], [max] and
+ * [hasValueExpression] values.
+ */
+internal fun handleCharConstraints(
+    min : Int,
+    max : Int,
+    hasValueExpression : Boolean
+) : ValidationErrorState {
+    return when {
+        min == max -> ValidationErrorState.ExactCharConstraint(min, hasValueExpression)
+        min > 0 && max > 0 -> ValidationErrorState.MinMaxCharConstraint(
+            min,
+            max,
+            hasValueExpression
+        )
+
+        max > 0 -> ValidationErrorState.MaxCharConstraint(max)
+        else -> ValidationErrorState.NoError
+    }
+}
+
+/**
+ * Creates a [ValidationErrorState] based on the numeric constraints of the given [formElement].
+ */
+internal fun handleNumericConstraints(
+    formElement: FieldFormElement
+): ValidationErrorState {
+    val rangeDomain = formElement.domain as RangeDomain
+    val (min: Number?, max: Number?) = if (formElement.fieldType.isIntegerType) {
+        val tuple = rangeDomain.asLongTuple
+        Pair(tuple.min, tuple.max)
+    } else if (formElement.fieldType.isFloatingPoint) {
+        val tuple = rangeDomain.asDoubleTuple
+        Pair(tuple.min, tuple.max)
+    } else {
+        Pair(null, null)
+    }
+    return handleNumericConstraints(min, max, formElement.hasValueExpression)
+}
+
+/**
+ * Creates a [ValidationErrorState] based on the numeric constraints of the given [min], [max] and
+ * [hasValueExpression] values.
+ */
+internal fun handleNumericConstraints(
+    min: Number?,
+    max: Number?,
+    hasValueExpression: Boolean
+): ValidationErrorState {
+    return when {
+        min != null && max != null -> ValidationErrorState.MinMaxNumericConstraint(
+            min.format(),
+            max.format(),
+            hasValueExpression
+        )
+        min != null -> ValidationErrorState.MinNumericConstraint(min.format())
+        max != null -> ValidationErrorState.MaxNumericConstraint(max.format())
+        else -> ValidationErrorState.NoError
+    }
+}
+
+/**
  * Creates a list of [ValidationErrorState] with appropriate messages with the given [errors] and
  * [formElement].
  */
@@ -94,6 +173,7 @@ private fun createValidationErrorStates(
     var (hasMinCharError, hasMaxCharError) = Pair(false, false)
     return buildList {
         errors.forEach { error ->
+            // add the appropriate error state based on the type of error
             when (error) {
                 is FeatureFormValidationException.RequiredException -> {
                     add(ValidationErrorState.Required)
@@ -110,10 +190,18 @@ private fun createValidationErrorStates(
                 }
 
                 is FeatureFormValidationException.IncorrectValueTypeException -> {
-                    if (formElement.fieldType.isFloatingPoint) {
-                        add(ValidationErrorState.NotANumber)
-                    } else if (formElement.fieldType.isIntegerType) {
-                        add(ValidationErrorState.NotAWholeNumber)
+                    when {
+                        formElement.fieldType.isFloatingPoint -> {
+                            add(ValidationErrorState.NotANumber)
+                        }
+
+                        formElement.fieldType.isIntegerType -> {
+                            add(ValidationErrorState.NotAWholeNumber)
+                        }
+
+                        formElement.fieldType is FieldType.Guid -> {
+                            add(ValidationErrorState.NotAGuid)
+                        }
                     }
                 }
 
@@ -135,7 +223,8 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
                     val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted = dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
+                    val formatted =
+                        dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
                     if (formatted != null) {
                         add(ValidationErrorState.MinDatetimeConstraint(formatted))
                     }
@@ -143,67 +232,24 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.MaxDateTimeConstraintException -> {
                     val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted = dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
+                    val formatted =
+                        dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
                     if (formatted != null) {
                         add(ValidationErrorState.MaxDatetimeConstraint(formatted))
                     }
                 }
             }
-            if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput || formElement.input is BarcodeScannerFormInput) {
-                if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
-                    val (min, max) = when (val input = formElement.input) {
-                        is TextBoxFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
-                        is TextAreaFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
-                        is BarcodeScannerFormInput -> Pair(input.minLength.toInt(), input.maxLength.toInt())
-                        // logical edge case, should never happen
-                        else -> Pair(0, 256)
-                    }
-                    if (min > 0 && max > 0) {
-                        if (min == max) {
-                            add(
-                                ValidationErrorState.ExactCharConstraint(
-                                    min,
-                                    formElement.hasValueExpression
-                                )
-                            )
-                        } else {
-                            add(
-                                ValidationErrorState.MinMaxCharConstraint(
-                                    min,
-                                    max,
-                                    formElement.hasValueExpression
-                                )
-                            )
-                        }
-                    } else {
-                        add(ValidationErrorState.MaxCharConstraint(max))
-                    }
-
-                } else if (hasMinRangeError || hasMaxRangeError) {
-                    val rangeDomain = formElement.domain as RangeDomain
-                    val (min: Number?, max: Number?) = if (formElement.fieldType.isIntegerType) {
-                        val tuple = rangeDomain.asLongTuple
-                        Pair(tuple.min, tuple.max)
-                    } else if (formElement.fieldType.isFloatingPoint) {
-                        val tuple = rangeDomain.asDoubleTuple
-                        Pair(tuple.min, tuple.max)
-                    } else {
-                        Pair(null, null)
-                    }
-                    if (min != null && max != null) {
-                        add(
-                            ValidationErrorState.MinMaxNumericConstraint(
-                                min.format(),
-                                max.format(),
-                                formElement.hasValueExpression
-                            )
-                        )
-                    } else if (min != null) {
-                        add(ValidationErrorState.MinNumericConstraint(min.format()))
-                    } else {
-                        add(ValidationErrorState.MaxNumericConstraint(max.format()))
+            // check and add length/range constraints based validation rules
+            when (formElement.input) {
+                is TextBoxFormInput, is TextAreaFormInput, is BarcodeScannerFormInput -> {
+                    if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
+                        add(handleCharConstraints(formElement))
+                    } else if (hasMinRangeError || hasMaxRangeError) {
+                        add(handleNumericConstraints(formElement))
                     }
                 }
+
+                else -> { /* no constraints to check */ }
             }
         }
     }

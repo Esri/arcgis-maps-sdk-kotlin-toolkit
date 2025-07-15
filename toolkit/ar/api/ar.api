@@ -1,0 +1,252 @@
+public final class com/arcgismaps/toolkit/ar/ArCoreAuthorizationException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/arcgismaps/toolkit/ar/ArCoreResourceExhaustedException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewKt {
+	public static final fun TableTopSceneView-yL0mQJU (Lcom/arcgismaps/mapping/ArcGISScene;Lcom/arcgismaps/geometry/Point;DLandroidx/compose/ui/Modifier;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewProxy {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun exportImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getFieldOfView ()Ljava/lang/Double;
+	public final fun getFieldOfViewDistortionRatio ()Ljava/lang/Double;
+	public final fun getLayerViewState (Lcom/arcgismaps/mapping/layers/Layer;)Lcom/arcgismaps/mapping/view/LayerViewState;
+	public final fun identify-ZFpZYwg (Lcom/arcgismaps/mapping/layers/Layer;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun identify-ZFpZYwg (Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identify-ZFpZYwg$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/layers/Layer;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun identify-ZFpZYwg$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun identifyGraphicsOverlays-GOOf7xI (Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identifyGraphicsOverlays-GOOf7xI$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun identifyLayers-GOOf7xI (Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identifyLayers-GOOf7xI$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun isWrapAroundEnabled ()Ljava/lang/Boolean;
+	public final fun locationToScreen (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/LocationToScreenResult;
+	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
+	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewScope {
+	public static final field $stable I
+	public final fun Callout (Lcom/arcgismaps/mapping/GeoElement;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/geometry/Point;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final fun Callout-jHo2IpA (Lcom/arcgismaps/geometry/Point;Landroidx/compose/ui/Modifier;JZLcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$DetectingPlanes : com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$DetectingPlanes;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize : com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
+	public static final field $stable I
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$Initialized : com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatus$Initializing : com/arcgismaps/toolkit/ar/TableTopSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/TableTopSceneViewStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/TableTopSceneViewStatusKt {
+	public static final fun rememberTableTopSceneViewStatus (Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/MutableState;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun copy-tNS2XkQ (JJJJJJ)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;
+	public static synthetic fun copy-tNS2XkQ$default (Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;JJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackgroundColor-0d7_KjU ()J
+	public final fun getButtonContainerColor-0d7_KjU ()J
+	public final fun getButtonContentColor-0d7_KjU ()J
+	public final fun getContainerColor-0d7_KjU ()J
+	public final fun getSliderThumbColor-0d7_KjU ()J
+	public final fun getSliderTrackColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewDefaults;
+	public final fun colorScheme-5tl4gsc (JJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;
+	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBodyTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSubtitleTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getTitleTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewKt {
+	public static final synthetic fun WorldScaleSceneView--aEHHIo (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/ar/WorldScaleTrackingMode;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final fun WorldScaleSceneView-63MYszw (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/ar/WorldScaleTrackingMode;Ljava/lang/Double;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun checkVpsAvailability-0E7RQCE (DDLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun checkVpsAvailability-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun exportImage-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getFieldOfView ()Ljava/lang/Double;
+	public final fun getFieldOfViewDistortionRatio ()Ljava/lang/Double;
+	public final fun getLayerViewState (Lcom/arcgismaps/mapping/layers/Layer;)Lcom/arcgismaps/mapping/view/LayerViewState;
+	public final fun identify-ZFpZYwg (Lcom/arcgismaps/mapping/layers/Layer;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun identify-ZFpZYwg (Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identify-ZFpZYwg$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/layers/Layer;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun identify-ZFpZYwg$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun identifyGraphicsOverlays-GOOf7xI (Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identifyGraphicsOverlays-GOOf7xI$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun identifyLayers-GOOf7xI (Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun identifyLayers-GOOf7xI$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun isWrapAroundEnabled ()Ljava/lang/Boolean;
+	public final fun locationToScreen (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/LocationToScreenResult;
+	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
+	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewScope {
+	public static final field $stable I
+	public final fun CalibrationView (Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewColorScheme;Lcom/arcgismaps/toolkit/ar/WorldScaleCalibrationViewTypography;Landroidx/compose/runtime/Composer;II)V
+	public final fun Callout (Lcom/arcgismaps/mapping/GeoElement;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/geometry/Point;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final fun Callout-jHo2IpA (Lcom/arcgismaps/geometry/Point;Landroidx/compose/ui/Modifier;JZLcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize : com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
+	public static final field $stable I
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$Initialized : com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$Initializing : com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleSceneViewStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleSceneViewStatusKt {
+	public static final fun rememberWorldScaleSceneViewStatus (Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/MutableState;
+}
+
+public abstract class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$Geospatial : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleTrackingMode$World : com/arcgismaps/toolkit/ar/WorldScaleTrackingMode {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public abstract class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Available : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Available;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$NotAuthorized : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$NotAuthorized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$ResourceExhausted : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$ResourceExhausted;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Unavailable : com/arcgismaps/toolkit/ar/WorldScaleVpsAvailability {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/ar/WorldScaleVpsAvailability$Unavailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

@@ -513,7 +513,7 @@ internal fun Modifier.horizontalScrollbar(
 ): Modifier = this
     .padding(bottom = offsetY)
     .then(
-        composed {
+        this.composed {
             // fade in fast when scrolling, fade out slow when not scrolling
             val duration = if (state.isScrollInProgress) 50 else 500
             // animate the scrollbar alpha based on the scroll state

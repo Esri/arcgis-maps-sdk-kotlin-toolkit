@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">ป้อน %1$d ตัวอักขระ</item>
         <item quantity="one">ป้อน %1$d ตัวอักขระ</item>
+        <item quantity="two">ป้อน %1$d อักขระ</item>
+        <item quantity="few">ป้อน %1$d อักขระ</item>
+        <item quantity="many">ป้อน %1$d อักขระ</item>
         <item quantity="other">ป้อน %1$d อักขระ</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
         <item quantity="one">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="two">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="few">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="many">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
         <item quantity="other">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
     </plurals>
-    <string name="enter_min_to_max_chars">ป้อนอักขระ %1$d ถึง %2$d ตัว</string>
-    <string name="value_must_be_from_to_characters">ค่าต้องอยู่ระหว่าง %1$d ถึง %2$d อักขระ</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">สูงสุด %1$d อักขระ</item>
         <item quantity="one">สูงสุด %1$d อักขระ</item>
+        <item quantity="two">สูงสุด %1$d อักขระ</item>
+        <item quantity="few">สูงสุด %1$d อักขระ</item>
+        <item quantity="many">สูงสุด %1$d อักขระ</item>
         <item quantity="other">สูงสุด %1$d อักขระ</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">ป้อนอักขระ %1$d ถึง %2$d ตัว</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">ค่าต้องอยู่ระหว่าง %1$d ถึง %2$d อักขระ</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">สูงสุด %1$d อักขระ</string>
     <string name="no_value">ไม่มีค่า</string>
     <string name="enter_value">ป้อนค่า</string>
@@ -39,6 +60,7 @@
     <string name="ok">ตกลง</string>
     <string name="done">สำเร็จ</string>
     <string name="filter">ตัวกรอง %1$s</string>
+    <string name="search">ค้นหา</string>
     <string name="numeric_range_helper_text">ป้อนค่าตั้งแต่ %1$s ถึง %2$s</string>
     <string name="value_must_be_from_to">ค่าต้องอยู่ระหว่าง %1$s ถึง %2$s</string>
     <string name="less_than_min_value">น้อยกว่าค่าขั้นต่ำ %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">ชั่วโมง</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d ชั่วโมง</string>
     <string name="ff_time_picker_hour_selection">เลือกชั่วโมง</string>
     <string name="ff_time_picker_hour_suffix">%1$d นาฬิกา</string>
     <string name="ff_time_picker_hour_text_field">สำหรับชั่วโมง</string>
     <string name="ff_time_picker_minute">นาที</string>
     <string name="ff_time_picker_minute_selection">เลือกนาที</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d นาที</string>
     <string name="ff_time_picker_minute_text_field">สำหรับนาที</string>
     <string name="ff_time_picker_period_toggle_description">เลือก AM หรือ PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">ไม่สามารถดาวน์โหลดไฟล์เปล่าได้</string>
     <string name="attachment_deleted">ลบ %1s สำเร็จแล้ว</string>
     <string name="attachment_size_limit_exceeded">ไม่สามารถดาวน์โหลดไฟล์แนบที่ใหญ่เกิน %1$s ได้</string>
+    <string name="barcode_tooltip">หันกล้องของคุณไปที่บาร์โค้ด</string>
+    <string name="barcode_permission_denied">จำเป็นต้องใช้งานสิทธิ์กล้องเพื่อสแกนบาร์โค้ด โปรดเปิดใช้งานสิทธิ์กล้องในการตั้งค่าอุปกรณ์ของคุณ</string>
+    <string name="unsupported_value">ค่าที่ไม่รองรับ</string>
+    <string name="tap_to_scan">แตะเพื่อสแกน</string>
+    <string name="unable_to_open_the_camera">ไม่สามารถเปิดกล้องได้</string>
+    <string name="value_must_be_a_guid">ค่าต้องเป็น GUID ที่ใช้งานได้</string>
 </resources>

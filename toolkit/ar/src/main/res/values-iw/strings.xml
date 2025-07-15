@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">לא ניתנו הרשאות מצלמה</string>
+    <string name="arcore_not_installed_message">ARCore חייב להיות מותקן כדי להשתמש ברכיב זה. זמינות ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">הפעלת מקור הנתונים של מיקום נכשלה: %1$s</string>
+    <string name="location_permission_not_granted">לא ניתנה הרשאת מיקום</string>
+    <string name="permissions_not_granted_message">"ההרשאות הבאות נדרשות, אך לא ניתנו: %1$s"</string>
+    <string name="close_calibration">סגור כיול</string>
+    <string name="heading_title">כותרת</string>
+    <string name="decrease_heading">הקטן כיוון</string>
+    <string name="increase_heading">הגדל כיוון</string>
+    <string name="reset_heading">איפוס כיוון</string>
+    <string name="heading_slider_description">מחוון כיוון</string>
+    <string name="elevation_title">גובה</string>
+    <string name="decrease_elevation">הקטן גובה</string>
+    <string name="increase_elevation">הגדל גובה</string>
+    <string name="reset_elevation">איפוס גובה</string>
+    <string name="elevation_slider_description">מחוון גובה</string>
+</resources>

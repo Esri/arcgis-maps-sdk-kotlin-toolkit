@@ -23,11 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +39,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.FieldType
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
@@ -51,19 +49,34 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * Composable that renders a [FieldFormElement] with a [BarcodeScannerFormInput].
+ *
+ * @param state The [BarcodeTextFieldState] that represents the barcode text field.
+ * @param onBarcodeAccessoryClicked The click listener for the barcode accessory button. If null,
+ * the default barcode scanner experience will be used. This can be used to override the default
+ * behavior and provide a custom barcode scanning experience.
+ */
 @Composable
-internal fun BarcodeTextField(state: BarcodeTextFieldState) {
+internal fun BarcodeTextField(
+    state: BarcodeTextFieldState,
+    onBarcodeAccessoryClicked: (() -> Unit)?
+) {
     val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val isError = value.error !is ValidationErrorState.NoError
     // only show character count if there is a min or max length for this field
     val showCharacterCount = state.minLength > 0 || state.maxLength > 0
-    // if any errors are present, show the error as the supporting text
-    val supportingText = if (!isError) {
-        state.description
-    } else {
-        value.error.getString()
+    val isFocused by state.isFocused.collectAsState()
+    // show the supporting text based on the current state
+    val supportingText = when {
+        // show the error message if there is an error
+        isError -> value.error.getString()
+        // show the helper text if the description is empty and the field is focused
+        state.description.isEmpty() && isFocused -> state.helperText.getString()
+        // show the description if it is not empty
+        else -> state.description
     }
     val dialogRequester = LocalDialogRequester.current
     val stateId = remember(key1 = state) {
@@ -90,18 +103,11 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // show clear button if there is text in the field
-                if (value.data.isNotEmpty()) {
-                    IconButton(onClick = { state.onValueChanged("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "clear text",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
                 BarcodeScannerButton {
-                    dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
+                    // if the consumer has provided a click listener, invoke it
+                    // otherwise, request the barcode scanner dialog
+                    onBarcodeAccessoryClicked?.invoke()
+                        ?: dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
                 }
             }
         }
@@ -110,13 +116,14 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
 
 @Composable
 private fun BarcodeScannerButton(onClick: () -> Unit) {
-    val tintColor = MaterialTheme.colorScheme.onSurface
     Box(modifier = Modifier.padding(8.dp)) {
         Image(
             painter = painterResource(id = R.drawable.barcode_scanner),
             contentDescription = "scan barcode",
-            modifier = Modifier.clickable { onClick() },
-            colorFilter = ColorFilter.tint(tintColor)
+            modifier = Modifier
+                .size(BarcodeTextFieldDefaults.barcodeIconSize)
+                .clickable { onClick() },
+            colorFilter = ColorFilter.tint(BarcodeTextFieldDefaults.barcodeIconTintColor)
         )
     }
 }
@@ -132,12 +139,13 @@ private fun BarcodeTextFieldPreview() {
                 label = "Barcode",
                 placeholder = "Scan barcode",
                 description = "Scan barcode to populate",
-                value = MutableStateFlow(""),
+                value = MutableStateFlow("01234F1234"),
                 required = MutableStateFlow(true),
                 editable = MutableStateFlow(true),
                 visible = MutableStateFlow(true),
                 validationErrors = MutableStateFlow(emptyList()),
                 fieldType = FieldType.Text,
+                domain = null,
                 minLength = 0,
                 maxLength = 0
             ),
@@ -145,6 +153,7 @@ private fun BarcodeTextFieldPreview() {
             scope = scope,
             updateValue = {},
             evaluateExpressions = { Result.success(emptyList()) },
-        )
+        ),
+        null
     )
 }

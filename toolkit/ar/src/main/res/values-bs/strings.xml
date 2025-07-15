@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Dopuštenje za kameru nije odobreno</string>
+    <string name="arcore_not_installed_message">ARCore treba biti instalirano za korištenje ove komponente. ARCore dostupnost: %1$s</string>
+    <string name="location_data_source_failed_to_start">Pokretanje izvora podataka o lokaciji nije uspjelo: %1$s</string>
+    <string name="location_permission_not_granted">Dopuštenje za lokaciju nije odobreno</string>
+    <string name="permissions_not_granted_message">"Sljedeća dopuštenja su potrebna, ali nisu omogućena: %1$s"</string>
+    <string name="close_calibration">Zatvori kalibraciju</string>
+    <string name="heading_title">Zaglavlje</string>
+    <string name="decrease_heading">Smanji naslov</string>
+    <string name="increase_heading">Povećaj naslov</string>
+    <string name="reset_heading">Poništi naslov</string>
+    <string name="heading_slider_description">Klizač za naslov</string>
+    <string name="elevation_title">Visina terena</string>
+    <string name="decrease_elevation">Smanji visinu terena</string>
+    <string name="increase_elevation">Povećaj visinu terena</string>
+    <string name="reset_elevation">Poništi visinu terena</string>
+    <string name="elevation_slider_description">Klizač za visinu terena</string>
+</resources>

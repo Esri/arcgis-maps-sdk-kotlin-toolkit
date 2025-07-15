@@ -5,13 +5,19 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 ## Toolkit Components
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
+* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
+  * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - a small, secondary Map View which shows a representation of the main view's current viewpoint.
+* **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
+* **[OfflineMapAreas](toolkit/offline)** - Allows you to take a web map offline by downloading map areas ahead-of-time or on-demand.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
+* **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
+* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
 ## API Reference
 
@@ -44,20 +50,56 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.5.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.8.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-legend")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-offline")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-scalebar")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-utilitynetworks")
-
+implementation("com.esri:arcgis-maps-kotlin-toolkit-ar")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.
 
 Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
+
+## Accessing Esri location services
+
+Some toolkit components may require access to Esri location services, including basemaps, routing,
+and geocoding, which requires authentication using either an API Key or an ArcGIS identity. The
+toolkit code is set up to easily use an API key.
+
+### API key
+
+A long-lived access token that gives your application access to ArcGIS location services. Go to
+the [Create an API key](https://links.esri.com/create-an-api-key) tutorial to obtain a new API key
+access token. Ensure that the following privileges are enabled:
+
+* **Location services** > **Basemaps**
+* **Location services** > **Geocoding**
+* **Location services** > **Routing**
+
+The components in this repository have been structured to use an access token, set once.
+Set your access token in the `local.properties` in the same folder as the
+`secrets.defaults.properties` as shown below.
+
+```gradle
+API_KEY=YOUR_ACCESS_TOKEN
+```
+
+### ArcGIS identity
+
+An ArcGIS named user account that is a member of an organization in ArcGIS Online or ArcGIS
+Enterprise can be used as an alternative to API keys. Most toolkit micro apps don't make use of
+named user authentication.
+See [User authentication](https://developers.arcgis.com/kotlin/security-and-authentication/#user-authentication)
+for more information.
 
 ## Issues
 

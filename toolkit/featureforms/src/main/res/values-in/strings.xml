@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Masukkan %1$d karakter</item>
         <item quantity="one">Masukkan %1$d karakter</item>
+        <item quantity="two">Masukkan %1$d karakter</item>
+        <item quantity="few">Masukkan %1$d karakter</item>
+        <item quantity="many">Masukkan %1$d karakter</item>
         <item quantity="other">Masukkan %1$d karakter</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Nilai harus %1$d karakter</item>
         <item quantity="one">Nilai harus %1$d karakter</item>
+        <item quantity="two">Nilai harus %1$d karakter</item>
+        <item quantity="few">Nilai harus %1$d karakter</item>
+        <item quantity="many">Nilai harus %1$d karakter</item>
         <item quantity="other">Nilai harus %1$d karakter</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Masukkan %1$d hingga %2$d karakter</string>
-    <string name="value_must_be_from_to_characters">Nilai harus %1$d hingga %2$d karakter</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksimal %1$d karakter</item>
         <item quantity="one">Maksimal %1$d karakter</item>
+        <item quantity="two">Maksimal %1$d karakter</item>
+        <item quantity="few">Maksimal %1$d karakter</item>
+        <item quantity="many">Maksimal %1$d karakter</item>
         <item quantity="other">Maksimal %1$d karakter</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Masukkan %1$d hingga %2$d karakter</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Nilai harus %1$d hingga %2$d karakter</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimal %1$d karakter</string>
     <string name="no_value">Tidak ada nilai</string>
     <string name="enter_value">Masukkan Nilai</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Selesai</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Cari</string>
     <string name="numeric_range_helper_text">Masukkan nilai dari %1$s hingga %2$s</string>
     <string name="value_must_be_from_to">Nilai harus dari %1$s hingga %2$s</string>
     <string name="less_than_min_value">Kurang dari nilai minimal %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Jam</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d jam</string>
     <string name="ff_time_picker_hour_selection">Pilih jam</string>
     <string name="ff_time_picker_hour_suffix">Jam %1$d</string>
     <string name="ff_time_picker_hour_text_field">selama satu jam</string>
     <string name="ff_time_picker_minute">Menit</string>
     <string name="ff_time_picker_minute_selection">Pilih menit</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d menit</string>
     <string name="ff_time_picker_minute_text_field">selama beberapa menit</string>
     <string name="ff_time_picker_period_toggle_description">Pilih AM atau PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">File kosong tidak dapat diunduh</string>
     <string name="attachment_deleted">%1s berhasil dihapus</string>
     <string name="attachment_size_limit_exceeded">Lampiran yang lebih besar dari %1$s tidak bisa diunduh</string>
+    <string name="barcode_tooltip">Arahkan kamera Anda ke kode batang</string>
+    <string name="barcode_permission_denied">Diperlukan izin kamera untuk memindai kode batang. Aktifkan izin kamera di pengaturan perangkat Anda.</string>
+    <string name="unsupported_value">Nilai Tidak Didukung</string>
+    <string name="tap_to_scan">Ketuk untuk memindai</string>
+    <string name="unable_to_open_the_camera">Tidak dapat membuka kamera</string>
+    <string name="value_must_be_a_guid">Nilai harus berupa GUID yang valid</string>
 </resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Dovoljenje za kamero ni odobreno</string>
+    <string name="arcore_not_installed_message">ARCore mora biti nameščen za uporabo te komponente. Razpoložljivost ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Zagon vira podatkov o lokaciji je bil neuspešen: %1$s</string>
+    <string name="location_permission_not_granted">Dovoljenje za lokacijo ni odobreno</string>
+    <string name="permissions_not_granted_message">"Naslednja dovoljenja so potrebna, vendar niso odobrena: %1$s"</string>
+    <string name="close_calibration">Zapri kalibracijo</string>
+    <string name="heading_title">Glava</string>
+    <string name="decrease_heading">Zmanjšaj glavo</string>
+    <string name="increase_heading">Povečaj glavo</string>
+    <string name="reset_heading">Ponastavi glavo</string>
+    <string name="heading_slider_description">Drsnik glave</string>
+    <string name="elevation_title">Višina</string>
+    <string name="decrease_elevation">Zmanjšaj višino</string>
+    <string name="increase_elevation">Povečaj višino</string>
+    <string name="reset_elevation">Ponastavi višino</string>
+    <string name="elevation_slider_description">Drsnik višine</string>
+</resources>

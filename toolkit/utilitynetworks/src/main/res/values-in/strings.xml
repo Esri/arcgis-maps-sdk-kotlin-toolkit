@@ -28,4 +28,36 @@
     <string name="feature_results">Hasil Fitur</string>
     <string name="function_results">Hasil Fungsi</string>
     <string name="clear_all_results">Hapus semua hasil</string>
+    <string name="delete">Hapus</string>
+    <string name="not_available">Tidak tersedia</string>
+    <string name="zoom_to">Zoom hingga</string>
+    <string name="zoom_in">Perbesar</string>
+    <string name="fraction_along_edge">Fraksi Sepanjang Tepi</string>
+    <string name="attributes">Atribut</string>
+    <string name="terminal_configuration">Konfigurasi Terminal</string>
+    <string name="an_error_has_occurred">Terjadi kesalahan</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Batalkan</string>
+    <string name="clear_all_results_confirmation">Semua hasil pelacakan akan hilang.</string>
+    <string name="object_id">ID Objek: %s</string>
+<!--Trace Tool Errors-->
+    <string name="no_utility_network_found">Tidak ada Utility Network yang ditemukan.</string>
+    <string name="no_trace_configurations_found">Tidak ada konfigurasi pelacakan yang ditemukan.</string>
+    <string name="not_enough_starting_points_please_set_at_least_1_starting_location">Titik awal tidak cukup. Harap tetapkan setidaknya 1 titik awal.</string>
+    <string name="not_enough_starting_points_please_set_at_least_2_starting_locations">Titik awal tidak cukup. Harap tetapkan setidaknya 2 titik awal.</string>
+    <string name="could_not_create_utility_element_from_arcgisfeature">Tidak dapat membuat elemen utilitas dari ArcGISFeature.</string>
+    <string name="one_or_more_starting_points_already_exists">Salah titik awal atau lebih sudah ada.</string>
+    <string name="could_not_create_drawable_from_feature_symbol">Tidak dapat membuat objek yang dapat digambar dari simbol fitur.</string>
+    <string name="no_configuration_selected">Tidak Ada Konfigurasi Dipilih</string>
+<!--Content Descriptions-->
+    <string name="trace_component">Lacak komponen</string>
+    <string name="more_options">Opsi lainnya</string>
+    <string name="go_back">Kembali</string>
+    <string name="edit_terminal_configuration">Edit konfigurasi terminal</string>
+    <string name="selected">Dipilih</string>
+    <string name="feature_icon">Ikon fitur</string>
+    <string name="zoom_to_result_description">Aktifkan atau nonaktifkan zoom hingga hasil</string>
+    <string name="select_previous_result">Pilih hasil sebelumnya</string>
+    <string name="select_next_result">Pilih hasil selanjutnya</string>
+    <string name="error">Kesalahan</string>
 </resources>

@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2024 Esri
+ *  Copyright CURRENT_YEAR Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -70,14 +70,10 @@ android {
         }
     }
 
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
     }
 }
 

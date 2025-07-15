@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">האישור שסופק על ידי %1$s לא חתום על ידי רשות מהימנה.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">מארח לא מהימן</string>
+    <string name="server_trust_message">אישור השרת עבור %1$s אינו מהימן. התחברות עלולה לסכן את הנתונים שלך. האם ברצונך להמשיך?</string>
     <string name="cancel">ביטול</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">מסוכן: הרשה חיבור</string>
-    <string name="username_password_login_message">היכנס אל %1$s</string>
+    <string name="allow_connection">הרשה חיבור</string>
+    <string name="username_password_login_title">נדרש אימות</string>
+    <string name="username_password_login_message">עליך להתחבר כדי לגשת אל %1$s</string>
+    <string name="incorrect_credentials">האישורים לא נכונים עבור %1$s. נסה שוב.</string>
+    <string name="sign_in_error_occurred">אירעה שגיאה בהתחברות אל %1$s. נסה שוב.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">שם משתמש</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">סיסמה</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">כניסה</string>
+    <string name="sign_in">התחבר</string>
 </resources>

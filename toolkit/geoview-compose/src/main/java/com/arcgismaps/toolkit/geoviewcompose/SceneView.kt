@@ -34,10 +34,10 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -208,8 +208,15 @@ public fun SceneView(
 
         val sceneViewScope = remember { SceneViewScope(sceneView) }
         val isSceneViewReady = sceneView.rememberIsReady()
+        val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
-        if (isSceneViewReady.value) {
+        // Invoke the content lambda only when the SceneView is either:
+        // - ready
+        // - or manual rendering is enabled
+        // Manual rendering is enabled in AR scenarios, such as TableTopSceneView, in which case we
+        // never receive a DrawStatus.Completed event, thus the SceneView would never be "ready" if
+        // we waited for that event
+        if (isSceneViewReady.value || isManualRenderingEnabled) {
             content?.let {
                 sceneViewScope.it()
             }

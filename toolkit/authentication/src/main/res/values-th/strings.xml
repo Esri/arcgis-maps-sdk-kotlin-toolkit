@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ใบรับรองที่จัดเตรียมโดย %1$s ไม่ได้รับการลงนามโดยหน่วยงานที่เชื่อถือได้</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">โฮสต์ที่ไม่น่าเชื่อถือ</string>
+    <string name="server_trust_message">ใบรับรองเซิร์ฟเวอร์สำหรับ %1$s ไม่น่าเชื่อถือ การเชื่อมต่ออาจส่งผลให้ข้อมูลของคุณไม่ปลอดภัยได้ คุณต้องการดำเนินงานหรือไม่</string>
     <string name="cancel">ยกเลิก</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">อันตราย: อนุญาตการเชื่อมต่อ</string>
-    <string name="username_password_login_message">โปรดเข้าสู่ระบบ %1$s</string>
+    <string name="allow_connection">อนุญาตการเชื่อมต่อ</string>
+    <string name="username_password_login_title">ต้องการการรับรองความถูกต้อง</string>
+    <string name="username_password_login_message">คุณต้องลงชื่อเข้าใช้เพื่อเข้าถึง %1$s</string>
+    <string name="incorrect_credentials">ข้อมูลประจำตัวไม่ถูกต้องสำหรับ %1$s โปรดลองใหม่อีกครั้ง</string>
+    <string name="sign_in_error_occurred">เกิดข้อผิดพลาดขณะลงชื่อเข้าใช้ %1$s โปรดลองใหม่อีกครั้ง</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">ชื่อผู้ใช้</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">รหัสผ่าน</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">เข้าสู่ระบบ</string>
+    <string name="sign_in">ลงชื่อเข้าใช้</string>
 </resources>

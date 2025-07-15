@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certificatul furnizat de %1$s nu este semnat de o autoritate de încredere.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Hostul nu este de încredere</string>
+    <string name="server_trust_message">Certificatul serverului pentru %1$s nu este de încredere. Conectarea v-ar putea compromite datele. Doriți să continuați?</string>
     <string name="cancel">Anulare</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Periculos: permiteți conectarea</string>
-    <string name="username_password_login_message">Conectați-vă la %1$s</string>
+    <string name="allow_connection">Permiteți conectarea</string>
+    <string name="username_password_login_title">Autentificare necesară</string>
+    <string name="username_password_login_message">Trebuie să vă autentificați pentru a accesa %1$s</string>
+    <string name="incorrect_credentials">Datele de autentificare au fost incorecte pentru%1$s. Încercați din nou.</string>
+    <string name="sign_in_error_occurred">A apărut o eroare la autentificarea în%1$s. Încercați din nou.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nume de utilizator</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parolă</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Autentificare</string>
+    <string name="sign_in">Autentificaţi-vă</string>
 </resources>

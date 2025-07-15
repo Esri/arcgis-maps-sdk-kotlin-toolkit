@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.ImeAction
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.ArcGISAuthenticationException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
@@ -51,10 +53,8 @@ import org.junit.rules.TestRule
  */
 class UsernamePasswordTests {
 
-    private val authenticatorState = AuthenticatorState()
-
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<AuthenticatorStateActivity>()
 
     @Before
     fun before() = signOut()
@@ -62,9 +62,9 @@ class UsernamePasswordTests {
     @After
     fun after() = signOut()
 
-    fun signOut() {
+    private fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.authenticatorState.signOut()
         }
         ArcGISEnvironment.configureArcGISHttpClient { }
     }
@@ -106,6 +106,8 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun loginButtonEnabledState() = runTest {
         composeTestRule.setContent {
             UsernamePasswordAuthenticator(
@@ -118,24 +120,24 @@ class UsernamePasswordTests {
         }
         advanceUntilIdle()
         // verify the login button is disabled when the fields are empty
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the username field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify the login button is disabled when only the password field is filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextClearance()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
             .performTextInput("testPassword")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsNotEnabled()
         // verify it is enabled when both are filled
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
             .performTextInput("testuser")
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login))
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in))
             .assertIsEnabled()
     }
 
@@ -154,9 +156,12 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun keyboardActions() = runTest {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every { usernamePasswordChallengeMock.cause } returns null
         every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
@@ -205,6 +210,157 @@ class UsernamePasswordTests {
      * When a username and password challenge is issued
      * Then the dialog prompt should be displayed
      *
+     * When the user types in the password field
+     * Then the password should be obscured
+     * And when the user clicks the show password button
+     * Then the password should be revealed
+     *
+     * @since 200.7.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    @Suppress("DEPRECATION")
+    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
+    fun testPasswordVisibility() = runTest {
+        val password = "helloWorld"
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.cause } returns null
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+            .performTextInput(password)
+
+        // verify that the password field is obscured
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
+        // verify that clicking the show password button will reveal the password
+        composeTestRule.onNodeWithContentDescription("Show password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText(password).assertExists()
+
+        // verify that clicking the hide password button again will obscure the password
+        composeTestRule.onNodeWithContentDescription("Hide password")
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule.onNodeWithText("••••••••••").assertExists()
+    }
+
+    /**
+     * Given a UsernamePasswordAuthenticatorDialog,
+     * When a username and password challenge is issued with null cause,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that credentials are required.
+     *
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testDefaultSupportingText() = runTest {
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        val hostname = "arcgis.com"
+        every { usernamePasswordChallengeMock.hostname } returns hostname
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+        every {
+            @Suppress("DEPRECATION")
+            usernamePasswordChallengeMock.additionalMessage
+        } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.cause } returns null
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticatorDialog(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
+
+        // verify that the default message is displayed
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_message, hostname))
+            .assertIsDisplayed()
+    }
+
+    /**
+     * Given a UsernamePasswordAuthenticator,
+     * When a username and password challenge is issued with an ArcGISAuthenticationException cause,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that the credentials are incorrect.
+     *
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testArcGISAuthenticationSupportingText() = runTest {
+        val mockCause = mockk<ArcGISAuthenticationException>()
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every {
+            @Suppress("DEPRECATION")
+            usernamePasswordChallengeMock.additionalMessage
+        } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+        every { usernamePasswordChallengeMock.cause } returns mockCause
+
+        composeTestRule.setContent {
+            @Suppress("DEPRECATION")
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
+
+        // verify that the default message is displayed
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.incorrect_credentials, "arcgis.com"))
+            .assertIsDisplayed()
+    }
+
+    /**
+     * Given a UsernamePasswordAuthenticatorDialog,
+     * When a username and password challenge is issued with an IllegalStateException cause,
+     * Then the dialog prompt should be displayed
+     * With a message informing the user that an error occurred.
+     *
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testAnyOtherExceptionSupportingText() = runTest {
+
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
+        every {
+            @Suppress("DEPRECATION")
+            usernamePasswordChallengeMock.additionalMessage
+        } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+        every { usernamePasswordChallengeMock.cause } returns IllegalStateException("Test")
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticatorDialog(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_password_login_title)).assertIsDisplayed()
+
+        // verify that the default message is displayed
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.sign_in_error_occurred, "arcgis.com"))
+            .assertIsDisplayed()
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
      * When the user presses the back button
      * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
      *
@@ -234,7 +390,7 @@ class UsernamePasswordTests {
     fun TestScope.testUsernamePasswordChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> {
         with(StateRestorationTester(composeTestRule)) {
             setContent {
-                DialogAuthenticator(authenticatorState = authenticatorState)
+                DialogAuthenticator(authenticatorState = composeTestRule.activity.authenticatorState)
             }
 
             val hostname = "arcgis.com"
@@ -245,7 +401,7 @@ class UsernamePasswordTests {
             )
             // issue the challenge
             val challengeResponse = async {
-                authenticatorState.handleNetworkAuthenticationChallenge(challenge)
+                composeTestRule.activity.authenticatorState.handleNetworkAuthenticationChallenge(challenge)
             }
             // ensure the dialog prompt is displayed as expected
             advanceUntilIdle()
@@ -253,7 +409,7 @@ class UsernamePasswordTests {
                 R.string.username_password_login_message,
                 hostname
             )
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value != null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value != null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertIsDisplayed()
 
             // simulate a configuration change
@@ -264,7 +420,7 @@ class UsernamePasswordTests {
 
             // ensure the dialog has disappeared
             advanceUntilIdle()
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
             // return the response deferred
@@ -277,26 +433,23 @@ class UsernamePasswordTests {
      * When a username and password challenge is issued
      * Then the dialog prompt should be displayed
      *
-     * When the user enters an incorrect username and password 5 times
+     * When the user enters an incorrect username and password with a previous failure count of 4
      * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
-     *
-     * When the user enters a correct username and password
-     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
      *
      * @since 200.5.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun arcGISTokenAuthentication() = runTest {
+    fun testInvalidCredentialsWithArcGISTokenAuthentication() = runTest {
         with(StateRestorationTester(composeTestRule)) {
             setContent {
-                DialogAuthenticator(authenticatorState = authenticatorState)
+                DialogAuthenticator(authenticatorState = composeTestRule.activity.authenticatorState)
             }
             // issue the challenge
             val hostname = "arcgis.com"
             val challenge = makeMockArcGISAuthenticationChallenge()
             val challengeResponse = async {
-                authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+                composeTestRule.activity.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
             }
             // ensure the dialog prompt is displayed as expected
             advanceUntilIdle()
@@ -305,7 +458,7 @@ class UsernamePasswordTests {
                 R.string.username_password_login_message,
                 hostname
             )
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value != null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value != null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertIsDisplayed()
 
             // simulate a configuration change
@@ -316,25 +469,60 @@ class UsernamePasswordTests {
                 setupFailingArcGISTokenRequestInterceptor()
             }
 
-            // simulate incorrect username/password 4 times
-            repeat(4) {
-                composeTestRule.enterUsernamePasswordAndLogin()
-                advanceUntilIdle()
-                composeTestRule.onNodeWithText("Invalid username or password.").assertIsDisplayed()
-            }
-            // the 5th time is should dismiss the dialog.
+            // simulate incorrect username/password
             composeTestRule.enterUsernamePasswordAndLogin()
             advanceUntilIdle()
 
             // ensure the dialog has disappeared
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
 
             assert(challengeResponse.await() is ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError)
 
-            // clear out the credentials
-            signOut()
+            val mockArcGISAuthenticationException = mockk<ArcGISAuthenticationException>()
+            val challenge2 = makeMockArcGISAuthenticationChallenge(
+                mockedCause = mockArcGISAuthenticationException,
+                mockPreviousFailureCount = 4
+            )
+            val challengeResponse2 = async {
+                composeTestRule.activity.authenticatorState.handleArcGISAuthenticationChallenge(challenge2)
+            }
+            // ensure the dialog prompt is displayed as expected
+            advanceUntilIdle()
 
+            val incorrectCredentialsMessage = composeTestRule.activity.getString(
+                R.string.incorrect_credentials,
+                hostname
+            )
+
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value != null)
+            composeTestRule.onNodeWithText(incorrectCredentialsMessage).assertIsDisplayed()
+
+            // simulate incorrect username/password
+            composeTestRule.enterUsernamePasswordAndLogin()
+            advanceUntilIdle()
+
+            assert(challengeResponse2.await() is ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError)
+        }
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user enters a correct username and password
+     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
+     *
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testValidCredentialsWithArcGISTokenAuthentication() = runTest {
+        with(StateRestorationTester(composeTestRule)) {
+            setContent {
+                DialogAuthenticator(authenticatorState = composeTestRule.activity.authenticatorState)
+            }
             // ensure all responses succeed to test that we can login
             ArcGISEnvironment.configureArcGISHttpClient {
                 setupSuccessfulArcGISTokenRequestInterceptor()
@@ -350,16 +538,22 @@ class UsernamePasswordTests {
                     allAny()
                 )
             } returns Result.success(mockk<TokenCredential>())
-
-            // issue another challenge
-            val challengeResponse2 = async {
-                authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+            val hostname = "arcgis.com"
+            val challenge = makeMockArcGISAuthenticationChallenge()
+            // issue challenge
+            val challengeResponse = async {
+                composeTestRule.activity.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
             }
+
+            val usernamePasswordMessage = composeTestRule.activity.getString(
+                R.string.username_password_login_message,
+                hostname
+            )
 
             // ensure the dialog prompt is displayed as expected
             advanceUntilIdle()
 
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value != null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value != null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertIsDisplayed()
 
             // enter a username and password
@@ -367,11 +561,11 @@ class UsernamePasswordTests {
             advanceUntilIdle()
 
             // verify we get the expected response
-            val response2 = challengeResponse2.await()
+            val response2 = challengeResponse.await()
             assert(response2 is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
 
             // assert the dialog has been dismissed
-            assert(authenticatorState.pendingUsernamePasswordChallenge.value == null)
+            assert(composeTestRule.activity.authenticatorState.pendingUsernamePasswordChallenge.value == null)
             composeTestRule.onNodeWithText(usernamePasswordMessage).assertDoesNotExist()
         }
     }
@@ -390,6 +584,6 @@ fun <T : TestRule, A : ComponentActivity> AndroidComposeTestRule<T, A>.enterUser
     onNodeWithText(activity.getString(R.string.password_label))
         .performTextInput("testpassword")
     // Click the sign in button
-    onNodeWithText(activity.getString(R.string.login))
+    onNodeWithText(activity.getString(R.string.sign_in))
         .performClick()
 }

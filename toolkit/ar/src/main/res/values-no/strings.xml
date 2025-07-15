@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Kameratillatelse ikke gitt</string>
+    <string name="arcore_not_installed_message">ARCore må være installert for å bruke denne komponenten. ARCore-tilgjengelighet: %1$s</string>
+    <string name="location_data_source_failed_to_start">Posisjonsdatakilden startet ikke: %1$s</string>
+    <string name="location_permission_not_granted">Posisjonstillatelse ikke gitt</string>
+    <string name="permissions_not_granted_message">«Følgende tillatelser er påkrevd, men ikke gitt: %1$s»</string>
+    <string name="close_calibration">Lukk kalibrering</string>
+    <string name="heading_title">Topptekst</string>
+    <string name="decrease_heading">Reduser topptekst</string>
+    <string name="increase_heading">Øk topptekst</string>
+    <string name="reset_heading">Tilbakestill topptekst</string>
+    <string name="heading_slider_description">Topptekstglidebryter</string>
+    <string name="elevation_title">Høyde</string>
+    <string name="decrease_elevation">Senk høyde</string>
+    <string name="increase_elevation">Øk høyde</string>
+    <string name="reset_elevation">Tilbakestill høyde</string>
+    <string name="elevation_slider_description">Høydeglidebryter</string>
+</resources>

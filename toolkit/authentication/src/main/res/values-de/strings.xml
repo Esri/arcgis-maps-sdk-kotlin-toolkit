@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Das von %1$s bereitgestellte Zertifikat wurde nicht von einer vertrauenswürdigen Stelle unterzeichnet.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Nicht vertrauenswürdiger Host</string>
+    <string name="server_trust_message">Das Serverzertifikat für %1$s wird nicht als vertrauenswürdig eingestuft. Das Herstellen einer Verbindung könnte Ihre Daten gefährden. Möchten Sie den Vorgang fortsetzen?</string>
     <string name="cancel">Abbrechen</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Warnung: Verbindung zulassen</string>
-    <string name="username_password_login_message">Melden Sie sich bei %1$s an.</string>
+    <string name="allow_connection">Verbindung zulassen</string>
+    <string name="username_password_login_title">Authentifizierung erforderlich</string>
+    <string name="username_password_login_message">Sie müssen sich anmelden, um auf %1$s zugreifen zu können.</string>
+    <string name="incorrect_credentials">Die Anmeldeinformationen für %1$s sind falsch. Versuchen Sie es erneut.</string>
+    <string name="sign_in_error_occurred">Fehler beim Anmelden bei %1$s. Versuchen Sie es erneut.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Benutzername</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Kennwort</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Anmeldung</string>
+    <string name="sign_in">Anmelden</string>
 </resources>

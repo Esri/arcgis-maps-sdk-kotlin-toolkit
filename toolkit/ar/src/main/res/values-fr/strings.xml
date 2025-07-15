@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Autorisation d’accès à l’appareil photo non accordée</string>
+    <string name="arcore_not_installed_message">ARCore doit être installé pour que ce composant puisse être utilisé. Disponibilité d’ARCore : %1$s</string>
+    <string name="location_data_source_failed_to_start">Échec du démarrage de la source de données de localisation : %1$s</string>
+    <string name="location_permission_not_granted">Autorisation de localisation non accordée</string>
+    <string name="permissions_not_granted_message">"Les autorisations suivantes sont requises, mais n’ont pas été accordées : %1$s"</string>
+    <string name="close_calibration">Fermer le calibrage</string>
+    <string name="heading_title">Direction</string>
+    <string name="decrease_heading">Réduire la direction</string>
+    <string name="increase_heading">Augmenter la direction</string>
+    <string name="reset_heading">Réinitialiser la direction</string>
+    <string name="heading_slider_description">Curseur de direction</string>
+    <string name="elevation_title">Élévation</string>
+    <string name="decrease_elevation">Réduire l’élévation</string>
+    <string name="increase_elevation">Augmenter l’élévation</string>
+    <string name="reset_elevation">Réinitialiser l’élévation</string>
+    <string name="elevation_slider_description">Curseur d’élévation</string>
+</resources>

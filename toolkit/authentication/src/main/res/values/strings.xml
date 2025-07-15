@@ -17,16 +17,18 @@
   -->
 
 <resources>
-    <string name="server_trust_message">The certificate provided by %1$s is not signed by a trusted authority.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Untrusted host</string>
+    <string name="server_trust_message">The server certificate for %1$s is not trusted. Connecting could compromise your data. Do you want to proceed?</string>
     <string name="cancel">Cancel</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Dangerous: Allow Connection</string>
-    <string name="username_password_login_message">Please login to %1$s</string>
+    <string name="allow_connection">Allow connection</string>
+    <string name="username_password_login_title">Authentication required</string>
+    <string name="username_password_login_message">You need to sign in to access %1$s</string>
+    <string name="incorrect_credentials">The credentials were incorrect for %1$s. Please try again.</string>
+    <string name="sign_in_error_occurred">An error occurred signing in to %1$s. Please try again.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Username</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Password</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Login</string>
+    <string name="sign_in">Sign in</string>
 </resources>

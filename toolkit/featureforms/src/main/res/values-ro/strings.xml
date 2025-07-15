@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Introduceți %1$d caracter</item>
         <item quantity="one">Introduceți %1$d caracter</item>
+        <item quantity="two">Introduceți %1$d caractere</item>
+        <item quantity="few">Introduceți %1$d caractere</item>
+        <item quantity="many">Introduceți %1$d caractere</item>
         <item quantity="other">Introduceți %1$d caractere</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Valoarea trebuie să aibă %1$d caracter</item>
         <item quantity="one">Valoarea trebuie să aibă %1$d caracter</item>
+        <item quantity="two">Valoarea trebuie să aibă %1$d caractere</item>
+        <item quantity="few">Valoarea trebuie să aibă %1$d caractere</item>
+        <item quantity="many">Valoarea trebuie să aibă %1$d caractere</item>
         <item quantity="other">Valoarea trebuie să aibă %1$d caractere</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Introduceți %1$d până la %2$d caractere</string>
-    <string name="value_must_be_from_to_characters">Valoarea trebuie să fie cuprinsă între %1$d și %2$d caractere</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximum %1$d caracter</item>
         <item quantity="one">Maximum %1$d caracter</item>
+        <item quantity="two">Maximum %1$d (de) caractere</item>
+        <item quantity="few">Maximum %1$d (de) caractere</item>
+        <item quantity="many">Maximum %1$d (de) caractere</item>
         <item quantity="other">Maximum %1$d (de) caractere</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Introduceți %1$d până la %2$d caractere</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Valoarea trebuie să fie cuprinsă între %1$d și %2$d caractere</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximum %1$d (de) caractere</string>
     <string name="no_value">Fără valori</string>
     <string name="enter_value">Introduceți o valoare</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Gata</string>
     <string name="filter">Filtru %1$s</string>
+    <string name="search">Căutare</string>
     <string name="numeric_range_helper_text">Introduceți o valoare de la %1$s la %2$s</string>
     <string name="value_must_be_from_to">Valoarea trebuie să fie de la %1$s până la %2$s</string>
     <string name="less_than_min_value">Mai puțin decât valoarea minimă %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Oră</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d ore</string>
     <string name="ff_time_picker_hour_selection">Selectare oră</string>
     <string name="ff_time_picker_hour_suffix">Ora %1$d</string>
     <string name="ff_time_picker_hour_text_field">pentru oră</string>
     <string name="ff_time_picker_minute">Minut</string>
     <string name="ff_time_picker_minute_selection">Selectare minute</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minute</string>
     <string name="ff_time_picker_minute_text_field">pentru minute</string>
     <string name="ff_time_picker_period_toggle_description">Selectați AM șu PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Fișierele goale nu pot fi descărcate</string>
     <string name="attachment_deleted">%1s a fost șters cu succes</string>
     <string name="attachment_size_limit_exceeded">Fișierele atașate mai mari de %1$s nu pot fi descărcate</string>
+    <string name="barcode_tooltip">Îndreptați camera spre un cod de bare</string>
+    <string name="barcode_permission_denied">Permisiunile camerei sunt necesare pentru a scana coduri de bare. Activați permisiunile camerei din setările dispozitivului dvs.</string>
+    <string name="unsupported_value">Valoare neacceptată</string>
+    <string name="tap_to_scan">Atingeți pentru a scana</string>
+    <string name="unable_to_open_the_camera">Nu se poate deschide camera</string>
+    <string name="value_must_be_a_guid">Valoarea trebuie să fie un GUID valid</string>
 </resources>

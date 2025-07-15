@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Serdil, mida pakub %1$s, pole usaldusväärse sertimiskeskuse allkirja.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Mitteusaldusväärne host</string>
+    <string name="server_trust_message">%1$s serveri sertifikaati ei saa usaldada. Ühenduse loomine võib teie andmeid rikkuda Kas soovite jätkata?</string>
     <string name="cancel">Tühista</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Ohtlik: luba ühendus</string>
-    <string name="username_password_login_message">Logige %1$s sisse</string>
+    <string name="allow_connection">Luba ühendus</string>
+    <string name="username_password_login_title">Autentimine on nõutav</string>
+    <string name="username_password_login_message">Üksusele %1$s juurdepääsemiseks peate sisse logima</string>
+    <string name="incorrect_credentials">Üksuse %1$s sisselogimisandmed olid valed. Proovige uuesti.</string>
+    <string name="sign_in_error_occurred">Üksusesse %1$s sisselogimisel ilmnes viga. Proovige uuesti.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Kasutajanimi</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parool</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Sisselogimine</string>
+    <string name="sign_in">Logi sisse</string>
 </resources>

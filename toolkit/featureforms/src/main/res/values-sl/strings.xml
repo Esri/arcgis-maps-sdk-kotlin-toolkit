@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Vnesi %1$d znak</item>
         <item quantity="one">Vnesi %1$d znak</item>
+        <item quantity="two">Vnesi %1$d znakov</item>
+        <item quantity="few">Vnesi %1$d znakov</item>
+        <item quantity="many">Vnesi %1$d znakov</item>
         <item quantity="other">Vnesi %1$d znakov</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Vrednost mora biti %1$d znak</item>
         <item quantity="one">Vrednost mora biti %1$d znak</item>
+        <item quantity="two">Vrednost mora biti %1$d znakov</item>
+        <item quantity="few">Vrednost mora biti %1$d znakov</item>
+        <item quantity="many">Vrednost mora biti %1$d znakov</item>
         <item quantity="other">Vrednost mora biti %1$d znakov</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Vnesite %1$d do %2$d znakov</string>
-    <string name="value_must_be_from_to_characters">Vrednost mora biti od %1$d do %2$d znakov</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maksimalno %1$d znakov</item>
         <item quantity="one">Maksimalno %1$d znakov</item>
+        <item quantity="two">Maksimalno %1$d znakov</item>
+        <item quantity="few">Maksimalno %1$d znakov</item>
+        <item quantity="many">Maksimalno %1$d znakov</item>
         <item quantity="other">Maksimalno %1$d znakov</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Vnesite %1$d do %2$d znakov</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Vrednost mora biti od %1$d do %2$d znakov</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maksimalno %1$d znakov</string>
     <string name="no_value">Ni vrednosti</string>
     <string name="enter_value">Vnesite vrednost</string>
@@ -39,6 +60,7 @@
     <string name="ok">V redu</string>
     <string name="done">Končano</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Išči</string>
     <string name="numeric_range_helper_text">Vnesite vrednosti od %1$s do %2$s</string>
     <string name="value_must_be_from_to">Vrednost mora biti od %1$s do %2$s</string>
     <string name="less_than_min_value">Manj kot najmanjša vrednost %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">dopoldne</string>
     <string name="ff_time_picker_hour">Ura</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d ur</string>
     <string name="ff_time_picker_hour_selection">Izberi uro</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
     <string name="ff_time_picker_hour_text_field">za uro</string>
     <string name="ff_time_picker_minute">Minuta</string>
     <string name="ff_time_picker_minute_selection">Izberi minute</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minut</string>
     <string name="ff_time_picker_minute_text_field">za minute</string>
     <string name="ff_time_picker_period_toggle_description">Izberi AM ali PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Praznih datotek ni mogoče prenesti</string>
     <string name="attachment_deleted">%1s je bilo uspešno izbrisano</string>
     <string name="attachment_size_limit_exceeded">Prilog večjih od %1$s ni mogoče prenesti</string>
+    <string name="barcode_tooltip">Usmerite kamero v črtno kodo</string>
+    <string name="barcode_permission_denied">Za skeniranje črtnih kod so potrebna dovoljenja kamere. Omogočite dovoljenja kamere v nastavitvah naprave.</string>
+    <string name="unsupported_value">Nepodprta vrednost</string>
+    <string name="tap_to_scan">Tapnite za skeniranje</string>
+    <string name="unable_to_open_the_camera">Kamere ni mogoče odpreti</string>
+    <string name="value_must_be_a_guid">Vrednost mora biti veljaven GUID</string>
 </resources>

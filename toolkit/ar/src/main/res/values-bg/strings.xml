@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Разрешение за камерата не е дадено</string>
+    <string name="arcore_not_installed_message">За да използвате този компонент, трябва да инсталирате ARCore. Наличност на ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Стартирането на източника на данни за местоположение не бе успешно: %1$s</string>
+    <string name="location_permission_not_granted">Не е предоставено разрешение за местоположение</string>
+    <string name="permissions_not_granted_message">"Следните разрешения са необходими, но не са предоставени: %1$s"</string>
+    <string name="close_calibration">Затваряне на калибрирането</string>
+    <string name="heading_title">Посока на движение</string>
+    <string name="decrease_heading">Намаляване на посоката на движение</string>
+    <string name="increase_heading">Увеличаване на посоката на движение</string>
+    <string name="reset_heading">Нулиране на посоката на движение</string>
+    <string name="heading_slider_description">Плъзгач за посока на движение</string>
+    <string name="elevation_title">Височина</string>
+    <string name="decrease_elevation">Намаляване на височината</string>
+    <string name="increase_elevation">Увеличаване на височината</string>
+    <string name="reset_elevation">Нулиране на височината</string>
+    <string name="elevation_slider_description">Плъзгач за височина</string>
+</resources>

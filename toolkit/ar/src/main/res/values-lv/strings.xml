@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Kameras atļauja nav piešķirta</string>
+    <string name="arcore_not_installed_message">Lai varētu izmantot šo komponentu, ir jāinstalē ARCore. ARCore pieejamība: %1$s</string>
+    <string name="location_data_source_failed_to_start">Novietojuma datu avotu neizdevās startēt: %1$s</string>
+    <string name="location_permission_not_granted">Novietojuma atļauja nav piešķirta</string>
+    <string name="permissions_not_granted_message">"Šādas atļaujas ir nepieciešamas, bet nav piešķirtas: %1$s"</string>
+    <string name="close_calibration">Aizvērt kalibrēšanu</string>
+    <string name="heading_title">Virsraksts</string>
+    <string name="decrease_heading">Samazināt virsrakstu</string>
+    <string name="increase_heading">Palielināt virsrakstu</string>
+    <string name="reset_heading">Atiestatīt virsrakstu</string>
+    <string name="heading_slider_description">Virsraksta slīdnis</string>
+    <string name="elevation_title">Augstums</string>
+    <string name="decrease_elevation">Samazināt augstumu</string>
+    <string name="increase_elevation">Palielināt augstumu</string>
+    <string name="reset_elevation">Atiestatīt augstumu</string>
+    <string name="elevation_slider_description">Augstuma slīdnis</string>
+</resources>

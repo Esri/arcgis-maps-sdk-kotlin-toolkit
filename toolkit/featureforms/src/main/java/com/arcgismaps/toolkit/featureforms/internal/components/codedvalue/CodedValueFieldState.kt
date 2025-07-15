@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
-import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
@@ -33,15 +32,26 @@ internal open class CodedValueFieldProperties(
     placeholder: String,
     description: String,
     value: StateFlow<Any?>,
-    validationErrors : StateFlow<List<ValidationErrorState>>,
+    validationErrors: StateFlow<List<ValidationErrorState>>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
-    val fieldType: FieldType,
+    fieldType: FieldType,
     val codedValues: Map<Any?, String>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties<Any?>(label, placeholder, description, value, validationErrors, required, editable, visible)
+) : FieldProperties<Any?>(
+    label,
+    placeholder,
+    description,
+    value,
+    validationErrors,
+    required,
+    editable,
+    visible,
+    fieldType,
+    null
+)
 
 /**
  * A class to handle the state of any coded value type. Essential properties are inherited
@@ -93,11 +103,6 @@ internal abstract class CodedValueFieldState(
      * The custom label to use if [showNoValueOption] is enabled.
      */
     val noValueLabel: String = properties.noValueLabel
-
-    /**
-     * The FieldType of the element's Field.
-     */
-    val fieldType: FieldType = properties.fieldType
 
     /**
      * Returns the name of the [code] if it is present in [codedValues]. If not, it returns the

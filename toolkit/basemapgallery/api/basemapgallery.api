@@ -1,0 +1,17 @@
+public final class com/arcgismaps/toolkit/basemapgallery/BasemapGalleryItem {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/BasemapStyleInfo;)V
+	public synthetic fun <init> (Lcom/arcgismaps/mapping/Item;)V
+	public fun <init> (Lcom/arcgismaps/mapping/Item;Z)V
+	public synthetic fun <init> (Lcom/arcgismaps/mapping/Item;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;ZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;ZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getTag ()Ljava/lang/Object;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun is3D ()Z
+}
+
+public final class com/arcgismaps/toolkit/basemapgallery/BasemapGalleryKt {
+	public static final fun BasemapGallery (Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+

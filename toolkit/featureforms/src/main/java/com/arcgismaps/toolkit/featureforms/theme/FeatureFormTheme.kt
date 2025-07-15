@@ -28,11 +28,11 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
-import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -126,7 +126,7 @@ internal fun FeatureFormTheme(
  * @since 200.5.0
  */
 @Immutable
-public data class FeatureFormColorScheme internal constructor(
+public data class FeatureFormColorScheme(
     public val editableTextFieldColors: EditableTextFieldColors,
     public val readOnlyFieldColors: ReadOnlyFieldColors,
     public val radioButtonFieldColors: RadioButtonFieldColors,
@@ -179,7 +179,7 @@ public data class FeatureFormColorScheme internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class EditableTextFieldColors internal constructor(
+public data class EditableTextFieldColors(
     public val focusedTextColor: Color,
     public val unfocusedTextColor: Color,
     public val errorTextColor: Color,
@@ -228,7 +228,7 @@ public data class EditableTextFieldColors internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class ReadOnlyFieldColors internal constructor(
+public data class ReadOnlyFieldColors(
     public val labelColor: Color,
     public val textColor: Color,
     public val supportingTextColor: Color,
@@ -250,7 +250,7 @@ public data class ReadOnlyFieldColors internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class GroupElementColors internal constructor(
+public data class GroupElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
     public val outlineColor: Color,
@@ -275,7 +275,7 @@ public data class GroupElementColors internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class RadioButtonFieldColors internal constructor(
+public data class RadioButtonFieldColors(
     public val labelColor: Color,
     public val textColor: Color,
     public val supportingTextColor: Color,
@@ -301,7 +301,7 @@ public data class RadioButtonFieldColors internal constructor(
  * @property scrollBarColor the color used for the scroll bar of the attachment list.
  * @since 200.5.0
  */
-public data class AttachmentsElementColors internal constructor(
+public data class AttachmentsElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
     public val outlineColor: Color,
@@ -328,7 +328,7 @@ public data class AttachmentsElementColors internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public class FeatureFormTypography internal constructor(
+public data class FeatureFormTypography(
     public val editableTextFieldTypography: EditableTextFieldTypography,
     public val readOnlyFieldTypography: ReadOnlyFieldTypography,
     public val groupElementTypography: GroupElementTypography,
@@ -348,7 +348,7 @@ public class FeatureFormTypography internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class EditableTextFieldTypography internal constructor(
+public data class EditableTextFieldTypography(
     public val labelStyle: TextStyle,
     public val textStyle: TextStyle,
     public val supportingTextStyle: TextStyle
@@ -366,7 +366,7 @@ public data class EditableTextFieldTypography internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class ReadOnlyFieldTypography internal constructor(
+public data class ReadOnlyFieldTypography(
     public val labelStyle: TextStyle,
     public val textStyle: TextStyle,
     public val supportingTextStyle: TextStyle
@@ -382,7 +382,7 @@ public data class ReadOnlyFieldTypography internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class GroupElementTypography internal constructor(
+public data class GroupElementTypography(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle
 )
@@ -398,7 +398,7 @@ public data class GroupElementTypography internal constructor(
  * @since 200.5.0
  */
 @Immutable
-public data class RadioButtonFieldTypography internal constructor(
+public data class RadioButtonFieldTypography(
     public val labelStyle: TextStyle,
     public val optionStyle: TextStyle,
     public val supportingTextStyle: TextStyle
@@ -415,7 +415,7 @@ public data class RadioButtonFieldTypography internal constructor(
  * @property tileTextStyle The style for the text of an individual attachment tile.
  * @since 200.5.0
  */
-public data class AttachmentsElementTypography internal constructor(
+public data class AttachmentsElementTypography(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle,
     public val tileTextStyle: TextStyle,

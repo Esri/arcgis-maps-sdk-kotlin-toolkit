@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Luotettava valtuuttaja ei ole allekirjoittanut kohteen %1$s varmennetta.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Isäntään ei luoteta</string>
+    <string name="server_trust_message">Kohteen %1$s palvelinvarmenteeseen ei luoteta. Yhdistäminen voi vaarantaa tietosi. Haluatko jatkaa?</string>
     <string name="cancel">Peruuta</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Vaarallinen: salli yhteys</string>
-    <string name="username_password_login_message">Kirjaudu sisään kohteeseen %1$s</string>
+    <string name="allow_connection">Salli yhdistäminen</string>
+    <string name="username_password_login_title">Todennus on pakollinen</string>
+    <string name="username_password_login_message">Sinun on kirjauduttava sisään, jotta voit käyttää kohdetta %1$s.</string>
+    <string name="incorrect_credentials">Kohteen %1$s käyttäjätiedot olivat virheelliset. Yritä uudelleen.</string>
+    <string name="sign_in_error_occurred">Kohteeseen %1$s kirjautumisen aikana tapahtui virhe. Yritä uudelleen.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Käyttäjänimi:</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Salasana</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Kirjaudu sisään</string>
+    <string name="sign_in">Kirjaudu sisään</string>
 </resources>

@@ -17,20 +17,41 @@
   -->
 
 <resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Enter %1$d character</item>
         <item quantity="one">Enter %1$d character</item>
+        <item quantity="two">Enter %1$d characters</item>
+        <item quantity="few">Enter %1$d characters</item>
+        <item quantity="many">Enter %1$d characters</item>
         <item quantity="other">Enter %1$d characters</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Value must be %1$d character</item>
         <item quantity="one">Value must be %1$d character</item>
+        <item quantity="two">Value must be %1$d characters</item>
+        <item quantity="few">Value must be %1$d characters</item>
+        <item quantity="many">Value must be %1$d characters</item>
         <item quantity="other">Value must be %1$d characters</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
-    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximum %1$d character</item>
         <item quantity="one">Maximum %1$d character</item>
+        <item quantity="two">Maximum %1$d characters</item>
+        <item quantity="few">Maximum %1$d characters</item>
+        <item quantity="many">Maximum %1$d characters</item>
         <item quantity="other">Maximum %1$d characters</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
@@ -41,6 +62,7 @@
     <string name="ok">OK</string>
     <string name="done">Done</string>
     <string name="filter">Filter %1$s</string>
+    <string name="search">Search</string>
     <string name="numeric_range_helper_text">Enter value from %1$s to %2$s</string>
     <string name="value_must_be_from_to">Value must be from %1$s to %2$s</string>
     <string name="less_than_min_value">Less than minimum value %1$s</string>
@@ -92,12 +114,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Hour</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d hours</string>
     <string name="ff_time_picker_hour_selection">Select hour</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
     <string name="ff_time_picker_hour_text_field">for hour</string>
     <string name="ff_time_picker_minute">Minute</string>
     <string name="ff_time_picker_minute_selection">Select minutes</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minutes</string>
     <string name="ff_time_picker_minute_text_field">for minutes</string>
     <string name="ff_time_picker_period_toggle_description">Select AM or PM</string>
@@ -119,7 +143,8 @@
     <string name="attachment_size_limit_exceeded">Attachments larger than %1$s cannot be downloaded</string>
     <string name="barcode_tooltip">Point your camera at a barcode</string>
     <string name="barcode_permission_denied">Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings.</string>
-    <string name="unsupported_type">Unsupported Type</string>
+    <string name="unsupported_value">Unsupported Value</string>
     <string name="tap_to_scan">Tap to scan</string>
     <string name="unable_to_open_the_camera">Unable to open the camera</string>
+    <string name="value_must_be_a_guid">Value must be a valid GUID</string>
 </resources>

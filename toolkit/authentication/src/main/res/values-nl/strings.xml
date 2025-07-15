@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Het door %1$s verstrekte certificaat is niet ondertekend door een vertrouwde autoriteit.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Niet-vertrouwde host</string>
+    <string name="server_trust_message">Het servercertificaat voor %1$s wordt niet vertrouwd. Een verbinding maken zou een risico kunnen inhouden voor uw gegevens. Wilt u doorgaan?</string>
     <string name="cancel">Annuleren</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Gevaarlijk: verbinding toestaan</string>
-    <string name="username_password_login_message">Meld u aan bij %1$s</string>
+    <string name="allow_connection">Verbinding toestaan</string>
+    <string name="username_password_login_title">Verificatie verplicht</string>
+    <string name="username_password_login_message">U moet zich aanmelden voor toegang tot %1$s</string>
+    <string name="incorrect_credentials">De aanmeldingsgegevens waren onjuist voor %1$s. Probeer het opnieuw.</string>
+    <string name="sign_in_error_occurred">Er is een fout opgetreden bij het aanmelden op %1$s. Probeer het opnieuw.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Gebruikersnaam</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Wachtwoord</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Aanmelden</string>
+    <string name="sign_in">Aanmelden</string>
 </resources>

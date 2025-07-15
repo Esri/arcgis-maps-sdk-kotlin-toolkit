@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">카메라 권한이 부여되지 않음</string>
+    <string name="arcore_not_installed_message">이 구성 요소를 사용하려면 ARCore를 설치해야 합니다. ARCore 사용 가능 여부: %1$s</string>
+    <string name="location_data_source_failed_to_start">위치 데이터 소스 시작 실패: %1$s</string>
+    <string name="location_permission_not_granted">위치 권한이 부여되지 않음</string>
+    <string name="permissions_not_granted_message">"다음 권한이 필요하지만 부여되지 않음: %1$s"</string>
+    <string name="close_calibration">보정 닫기</string>
+    <string name="heading_title">방향(방위각)</string>
+    <string name="decrease_heading">방향(방위각) 줄이기</string>
+    <string name="increase_heading">방향(방위각) 늘리기</string>
+    <string name="reset_heading">방향(방위각) 재설정</string>
+    <string name="heading_slider_description">방향(방위각) 슬라이더</string>
+    <string name="elevation_title">고도</string>
+    <string name="decrease_elevation">고도 낮추기</string>
+    <string name="increase_elevation">고도 높이기</string>
+    <string name="reset_elevation">고도 재설정</string>
+    <string name="elevation_slider_description">고도 슬라이더</string>
+</resources>

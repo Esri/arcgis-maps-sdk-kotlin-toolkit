@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">El certificat proporcionat per %1$s no està firmat per una autoritat de confiança.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Amfitrió no fiable</string>
+    <string name="server_trust_message">El certificat del servidor per a %1$s no és fiable. Establir la connexió podria posar en risc les dades. Voleu continuar?</string>
     <string name="cancel">Cancel·la</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Perill: permeteu la connexió</string>
-    <string name="username_password_login_message">Inicieu la sessió a %1$s</string>
+    <string name="allow_connection">Permet la connexió</string>
+    <string name="username_password_login_title">Es necessita autenticació</string>
+    <string name="username_password_login_message">Heu d\'iniciar la sessió per accedir a %1$s</string>
+    <string name="incorrect_credentials">Les credencials no eren correctes per a "%1$s". Torneu-ho a provar.</string>
+    <string name="sign_in_error_occurred">Hi ha hagut un error en iniciar la sessió a %1$s. Torneu-ho a provar.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nom d\'usuari</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Contrasenya</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Inicia la sessió</string>
+    <string name="sign_in">Inicia la sessió</string>
 </resources>

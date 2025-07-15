@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="camera_permission_not_granted">Oprávnění k fotoaparátu nebylo uděleno</string>
+    <string name="arcore_not_installed_message">K použití této komponenty je nutné nainstalovat ARCore. Dostupnost ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Nepodařilo se spustit zdroj dat polohy: %1$s</string>
+    <string name="location_permission_not_granted">Oprávnění k poloze nebylo uděleno</string>
+    <string name="permissions_not_granted_message">Jsou vyžadována následující oprávnění, ale nebyla udělena: %1$s</string>
+    <string name="close_calibration">Zavřít kalibraci</string>
+    <string name="heading_title">Záhlaví</string>
+    <string name="decrease_heading">Zmenšit záhlaví</string>
+    <string name="increase_heading">Zvětšit záhlaví</string>
+    <string name="reset_heading">Resetovat záhlaví</string>
+    <string name="heading_slider_description">Posuvník záhlaví</string>
+    <string name="elevation_title">Nadmořská výška</string>
+    <string name="decrease_elevation">Snížit nadmořskou výšku</string>
+    <string name="increase_elevation">Zvýšit nadmořskou výšku</string>
+    <string name="reset_elevation">Resetovat nadmořskou výšku</string>
+    <string name="elevation_slider_description">Posuvník nadmořské výšky</string>
+</resources>

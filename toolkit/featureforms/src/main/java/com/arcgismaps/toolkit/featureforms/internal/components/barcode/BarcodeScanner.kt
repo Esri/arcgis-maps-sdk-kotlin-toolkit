@@ -78,8 +78,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -92,6 +93,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
@@ -158,7 +160,12 @@ internal fun BarcodeScanner(
                     usePlatformDefaultWidth = false
                 )
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .semantics {
+                        // Set the content description for the barcode scanner dialog
+                        contentDescription = "MLKit Barcode Scanner"
+                    }) {
                     AndroidView(
                         modifier = Modifier.fillMaxSize(),
                         factory = { previewView },

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">הזן תו %1$d</item>
         <item quantity="one">הזן תו %1$d</item>
+        <item quantity="two">הזן %1$d תווים</item>
+        <item quantity="few">הזן %1$d תווים</item>
+        <item quantity="many">הזן %1$d תווים</item>
         <item quantity="other">הזן %1$d תווים</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">הערך חייב להיות תו %1$d</item>
         <item quantity="one">הערך חייב להיות תו %1$d</item>
+        <item quantity="two">הערך חייב להיות %1$d תווים</item>
+        <item quantity="few">הערך חייב להיות %1$d תווים</item>
+        <item quantity="many">הערך חייב להיות %1$d תווים</item>
         <item quantity="other">הערך חייב להיות %1$d תווים</item>
     </plurals>
-    <string name="enter_min_to_max_chars">הזן בין %1$d ל-%2$d תווים</string>
-    <string name="value_must_be_from_to_characters">הערך חייב להכיל %1$d עד %2$d תווים</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">לכל היותר תו %1$d</item>
         <item quantity="one">לכל היותר תו %1$d</item>
+        <item quantity="two">לכל היותר %1$d תווים</item>
+        <item quantity="few">לכל היותר %1$d תווים</item>
+        <item quantity="many">לכל היותר %1$d תווים</item>
         <item quantity="other">לכל היותר %1$d תווים</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">הזן בין %1$d ל-%2$d תווים</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">הערך חייב להכיל %1$d עד %2$d תווים</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">לכל היותר %1$d תווים</string>
     <string name="no_value">אין ערך</string>
     <string name="enter_value">הזן ערך</string>
@@ -39,6 +60,7 @@
     <string name="ok">אישור</string>
     <string name="done">בוצע</string>
     <string name="filter">מסנן %1$s</string>
+    <string name="search">חיפוש</string>
     <string name="numeric_range_helper_text">הזן ערך בין %1$s ל-%2$s</string>
     <string name="value_must_be_from_to">הערך חייב להיות בין %1$s ל-%2$s.</string>
     <string name="less_than_min_value">פחות מהערך המינימלי %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">שעה</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d שעות</string>
     <string name="ff_time_picker_hour_selection">בחר שעה</string>
     <string name="ff_time_picker_hour_suffix">שעה %1$d</string>
     <string name="ff_time_picker_hour_text_field">עבור שעה</string>
     <string name="ff_time_picker_minute">דקה</string>
     <string name="ff_time_picker_minute_selection">בחר דקות</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d דקות</string>
     <string name="ff_time_picker_minute_text_field">עבור דקות</string>
     <string name="ff_time_picker_period_toggle_description">בחר AM או PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">לא ניתן להוריד קבצים ריקים</string>
     <string name="attachment_deleted">המחיקה של %1s בוצעה בהצלחה</string>
     <string name="attachment_size_limit_exceeded">לא ניתן להוריד צרופות גדולות מ-%1$s</string>
+    <string name="barcode_tooltip">כוון את המצלמה שלך לברקוד</string>
+    <string name="barcode_permission_denied">הרשאות מצלמה נדרשות כדי לסרוק ברקודים. הפעל הרשאות מצלמה בהגדרות המכשיר שלך.</string>
+    <string name="unsupported_value">ערך שאינו נתמך</string>
+    <string name="tap_to_scan">הקש כדי לסרוק</string>
+    <string name="unable_to_open_the_camera">לא ניתן לפתוח את המצלמה</string>
+    <string name="value_must_be_a_guid">הערך חייב להיות GUID חוקי</string>
 </resources>

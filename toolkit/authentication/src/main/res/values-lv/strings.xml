@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">%1$s nodrošināto sertifikātu nav parakstījusi uzticama iestāde.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Neuzticams resursdators</string>
+    <string name="server_trust_message">Servera sertifikāts %1$s nav uzticams. Savienojuma izveide var apdraudēt Jūsu datus. Vai vēlaties turpināt?</string>
     <string name="cancel">Atcelt</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Bīstami: atļaut savienojumu</string>
-    <string name="username_password_login_message">Lūdzu, piesakieties %1$s</string>
+    <string name="allow_connection">Atļaut savienojumu</string>
+    <string name="username_password_login_title">Nepieciešama autentifikācija</string>
+    <string name="username_password_login_message">Jums ir jāpierakstās, lai piekļūtu %1$s</string>
+    <string name="incorrect_credentials">%1$s paredzētie akreditācijas dati bija nepareizi. Lūdzu, mēģiniet vēlreiz.</string>
+    <string name="sign_in_error_occurred">Piesakoties %1$s, radās kļūda. Lūdzu, mēģiniet vēlreiz.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Lietotājvārds</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Parole</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Pieteikties</string>
+    <string name="sign_in">Pierakstīties</string>
 </resources>

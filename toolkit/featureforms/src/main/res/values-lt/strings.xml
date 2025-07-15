@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Įveskite %1$d simbolį</item>
         <item quantity="one">Įveskite %1$d simbolį</item>
+        <item quantity="two">Įveskite %1$d simb.</item>
+        <item quantity="few">Įveskite %1$d simb.</item>
+        <item quantity="many">Įveskite %1$d simb.</item>
         <item quantity="other">Įveskite %1$d simb.</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Reikšmė turi būti %1$d simbolis</item>
         <item quantity="one">Reikšmė turi būti %1$d simbolis</item>
+        <item quantity="two">Reikšmė turi būti %1$d simboliai</item>
+        <item quantity="few">Reikšmė turi būti %1$d simboliai</item>
+        <item quantity="many">Reikšmė turi būti %1$d simboliai</item>
         <item quantity="other">Reikšmė turi būti %1$d simboliai</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Įveskite %1$d iki %2$d simbolių</string>
-    <string name="value_must_be_from_to_characters">Reikšmė turi būti nuo %1$d iki %2$d simbolių</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maks. %1$d simbolis</item>
         <item quantity="one">Maks. %1$d simbolis</item>
+        <item quantity="two">Maks. %1$d simboliai (-ių)</item>
+        <item quantity="few">Maks. %1$d simboliai (-ių)</item>
+        <item quantity="many">Maks. %1$d simboliai (-ių)</item>
         <item quantity="other">Maks. %1$d simboliai (-ių)</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Įveskite %1$d iki %2$d simbolių</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Reikšmė turi būti nuo %1$d iki %2$d simbolių</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maks. %1$d simboliai (-ių)</string>
     <string name="no_value">Nėra reikšmės</string>
     <string name="enter_value">Įvesti reikšmę</string>
@@ -39,6 +60,7 @@
     <string name="ok">Gerai</string>
     <string name="done">Atlikta</string>
     <string name="filter">Filtruoti %1$s</string>
+    <string name="search">Ieškoti</string>
     <string name="numeric_range_helper_text">Įveskite reikšmę nuo %1$s iki %2$s</string>
     <string name="value_must_be_from_to">Reikšmė turi būti nuo %1$s iki %2$s</string>
     <string name="less_than_min_value">Mažiau negu minimali reikšmė %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">priešpiet</string>
     <string name="ff_time_picker_hour">Valanda</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d val.</string>
     <string name="ff_time_picker_hour_selection">Pasirinkti valandą</string>
     <string name="ff_time_picker_hour_suffix">%1$d val.</string>
     <string name="ff_time_picker_hour_text_field">valandai</string>
     <string name="ff_time_picker_minute">Minutė</string>
     <string name="ff_time_picker_minute_selection">Pasirinkti minutes</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d min.</string>
     <string name="ff_time_picker_minute_text_field">minutėms</string>
     <string name="ff_time_picker_period_toggle_description">Pasirinkti priešpiet ar popiet</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Negalima atsisiųsti tuščių failų</string>
     <string name="attachment_deleted">%1s sėkmingai ištrinta</string>
     <string name="attachment_size_limit_exceeded">Didesnių nei %1$s priedų atsisiųsti negalima</string>
+    <string name="barcode_tooltip">Nukreipkite kamerą į brūkšninį kodą.</string>
+    <string name="barcode_permission_denied">Norint nuskaityti brūkšninius kodus reikia suteikti leidimą naudoti kamerą. Įjunkite leidimą naudoti kamerą savo įrenginio nustatymuose.</string>
+    <string name="unsupported_value">Nepalaikoma reikšmė</string>
+    <string name="tap_to_scan">Bakstelėkite, kad nuskaitytumėte</string>
+    <string name="unable_to_open_the_camera">Nepavyksta atidaryti kameros</string>
+    <string name="value_must_be_a_guid">Reikšmė turi būti tinkama GUID</string>
 </resources>

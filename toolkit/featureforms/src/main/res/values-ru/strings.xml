@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Ввести %1$d символ</item>
         <item quantity="one">Ввести %1$d символ</item>
+        <item quantity="two">Ввести %1$d символов</item>
+        <item quantity="few">Ввести %1$d символов</item>
+        <item quantity="many">Ввести %1$d символов</item>
         <item quantity="other">Введите %1$d знаков</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Значение должно содержать %1$d символ</item>
         <item quantity="one">Значение должно содержать %1$d символ</item>
+        <item quantity="two">Значение должно содержать %1$d символов</item>
+        <item quantity="few">Значение должно содержать %1$d символов</item>
+        <item quantity="many">Значение должно содержать %1$d символов</item>
         <item quantity="other">Значение должно содержать %1$d символов</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Введите от %1$d до %2$d знаков</string>
-    <string name="value_must_be_from_to_characters">Значение должно содержать от %1$d до %2$d символов</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Максимум %1$d символа</item>
         <item quantity="one">Максимум %1$d символа</item>
+        <item quantity="two">Максимум %1$d символов</item>
+        <item quantity="few">Максимум %1$d символов</item>
+        <item quantity="many">Максимум %1$d символов</item>
         <item quantity="other">Максимум %1$d символов</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Введите от %1$d до %2$d знаков</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Значение должно содержать от %1$d до %2$d символов</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Максимум %1$d символов</string>
     <string name="no_value">Нет значения</string>
     <string name="enter_value">Введите значение</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Готово</string>
     <string name="filter">Фильтр %1$s</string>
+    <string name="search">Поиск</string>
     <string name="numeric_range_helper_text">Введите значение от %1$s до %2$s</string>
     <string name="value_must_be_from_to">Значение должно содержать от %1$s до %2$s символов</string>
     <string name="less_than_min_value">Меньше минимального значения %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Час</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d часов</string>
     <string name="ff_time_picker_hour_selection">Выбрать час</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'часы</string>
     <string name="ff_time_picker_hour_text_field">в течение часа</string>
     <string name="ff_time_picker_minute">Минута</string>
     <string name="ff_time_picker_minute_selection">Выбрать минуты</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d минут</string>
     <string name="ff_time_picker_minute_text_field">в течение минут</string>
     <string name="ff_time_picker_period_toggle_description">Выбрать AM или PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Пустые файлы невозможно загрузить</string>
     <string name="attachment_deleted">%1s был успешно удален</string>
     <string name="attachment_size_limit_exceeded">Вложения размером более %1$s не могут быть загружены</string>
+    <string name="barcode_tooltip">Наведите свою камеру на штрихкод</string>
+    <string name="barcode_permission_denied">Требуются права доступа к камере, чтобы отсканировать штрихкод. Включите права доступа к камере в настройках вашего устройства.</string>
+    <string name="unsupported_value">Неподдерживаемое значение</string>
+    <string name="tap_to_scan">Коснитесь, чтобы сканировать</string>
+    <string name="unable_to_open_the_camera">Невозможно открыть камеру</string>
+    <string name="value_must_be_a_guid">Значением должен быть корректный GUID</string>
 </resources>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Geben Sie %1$d Zeichen ein.</item>
         <item quantity="one">Geben Sie %1$d Zeichen ein.</item>
+        <item quantity="two">Geben Sie %1$d Zeichen ein.</item>
+        <item quantity="few">Geben Sie %1$d Zeichen ein.</item>
+        <item quantity="many">Geben Sie %1$d Zeichen ein.</item>
         <item quantity="other">Geben Sie %1$d Zeichen ein.</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Wert muss %1$d Zeichen enthalten.</item>
         <item quantity="one">Wert muss %1$d Zeichen enthalten.</item>
+        <item quantity="two">Wert muss %1$d Zeichen enthalten.</item>
+        <item quantity="few">Wert muss %1$d Zeichen enthalten.</item>
+        <item quantity="many">Wert muss %1$d Zeichen enthalten.</item>
         <item quantity="other">Wert muss %1$d Zeichen enthalten.</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Geben Sie %1$d bis %2$d Zeichen ein.</string>
-    <string name="value_must_be_from_to_characters">Wert muss zwischen %1$d und %2$d Zeichen enthalten</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Maximal %1$d Zeichen</item>
         <item quantity="one">Maximal %1$d Zeichen</item>
+        <item quantity="two">Maximal %1$d Zeichen</item>
+        <item quantity="few">Maximal %1$d Zeichen</item>
+        <item quantity="many">Maximal %1$d Zeichen</item>
         <item quantity="other">Maximal %1$d Zeichen</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Geben Sie %1$d bis %2$d Zeichen ein.</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Wert muss zwischen %1$d und %2$d Zeichen enthalten</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Maximal %1$d Zeichen</string>
     <string name="no_value">Kein Wert</string>
     <string name="enter_value">Wert eingeben</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Fertig</string>
     <string name="filter">%1$s filtern</string>
+    <string name="search">Suchen</string>
     <string name="numeric_range_helper_text">Geben Sie einen Wert zwischen %1$s und %2$s ein.</string>
     <string name="value_must_be_from_to">Wert muss zwischen %1$s und %2$s liegen</string>
     <string name="less_than_min_value">Kleiner als Minimalwert %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Stunde</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d Stunden</string>
     <string name="ff_time_picker_hour_selection">Stunde auswählen</string>
     <string name="ff_time_picker_hour_suffix">%1$d Uhr</string>
     <string name="ff_time_picker_hour_text_field">für Stunde</string>
     <string name="ff_time_picker_minute">Minute</string>
     <string name="ff_time_picker_minute_selection">Minuten auswählen</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d Minuten</string>
     <string name="ff_time_picker_minute_text_field">für Minuten</string>
     <string name="ff_time_picker_period_toggle_description">AM oder PM auswählen</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Leere Dateien können nicht heruntergeladen werden.</string>
     <string name="attachment_deleted">%1s wurde erfolgreich gelöscht.</string>
     <string name="attachment_size_limit_exceeded">Anlagen, die größer als %1$s sind, können nicht heruntergeladen werden.</string>
+    <string name="barcode_tooltip">Richten Sie die Kamera auf einen Barcode.</string>
+    <string name="barcode_permission_denied">Zum Scannen von Barcodes sind Kameraberechtigungen erforderlich. Aktivieren Sie die Kameraberechtigungen in den Geräteeinstellungen.</string>
+    <string name="unsupported_value">Nicht unterstützter Wert</string>
+    <string name="tap_to_scan">Zum Scannen tippen</string>
+    <string name="unable_to_open_the_camera">Die Kamera kann nicht geöffnet werden.</string>
+    <string name="value_must_be_a_guid">Der Wert muss eine gültige GUID sein.</string>
 </resources>

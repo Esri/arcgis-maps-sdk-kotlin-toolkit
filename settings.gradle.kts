@@ -28,6 +28,13 @@ pluginManagement {
 val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
     .run { this == "true" }
 
+val localProperties = java.util.Properties().apply {
+    val localPropertiesFile = file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
 // The version of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
 // take the one defined in gradle.properties.
@@ -39,12 +46,31 @@ val sdkVersionNumber: String =
 
 // The build number of the ArcGIS Maps SDK for Kotlin dependency.
 // First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in gradle.properties.
+// take the one defined in local.properties.
 // CI builds pass -PbuildNumber=${BUILDNUM}
 val sdkBuildNumber: String =
     providers.gradleProperty("buildNumber").orNull
-        ?: providers.gradleProperty("sdkBuildNumber").orNull
-        ?: throw IllegalStateException("sdkBuildNumber must be set either via command line or in gradle.properties")
+        ?: localProperties.getProperty("sdkBuildNumber")
+        ?: ""
+
+// The Artifactory credentials for the ArcGIS Maps SDK for Kotlin repository.
+// First look for the credentials provided via command line (for CI builds), if not found,
+// take the one defined in local.properties.
+// CI builds pass -PartifactoryURL=${ARTIFACTORY_URL} -PartifactoryUsername=${ARTIFACTORY_USER} -PartifactoryPassword=${ARTIFACTORY_PASSWORD}
+val artifactoryUrl: String =
+    providers.gradleProperty("artifactoryUrl").orNull
+        ?: localProperties.getProperty("artifactoryUrl")
+        ?: ""
+
+val artifactoryUsername: String =
+    providers.gradleProperty("artifactoryUsername").orNull
+        ?: localProperties.getProperty("artifactoryUsername")
+        ?: ""
+
+val artifactoryPassword: String =
+    providers.gradleProperty("artifactoryPassword").orNull
+        ?: localProperties.getProperty("artifactoryPassword")
+        ?: ""
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -58,10 +84,14 @@ dependencyResolutionManagement {
                 "https://esri.jfrog.io/artifactory/arcgis"
             )
         }
-        maven {
-            url = java.net.URI(
-                "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
-            )
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
+            }
         }
     }
 
@@ -73,8 +103,13 @@ dependencyResolutionManagement {
                 )
                 sdkVersionNumber
             } else {
-                logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
-                "$sdkVersionNumber-$sdkBuildNumber"
+                if (sdkBuildNumber.isBlank()) {
+                    logger.warn("Maps SDK dependency: $sdkVersionNumber")
+                    sdkVersionNumber
+                } else {
+                    logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
+                    "$sdkVersionNumber-$sdkBuildNumber"
+                }
             }
 
             version("mapsSdk", versionAndBuild)
@@ -148,4 +183,29 @@ include(":utilitynetworks")
 project(":utilitynetworks").projectDir = File(rootDir, "toolkit/utilitynetworks")
 include(":viewpoint-persistence-tests-app")
 project(":viewpoint-persistence-tests-app").projectDir = File(rootDir, "microapps/viewpointpersistencetestsapp/app")
+
+include(":ar")
+project(":ar").projectDir = File(rootDir, "toolkit/ar")
+include(":ar-tabletop-app")
+project(":ar-tabletop-app").projectDir = File(rootDir, "microapps/ArTabletopApp/app")
+include(":ar-worldscale-app")
+project(":ar-worldscale-app").projectDir = File(rootDir, "microapps/ArWorldScaleApp/app")
+include(":scalebar-app")
+project(":scalebar-app").projectDir = File(rootDir, "microapps/ScalebarApp/app")
+include(":scalebar")
+project(":scalebar").projectDir = File(rootDir, "toolkit/scalebar")
+include(":legend")
+project(":legend").projectDir = File(rootDir, "toolkit/legend")
+include(":legend-app")
+project(":legend-app").projectDir = File(rootDir, "microapps/LegendApp/app")
+include(":basemapgallery-app")
+project(":basemapgallery-app").projectDir = File(rootDir, "microapps/BasemapGalleryApp/app")
+include(":basemapgallery")
+project(":basemapgallery").projectDir = File(rootDir, "toolkit/basemapgallery")
+include(":overviewmap-app")
+project(":overviewmap-app").projectDir = File(rootDir, "microapps/OverviewMapApp/app")
+include(":offline")
+project(":offline").projectDir = File(rootDir, "toolkit/offline")
+include(":offlinemapareas-app")
+project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 

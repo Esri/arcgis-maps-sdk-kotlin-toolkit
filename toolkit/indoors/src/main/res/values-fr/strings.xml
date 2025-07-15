@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Sélectionner un bâtiment</string>
     <string name="floor_filter_no_results">Aucun résultat trouvé.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel ne comporte pas de données tenant compte des étages</string>
+    <string name="an_error_has_occurred">Une erreur s’est produite</string>
     <string name="not_available">Indisponible</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Site – %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Effacer la recherche</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Fermer</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Réduire</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Revenir au sélecteur de sites</string>
 </resources>

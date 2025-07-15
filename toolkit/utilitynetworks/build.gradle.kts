@@ -51,7 +51,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -63,7 +64,9 @@ android {
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
@@ -77,8 +80,11 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 
@@ -91,7 +97,7 @@ apiValidation {
         "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsScreenKt",
-        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultsScreenKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceResultScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$AddStartingPointScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$StartingPointDetailsScreenKt",
         "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$ClearAllResultsDialogKt",

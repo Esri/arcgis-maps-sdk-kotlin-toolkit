@@ -28,7 +28,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.TextFields
@@ -47,7 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
@@ -62,6 +65,7 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.PlaceholderTransformat
 import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
 import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
+import kotlin.math.abs
 
 
 /**
@@ -154,7 +158,8 @@ internal fun BaseTextField(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .semantics { contentDescription = "outlined text field" },
+                    .semantics { contentDescription = "outlined text field" }
+                    .preventParentScrollWhenAtBounds(),
                 enabled = true,
                 readOnly = readOnly,
                 isError = isError,
@@ -172,10 +177,8 @@ internal fun BaseTextField(
                     ?: trailingIcon(
                         text.isEmpty(),
                         singleLine,
-                        isFocused,
                         trailingIcon,
                         onValueChange = onValueChange,
-                        onDone = { focusManager.clearFocus() }
                     ),
                 supportingText = if (isSupportingTextAvailable) {
                     {
@@ -212,6 +215,8 @@ internal fun BaseTextField(
                 ),
                 interactionSource = interactionSource,
                 singleLine = singleLine,
+                minLines = if (singleLine) 1 else BaseTextFieldDefaults.MIN_LINES_MULTI_LINE,
+                maxLines = if (singleLine) 1 else BaseTextFieldDefaults.MAX_LINES_MULTI_LINE,
                 colors = colors
             )
         } else {
@@ -230,24 +235,14 @@ internal fun BaseTextField(
 private fun trailingIcon(
     isEmpty: Boolean,
     singleLine: Boolean,
-    isFocused: Boolean,
     trailingIcon: ImageVector?,
     onValueChange: (String) -> Unit,
-    onDone: () -> Unit
 ): @Composable () -> Unit = {
-    if (!singleLine && isFocused) {
-        // show a done button only when focused for a multi line text field
-        IconButton(
-            onClick = onDone,
-            modifier = Modifier.semantics { contentDescription = "Save local edit button" }
-        ) {
-            Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done")
-        }
-    } else if (singleLine && trailingIcon != null && isEmpty) {
-        // show a trailing icon if provided when the single line field is empty
+    if (trailingIcon != null && isEmpty) {
+        // show a trailing icon if provided when the field is empty
         Icon(imageVector = trailingIcon, contentDescription = "field icon")
-    } else if (!isEmpty) {
-        // show a clear icon if the field is not empty
+    } else if (!isEmpty && singleLine) {
+        // show a clear icon if the field is not empty and is single line
         IconButton(
             onClick = { onValueChange("") },
             modifier = Modifier.semantics { contentDescription = "Clear text button" }
@@ -316,6 +311,32 @@ private fun ReadOnlyTextField(
             )
         }
     }
+}
+
+/**
+ * Prevents the parent scroll from scrolling when the child is at the bounds of the scrollable area.
+ * See [doc](https://developer.android.com/develop/ui/compose/touch-input/pointer-input/scroll#nested-scroll-participation)
+ * on nested scrolling for more information.
+ */
+internal fun Modifier.preventParentScrollWhenAtBounds(): Modifier {
+
+    // Create a nested scroll connection to prevent the parent from scrolling when the child is at the bounds
+    val nestedScrollConnection = object : NestedScrollConnection {
+        override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            // if there is any vertical scroll available, consume it by returning the available offset
+            return if (abs(available.y) > 0) {
+                available
+            } else {
+                Offset.Zero
+            }
+        }
+    }
+
+    return this.nestedScroll(nestedScrollConnection)
 }
 
 @Composable
@@ -397,10 +418,30 @@ private fun ReadOnlyTextFieldPreview() {
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
-private fun BaseTextFieldPreview() {
+private fun SingleLineTextFieldPreview() {
     MaterialTheme {
         BaseTextField(
             text = "This is a text",
+            onValueChange = {},
+            isEditable = true,
+            label = "Title",
+            placeholder = "Enter Value",
+            supportingText = "A Description",
+            isError = false,
+            isRequired = true,
+            singleLine = true,
+            trailingIcon = Icons.Rounded.TextFields,
+            hasValueExpression = false
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun MultiLineTextFieldPreview() {
+    MaterialTheme {
+        BaseTextField(
+            text = "This is a multi-line text",
             onValueChange = {},
             isEditable = true,
             label = "Title",

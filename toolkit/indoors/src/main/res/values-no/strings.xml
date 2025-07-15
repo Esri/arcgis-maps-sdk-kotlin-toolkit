@@ -8,6 +8,8 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Velg en fasilitet</string>
     <string name="floor_filter_no_results">Fant ingen resultater.</string>
+    <string name="geomodel_has_no_floor_aware_data">GeoModel har ingen data som gjenkjenner etasjer</string>
+    <string name="an_error_has_occurred">Det har oppstått en feil</string>
     <string name="not_available">Ikke tilgjengelig</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Område - %1$s</string>
@@ -23,6 +25,8 @@
     <string name="clear_search">Tøm søk</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="close">Lukk</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="collapse">Skjul</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="go_back_to_site_selector">Gå tilbake til områdevelgeren</string>
 </resources>

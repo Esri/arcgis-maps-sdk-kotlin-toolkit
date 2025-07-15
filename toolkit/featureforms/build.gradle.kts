@@ -32,6 +32,13 @@ secrets {
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
+
+    // Lint crashes on the latest Android studio
+    // (Bug with Android Studio Meerkat | 2024.3.1)
+    // TODO: Remove this when Android Studio lint checker is fixed
+    lint {
+        disable.add("SuspiciousModifierThen")
+    }
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -51,8 +58,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -62,7 +70,9 @@ android {
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+            compilerOptions {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
         }
     }
 
@@ -70,13 +80,17 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
+    @Suppress("UnstableApiUsage")
     testOptions {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-    lint {
-        targetSdk = libs.versions.compileSdk.get().toInt()
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 
@@ -88,6 +102,7 @@ apiValidation {
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.featureforms.internal.components.base.ComposableSingletons\$BaseTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$ComboBoxFieldKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$ComboBoxDialogKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComposableSingletons\$RadioButtonFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.ComposableSingletons\$DateTimeFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.ComposableSingletons\$DateTimePickerKt",
@@ -97,6 +112,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
     )
     
     ignoredClasses.addAll(composableSingletons)
@@ -124,5 +141,6 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.bundles.androidXTest)
     debugImplementation(libs.bundles.debug)
 }

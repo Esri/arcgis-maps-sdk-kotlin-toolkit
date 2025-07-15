@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Введіть %1$d символ</item>
         <item quantity="one">Введіть %1$d символ</item>
+        <item quantity="two">Введіть %1$d символи(-ів)</item>
+        <item quantity="few">Введіть %1$d символи(-ів)</item>
+        <item quantity="many">Введіть %1$d символи(-ів)</item>
         <item quantity="other">Введіть %1$d символи(-ів)</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">Значення має містити %1$d символ</item>
         <item quantity="one">Значення має містити %1$d символ</item>
+        <item quantity="two">Значення має містити %1$d символи(-ів)</item>
+        <item quantity="few">Значення має містити %1$d символи(-ів)</item>
+        <item quantity="many">Значення має містити %1$d символи(-ів)</item>
         <item quantity="other">Значення має містити %1$d символи(-ів)</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Ввести від %1$d до %2$d символів</string>
-    <string name="value_must_be_from_to_characters">Значення має містити від %1$d до %2$d символів</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Максимум %1$d символ</item>
         <item quantity="one">Максимум %1$d символ</item>
+        <item quantity="two">Максимум %1$d символи</item>
+        <item quantity="few">Максимум %1$d символи</item>
+        <item quantity="many">Максимум %1$d символи</item>
         <item quantity="other">Максимум %1$d символи</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Ввести від %1$d до %2$d символів</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">Значення має містити від %1$d до %2$d символів</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Максимум %1$d символи</string>
     <string name="no_value">Немає значення</string>
     <string name="enter_value">Ввести значення</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Готово</string>
     <string name="filter">Фільтр %1$s</string>
+    <string name="search">Пошук</string>
     <string name="numeric_range_helper_text">Ввести значення від %1$s до %2$s</string>
     <string name="value_must_be_from_to">Значення має бути від %1$s до %2$s</string>
     <string name="less_than_min_value">Менше мінімального значення %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Година</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d годин(-и)</string>
     <string name="ff_time_picker_hour_selection">Вибрати годину</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
     <string name="ff_time_picker_hour_text_field">на годину</string>
     <string name="ff_time_picker_minute">Хвилина</string>
     <string name="ff_time_picker_minute_selection">Вибрати хвилини</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d хв</string>
     <string name="ff_time_picker_minute_text_field">на хвилини</string>
     <string name="ff_time_picker_period_toggle_description">Виберіть ранок або вечір</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Порожні файли не можна завантажити</string>
     <string name="attachment_deleted">%1s успішно видалено</string>
     <string name="attachment_size_limit_exceeded">Прикріплення з розміром %1$s не можна завантажити</string>
+    <string name="barcode_tooltip">Направте камеру на штрихкод.</string>
+    <string name="barcode_permission_denied">Дозвіл на використання камери потрібен для сканування штрихкодів. Увімкніть у налаштуваннях пристрою доступ до камери.</string>
+    <string name="unsupported_value">Непідтримуване значення</string>
+    <string name="tap_to_scan">Натисніть, щоб відсканувати</string>
+    <string name="unable_to_open_the_camera">Неможливо відкрити камеру</string>
+    <string name="value_must_be_a_guid">Значення має бути дійсним GUID</string>
 </resources>

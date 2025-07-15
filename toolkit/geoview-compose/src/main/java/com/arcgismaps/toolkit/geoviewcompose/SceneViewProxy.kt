@@ -41,6 +41,9 @@ import kotlin.time.DurationUnit
  */
 @Stable
 public class SceneViewProxy : GeoViewProxy("SceneView") {
+
+    private var _isManualRenderingEnabled = false
+
     /**
      * The view-based [com.arcgismaps.mapping.view.SceneView] that this SceneViewProxy will operate on. This should
      * be initialized by the composable [SceneView] when it enters the composition and set to null when
@@ -52,6 +55,10 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         set(value) {
             setGeoView(value)
             field = value
+
+            // sync up the manual rendering state as it may have been set before the SceneView was
+            // initialized
+            value?.isManualRenderingEnabled = _isManualRenderingEnabled
         }
 
     /**
@@ -155,8 +162,8 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      * @see setManualRenderingEnabled
      * @since 200.4.0
      */
-    public val isManualRenderingEnabled: Boolean?
-        get() = sceneView?.isManualRenderingEnabled
+    public val isManualRenderingEnabled: Boolean
+        get() = _isManualRenderingEnabled
 
     /**
      * Sets whether manual rendering is enabled or not.
@@ -171,6 +178,7 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      * @since 200.4.0
      */
     public fun setManualRenderingEnabled(isManualRenderingEnabled: Boolean) {
+        _isManualRenderingEnabled = isManualRenderingEnabled
         sceneView?.isManualRenderingEnabled = isManualRenderingEnabled
     }
 

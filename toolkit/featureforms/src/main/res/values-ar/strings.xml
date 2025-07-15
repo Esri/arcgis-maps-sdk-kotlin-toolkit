@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">أدخل %1$d أحرف</item>
         <item quantity="one">أدخل %1$d أحرف</item>
+        <item quantity="two">إدخال %1$d من الرموز</item>
+        <item quantity="few">إدخال %1$d من الرموز</item>
+        <item quantity="many">إدخال %1$d من الرموز</item>
         <item quantity="other">إدخال %1$d من الرموز</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">يجب أن تتكون القيمة من %1$d حرف</item>
         <item quantity="one">يجب أن تتكون القيمة من %1$d حرف</item>
+        <item quantity="two">يجب أن تتكون القيمة من %1$d من الحروف</item>
+        <item quantity="few">يجب أن تتكون القيمة من %1$d من الحروف</item>
+        <item quantity="many">يجب أن تتكون القيمة من %1$d من الحروف</item>
         <item quantity="other">يجب أن تتكون القيمة من %1$d من الحروف</item>
     </plurals>
-    <string name="enter_min_to_max_chars">إدخال %1$d إلى %2$d من الرموز</string>
-    <string name="value_must_be_from_to_characters">يجب أن تكون القيمة %1$d إلى %2$d من الأحرف</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">الحد الأقصى %1$d حرف</item>
         <item quantity="one">الحد الأقصى %1$d حرف</item>
+        <item quantity="two">الحد الأقصى %1$d من الحروف</item>
+        <item quantity="few">الحد الأقصى %1$d من الحروف</item>
+        <item quantity="many">الحد الأقصى %1$d من الحروف</item>
         <item quantity="other">الحد الأقصى %1$d من الحروف</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">إدخال %1$d إلى %2$d من الرموز</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">يجب أن تكون القيمة %1$d إلى %2$d من الأحرف</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">الحد الأقصى %1$d من الحروف</string>
     <string name="no_value">لا توجد قيمة</string>
     <string name="enter_value">إدخال قيمة</string>
@@ -39,6 +60,7 @@
     <string name="ok">موافق</string>
     <string name="done">تم</string>
     <string name="filter">عامل التصفية %1$s</string>
+    <string name="search">بحث</string>
     <string name="numeric_range_helper_text">إدخال قيمة من %1$s إلى %2$s</string>
     <string name="value_must_be_from_to">يجب أن تتراوح القيمة بين %1$s و %2$s.</string>
     <string name="less_than_min_value">أقل من أدنى قيمة %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">صباحًا</string>
     <string name="ff_time_picker_hour">ساعة</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d من الساعات</string>
     <string name="ff_time_picker_hour_selection">تحديد الساعة</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'ساعة</string>
     <string name="ff_time_picker_hour_text_field">لمدة ساعة</string>
     <string name="ff_time_picker_minute">دقيقة</string>
     <string name="ff_time_picker_minute_selection">تحديد الدقائق</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d من الدقائق</string>
     <string name="ff_time_picker_minute_text_field">لمدة دقائق</string>
     <string name="ff_time_picker_period_toggle_description">تحديد صباحًا أو مساءً</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">لا يمكن تنزيل الملفات الفارغة</string>
     <string name="attachment_deleted">تم حذف %1s بنجاح</string>
     <string name="attachment_size_limit_exceeded">لا يمكن تنزيل المرفقات التي يزيد حجمها عن %1$s</string>
+    <string name="barcode_tooltip">قم بتوجيه الكاميرا نحو الرمز الشريطي</string>
+    <string name="barcode_permission_denied">مطلوب إذن الوصول إلى الكاميرا لمسح الباركود ضوئيًا. يرجى تفعيل أذونات الكاميرا من إعدادات جهازك.</string>
+    <string name="unsupported_value">قيمة غير مدعومة</string>
+    <string name="tap_to_scan">انقر للمسح الضوئي</string>
+    <string name="unable_to_open_the_camera">يتعذر فتح الكاميرا</string>
+    <string name="value_must_be_a_guid">يجب أن تكون القيمة GUID صالحًا</string>
 </resources>

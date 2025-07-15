@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~
   ~  Copyright 2023 Esri
   ~
@@ -15,20 +15,41 @@
   ~  limitations under the License.
   ~
   --><resources>
+    <!-- Helper text that tells the user how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="enter_n_chars">
+        <item quantity="zero">Insirir %1$d caractere</item>
         <item quantity="one">Insirir %1$d caractere</item>
+        <item quantity="two">Insira %1$d caracteres</item>
+        <item quantity="few">Insira %1$d caracteres</item>
+        <item quantity="many">Insira %1$d caracteres</item>
         <item quantity="other">Insira %1$d caracteres</item>
     </plurals>
+    <!-- Helper text that tells the user exactly how many characters to enter in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="value_must_be_n_characters">
+        <item quantity="zero">O valor deve ser %1$d caractere</item>
         <item quantity="one">O valor deve ser %1$d caractere</item>
+        <item quantity="two">O valor deve ser %1$d caracteres</item>
+        <item quantity="few">O valor deve ser %1$d caracteres</item>
+        <item quantity="many">O valor deve ser %1$d caracteres</item>
         <item quantity="other">O valor deve ser %1$d caracteres</item>
     </plurals>
-    <string name="enter_min_to_max_chars">Insira %1$d até %2$d caracteres</string>
-    <string name="value_must_be_from_to_characters">O valor deve ser %1$d para %2$d caracteres</string>
+    <!-- Helper text that tells the user the maximum number of characters allowed in a field
+        All the quantities may not be needed for all languages -->
     <plurals name="maximum_n_chars">
+        <item quantity="zero">Máximo %1$d caracteres</item>
         <item quantity="one">Máximo %1$d caracteres</item>
+        <item quantity="two">Máximo %1$d caracteres</item>
+        <item quantity="few">Máximo %1$d caracteres</item>
+        <item quantity="many">Máximo %1$d caracteres</item>
         <item quantity="other">Máximo %1$d caracteres</item>
     </plurals>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="enter_min_to_max_chars">Insira %1$d até %2$d caracteres</string>
+    <!--suppress AndroidLintPluralsCandidate-->
+    <string name="value_must_be_from_to_characters">O valor deve ser %1$d para %2$d caracteres</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="maximum_n_chars">Máximo %1$d caracteres</string>
     <string name="no_value">Sem valor</string>
     <string name="enter_value">Inserir Valor</string>
@@ -39,6 +60,7 @@
     <string name="ok">OK</string>
     <string name="done">Concluir</string>
     <string name="filter">Filtro %1$s</string>
+    <string name="search">Pesquisar</string>
     <string name="numeric_range_helper_text">Insira o valor de %1$s para %2$s</string>
     <string name="value_must_be_from_to">O valor deve ser de %1$s até %2$s</string>
     <string name="less_than_min_value">Menor que o valor mínimo %1$s</string>
@@ -90,12 +112,14 @@
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
     <string name="ff_time_picker_hour">Hora</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_hour_24h_suffix">%1$d horas</string>
     <string name="ff_time_picker_hour_selection">Selecionar hora</string>
     <string name="ff_time_picker_hour_suffix">%1$d o\'relógio</string>
     <string name="ff_time_picker_hour_text_field">para hora</string>
     <string name="ff_time_picker_minute">Minuto</string>
     <string name="ff_time_picker_minute_selection">Selecionar minutos</string>
+    <!--suppress AndroidLintPluralsCandidate-->
     <string name="ff_time_picker_minute_suffix">%1$d minutos</string>
     <string name="ff_time_picker_minute_text_field">para minutos</string>
     <string name="ff_time_picker_period_toggle_description">Selecionar AM ou PM</string>
@@ -115,4 +139,10 @@
     <string name="download_empty_file">Arquivos vazios não podem ser baixados</string>
     <string name="attachment_deleted">%1s excluído com sucesso</string>
     <string name="attachment_size_limit_exceeded">Anexos maiores que %1$s não podem ser baixados</string>
+    <string name="barcode_tooltip">Aponte sua câmera para um código de barras</string>
+    <string name="barcode_permission_denied">Permissões de câmera são necessárias para escanear códigos de barras. Habilite as permissões da câmera nas configurações do seu dispositivo.</string>
+    <string name="unsupported_value">Valor Não Suportado</string>
+    <string name="tap_to_scan">Toque para escanear</string>
+    <string name="unable_to_open_the_camera">Não foi possível abrir a câmera</string>
+    <string name="value_must_be_a_guid">O valor deve ser um GUID válido</string>
 </resources>

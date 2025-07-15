@@ -15,16 +15,18 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">O certificado fornecido por %1$s não está assinado por uma autoridade fidedigna.</string>
-    <!-- This text is on a button that can fit 12 chars -->
+    <string name="server_trust_title">Anfitrião não fidedigno</string>
+    <string name="server_trust_message">O certificado do servidor para %1$s não é fidedigno. A ligação pode comprometer os seus dados. Pretende continuar?</string>
     <string name="cancel">Cancelar</string>
-    <!-- This text is on a button that can fit 40 chars -->
-    <string name="allow_connection">Perigoso: permitir ligação</string>
-    <string name="username_password_login_message">Inicie sessão no %1$s</string>
+    <string name="allow_connection">Permitir ligação</string>
+    <string name="username_password_login_title">Autenticação necessária</string>
+    <string name="username_password_login_message">É necessário iniciar sessão para aceder a %1$s</string>
+    <string name="incorrect_credentials">As credenciais estavam incorretas para %1$s. Tente novamente.</string>
+    <string name="sign_in_error_occurred">Ocorreu um erro ao iniciar sessão no %1$s. Tente novamente.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nome de utilizador</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="password_label">Palavra-passe</string>
     <!-- This text is on a button that can fit 24 chars -->
-    <string name="login">Iniciar sessão</string>
+    <string name="sign_in">Iniciar sessão</string>
 </resources>
