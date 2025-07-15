@@ -60,6 +60,7 @@ import com.arcgismaps.toolkit.offline.internal.utils.CancelButton
 import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithProgressIndicator
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
 import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
@@ -73,6 +74,7 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 internal fun OnDemandMapAreas(
     onDemandMapAreasStates: List<OnDemandMapAreasState>,
     onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
+    colorScheme: ColorScheme,
     typography: Typography,
     modifier: Modifier
 ) {
@@ -188,7 +190,7 @@ internal fun OnDemandMapAreas(
                     // Display the action button based on the status
                     when {
                         state.status.allowsDownload -> {
-                            DownloadButton {
+                            DownloadButton(colorScheme = colorScheme) {
                                 if (state.status.allowsDownload) {
                                     state.downloadOnDemandMapArea()
                                 }
@@ -196,13 +198,13 @@ internal fun OnDemandMapAreas(
                         }
 
                         state.status == OnDemandStatus.Downloading -> {
-                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
+                            CancelDownloadButtonWithProgressIndicator(colorScheme, state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }
 
                         state.status == OnDemandStatus.DownloadCancelled || state.status is OnDemandStatus.DownloadFailure -> {
-                            CancelButton {
+                            CancelButton(colorScheme = colorScheme){
                                 state.removeCancelledMapArea { !onDemandMapAreasStates.any { it.status.isDownloaded } }
                                 onDownloadDeleted(state)
                             }
