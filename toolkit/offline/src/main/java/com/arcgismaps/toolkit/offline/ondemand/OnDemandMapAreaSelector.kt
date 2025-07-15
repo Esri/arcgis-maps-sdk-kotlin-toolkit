@@ -84,7 +84,6 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.internal.utils.calculateEnvelope
-import com.arcgismaps.toolkit.offline.theme.ColorScheme
 import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
 import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
@@ -105,7 +104,6 @@ internal fun OnDemandMapAreaSelector(
     localMap: ArcGISMap,
     uniqueMapAreaTitle: String,
     showSheet: Boolean,
-    colorScheme: ColorScheme,
     typography: Typography,
     onDismiss: () -> Unit,
     isProposedTitleChangeUnique: Boolean,
@@ -136,7 +134,6 @@ internal fun OnDemandMapAreaSelector(
                 localMap = localMap,
                 currentAreaName = uniqueMapAreaTitle,
                 isProposedTitleChangeUnique = isProposedTitleChangeUnique,
-                colorScheme = colorScheme,
                 typography = typography,
                 onProposedTitleChange = onProposedTitleChange,
                 onDismiss = { onHideSheet = true },
@@ -154,7 +151,6 @@ private fun OnDemandMapAreaSelectorOptions(
     currentAreaName: String,
     localMap: ArcGISMap,
     isProposedTitleChangeUnique: Boolean,
-    colorScheme: ColorScheme,
     typography: Typography,
     onProposedTitleChange: (String) -> Unit,
     onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit,
@@ -169,7 +165,6 @@ private fun OnDemandMapAreaSelectorOptions(
         AreaNameDialog(
             currentAreaName = mapAreaName,
             isProposedTitleChangeUnique = isProposedTitleChangeUnique,
-            colorScheme = colorScheme,
             typography = typography,
             onProposedTitleChange = onProposedTitleChange,
             onDismiss = { isShowingAreaNameDialog = false },
@@ -333,7 +328,6 @@ private fun MapAreaSelectorOverlay(
 private fun AreaNameDialog(
     currentAreaName: String,
     isProposedTitleChangeUnique: Boolean,
-    colorScheme: ColorScheme,
     typography: Typography,
     onProposedTitleChange: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -449,7 +443,6 @@ private fun AreaNameDialogPreview() {
         currentAreaName = "Area 1",
         isProposedTitleChangeUnique = true,
         onProposedTitleChange = { },
-        colorScheme = OfflineMapAreasDefaults.colorScheme(),
         typography = OfflineMapAreasDefaults.typography(),
         onDismiss = { },
         onConfirm = { }

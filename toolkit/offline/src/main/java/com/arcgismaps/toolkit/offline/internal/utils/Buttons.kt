@@ -51,25 +51,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
-import com.arcgismaps.toolkit.offline.theme.ColorScheme
 import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
 import com.arcgismaps.toolkit.offline.theme.Typography
 
 @Composable
-internal fun DownloadButton(colorScheme: ColorScheme, onClick: () -> Unit) {
+internal fun DownloadButton(onClick: () -> Unit) {
     IconButton(
         modifier = Modifier.size(30.dp),
         onClick = onClick
     ) {
         Icon(painter = painterResource(R.drawable.download_24px),
             contentDescription = stringResource(R.string.download),
-            tint = colorScheme.downloadButtonColor
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }
 
 @Composable
-internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme, progress: Int, onClick: () -> Unit) {
+internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -88,14 +87,14 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
             modifier = Modifier
                 .size(10.dp)
                 .clip(RectangleShape)
-                .background(colorScheme.cancelDownloadButtonColor)
+                .background(MaterialTheme.colorScheme.primary)
                 .align(Alignment.Center),
         )
     }
 }
 
 @Composable
-internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
+internal fun CancelButton(onClick: () -> Unit) {
     IconButton(
         modifier = Modifier.size(30.dp),
         onClick = onClick
@@ -103,7 +102,7 @@ internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.cancelled),
-            tint = colorScheme.cancelButtonColor
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -154,10 +153,10 @@ private fun ButtonsPreview() {
                 columns = GridCells.Fixed(2),
             ) {
                 item {
-                    DownloadButton(OfflineMapAreasDefaults.colorScheme()) { }
+                    DownloadButton { }
                 }
                 item {
-                    CancelDownloadButtonWithProgressIndicator(OfflineMapAreasDefaults.colorScheme(), 55) { }
+                    CancelDownloadButtonWithProgressIndicator(55) { }
                 }
                 item {
                     OpenButton(true) { }
@@ -166,7 +165,7 @@ private fun ButtonsPreview() {
                     AddMapAreaButton(OfflineMapAreasDefaults.typography()) { }
                 }
                 item {
-                    CancelButton(OfflineMapAreasDefaults.colorScheme()) { }
+                    CancelButton { }
                 }
             }
         }

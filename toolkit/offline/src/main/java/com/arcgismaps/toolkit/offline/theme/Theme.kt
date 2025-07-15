@@ -16,11 +16,9 @@
 
 package com.arcgismaps.toolkit.offline.theme
 
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -76,27 +74,6 @@ public data class Typography internal constructor(
 
     val areaNameDialogTitle: TextStyle
 )
-
-/**
- * Color styling properties for the OfflineMapAreas composable.
- *
- * This class defines the color scheme used for various buttons and dialogs in the OfflineMapAreas UI,
- * ensuring a consistent and visually appealing design.
- *
- * @param downloadButtonColor The color used for the download button.
- * @param cancelButtonColor The color used for the cancel button.
- * @param cancelDownloadButtonColor The color used for the cancel download button.
- *
- * @since 200.8.0
- */
-@Immutable
-@ExposedCopyVisibility
-public data class ColorScheme internal constructor(
-    val downloadButtonColor: Color,
-    val cancelButtonColor: Color,
-    val cancelDownloadButtonColor: Color,
-)
-
 
 /**
  * Default values for the OfflineMapAreas composable.
@@ -169,27 +146,4 @@ public object OfflineMapAreasDefaults {
         onDemandMapAreaSelectorRenameButtonTextStyle = onDemandMapAreaSelectorRenameButtonTextStyle,
         areaNameDialogTitle = areaNameDialogTitle
     )
-
-    /**
-     * Creates default color scheme values for the OfflineMapAreas composable.
-     *
-     * @param downloadButtonColor The color used for the download button.
-     * @param cancelButtonColor The color used for the cancel button.
-     * @param cancelDownloadButtonColor The color used for the cancel download button.
-     *
-     * @since 200.8.0
-     */
-    @Composable
-    public fun colorScheme(
-        downloadButtonColor: Color = MaterialTheme.colorScheme.primary,
-        cancelButtonColor: Color = MaterialTheme.colorScheme.primary,
-        cancelDownloadButtonColor: Color = ButtonDefaults.buttonColors().containerColor,
-    ): ColorScheme = ColorScheme(
-        downloadButtonColor = downloadButtonColor,
-        cancelButtonColor = cancelButtonColor,
-        cancelDownloadButtonColor = cancelDownloadButtonColor,
-    )
 }
-
-
-

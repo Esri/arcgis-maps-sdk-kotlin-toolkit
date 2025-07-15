@@ -61,7 +61,6 @@ import com.arcgismaps.toolkit.offline.internal.utils.CancelDownloadButtonWithPro
 import com.arcgismaps.toolkit.offline.internal.utils.DownloadButton
 import com.arcgismaps.toolkit.offline.internal.utils.OpenButton
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
-import com.arcgismaps.toolkit.offline.theme.ColorScheme
 import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.MapAreaDetailsBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
@@ -75,7 +74,6 @@ import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
 internal fun PreplannedMapAreas(
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     isShowingOnlyOfflineModels: Boolean,
-    colorScheme: ColorScheme,
     typography: Typography,
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     modifier: Modifier
@@ -206,7 +204,7 @@ internal fun PreplannedMapAreas(
                     // Display the action button based on the status
                     when {
                         state.status.allowsDownload -> {
-                            DownloadButton(colorScheme) {
+                            DownloadButton {
                                 if (state.status.allowsDownload) {
                                     state.downloadPreplannedMapArea()
                                 }
@@ -214,7 +212,7 @@ internal fun PreplannedMapAreas(
                         }
 
                         state.status == PreplannedStatus.Downloading -> {
-                            CancelDownloadButtonWithProgressIndicator(colorScheme, state.downloadProgress.value) {
+                            CancelDownloadButtonWithProgressIndicator(state.downloadProgress.value) {
                                 state.cancelDownload()
                             }
                         }
