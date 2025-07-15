@@ -45,7 +45,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -196,7 +195,8 @@ private fun OnDemandMapAreaSelectorOptions(
                 onClick = onDismiss,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
+                    .padding(end = 8.dp),
+                colors = colorScheme.onDemandMapAreaSelectorCancelButtonColor
             ) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon")
             }
@@ -224,7 +224,7 @@ private fun OnDemandMapAreaSelectorOptions(
                     .fillMaxWidth()
                     .weight(1f)
             )
-            OutlinedButton(onClick = { isShowingAreaNameDialog = true }) {
+            OutlinedButton(onClick = { isShowingAreaNameDialog = true }, colors = colorScheme.offlineButtonsColor) {
                 Icon(
                     imageVector = Icons.Default.Create,
                     contentDescription = "Rename map area button",
@@ -270,7 +270,8 @@ private fun OnDemandMapAreaSelectorOptions(
                         )
                     }
                 }
-            }
+            },
+            colors = colorScheme.offlineButtonsColor
         ) { Text(stringResource(R.string.download)) }
     }
 }

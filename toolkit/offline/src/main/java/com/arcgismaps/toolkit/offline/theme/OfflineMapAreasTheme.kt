@@ -16,7 +16,10 @@
 
 package com.arcgismaps.toolkit.offline.theme
 
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.sp
  * It provides a structured way to manage text appearance, ensuring consistency across the UI.
  *
  * @param offlineMapAreasTitle The text style for the title of the Offline Map Areas.
+ * @param offlineOpenButtonText The text style for the open button in Offline Map Areas.
  * @param preplannedMapAreaTitle The text style for the title of preplanned map area.
  * @param preplannedMapAreaDescription The text style for the description of preplanned map area.
  * @param preplannedMapAreaStatus The text style for the status of preplanned map area.
@@ -55,6 +59,7 @@ import androidx.compose.ui.unit.sp
 @ExposedCopyVisibility
 public data class Typography internal constructor(
     val offlineMapAreasTitle: TextStyle,
+    val offlineOpenButtonText: TextStyle,
 
     val preplannedMapAreaTitle: TextStyle,
     val preplannedMapAreaDescription: TextStyle,
@@ -84,7 +89,10 @@ public data class Typography internal constructor(
  * ensuring a consistent and visually appealing design.
  *
  * @param offlineBackgroundColor The background color used for the offline map areas.
- * @param offlineButtonsColor The color used for the download button.
+ * @param offlineSurfaceContainerColor The color used for the background of offline map area descriptions.
+ * @param offlineIconButtonsColor The color used for the icon buttons in offline map areas.
+ * @param offlineButtonsColor The color used for the buttons in offline map areas.
+ * @param onDemandMapAreaSelectorCancelButtonColor The color used for the cancel button in the on-demand map area selector.
  *
  * @since 200.8.0
  */
@@ -92,7 +100,10 @@ public data class Typography internal constructor(
 @ExposedCopyVisibility
 public data class ColorScheme internal constructor(
     val offlineBackgroundColor: Color,
-    val offlineButtonsColor: Color
+    val offlineSurfaceContainerColor: Color,
+    val offlineIconButtonsColor: Color,
+    val offlineButtonsColor: ButtonColors,
+    val onDemandMapAreaSelectorCancelButtonColor: IconButtonColors
 )
 
 
@@ -107,6 +118,7 @@ public object OfflineMapAreasDefaults {
      * Creates default typography values for the OfflineMapAreas composable.
      *
      * @param offlineMapAreasTitle The text style for the title of the Offline Map Areas.
+     * @param offlineOpenButtonText The text style for the open button in offline map areas.
      * @param preplannedMapAreaTitle The text style for the title of preplanned map area.
      * @param preplannedMapAreaDescription The text style for the description of preplanned map area.
      * @param preplannedMapAreaStatus The text style for the status of preplanned map area.
@@ -128,6 +140,7 @@ public object OfflineMapAreasDefaults {
     @Composable
     public fun typography(
         offlineMapAreasTitle: TextStyle = MaterialTheme.typography.titleMedium,
+        offlineOpenButtonText: TextStyle = MaterialTheme.typography.labelSmall,
         preplannedMapAreaTitle: TextStyle = MaterialTheme.typography.titleSmall,
         preplannedMapAreaDescription: TextStyle = MaterialTheme.typography.bodySmall,
         preplannedMapAreaStatus: TextStyle = MaterialTheme.typography.labelSmall.copy(
@@ -151,6 +164,7 @@ public object OfflineMapAreasDefaults {
         areaNameDialogTitle: TextStyle = MaterialTheme.typography.titleLarge
     ): Typography = Typography(
         offlineMapAreasTitle = offlineMapAreasTitle,
+        offlineOpenButtonText = offlineOpenButtonText,
         preplannedMapAreaTitle = preplannedMapAreaTitle,
         preplannedMapAreaDescription = preplannedMapAreaDescription,
         preplannedMapAreaStatus = preplannedMapAreaStatus,
@@ -172,17 +186,26 @@ public object OfflineMapAreasDefaults {
      * Creates default color scheme values for the OfflineMapAreas composable.
      *
      * @param offlineBackgroundColor The background color used for the offline map areas.
-     * @param downloadButtonColor The color used for the download button.
+     * @param offlineSurfaceContainerColor The color used for the background of offline map area descriptions.
+     * @param offlineIconButtonsColor The color used for the icon buttons in offline map areas.
+     * @param offlineButtonsColor The color used for the buttons in offline map areas.
+     * @param onDemandMapAreaSelectorCancelButtonColor The color used for the cancel button in the on-demand map area selector.
      *
      * @since 200.8.0
      */
     @Composable
     public fun colorScheme(
         offlineBackgroundColor: Color = MaterialTheme.colorScheme.background,
-        downloadButtonColor: Color = MaterialTheme.colorScheme.primary
+        offlineSurfaceContainerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+        offlineIconButtonsColor: Color = MaterialTheme.colorScheme.primary,
+        offlineButtonsColor: ButtonColors = ButtonDefaults.buttonColors(),
+        onDemandMapAreaSelectorCancelButtonColor: IconButtonColors = IconButtonDefaults.filledTonalIconButtonColors()
     ): ColorScheme = ColorScheme(
         offlineBackgroundColor = offlineBackgroundColor,
-        offlineButtonsColor = downloadButtonColor
+        offlineSurfaceContainerColor = offlineSurfaceContainerColor,
+        offlineIconButtonsColor = offlineIconButtonsColor,
+        offlineButtonsColor = offlineButtonsColor,
+        onDemandMapAreaSelectorCancelButtonColor = onDemandMapAreaSelectorCancelButtonColor
     )
 }
 

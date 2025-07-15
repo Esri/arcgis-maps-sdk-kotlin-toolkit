@@ -63,7 +63,7 @@ internal fun DownloadButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     ) {
         Icon(painter = painterResource(R.drawable.download_24px),
             contentDescription = stringResource(R.string.download),
-            tint = colorScheme.offlineButtonsColor
+            tint = colorScheme.offlineIconButtonsColor
         )
     }
 }
@@ -81,6 +81,7 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
             modifier = Modifier
                 .size(30.dp)
                 .align(Alignment.Center),
+            color = colorScheme.offlineIconButtonsColor,
             progress = { progress / 100f }
         )
         // Square Button to cancel the download
@@ -88,7 +89,7 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
             modifier = Modifier
                 .size(10.dp)
                 .clip(RectangleShape)
-                .background(colorScheme.offlineButtonsColor)
+                .background(colorScheme.offlineIconButtonsColor)
                 .align(Alignment.Center),
         )
     }
@@ -103,31 +104,40 @@ internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.cancelled),
-            tint = colorScheme.offlineButtonsColor
+            tint = colorScheme.offlineIconButtonsColor
         )
     }
 }
 
 @Composable
-internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
+internal fun OpenButton(
+    colorScheme: ColorScheme,
+    typography: Typography,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
     Button(
         modifier = Modifier.widthIn(max = 80.dp), // restricts max width
         contentPadding = PaddingValues(horizontal = 10.dp),
         enabled = isEnabled,
-        onClick = onClick
+        onClick = onClick,
+        colors = colorScheme.offlineButtonsColor
     ) {
         Text(
             text = stringResource(R.string.open),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelSmall
+            style = typography.offlineOpenButtonText
         )
     }
 }
 
 @Composable
-internal fun AddMapAreaButton(typography: Typography, onAdd: () -> Unit) {
-    Button(onClick = onAdd) {
+internal fun AddMapAreaButton(colorScheme: ColorScheme, typography: Typography, onAdd: () -> Unit) {
+    Button(
+        onClick = onAdd,
+        colors = colorScheme.offlineButtonsColor
+    ) {
         Icon(
             modifier = Modifier.size(16.dp),
             imageVector = Icons.Default.Add,
@@ -160,10 +170,10 @@ private fun ButtonsPreview() {
                     CancelDownloadButtonWithProgressIndicator(OfflineMapAreasDefaults.colorScheme(), 55) { }
                 }
                 item {
-                    OpenButton(true) { }
+                    OpenButton(OfflineMapAreasDefaults.colorScheme(), OfflineMapAreasDefaults.typography(), true) { }
                 }
                 item {
-                    AddMapAreaButton(OfflineMapAreasDefaults.typography()) { }
+                    AddMapAreaButton(OfflineMapAreasDefaults.colorScheme(), OfflineMapAreasDefaults.typography()) { }
                 }
                 item {
                     CancelButton(OfflineMapAreasDefaults.colorScheme()) { }

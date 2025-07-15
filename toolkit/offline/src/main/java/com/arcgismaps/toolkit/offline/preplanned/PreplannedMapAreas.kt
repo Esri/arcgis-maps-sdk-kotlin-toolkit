@@ -221,7 +221,7 @@ internal fun PreplannedMapAreas(
                         }
 
                         state.status.isDownloaded -> {
-                            OpenButton(!state.isSelectedToOpen) {
+                            OpenButton(colorScheme, typography, !state.isSelectedToOpen) {
                                 // Unselect all, then select this one
                                 preplannedMapAreaStates.forEach { it.setSelectedToOpen(false) }
                                 state.setSelectedToOpen(true)

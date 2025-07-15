@@ -39,7 +39,7 @@ public final class com/arcgismaps/toolkit/offline/InitializationStatus$NotInitia
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
-	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
@@ -71,10 +71,30 @@ public final class com/arcgismaps/toolkit/offline/OfflineRepository {
 	public final fun removeDownloads (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
 }
 
+public final class com/arcgismaps/toolkit/offline/theme/ColorScheme {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4 ()Landroidx/compose/material3/ButtonColors;
+	public final fun component5 ()Landroidx/compose/material3/IconButtonColors;
+	public final fun copy-TkvDFsM (JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public static synthetic fun copy-TkvDFsM$default (Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOfflineBackgroundColor-0d7_KjU ()J
+	public final fun getOfflineButtonsColor ()Landroidx/compose/material3/ButtonColors;
+	public final fun getOfflineIconButtonsColor-0d7_KjU ()J
+	public final fun getOfflineSurfaceContainerColor-0d7_KjU ()J
+	public final fun getOnDemandMapAreaSelectorCancelButtonColor ()Landroidx/compose/material3/IconButtonColors;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults;
-	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+	public final fun colorScheme-KC2tld4 (JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)Lcom/arcgismaps/toolkit/offline/theme/Typography;
 }
 
 public final class com/arcgismaps/toolkit/offline/theme/Typography {
@@ -87,6 +107,7 @@ public final class com/arcgismaps/toolkit/offline/theme/Typography {
 	public final fun component14 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component15 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component16 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component17 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
@@ -95,8 +116,8 @@ public final class com/arcgismaps/toolkit/offline/theme/Typography {
 	public final fun component7 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component8 ()Landroidx/compose/ui/text/TextStyle;
 	public final fun component9 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
-	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAreaNameDialogTitle ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getMapAreasDetailsDescription ()Landroidx/compose/ui/text/TextStyle;
@@ -104,6 +125,7 @@ public final class com/arcgismaps/toolkit/offline/theme/Typography {
 	public final fun getMapAreasDetailsSize ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getMapAreasDetailsTitle ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getOfflineMapAreasTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOfflineOpenButtonText ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getOnDemandMapAreaAddMapAreaButtonText ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getOnDemandMapAreaSelectorAreaName ()Landroidx/compose/ui/text/TextStyle;
 	public final fun getOnDemandMapAreaSelectorMessage ()Landroidx/compose/ui/text/TextStyle;

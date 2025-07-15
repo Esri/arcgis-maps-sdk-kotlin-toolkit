@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -182,7 +181,7 @@ internal fun MapAreaDetailsScreen(
             Box(
                 modifier = Modifier
                     .background(
-                        MaterialTheme.colorScheme.surfaceContainer,
+                        colorScheme.offlineSurfaceContainerColor,
                         shape = RoundedCornerShape(10.dp)
                     )
                     .padding(12.dp)
@@ -198,12 +197,12 @@ internal fun MapAreaDetailsScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (isAvailableToDownload) {
-                Button(onClick = { onStartDownload() }) {
+                Button(onClick = { onStartDownload() }, colors = colorScheme.offlineButtonsColor) {
                     Text(stringResource(id = R.string.download_map_area))
                 }
             }
             if (isDeletable) {
-                Button(onClick = { onDeleteDownload() }) {
+                Button(onClick = { onDeleteDownload() }, colors = colorScheme.offlineButtonsColor) {
                     Text(
                         if (offlineMapMode == OfflineMapMode.Preplanned)
                             stringResource(id = R.string.remove_download)

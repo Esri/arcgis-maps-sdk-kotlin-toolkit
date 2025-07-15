@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -269,7 +268,7 @@ internal fun OnDemandLayoutContainer(
             )
             // Show "Add Map Area" button if not in offline-only mode
             if (!isShowingOnlyOfflineModels) {
-                AddMapAreaButton(typography) { isOnDemandMapAreaSelectorVisible = true }
+                AddMapAreaButton(colorScheme, typography) { isOnDemandMapAreaSelectorVisible = true }
             }
         }
         // Show "No Internet" message if offline models are displayed
@@ -281,7 +280,7 @@ internal fun OnDemandLayoutContainer(
         }
         // Show empty state message if no on-demand areas and online mode
         else if (onDemandMapAreaStates.isEmpty()) {
-            EmptyOnDemandOfflineAreas(typography) { isOnDemandMapAreaSelectorVisible = true }
+            EmptyOnDemandOfflineAreas(colorScheme, typography) { isOnDemandMapAreaSelectorVisible = true }
         }
     }
     // Map area selection bottom sheet
