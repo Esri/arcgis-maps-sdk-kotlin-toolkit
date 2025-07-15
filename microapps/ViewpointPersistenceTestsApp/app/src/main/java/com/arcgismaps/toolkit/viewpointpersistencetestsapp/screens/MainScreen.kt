@@ -22,8 +22,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,37 +49,50 @@ fun MainScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(navController: NavHostController) {
-    LazyColumn() {
-        item {
-            ScreenSelectionItem(text = "TC 1: Single MapView", onClick = {
-                navController.navigate("TC1_SingleMapView")
-            })
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Viewpoint Persistence Tests", style = MaterialTheme.typography.headlineMedium)
+                }
+            )
         }
-        item {
-            ScreenSelectionItem(text = "TC 1.7: Single MapView with Initial Viewpoint", onClick = {
-                navController.navigate("TC1_7_InitialViewpoint")
-            })
-        }
-        item {
-            ScreenSelectionItem(text = "TC 2: Two MapViews", onClick = {
-                navController.navigate("TC2_TwoMapViews")
-            })
-        }
-        item {
-            ScreenSelectionItem(text = "TC 3: Two Screens") {
-                navController.navigate("TC3_TwoScreens")
+    ) {
+        LazyColumn(modifier = Modifier.padding(it)) {
+            item {
+                ScreenSelectionItem(text = "TC 1: Single MapView", onClick = {
+                    navController.navigate("TC1_SingleMapView")
+                })
             }
-        }
-        item {
-            ScreenSelectionItem(text = "TC 4: Single SceneView") {
-                navController.navigate("TC4_SceneView")
+            item {
+                ScreenSelectionItem(
+                    text = "TC 1.7: Single MapView with Initial Viewpoint",
+                    onClick = {
+                        navController.navigate("TC1_7_InitialViewpoint")
+                    })
             }
-        }
-        item {
-            ScreenSelectionItem(text = "TC 5: Animated Viewpoint") {
-                navController.navigate("TC5_AnimatedViewpoint")
+            item {
+                ScreenSelectionItem(text = "TC 2: Two MapViews", onClick = {
+                    navController.navigate("TC2_TwoMapViews")
+                })
+            }
+            item {
+                ScreenSelectionItem(text = "TC 3: Two Screens") {
+                    navController.navigate("TC3_TwoScreens")
+                }
+            }
+            item {
+                ScreenSelectionItem(text = "TC 4: Single SceneView") {
+                    navController.navigate("TC4_SceneView")
+                }
+            }
+            item {
+                ScreenSelectionItem(text = "TC 5: Animated Viewpoint") {
+                    navController.navigate("TC5_AnimatedViewpoint")
+                }
             }
         }
     }
