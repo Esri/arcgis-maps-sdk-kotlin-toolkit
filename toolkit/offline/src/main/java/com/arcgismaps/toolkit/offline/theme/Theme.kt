@@ -86,7 +86,6 @@ public data class Typography internal constructor(
  * @param downloadButtonColor The color used for the download button.
  * @param cancelButtonColor The color used for the cancel button.
  * @param cancelDownloadButtonColor The color used for the cancel download button.
- * @param onDemandMapAreaSelectorAreaNameDialogBackgroundColor The background color of the area name dialog in on-demand map area selector.
  *
  * @since 200.8.0
  */
@@ -96,7 +95,6 @@ public data class ColorScheme internal constructor(
     val downloadButtonColor: Color,
     val cancelButtonColor: Color,
     val cancelDownloadButtonColor: Color,
-    val onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color
 )
 
 
@@ -178,7 +176,6 @@ public object OfflineMapAreasDefaults {
      * @param downloadButtonColor The color used for the download button.
      * @param cancelButtonColor The color used for the cancel button.
      * @param cancelDownloadButtonColor The color used for the cancel download button.
-     * @param onDemandMapAreaSelectorAreaNameDialogBackgroundColor The background color of the area name dialog in on-demand map area selector.
      *
      * @since 200.8.0
      */
@@ -187,12 +184,10 @@ public object OfflineMapAreasDefaults {
         downloadButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelButtonColor: Color = MaterialTheme.colorScheme.primary,
         cancelDownloadButtonColor: Color = ButtonDefaults.buttonColors().containerColor,
-        onDemandMapAreaSelectorAreaNameDialogBackgroundColor: Color = MaterialTheme.colorScheme.background
     ): ColorScheme = ColorScheme(
         downloadButtonColor = downloadButtonColor,
         cancelButtonColor = cancelButtonColor,
         cancelDownloadButtonColor = cancelDownloadButtonColor,
-        onDemandMapAreaSelectorAreaNameDialogBackgroundColor = onDemandMapAreaSelectorAreaNameDialogBackgroundColor
     )
 }
 

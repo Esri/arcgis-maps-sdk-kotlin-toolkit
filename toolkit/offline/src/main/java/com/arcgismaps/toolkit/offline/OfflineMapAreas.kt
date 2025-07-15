@@ -18,10 +18,12 @@
 
 package com.arcgismaps.toolkit.offline
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -208,7 +210,9 @@ internal fun PreplannedLayoutContainer(
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     onRefresh: () -> Unit
 ) {
-    Column {
+    Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
+    ) {
         // Show preplanned map areas if available
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
@@ -250,7 +254,10 @@ internal fun OnDemandLayoutContainer(
     var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
     // Track if the proposed map area title is unique
     var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(true) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         // Show on-demand map areas if available
         if (onDemandMapAreaStates.isNotEmpty()) {
             OnDemandMapAreas(

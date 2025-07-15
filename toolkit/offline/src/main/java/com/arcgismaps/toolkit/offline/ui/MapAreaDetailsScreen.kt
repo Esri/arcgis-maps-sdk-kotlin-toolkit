@@ -119,6 +119,7 @@ internal fun MapAreaDetailsScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
             .fillMaxWidth()
             .verticalScroll(scrollState),

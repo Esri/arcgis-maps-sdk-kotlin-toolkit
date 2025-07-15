@@ -45,6 +45,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -179,7 +180,9 @@ private fun OnDemandMapAreaSelectorOptions(
         )
     }
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -344,7 +347,7 @@ private fun AreaNameDialog(
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(colorScheme.onDemandMapAreaSelectorAreaNameDialogBackgroundColor)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -408,6 +411,7 @@ private fun DropDownMenuBox(
                 .fillMaxWidth()
         )
         DropdownMenu(
+            modifier = modifier.background(MaterialTheme.colorScheme.background),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
