@@ -57,6 +57,7 @@ import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
 import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
 import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
@@ -66,6 +67,7 @@ import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
     sheetState: SheetState,
+    colorScheme: ColorScheme,
     typography: Typography,
     onDismiss: () -> Unit,
     offlineMapMode: OfflineMapMode,
@@ -95,6 +97,7 @@ internal fun MapAreaDetailsBottomSheet(
                 size = size,
                 isAvailableToDownload = isAvailableToDownload,
                 isDeletable = isDeletable,
+                colorScheme = colorScheme,
                 typography = typography,
                 onStartDownload = onStartDownload,
                 onDeleteDownload = onDeleteDownload
@@ -112,6 +115,7 @@ internal fun MapAreaDetailsScreen(
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
+    colorScheme: ColorScheme,
     typography: Typography,
     onStartDownload: () -> Unit,
     onDeleteDownload: () -> Unit
@@ -119,7 +123,7 @@ internal fun MapAreaDetailsScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(colorScheme.offlineBackgroundColor)
             .padding(16.dp)
             .fillMaxWidth()
             .verticalScroll(scrollState),
@@ -131,7 +135,7 @@ internal fun MapAreaDetailsScreen(
                 .padding(12.dp)
                 .shadow(8.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
-                .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp))
+                .border(2.dp, colorScheme.offlineBackgroundColor, RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface),
         ) {
             if (thumbnail != null) {
@@ -225,6 +229,7 @@ private fun PreviewMapAreaDetailsScreen() {
                 size = 40000,
                 isAvailableToDownload = false,
                 isDeletable = true,
+                colorScheme = OfflineMapAreasDefaults.colorScheme(),
                 typography = OfflineMapAreasDefaults.typography(),
                 onStartDownload = { },
                 onDeleteDownload = { }

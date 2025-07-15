@@ -211,7 +211,7 @@ internal fun PreplannedLayoutContainer(
     onRefresh: () -> Unit
 ) {
     Column(
-        modifier = modifier.background(MaterialTheme.colorScheme.background)
+        modifier = modifier.background(colorScheme.offlineBackgroundColor)
     ) {
         // Show preplanned map areas if available
         if (preplannedMapAreaStates.isNotEmpty()) {
@@ -255,7 +255,7 @@ internal fun OnDemandLayoutContainer(
     // Track if the proposed map area title is unique
     var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(true) }
     Column(
-        modifier = modifier.background(MaterialTheme.colorScheme.background),
+        modifier = modifier.background(colorScheme.offlineBackgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Show on-demand map areas if available

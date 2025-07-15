@@ -182,7 +182,7 @@ private fun OnDemandMapAreaSelectorOptions(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background),
+            .background(colorScheme.offlineBackgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -246,6 +246,7 @@ private fun OnDemandMapAreaSelectorOptions(
                 textFieldValue = stringResource(zoomLevel.descriptionResId),
                 textFieldLabel = stringResource(R.string.level_of_detail),
                 dropDownItemList = ZoomLevel.entries.map { stringResource(it.descriptionResId) },
+                colorScheme = colorScheme,
                 onIndexSelected = { zoomLevel = ZoomLevel.entries[it] }
             )
         }
@@ -347,7 +348,7 @@ private fun AreaNameDialog(
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.background)
+                .background(colorScheme.offlineBackgroundColor)
                 .padding(12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -382,6 +383,7 @@ private fun DropDownMenuBox(
     textFieldValue: String,
     textFieldLabel: String,
     dropDownItemList: List<String>,
+    colorScheme: ColorScheme,
     onIndexSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -411,7 +413,7 @@ private fun DropDownMenuBox(
                 .fillMaxWidth()
         )
         DropdownMenu(
-            modifier = modifier.background(MaterialTheme.colorScheme.background),
+            modifier = modifier.background(colorScheme.offlineBackgroundColor),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {

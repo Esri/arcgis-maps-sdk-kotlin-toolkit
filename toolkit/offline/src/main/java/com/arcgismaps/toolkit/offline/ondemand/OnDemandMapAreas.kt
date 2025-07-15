@@ -100,6 +100,7 @@ internal fun OnDemandMapAreas(
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
+            colorScheme = colorScheme,
             typography = typography,
             onDismiss = { showSheet = false },
             offlineMapMode = OfflineMapMode.OnDemand,

@@ -80,21 +80,19 @@ public data class Typography internal constructor(
 /**
  * Color styling properties for the OfflineMapAreas composable.
  *
- * This class defines the color scheme used for various buttons and dialogs in the OfflineMapAreas UI,
+ * This class defines the color scheme used for various buttons and background in the OfflineMapAreas UI,
  * ensuring a consistent and visually appealing design.
  *
- * @param downloadButtonColor The color used for the download button.
- * @param cancelButtonColor The color used for the cancel button.
- * @param cancelDownloadButtonColor The color used for the cancel download button.
+ * @param offlineBackgroundColor The background color used for the offline map areas.
+ * @param offlineButtonsColor The color used for the download button.
  *
  * @since 200.8.0
  */
 @Immutable
 @ExposedCopyVisibility
 public data class ColorScheme internal constructor(
-    val downloadButtonColor: Color,
-    val cancelButtonColor: Color,
-    val cancelDownloadButtonColor: Color,
+    val offlineBackgroundColor: Color,
+    val offlineButtonsColor: Color
 )
 
 
@@ -173,21 +171,18 @@ public object OfflineMapAreasDefaults {
     /**
      * Creates default color scheme values for the OfflineMapAreas composable.
      *
+     * @param offlineBackgroundColor The background color used for the offline map areas.
      * @param downloadButtonColor The color used for the download button.
-     * @param cancelButtonColor The color used for the cancel button.
-     * @param cancelDownloadButtonColor The color used for the cancel download button.
      *
      * @since 200.8.0
      */
     @Composable
     public fun colorScheme(
-        downloadButtonColor: Color = MaterialTheme.colorScheme.primary,
-        cancelButtonColor: Color = MaterialTheme.colorScheme.primary,
-        cancelDownloadButtonColor: Color = ButtonDefaults.buttonColors().containerColor,
+        offlineBackgroundColor: Color = MaterialTheme.colorScheme.background,
+        downloadButtonColor: Color = MaterialTheme.colorScheme.primary
     ): ColorScheme = ColorScheme(
-        downloadButtonColor = downloadButtonColor,
-        cancelButtonColor = cancelButtonColor,
-        cancelDownloadButtonColor = cancelDownloadButtonColor,
+        offlineBackgroundColor = offlineBackgroundColor,
+        offlineButtonsColor = downloadButtonColor
     )
 }
 

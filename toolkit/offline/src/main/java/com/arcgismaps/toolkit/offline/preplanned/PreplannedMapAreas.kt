@@ -102,6 +102,7 @@ internal fun PreplannedMapAreas(
         MapAreaDetailsBottomSheet(
             showSheet = true,
             sheetState = sheetState,
+            colorScheme = colorScheme,
             typography = typography,
             onDismiss = { onHideSheet = true },
             offlineMapMode = OfflineMapMode.Preplanned,

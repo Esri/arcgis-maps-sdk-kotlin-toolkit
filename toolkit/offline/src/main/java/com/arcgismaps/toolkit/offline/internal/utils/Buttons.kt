@@ -63,7 +63,7 @@ internal fun DownloadButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     ) {
         Icon(painter = painterResource(R.drawable.download_24px),
             contentDescription = stringResource(R.string.download),
-            tint = colorScheme.downloadButtonColor
+            tint = colorScheme.offlineButtonsColor
         )
     }
 }
@@ -88,7 +88,7 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
             modifier = Modifier
                 .size(10.dp)
                 .clip(RectangleShape)
-                .background(colorScheme.cancelDownloadButtonColor)
+                .background(colorScheme.offlineButtonsColor)
                 .align(Alignment.Center),
         )
     }
@@ -103,7 +103,7 @@ internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.cancelled),
-            tint = colorScheme.cancelButtonColor
+            tint = colorScheme.offlineButtonsColor
         )
     }
 }
