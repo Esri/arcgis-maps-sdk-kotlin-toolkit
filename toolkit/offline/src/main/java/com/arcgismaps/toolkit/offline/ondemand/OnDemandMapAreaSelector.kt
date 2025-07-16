@@ -125,6 +125,7 @@ internal fun OnDemandMapAreaSelector(
     if (showSheet) {
         ModalBottomSheet(
             modifier = Modifier.systemBarsPadding(),
+            containerColor = colorScheme.offlineBackgroundColor,
             onDismissRequest = { onHideSheet = true },
             sheetState = sheetState,
             sheetGesturesEnabled = false,
@@ -179,9 +180,7 @@ private fun OnDemandMapAreaSelectorOptions(
         )
     }
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colorScheme.offlineBackgroundColor),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {

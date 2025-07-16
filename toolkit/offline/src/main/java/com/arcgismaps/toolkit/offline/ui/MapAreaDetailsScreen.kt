@@ -85,6 +85,7 @@ internal fun MapAreaDetailsBottomSheet(
             sheetState.expand()
         }
         ModalBottomSheet(
+            containerColor = colorScheme.offlineBackgroundColor,
             onDismissRequest = onDismiss,
             sheetState = sheetState
         ) {
@@ -122,7 +123,6 @@ internal fun MapAreaDetailsScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .background(colorScheme.offlineBackgroundColor)
             .padding(16.dp)
             .fillMaxWidth()
             .verticalScroll(scrollState),

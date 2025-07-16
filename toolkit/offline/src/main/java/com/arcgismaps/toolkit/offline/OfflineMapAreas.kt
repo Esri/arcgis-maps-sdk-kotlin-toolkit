@@ -135,7 +135,10 @@ public fun OfflineMapAreas(
         isRefreshEnabled = false
     }
 
-    Surface(modifier = modifier) {
+    Surface(
+        modifier = modifier,
+        color = colorScheme.offlineBackgroundColor
+    ) {
         when (initializationStatus) {
             is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
@@ -209,9 +212,7 @@ internal fun PreplannedLayoutContainer(
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     onRefresh: () -> Unit
 ) {
-    Column(
-        modifier = modifier.background(colorScheme.offlineBackgroundColor)
-    ) {
+    Column {
         // Show preplanned map areas if available
         if (preplannedMapAreaStates.isNotEmpty()) {
             PreplannedMapAreas(
@@ -253,10 +254,7 @@ internal fun OnDemandLayoutContainer(
     var isOnDemandMapAreaSelectorVisible by rememberSaveable { mutableStateOf(false) }
     // Track if the proposed map area title is unique
     var isProposedTitleChangeUnique by rememberSaveable { mutableStateOf(true) }
-    Column(
-        modifier = modifier.background(colorScheme.offlineBackgroundColor),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // Show on-demand map areas if available
         if (onDemandMapAreaStates.isNotEmpty()) {
             OnDemandMapAreas(
