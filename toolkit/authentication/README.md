@@ -154,9 +154,10 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
     
     override fun onResume() {
         super.onResume()
-        // This gets called when the Custom Tab is closed using the close button or the phone's back button.
+        // This gets called when the Custom Tab is closed using the close button or the phone's back button, so we
+        // pass null.
         if (viewModel.isCustomTabLaunched()) {
-            authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(intent)
+            authenticationAppViewModel.authenticatorState.completeBrowserAuthenticationChallenge(null)
         }
     }
     ```
