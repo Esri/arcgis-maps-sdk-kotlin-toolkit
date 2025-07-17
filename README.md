@@ -167,7 +167,7 @@ The test reports for connected tests can be located under `arcgis-maps-sdk-kotli
 
 ## Licensing
 
-Copyright 2019-2022 Esri
+Copyright 2019-2025 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
