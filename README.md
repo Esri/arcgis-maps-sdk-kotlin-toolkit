@@ -5,6 +5,10 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 ## Toolkit Components
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
+* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
+  * **[FlyoverSceneView](toolkit/ar#flyoversceneview)** - Allows you to explore a scene using your device as a window into the virtual world.
+  * **[TableTopSceneView](toolkit/ar#tabletopsceneview)** - Allows you to anchor scene content to a physical surface, as if it were a 3D-printed model.
+  * **[WorldScaleSceneView](toolkit/ar#worldscalesceneview)** - Allows you to integrate scene content with the real world.
 * **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
@@ -17,7 +21,6 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
-* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
 ## API Reference
 
