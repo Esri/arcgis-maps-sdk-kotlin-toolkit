@@ -94,7 +94,7 @@ class MyAppViewModel(application: Application) : AndroidViewModel(application), 
 }
 ```
 
-### Intercepting OAuth Sign-in
+### Intercepting Browser Authentication Challenges
 
 The `Authenticator` launches a Custom Tab when an OAuth or Identity-Aware Proxy (IAP) challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `AuthenticationActivity` that is declared in your app's manifest via its intent filter.
 
