@@ -58,7 +58,7 @@ class VPSAvailabilityTests {
      *
      * @since 200.8.0
      */
-    @Ignore("Requires ARCore installation + API key")
+    //@Ignore("Requires ARCore installation + API key")
     @Test
     fun testVPSAvailability() = runTest {
         // check ARCore is installed
