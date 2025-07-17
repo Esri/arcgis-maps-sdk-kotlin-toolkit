@@ -34,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,22 +51,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.offline.R
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 
 @Composable
-internal fun DownloadButton(onClick: () -> Unit) {
+internal fun DownloadButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     IconButton(
         modifier = Modifier.size(30.dp),
         onClick = onClick
     ) {
         Icon(painter = painterResource(R.drawable.download_24px),
             contentDescription = stringResource(R.string.download),
-            tint = MaterialTheme.colorScheme.primary,
+            tint = colorScheme.offlineIconButtonsColor
         )
     }
 }
 
 @Composable
-internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: () -> Unit) {
+internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme, progress: Int, onClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -79,21 +81,22 @@ internal fun CancelDownloadButtonWithProgressIndicator(progress: Int, onClick: (
             modifier = Modifier
                 .size(30.dp)
                 .align(Alignment.Center),
-            progress = { progress / 100f },
+            color = colorScheme.offlineIconButtonsColor,
+            progress = { progress / 100f }
         )
         // Square Button to cancel the download
         Box(
             modifier = Modifier
                 .size(10.dp)
                 .clip(RectangleShape)
-                .background(ButtonDefaults.buttonColors().containerColor)
+                .background(colorScheme.offlineIconButtonsColor)
                 .align(Alignment.Center),
         )
     }
 }
 
 @Composable
-internal fun CancelButton(onClick: () -> Unit) {
+internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     IconButton(
         modifier = Modifier.size(30.dp),
         onClick = onClick
@@ -101,31 +104,40 @@ internal fun CancelButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.cancelled),
-            tint = MaterialTheme.colorScheme.primary,
+            tint = colorScheme.offlineIconButtonsColor
         )
     }
 }
 
 @Composable
-internal fun OpenButton(isEnabled: Boolean, onClick: () -> Unit) {
+internal fun OpenButton(
+    colorScheme: ColorScheme,
+    typography: Typography,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
     Button(
         modifier = Modifier.widthIn(max = 80.dp), // restricts max width
         contentPadding = PaddingValues(horizontal = 10.dp),
         enabled = isEnabled,
-        onClick = onClick
+        onClick = onClick,
+        colors = colorScheme.offlineButtonsColor
     ) {
         Text(
             text = stringResource(R.string.open),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelSmall
+            style = typography.offlineOpenButtonText
         )
     }
 }
 
 @Composable
-internal fun AddMapAreaButton(onAdd: () -> Unit) {
-    Button(onClick = onAdd) {
+internal fun AddMapAreaButton(colorScheme: ColorScheme, typography: Typography, onAdd: () -> Unit) {
+    Button(
+        onClick = onAdd,
+        colors = colorScheme.offlineButtonsColor
+    ) {
         Icon(
             modifier = Modifier.size(16.dp),
             imageVector = Icons.Default.Add,
@@ -134,7 +146,7 @@ internal fun AddMapAreaButton(onAdd: () -> Unit) {
         Spacer(Modifier.width(4.dp))
         Text(
             text = stringResource(R.string.add_map_area),
-            style = MaterialTheme.typography.labelSmall
+            style = typography.onDemandMapAreaAddMapAreaButtonText
         )
     }
 }
@@ -152,19 +164,19 @@ private fun ButtonsPreview() {
                 columns = GridCells.Fixed(2),
             ) {
                 item {
-                    DownloadButton { }
+                    DownloadButton(OfflineMapAreasDefaults.colorScheme()) { }
                 }
                 item {
-                    CancelDownloadButtonWithProgressIndicator(55) { }
+                    CancelDownloadButtonWithProgressIndicator(OfflineMapAreasDefaults.colorScheme(), 55) { }
                 }
                 item {
-                    OpenButton(true) { }
+                    OpenButton(OfflineMapAreasDefaults.colorScheme(), OfflineMapAreasDefaults.typography(), true) { }
                 }
                 item {
-                    AddMapAreaButton { }
+                    AddMapAreaButton(OfflineMapAreasDefaults.colorScheme(), OfflineMapAreasDefaults.typography()) { }
                 }
                 item {
-                    CancelButton { }
+                    CancelButton(OfflineMapAreasDefaults.colorScheme()) { }
                 }
             }
         }

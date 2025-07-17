@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -57,6 +56,9 @@ import com.arcgismaps.toolkit.offline.OfflineMapMode
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.formatSize
 import com.arcgismaps.toolkit.offline.internal.utils.htmlToPlainText
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 
@@ -64,6 +66,8 @@ import com.arcgismaps.toolkit.offline.ui.material3.SheetState
 internal fun MapAreaDetailsBottomSheet(
     showSheet: Boolean,
     sheetState: SheetState,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onDismiss: () -> Unit,
     offlineMapMode: OfflineMapMode,
     thumbnail: ImageBitmap?,
@@ -81,6 +85,7 @@ internal fun MapAreaDetailsBottomSheet(
             sheetState.expand()
         }
         ModalBottomSheet(
+            containerColor = colorScheme.offlineBackgroundColor,
             onDismissRequest = onDismiss,
             sheetState = sheetState
         ) {
@@ -92,6 +97,8 @@ internal fun MapAreaDetailsBottomSheet(
                 size = size,
                 isAvailableToDownload = isAvailableToDownload,
                 isDeletable = isDeletable,
+                colorScheme = colorScheme,
+                typography = typography,
                 onStartDownload = onStartDownload,
                 onDeleteDownload = onDeleteDownload
             )
@@ -108,6 +115,8 @@ internal fun MapAreaDetailsScreen(
     size: Int,
     isAvailableToDownload: Boolean,
     isDeletable: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onStartDownload: () -> Unit,
     onDeleteDownload: () -> Unit
 ) {
@@ -125,7 +134,7 @@ internal fun MapAreaDetailsScreen(
                 .padding(12.dp)
                 .shadow(8.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
-                .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp))
+                .border(2.dp, colorScheme.offlineBackgroundColor, RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface),
         ) {
             if (thumbnail != null) {
@@ -142,19 +151,19 @@ internal fun MapAreaDetailsScreen(
                         .size(50.dp), // 1/4th the size of the image Box
                     imageVector = Icons.Default.ImageNotSupported,
                     contentDescription = stringResource(id = R.string.no_image_available),
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
         // Title
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        Text(text = title, style = typography.mapAreasDetailsTitle)
 
         // Size of the map area
         if (size != 0) {
             Text(
                 text = stringResource(R.string.directory_size, formatSize(size)),
-                style = MaterialTheme.typography.bodyMedium
+                style = typography.mapAreasDetailsSize
             )
         }
 
@@ -163,7 +172,7 @@ internal fun MapAreaDetailsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = stringResource(id = R.string.description),
-                style = MaterialTheme.typography.labelSmall,
+                style = typography.mapAreasDetailsDescriptionLabel,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(start = 14.dp)
@@ -172,7 +181,7 @@ internal fun MapAreaDetailsScreen(
             Box(
                 modifier = Modifier
                     .background(
-                        MaterialTheme.colorScheme.surfaceContainer,
+                        colorScheme.offlineSurfaceContainerColor,
                         shape = RoundedCornerShape(10.dp)
                     )
                     .padding(12.dp)
@@ -180,7 +189,7 @@ internal fun MapAreaDetailsScreen(
             ) {
                 Text(
                     text = htmlToPlainText(description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = typography.mapAreasDetailsDescription
                 )
             }
         }
@@ -188,12 +197,12 @@ internal fun MapAreaDetailsScreen(
         Spacer(modifier = Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (isAvailableToDownload) {
-                Button(onClick = { onStartDownload() }) {
+                Button(onClick = { onStartDownload() }, colors = colorScheme.offlineButtonsColor) {
                     Text(stringResource(id = R.string.download_map_area))
                 }
             }
             if (isDeletable) {
-                Button(onClick = { onDeleteDownload() }) {
+                Button(onClick = { onDeleteDownload() }, colors = colorScheme.offlineButtonsColor) {
                     Text(
                         if (offlineMapMode == OfflineMapMode.Preplanned)
                             stringResource(id = R.string.remove_download)
@@ -219,6 +228,8 @@ private fun PreviewMapAreaDetailsScreen() {
                 size = 40000,
                 isAvailableToDownload = false,
                 isDeletable = true,
+                colorScheme = OfflineMapAreasDefaults.colorScheme(),
+                typography = OfflineMapAreasDefaults.typography(),
                 onStartDownload = { },
                 onDeleteDownload = { }
             )
