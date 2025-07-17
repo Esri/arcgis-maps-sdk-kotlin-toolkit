@@ -1,6 +1,6 @@
 # Authenticator
 
-The `Authenticator` is a ready-to-use component designed to simplify handling authentication challenges when working with the ArcGIS Maps SDK for Kotlin. It provides a user-friendly interface to manage various authentication scenarios, such as network and ArcGIS-specific challenges, ensuring seamless integration into your app.
+The `Authenticator` is a ready-to-use component designed to simplify handling authentication challenges when working with the ArcGIS Maps SDK for Kotlin. It provides a user-friendly interface to manage various authentication scenarios, such as network and ArcGIS-specific authentication challenges, ensuring seamless integration into your app.
 
 <img src="username-password-prompt.png" alt="drawing" width="400"/>
 
@@ -15,7 +15,7 @@ The `Authenticator` is a Composable function that will display a prompt when it 
 
 The `Authenticator` works directly with the `ArcGISEnvironment.authenticationManager`, so any configuration set on the `AuthenticationManager` (for example, credential persistence, interceptors, and the http cache) will be reflected in the `Authenticator`'s behavior.
 
-A second Composable component, the `DialogAuthenticator`, performs the same functionality as the `Authenticator` but presents Username/Password prompts and Server Trust prompts in an `Dialog`. In any of the code samples below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior should be identical.
+A second Composable component, the `DialogAuthenticator`, performs the same functionality as the `Authenticator` but presents Username/Password prompts and Server Trust prompts in a `Dialog`. In any of the code samples below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior will be identical.
 
 ## Usage
 
@@ -100,55 +100,27 @@ The `Authenticator` launches a Custom Tab when an OAuth or Identity-Aware Proxy 
 
 If you want to launch a Custom Tab from your own app's activity, follow these steps:
 
-1. Remove the `AuthenticationActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent:
+1. Remove the `AuthenticationActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent
+2. Set your activity's `launchMode` to `singleTop`. 
+
+   ℹ️ This is necessary because, when handling OAuth or IAP redirects, the Android system delivers the redirect intent to your activity. Using `singleTop` ensures that if your activity is already running at the top of the stack, a new instance is not created; instead, the existing instance receives the intent via `onNewIntent`. This allows your app to properly process authentication results without launching duplicate activities.
 
     ```xml
     <activity
         android:name="<Your-App-Activity-Name>"
-        android:exported="true"
-        android:theme="@style/Theme.AuthenticationApp">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        <!-- This intent filter here -->
+        ...
+        android:launchMode="singleTop"
+        ...>
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
-
+   
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-
+   
             <data
                 android:host="auth"
-                android:scheme="my-ags-app" />
+                android:scheme="my-ags-app"/>
         </intent-filter>
-        <!--    -->
-    </activity>
-    ```
-
-2. Set your activity's `launchMode` to `singleTop`. This is necessary because, when handling OAuth or IAP redirects, the Android system delivers the redirect intent to your activity. Using `singleTop` ensures that if your activity is already running at the top of the stack, a new instance is not created; instead, the existing instance receives the intent via `onNewIntent`. This allows your app to properly process authentication results without launching duplicate activities.
-    ```xml
-    <activity
-        android:name="<Your-App-Activity-Name>"
-        android:exported="true"
-        android:launchMode="singleTop"                         <-------
-        android:theme="@style/Theme.AuthenticationApp">
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-
-        <category android:name="android.intent.category.LAUNCHER" />
-    </intent-filter>
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-
-        <data
-            android:host="auth"
-            android:scheme="my-ags-app"/>
-    </intent-filter>
     </activity>
     ```
 3. Call the extension function `launchCustomTabs` in the lambda `onPendingBrowserAuthenticationChallenge` of the `Authenticator`, passing in the pending `BrowserAuthenticationChallenge`:

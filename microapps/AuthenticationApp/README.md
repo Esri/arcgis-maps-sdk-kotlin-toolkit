@@ -10,7 +10,7 @@ On startup, the app presents the user with a editable text field containing a po
 If the portal is successfully loaded, the info screen below will display the portal info JSON, otherwise it will display the loading error. 
 
 The "Use OAuth" checkbox controls whether the `Authenticator` will use OAuth to load the `Portal`.
-The "Signout" button clears any saved credentials, if there are any Identity-Aware-Proxy (IAP) credentials, this will launch a browser page to invalidate the IAP session.
+The "Sign out" button clears any saved credentials. If there are any Identity-Aware-Proxy (IAP) credentials, this will launch a browser page to invalidate the IAP session.
 
 To load a different Portal URL with OAuth, the `AuthenticationAppViewModel.oAuthUserConfiguration` should be changed to match the portal's configuration. 
 
