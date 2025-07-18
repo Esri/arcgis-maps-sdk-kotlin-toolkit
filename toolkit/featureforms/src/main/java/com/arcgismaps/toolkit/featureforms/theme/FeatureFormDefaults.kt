@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
 /**
@@ -273,6 +274,7 @@ public object FeatureFormDefaults {
         containerColor: Color = Color.Unspecified,
         tileTextColor: Color = MaterialTheme.colorScheme.onSurface,
         tileBorderColor: Color = MaterialTheme.colorScheme.outline,
+        tileContainerColor: Color = Color.Unspecified,
         scrollBarColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     ): AttachmentsElementColors {
         return AttachmentsElementColors(
@@ -282,6 +284,7 @@ public object FeatureFormDefaults {
             containerColor = containerColor,
             tileTextColor = tileTextColor,
             tileBorderColor = tileBorderColor,
+            tileContainerColor = tileContainerColor,
             scrollBarColor = scrollBarColor
         )
     }
@@ -404,14 +407,18 @@ public object FeatureFormDefaults {
      */
     @Composable
     public fun attachmentsElementTypography(
-        labelStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+        labelStyle: TextStyle = MaterialTheme.typography.titleLarge,
         supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-        tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall
+        tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
+            textAlign = TextAlign.Center
+        ),
+        tileSupportingTextStyle: TextStyle = MaterialTheme.typography.bodySmall
     ): AttachmentsElementTypography {
         return AttachmentsElementTypography(
             labelStyle = labelStyle,
             supportingTextStyle = supportingTextStyle,
-            tileTextStyle = tileTextStyle
+            tileTextStyle = tileTextStyle,
+            tileSupportingTextStyle = tileSupportingTextStyle
         )
     }
 }

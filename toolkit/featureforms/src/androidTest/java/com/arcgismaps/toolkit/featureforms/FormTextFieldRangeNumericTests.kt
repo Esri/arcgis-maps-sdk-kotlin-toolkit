@@ -16,15 +16,22 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performTextInput
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextAreaFormInput
+import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -62,11 +69,32 @@ class FormTextFieldRangeNumericTests : FeatureFormTestRunner(
     fun testEnterNumericValueOutOfRange() = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            val state = rememberFieldState(
-                element = integerField,
-                form = featureForm,
-                scope = scope
-            ) as FormTextFieldState
+            val state = remember {
+                FormTextFieldState(
+                    id = integerField.hashCode(),
+                    properties = TextFieldProperties(
+                        label = integerField.label,
+                        placeholder = integerField.hint,
+                        description = integerField.description,
+                        value = integerField.formattedValueAsStateFlow(scope),
+                        validationErrors = integerField.mapValidationErrors(scope),
+                        editable = integerField.isEditable,
+                        required = integerField.isRequired,
+                        visible = integerField.isVisible,
+                        singleLine = integerField.input is TextBoxFormInput,
+                        fieldType = integerField.fieldType,
+                        domain = integerField.domain as? RangeDomain,
+                        minLength = (integerField.input as TextBoxFormInput).minLength.toInt(),
+                        maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt()
+                    ),
+                    hasValueExpression = integerField.hasValueExpression,
+                    scope = scope,
+                    updateValue = integerField::updateValue,
+                    evaluateExpressions = {
+                        featureForm.evaluateExpressions()
+                    },
+                )
+            }
             FormTextField(state = state)
         }
         val outlinedTextField =
