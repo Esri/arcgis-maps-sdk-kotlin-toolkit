@@ -65,10 +65,6 @@ class FloorFilterViewModel : ViewModel() {
             }
         }
 
-    init {
-        viewModelScope.launch { floorAwareWebMap.load() }
-    }
-
     /**
      * Returns the envelope with an added buffer factor applied to the given Geometry's extent.
      *
