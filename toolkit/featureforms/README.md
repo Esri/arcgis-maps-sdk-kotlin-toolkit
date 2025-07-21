@@ -33,9 +33,9 @@ To display a `FeatureForm` the first step is to create a `FeatureFormState` obje
 ### Creating the FeatureFormState
 
 ```kotlin
-// create the FeatureForm from the Feature
+// First create the FeatureForm object from the Feature
 val featureForm = FeatureForm(arcGISFeature)
-// create the state object
+// Then create the state object by passing in the FeatureForm object.
 val featureFormState = FeatureFormState(featureForm, coroutineScope)
 ```
 
@@ -226,7 +226,7 @@ special styling.
 
 <img src="screenshots/text_form_element.png" width="250"/>
 
-### UtilityAssociationsFormElement
+### [UtilityAssociationsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-utility-associations-form-element/index.html)
 
 - The `UtilityAssociationsFormElement` is used to display utility network associations in the form.
 - It supports grouping associations by their type and network source.
