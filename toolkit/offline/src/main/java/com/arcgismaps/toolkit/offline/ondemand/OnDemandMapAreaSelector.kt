@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -252,7 +253,8 @@ private fun OnDemandMapAreaSelectorOptions(
         Button(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .testTag("DownloadButton"),
             onClick = {
                 scope.launch {
                     val thumbnail = mapViewProxy.exportImage().getOrNull()?.bitmap
@@ -286,7 +288,7 @@ private fun MapViewWithAreaSelector(
             .fillMaxWidth()
             .onSizeChanged { onMapViewSizeChanged.invoke(it) }) {
         MapView(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.matchParentSize().testTag("OnDemandMapViewSelector"),
             arcGISMap = arcGISMap,
             mapViewProxy = mapViewProxy
         )

@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
@@ -135,7 +136,7 @@ public fun OfflineMapAreas(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.testTag("OfflineMapAreasContainerLayout"),
         color = colorScheme.offlineBackgroundColor
     ) {
         when (initializationStatus) {
