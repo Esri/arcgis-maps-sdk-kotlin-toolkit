@@ -28,7 +28,7 @@ To see it in action, check out the [microapp](../../microapps/FeatureFormsApp). 
 
 To display a `FeatureForm` the first step is to create a `FeatureFormState` object as follows.
 
-> *Note:* In version 200.8.0, the `FeatureForm` composable has been updated to improve functionality and provide Utility Association support through the use of a `FeatureFormState` class. Please follow this [migration guide](#migrate-to-the-state-based-featureform-api) which provides steps to migrate from the deprecated `FeatureForm` composable introduced in version 200.4.0 which does not support Utility Associations.
+> *Note:* In version 200.8.0, the `FeatureForm` compose API has been updated to improve functionality and support advanced editing workflows that involve Utility Network Associations through the use of a `FeatureFormState` class.
 
 ### Creating the FeatureFormState
 
@@ -232,11 +232,17 @@ special styling.
 - It supports grouping associations by their type and network source.
 - Navigating to edit another feature on the other side of the association is also supported.
 
+#### The element with different association types with the count of total associations is displayed
 
+<img src="screenshots/ua_form_element.png" width="250"/>
 
-## Migrate to the state-based FeatureForm API
+#### Each association type shows the different network sources present
 
+<img src="screenshots/ua_network_sources.png" width="250"/>
 
+#### Final page shows the utility associations for the selected network source
+
+<img src="screenshots/utility_associations.png" width="250"/>
 
 ## Theming and Customization
 
