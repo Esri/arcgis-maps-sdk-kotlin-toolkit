@@ -74,7 +74,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         groupNode.assertIsDisplayed()
         groupNode.performClick()
         val associationNode =
-            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Content"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
@@ -132,7 +132,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         groupNode.assertIsDisplayed()
         groupNode.performClick()
         val associationNode =
-            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Containment Visible : false"))
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Content"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
