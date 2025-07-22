@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,7 +59,7 @@ import com.arcgismaps.toolkit.offline.theme.Typography
 @Composable
 internal fun DownloadButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     IconButton(
-        modifier = Modifier.size(30.dp),
+        modifier = Modifier.size(30.dp).testTag("DownloadButton"),
         onClick = onClick
     ) {
         Icon(painter = painterResource(R.drawable.download_24px),
@@ -75,6 +76,7 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
         modifier = Modifier
             .size(30.dp)
             .clickable { onClick.invoke() }
+            .testTag("StopDownloadButton")
     ) {
         // Circular Progress Indicator
         CircularProgressIndicator(
@@ -98,7 +100,7 @@ internal fun CancelDownloadButtonWithProgressIndicator(colorScheme: ColorScheme,
 @Composable
 internal fun CancelButton(colorScheme: ColorScheme, onClick: () -> Unit) {
     IconButton(
-        modifier = Modifier.size(30.dp),
+        modifier = Modifier.size(30.dp).testTag("CancelButton"),
         onClick = onClick
     ) {
         Icon(
@@ -117,7 +119,7 @@ internal fun OpenButton(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = Modifier.widthIn(max = 80.dp), // restricts max width
+        modifier = Modifier.widthIn(max = 80.dp).testTag("OpenButton"), // restricts max width
         contentPadding = PaddingValues(horizontal = 10.dp),
         enabled = isEnabled,
         onClick = onClick,
@@ -136,7 +138,8 @@ internal fun OpenButton(
 internal fun AddMapAreaButton(colorScheme: ColorScheme, typography: Typography, onAdd: () -> Unit) {
     Button(
         onClick = onAdd,
-        colors = colorScheme.offlineButtonsColor
+        colors = colorScheme.offlineButtonsColor,
+        modifier = Modifier.testTag("AddMapAreaButton")
     ) {
         Icon(
             modifier = Modifier.size(16.dp),
