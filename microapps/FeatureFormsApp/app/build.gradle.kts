@@ -94,6 +94,9 @@ dependencies {
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
+    // coil
+    implementation(platform(libs.coil.bom))
+    implementation(libs.coil.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

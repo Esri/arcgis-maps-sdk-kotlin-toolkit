@@ -57,6 +57,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
 import com.arcgismaps.httpcore.authentication.NetworkCredentialStore
 import com.arcgismaps.portal.Portal
+import com.arcgismaps.toolkit.featureformsapp.data.CredentialInfo
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
@@ -69,6 +70,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -150,6 +152,9 @@ class MainActivity : ComponentActivity() {
                     AppState.NotLoggedIn
                 }
             } else {
+                launch {
+                    CredentialInfo.loadCredential(portalSettings.getPortalUrl())
+                }
                 AppState.LoggedIn
             }
         }
