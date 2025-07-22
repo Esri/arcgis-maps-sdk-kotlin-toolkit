@@ -58,8 +58,8 @@ class OfflineMapAreasTests {
 
     /**
      * Given the OfflineMapAreas UI is displayed and initialized in Preplanned mode,
-     * When a download button for a preplanned map area is clicked, the download starts, and then finishes,
-     * Then the downloaded map area can be opened and subsequently removed.
+     * When a download button for a preplanned map area is clicked,
+     * Then a download job is successfully executed, the downloaded map area can be opened and subsequently removed.
      *
      * @since 200.8.0
      */
@@ -110,8 +110,8 @@ class OfflineMapAreasTests {
 
     /**
      * Given the OfflineMapAreas UI is displayed and initialized in On-Demand mode,
-     * When the "add map area" button is clicked, and the map view is double-tapped multiple times to zoom,
-     * Then the download button is clicked to initiate an on-demand download, and the download job is handled.
+     * When the various interactions to setup the parameters to execute On-Demand download, such as "add map area" button is clicked, and the map view is double-tapped multiple times to zoom, click on download button to initiate the download
+     * Then all the parameters are set as expected and the download job is executed.
      *
      * @since 200.8.0
      */
