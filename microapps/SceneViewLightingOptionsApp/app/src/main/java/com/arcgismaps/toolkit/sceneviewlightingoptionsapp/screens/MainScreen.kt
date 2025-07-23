@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -288,6 +290,7 @@ fun SunTimeOptions(
             modifier = Modifier
                 .width(IntrinsicSize.Min)
                 .height(IntrinsicSize.Min)
+                .verticalScroll(rememberScrollState())
                 .background(
                     shape = MaterialTheme.shapes.extraLarge,
                     color = MaterialTheme.colorScheme.surface
