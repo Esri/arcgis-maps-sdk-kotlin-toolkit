@@ -75,7 +75,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -83,12 +82,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
 import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
-import com.arcgismaps.toolkit.featureformsapp.data.CredentialInfo
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -219,14 +216,16 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            MapListItemThumbnail(
-                loadableImage = thumbnail,
-                placeholder = placeholder,
+            AsyncImage(
+                model = thumbnail,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
                     .aspectRatio(16 / 9f)
                     .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = placeholder,
+                error = placeholder,
             )
             Box(
                 modifier = Modifier
@@ -248,36 +247,6 @@ fun MapListItem(
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(text = title, style = MaterialTheme.typography.bodyLarge)
             Text(text = "Last Updated: $lastModified", style = MaterialTheme.typography.labelSmall)
-        }
-    }
-}
-
-@Composable
-fun MapListItemThumbnail(
-    loadableImage: LoadableImage?,
-    placeholder: Painter,
-    modifier: Modifier,
-    contentScale: ContentScale
-) {
-    val context = LocalContext.current
-    var imageRequest by remember {
-        mutableStateOf<ImageRequest?>(null)
-    }
-    AsyncImage(
-        model = imageRequest,
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = contentScale,
-        placeholder = placeholder,
-        error = placeholder,
-    )
-    LaunchedEffect(loadableImage) {
-        if (loadableImage != null) {
-            loadableImage.load().onSuccess {
-                imageRequest = ImageRequest.Builder(context)
-                    .data("${loadableImage.uri}/?token=${CredentialInfo.accessToken}")
-                    .build()
-            }
         }
     }
 }

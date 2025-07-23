@@ -53,16 +53,20 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.request.crossfade
+import coil3.util.DebugLogger
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
 import com.arcgismaps.httpcore.authentication.NetworkCredentialStore
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.toolkit.featureformsapp.data.CredentialInfo
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
+import com.arcgismaps.toolkit.featureformsapp.utils.LoadableImageFetcher
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
@@ -70,7 +74,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -104,6 +107,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
+        // Setup Coil ImageLoader
+        SingletonImageLoader.setSafe {
+            ImageLoader.Builder(this)
+                .crossfade(true)
+                .components {
+                    add(LoadableImageFetcher.Factory())
+                    add(LoadableImageFetcher.Keyer())
+                }
+                .build()
+        }
         setContent {
             FeatureFormsAppTheme {
                 FeatureFormApp(
@@ -152,9 +165,6 @@ class MainActivity : ComponentActivity() {
                     AppState.NotLoggedIn
                 }
             } else {
-                launch {
-                    CredentialInfo.loadCredential(portalSettings.getPortalUrl())
-                }
                 AppState.LoggedIn
             }
         }
