@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.animation.SizeTransform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,7 +44,11 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
         navController.navigateTo(it)
     }
 
-    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
+    NavHost(
+        navController = navController,
+        startDestination = TraceNavRoute.TraceOptions.name,
+        sizeTransform = { SizeTransform(clip = false) }
+    ) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs by traceState.traceConfigurations
             val coroutineScope = rememberCoroutineScope()
