@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
@@ -30,10 +31,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
-import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -72,13 +78,32 @@ class FormTextFieldTests : FeatureFormTestRunner(
     fun setContent() = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            val state = rememberFormTextFieldState(
-                field = field,
-                minLength = (field.input as TextBoxFormInput).minLength.toInt(),
-                maxLength = (field.input as TextBoxFormInput).maxLength.toInt(),
-                form = featureForm,
-                scope = scope,
-            )
+            val state = remember {
+                FormTextFieldState(
+                    id = field.hashCode(),
+                    properties = TextFieldProperties(
+                        label = field.label,
+                        placeholder = field.hint,
+                        description = field.description,
+                        value = field.formattedValueAsStateFlow(scope),
+                        validationErrors = field.mapValidationErrors(scope),
+                        editable = field.isEditable,
+                        required = field.isRequired,
+                        visible = field.isVisible,
+                        singleLine = field.input is TextBoxFormInput,
+                        fieldType = field.fieldType,
+                        domain = field.domain as? RangeDomain,
+                        minLength = (field.input as TextBoxFormInput).minLength.toInt(),
+                        maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
+                    ),
+                    hasValueExpression = field.hasValueExpression,
+                    scope = scope,
+                    updateValue = field::updateValue,
+                    evaluateExpressions = {
+                        featureForm.evaluateExpressions()
+                    },
+                )
+            }
             FormTextField(
                 state = state
             )

@@ -9,7 +9,6 @@ androidxComposeCompiler = "1.5.12"
 androidxCore = "1.16.0"
 androidxEspresso = "3.6.1"
 androidxHiltNavigationCompose = "1.2.0"
-androidxLifecycle = "2.8.7"
 androidxMaterialIcons = "1.7.8"
 androidxTestExt = "1.2.1"
 androidXTestRunner = "1.6.2"
@@ -60,7 +59,6 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest"}
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util"}
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose"}
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose"}
 androidx-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "androidxMaterialIcons"}
