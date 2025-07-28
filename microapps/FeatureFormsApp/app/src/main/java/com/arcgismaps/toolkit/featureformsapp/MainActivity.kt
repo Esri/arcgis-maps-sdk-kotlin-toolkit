@@ -56,7 +56,6 @@ import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.request.crossfade
-import coil3.util.DebugLogger
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
 import com.arcgismaps.httpcore.authentication.NetworkCredentialStore
