@@ -58,9 +58,9 @@ public suspend fun AuthenticationManager.signOut() {
  * @since 200.2.0
  */
 @Deprecated (
-    message = "since 200.8.0. Use AuthenticatorState.launchCustomTabs(BrowserAuthenticationChallenge) " +
+    message = "since 200.8.0. Use Activity.launchCustomTabs(BrowserAuthenticationChallenge) " +
             "instead as it provides support for IAP sign-in/sign-out.",
-    replaceWith = ReplaceWith("AuthenticatorState.launchCustomTabs(BrowserAuthenticationChallenge)")
+    replaceWith = ReplaceWith("Activity.launchCustomTabs(BrowserAuthenticationChallenge)")
 )
 public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
     launchCustomTabs(

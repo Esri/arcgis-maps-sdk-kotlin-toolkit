@@ -45,7 +45,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -70,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,6 +84,9 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.offline.R
 import com.arcgismaps.toolkit.offline.internal.utils.ZoomLevel
 import com.arcgismaps.toolkit.offline.internal.utils.calculateEnvelope
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.offline.ui.material3.ModalBottomSheetProperties
 import com.arcgismaps.toolkit.offline.ui.material3.rememberModalBottomSheetState
@@ -102,6 +105,8 @@ internal fun OnDemandMapAreaSelector(
     localMap: ArcGISMap,
     uniqueMapAreaTitle: String,
     showSheet: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onDismiss: () -> Unit,
     isProposedTitleChangeUnique: Boolean,
     onProposedTitleChange: (String) -> Unit,
@@ -121,6 +126,7 @@ internal fun OnDemandMapAreaSelector(
     if (showSheet) {
         ModalBottomSheet(
             modifier = Modifier.systemBarsPadding(),
+            containerColor = colorScheme.offlineBackgroundColor,
             onDismissRequest = { onHideSheet = true },
             sheetState = sheetState,
             sheetGesturesEnabled = false,
@@ -131,6 +137,8 @@ internal fun OnDemandMapAreaSelector(
                 localMap = localMap,
                 currentAreaName = uniqueMapAreaTitle,
                 isProposedTitleChangeUnique = isProposedTitleChangeUnique,
+                colorScheme = colorScheme,
+                typography = typography,
                 onProposedTitleChange = onProposedTitleChange,
                 onDismiss = { onHideSheet = true },
                 onDownloadMapAreaSelected = { onDemandConfig ->
@@ -147,6 +155,8 @@ private fun OnDemandMapAreaSelectorOptions(
     currentAreaName: String,
     localMap: ArcGISMap,
     isProposedTitleChangeUnique: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onProposedTitleChange: (String) -> Unit,
     onDownloadMapAreaSelected: (OnDemandMapAreaConfiguration) -> Unit,
     onDismiss: () -> Unit
@@ -160,6 +170,8 @@ private fun OnDemandMapAreaSelectorOptions(
         AreaNameDialog(
             currentAreaName = mapAreaName,
             isProposedTitleChangeUnique = isProposedTitleChangeUnique,
+            colorScheme = colorScheme,
+            typography = typography,
             onProposedTitleChange = onProposedTitleChange,
             onDismiss = { isShowingAreaNameDialog = false },
             onConfirm = { newAreaName ->
@@ -176,20 +188,21 @@ private fun OnDemandMapAreaSelectorOptions(
         Box(modifier = Modifier.fillMaxWidth()) {
             Text(
                 stringResource(R.string.select_area),
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.onDemandMapAreaSelectorTitle,
                 modifier = Modifier.align(Alignment.Center)
             )
             FilledTonalIconButton(
                 onClick = onDismiss,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
+                    .padding(end = 8.dp),
+                colors = colorScheme.onDemandMapAreaSelectorCancelButtonColor
             ) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon")
             }
             HorizontalDivider(Modifier.align(Alignment.BottomCenter))
         }
-        Text(text = stringResource(R.string.pan_and_zoom_text), style = MaterialTheme.typography.labelSmall)
+        Text(text = stringResource(R.string.pan_and_zoom_text), style = typography.onDemandMapAreaSelectorMessage)
         MapViewWithAreaSelector(
             modifier = Modifier.weight(1f),
             arcGISMap = localMap,
@@ -204,21 +217,21 @@ private fun OnDemandMapAreaSelectorOptions(
         ) {
             Text(
                 text = mapAreaName,
-                style = MaterialTheme.typography.titleLarge,
+                style = typography.onDemandMapAreaSelectorAreaName,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
-            OutlinedButton(onClick = { isShowingAreaNameDialog = true }) {
+            OutlinedButton(onClick = { isShowingAreaNameDialog = true }, colors = colorScheme.offlineButtonsColor) {
                 Icon(
                     imageVector = Icons.Default.Create,
                     contentDescription = "Rename map area button",
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.size(4.dp))
-                Text(stringResource(R.string.rename), style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.rename), style = typography.onDemandMapAreaSelectorRenameButtonTextStyle)
             }
         }
         HorizontalDivider()
@@ -233,13 +246,15 @@ private fun OnDemandMapAreaSelectorOptions(
                 textFieldValue = stringResource(zoomLevel.descriptionResId),
                 textFieldLabel = stringResource(R.string.level_of_detail),
                 dropDownItemList = ZoomLevel.entries.map { stringResource(it.descriptionResId) },
+                colorScheme = colorScheme,
                 onIndexSelected = { zoomLevel = ZoomLevel.entries[it] }
             )
         }
         Button(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .testTag("DownloadButton"),
             onClick = {
                 scope.launch {
                     val thumbnail = mapViewProxy.exportImage().getOrNull()?.bitmap
@@ -256,7 +271,8 @@ private fun OnDemandMapAreaSelectorOptions(
                         )
                     }
                 }
-            }
+            },
+            colors = colorScheme.offlineButtonsColor
         ) { Text(stringResource(R.string.download)) }
     }
 }
@@ -272,7 +288,7 @@ private fun MapViewWithAreaSelector(
             .fillMaxWidth()
             .onSizeChanged { onMapViewSizeChanged.invoke(it) }) {
         MapView(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.matchParentSize().testTag("OnDemandMapViewSelector"),
             arcGISMap = arcGISMap,
             mapViewProxy = mapViewProxy
         )
@@ -320,6 +336,8 @@ private fun MapAreaSelectorOverlay(
 private fun AreaNameDialog(
     currentAreaName: String,
     isProposedTitleChangeUnique: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onProposedTitleChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
@@ -332,13 +350,13 @@ private fun AreaNameDialog(
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.background)
+                .background(colorScheme.offlineBackgroundColor)
                 .padding(12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(stringResource(R.string.enter_a_name), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.enter_a_name), style = typography.areaNameDialogTitle)
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.unique_name_text)) },
@@ -367,6 +385,7 @@ private fun DropDownMenuBox(
     textFieldValue: String,
     textFieldLabel: String,
     dropDownItemList: List<String>,
+    colorScheme: ColorScheme,
     onIndexSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -396,6 +415,7 @@ private fun DropDownMenuBox(
                 .fillMaxWidth()
         )
         DropdownMenu(
+            modifier = modifier.background(colorScheme.offlineBackgroundColor),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
@@ -433,6 +453,8 @@ private fun AreaNameDialogPreview() {
         currentAreaName = "Area 1",
         isProposedTitleChangeUnique = true,
         onProposedTitleChange = { },
+        colorScheme = OfflineMapAreasDefaults.colorScheme(),
+        typography = OfflineMapAreasDefaults.typography(),
         onDismiss = { },
         onConfirm = { }
     )

@@ -151,7 +151,6 @@ dependencies {
     implementation(libs.bundles.composeCore)
     implementation(libs.androidx.compose.ui.util)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons)
     implementation(libs.bundles.camerax)

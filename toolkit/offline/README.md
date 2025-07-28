@@ -2,7 +2,7 @@
 
 The `OfflineMapAreas` toolkit component provides composable UI to take a web map offline by downloading map areas. 
 
-Users can download map areas created ahead-of-time(preplanned) by the web map author, or they can create map areas on-demand by specifying an area of interest and level of detail. Map areas are downloaded to the app’s external directory and can be used when the device is disconnected from the network. Users can get information about a map area such as its size and the geographic region it covers. They can also delete a downloaded map area to free up storage space on the device.
+Users can download map areas created ahead-of-time (preplanned) by the web map author, or they can create map areas on-demand by specifying an area of interest and level of detail. Map areas are downloaded to the app’s external directory and can be used when the device is disconnected from the network. Users can get information about a map area such as its size and the geographic region it covers. They can also delete a downloaded map area to free up storage space on the device.
 
 
 | Ahead-of-time (preplanned) workflow 	| On-demand workflow 	|
@@ -40,7 +40,7 @@ To use the composable you would need to provide an `OfflineMapState`. The state 
   - Displays only downloaded map areas by retrieving offline map info from the device.
   - Use the constructor with `OfflineMapInfo` to create the state. `OfflineRepository.OfflineMapInfos` provides the list of all portal item information for web maps that have downloaded map areas can be obtained using the `OfflineRepository` singleton object. 
 - When the device network connection has changed…
-  - Re-initialize the the state `OfflineMapState` using the desired constructor.
+  - Re-initialize the `OfflineMapState` using the desired constructor.
 
 ### Permissions 
 

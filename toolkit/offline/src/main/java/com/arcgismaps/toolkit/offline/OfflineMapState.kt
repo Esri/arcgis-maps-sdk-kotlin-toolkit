@@ -118,6 +118,7 @@ public class OfflineMapState {
         get() = _mode
 
     internal lateinit var localMap: ArcGISMap
+        private set
 
     private lateinit var offlineMapTask: OfflineMapTask
 
