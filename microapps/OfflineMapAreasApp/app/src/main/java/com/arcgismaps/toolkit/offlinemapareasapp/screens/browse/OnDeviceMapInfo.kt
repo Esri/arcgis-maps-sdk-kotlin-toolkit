@@ -60,7 +60,7 @@ fun OnDeviceMapInfo(
                 OfflineMapInfoCard(info = offlineMapInfo, onOpen = {
                     onClick.invoke(offlineMapInfo.id)
                 }, onDelete = {
-                    OfflineRepository.removeDownloadsForWebmap(context, offlineMapInfo)
+                    OfflineRepository.removeDownloads(context, offlineMapInfo)
                 })
             }
         }
