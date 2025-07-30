@@ -30,7 +30,12 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Represents the information of an offline map.
+ * Represents the information for an online map that has been taken offline.
+ *
+ * When a map is taken offline, map information needs to be saved on device so that the map can be reloaded later when the device is offline.
+ * It provides access to and also enables display locally saved map information about downloaded map areas.
+ *
+ * This type is typically used when there is no network connection.
  *
  * @since 200.8.0
  */
@@ -105,14 +110,14 @@ public class OfflineMapInfo private constructor(
         get() = info.portalItemURL
 
 
-    public companion object {
+    internal companion object {
 
         /**
          * Creates an [OfflineMapInfo] from a [directory] on disk, if “info.json” exists.
          *
          * @since 200.8.0
          */
-        public fun createFromDirectory(directory: File): OfflineMapInfo? {
+        internal fun createFromDirectory(directory: File): OfflineMapInfo? {
             val infoFile = File(directory, offlineMapInfoJsonFile)
             if (!infoFile.exists()) {
                 return null
@@ -142,7 +147,7 @@ public class OfflineMapInfo private constructor(
          *
          * @since 200.8.0
          */
-        public fun removeFromDirectory(directory: File) {
+        internal fun removeFromDirectory(directory: File) {
             File(directory, offlineMapInfoJsonFile).delete()
             File(directory, offlineMapInfoThumbnailFile).delete()
         }
@@ -152,7 +157,7 @@ public class OfflineMapInfo private constructor(
          *
          * @since 200.8.0
          */
-        public fun isSerializedFilePresent(directory: File): Boolean {
+        internal fun isSerializedFilePresent(directory: File): Boolean {
             return File(directory, offlineMapInfoJsonFile).exists()
         }
     }
@@ -162,7 +167,7 @@ public class OfflineMapInfo private constructor(
      *
      * @since 200.8.0
      */
-    public fun saveToDirectory(directory: File) {
+    internal fun saveToDirectory(directory: File) {
         if (!directory.exists()) {
             directory.mkdirs()
         }

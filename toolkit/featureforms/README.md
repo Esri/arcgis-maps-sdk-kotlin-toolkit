@@ -1,5 +1,3 @@
-
-
 # FeatureForm
 
 ## Description
@@ -7,47 +5,57 @@
 The `FeatureForm` toolkit component enables users to display and edit feature attributes and attachments in a layer using the `FeatureForm` API.
 FeatureForms can be authored as part of the web map using [Field Maps Designer](https://www.arcgis.com/apps/fieldmaps/) or using Map Viewer. This allows a simplified user experience to edit feature attribute data on the web map.
 
-More information about editing attributes using forms can be found [here](https://next.sites.afd.arcgis.com/kotlin/edit-features/edit-attribute-values/).
+More information about editing attributes using forms can be found [here](https://developers.arcgis.com/kotlin/edit-features/overview-edit-using-feature-forms/).
 
 ## Features
 
 The `FeatureForm` is a composable that can render a `FeatureForm` object with a `FeatureFormDefinition`  using Jetpack Compose.
+
 - It can be integrated into any custom layout or container.
 - All expressions present in the form are initially evaluated with a progress indicator before the FeatureForm is available for editing.
 - Provides automatic saving and restoring of form data after device configuration changes.
 - Provides a DateTime picker and a picker for coded-value field types.
-- Shows validation errors for any fields with errors.
+- Shows Validation errors for any fields with errors.
 - Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
+- Supports viewing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
 - Follows material 3 design system.
 
 ## Usage
 
 To see it in action, check out the [microapp](../../microapps/FeatureFormsApp). The micro-app integrates the `FeatureForm` component into a `BottomSheet`.
 
-*View the API Reference for the `featureforms` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.featureforms/index.html).*
+*View the Toolkit API Reference for the `featureforms` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.featureforms/index.html).*
 
-A `FeatureForm` composable can be created using a `FeatureForm` object as follows.
+To display a `FeatureForm` the first step is to create a `FeatureFormState` object as follows.
 
-#### Creating a FeatureForm object
+> *Note:* In version 200.8.0, the `FeatureForm` compose API has been updated to improve functionality and support advanced editing workflows that involve Utility Network Associations through the use of a `FeatureFormState` class.
+
+### Creating the FeatureFormState
 
 ```kotlin
-// create the FeatureForm from the Feature
-val featureForm = FeatureForm(feature, featureFormDefinition)
+// First create the FeatureForm object from the Feature
+val featureForm = FeatureForm(arcGISFeature)
+// Then create the state object by passing in the FeatureForm object.
+val featureFormState = FeatureFormState(featureForm, coroutineScope)
 ```
 
-#### Creating a FeatureForm UI in Compose
+The state object must be hoisted out of the composition to prevent data loss during configuration changes, ideally at the ViewModel level. Refer to the Compose [state hoisting guide](https://developer.android.com/develop/ui/compose/state-hoisting#screen-ui-state) for details.
 
-A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable with the `FeaureForm` object. The FeatureForm should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
+It is important that the `CoroutineScope` provided is [Lifecycle-aware](https://developer.android.com/topic/libraries/architecture/coroutines#lifecycle-aware). This ensures that coroutines launched for tasks like expression evaluation, data fetching (e.g., attachments, associations), etc., are not cancelled during configuration changes.
+
+### Creating a FeatureForm UI in Compose
+
+A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable with the `FeatureFormState` object. The FeatureForm should be displayed in a container. Its visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin  
 @Composable  
-fun MyComposable(featureForm : FeatureForm) {  
+fun MyComposable(featureFormState : FeatureFormState) {  
     // a container  
     MyContainer(modifier = Modifier) {
         // create a FeatureForm Composable
         FeatureForm(  
-            // pass in the FeatureForm object  
-            featureForm = featureForm,  
+            // pass in the FeatureFormState object  
+            featureFormState = featureFormState,  
             // control the layout using the modifier property  
             modifier = Modifier.fillMaxSize()  
         )  
@@ -55,27 +63,27 @@ fun MyComposable(featureForm : FeatureForm) {
 } 
 ```  
 
-#### Updating the `FeatureForm`
+### Updating the `FeatureForm`
 
-To display a new `FeatureForm`  object, simply trigger a recomposition with the new `FeatureForm` object.
+To display a new `FeatureForm`, simply trigger a recomposition with a new `FeatureFormState` object.
 
 ```kotlin  
 @Composable  
 fun MyComposable(viewModel : MyViewModel) {  
-    // use a state object that will recompose this composable when the featureForm changes
-    // in this example, the FeatureForm object is hoisted in the ViewModel
-    val featureForm : State by viewModel.featureForm  
+    // use a state object that will recompose this composable when the state changes
+    // in this example, the FeatureFormState object is hoisted in the ViewModel
+    val state by viewModel.featureFormState  
     // a container  
     MyContainer(modifier = Modifier) {
         FeatureForm(    
-            featureForm = featureForm,  
+            featureFormState = state,  
             modifier = Modifier.fillMaxSize()
         )  
     }  
 }
 ```  
 
-#### Changing the Validation Error Visibility policy
+### Changing the Validation Error Visibility policy
 
 By default validation errors for any fields are only visible after the fields gain focus. But this can be customized using the `validationErrorVisibility` parameter of the `FeatureForm`. This property can be changed at any time to show all the errors. It supports two modes of visibility.
 
@@ -85,17 +93,41 @@ By default validation errors for any fields are only visible after the fields ga
 ```kotlin
 @Composable
 FeatureForm(  
-    featureForm = featureForm,  
+    featureFormState = state,  
     modifier = Modifier.fillMaxSize(),  
     validationErrorVisibility = ValidationErrorVisibility.Visible  
 )
 ```
-*Note* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
+
+> *Note:* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
+
+### Close Icon
+
+Beginning with version 200.8.0, a close icon is now displayed in the bottom right corner of the form. The `onDismiss` parameter allows handling the tap action. The container can then remove the FeatureForm from the composition using this tap action.
+
+ The icon can be hidden by setting the parameter  `showCloseIcon: Boolean` to `false`.
+
+### Action Bar
+
+Beginning with version 200.8.0, when edits are present in the `FeatureForm`, an action bar is displayed at the top of the form with “Save” and “Discard” buttons. This can be hidden by setting `showFormActions: Boolean` to `false`.
+
+A new `onEditingEvent` callback of type `FeatureFormEditingEvent` is introduced which is invoked when the user performs the "Save" or "Discard" action. This event can be used to perform any additional tasks such as rolling back changes on "Discard" or applying edits to the service on "Save". The [microapp](../../microapps/FeatureFormsApp) uses this mechanism.
+
+### Utility Associations and Navigation
+
+The `FeatureForm` composable, introduced in version 200.8.0, leverages the `FeatureFormState` class to support the `UtilityAssociationsFormElement`. This enhancement enables more advanced workflows such as viewing utility network associations for the feature being edited and navigating to and editing associated features.
+
+When a `UtilityAssociationsFormElement` is present in the form definition, the toolkit displays the element based on its configuration. The behavior of this element is detailed [here](#utilityassociationsformelement).
+
+If the user taps on an association and there are no edits in the current `FeatureForm`, the component navigates to a new `FeatureForm` created for the associated feature. The Android system's back action, along with the provided back button, allows navigation back to the previous `FeatureForm` screen.
+
+During navigation, the `FeatureFormState.activeFeatureForm` observable property is updated with the new `FeatureForm` instance as the user moves forward or backward through associations.
+
+If edits exist in the current `FeatureForm`, a dialog prompts the user to save or discard changes before proceeding to the next or previous `FeatureForm`. Navigation can be disabled using the `isNavigationEnabled: Boolean` parameter.
 
 ### Permissions
 
-The `FeatureForm` component requires the following permissions to function correctly. These permissions are added to the AndroidManifest.xml file of the library. 
-But the calling app should request these permissions at runtime. If the permissions are not granted, the respective functionality will be limited.
+The `FeatureForm` component requires the following permissions to function correctly. These permissions are added to the AndroidManifest.xml file of the library. But the calling app should request these permissions at runtime. If the permissions are not granted, the respective functionality will be limited.
 
 - `Manifest.permission.CAMERA` : Required to use the camera for the `BarcodeScannerFormInput` input type and the `AttachmentsFormElement` to add attachments.
 
@@ -187,12 +219,30 @@ special styling.
 
 <img src="screenshots/group_element_expanded.png" width="250"/>
 
-### TextFormElement
+### [TextFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-text-form-element/index.html)
 
 - The `TextFormElement` is used to display text in the form.
 - It supports plain text and markdown text.
 
 <img src="screenshots/text_form_element.png" width="250"/>
+
+### [UtilityAssociationsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-utility-associations-form-element/index.html)
+
+- The `UtilityAssociationsFormElement` is used to display utility network associations in the form.
+- It supports grouping associations by their type and network source.
+- Navigating to edit another feature on the other side of the association is also supported.
+
+#### The element with different association types with the count of total associations is displayed
+
+<img src="screenshots/ua_form_element.png" width="250"/>
+
+#### Each association type shows the different network sources present
+
+<img src="screenshots/ua_network_sources.png" width="250"/>
+
+#### Final page shows the utility associations for the selected network source
+
+<img src="screenshots/utility_associations.png" width="250"/>
 
 ## Theming and Customization
 

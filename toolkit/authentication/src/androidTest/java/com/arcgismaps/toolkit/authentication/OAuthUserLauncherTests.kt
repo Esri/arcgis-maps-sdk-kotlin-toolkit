@@ -63,7 +63,7 @@ class OAuthUserLauncherTests {
 
     private fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.viewModel.authenticatorState.signOut()
         }
         // reset the ArcGISHttpClient to remove any custom interceptors
         ArcGISEnvironment.configureArcGISHttpClient()
@@ -183,14 +183,18 @@ class OAuthUserLauncherTests {
  *
  * @since 200.5.0
  */
+@Suppress("DEPRECATION")
 class OAuthUserLauncherTestActivity : ComponentActivity() {
     val viewModel: OAuthUserLauncherTestViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Authenticator(authenticatorState = viewModel.authenticatorState) {
-                launchCustomTabs(it)
-            }
+            Authenticator(
+                authenticatorState = viewModel.authenticatorState,
+                onPendingOAuthUserSignIn = {
+                    launchCustomTabs(it)
+                }
+            )
         }
     }
 

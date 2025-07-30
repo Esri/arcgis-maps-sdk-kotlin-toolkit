@@ -58,12 +58,14 @@ internal class WorkerNotification(
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         // set the pending intent that will be passed to the NotificationManager
-        PendingIntent.getActivity(
-            applicationContext,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        intent?.let {
+            PendingIntent.getActivity(
+                applicationContext,
+                0,
+                it,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        }
     }
 
     // intent for notification action to WorkManager’s cancellation mechanism

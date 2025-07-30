@@ -21,11 +21,9 @@ package com.arcgismaps.toolkit.authenticationapp
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
-import com.arcgismaps.toolkit.authentication.signOut
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,17 +59,27 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     val url: StateFlow<String> = _url.asStateFlow()
     fun setUrl(newUrl: String) { _url.value = newUrl }
 
+    private val oAuthUserConfigurations: List<OAuthUserConfiguration>
+        get() =
+            if (useOAuth.value) {
+                listOf(oAuthUserConfiguration)
+            } else {
+                emptyList()
+            }
+
     fun signOut() = viewModelScope.launch {
         _isLoading.value = true
-        ArcGISEnvironment.authenticationManager.signOut()
+        authenticatorState.signOut()
+            .onFailure {
+                _infoText.value = it.toString()
+            }
         _infoText.value = startInfoText
         _isLoading.value = false
     }
 
     public fun loadPortal() = viewModelScope.launch {
         _isLoading.value = true
-        authenticatorState.oAuthUserConfiguration =
-            if (useOAuth.value) oAuthUserConfiguration else null
+        authenticatorState.oAuthUserConfigurations = oAuthUserConfigurations
         val portal = Portal(url.value, Portal.Connection.Authenticated)
         portal.load().also {
             _isLoading.value = false

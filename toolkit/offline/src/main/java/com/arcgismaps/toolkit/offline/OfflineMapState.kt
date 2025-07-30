@@ -45,17 +45,63 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Represents the state of the offline map.
+ * Represents the state of the [OfflineMapAreas] composable.
+ *
+ * #### Behavior
+ *
+ * This state class provides two constructors to initialize the [OfflineMapAreas] composable using an [ArcGISMap] or an [OfflineMapInfo].
+ * Therefore, the [OfflineMapAreas] composable can be used either when the device is connected to or disconnected from the network.
+ *
+ * In other words, the composable can be used in the following situations:
+ *
+ * - When the device is connected to the network…
+ *     - Displays preplanned map areas from a web map that are available for download.
+ *     - When the web map doesn’t contain preplanned map areas, users can add and download on-demand map areas by specifying a geographic area and level of detail.
+ *     - Use the constructor with [ArcGISMap] to create the state.
+ *
+ * - When the device is disconnected from the network…
+ *     - Displays only downloaded map areas by retrieving offline map info from the device.
+ *     - Use the constructor with [OfflineMapInfo] to create the state.
+ *
+ * - When the device network connection has changed…
+ *     - Re-initialize the the state `OfflineMapState` using the desired constructor.
+ *
+ * #### Associated Types
+ *
+ * `OfflineMapState` has the following associated types:
+ *
+ * - [OfflineMapAreas]
+ * - [OfflineRepository]
+ * - [OfflineMapInfo]
  *
  * @since 200.8.0
  */
 @Stable
-public class OfflineMapState(
-    private val arcGISMap: ArcGISMap,
-    private val onSelectionChanged: (ArcGISMap?) -> Unit = { }
-) {
+public class OfflineMapState {
+    private val arcGISMap: ArcGISMap
+    private val onSelectionChanged: ((ArcGISMap?) -> Unit)
+
+    /**
+     * Represents the state of the offline map with a given [ArcGISMap].
+     *
+     * @param arcGISMap The web map to be taken offline.
+     * @param onSelectionChanged A callback for the currently selected offline map.
+     *
+     * @since 200.8.0
+     */
+    public constructor(
+        arcGISMap: ArcGISMap,
+        onSelectionChanged: (ArcGISMap?) -> Unit = { }
+    ) {
+        this.arcGISMap = arcGISMap
+        this.onSelectionChanged = onSelectionChanged
+    }
+
     /**
      * Represents the state of the offline map with a given [OfflineMapInfo].
+     *
+     * @param offlineMapInfo The offline map info for which to create the state.
+     * @param onSelectionChanged A callback for the currently selected offline map.
      *
      * @since 200.8.0
      */
@@ -72,6 +118,7 @@ public class OfflineMapState(
         get() = _mode
 
     internal lateinit var localMap: ArcGISMap
+        private set
 
     private lateinit var offlineMapTask: OfflineMapTask
 
@@ -388,7 +435,7 @@ public class OfflineMapState(
     }
 
     /**
-     * Resets the current selection of preplanned map areas.
+     * Resets the current selection of the map areas.
      *
      * @since 200.8.0
      */

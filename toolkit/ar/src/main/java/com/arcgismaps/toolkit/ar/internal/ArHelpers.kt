@@ -174,7 +174,14 @@ internal fun rememberArCoreInstalled(
     LaunchedEffect(Unit) {
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            onFailed(IllegalStateException(context.getString(R.string.arcore_not_installed_message)))
+            onFailed(
+                IllegalStateException(
+                    context.getString(
+                        R.string.arcore_not_installed_message,
+                        arCoreAvailability
+                    )
+                )
+            )
         } else {
             arCoreInstalled.value = true
         }

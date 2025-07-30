@@ -21,6 +21,8 @@
     <string name="allow_connection">接続の許可</string>
     <string name="username_password_login_title">認証が必要</string>
     <string name="username_password_login_message">サイン インして、%1$s にアクセスする必要があります</string>
+    <string name="incorrect_credentials">%1$s の認証情報が不正でした もう一度お試しください。</string>
+    <string name="sign_in_error_occurred">%1$s のサイン イン中にエラーが発生しました。 もう一度お試しください。</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">ユーザー名</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

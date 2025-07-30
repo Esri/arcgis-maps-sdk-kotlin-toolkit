@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.offline.internal.utils.AddMapAreaButton
 import com.arcgismaps.toolkit.offline.internal.utils.getDefaultMapAreaTitle
@@ -42,6 +43,9 @@ import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreas
 import com.arcgismaps.toolkit.offline.ondemand.OnDemandMapAreasState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreaState
 import com.arcgismaps.toolkit.offline.preplanned.PreplannedMapAreas
+import com.arcgismaps.toolkit.offline.theme.ColorScheme
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
+import com.arcgismaps.toolkit.offline.theme.Typography
 import com.arcgismaps.toolkit.offline.ui.EmptyOnDemandOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.EmptyPreplannedOfflineAreas
 import com.arcgismaps.toolkit.offline.ui.NoInternetNoAreas
@@ -51,12 +55,73 @@ import com.arcgismaps.toolkit.offline.ui.OfflineMapAreasError
 /**
  * Take a web map offline by downloading map areas.
  *
+ * #### Features
+ *
+ * Supports both ahead-of-time (preplanned) and on-demand map areas for an offline enabled web map. This [OfflineMapAreas] composable:
+ *
+ * - Displays a list of map areas.
+ *
+ * - Shows download progress and status for map areas.
+ *
+ * - Opens a map area for viewing when selected.
+ *
+ * - Provides options to view details about downloaded map areas.
+ *
+ * - Supports removing downloaded offline map areas files from the device.
+ *
+ * For preplanned workflows, this composable:
+ *
+ * - Displays a list of available preplanned map areas from an offline-enabled web map that contains preplanned map areas when the network is connected.
+ *
+ * - Downloads preplanned map areas in the list.
+ *
+ * - Displays a list of downloaded preplanned map areas on the device when the network is disconnected.
+ *
+ * For on-demand workflows, this composable:
+ *
+ * - Allows users to add and download on-demand map areas to the device by specifying an area of interest and level of detail.
+ *
+ * - Displays a list of on-demand map areas available on the device that are tied to a specific web map.
+ *
+ * _Workflow example:_
+ *
+ * ```
+ * val selectedMap = mutableStateOf<ArcGISMap?>(null)
+ *
+ * val displayedMap get() = selectedMap.value ?: onlineMap
+ *
+ * val offlineMapState = OfflineMapState(
+ *     arcGISMap = displayedMap,
+ *     onSelectionChanged = { offlineMap ->
+ *         selectedMap.value = offlineMap
+ *     }
+ * )
+ *
+ * @Composable
+ * fun SheetContent() {
+ *     OfflineMapAreas(
+ *         offlineMapState = offlineMapState,
+ *         modifier = Modifier
+ *             .padding(horizontal = 16.dp)
+ *             .animateContentSize()
+ *     )
+ * }
+ *
+ *```
+ *
+ * @param offlineMapState The state of the OfflineMapAreas.
+ * @param modifier The modifier to be applied to the OfflineMapAreas.
+ * @param colorScheme The color scheme to use for the OfflineMapAreas.
+ * @param typography The typography to use for the OfflineMapAreas.
+ *
  * @since 200.8.0
  */
 @Composable
 public fun OfflineMapAreas(
     offlineMapState: OfflineMapState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    colorScheme: ColorScheme = OfflineMapAreasDefaults.colorScheme(),
+    typography: Typography = OfflineMapAreasDefaults.typography()
 ) {
     val context = LocalContext.current
     val initializationStatus by offlineMapState.initializationStatus
@@ -70,7 +135,10 @@ public fun OfflineMapAreas(
         isRefreshEnabled = false
     }
 
-    Surface(modifier = modifier) {
+    Surface(
+        modifier = modifier.testTag("OfflineMapAreasContainerLayout"),
+        color = colorScheme.offlineBackgroundColor
+    ) {
         when (initializationStatus) {
             is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
@@ -101,6 +169,8 @@ public fun OfflineMapAreas(
                                 modifier = modifier,
                                 preplannedMapAreaStates = offlineMapState.preplannedMapAreaStates,
                                 isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
+                                colorScheme = colorScheme,
+                                typography = typography,
                                 onDownloadDeleted = offlineMapState::removePreplannedMapArea,
                                 onRefresh = { isRefreshEnabled = true }
                             )
@@ -111,6 +181,8 @@ public fun OfflineMapAreas(
                                 modifier = modifier,
                                 onDemandMapAreaStates = offlineMapState.onDemandMapAreaStates,
                                 isShowingOnlyOfflineModels = offlineMapState.isShowingOnlyOfflineModels,
+                                colorScheme = colorScheme,
+                                typography = typography,
                                 localMap = offlineMapState.localMap,
                                 onRefresh = { isRefreshEnabled = true },
                                 onDownloadDeleted = offlineMapState::removeOnDemandMapArea,
@@ -135,6 +207,8 @@ internal fun PreplannedLayoutContainer(
     modifier: Modifier,
     preplannedMapAreaStates: List<PreplannedMapAreaState>,
     isShowingOnlyOfflineModels: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     onDownloadDeleted: (PreplannedMapAreaState) -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -144,6 +218,8 @@ internal fun PreplannedLayoutContainer(
             PreplannedMapAreas(
                 preplannedMapAreaStates = preplannedMapAreaStates,
                 isShowingOnlyOfflineModels = isShowingOnlyOfflineModels,
+                colorScheme = colorScheme,
+                typography = typography,
                 onDownloadDeleted = onDownloadDeleted,
                 modifier = modifier
             )
@@ -167,6 +243,8 @@ internal fun OnDemandLayoutContainer(
     modifier: Modifier,
     onDemandMapAreaStates: List<OnDemandMapAreasState>,
     isShowingOnlyOfflineModels: Boolean,
+    colorScheme: ColorScheme,
+    typography: Typography,
     localMap: ArcGISMap,
     onRefresh: () -> Unit,
     onDownloadDeleted: (OnDemandMapAreasState) -> Unit,
@@ -182,11 +260,13 @@ internal fun OnDemandLayoutContainer(
             OnDemandMapAreas(
                 onDemandMapAreasStates = onDemandMapAreaStates,
                 onDownloadDeleted = onDownloadDeleted,
+                colorScheme = colorScheme,
+                typography = typography,
                 modifier = modifier
             )
             // Show "Add Map Area" button if not in offline-only mode
             if (!isShowingOnlyOfflineModels) {
-                AddMapAreaButton { isOnDemandMapAreaSelectorVisible = true }
+                AddMapAreaButton(colorScheme, typography) { isOnDemandMapAreaSelectorVisible = true }
             }
         }
         // Show "No Internet" message if offline models are displayed
@@ -198,7 +278,7 @@ internal fun OnDemandLayoutContainer(
         }
         // Show empty state message if no on-demand areas and online mode
         else if (onDemandMapAreaStates.isEmpty()) {
-            EmptyOnDemandOfflineAreas { isOnDemandMapAreaSelectorVisible = true }
+            EmptyOnDemandOfflineAreas(colorScheme, typography) { isOnDemandMapAreaSelectorVisible = true }
         }
     }
     // Map area selection bottom sheet
@@ -206,6 +286,8 @@ internal fun OnDemandLayoutContainer(
         localMap = localMap,
         showSheet = isOnDemandMapAreaSelectorVisible,
         uniqueMapAreaTitle = getDefaultMapAreaTitle(onDemandMapAreaStates),
+        colorScheme = colorScheme,
+        typography = typography,
         isProposedTitleChangeUnique = isProposedTitleChangeUnique,
         onDismiss = { isOnDemandMapAreaSelectorVisible = false },
         onProposedTitleChange = { mapAreaTitle ->
