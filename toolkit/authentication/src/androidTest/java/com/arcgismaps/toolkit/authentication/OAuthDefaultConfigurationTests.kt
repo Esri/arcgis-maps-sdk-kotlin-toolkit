@@ -16,7 +16,6 @@
  */
 package com.arcgismaps.toolkit.authentication
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -49,7 +48,7 @@ import org.junit.Test
 class OAuthDefaultConfigurationTests {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<AuthenticatorStateActivity>()
 
     @Before
     fun signOutBefore() = signOut()
@@ -59,7 +58,7 @@ class OAuthDefaultConfigurationTests {
 
     private fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.authenticatorState.signOut()
         }
         // reset the ArcGISHttpClient to remove any custom interceptors
         ArcGISEnvironment.configureArcGISHttpClient()
@@ -121,6 +120,87 @@ class OAuthDefaultConfigurationTests {
             pressBack()
         }.await().exceptionOrNull()
         assert(response is OperationCancelledException)
+    }
+
+    /**
+     * Given an [AuthenticatorState] configured with multiple [OAuthUserConfiguration]s,
+     * When an [ArcGISAuthenticationChallenge] is received for each configuration,
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
+     * for each configuration with the correct [OAuthUserConfiguration].
+     *
+     * @since 200.8.0
+     */
+    @Test
+    fun testMultipleOAuthUserConfigurations() = runTest {
+        val url1 = "https://arcgis.com"
+        val url2 = "https://www.arcgisonline.com/"
+
+        ArcGISEnvironment.configureArcGISHttpClient {
+            setupOAuthTokenRequestInterceptor()
+        }
+
+        val firstOAuthConfig = OAuthUserConfiguration(
+            url1,
+            "uITYQG1POJsrluOP",
+            "kotlin-authentication-test-1://auth"
+        )
+        val secondOAuthConfig = OAuthUserConfiguration(
+            url2,
+            "abc1234567890def",
+            "kotlin-auth-local-test-2://auth"
+        )
+
+        val authenticatorState = AuthenticatorState().apply {
+            oAuthUserConfigurations = listOf(firstOAuthConfig, secondOAuthConfig)
+        }
+
+        composeTestRule.setContent {
+            Authenticator(
+                authenticatorState,
+                modifier = Modifier.testTag("Authenticator")
+            )
+        }
+        performOAuthChallenge(url1, "kotlin-authentication-test-1://auth", firstOAuthConfig, authenticatorState)
+        performOAuthChallenge(url2, "kotlin-auth-local-test-2://auth", secondOAuthConfig, authenticatorState)
+    }
+
+    /**
+     * Performs an OAuth challenge with the given [url] and [redirectUri].
+     * The [expectedConfig] is should be used to create the [OAuthUserCredential].
+     *
+     * @param url The URL to use for the OAuth challenge.
+     * @param redirectUri The redirect URI to use for the OAuth challenge.
+     * @param expectedConfig The expected [OAuthUserConfiguration] to be used for the OAuth challenge.
+     * @param authenticatorState The [AuthenticatorState] to use for the OAuth challenge.
+     * @since 200.8.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun performOAuthChallenge(
+        url: String,
+        redirectUri: String,
+        expectedConfig: OAuthUserConfiguration,
+        authenticatorState: AuthenticatorState
+    ) = runTest {
+        val challengeResponse = async {
+            runCatching {
+                authenticatorState.handleArcGISAuthenticationChallenge(
+                    makeMockArcGISAuthenticationChallenge(mockRequestUrl = url)
+                )
+            }
+        }
+        advanceUntilIdle()
+        composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+        composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        uiDevice.awaitViewVisible("com.android.chrome")
+        uiDevice.setOrientationLandscape()
+        uiDevice.setOrientationPortrait()
+        InstrumentationRegistry.getInstrumentation().context.startActivity(createSuccessfulRedirectIntent(redirectUri))
+        val response = challengeResponse.await().getOrNull()
+        assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
+        val credential = (response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential
+        assert(credential is OAuthUserCredential)
+        assert((credential as OAuthUserCredential).configuration == expectedConfig)
     }
 
     /**

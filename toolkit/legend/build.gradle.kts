@@ -74,6 +74,12 @@ android {
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 apiValidation {
@@ -93,7 +99,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

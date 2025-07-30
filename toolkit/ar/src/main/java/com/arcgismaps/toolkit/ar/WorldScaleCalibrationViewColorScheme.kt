@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
  * @since 200.7.0
  */
 @Immutable
+@ExposedCopyVisibility
 public data class WorldScaleCalibrationViewColorScheme internal constructor(
     val backgroundColor: Color,
     val containerColor: Color,

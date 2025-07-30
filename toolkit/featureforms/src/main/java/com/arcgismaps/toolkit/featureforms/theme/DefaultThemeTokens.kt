@@ -23,6 +23,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.arcgismaps.toolkit.featureforms.theme.DefaultThemeTokens.colorScheme
+import com.arcgismaps.toolkit.featureforms.theme.DefaultThemeTokens.typography
 
 /**
  * Default color used is the blue from the Compose logo, b/172679845 for context
@@ -114,6 +116,7 @@ internal object DefaultThemeTokens {
             containerColor = ColorTokens.Surface,
             tileTextColor = Color.Unspecified,
             tileBorderColor = ColorTokens.Outline,
+            tileContainerColor = Color.Unspecified,
             scrollBarColor = ColorTokens.OnSurface,
         )
     )
@@ -145,7 +148,8 @@ internal object DefaultThemeTokens {
         attachmentsElementTypography = AttachmentsElementTypography(
             labelStyle = TypographyTokens.bodyMedium,
             supportingTextStyle = TypographyTokens.bodySmall,
-            tileTextStyle = TypographyTokens.bodySmall
+            tileTextStyle = TypographyTokens.bodySmall,
+            tileSupportingTextStyle = TypographyTokens.bodySmall,
         )
     )
 }

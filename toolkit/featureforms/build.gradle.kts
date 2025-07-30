@@ -22,7 +22,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
@@ -38,6 +40,9 @@ android {
     // TODO: Remove this when Android Studio lint checker is fixed
     lint {
         disable.add("SuspiciousModifierThen")
+        // remove these disables when strings.xml lint is fixed via localization
+        disable += "MissingTranslation"
+        disable += "MissingQuantity"
     }
     
     defaultConfig {
@@ -58,6 +63,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -84,6 +91,12 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
 }
 
 apiValidation {
@@ -102,10 +115,24 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentErrorDialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$DeleteAttachmentDialogKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$RenameAttachmentDialogKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToFeature\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
+        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
     )
     
     ignoredClasses.addAll(composableSingletons)
@@ -124,11 +151,12 @@ dependencies {
     implementation(libs.bundles.composeCore)
     implementation(libs.androidx.compose.ui.util)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

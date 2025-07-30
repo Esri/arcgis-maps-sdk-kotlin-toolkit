@@ -36,18 +36,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
@@ -61,6 +55,15 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Objects
 
+/**
+ * The maximum attachment size in bytes that can be added.
+ */
+internal const val maxAttachmentUploadSize = 50_000_000L
+
+/**
+ * The maximum attachment size in bytes that can be downloaded.
+ */
+internal const val maxAttachmentsDownloadSize = 999_999_999L
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -74,8 +77,7 @@ internal class AttachmentElementState(
     id: Int,
     private val formElement: AttachmentsFormElement,
     private val scope: CoroutineScope,
-    private val evaluateExpressions: suspend () -> Unit,
-    private val filesDir: String
+    private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
     id = id,
     label = formElement.label,
@@ -105,12 +107,7 @@ internal class AttachmentElementState(
     val lazyListState = LazyListState()
 
     init {
-        scope.launch {
-            formElement.fetchAttachments().onSuccess {
-                // build a state list of attachments
-                buildAttachmentStates(formElement.attachments)
-            }
-        }
+        refreshAttachments()
     }
 
     /**
@@ -128,7 +125,6 @@ internal class AttachmentElementState(
                 type = formAttachment.type,
                 elementStateId = id,
                 deleteAttachment = { deleteAttachment(formAttachment) },
-                filesDir = filesDir,
                 scope = scope,
                 formAttachment = formAttachment
             )
@@ -139,6 +135,15 @@ internal class AttachmentElementState(
                 state.loadWithParentScope()
             }
             _attachments.add(state)
+        }
+    }
+
+    fun refreshAttachments() {
+        scope.launch {
+            formElement.fetchAttachments().onSuccess {
+                // build a state list of attachments
+                buildAttachmentStates(formElement.attachments)
+            }
         }
     }
 
@@ -156,7 +161,6 @@ internal class AttachmentElementState(
             type = formAttachment.type,
             elementStateId = id,
             deleteAttachment = { deleteAttachment(formAttachment) },
-            filesDir = filesDir,
             scope = scope,
             formAttachment = formAttachment
         )
@@ -205,44 +209,6 @@ internal class AttachmentElementState(
         context,
         Manifest.permission.CAMERA
     ) == PackageManager.PERMISSION_GRANTED
-
-    companion object {
-        fun Saver(
-            attachmentFormElement: AttachmentsFormElement,
-            scope: CoroutineScope,
-            evaluateExpressions: suspend () -> Unit,
-            filesDir: String
-        ): Saver<AttachmentElementState, Any> = listSaver(
-            save = {
-                buildList<Int> {
-                    // save the index of the first visible item
-                    add(it.lazyListState.firstVisibleItemIndex)
-                    add(it.lazyListState.firstVisibleItemScrollOffset)
-                }
-            },
-            restore = { savedList ->
-                AttachmentElementState(
-                    id = attachmentFormElement.hashCode(),
-                    formElement = attachmentFormElement,
-                    scope = scope,
-                    evaluateExpressions = evaluateExpressions,
-                    filesDir = filesDir
-                ).also {
-                    scope.launch {
-                        if (savedList.count() == 2) {
-                            // scroll to the last visible item
-                            val firstVisibleItemIndex = savedList[0]
-                            val firstVisibleItemScrollOffset = savedList[1]
-                            it.lazyListState.scrollToItem(
-                                firstVisibleItemIndex,
-                                firstVisibleItemScrollOffset
-                            )
-                        }
-                    }
-                }
-            }
-        )
-    }
 }
 
 /**
@@ -254,7 +220,6 @@ internal class AttachmentElementState(
  * @param type The type of the attachment.
  * @param elementStateId The ID of the [AttachmentElementState] that created this attachment.
  * @param deleteAttachment A function to delete the attachment.
- * @param filesDir The directory where the attachments are stored.
  * @param scope The coroutine scope used to launch coroutines.
  * @param formAttachment The [FormAttachment] that this state represents.
  */
@@ -266,7 +231,6 @@ internal class FormAttachmentState(
     val type: FormAttachmentType,
     val elementStateId: Int,
     val deleteAttachment: () -> Unit,
-    private val filesDir: String,
     private val scope: CoroutineScope,
     val formAttachment: FormAttachment? = null
 ) : Loadable {
@@ -312,16 +276,14 @@ internal class FormAttachmentState(
     val thumbnail: State<Bitmap?> = _thumbnail
 
     /**
-     * The maximum attachment size in bytes that can be loaded. If [size] is greater than this limit,
-     * then the attachment will fail to load with an [AttachmentSizeLimitExceededException] when
-     * [load] is called.
-     */
-    val maxAttachmentSize = 50_000_000L
-
-    /**
      * The size of the thumbnail image.
      */
     private val thumbnailSize = Size(368, 300)
+
+    /**
+     * A callback that is invoked when the attachment fails to load.
+     */
+    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
 
     /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
@@ -335,18 +297,26 @@ internal class FormAttachmentState(
     }
 
     /**
+     * Sets a callback that is invoked when the attachment fails to load. This is useful for
+     * handling any errors in the UI.
+     */
+    fun setOnLoadErrorCallback(callback: ((Throwable) -> Unit)?) {
+        onLoadErrorCallback = callback
+    }
+
+    /**
      * Loads the attachment and its thumbnail. Use [loadWithParentScope] to load the attachment as
      * a long-running task. This coroutine will get cancelled if the calling composable is removed
      * from the composition.
      */
-    override suspend fun load(): Result<Unit> {
+    override suspend fun load(): Result<Unit> = withContext(Dispatchers.IO) {
         _loadStatus.value = LoadStatus.Loading
         var result = Result.success(Unit)
         try {
             result = when {
                 formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
                 formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
-                formAttachment.size > maxAttachmentSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentSize))
+                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize))
                 else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
@@ -362,13 +332,14 @@ internal class FormAttachmentState(
             } else {
                 val error = result.exceptionOrNull() ?: Exception("Failed to load attachment")
                 _loadStatus.value = LoadStatus.FailedToLoad(error)
+                onLoadErrorCallback?.invoke(error)
             }
         }
-        return result
+        return@withContext result
     }
 
     override fun cancelLoad() {
-        // cancel op not supported
+        formAttachment?.cancelLoad()
     }
 
     override suspend fun retryLoad(): Result<Unit> {
@@ -396,6 +367,7 @@ internal class FormAttachmentState(
     /**
      * Creates a thumbnail image for the attachment.
      */
+    @Suppress("DEPRECATION")
     private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
         if (formAttachment == null) {
             return@withContext
@@ -476,32 +448,6 @@ internal sealed class CaptureOptions {
     }
 }
 
-@Composable
-internal fun rememberAttachmentElementState(
-    form: FeatureForm,
-    attachmentFormElement: AttachmentsFormElement
-): AttachmentElementState {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    return rememberSaveable(
-        inputs = arrayOf(form),
-        saver = AttachmentElementState.Saver(
-            attachmentFormElement,
-            scope,
-            form::evaluateExpressions,
-            context.cacheDir.absolutePath
-        )
-    ) {
-        AttachmentElementState(
-            formElement = attachmentFormElement,
-            scope = scope,
-            id = attachmentFormElement.hashCode(),
-            evaluateExpressions = form::evaluateExpressions,
-            filesDir = context.cacheDir.absolutePath
-        )
-    }
-}
-
 /**
  * Returns an icon for the attachment type.
  */
@@ -541,11 +487,13 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
 }
 
 /**
- * Exception indicating that the attachment size exceeds the maximum limit.
+ * Exception indicating that the attachment size exceeds the limit.
  *
- * @param limit The maximum attachment size limit in bytes.
+ * @param limit The attachment size limit in bytes.
  */
-internal class AttachmentSizeLimitExceededException(val limit : Long) : Exception("Attachment size exceeds the maximum limit of $limit MB")
+internal class AttachmentSizeLimitExceededException(val limit: Long) : Exception(
+    "Attachment size exceeds the limit of ${limit/1_000_000} MB"
+)
 
 /**
  * Exception indicating that the attachment size is 0.

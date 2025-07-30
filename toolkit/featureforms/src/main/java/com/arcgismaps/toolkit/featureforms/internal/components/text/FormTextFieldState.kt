@@ -16,25 +16,14 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.data.RangeDomain
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
-import com.arcgismaps.mapping.featureforms.TextAreaFormInput
-import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.handleCharConstraints
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -130,86 +119,4 @@ internal class FormTextFieldState(
             super.calculateHelperText()
         }
     }
-
-    companion object {
-        fun Saver(
-            formElement: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope
-        ): Saver<FormTextFieldState, Any> = listSaver(
-            save = {
-                listOf(
-                    it.value.value.data,
-                    it.wasFocused
-                )
-            },
-            restore = { list ->
-                val minLength = (formElement.input as? TextBoxFormInput)?.minLength
-                    ?: (formElement.input as TextAreaFormInput).minLength
-                val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength
-                    ?: (formElement.input as TextAreaFormInput).maxLength
-                FormTextFieldState(
-                    id = formElement.hashCode(),
-                    properties = TextFieldProperties(
-                        label = formElement.label,
-                        placeholder = formElement.hint,
-                        description = formElement.description,
-                        value = formElement.formattedValueAsStateFlow(scope),
-                        validationErrors = formElement.mapValidationErrors(scope),
-                        required = formElement.isRequired,
-                        editable = formElement.isEditable,
-                        visible = formElement.isVisible,
-                        domain = formElement.domain as? RangeDomain,
-                        fieldType = formElement.fieldType,
-                        singleLine = formElement.input is TextBoxFormInput,
-                        minLength = minLength.toInt(),
-                        maxLength = maxLength.toInt()
-                    ),
-                    initialValue = list[0] as String,
-                    hasValueExpression = formElement.hasValueExpression,
-                    scope = scope,
-                    updateValue = formElement::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                ).apply {
-                    // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
-                    onFocusChanged(list[1] as Boolean)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberFormTextFieldState(
-    field: FieldFormElement,
-    minLength: Int,
-    maxLength: Int,
-    form: FeatureForm,
-    scope: CoroutineScope
-): FormTextFieldState = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = FormTextFieldState.Saver(field, form, scope)
-) {
-    FormTextFieldState(
-        id = field.hashCode(),
-        properties = TextFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.formattedValueAsStateFlow(scope),
-            validationErrors = field.mapValidationErrors(scope),
-            editable = field.isEditable,
-            required = field.isRequired,
-            visible = field.isVisible,
-            singleLine = field.input is TextBoxFormInput,
-            fieldType = field.fieldType,
-            domain = field.domain as? RangeDomain,
-            minLength = minLength,
-            maxLength = maxLength
-        ),
-        hasValueExpression = field.hasValueExpression,
-        scope = scope,
-        updateValue = field::updateValue,
-        evaluateExpressions = form::evaluateExpressions,
-    )
 }

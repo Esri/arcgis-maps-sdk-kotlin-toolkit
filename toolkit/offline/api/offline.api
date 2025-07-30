@@ -1,0 +1,142 @@
+public abstract class com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$Initializing : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/offline/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapAreasKt {
+	public static final fun OfflineMapAreas (Lcom/arcgismaps/toolkit/offline/OfflineMapState;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapInfo {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo$CodableInfo;Landroid/graphics/Bitmap;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPortalItemUrl ()Ljava/lang/String;
+	public final fun getThumbnail ()Landroid/graphics/Bitmap;
+	public final fun getTitle ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineMapState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
+	public final fun resetSelectedMapArea ()V
+}
+
+public final class com/arcgismaps/toolkit/offline/OfflineRepository {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/OfflineRepository;
+	public final fun getOfflineMapInfos ()Ljava/util/List;
+	public final fun refreshOfflineMapInfos (Landroid/content/Context;)V
+	public final fun removeAllDownloads (Landroid/content/Context;)V
+	public final fun removeDownloads (Landroid/content/Context;Lcom/arcgismaps/toolkit/offline/OfflineMapInfo;)V
+}
+
+public final class com/arcgismaps/toolkit/offline/theme/ColorScheme {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4 ()Landroidx/compose/material3/ButtonColors;
+	public final fun component5 ()Landroidx/compose/material3/IconButtonColors;
+	public final fun copy-TkvDFsM (JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public static synthetic fun copy-TkvDFsM$default (Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOfflineBackgroundColor-0d7_KjU ()J
+	public final fun getOfflineButtonsColor ()Landroidx/compose/material3/ButtonColors;
+	public final fun getOfflineIconButtonsColor-0d7_KjU ()J
+	public final fun getOfflineSurfaceContainerColor-0d7_KjU ()J
+	public final fun getOnDemandMapAreaSelectorCancelButtonColor ()Landroidx/compose/material3/IconButtonColors;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/offline/theme/OfflineMapAreasDefaults;
+	public final fun colorScheme-KC2tld4 (JJJLandroidx/compose/material3/ButtonColors;Landroidx/compose/material3/IconButtonColors;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/offline/theme/ColorScheme;
+	public final fun typography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+}
+
+public final class com/arcgismaps/toolkit/offline/theme/Typography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component10 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component11 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component12 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component13 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component14 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component15 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component16 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component17 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component5 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component6 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component7 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component8 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component9 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/offline/theme/Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/offline/theme/Typography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAreaNameDialogTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMapAreasDetailsDescription ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMapAreasDetailsDescriptionLabel ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMapAreasDetailsSize ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMapAreasDetailsTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOfflineMapAreasTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOfflineOpenButtonText ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaAddMapAreaButtonText ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaSelectorAreaName ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaSelectorMessage ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaSelectorRenameButtonTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaSelectorTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreaStatus ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOnDemandMapAreasTitle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getPreplannedMapAreaDescription ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getPreplannedMapAreaStatus ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getPreplannedMapAreaTitle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

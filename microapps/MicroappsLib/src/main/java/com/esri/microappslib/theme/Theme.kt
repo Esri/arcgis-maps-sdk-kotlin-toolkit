@@ -75,6 +75,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
+@Suppress("DEPRECATION")
 fun MicroAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit

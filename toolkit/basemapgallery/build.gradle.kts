@@ -66,6 +66,23 @@ android {
     tasks.withType<Test> {
         enabled = false
     }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
+    }
+}
+
+apiValidation {
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.basemapgallery.ComposableSingletons\$BasemapGalleryKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {
@@ -73,7 +90,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
