@@ -18,4 +18,13 @@
 
 <resources>
     <string name="app_name">OfflineMapAreasApp</string>
+    <string name="agol_portal_url">https://www.arcgis.com</string>
+    <string name="login">Login</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_enterprise_url">"Enter an URL for ArcGIS Enterprise"</string>
+    <string name="signing_in">Signing in..</string>
+    <string name="sign_in_with_agol">Sign in with ArcGIS Online</string>
+    <string name="sign_in_with_enterprise">Sign in with ArcGIS Enterprise</string>
+    <string name="skin_sign_in">Skip sign in</string>
+    <string name="browse_demo_maps">Browse Demo Maps</string>
 </resources>
