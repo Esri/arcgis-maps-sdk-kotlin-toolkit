@@ -155,7 +155,6 @@ class PortalItemRepository(
                 item.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
                 }
-                //item.thumbnail?.load()
             }
             // suspend till all the portal loading jobs are complete
         }.joinAll()

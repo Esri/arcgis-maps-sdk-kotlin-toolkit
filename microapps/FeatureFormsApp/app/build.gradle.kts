@@ -99,6 +99,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     // datastore
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+    // coil
+    implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

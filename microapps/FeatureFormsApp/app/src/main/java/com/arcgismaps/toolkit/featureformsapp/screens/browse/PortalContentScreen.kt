@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +77,8 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.portal.PortalFolder
+import coil3.compose.AsyncImage
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
 import com.arcgismaps.toolkit.featureformsapp.data.datastore
