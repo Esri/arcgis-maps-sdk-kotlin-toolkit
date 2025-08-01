@@ -21,11 +21,13 @@ package com.arcgismaps.toolkit.featureformsapp.data.local
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.TypeConverters
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -35,7 +37,8 @@ import kotlinx.coroutines.flow.Flow
 data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
     val json: String,
-    val portalUrl: String
+    val portalUrl: String,
+    val parentFolderId: String? = null
 )
 
 @Dao
@@ -47,7 +50,10 @@ interface ItemCacheDao {
      * @param item the ItemCacheEntry type to insert.
      */
     @Insert
-    suspend fun insert(item: ItemCacheEntry) : Long
+    suspend fun insert(item: ItemCacheEntry): Long
+
+    @Insert
+    suspend fun insertAll(items: List<ItemCacheEntry>): List<Long>
 
     /**
      * Observes list of ItemData.
@@ -56,6 +62,13 @@ interface ItemCacheDao {
      */
     @Query("SELECT * FROM itemcacheentry")
     fun observeAll(): Flow<List<ItemCacheEntry>>
+
+    @Query("""
+    SELECT * FROM itemcacheentry
+    WHERE (:folderId IS NULL AND parentFolderId IS NULL)
+    OR parentFolderId = :folderId
+    """)
+    fun observeByFolder(folderId: String?): Flow<List<ItemCacheEntry>>
 
     /**
      * fetch an entry by id.
@@ -71,8 +84,12 @@ interface ItemCacheDao {
      *
      * @return the number of items.
      */
-    @Query("SELECT COUNT(*) FROM itemcacheentry")
-    suspend fun getCount() : Int
+    @Query("""
+    SELECT COUNT(*) FROM itemcacheentry
+    WHERE (:folderId IS NULL AND parentFolderId IS NULL)
+    OR parentFolderId = :folderId
+    """)
+    suspend fun getCount(folderId : String?): Int
 
 
     /**
@@ -82,7 +99,7 @@ interface ItemCacheDao {
      * @return the list of row id's that were inserted.
      */
     @Transaction
-    suspend fun deleteAndInsert(items: List<ItemCacheEntry>) : List<Long> {
+    suspend fun deleteAndInsert(items: List<ItemCacheEntry>): List<Long> {
         deleteAll()
         return items.map {
             insert(it)
@@ -99,7 +116,12 @@ interface ItemCacheDao {
 /**
  * The room database that contains the ItemCacheEntry table.
  */
-@Database(entities = [ItemCacheEntry::class], version = 2, exportSchema = false)
+@Database(
+    entities = [ItemCacheEntry::class, FolderCacheEntry::class],
+    version = 3,
+    exportSchema = false
+)
+@TypeConverters(DateConverter::class)
 abstract class ItemCacheDatabase : RoomDatabase() {
-    abstract fun itemCacheDao() : ItemCacheDao
+    abstract fun itemCacheDao(): ItemCacheDao
 }

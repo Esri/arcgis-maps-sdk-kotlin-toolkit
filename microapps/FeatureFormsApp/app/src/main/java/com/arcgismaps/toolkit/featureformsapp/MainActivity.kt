@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.featureformsapp
 import android.Manifest.permission.CAMERA
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.preference.PreferenceDataStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -51,13 +52,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
 import com.arcgismaps.httpcore.authentication.NetworkCredentialStore
 import com.arcgismaps.portal.Portal
+import com.arcgismaps.portal.PortalFolder
+import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
+import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
@@ -69,8 +75,10 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -117,7 +125,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity,
                 PortalSettingsFactory::class.java
             )
-            loadCredentials(factory.getPortalSettings())
+            loadCredentials(factory.getPortalSettings(), this@MainActivity.datastore)
         }
         // check for permissions
         when (ContextCompat.checkSelfPermission(this, CAMERA)) {
@@ -129,30 +137,47 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun loadCredentials(portalSettings: PortalSettings) =
-        withContext(Dispatchers.Default) {
-            // create and set a ArcGISCredentialStore that persists
-            val arcGISCredentialStore = ArcGISCredentialStore.createWithPersistence().getOrThrow()
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore = arcGISCredentialStore
-            // create and set a NetworkCredentialStore that persists
-            val networkCredentialStore = NetworkCredentialStore.createWithPersistence().getOrThrow()
-            ArcGISEnvironment.authenticationManager.networkCredentialStore = networkCredentialStore
-            // get the portal settings url
-            val url = portalSettings.getPortalUrl()
-            // check if any credentials are present for this portal
-            val credential =
-                ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
-            appState.value = if (credential == null) {
-                // if the portal connection type set it Anonymous, then the user has skipped sign in
-                if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {
-                    AppState.SkipSignIn
-                } else {
-                    AppState.NotLoggedIn
-                }
+    private suspend fun loadCredentials(
+        portalSettings: PortalSettings,
+        dataStore: DataStore<Preferences>
+    ) = withContext(Dispatchers.Default) {
+        // create and set a ArcGISCredentialStore that persists
+        val arcGISCredentialStore = ArcGISCredentialStore.createWithPersistence().getOrThrow()
+        ArcGISEnvironment.authenticationManager.arcGISCredentialStore = arcGISCredentialStore
+        // create and set a NetworkCredentialStore that persists
+        val networkCredentialStore = NetworkCredentialStore.createWithPersistence().getOrThrow()
+        ArcGISEnvironment.authenticationManager.networkCredentialStore = networkCredentialStore
+        // get the portal settings url
+        val url = portalSettings.getPortalUrl()
+        // check if any credentials are present for this portal
+        val credential =
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
+        appState.value = if (credential == null) {
+            // if the portal connection type set it Anonymous, then the user has skipped sign in
+            if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {
+                AppState.SkipSignIn
             } else {
-                AppState.LoggedIn
+                AppState.NotLoggedIn
             }
+        } else {
+            val data = dataStore.data.first()
+            val folder = data[CURRENT_FOLDER].let { json ->
+                if (json.isNullOrEmpty().not()) {
+                    try {
+                        Json.decodeFromString<PortalFolder>(json)
+                    } catch (e: Exception) {
+                        // if the json is invalid, return null
+                        null
+                    }
+                } else null
+            }
+            // if the folder is null, then set the start destination to Home
+            val startDestination = folder?.let {
+                NavigationRoute.Folder(it)
+            } ?: NavigationRoute.Home
+            AppState.LoggedIn(startDestination)
         }
+    }
 }
 
 @Composable
@@ -171,12 +196,11 @@ fun FeatureFormApp(
         val navController = rememberNavController()
         // if the user has logged in or skipped sign in, go to the Home screen, else present
         // login screen
-        val startDestination =
-            if (appState is AppState.LoggedIn || appState is AppState.SkipSignIn) {
-                NavigationRoute.Home.route
-            } else {
-                NavigationRoute.Login.route
-            }
+        val startDestination = when(appState) {
+            is AppState.LoggedIn -> appState.startDestination
+            is AppState.SkipSignIn -> NavigationRoute.Home
+            else -> NavigationRoute.Login
+        }
         AppNavigation(
             navController = navController,
             navigator = navigator,
@@ -238,7 +262,7 @@ fun AnimatedLoading(
  */
 sealed class AppState {
     object Loading : AppState()
-    object LoggedIn : AppState()
+    data class LoggedIn(val startDestination: NavigationRoute) : AppState()
     object NotLoggedIn : AppState()
     object SkipSignIn : AppState()
 }

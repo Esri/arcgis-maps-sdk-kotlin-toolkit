@@ -18,16 +18,39 @@
 
 package com.arcgismaps.toolkit.featureformsapp.data.local
 
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
+import com.arcgismaps.portal.PortalFolder
+import java.time.Instant
 
-/**
- * the data for the item. Just an URL, but abstracted away
- */
-data class ItemData(val url: String)
+//sealed class ItemData(val id: String)
+//
+//class PortalItemData(id: String) : ItemData(id)
+//
+//class FolderData(
+//    id: String,
+//    val username: String,
+//    val title: String,
+//    val creationDate: Instant? = null
+//) : ItemData(id)
+
+class UserContent(
+    val items : List<PortalItem>,
+    val folders: List<PortalFolder>
+)
 
 /**
  * The API to use to get the items
  */
 interface ItemApi {
-    suspend fun fetchItems(portalUri: String, connection : Portal.Connection): List<ItemData>
+
+    suspend fun fetchContent(
+        portalUri: String,
+        connection: Portal.Connection
+    ): UserContent
+
+    suspend fun fetchItemsInFolder(
+        portalUri: String,
+        folderId: String,
+    ): List<PortalItem>
 }

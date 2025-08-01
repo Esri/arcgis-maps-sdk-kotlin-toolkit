@@ -19,29 +19,18 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,86 +38,112 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arcgismaps.portal.LoadableImage
+import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
-import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
+import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
- * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
+ * Displays a list of PortalItems using the [viewModel]. Provides a callback [onItemClick]
  * when an item is tapped.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapListScreen(
+fun PortalContentScreen(
     modifier: Modifier = Modifier,
-    mapListViewModel: MapListViewModel = hiltViewModel(),
-    onItemClick: (String) -> Unit = {}
+    viewModel: PortalContentViewModel = hiltViewModel(),
+    onFolderClick: (PortalFolder) -> Unit = {},
+    onItemClick: (String) -> Unit = {},
+    onSearchIconClick: () -> Unit = {}
 ) {
-    val uiState by mapListViewModel.uiState.collectAsState()
-    val lazyListState = rememberLazyListState()
+    val dataStore = LocalContext.current.datastore
+    val uiState by viewModel.uiState.collectAsState()
     var showSignOutProgress by rememberSaveable {
         mutableStateOf(false)
     }
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing
+        contentWindowInsets = WindowInsets.safeDrawing,
+        topBar = {
+            MediumTopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Map",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                },
+                navigationIcon = {
+
+                },
+                actions = {
+                    IconButton(onClick = onSearchIconClick) {
+                        Icon(Icons.Filled.Search, contentDescription = "Refresh")
+                    }
+                }
+            )
+//            AppSearchBar(
+//                "",
+//                isLoading = uiState.isLoading,
+//                username = viewModel.getUsername(),
+//                modifier = Modifier,
+//                    //.fillMaxWidth(),
+//                    //.padding(horizontal = 16.dp),
+//                onQueryChange = viewModel::filterPortalItems,
+//                onRefresh = viewModel::refresh,
+//                onSignOut = {
+//                    showSignOutProgress = true
+//                    viewModel.signOut()
+//                }
+//            )
+        }
     ) { innerPadding ->
         Box(
             modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            AppSearchBar(
-                uiState.searchText,
-                isLoading = uiState.isLoading,
-                username = mapListViewModel.getUsername(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                onQueryChange = mapListViewModel::filterPortalItems,
-                onRefresh = mapListViewModel::refresh,
-                onSignOut = {
-                    showSignOutProgress = true
-                    mapListViewModel.signOut()
-                }
-            )
             // use a cross fade animation to show a loading indicator when the data is loading
             // and transition to the list of portalItems once loaded
             Crossfade(
@@ -146,32 +161,20 @@ fun MapListScreen(
                         )
                     }
 
-                    false -> if (uiState.data.isNotEmpty()) {
-                        val itemThumbnailPlaceholder =
-                            painterResource(id = R.drawable.ic_default_map)
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            state = lazyListState,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            items(
-                                uiState.data
-                            ) { item ->
-                                MapListItem(
-                                    title = item.title,
-                                    lastModified = item.modified?.format("MMM dd yyyy")
-                                        ?: "",
-                                    shareType = item.access.encoding.uppercase(Locale.getDefault()),
-                                    thumbnail = item.thumbnail,
-                                    placeholder = itemThumbnailPlaceholder,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(100.dp)
-                                ) {
-                                    onItemClick(item.itemId)
-                                }
-                            }
-                        }
+                    false -> if (uiState.items.isNotEmpty() || uiState.folders.isNotEmpty()) {
+                        SectionedLazyColumn(
+                            portalFolders = uiState.folders,
+                            portalItems = uiState.items,
+                            onFolderClick = { folder ->
+                                onFolderClick(folder)
+                                //mapListViewModel.selectFolder(folder)
+                            },
+                            onItemClick = { item ->
+                                onItemClick(item.itemId)
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+
                     } else if (!uiState.isLoading) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -189,94 +192,16 @@ fun MapListScreen(
                 showSignOutProgress
             },
             modifier = Modifier.fillMaxSize(),
-            statusText = if (mapListViewModel.getUsername()
+            statusText = if (viewModel.getUsername()
                     .isEmpty()
             ) "Loading.." else "Signing out.."
         )
     }
-}
-
-/**
- * A list item row for a PortalItem that shows the [title], [lastModified] and thumbnail. Provides
- * an [onClick] callback when the item is tapped.
- */
-@Composable
-fun MapListItem(
-    title: String,
-    lastModified: String,
-    shareType: String,
-    thumbnail: LoadableImage?,
-    placeholder: Painter,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
-) {
-    Row(
-        modifier = modifier.clickable { onClick() },
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(20.dp))
-        Box {
-            MapListItemThumbnail(
-                loadableImage = thumbnail,
-                placeholder = placeholder,
-                modifier = Modifier
-                    .fillMaxHeight(0.8f)
-                    .aspectRatio(16 / 9f)
-                    .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Box(
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .wrapContentSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Text(
-                    text = shareType,
-                    modifier = Modifier.padding(5.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(20.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            Text(text = "Last Updated: $lastModified", style = MaterialTheme.typography.labelSmall)
+    LaunchedEffect(Unit) {
+        dataStore.edit { preferences ->
+            preferences[CURRENT_FOLDER] = ""
         }
     }
-}
-
-@Composable
-fun MapListItemThumbnail(
-    loadableImage: LoadableImage?,
-    placeholder: Painter,
-    modifier: Modifier,
-    contentScale: ContentScale
-) {
-    val scope = rememberCoroutineScope()
-    loadableImage?.let {
-        val imageLoader = remember {
-            ImageLoader(
-                loadable = it,
-                scope = scope,
-                placeholder = placeholder,
-            )
-        }
-        AsyncImage(
-            imageLoader = imageLoader,
-            modifier = modifier,
-            contentScale = contentScale
-        )
-    } ?: Image(
-        painter = placeholder,
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = contentScale
-    )
 }
 
 @Composable
@@ -303,8 +228,8 @@ fun AppSearchBar(
                 if (it.hasFocus) {
                     active = true
                 }
-            }
-            .height(56.dp),
+            },
+            //.height(56.dp),
         placeholder = {
             Text(text = "Search Maps")
         },
@@ -314,7 +239,7 @@ fun AppSearchBar(
         trailingIcon = {
             Row(
                 modifier = Modifier
-                    .widthIn(80.dp)
+                    //.widthIn(80.dp)
                     .padding(end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
@@ -334,7 +259,7 @@ fun AppSearchBar(
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(30.dp)
+                        //modifier = Modifier.size(30.dp)
                     )
                 }
                 MaterialTheme(
@@ -424,19 +349,6 @@ fun AppSearchBar(
  */
 fun Instant.format(format: String): String =
     DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault()).format(this)
-
-@Preview
-@Composable
-fun MapListItemPreview() {
-    MapListItem(
-        title = "Water Utility",
-        lastModified = "June 1 2023",
-        shareType = "Public",
-        modifier = Modifier.size(width = 485.dp, height = 100.dp),
-        thumbnail = null,
-        placeholder = painterResource(id = R.drawable.ic_default_map)
-    )
-}
 
 @Composable
 @Preview

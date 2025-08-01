@@ -18,13 +18,16 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
+import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,15 +42,15 @@ import javax.inject.Inject
 
 data class MapListUIState(
     val isLoading: Boolean,
-    val searchText: String,
-    val data: List<PortalItem>
+    val items: List<PortalItem>,
+    val folders: List<PortalFolder>
 )
 
 /**
  * ViewModel class which acts as the data source of PortalItems to load.
  */
 @HiltViewModel
-class MapListViewModel @Inject constructor(
+class PortalContentViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
     private val portalItemRepository: PortalItemRepository,
     private val portalSettings: PortalSettings,
@@ -64,26 +67,21 @@ class MapListViewModel @Inject constructor(
     val uiState: StateFlow<MapListUIState> =
         combine(
             _isLoading,
-            _searchText,
-            portalItemRepository.observe()
-        ) { isLoading, searchText, portalItemData ->
-            val data = portalItemData.filter {
-                searchText.isEmpty()
-                    || it.title.uppercase().contains(searchText.uppercase())
-                    || it.itemId.contains(searchText)
-            }
-            MapListUIState(isLoading, searchText, data)
+            portalItemRepository.observe(null),
+            portalItemRepository.observeFolders()
+        ) { isLoading, portalItemData, folderData ->
+            MapListUIState(isLoading, portalItemData, folderData)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(1000),
-            initialValue = MapListUIState(true, "", emptyList())
+            initialValue = MapListUIState(true, emptyList(), emptyList())
         )
 
     init {
         viewModelScope.launch {
             // if the data is empty, refresh it
             // this is used to identify first launch
-            if (portalItemRepository.getItemCount() == 0) {
+            if (portalItemRepository.getItemCount(null) == 0) {
                 refresh()
             }
         }
