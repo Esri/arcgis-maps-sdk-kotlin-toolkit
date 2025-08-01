@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,19 +56,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.R
-import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Locale
@@ -233,14 +230,16 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            MapListItemThumbnail(
-                loadableImage = thumbnail,
-                placeholder = placeholder,
+            AsyncImage(
+                model = thumbnail,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
                     .aspectRatio(16 / 9f)
                     .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = placeholder,
+                error = placeholder,
             )
             Box(
                 modifier = Modifier
@@ -269,35 +268,6 @@ fun MapListItem(
             }
         }
     }
-}
-
-@Composable
-fun MapListItemThumbnail(
-    loadableImage: LoadableImage?,
-    placeholder: Painter,
-    modifier: Modifier,
-    contentScale: ContentScale
-) {
-    val scope = rememberCoroutineScope()
-    loadableImage?.let {
-        val imageLoader = remember {
-            ImageLoader(
-                loadable = it,
-                scope = scope,
-                placeholder = placeholder,
-            )
-        }
-        AsyncImage(
-            imageLoader = imageLoader,
-            modifier = modifier,
-            contentScale = contentScale
-        )
-    } ?: Image(
-        painter = placeholder,
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = contentScale
-    )
 }
 
 @Composable
