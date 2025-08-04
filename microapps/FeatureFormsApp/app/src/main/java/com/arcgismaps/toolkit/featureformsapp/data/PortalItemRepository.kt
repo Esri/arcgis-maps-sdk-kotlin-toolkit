@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.util.Log
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
@@ -27,7 +28,6 @@ import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheEntry
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheEntry
-import com.arcgismaps.toolkit.featureformsapp.data.local.UserContent
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +50,8 @@ class PortalItemRepository(
     private val dispatcher: CoroutineDispatcher,
     private val remoteDataSource: ItemRemoteDataSource,
     private val itemCacheDao: ItemCacheDao,
-    private val folderCacheDao: FolderCacheDao
+    private val folderCacheDao: FolderCacheDao,
+    private val portalSettings: PortalSettings
 ) {
     // in memory cache of loaded portal items
     private val portalItems: MutableMap<String, PortalItem> = mutableMapOf()
@@ -58,10 +59,11 @@ class PortalItemRepository(
     // to protect shared state of portalItems
     private val mutex = Mutex()
 
-    private var selectedFolder: String? = null
-
     /**
      * Returns the list of loaded PortalItemData as a flow.
+     *
+     * @param folder The folder to filter the portal items by. If null, only the items not in any
+     * folder like the root folder will be returned.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observe(folder: String?): Flow<List<PortalItem>> =
@@ -86,7 +88,6 @@ class PortalItemRepository(
         folderCacheDao.observeAll().mapLatest {
             // map the cache entries into PortalFolder
             it.map { entry ->
-                //Log.e("TAG", "observeFolders: ${entry.folderId}", )
                 entry.toPortalFolder()
             }
         }.flowOn(dispatcher)
@@ -97,90 +98,110 @@ class PortalItemRepository(
      * This operation is suspending and will wait until the underlying data source has finished
      * AND the repository has finished loading the portal items.
      */
-    suspend fun refresh(
-        portalUri: String,
-        connection: Portal.Connection
-    ) = withContext(dispatcher) {
+    suspend fun refresh() = withContext(dispatcher) {
         mutex.withLock {
             // delete existing cache items
             itemCacheDao.deleteAll()
             portalItems.clear()
-            val localItems = getListOfMaps().map {
-                PortalItem(it)
+            val connection = portalSettings.getPortalConnection()
+            val items = if (connection == Portal.Connection.Anonymous) {
+                // if the connection is anonymous, only fetch the sample items
+                getListOfMaps().map {
+                    PortalItem(
+                        portal = Portal.arcGISOnline(connection = connection),
+                        itemId = it
+                    )
+                }
+            } else {
+                // if the connection is authenticated, fetch the content from the remote data source
+                val content = remoteDataSource.fetchContent()
+                // insert the folders into the local cache
+                insertFolderEntries(content.folders)
+                content.items
             }
-            // get the content from the remote data source
-            val content = remoteDataSource.fetchContent(portalUri, connection)
             // load the portal items and add them to cache
-            loadAndInsertPortalItems(content.items + localItems, deleteExisting = true)
-            insertFolderEntries(content.folders)
+            loadAndInsertPortalItems(items, deleteExisting = true)
         }
     }
 
-    suspend fun getItemsInFolder(
-        portalUrl: String,
-        folder: PortalFolder
-    ) = withContext(dispatcher) {
-        val items = remoteDataSource.fetchItemsInFolder(portalUrl, folder.folderId)
+    /**
+     * Fetches the items in a specific [folder] from the remote data source and loads them into
+     * the local cache storage. Use [observe] to observe the changes in the folder items.
+     *
+     * @param folder The [PortalFolder] to fetch items from.
+     */
+    suspend fun getItemsInFolder(folder: PortalFolder) = withContext(dispatcher) {
+        val items = remoteDataSource.fetchItemsInFolder(folder.folderId)
         loadAndInsertPortalItems(items, deleteExisting = false)
-        selectedFolder = folder.folderId
     }
 
     /**
-     * Deletes all the portal items from the local cache storage.
+     * Returns the number of items in the repository for a specific [folder].
      */
-    suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        mutex.withLock {
-            itemCacheDao.deleteAll()
-            portalItems.clear()
-        }
-    }
-
-    /**
-     * Returns the number of items in the repository.
-     */
-    suspend fun getItemCount(folder : String?): Int = withContext(dispatcher) {
+    suspend fun getItemCount(folder: String?): Int = withContext(dispatcher) {
         itemCacheDao.getCount(folder)
     }
 
     /**
-     * Loads the list of [items] into loaded portal items and adds them to the Cache.
+     * Returns the username of the currently signed-in user.
+     */
+    fun getUsername(): String? {
+        val credential =
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(
+                portalSettings.getPortalUrl()
+            )
+        return credential?.username
+    }
+
+    /**
+     * Signs out the user from the portal and clears the local cache.
+     */
+    suspend fun signOut() = withContext(dispatcher) {
+        // clear the portal items and delete the cache
+        mutex.withLock {
+            itemCacheDao.deleteAll()
+            folderCacheDao.deleteAll()
+            portalItems.clear()
+        }
+        // sign out from the portal
+        portalSettings.signOut()
+    }
+
+    /**
+     * Loads the list of [portalItems] into loaded portal items and adds them to the Cache.
+     *
+     * @param portalItems The list of [PortalItem] to load and insert into the cache.
+     * @param deleteExisting If true, deletes the existing items in the cache before inserting the new ones.
      */
     private suspend fun loadAndInsertPortalItems(
         portalItems: List<PortalItem>,
         deleteExisting: Boolean
     ) = withContext(dispatcher) {
+        val entries = mutableListOf<ItemCacheEntry>()
         portalItems.map { item ->
             // load each portal item and its thumbnail in a new coroutine
             launch {
                 item.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
+                }.onSuccess {
+                    // create a cache entry for the item if it loaded successfully
+                    entries.add(
+                        ItemCacheEntry(
+                            itemId = item.itemId,
+                            json = item.toJson(),
+                            portalUrl = item.portal.url,
+                            parentFolderId = item.folderId
+                        )
+                    )
                 }
             }
             // suspend till all the portal loading jobs are complete
         }.joinAll()
-        // create entries to be inserted into the local cache storage.
-        val entries = portalItems.mapNotNull { item ->
-            // ignore if the portal item failed to load
-            if (item.loadStatus.value is LoadStatus.FailedToLoad) {
-                null
-            } else {
-                Log.e("TAG", "loadAndInsertPortalItems: ${item.folderId}")
-                ItemCacheEntry(
-                    itemId = item.itemId,
-                    json = item.toJson(),
-                    portalUrl = item.portal.url,
-                    parentFolderId = item.folderId
-                )
-            }
-        }
         // insert all the items into the local cache storage
         if (deleteExisting) {
             itemCacheDao.deleteAndInsert(entries)
         } else {
-            entries.forEach {
-                Log.e("TAG", "loadAndInsertPortalItems: ${it.itemId}, ${it.parentFolderId}")
-                itemCacheDao.insert(it)
-            }
+            itemCacheDao.insertAll(entries)
         }
     }
 
@@ -196,7 +217,7 @@ class PortalItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        "https://www.arcgis.com/home/item.html?id=f72207ac170a40d8992b7a3507b44fad"
+        "f72207ac170a40d8992b7a3507b44fad"
     )
 
 fun PortalFolder.toFolderCacheEntry(): FolderCacheEntry {

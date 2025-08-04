@@ -58,8 +58,13 @@ class DataModule {
      */
     @Provides
     @ItemRemoteSource
-    internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
-        ItemRemoteDataSource(dispatcher)
+    internal fun provideItemRemoteDataSource(
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        portalSettings: PortalSettings
+    ): ItemRemoteDataSource {
+        return ItemRemoteDataSource(dispatcher, portalSettings.getPortalUrl())
+    }
+
 
     /**
      * The provider of the PortalItemRepository.
@@ -71,9 +76,10 @@ class DataModule {
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
         @ItemCache itemCacheDao: ItemCacheDao,
-        @FolderCache folderCacheDao: FolderCacheDao
+        @FolderCache folderCacheDao: FolderCacheDao,
+        portalSettings: PortalSettings
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, folderCacheDao)
+        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, folderCacheDao, portalSettings)
 
     @Singleton
     @Provides

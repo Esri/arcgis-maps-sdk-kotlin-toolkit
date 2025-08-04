@@ -18,16 +18,12 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
-import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
-import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,14 +49,11 @@ data class MapListUIState(
 class PortalContentViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
     private val portalItemRepository: PortalItemRepository,
-    private val portalSettings: PortalSettings,
     private val navigator: Navigator
 ) : ViewModel() {
 
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
-
-    private val _searchText = MutableStateFlow("")
 
     // State flow that combines the _isLoading and the PortalItemUseCase data flow to create
     // a MapListUIState
@@ -87,13 +80,7 @@ class PortalContentViewModel @Inject constructor(
         }
     }
 
-    fun getUsername(): String {
-        val credential =
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(
-                portalSettings.getPortalUrl()
-            )
-        return credential?.username ?: ""
-    }
+    fun getUsername(): String? = portalItemRepository.getUsername()
 
     /**
      * Refreshes the data.
@@ -102,23 +89,15 @@ class PortalContentViewModel @Inject constructor(
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
-                portalItemRepository.refresh(
-                    portalSettings.getPortalUrl(),
-                    portalSettings.getPortalConnection()
-                )
+                portalItemRepository.refresh()
                 _isLoading.emit(false)
             }
         }
     }
 
-    fun filterPortalItems(filterText: String) {
-        _searchText.value = filterText
-    }
-
     fun signOut() {
         viewModelScope.launch {
-            portalItemRepository.deleteAll()
-            portalSettings.signOut()
+            portalItemRepository.signOut()
             // add a artificial delay before navigating screens
             delay(500)
             navigator.navigateTo(NavigationRoute.Login)

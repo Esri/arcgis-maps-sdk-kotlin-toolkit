@@ -107,13 +107,13 @@ fun PortalContentScreen(
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            MediumTopAppBar(
+            TopAppBar(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Map",
+                            text = "Home",
                             style = MaterialTheme.typography.headlineMedium
                         )
                     }
@@ -125,22 +125,20 @@ fun PortalContentScreen(
                     IconButton(onClick = onSearchIconClick) {
                         Icon(Icons.Filled.Search, contentDescription = "Refresh")
                     }
+                    User(
+                        username = viewModel.getUsername(),
+                        isLoading = uiState.isLoading,
+                        onRefresh = viewModel::refresh,
+                        onSignOut = {
+                            showSignOutProgress = true
+                            viewModel.signOut()
+                        },
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable { }
+                    )
                 }
             )
-//            AppSearchBar(
-//                "",
-//                isLoading = uiState.isLoading,
-//                username = viewModel.getUsername(),
-//                modifier = Modifier,
-//                    //.fillMaxWidth(),
-//                    //.padding(horizontal = 16.dp),
-//                onQueryChange = viewModel::filterPortalItems,
-//                onRefresh = viewModel::refresh,
-//                onSignOut = {
-//                    showSignOutProgress = true
-//                    viewModel.signOut()
-//                }
-//            )
         }
     ) { innerPadding ->
         Box(
@@ -152,7 +150,7 @@ fun PortalContentScreen(
             // and transition to the list of portalItems once loaded
             Crossfade(
                 targetState = uiState.isLoading,
-                modifier = Modifier.padding(top = 70.dp),
+                //modifier = Modifier.padding(top = 70.dp),
                 label = "list fade"
             ) { state ->
                 when (state) {
@@ -197,7 +195,7 @@ fun PortalContentScreen(
             },
             modifier = Modifier.fillMaxSize(),
             statusText = if (viewModel.getUsername()
-                    .isEmpty()
+                    .isNullOrEmpty()
             ) "Loading.." else "Signing out.."
         )
     }
@@ -209,141 +207,82 @@ fun PortalContentScreen(
 }
 
 @Composable
-fun AppSearchBar(
-    query: String,
+fun User(
+    username: String?,
     isLoading: Boolean,
-    username: String,
-    modifier: Modifier = Modifier,
-    onQueryChange: (String) -> Unit = {},
-    onRefresh: () -> Unit = {},
-    onSignOut: () -> Unit = {}
+    onRefresh: () -> Unit,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val focusManager = LocalFocusManager.current
     var active by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
-
-    TextField(
-        value = query,
-        onValueChange = {
-            onQueryChange(it)
-        },
-        modifier = modifier
-            .onFocusChanged {
-                if (it.hasFocus) {
-                    active = true
-                }
-            },
-            //.height(56.dp),
-        placeholder = {
-            Text(text = "Search Maps")
-        },
-        leadingIcon = {
-            Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
-        },
-        trailingIcon = {
-            Row(
-                modifier = Modifier
-                    //.widthIn(80.dp)
-                    .padding(end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = null
-                        )
-                    }
-                }
-                IconButton(onClick = {
-                    expanded = !expanded
-                    active = false
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        //modifier = Modifier.size(30.dp)
-                    )
-                }
-                MaterialTheme(
-                    shapes = MaterialTheme.shapes.copy(
-                        extraSmall = RoundedCornerShape(
-                            16.dp
-                        )
-                    )
-                ) {
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.widthIn(150.dp),
-                        offset = DpOffset(0.dp, 10.dp)
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = if (username.isEmpty()) {
-                                        "Not logged in"
-                                    } else {
-                                        "Logged in as $username"
-                                    }
-                                )
-                            },
-                            onClick = { }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Refresh") },
-                            enabled = !isLoading,
-                            onClick = {
-                                expanded = false
-                                onRefresh()
-                            },
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = if (username.isEmpty()) {
-                                        "Sign In"
-                                    } else {
-                                        "Sign Out"
-                                    }
-                                )
-                            },
-                            enabled = !isLoading,
-                            onClick = {
-                                expanded = false
-                                onSignOut()
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                    contentDescription = null
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-        },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = {
+    Row(
+        modifier = modifier.padding(end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
+        IconButton(onClick = {
+            expanded = !expanded
             active = false
-        }),
-        shape = RoundedCornerShape(30.dp),
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        textStyle = MaterialTheme.typography.titleMedium
-    )
-
-    LaunchedEffect(active) {
-        if (!active) {
-            focusManager.clearFocus()
+        }) {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.widthIn(150.dp),
+            offset = DpOffset(0.dp, 10.dp),
+            shape = RoundedCornerShape(10.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = if (username.isNullOrEmpty()) {
+                            "Not logged in"
+                        } else {
+                            "Logged in as $username"
+                        }
+                    )
+                },
+                onClick = { }
+            )
+            DropdownMenuItem(
+                text = { Text(text = "Refresh") },
+                enabled = !isLoading,
+                onClick = {
+                    expanded = false
+                    onRefresh()
+                },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = if (username.isNullOrEmpty()) {
+                            "Sign In"
+                        } else {
+                            "Sign Out"
+                        }
+                    )
+                },
+                enabled = !isLoading,
+                onClick = {
+                    expanded = false
+                    onSignOut()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     }
 }
@@ -353,9 +292,3 @@ fun AppSearchBar(
  */
 fun Instant.format(format: String): String =
     DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault()).format(this)
-
-@Composable
-@Preview
-fun AppBarPreview() {
-    AppSearchBar("", false, "User")
-}
