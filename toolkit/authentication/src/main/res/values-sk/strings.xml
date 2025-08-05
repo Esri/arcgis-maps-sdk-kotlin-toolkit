@@ -21,6 +21,8 @@
     <string name="allow_connection">Povoliť pripojenie</string>
     <string name="username_password_login_title">Vyžaduje sa overenie</string>
     <string name="username_password_login_message">Pre prístup k %1$s sa musíte prihlásiť</string>
+    <string name="incorrect_credentials">Poverenia pre %1$s boli nesprávne. Skúste to prosím znova.</string>
+    <string name="sign_in_error_occurred">Pri prihlasovaní do %1$s sa vyskytla chyba. Skúste to prosím znova.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Používateľské meno</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

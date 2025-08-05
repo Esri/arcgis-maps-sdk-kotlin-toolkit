@@ -2,7 +2,7 @@
 
 This micro-app demonstrates the use of the `TableTopSceneView` toolkit component which renders an `ArcGISSceneLayer` with buildings onto a physical surface detected in the device's camera feed.
 
-![Screenshot](../../toolkit/ar/screenshot.png)
+![Screenshot](../../toolkit/ar/tabletop-screenshot.png)
 
 ## Usage
 

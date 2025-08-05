@@ -21,6 +21,8 @@
     <string name="allow_connection">Zezwól na połączenie</string>
     <string name="username_password_login_title">Wymagane uwierzytelnienie</string>
     <string name="username_password_login_message">Musisz się zalogować, aby uzyskać dostęp do %1$s</string>
+    <string name="incorrect_credentials">Poświadczenia były nieprawidłowe dla %1$s. Spróbuj ponownie.</string>
+    <string name="sign_in_error_occurred">Wystąpił błąd podczas logowania do %1$s. Spróbuj ponownie.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nazwa użytkownika</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

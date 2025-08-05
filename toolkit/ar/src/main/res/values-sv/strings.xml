@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kamerabehörighet inte beviljad</string>
-    <string name="arcore_not_installed_message">ARCore måste vara installerad för användning av TableTopSceneView. ARCore-tillgänglighet: %1$s</string>
+    <string name="arcore_not_installed_message">ARCore måste vara installerad för användning av den här komponenten. ARCore-tillgänglighet: %1$s</string>
+    <string name="location_data_source_failed_to_start">Platsdatakällan kunde inte startas: %1$s</string>
+    <string name="location_permission_not_granted">Platsbehörighet inte beviljad</string>
+    <string name="permissions_not_granted_message">"Följande behörigheter krävs, men är inte beviljade: %1$s"</string>
+    <string name="close_calibration">Stäng kalibrering</string>
+    <string name="heading_title">Rubrik</string>
+    <string name="decrease_heading">Minska rubrik</string>
+    <string name="increase_heading">Öka rubrik</string>
+    <string name="reset_heading">Återställ rubrik</string>
+    <string name="heading_slider_description">Reglage för rubrik</string>
+    <string name="elevation_title">Höjdlager</string>
+    <string name="decrease_elevation">Minska höjd</string>
+    <string name="increase_elevation">Öka höjd</string>
+    <string name="reset_elevation">Återställ höjd</string>
+    <string name="elevation_slider_description">Reglage för höjd</string>
 </resources>

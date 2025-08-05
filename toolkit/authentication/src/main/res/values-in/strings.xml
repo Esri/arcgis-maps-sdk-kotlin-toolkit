@@ -21,6 +21,8 @@
     <string name="allow_connection">Izinkan koneksi</string>
     <string name="username_password_login_title">Diperlukan autentikasi</string>
     <string name="username_password_login_message">Anda harus masuk untuk mengakses %1$s</string>
+    <string name="incorrect_credentials">Kredensial untuk %1$s salah. Silakan coba lagi.</string>
+    <string name="sign_in_error_occurred">Terjadi kesalahan saat masuk ke %1$s. Silakan coba lagi.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Nama Pengguna</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

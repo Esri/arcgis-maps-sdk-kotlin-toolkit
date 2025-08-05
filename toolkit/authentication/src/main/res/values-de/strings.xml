@@ -21,6 +21,8 @@
     <string name="allow_connection">Verbindung zulassen</string>
     <string name="username_password_login_title">Authentifizierung erforderlich</string>
     <string name="username_password_login_message">Sie müssen sich anmelden, um auf %1$s zugreifen zu können.</string>
+    <string name="incorrect_credentials">Die Anmeldeinformationen für %1$s sind falsch. Versuchen Sie es erneut.</string>
+    <string name="sign_in_error_occurred">Fehler beim Anmelden bei %1$s. Versuchen Sie es erneut.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Benutzername</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

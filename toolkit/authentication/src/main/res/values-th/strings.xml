@@ -21,6 +21,8 @@
     <string name="allow_connection">อนุญาตการเชื่อมต่อ</string>
     <string name="username_password_login_title">ต้องการการรับรองความถูกต้อง</string>
     <string name="username_password_login_message">คุณต้องลงชื่อเข้าใช้เพื่อเข้าถึง %1$s</string>
+    <string name="incorrect_credentials">ข้อมูลประจำตัวไม่ถูกต้องสำหรับ %1$s โปรดลองใหม่อีกครั้ง</string>
+    <string name="sign_in_error_occurred">เกิดข้อผิดพลาดขณะลงชื่อเข้าใช้ %1$s โปรดลองใหม่อีกครั้ง</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">ชื่อผู้ใช้</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

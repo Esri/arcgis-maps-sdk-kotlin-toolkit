@@ -21,6 +21,8 @@
     <string name="allow_connection">Dozvoli konekciju</string>
     <string name="username_password_login_title">Potvrda identiteta je obavezna</string>
     <string name="username_password_login_message">Potrebno je da se prijavite da biste pristupili %1$s</string>
+    <string name="incorrect_credentials">Akreditivi su neispravni za %1$s. Pokušajte ponovo.</string>
+    <string name="sign_in_error_occurred">Došlo je do greške prilikom prijavljivanja u %1$s. Pokušajte ponovo.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Korisničko ime</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

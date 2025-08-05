@@ -21,6 +21,8 @@
     <string name="allow_connection">Tillat tilkobling</string>
     <string name="username_password_login_title">Krever godkjenning</string>
     <string name="username_password_login_message">Du må logge på for å få tilgang til %1$s</string>
+    <string name="incorrect_credentials">Feil legitimasjon for %1$s. Prøv på nytt.</string>
+    <string name="sign_in_error_occurred">Det oppstod en feil ved pålogging til %1$s. Prøv på nytt.</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->
     <string name="username_label">Brukernavn</string>
     <!-- This text is a label on a textfield that can fit 23 chars -->

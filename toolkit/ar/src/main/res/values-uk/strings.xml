@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Дозвіл на використання камери не надано</string>
-    <string name="arcore_not_installed_message">Для використання TableTopSceneView потрібно інсталювати ARCore. Доступність ARCore: %1$s</string>
+    <string name="arcore_not_installed_message">Для використання цього компоненту потрібно інсталювати ARCore. Доступність ARCore: %1$s</string>
+    <string name="location_data_source_failed_to_start">Помилка запуску джерела даних про місце розташування: %1$s</string>
+    <string name="location_permission_not_granted">Дозвіл на використання місця розташування не надано</string>
+    <string name="permissions_not_granted_message">"Зазначені далі дозволи є обовʼязковими, але їх не надано: %1$s"</string>
+    <string name="close_calibration">Закрити калібрування</string>
+    <string name="heading_title">Курс</string>
+    <string name="decrease_heading">Зменшити курс</string>
+    <string name="increase_heading">Збільшити курс</string>
+    <string name="reset_heading">Відновити курс</string>
+    <string name="heading_slider_description">Повзунок курсу</string>
+    <string name="elevation_title">Висота</string>
+    <string name="decrease_elevation">Зменшити висоту</string>
+    <string name="increase_elevation">Збільшити висоту</string>
+    <string name="reset_elevation">Відновити висоту</string>
+    <string name="elevation_slider_description">Повзунок висоти</string>
 </resources>

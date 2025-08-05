@@ -21,91 +21,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.geometry.Envelope
-import com.arcgismaps.geometry.Geometry
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.portal.Portal
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.indoors.FloorFilter
-import com.arcgismaps.toolkit.indoors.FloorFilterSelection
-import com.arcgismaps.toolkit.indoors.FloorFilterState
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    val floorAwareWebMap by remember {
-        mutableStateOf(
-            ArcGISMap(
-                PortalItem(
-                    Portal("https://arcgis.com/"),
-                    "b4b599a43a474d33946cf0df526426f5"
-                )
-            )
-        )
-    }
-
-    val mapViewProxy = remember { MapViewProxy() }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    // use default UI properties
-    @Suppress("DEPRECATION")
-    val floorFilterState: FloorFilterState by remember {
-        mutableStateOf(FloorFilterState(
-            geoModel = floorAwareWebMap,
-            coroutineScope = coroutineScope
-        ) { floorFilterSelection ->
-            when (floorFilterSelection.type) {
-                is FloorFilterSelection.Type.FloorSite -> {
-                    val floorFilterSelectionType =
-                        floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
-                    floorFilterSelectionType.site.geometry?.let {
-                        mapViewProxy.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
-                    }
-                }
-
-                is FloorFilterSelection.Type.FloorFacility -> {
-                    val floorFilterSelectionType =
-                        floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
-                    floorFilterSelectionType.facility.geometry?.let {
-                        mapViewProxy.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
-                    }
-                }
-
-                else -> {}
-            }
-        })
-    }
+fun MainScreen(modifier: Modifier = Modifier, viewModel: FloorFilterViewModel = viewModel()) {
 
     MapView(
-        floorAwareWebMap,
+        viewModel.floorAwareWebMap,
         modifier = modifier.fillMaxSize(),
-        mapViewProxy = mapViewProxy
+        mapViewProxy = viewModel.mapViewProxy
     )
     Box(
         modifier = modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
         contentAlignment = Alignment.BottomStart
     ) {
-        FloorFilter(floorFilterState = floorFilterState)
+        FloorFilter(floorFilterState = viewModel.floorFilterState)
     }
-}
-
-/**
- * Returns the envelope with an added buffer factor applied to the given Geometry's extent.
- *
- * @since 200.2.0
- */
-private fun getEnvelopeWithBuffer(geometry: Geometry): Envelope {
-    val bufferFactor = 1.25
-    val envelope = geometry.extent
-    return Envelope(envelope.center, envelope.width * bufferFactor, envelope.height * bufferFactor)
 }

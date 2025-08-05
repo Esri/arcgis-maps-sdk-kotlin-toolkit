@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Nije data dozvola za kameru</string>
-    <string name="arcore_not_installed_message">ARCore mora biti instaliran da bi se koristio TableTopSceneView. Dostupnost ARCore-a: %1$s</string>
+    <string name="arcore_not_installed_message">ARCore mora biti instaliran da bi se koristila ova komponenta. Dostupnost ARCore-a: %1$s</string>
+    <string name="location_data_source_failed_to_start">Pokretanje izvora podataka lokacije nije uspelo: %1$s</string>
+    <string name="location_permission_not_granted">Nije data dozvola za lokaciju</string>
+    <string name="permissions_not_granted_message">"Sledeće dozvole su potrebne, ali nisu date: %1$s"</string>
+    <string name="close_calibration">Zatvori kalibraciju</string>
+    <string name="heading_title">Zaglavlje</string>
+    <string name="decrease_heading">Smanji zaglavlje</string>
+    <string name="increase_heading">Povećaj zaglavlje</string>
+    <string name="reset_heading">Resetuj zaglavlje</string>
+    <string name="heading_slider_description">Klizač zaglavlja</string>
+    <string name="elevation_title">Elevacija</string>
+    <string name="decrease_elevation">Smanji elevaciju</string>
+    <string name="increase_elevation">Povećaj elevaciju</string>
+    <string name="reset_elevation">Resetuj elevaciju</string>
+    <string name="elevation_slider_description">Klizač elevacije</string>
 </resources>

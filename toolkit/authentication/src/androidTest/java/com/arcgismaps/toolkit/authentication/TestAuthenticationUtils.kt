@@ -22,17 +22,26 @@ import com.arcgismaps.httpcore.ArcGISHttpClient
 import com.arcgismaps.httpcore.Request
 import com.arcgismaps.httpcore.Response
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeType
 import io.mockk.every
 import io.mockk.mockk
 
 /**
  * A mock [ArcGISAuthenticationChallenge] for testing purposes.
  *
+ * @param challengeType the type of authentication challenge to mock.
  * @since 200.5.0
  */
-fun makeMockArcGISAuthenticationChallenge() = mockk<ArcGISAuthenticationChallenge>().apply {
-    every { requestUrl } returns "https://arcgis.com"
-    every { cause } returns Throwable()
+fun makeMockArcGISAuthenticationChallenge(
+    mockRequestUrl:String = "https://arcgis.com",
+    mockedCause: Throwable =  Throwable(),
+    challengeType: ArcGISAuthenticationChallengeType = ArcGISAuthenticationChallengeType.OAuthOrToken,
+    mockPreviousFailureCount: Int = 0
+) = mockk<ArcGISAuthenticationChallenge>().apply {
+    every { requestUrl } returns mockRequestUrl
+    every { cause } returns mockedCause
+    every { type } returns challengeType
+    every { previousFailureCount } returns mockPreviousFailureCount
 }
 
 /**

@@ -17,14 +17,12 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.view.KeyEvent
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
@@ -48,13 +46,13 @@ import java.security.cert.CertificateException
 class ServerTrustTests {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<AuthenticatorStateActivity>()
 
 
     @Before
     fun signOut() {
         runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
+            composeTestRule.activity.authenticatorState.signOut()
         }
     }
 
@@ -129,14 +127,13 @@ class ServerTrustTests {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> =
         with(StateRestorationTester(composeTestRule)) {
-            val authenticatorState = AuthenticatorState()
             setContent {
-                DialogAuthenticator(authenticatorState = authenticatorState)
+                DialogAuthenticator(authenticatorState = composeTestRule.activity.authenticatorState)
             }
             // issue the server trust challenge
             val certificateHostName = "https://server-trust-tests.com/"
             val challengeResponse = async {
-                authenticatorState.handleNetworkAuthenticationChallenge(
+                composeTestRule.activity.authenticatorState.handleNetworkAuthenticationChallenge(
                     NetworkAuthenticationChallenge(
                         certificateHostName,
                         NetworkAuthenticationType.ServerTrust,
@@ -152,7 +149,7 @@ class ServerTrustTests {
                 )
             // ensure the dialog prompt is displayed as expected
             advanceUntilIdle()
-            assert(authenticatorState.pendingServerTrustChallenge.value != null)
+            assert(composeTestRule.activity.authenticatorState.pendingServerTrustChallenge.value != null)
             composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
 
             // simulate a configuration change
@@ -163,7 +160,7 @@ class ServerTrustTests {
 
             advanceUntilIdle()
             // ensure the dialog has disappeared
-            assert(authenticatorState.pendingServerTrustChallenge.value == null)
+            assert(composeTestRule.activity.authenticatorState.pendingServerTrustChallenge.value == null)
             composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
 
             // return the response deferred

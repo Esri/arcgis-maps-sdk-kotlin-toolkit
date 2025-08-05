@@ -93,6 +93,12 @@ private const val RESULT_CODE_CANCELED = 2
  *
  * @since 200.2.0
  */
+@Deprecated(
+    message = "As of 200.8.0, this class is deprecated and will be removed in a future release. " +
+            "Use `AuthenticationActivity` instead.",
+    replaceWith = ReplaceWith(expression = "com.arcgismaps.toolkit.authentication.AuthenticationActivity"),
+    level = DeprecationLevel.WARNING
+)
 public class OAuthUserSignInActivity : ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -163,6 +169,11 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      *
      * @since 200.2.0
      */
+    @Deprecated(
+        message = "As of 200.8.0 this class is deprecated and will be removed in a future release." +
+                "Use AuthenticationActivity for OAuth user sign in support.",
+        level = DeprecationLevel.WARNING
+    )
     public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {

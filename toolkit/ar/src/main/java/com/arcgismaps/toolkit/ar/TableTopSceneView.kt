@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.ar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +59,7 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.checkArCoreAvailability
+import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.rememberCameraPermission
 import com.arcgismaps.toolkit.ar.internal.setFieldOfViewFromLensIntrinsics
@@ -69,7 +68,6 @@ import com.arcgismaps.toolkit.ar.internal.update
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.Anchor
-import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import java.time.Instant
 
@@ -186,21 +184,14 @@ public fun TableTopSceneView(
         )
     }
 
-    var arCoreInstalled by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        val arCoreAvailability = checkArCoreAvailability(context)
-        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+    val arCoreInstalled by rememberArCoreInstalled(
+        onFailed = {
             initializationStatus.update(
-                TableTopSceneViewStatus.FailedToInitialize(
-                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                ),
+                TableTopSceneViewStatus.FailedToInitialize(it),
                 onInitializationStatusChanged
             )
-        } else {
-            arCoreInstalled = true
         }
-    }
+    )
 
     val cameraController = remember {
         TransformationMatrixCameraController().apply {
@@ -319,7 +310,12 @@ public fun TableTopSceneView(
                 onTwoPointerTap = onTwoPointerTap,
                 onPan = onPan,
                 content = {
-                    content?.invoke(TableTopSceneViewScope(this))
+                    content?.let { content ->
+                        val tableTopSceneViewScope = remember {
+                            TableTopSceneViewScope(this)
+                        }
+                        content.invoke(tableTopSceneViewScope)
+                    }
                 }
             )
         }

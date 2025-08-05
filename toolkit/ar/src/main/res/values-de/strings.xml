@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
     <string name="camera_permission_not_granted">Kameraberechtigung nicht gewährt</string>
-    <string name="arcore_not_installed_message">Zur Verwendung von TableTopSceneView muss ARCore installiert sein. ARCore-Verfügbarkeit: %1$s</string>
+    <string name="arcore_not_installed_message">Zur Verwendung dieser Komponente muss ARCore installiert sein. ARCore-Verfügbarkeit: %1$s</string>
+    <string name="location_data_source_failed_to_start">Positionsdatenquelle konnte nicht gestartet werden: %1$s</string>
+    <string name="location_permission_not_granted">Standortberechtigung nicht gewährt</string>
+    <string name="permissions_not_granted_message">"Die folgenden Berechtigungen sind erforderlich, wurden aber nicht erteilt: %1$s"</string>
+    <string name="close_calibration">Kalibrierung schließen</string>
+    <string name="heading_title">Richtung</string>
+    <string name="decrease_heading">Richtungswert verringern</string>
+    <string name="increase_heading">Richtungswert vergrößern</string>
+    <string name="reset_heading">Richtungswert zurücksetzen</string>
+    <string name="heading_slider_description">Schieberegler für Richtungswert</string>
+    <string name="elevation_title">Höhe</string>
+    <string name="decrease_elevation">Höhenwert verringern</string>
+    <string name="increase_elevation">Höhenwert vergrößern</string>
+    <string name="reset_elevation">Höhenwert zurücksetzen</string>
+    <string name="elevation_slider_description">Schieberegler für Höhenwert</string>
 </resources>

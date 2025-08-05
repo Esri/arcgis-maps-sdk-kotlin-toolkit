@@ -40,11 +40,16 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSizeLimitExceededException
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.EmptyAttachmentException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.maxAttachmentUploadSize
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -55,6 +60,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +70,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.time.Instant
+import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -159,7 +167,23 @@ internal sealed class DialogType {
         val name: String,
     ) : DialogType()
 
+    data class DeleteAttachmentDialog(
+        val stateId: Int,
+        val formAttachment: FormAttachment,
+    ) : DialogType()
+
+    data class AttachmentErrorDialog(
+        val title: String,
+        val description: String,
+    ) : DialogType()
+
     data class BarcodeScanner(val stateId: Int) : DialogType()
+
+    data class ValidationErrorsDialog(
+        val onDismiss: () -> Unit,
+        val title: String,
+        val body: String
+    ) : DialogType()
 }
 
 /**
@@ -328,6 +352,38 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
         }
 
+        is DialogType.DeleteAttachmentDialog -> {
+            val stateId = (dialogType as DialogType.DeleteAttachmentDialog).stateId
+            val formAttachment = (dialogType as DialogType.DeleteAttachmentDialog).formAttachment
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            DeleteAttachmentDialog(
+                attachmentName = formAttachment.name,
+                onDelete = {
+                    state.deleteAttachment(formAttachment)
+                    dialogRequester.dismissDialog()
+                },
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                }
+            )
+        }
+
+        is DialogType.AttachmentErrorDialog -> {
+            val title = (dialogType as DialogType.AttachmentErrorDialog).title
+            val description = (dialogType as DialogType.AttachmentErrorDialog).description
+            AttachmentErrorDialog(
+                errorTitle = title,
+                errorMessage = description,
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                }
+            )
+        }
+
         is DialogType.BarcodeScanner -> {
             val stateId = (dialogType as DialogType.BarcodeScanner).stateId
             val state = states[stateId] as? BarcodeTextFieldState
@@ -343,6 +399,20 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 onDismiss = {
                     dialogRequester.dismissDialog()
                 }
+            )
+        }
+
+        is DialogType.ValidationErrorsDialog -> {
+            val onDismiss = (dialogType as DialogType.ValidationErrorsDialog).onDismiss
+            val title = (dialogType as DialogType.ValidationErrorsDialog).title
+            val body = (dialogType as DialogType.ValidationErrorsDialog).body
+            ErrorDialog(
+                onDismissRequest = {
+                    dialogRequester.dismissDialog()
+                    onDismiss()
+                },
+                title = title,
+                body = body
             )
         }
 
@@ -381,7 +451,7 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     try {
         val windowSizeClass = WindowSizeClass.compute(width / density, height / density)
         return windowSizeClass
-    } catch (ex : IllegalArgumentException) {
+    } catch (ex: IllegalArgumentException) {
         // if the calculation has thrown an exception due to width or height being negative (like
         // in a preview), then use a default size of 400x900dp which indicates a compact size
         // representing 99.96% of phones in portrait
@@ -436,11 +506,11 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
             size = it
         }
     }
-    // check if the size is within the limit of 50 MB
+    // check if the size is within the limits
     return@withContext if (size == 0L) {
-        Result.failure(Exception(context.getString(R.string.attachment_is_empty)))
-    } else if (size > 50_000_000) {
-        Result.failure(Exception(context.getString(R.string.attachment_too_large)))
+        Result.failure(EmptyAttachmentException())
+    } else if (size > maxAttachmentUploadSize) {
+        Result.failure(AttachmentSizeLimitExceededException(maxAttachmentUploadSize))
     } else {
         var result = Result.success(Unit)
         context.readBytes(uri).onFailure {

@@ -304,10 +304,16 @@ public data class RadioButtonFieldColors(
 public data class AttachmentsElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
+    @Deprecated("outlineColor is deprecated since the element is no longer outlined")
     public val outlineColor: Color,
     public val containerColor: Color,
     public val tileTextColor: Color,
+    @Deprecated(
+        message = "tileBorderColor is deprecated since the tile is no longer outlined",
+        replaceWith = ReplaceWith("tileContainerColor")
+    )
     public val tileBorderColor: Color,
+    public val tileContainerColor: Color,
     public val scrollBarColor: Color,
 )
 
@@ -413,10 +419,13 @@ public data class RadioButtonFieldTypography(
  * @property labelStyle The style for the label of this field.
  * @property supportingTextStyle The style for the supporting text of this field.
  * @property tileTextStyle The style for the text of an individual attachment tile.
+ * @property tileSupportingTextStyle The style for the supporting text of an individual attachment tile.
+ * This is used to display the size of the attachment.
  * @since 200.5.0
  */
 public data class AttachmentsElementTypography(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle,
     public val tileTextStyle: TextStyle,
+    public val tileSupportingTextStyle: TextStyle,
 )

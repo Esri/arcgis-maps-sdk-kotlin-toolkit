@@ -16,23 +16,13 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.handleCharConstraints
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -113,78 +103,4 @@ internal class BarcodeTextFieldState(
             super.calculateHelperText()
         }
     }
-
-    companion object {
-        fun Saver(
-            field: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope
-        ): Saver<BarcodeTextFieldState, *> = listSaver(
-            save = {
-                listOf(
-                    it.wasFocused
-                )
-            },
-            restore = {
-                val focused = it[0]
-                val input = field.input as BarcodeScannerFormInput
-                BarcodeTextFieldState(
-                    id = field.hashCode(),
-                    properties = BarcodeFieldProperties(
-                        label = field.label,
-                        placeholder = field.hint,
-                        description = field.description,
-                        value = field.formattedValueAsStateFlow(scope),
-                        required = field.isRequired,
-                        editable = field.isEditable,
-                        visible = field.isVisible,
-                        validationErrors = field.mapValidationErrors(scope),
-                        fieldType = field.fieldType,
-                        domain = field.domain,
-                        minLength = input.minLength.toInt(),
-                        maxLength = input.maxLength.toInt()
-                    ),
-                    hasValueExpression = field.hasValueExpression,
-                    scope = scope,
-                    updateValue = field::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                ).apply {
-                    // Restore the focus state
-                    onFocusChanged(focused)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberBarcodeTextFieldState(
-    field: FieldFormElement,
-    form: FeatureForm,
-    scope: CoroutineScope,
-): BarcodeTextFieldState = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = BarcodeTextFieldState.Saver(field, form, scope)
-) {
-    BarcodeTextFieldState(
-        id = field.hashCode(),
-        properties = BarcodeFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.formattedValueAsStateFlow(scope),
-            required = field.isRequired,
-            editable = field.isEditable,
-            visible = field.isVisible,
-            validationErrors = field.mapValidationErrors(scope),
-            fieldType = field.fieldType,
-            domain = field.domain,
-            minLength = (field.input as BarcodeScannerFormInput).minLength.toInt(),
-            maxLength = (field.input as BarcodeScannerFormInput).maxLength.toInt()
-        ),
-        hasValueExpression = field.hasValueExpression,
-        scope = scope,
-        updateValue = field::updateValue,
-        evaluateExpressions = form::evaluateExpressions
-    )
 }
