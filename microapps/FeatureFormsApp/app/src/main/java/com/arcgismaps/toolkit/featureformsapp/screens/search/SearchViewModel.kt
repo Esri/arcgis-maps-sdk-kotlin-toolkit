@@ -95,7 +95,9 @@ class SearchViewModel @Inject constructor(
         val queryParams = PortalQueryParameters.items(
             types = listOf(PortalItemType.WebMap),
             searchQuery = "title:$searchQuery",
-        )
+        ).apply {
+            limit = 100
+        }
         val searchResults = repository.searchItems(queryParams).getOrNull()
         return searchResults?.results ?: emptyList()
     }
