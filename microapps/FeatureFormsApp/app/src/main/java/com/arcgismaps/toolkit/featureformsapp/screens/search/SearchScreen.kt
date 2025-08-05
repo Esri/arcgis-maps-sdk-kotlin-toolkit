@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.search
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,10 +39,14 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +63,7 @@ fun SearchScreen(
     onItemSelected: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
+    val focusRequester = remember { FocusRequester() }
     val items by viewModel.items.collectAsState()
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -71,7 +75,9 @@ fun SearchScreen(
                         onValueChange = {
                             viewModel.setSearchText(it)
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                         singleLine = true,
                         textStyle = MaterialTheme.typography.titleMedium,
                         placeholder = {
@@ -150,7 +156,7 @@ fun SearchScreen(
             }
         }
     }
-    BackHandler {
-        onBackPressed()
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
 }
