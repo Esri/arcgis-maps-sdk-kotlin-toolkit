@@ -34,7 +34,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -90,16 +89,6 @@ class PortalItemRepository(
             // map the cache entries into PortalFolder
             it.map { entry ->
                 entry.toPortalFolder()
-            }
-        }.flowOn(dispatcher)
-
-    fun observeAll(): Flow<List<PortalItem>> =
-        itemCacheDao.observeAll().map { entries ->
-            Log.e("TAG", "observeAll: ${entries.count()}")
-            // map the cache entries into loaded portal items
-            entries.mapNotNull { entry ->
-                val portal = Portal(entry.portalUrl)
-                PortalItem.fromJsonOrNull(entry.json, portal)
             }
         }.flowOn(dispatcher)
 

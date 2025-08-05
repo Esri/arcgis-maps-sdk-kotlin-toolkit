@@ -15,6 +15,7 @@ androidxTestExt = "1.2.1"
 androidXTestRunner = "1.6.2"
 androidXTestRules = "1.6.1"
 androidxWindow = "1.3.0"
+datastorePreferences = "1.1.7"
 workVersion = "2.10.0"
 binaryCompatibilityValidator = "0.17.0"
 compileSdk = "36"
@@ -59,6 +60,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview"}
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest"}
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util"}
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose"}
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose"}

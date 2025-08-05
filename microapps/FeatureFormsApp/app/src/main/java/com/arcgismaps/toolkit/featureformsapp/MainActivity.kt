@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.featureformsapp
 import android.Manifest.permission.CAMERA
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.preference.PreferenceDataStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge

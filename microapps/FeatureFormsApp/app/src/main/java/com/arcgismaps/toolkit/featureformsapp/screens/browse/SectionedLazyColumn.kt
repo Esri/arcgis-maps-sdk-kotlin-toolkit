@@ -198,9 +198,7 @@ fun ExpandableHeader(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowDown
                     else Icons.Default.KeyboardArrowUp,
                     contentDescription = null,
-                    modifier = Modifier
-                        //.padding(8.dp)
-                        .size(24.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

@@ -130,6 +130,7 @@ fun FolderContentScreen(
         }
     }
     LaunchedEffect(Unit) {
+        // Save the current folder to the data store
         dataStore.edit { preferences ->
             val json = Json.encodeToString(viewModel.folder)
             preferences[CURRENT_FOLDER] = json

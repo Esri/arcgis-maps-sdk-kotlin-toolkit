@@ -136,7 +136,7 @@ fun PortalContentScreen(
                     true -> Box(modifier = modifier.fillMaxSize()) {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         Text(
-                            text = "Loading...",
+                            text = stringResource(R.string.loading),
                             modifier = Modifier.align(Alignment.Center),
                             style = MaterialTheme.typography.titleMedium
                         )
@@ -162,7 +162,7 @@ fun PortalContentScreen(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = "Nothing to show.")
+                            Text(text = stringResource(R.string.nothing_to_show))
                         }
                     }
                 }
@@ -175,7 +175,7 @@ fun PortalContentScreen(
             modifier = Modifier.fillMaxSize(),
             statusText = if (viewModel.getUsername()
                     .isNullOrEmpty()
-            ) "Loading.." else "Signing out.."
+            ) stringResource(R.string.loading) else stringResource(R.string.signing_out)
         )
     }
     LaunchedEffect(Unit) {
@@ -221,16 +221,16 @@ fun User(
                 text = {
                     Text(
                         text = if (username.isNullOrEmpty()) {
-                            "Not logged in"
+                            stringResource(R.string.not_logged_in)
                         } else {
-                            "Logged in as $username"
+                            stringResource(R.string.logged_in_as, username)
                         }
                     )
                 },
                 onClick = { }
             )
             DropdownMenuItem(
-                text = { Text(text = "Refresh") },
+                text = { Text(text = stringResource(R.string.refresh)) },
                 enabled = !isLoading,
                 onClick = {
                     expanded = false
@@ -244,9 +244,9 @@ fun User(
                 text = {
                     Text(
                         text = if (username.isNullOrEmpty()) {
-                            "Sign In"
+                            stringResource(R.string.sign_in)
                         } else {
-                            "Sign Out"
+                            stringResource(R.string.sign_out)
                         }
                     )
                 },
