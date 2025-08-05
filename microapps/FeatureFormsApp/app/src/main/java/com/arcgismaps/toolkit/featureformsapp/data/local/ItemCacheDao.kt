@@ -21,13 +21,13 @@ package com.arcgismaps.toolkit.featureformsapp.data.local
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.TypeConverters
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -52,6 +52,19 @@ interface ItemCacheDao {
     @Insert
     suspend fun insert(item: ItemCacheEntry): Long
 
+    /**
+     * Upsert an item into the itemcacheentry table.
+     *
+     * @param item the ItemCacheEntry type to upsert.
+     */
+    @Upsert
+    suspend fun upsert(item: ItemCacheEntry): Long
+
+    /**
+     * Insert a list of items into the itemcacheentry table.
+     *
+     * @param items the list of ItemCacheEntry types to insert.
+     */
     @Insert
     suspend fun insertAll(items: List<ItemCacheEntry>): List<Long>
 
@@ -63,6 +76,12 @@ interface ItemCacheDao {
     @Query("SELECT * FROM itemcacheentry")
     fun observeAll(): Flow<List<ItemCacheEntry>>
 
+    /**
+     * Observes list of ItemData by folder.
+     *
+     * @param folderId the folder id to filter by. If null, it will return items that are not in
+     * any folder.
+     */
     @Query("""
     SELECT * FROM itemcacheentry
     WHERE (:folderId IS NULL AND parentFolderId IS NULL)
@@ -111,13 +130,22 @@ interface ItemCacheDao {
      */
     @Query("DELETE FROM itemcacheentry")
     suspend fun deleteAll()
+
+    /**
+     * Checks if an item exists in the cache.
+     *
+     * @param itemId the item id to check.
+     * @return true if the item exists, false otherwise.
+     */
+    @Query("SELECT EXISTS(SELECT * FROM itemcacheentry WHERE itemId = :itemId)")
+    suspend fun hasItem(itemId: String): Boolean
 }
 
 /**
  * The room database that contains the ItemCacheEntry table.
  */
 @Database(
-    entities = [ItemCacheEntry::class, FolderCacheEntry::class],
+    entities = [ItemCacheEntry::class],
     version = 3,
     exportSchema = false
 )

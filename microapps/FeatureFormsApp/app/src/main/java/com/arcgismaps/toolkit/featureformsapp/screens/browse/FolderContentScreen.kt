@@ -55,7 +55,8 @@ import kotlinx.serialization.json.Json
 @Composable
 fun FolderContentScreen(
     viewModel: FolderContentViewModel = hiltViewModel(),
-    onItemSelected: (String) -> Unit,
+    onItemSelected: () -> Unit,
+    onSearchIconClick: () -> Unit,
     onBackPressed: () -> Unit,
     hasBackStack: Boolean
 ) {
@@ -89,7 +90,7 @@ fun FolderContentScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onSearchIconClick) {
                         Icon(Icons.Filled.Search, contentDescription = "Refresh")
                     }
                 },
@@ -120,7 +121,8 @@ fun FolderContentScreen(
                         portalItems = items.value,
                         onFolderClick = {},
                         onItemClick = { item ->
-                            onItemSelected(item.itemId)
+                            viewModel.setPortalItem(item)
+                            onItemSelected()
                         },
                     )
                 }

@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,21 +27,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,11 +43,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,19 +56,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.portal.PortalFolder
-import coil3.compose.AsyncImage
-import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
 import com.arcgismaps.toolkit.featureformsapp.data.datastore
@@ -87,17 +70,17 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
- * Displays a list of PortalItems using the [viewModel]. Provides a callback [onItemClick]
+ * Displays a list of PortalItems using the [viewModel]. Provides a callback [onItemSelected]
  * when an item is tapped.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortalContentScreen(
     modifier: Modifier = Modifier,
+    onFolderClick: (PortalFolder) -> Unit,
+    onItemSelected: () -> Unit,
+    onSearchIconClick: () -> Unit,
     viewModel: PortalContentViewModel = hiltViewModel(),
-    onFolderClick: (PortalFolder) -> Unit = {},
-    onItemClick: (String) -> Unit = {},
-    onSearchIconClick: () -> Unit = {}
 ) {
     val dataStore = LocalContext.current.datastore
     val uiState by viewModel.uiState.collectAsState()
@@ -150,7 +133,6 @@ fun PortalContentScreen(
             // and transition to the list of portalItems once loaded
             Crossfade(
                 targetState = uiState.isLoading,
-                //modifier = Modifier.padding(top = 70.dp),
                 label = "list fade"
             ) { state ->
                 when (state) {
@@ -169,10 +151,10 @@ fun PortalContentScreen(
                             portalItems = uiState.items,
                             onFolderClick = { folder ->
                                 onFolderClick(folder)
-                                //mapListViewModel.selectFolder(folder)
                             },
                             onItemClick = { item ->
-                                onItemClick(item.itemId)
+                                viewModel.setPortalItem(item)
+                                onItemSelected()
                             },
                             modifier = Modifier.fillMaxSize()
                         )

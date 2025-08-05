@@ -47,7 +47,6 @@ data class MapListUIState(
  */
 @HiltViewModel
 class PortalContentViewModel @Inject constructor(
-    @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
     private val portalItemRepository: PortalItemRepository,
     private val navigator: Navigator
 ) : ViewModel() {
@@ -93,6 +92,10 @@ class PortalContentViewModel @Inject constructor(
                 _isLoading.emit(false)
             }
         }
+    }
+
+    fun setPortalItem(portalItem: PortalItem) {
+        portalItemRepository.setActivePortalItem(portalItem)
     }
 
     fun signOut() {

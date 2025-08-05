@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
@@ -42,9 +43,7 @@ interface FolderContentViewModelFactory {
 class FolderContentViewModel @AssistedInject constructor(
     @Assisted
     val folder: PortalFolder,
-    private val repository: PortalItemRepository,
-    private val portalSettings: PortalSettings,
-    private val navigator: Navigator
+    private val repository: PortalItemRepository
 ) : ViewModel() {
 
     val items = repository.observe(folder.folderId).stateIn(
@@ -72,5 +71,9 @@ class FolderContentViewModel @AssistedInject constructor(
             repository.getItemsInFolder(folder)
             isLoading = false
         }
+    }
+
+    fun setPortalItem(portalItem: PortalItem) {
+        repository.setActivePortalItem(portalItem)
     }
 }

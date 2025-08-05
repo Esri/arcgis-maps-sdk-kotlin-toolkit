@@ -16,28 +16,18 @@
 
 package com.arcgismaps.toolkit.featureformsapp.navigation
 
-import android.util.Log
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import com.arcgismaps.portal.PortalFolder
-import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
-import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.FolderContentScreen
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.FolderContentViewModel
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.FolderContentViewModelFactory
@@ -47,11 +37,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.map.MapScreen
 import com.arcgismaps.toolkit.featureformsapp.screens.search.SearchScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import kotlin.reflect.typeOf
 
 class Navigator {
@@ -79,7 +65,7 @@ sealed class NavigationRoute {
     object Search : NavigationRoute()
 
     @Serializable
-    data class MapView(val uri: String) : NavigationRoute()
+    object MapView : NavigationRoute()
 }
 
 @Composable
@@ -88,7 +74,6 @@ fun AppNavigation(
     navigator: Navigator,
     startDestination: NavigationRoute
 ) {
-    val dataStore = LocalContext.current.datastore
     LaunchedEffect(Unit) {
         navigator.navigationFlow.collect {
             navController.navigate(it) {
@@ -124,12 +109,9 @@ fun AppNavigation(
                     val route = NavigationRoute.Folder(it)
                     navController.navigate(route)
                 },
-                onItemClick = { uri ->
-                    // encode the uri since it is equivalent to a navigation route
-                    val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-                    val route = NavigationRoute.MapView(encodedUri)// "mapview/$encodedUri"
+                onItemSelected = {
                     // navigate to the mapview
-                    navController.navigate(route) {
+                    navController.navigate(NavigationRoute.MapView) {
                         restoreState = true
                     }
                 },
@@ -146,7 +128,9 @@ fun AppNavigation(
         composable<NavigationRoute.Folder>(
             typeMap = mapOf(typeOf<PortalFolder>() to PortalFolderNavType),
             enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { slideOutHorizontally { h -> h } }
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() },
+            popExitTransition = { slideOutHorizontally { h -> h } }
         ) { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.Folder>()
             val viewModel = hiltViewModel<FolderContentViewModel, FolderContentViewModelFactory> {
@@ -154,12 +138,16 @@ fun AppNavigation(
             }
             FolderContentScreen(
                 viewModel = viewModel,
-                onItemSelected = { uri ->
-                    // encode the uri since it is equivalent to a navigation route
-                    val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-                    val route = NavigationRoute.MapView(encodedUri)
+                onItemSelected = {
                     // navigate to the mapview
-                    navController.navigate(route)
+                    navController.navigate(NavigationRoute.MapView)
+                },
+                onSearchIconClick = {
+                    // navigate to the search screen
+                    navController.navigate(NavigationRoute.Search) {
+                        restoreState = true
+                        launchSingleTop = true
+                    }
                 },
                 onBackPressed = {
                     if (navController.previousBackStackEntry == null) {
@@ -176,9 +164,16 @@ fun AppNavigation(
 
         composable<NavigationRoute.Search>(
             enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { slideOutHorizontally { h -> h } }
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() },
+            popExitTransition = { slideOutHorizontally { h -> h }}
         ) {
-            SearchScreen {
+            SearchScreen(
+                onItemSelected = {
+                    // navigate to the mapview
+                    navController.navigate(NavigationRoute.MapView)
+                }
+            ) {
                 navController.navigateUp()
             }
         }
@@ -186,18 +181,14 @@ fun AppNavigation(
         // MapView Screen - shows the map and the FeatureForms
         composable<NavigationRoute.MapView>(
             enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { slideOutHorizontally { h -> h } }
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() },
+            popExitTransition = { slideOutHorizontally { h -> h } }
         ) {
             MapScreen {
                 // navigate back on back pressed
-                navController.navigateUp()
+                navController.popBackStack()
             }
-        }
-    }
-    LaunchedEffect(Unit) {
-        dataStore.data.collect {
-            val value = it[CURRENT_FOLDER]
-            Log.e("TAG", "AppNavigation: $value")
         }
     }
 }

@@ -19,10 +19,13 @@
 package com.arcgismaps.toolkit.featureformsapp.data.network
 
 import android.util.Log
+import androidx.room.Query
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.portal.PortalItemType
+import com.arcgismaps.portal.PortalQueryParameters
+import com.arcgismaps.portal.PortalQueryResultSet
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -89,6 +92,21 @@ class ItemRemoteDataSource(
             it.type == PortalItemType.WebMap
         }
         return@withContext items
+    }
+
+    suspend fun searchContent(query: PortalQueryParameters) : Result<PortalQueryResultSet<PortalItem>> = withContext(dispatcher) {
+        if (::portal.isInitialized.not()) {
+            portal = Portal(
+                portalUri,
+                connection = Portal.Connection.Authenticated
+            )
+        }
+        // log an exception and return if the portal loading fails
+        portal.load().onFailure {
+            Log.e("ItemRemoteDataSource", "unable to load the Portal: ${it.message}")
+            return@withContext Result.failure(it)
+        }
+        return@withContext portal.findItems(query)
     }
 
     private fun emptyUserContent(): UserContent {
