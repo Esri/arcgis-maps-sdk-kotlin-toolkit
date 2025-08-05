@@ -24,8 +24,6 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
-import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
-import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -46,12 +44,18 @@ class FolderContentViewModel @AssistedInject constructor(
     private val repository: PortalItemRepository
 ) : ViewModel() {
 
+    /**
+     * A flow that emits a list of [PortalItem]s in the specified [folder].
+     */
     val items = repository.observe(folder.folderId).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
         initialValue = emptyList()
     )
 
+    /**
+     * A boolean state that indicates whether the items in the folder are currently being loaded.
+     */
     var isLoading by mutableStateOf(false)
         private set
 
@@ -65,15 +69,21 @@ class FolderContentViewModel @AssistedInject constructor(
         }
     }
 
-    fun refresh() {
+    /**
+     * Sets the active [PortalItem] in the repository.
+     */
+    fun setPortalItem(portalItem: PortalItem) {
+        repository.setActivePortalItem(portalItem)
+    }
+
+    /**
+     * Refreshes the items in the specified [folder] by fetching them from the repository.
+     */
+    private fun refresh() {
         viewModelScope.launch {
             isLoading = true
             repository.getItemsInFolder(folder)
             isLoading = false
         }
-    }
-
-    fun setPortalItem(portalItem: PortalItem) {
-        repository.setActivePortalItem(portalItem)
     }
 }

@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.PortalItem
@@ -79,6 +78,9 @@ class PortalContentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Returns the username of the currently signed-in user.
+     */
     fun getUsername(): String? = portalItemRepository.getUsername()
 
     /**
@@ -94,10 +96,16 @@ class PortalContentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sets the active portal item to the provided [portalItem].
+     */
     fun setPortalItem(portalItem: PortalItem) {
         portalItemRepository.setActivePortalItem(portalItem)
     }
 
+    /**
+     * Signs out the user and navigates to the login screen.
+     */
     fun signOut() {
         viewModelScope.launch {
             portalItemRepository.signOut()

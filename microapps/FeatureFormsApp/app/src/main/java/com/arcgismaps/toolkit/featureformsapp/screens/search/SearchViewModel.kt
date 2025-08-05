@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.search
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,18 +42,28 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchText: MutableState<String> = mutableStateOf("")
+
+    /**
+     * The current search text used to filter portal items. This can be set via [setSearchText].
+     */
     val searchText by _searchText
 
     private val _isSearching: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     * A boolean state that indicates whether a search is currently in progress.
+     */
     val isSearching by _isSearching
 
+    /**
+     * A flow that emits a list of [PortalItem]s based on the current search text.
+     */
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val items: StateFlow<List<PortalItem>> = snapshotFlow {
         searchText
     }.debounce(500L).mapLatest { text ->
         return@mapLatest if (text.isNotEmpty()) {
             _isSearching.value = true
-            Log.e("TAG", "searching with: $text")
             searchOnPortal(text).also {
                 _isSearching.value = false
             }

@@ -135,7 +135,4 @@ fun FolderContentScreen(
             preferences[CURRENT_FOLDER] = json
         }
     }
-//    BackHandler {
-//        onBackPressed()
-//    }
 }

@@ -17,8 +17,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.search
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
@@ -35,7 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,21 +40,18 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.MapListItem
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +75,7 @@ fun SearchScreen(
                         singleLine = true,
                         textStyle = MaterialTheme.typography.titleMedium,
                         placeholder = {
-                            Text("Search Maps")
+                            Text(stringResource(R.string.search_maps))
                         },
                         trailingIcon = {
                             if (viewModel.searchText.isNotEmpty()) {
@@ -116,13 +109,14 @@ fun SearchScreen(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             HorizontalDivider()
             if (items.count() == 0 && viewModel.searchText.isNotEmpty() && viewModel.isSearching.not()) {
                 Text(
-                    text = "No results found",
+                    text = stringResource(R.string.no_results_found),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -140,16 +134,13 @@ fun SearchScreen(
                 }) { item ->
                     MapListItem(
                         title = item.title,
-                        lastModified = null,
-                        shareType = "",
+                        lastModified = item.modified,
+                        shareType = item.access.encoding.uppercase(Locale.getDefault()),
                         thumbnail = item.thumbnail,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp)
-                            .animateItem(
-//                                fadeInSpec = tween(500),
-//                                fadeOutSpec = tween(500)
-                            ),
+                            .animateItem(),
                         onClick = {
                             viewModel.selectItem(item)
                             onItemSelected()
@@ -162,10 +153,4 @@ fun SearchScreen(
     BackHandler {
         onBackPressed()
     }
-}
-
-@Preview
-@Composable
-fun SearchScreenPreview() {
-    SearchScreen(onItemSelected = {}, onBackPressed = {})
 }

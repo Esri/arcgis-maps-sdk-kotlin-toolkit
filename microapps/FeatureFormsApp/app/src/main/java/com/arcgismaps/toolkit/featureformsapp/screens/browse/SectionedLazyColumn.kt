@@ -149,15 +149,13 @@ fun SectionedLazyColumn(
                 expandable = false
             )
         }
-        items(portalItems) { item ->
+        items(portalItems, key = { it.itemId }) { item ->
             MapListItem(
                 title = item.title,
                 lastModified = item.modified,
                 shareType = item.access.encoding.uppercase(Locale.getDefault()),
                 thumbnail = item.thumbnail,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
+                modifier = Modifier.fillMaxWidth().height(100.dp)
             ) {
                 onItemClick(item)
             }
@@ -168,7 +166,7 @@ fun SectionedLazyColumn(
 @Composable
 fun ExpandableHeader(
     title: String,
-    count : Int,
+    count: Int,
     modifier: Modifier = Modifier,
     expandable: Boolean,
     onExpanded: ((Boolean) -> Unit)? = null

@@ -57,12 +57,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
+import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
 import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import java.time.Instant
@@ -92,17 +94,12 @@ fun PortalContentScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Home",
+                            text = stringResource(R.string.home),
                             style = MaterialTheme.typography.headlineMedium
                         )
                     }
-                },
-                navigationIcon = {
-
                 },
                 actions = {
                     IconButton(onClick = onSearchIconClick) {

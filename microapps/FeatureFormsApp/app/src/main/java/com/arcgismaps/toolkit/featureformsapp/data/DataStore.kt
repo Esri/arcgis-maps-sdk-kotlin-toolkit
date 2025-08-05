@@ -21,4 +21,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 
 val Context.datastore by preferencesDataStore(name = "preferences")
+
+/**
+ * A key for storing the current folder in the data store.
+ */
 val CURRENT_FOLDER = stringPreferencesKey("current_folder")
