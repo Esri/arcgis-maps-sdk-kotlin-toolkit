@@ -104,14 +104,14 @@ private fun TraceScaffold(
 ) {
     val localContext = LocalContext.current
     Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .semantics { contentDescription = localContext.getString(R.string.trace_component) }
     ) {
         Column(
             modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (initializationStatus) {
                 is InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
