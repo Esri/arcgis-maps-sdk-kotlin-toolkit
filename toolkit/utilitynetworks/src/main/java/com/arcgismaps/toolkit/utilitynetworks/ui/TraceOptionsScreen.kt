@@ -96,7 +96,7 @@ internal fun TraceOptionsScreen(
     onColorChanged: (Color) -> Unit,
     onZoomRequested: (Boolean) -> Unit
 ) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
         LazyColumn(
@@ -372,7 +372,6 @@ private fun TraceButton(enabled: Boolean = true, onClicked: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
     ) {
         Button(
             onClick = { onClicked() },

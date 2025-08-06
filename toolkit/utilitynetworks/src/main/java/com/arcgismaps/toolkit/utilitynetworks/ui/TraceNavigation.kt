@@ -43,10 +43,7 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
         navController.navigateTo(it)
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = TraceNavRoute.TraceOptions.name
-    ) {
+    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs by traceState.traceConfigurations
             val coroutineScope = rememberCoroutineScope()
