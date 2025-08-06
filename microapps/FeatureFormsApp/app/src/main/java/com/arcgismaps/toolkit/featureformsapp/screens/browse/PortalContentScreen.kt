@@ -86,6 +86,7 @@ fun PortalContentScreen(
 ) {
     val dataStore = LocalContext.current.datastore
     val uiState by viewModel.uiState.collectAsState()
+    val username = remember { viewModel.getUsername() }
     var showSignOutProgress by rememberSaveable {
         mutableStateOf(false)
     }
@@ -102,11 +103,13 @@ fun PortalContentScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onSearchIconClick) {
-                        Icon(Icons.Filled.Search, contentDescription = "Refresh")
+                    if (username != null) {
+                        IconButton(onClick = onSearchIconClick) {
+                            Icon(Icons.Filled.Search, contentDescription = "Refresh")
+                        }
                     }
                     User(
-                        username = viewModel.getUsername(),
+                        username = username,
                         isLoading = uiState.isLoading,
                         onRefresh = viewModel::refresh,
                         onSignOut = {
