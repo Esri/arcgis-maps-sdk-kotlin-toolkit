@@ -142,7 +142,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popupState, evaluated && fetched, lastUpdatedEntityId)
+    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
 }
 
 @Composable

@@ -21,6 +21,7 @@
 package com.arcgismaps.toolkit.popupapp.screens.mapscreen
 
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
@@ -65,7 +66,7 @@ fun MainScreen(viewModel: MapViewModel) {
     BottomSheetScaffold(
         sheetContent = {
             if (viewModel.popup != null) {
-                Popup(viewModel.popup!!)
+                Popup(viewModel.popup!!, Modifier.animateContentSize())
             }
         },
         modifier = Modifier.fillMaxSize(),
