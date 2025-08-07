@@ -21,11 +21,7 @@
 package com.arcgismaps.toolkit.popupapp.screens.mapscreen
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -68,19 +64,8 @@ fun MainScreen(viewModel: MapViewModel) {
     )
     BottomSheetScaffold(
         sheetContent = {
-            AnimatedVisibility(
-                visible = viewModel.popup != null,
-                enter = slideInVertically { h -> h },
-                exit = slideOutVertically { h -> h },
-                label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
-            ) {
-                if (viewModel.popup != null) {
-                    Popup(
-                        viewModel.popup!!,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+            if (viewModel.popup != null) {
+                Popup(viewModel.popup!!)
             }
         },
         modifier = Modifier.fillMaxSize(),

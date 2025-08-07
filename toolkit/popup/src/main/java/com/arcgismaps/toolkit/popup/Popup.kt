@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.popup
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -157,7 +156,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long,
         }
     }
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -199,9 +198,7 @@ private fun PopupBody(
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .semantics { contentDescription = "lazy column" },
+        modifier = Modifier.semantics { contentDescription = "lazy column" },
         state = lazyListState
     ) {
         states.forEach { entry ->
