@@ -105,7 +105,6 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
  */
 private val attachments: MutableList<PopupAttachment> = mutableListOf()
 
-@Suppress("unused_parameter")
 @Composable
 private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
