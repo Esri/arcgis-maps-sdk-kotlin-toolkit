@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.popup
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -106,7 +105,6 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
  */
 private val attachments: MutableList<PopupAttachment> = mutableListOf()
 
-@Suppress("unused_parameter")
 @Composable
 private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
@@ -143,7 +141,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popupState, evaluated && fetched, lastUpdatedEntityId)
+    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
 }
 
 @Composable
@@ -157,7 +155,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long,
         }
     }
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -199,9 +197,7 @@ private fun PopupBody(
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .semantics { contentDescription = "lazy column" },
+        modifier = Modifier.semantics { contentDescription = "lazy column" },
         state = lazyListState
     ) {
         states.forEach { entry ->
