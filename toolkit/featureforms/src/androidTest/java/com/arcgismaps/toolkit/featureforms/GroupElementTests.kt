@@ -46,8 +46,12 @@ class GroupElementTests : FeatureFormTestRunner(
 
     @Before
     fun setContent() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
     }
 

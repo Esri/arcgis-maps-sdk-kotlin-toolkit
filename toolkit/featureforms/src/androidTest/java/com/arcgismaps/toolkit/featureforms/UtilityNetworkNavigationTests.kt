@@ -39,8 +39,6 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val scope = CoroutineScope(Dispatchers.Main)
-
     /**
      * Given a FeatureForm with a UtilityAssociationsFormElement
      * When the navigation is enabled

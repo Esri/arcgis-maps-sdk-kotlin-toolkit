@@ -61,6 +61,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testEditableFieldTheming() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         // create custom color scheme and typography and apply to the FeatureForm
@@ -79,7 +83,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme,
                 typography = typography
             )
@@ -108,6 +112,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testPlaceHolderTransformation() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         // create custom color scheme and typography and apply to the FeatureForm
         composeTestRule.setContent {
@@ -120,7 +128,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme
             )
         }
@@ -154,6 +162,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testReadOnlyFieldTheming() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
@@ -171,7 +183,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme,
                 typography = typography
             )
@@ -199,6 +211,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testRadioButtonFieldTheming() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
@@ -216,7 +232,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme,
                 typography = typography
             )
@@ -244,6 +260,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testGroupElementTheming() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
@@ -261,7 +281,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme,
                 typography = typography
             )
@@ -289,6 +309,10 @@ class ThemingTests : FeatureFormTestRunner(
      */
     @Test
     fun testAttachmentsElementTheming() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
@@ -312,7 +336,7 @@ class ThemingTests : FeatureFormTestRunner(
                 )
             )
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 colorScheme = colorScheme,
                 typography = typography
             )

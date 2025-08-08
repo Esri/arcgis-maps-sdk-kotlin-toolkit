@@ -46,8 +46,12 @@ class AttachmentTests : FeatureFormTestRunner(
      */
     @Test
     fun testImageAttachments() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
         val attachmentsFormElement = featureForm.defaultAttachmentsElement
         assertThat(attachmentsFormElement).isNotNull()

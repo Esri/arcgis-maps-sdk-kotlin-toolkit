@@ -30,6 +30,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 
@@ -59,6 +61,8 @@ open class FeatureFormTestRunner(
      */
     lateinit var featureForm: FeatureForm
         private set
+
+    internal val scope = CoroutineScope(Dispatchers.Main)
 
     @Before
     fun setup(): Unit = runTest {
