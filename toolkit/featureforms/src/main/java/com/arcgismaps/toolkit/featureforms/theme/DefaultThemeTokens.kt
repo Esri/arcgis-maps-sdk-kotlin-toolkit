@@ -112,10 +112,8 @@ internal object DefaultThemeTokens {
         attachmentsElementColors = AttachmentsElementColors(
             labelColor = Color.Unspecified,
             supportingTextColor = Color.Unspecified,
-            outlineColor = ColorTokens.Outline,
             containerColor = ColorTokens.Surface,
             tileTextColor = Color.Unspecified,
-            tileBorderColor = ColorTokens.Outline,
             tileContainerColor = Color.Unspecified,
             scrollBarColor = ColorTokens.OnSurface,
         )

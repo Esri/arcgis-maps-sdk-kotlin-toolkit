@@ -260,30 +260,25 @@ public object FeatureFormDefaults {
      *
      * @param labelColor the color used for the label of this field.
      * @param supportingTextColor the color used for the supporting text of this field.
-     * @param outlineColor the color used for the outline of this field.
      * @param containerColor the color used for the container of this field.
      * @param tileTextColor the color used for the text of the individual attachment tile.
-     * @param tileBorderColor the color used for the border of the individual attachment tile.
+     * @param tileContainerColor the color used for the container of the individual attachment tile.
      * @param scrollBarColor the color used for the scroll bar in the attachment list.
      */
     @Composable
     public fun attachmentsElementColors(
         labelColor: Color = Color.Unspecified,
         supportingTextColor: Color = Color.Unspecified,
-        outlineColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
         containerColor: Color = Color.Unspecified,
         tileTextColor: Color = MaterialTheme.colorScheme.onSurface,
-        tileBorderColor: Color = MaterialTheme.colorScheme.outline,
         tileContainerColor: Color = Color.Unspecified,
         scrollBarColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     ): AttachmentsElementColors {
         return AttachmentsElementColors(
             labelColor = labelColor,
             supportingTextColor = supportingTextColor,
-            outlineColor = outlineColor,
             containerColor = containerColor,
             tileTextColor = tileTextColor,
-            tileBorderColor = tileBorderColor,
             tileContainerColor = tileContainerColor,
             scrollBarColor = scrollBarColor
         )

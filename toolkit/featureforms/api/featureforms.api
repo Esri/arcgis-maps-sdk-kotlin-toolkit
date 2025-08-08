@@ -57,24 +57,20 @@ public final class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility
 
 public final class com/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors {
 	public static final field $stable I
-	public synthetic fun <init> (JJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component2-0d7_KjU ()J
 	public final fun component3-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
-	public final fun component7-0d7_KjU ()J
-	public final fun component8-0d7_KjU ()J
-	public final fun copy-FD3wquc (JJJJJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
-	public static synthetic fun copy-FD3wquc$default (Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;JJJJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public final fun copy-tNS2XkQ (JJJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public static synthetic fun copy-tNS2XkQ$default (Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;JJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getContainerColor-0d7_KjU ()J
 	public final fun getLabelColor-0d7_KjU ()J
-	public final fun getOutlineColor-0d7_KjU ()J
 	public final fun getScrollBarColor-0d7_KjU ()J
 	public final fun getSupportingTextColor-0d7_KjU ()J
-	public final fun getTileBorderColor-0d7_KjU ()J
 	public final fun getTileContainerColor-0d7_KjU ()J
 	public final fun getTileTextColor-0d7_KjU ()J
 	public fun hashCode ()I
@@ -214,7 +210,7 @@ public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormColorSch
 public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormDefaults {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormDefaults;
-	public final fun attachmentsElementColors-oq7We08 (JJJJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public final fun attachmentsElementColors-5tl4gsc (JJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
 	public final fun attachmentsElementTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;
 	public final fun colorScheme (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;
 	public final fun editableTextFieldColors-s9joTbY (JJJJJJJJLandroidx/compose/foundation/text/selection/TextSelectionColors;JJJJJJJJJJJJJJJJJJJJJJJJLandroidx/compose/runtime/Composer;IIIIII)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
