@@ -102,7 +102,10 @@ internal fun TraceResultScreen(
                 onDelete = onDeleteResult,
                 showZoomToOption = selectedTraceRun.geometryTraceResult != null
             )
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.weight(weight = 1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 item {
                     FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
                 }
@@ -118,10 +121,8 @@ internal fun TraceResultScreen(
                         }
                     )
                 }
-                item {
-                    ClearAllResultsButton(onClearAllResults)
-                }
             }
+            ClearAllResultsButton(onClearAllResults)
         }
     } else {
         Column {
@@ -298,7 +299,7 @@ private fun ClearAllResultsButton(onClearAllResults: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp)
+            .padding(vertical = 8.dp)
     ) {
         Button(onClick = onClearAllResults) {
             Text(stringResource(R.string.clear_all_results))
