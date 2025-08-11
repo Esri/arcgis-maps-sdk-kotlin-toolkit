@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.arcgismaps.toolkit.featureforms.test">
+
+    <!--Note: this manifest is only applied to instrumented tests (tests in androidTest folder).
+    For manifest settings that should get applied to the SDK aar see AndroidManifest.xml under src/main-->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+<!--    <application android:requestLegacyExternalStorage="true"/>-->
+</manifest>

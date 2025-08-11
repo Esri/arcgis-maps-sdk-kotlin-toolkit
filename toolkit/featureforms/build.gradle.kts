@@ -141,6 +141,9 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
+    // mocking jay
+    implementation("com.esri:mockingjay:2.0.0")
+    //
     implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)

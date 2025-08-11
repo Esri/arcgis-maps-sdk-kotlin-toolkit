@@ -28,6 +28,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.rule.GrantPermissionRule
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.esri.mockingjay.MockingJayConfiguration
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -39,15 +40,16 @@ import org.junit.Test
 
 class BarcodeTests : FeatureFormTestRunner(
     uri = "https://www.arcgis.com/home/item.html?id=a14a825c22884dfe9998ac964bd1cf89",
-    objectId = 2L
+    objectId = 2L,
+    mockMode = MockingJayConfiguration.Mode.CleanRecord
 ) {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    // Grant camera permission for barcode scanning
-    @get:Rule
-    val runtimePermissionRule: GrantPermissionRule =
-        GrantPermissionRule.grant(Manifest.permission.CAMERA)
+//    // Grant camera permission for barcode scanning
+//    @get:Rule
+//    val runtimePermissionRule: GrantPermissionRule =
+//        GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
     /**
      * Test case 11.1:

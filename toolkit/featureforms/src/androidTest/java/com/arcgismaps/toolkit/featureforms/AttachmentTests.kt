@@ -24,6 +24,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.esri.mockingjay.MockingJayConfiguration
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -31,7 +32,8 @@ import org.junit.Test
 
 class AttachmentTests : FeatureFormTestRunner(
     uri = "https://www.arcgis.com/home/item.html?id=3e551c383fc949c7982ec73ba67d409b",
-    objectId = 1
+    objectId = 1,
+    mockMode = MockingJayConfiguration.Mode.CleanRecord
 ) {
     @get:Rule
     val composeTestRule = createComposeRule()
