@@ -1,0 +1,28 @@
+import com.esri.arcgismaps.kotlin.build_logic.convention.implementation
+import com.esri.arcgismaps.kotlin.build_logic.convention.libs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.project
+
+class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            dependencies {
+                dependencies {
+                    // if a "build" property is set from the command line like: "-D build=300.X.X-XXXX"
+                    val buildVersion = System.getProperty("build")
+                    // Override version in libs.versions.toml file
+                    if (buildVersion != null) {
+                        implementation("com.esri:arcgis-maps-kotlin:$buildVersion")
+                    } else {
+                        // Use version catalog when no build flag is provided
+                        implementation(libs.findLibrary("arcgis-maps-kotlin").get())
+                    }
+                    // Local project common microapps library
+                    implementation(project(":microapps-lib"))
+                }
+            }
+        }
+    }
+}
