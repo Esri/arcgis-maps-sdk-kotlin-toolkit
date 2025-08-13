@@ -33,7 +33,7 @@ import org.junit.Test
 class AttachmentTests : FeatureFormTestRunner(
     uri = "https://www.arcgis.com/home/item.html?id=3e551c383fc949c7982ec73ba67d409b",
     objectId = 1,
-    mockMode = MockingJayConfiguration.Mode.CleanRecord
+    mockMode = MockingJayConfiguration.Mode.Playback
 ) {
     @get:Rule
     val composeTestRule = createComposeRule()

@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 /*
  *
  *  Copyright 2024 Esri
@@ -23,6 +25,7 @@ plugins {
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
+    id("grant-test-permissions")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
@@ -44,14 +47,14 @@ android {
         disable += "MissingTranslation"
         disable += "MissingQuantity"
     }
-    
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        
+        testApplicationId = "com.arcgismaps.toolkit.featureforms.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -134,7 +137,7 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
     )
-    
+
     ignoredClasses.addAll(composableSingletons)
 }
 
@@ -142,7 +145,7 @@ apiValidation {
 dependencies {
     api(arcgis.mapsSdk)
     // mocking jay
-    implementation("com.esri:mockingjay:2.0.0")
+    implementation(libs.mockingjay)
     //
     implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
