@@ -96,7 +96,7 @@ class SearchViewModel @Inject constructor(
             types = listOf(PortalItemType.WebMap),
             searchQuery = "title:$searchQuery",
         ).apply {
-            // TO-DO: make this configurable
+            // TODO: make this configurable
             this.searchPublic = false
             limit = 100
         }
