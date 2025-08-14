@@ -135,7 +135,7 @@ class MockingJayTestWatcher(
         val testName = "$databaseName.db"
 
         if (mode == MockingJayConfiguration.Mode.Playback) {
-            copyDatabaseForTest(testName, "$testDataPath/mocked-responses/$folder")
+            copyDatabaseForTest(testName, "$testDataPath/test-data/mockingjay/$folder")
         }
         // Set the epoch to a distant future date to avoid token expiration issues
         val distantFutureEpoch = JsonPrimitive(80808080808080)

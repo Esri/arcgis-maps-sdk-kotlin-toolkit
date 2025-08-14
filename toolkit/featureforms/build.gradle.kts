@@ -102,6 +102,19 @@ android {
     }
 }
 
+grantTestPermissionsConfig {
+    packageName.set(android.defaultConfig.testApplicationId)
+    adbPath.set(android.adbExecutable.absoluteFile)
+    permissions.set(
+        listOf(
+            "android.permission.CAMERA",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.MANAGE_EXTERNAL_STORAGE"
+        )
+    )
+}
+
 apiValidation {
     ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74

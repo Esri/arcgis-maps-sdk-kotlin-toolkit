@@ -87,12 +87,12 @@ class GrantTestPermissions : Plugin<Project> {
         }
 
         project.afterEvaluate {
-            // Configure the grantPermissionTask runs right before the install task
+            // Configure the task runs right after the install task
             project.tasks.matching { it.name.startsWith("install") && it.name.endsWith("AndroidTest") }
                 .forEach { installTask ->
                     grantPermissionTask.get().dependsOn(installTask)
                 }
-            // Configure the grantPermissionTask runs before connected tasks
+            // Configure the task runs before the connectedAndroidTest tasks
             project.tasks.matching { it.name.startsWith("connected") && it.name.endsWith("AndroidTest") }
                 .forEach { connectedTask ->
                     connectedTask.dependsOn(grantPermissionTask.get())

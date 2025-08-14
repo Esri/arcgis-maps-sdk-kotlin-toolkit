@@ -16,15 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.Manifest
-import androidx.test.rule.GrantPermissionRule
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
-import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.ServerTrust
@@ -35,7 +31,6 @@ import com.esri.mockingjay.MockingJayConfiguration
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 
 /**
  * A test runner for feature form tests. This class is responsible for loading the map with the
@@ -59,11 +54,6 @@ open class FeatureFormTestRunner(
     private val layerName: String = "",
     mockMode : MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback
 ) : NetworkMockTestCase(mockMode = mockMode) {
-
-//    @Rule
-//    @JvmField
-//    val writeRule : GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//        Manifest.permission.READ_EXTERNAL_STORAGE, )
 
     /**
      * The feature form for the feature with the given [objectId].
