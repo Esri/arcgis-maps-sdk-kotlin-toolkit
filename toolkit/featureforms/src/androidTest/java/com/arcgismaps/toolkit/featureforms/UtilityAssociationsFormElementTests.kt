@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.esri.mockingjay.MockingJayConfiguration
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class UtilityAssociationsFormElementTests {
+class UtilityAssociationsFormElementTests : NetworkMockTestCase() {
 
     private lateinit var map: ArcGISMap
 
