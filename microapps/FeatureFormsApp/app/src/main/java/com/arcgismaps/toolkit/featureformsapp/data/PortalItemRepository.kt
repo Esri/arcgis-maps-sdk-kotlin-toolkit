@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.util.Log
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalFolder
@@ -33,6 +32,7 @@ import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.joinAll
@@ -145,12 +145,8 @@ class PortalItemRepository(
     /**
      * Returns the username of the currently signed-in user.
      */
-    fun getUsername(): String? {
-        val credential =
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(
-                portalSettings.getPortalUrl()
-            )
-        return credential?.username
+    suspend fun getUsername(): String? {
+        return portalSettings.user.firstOrNull()?.username
     }
 
     suspend fun searchItems(query: PortalQueryParameters): Result<PortalQueryResultSet<PortalItem>> {

@@ -79,6 +79,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -160,11 +161,10 @@ class MainActivity : ComponentActivity() {
         // create and set a NetworkCredentialStore that persists
         val networkCredentialStore = NetworkCredentialStore.createWithPersistence().getOrThrow()
         ArcGISEnvironment.authenticationManager.networkCredentialStore = networkCredentialStore
-        // get the portal settings url
-        val url = portalSettings.getPortalUrl()
         // check if any credentials are present for this portal
-        val credential =
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
+        val credential = portalSettings.getPortalUser()?.let { user ->
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(user.portal.url)
+        }
         appState.value = if (credential == null) {
             // if the portal connection type set it Anonymous, then the user has skipped sign in
             if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {
