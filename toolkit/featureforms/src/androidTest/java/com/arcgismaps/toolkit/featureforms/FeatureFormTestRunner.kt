@@ -53,7 +53,8 @@ open class FeatureFormTestRunner(
     private val user: String = BuildConfig.webMapUser,
     private val password: String = BuildConfig.webMapPassword,
     private val layerName: String = "",
-    mockMode : MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback
+    mockMode : MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback,
+    private val log : Boolean = false
 ) : NetworkMockTestCase(mockMode = mockMode) {
 
     /**
@@ -64,15 +65,17 @@ open class FeatureFormTestRunner(
 
     @Before
     fun setup(): Unit = runTest {
-        ArcGISEnvironment.configureArcGISHttpClient {
-            interceptor { chain ->
-                val request = chain.request()
-                Log.e("FeatureFormTestRunner", ": --- Request --->", )
-                Log.e("FeatureFormTestRunner", ": ${request.method} ${request.url}", )
-                Log.e("FeatureFormTestRunner", ": ${request.headers}", )
-                Log.e("FeatureFormTestRunner", ": ${request.parameters}", )
-                Log.e("FeatureFormTestRunner", ": <--- END Request ---", )
-                chain.proceed(request)
+        if (log) {
+            ArcGISEnvironment.configureArcGISHttpClient {
+                interceptor { chain ->
+                    val request = chain.request()
+                    Log.e("FeatureFormTestRunner", ": --- Request --->",)
+                    Log.e("FeatureFormTestRunner", ": ${request.method} ${request.url}",)
+                    Log.e("FeatureFormTestRunner", ": ${request.headers}",)
+                    Log.e("FeatureFormTestRunner", ": ${request.parameters}",)
+                    Log.e("FeatureFormTestRunner", ": <--- END Request ---",)
+                    chain.proceed(request)
+                }
             }
         }
         // If the feature form is already initialized, return
