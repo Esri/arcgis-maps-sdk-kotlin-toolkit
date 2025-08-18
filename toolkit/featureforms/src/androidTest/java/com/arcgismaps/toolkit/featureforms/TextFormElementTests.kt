@@ -47,9 +47,13 @@ class TextFormElementTests : FeatureFormTestRunner(
      */
     @Test
     fun testTextFormElementSubstitution() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             MaterialTheme {
-                FeatureForm(featureForm = featureForm)
+                FeatureForm(featureFormState = featureFormState)
             }
         }
         // verify initial state
@@ -84,9 +88,13 @@ class TextFormElementTests : FeatureFormTestRunner(
      */
     @Test
     fun testTextFormElementDisplaysPlainText() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             MaterialTheme {
-                FeatureForm(featureForm = featureForm)
+                FeatureForm(featureFormState = featureFormState)
             }
         }
         val textFormElement = featureForm.elements[2] as TextFormElement

@@ -50,8 +50,12 @@ class BarcodeTests : FeatureFormTestRunner(
      */
     @Test
     fun testBarcodeTextField(): Unit = runBlocking {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState)
         }
         val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
         // Check the barcode form element is displayed
@@ -74,10 +78,14 @@ class BarcodeTests : FeatureFormTestRunner(
      */
     @Test
     fun testCustomBarcodeClickAction() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var fieldFormElement: FieldFormElement? = null
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 onBarcodeButtonClick = {
                     // Custom barcode click event
                     fieldFormElement = it
@@ -129,10 +137,14 @@ class BarcodeTests : FeatureFormTestRunner(
      */
     @Test
     fun testGroupCustomBarcodeClickAction() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         var fieldFormElement: FieldFormElement? = null
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 onBarcodeButtonClick = {
                     // Custom barcode click event
                     fieldFormElement = it
@@ -165,9 +177,13 @@ class BarcodeTests : FeatureFormTestRunner(
      */
     @Test
     fun testDefaultBarcodeClickAction() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 onBarcodeButtonClick = null
             )
         }
@@ -190,9 +206,13 @@ class BarcodeTests : FeatureFormTestRunner(
      */
     @Test
     fun testDefaultBarcodeClickActionInGroup() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm,
+                featureFormState = featureFormState,
                 onBarcodeButtonClick = null
             )
         }

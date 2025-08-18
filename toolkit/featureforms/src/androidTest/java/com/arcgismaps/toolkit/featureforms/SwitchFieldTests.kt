@@ -49,9 +49,13 @@ class SwitchFieldTests : FeatureFormTestRunner(
 
     @Before
     fun setUp() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             context = LocalContext.current
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
     }
 

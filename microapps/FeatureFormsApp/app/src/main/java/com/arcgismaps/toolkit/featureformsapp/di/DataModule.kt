@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.featureformsapp.di
 import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
+import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
@@ -57,8 +58,13 @@ class DataModule {
      */
     @Provides
     @ItemRemoteSource
-    internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
-        ItemRemoteDataSource(dispatcher)
+    internal fun provideItemRemoteDataSource(
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        portalSettings: PortalSettings
+    ): ItemRemoteDataSource {
+        return ItemRemoteDataSource(dispatcher, portalSettings.getPortalUrl())
+    }
+
 
     /**
      * The provider of the PortalItemRepository.
@@ -70,9 +76,10 @@ class DataModule {
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
         @ItemCache itemCacheDao: ItemCacheDao,
-        @ApplicationContext context: Context
+        @FolderCache folderCacheDao: FolderCacheDao,
+        portalSettings: PortalSettings
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
+        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, folderCacheDao, portalSettings)
 
     @Singleton
     @Provides

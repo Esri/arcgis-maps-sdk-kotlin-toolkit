@@ -26,6 +26,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.TypeConverters
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -35,7 +37,8 @@ import kotlinx.coroutines.flow.Flow
 data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
     val json: String,
-    val portalUrl: String
+    val portalUrl: String,
+    val parentFolderId: String? = null
 )
 
 @Dao
@@ -47,7 +50,23 @@ interface ItemCacheDao {
      * @param item the ItemCacheEntry type to insert.
      */
     @Insert
-    suspend fun insert(item: ItemCacheEntry) : Long
+    suspend fun insert(item: ItemCacheEntry): Long
+
+    /**
+     * Upsert an item into the itemcacheentry table.
+     *
+     * @param item the ItemCacheEntry type to upsert.
+     */
+    @Upsert
+    suspend fun upsert(item: ItemCacheEntry): Long
+
+    /**
+     * Insert a list of items into the itemcacheentry table.
+     *
+     * @param items the list of ItemCacheEntry types to insert.
+     */
+    @Insert
+    suspend fun insertAll(items: List<ItemCacheEntry>): List<Long>
 
     /**
      * Observes list of ItemData.
@@ -56,6 +75,19 @@ interface ItemCacheDao {
      */
     @Query("SELECT * FROM itemcacheentry")
     fun observeAll(): Flow<List<ItemCacheEntry>>
+
+    /**
+     * Observes list of ItemData by folder.
+     *
+     * @param folderId the folder id to filter by. If null, it will return items that are not in
+     * any folder.
+     */
+    @Query("""
+    SELECT * FROM itemcacheentry
+    WHERE (:folderId IS NULL AND parentFolderId IS NULL)
+    OR parentFolderId = :folderId
+    """)
+    fun observeByFolder(folderId: String?): Flow<List<ItemCacheEntry>>
 
     /**
      * fetch an entry by id.
@@ -71,8 +103,12 @@ interface ItemCacheDao {
      *
      * @return the number of items.
      */
-    @Query("SELECT COUNT(*) FROM itemcacheentry")
-    suspend fun getCount() : Int
+    @Query("""
+    SELECT COUNT(*) FROM itemcacheentry
+    WHERE (:folderId IS NULL AND parentFolderId IS NULL)
+    OR parentFolderId = :folderId
+    """)
+    suspend fun getCount(folderId : String?): Int
 
 
     /**
@@ -82,7 +118,7 @@ interface ItemCacheDao {
      * @return the list of row id's that were inserted.
      */
     @Transaction
-    suspend fun deleteAndInsert(items: List<ItemCacheEntry>) : List<Long> {
+    suspend fun deleteAndInsert(items: List<ItemCacheEntry>): List<Long> {
         deleteAll()
         return items.map {
             insert(it)
@@ -94,12 +130,26 @@ interface ItemCacheDao {
      */
     @Query("DELETE FROM itemcacheentry")
     suspend fun deleteAll()
+
+    /**
+     * Checks if an item exists in the cache.
+     *
+     * @param itemId the item id to check.
+     * @return true if the item exists, false otherwise.
+     */
+    @Query("SELECT EXISTS(SELECT * FROM itemcacheentry WHERE itemId = :itemId)")
+    suspend fun hasItem(itemId: String): Boolean
 }
 
 /**
  * The room database that contains the ItemCacheEntry table.
  */
-@Database(entities = [ItemCacheEntry::class], version = 2, exportSchema = false)
+@Database(
+    entities = [ItemCacheEntry::class],
+    version = 3,
+    exportSchema = false
+)
+@TypeConverters(DateConverter::class)
 abstract class ItemCacheDatabase : RoomDatabase() {
-    abstract fun itemCacheDao() : ItemCacheDao
+    abstract fun itemCacheDao(): ItemCacheDao
 }

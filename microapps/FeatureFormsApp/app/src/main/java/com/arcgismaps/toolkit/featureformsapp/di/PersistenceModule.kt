@@ -20,6 +20,9 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import android.content.Context
 import androidx.room.Room
+import com.arcgismaps.toolkit.featureformsapp.data.local.DateConverter
+import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheDao
+import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheDatabase
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDatabase
 import com.arcgismaps.toolkit.featureformsapp.data.local.UrlHistoryDao
@@ -38,6 +41,10 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ItemCache
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class FolderCache
 
 @Qualifier
 @Retention(AnnotationRetention.SOURCE)
@@ -68,10 +75,32 @@ object PersistenceModule {
         ).build()
     }
 
+    /**
+     * The provider of the folder cache dao.
+     */
+    @Singleton
+    @Provides
+    @FolderCache
+    fun provideFolderCacheDao(database: FolderCacheDatabase): FolderCacheDao =
+        database.folderCacheDao()
+
+    /**
+     * The provider of the ItemCacheDatabase.
+     */
+    @Singleton
+    @Provides
+    fun provideFolderCacheDataBase(@ApplicationContext context: Context): FolderCacheDatabase {
+        return Room.databaseBuilder(
+            context,
+            FolderCacheDatabase::class.java,
+            "folder_items.db"
+        ).build()
+    }
+
     @Singleton
     @Provides
     @UrlHistory
-    fun provideUrlHistoryDao(database: UrlHistoryDatabase) : UrlHistoryDao = database.urlHistoryDao()
+    fun provideUrlHistoryDao(database: UrlHistoryDatabase): UrlHistoryDao = database.urlHistoryDao()
 
     @Singleton
     @Provides
