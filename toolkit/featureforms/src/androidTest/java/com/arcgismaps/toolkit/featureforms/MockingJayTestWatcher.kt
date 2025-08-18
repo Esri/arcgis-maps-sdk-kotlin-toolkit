@@ -56,7 +56,8 @@ open class NetworkMockTestCase(
 /**
  * A JUnit `TestRule` that conditionally applies the MockingJay network recorder and re-player.
  * It skips mocking if the test is annotated with `@LiveNetwork`, allowing live network requests.
- * @since 200.8.0
+ *
+ * @since 300.0.0
  */
 class NetworkMockingTestWatcher(private val mockMode: MockingJayConfiguration.Mode) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
