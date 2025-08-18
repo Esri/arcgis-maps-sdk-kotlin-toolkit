@@ -1,7 +1,7 @@
 [versions]
 
 # ArcGIS Maps SDK for Kotlin version
-arcgisMapsKotlinVersion = "300.0.0-4689"
+arcgisMapsKotlinVersion = "300.0.0-4695"
 
 ### Android versions
 androidGradlePlugin = "8.9.2"
@@ -151,6 +151,7 @@ arcgismaps-android-application = { id = "arcgismaps.android.application" }
 arcgismaps-android-application-compose = { id = "arcgismaps.android.application.compose" }
 arcgismaps-android-library-compose = { id = "arcgismaps.android.library.compose" }
 arcgismaps-android-library = { id = "arcgismaps.android.library" }
+arcgismaps-kotlin-sdk = { id = "arcgismaps.kotlin.sdk"}
 arcgismaps-kotlin-microapp = { id = "arcgismaps.kotlin.microapp" }
 arcgismaps-kotlin-toolkit = { id = "arcgismaps.kotlin.toolkit" }
 artifact-deploy = { id = "artifact-deploy" }

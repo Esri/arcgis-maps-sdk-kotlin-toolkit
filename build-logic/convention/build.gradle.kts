@@ -58,5 +58,9 @@ gradlePlugin {
             id = "arcgismaps.kotlin.microapp"
             implementationClass = "ArcGISMapsKotlinMicroappConventionPlugin"
         }
+        register("arcGISMapsKotlinSDK") {
+            id = "arcgismaps.kotlin.sdk"
+            implementationClass = "ArcGISMapsKotlinSDKConventionPlugin"
+        }
     }
 }

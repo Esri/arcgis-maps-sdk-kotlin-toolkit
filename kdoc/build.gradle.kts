@@ -17,9 +17,12 @@
  */
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.dokka) apply true
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.dokka)
+    // put exposed dependencies in dokka's classpath
+    alias(libs.plugins.arcgismaps.kotlin.toolkit)
+    alias(libs.plugins.arcgismaps.kotlin.sdk)
 }
 
 val versionNumber: String by project
@@ -89,33 +92,6 @@ dependencies {
     // Puts the version in the KDoc
     dokkaPlugin(libs.dokka.versioning)
     // put exposed dependencies in dokka's classpath
-    // The version of the ArcGIS Maps SDK for Kotlin dependency.
-    // First look for the version number provided via command line (for CI builds), if not found,
-    // take the one defined in gradle.properties.
-    // CI builds pass -PversionNumber=${BUILDVER}
-    val sdkVersionNumber: String? =
-        providers.gradleProperty("versionNumber").orNull
-            ?: providers.gradleProperty("sdkVersionNumber").orNull
-
-    // The build number of the ArcGIS Maps SDK for Kotlin dependency.
-    // First look for the version number provided via command line (for CI builds), if not found,
-    // take the one defined in local.properties.
-    // CI builds pass -PbuildNumber=${BUILDNUM}
-    val sdkBuildNumber: String =
-        providers.gradleProperty("buildNumber").orNull
-            ?: providers.gradleProperty("sdkBuildNumber").orNull
-            ?: ""
-    // ArcGIS Maps SDK dependency with build override support
-    if (sdkVersionNumber != null) {
-        if (!sdkVersionNumber.isBlank()) {
-            implementation("com.esri:arcgis-maps-kotlin:$sdkVersionNumber-$sdkBuildNumber")
-        } else {
-            implementation("com.esri:arcgis-maps-kotlin:$sdkVersionNumber")
-        }
-    } else {
-        // Use libs.versions.toml if no gradle property provided
-        implementation(libs.arcgis.maps.kotlin)
-    }
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
 }

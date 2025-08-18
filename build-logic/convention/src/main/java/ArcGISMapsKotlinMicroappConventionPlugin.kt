@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
+import com.esri.arcgismaps.kotlin.build_logic.convention.ArcGISMapsKotlinSDKDependency
 import com.esri.arcgismaps.kotlin.build_logic.convention.implementation
 import com.esri.arcgismaps.kotlin.build_logic.convention.libs
 import org.gradle.api.Plugin
@@ -25,7 +26,6 @@ class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
                 if (defaultPropertiesFile.exists()) {
                     val properties = java.util.Properties()
                     defaultPropertiesFile.inputStream().use { properties.load(it) }
-
                     defaultConfig {
                         // Add each property as a BuildConfig field
                         properties.forEach { (key, value) ->
@@ -43,33 +43,8 @@ class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                // The version of the ArcGIS Maps SDK for Kotlin dependency.
-                // First look for the version number provided via command line (for CI builds), if not found,
-                // take the one defined in gradle.properties.
-                // CI builds pass -PversionNumber=${BUILDVER}
-                val sdkVersionNumber: String? =
-                    providers.gradleProperty("versionNumber").orNull
-                        ?: providers.gradleProperty("sdkVersionNumber").orNull
-
-                // The build number of the ArcGIS Maps SDK for Kotlin dependency.
-                // First look for the version number provided via command line (for CI builds), if not found,
-                // take the one defined in local.properties.
-                // CI builds pass -PbuildNumber=${BUILDNUM}
-                val sdkBuildNumber: String =
-                    providers.gradleProperty("buildNumber").orNull
-                        ?: providers.gradleProperty("sdkBuildNumber").orNull
-                        ?: ""
-                // ArcGIS Maps SDK dependency with build override support
-                if (sdkVersionNumber != null) {
-                    if (!sdkVersionNumber.isBlank()) {
-                        implementation("com.esri:arcgis-maps-kotlin:$sdkVersionNumber-$sdkBuildNumber")
-                    } else {
-                        implementation("com.esri:arcgis-maps-kotlin:$sdkVersionNumber")
-                    }
-                } else {
-                    // Use libs.versions.toml if no gradle property provided
-                    implementation(libs.findLibrary("arcgis-maps-kotlin").get())
-                }
+                // Configure the ArcGIS Maps SDK dependency
+                ArcGISMapsKotlinSDKDependency.configureArcGISMapsDependencies(target)
 
                 // Local project common microapps library
                 implementation(project(":microapps-lib"))
