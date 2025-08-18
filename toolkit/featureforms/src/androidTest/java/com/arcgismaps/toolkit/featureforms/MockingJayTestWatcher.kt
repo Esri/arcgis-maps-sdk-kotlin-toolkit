@@ -41,11 +41,10 @@ import org.junit.runners.model.Statement
 /**
  * Mocks the network requests for a test class and replays the recorded responses when the flag
  * [MockingJayConfiguration.Mode.Playback] is set.
- * Controls before and after actions for a test class, see [BeforeAfterTestCase] for more details.
  *
  * @see [LiveNetwork] annotation to skip mocking for specific tests.
  *
- * @since 200.7.0
+ * @since 300.0.0
  */
 open class NetworkMockTestCase(
     mockMode: MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback
@@ -73,7 +72,7 @@ class NetworkMockingTestWatcher(private val mockMode: MockingJayConfiguration.Mo
  * Annotation to indicate that a test should bypass network mocking and allow live network requests.
  * Useful for tests in a [NetworkMockTestCase] that require direct interaction with live network services.
  *
- * @since 200.8.0
+ * @since 300.0.0
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
@@ -83,7 +82,7 @@ annotation class LiveNetwork
 /**
  * A JUnit TestWatcher that sets up and tears down the MockingJay network recorder and re-player.
  *
- * @since 200.6.0
+ * @since 300.0.0
  */
 class MockingJayTestWatcher(
     private val mode: MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback
@@ -91,7 +90,8 @@ class MockingJayTestWatcher(
     private val context: Context
         get() = getInstrumentation().targetContext.applicationContext
 
-    private val testDataPath: String = "${Environment.getExternalStorageDirectory()}/Data/androidKotlin"
+    private val testDataPath: String =
+        "${Environment.getExternalStorageDirectory()}/Data/androidKotlin"
 
 
     override fun starting(description: Description) {
@@ -128,8 +128,6 @@ class MockingJayTestWatcher(
      *
      * @param databaseName The name of the database, obtained from the test name.
      * @param folder The folder where the test data is located, obtained from the test package.
-     *
-     * @since 200.8.0
      */
     private fun setupMockingJay(databaseName: String, folder: String) {
         val testName = "$databaseName.db"
@@ -159,7 +157,8 @@ class MockingJayTestWatcher(
                 queryParameterReplacements.putAll(queryParameterReplacements)
 
                 jsonResponseKeyValueReplacements["access_token"] = JsonPrimitive("accessDummyToken")
-                jsonResponseKeyValueReplacements["refresh_token"] = JsonPrimitive("refreshDummyToken")
+                jsonResponseKeyValueReplacements["refresh_token"] =
+                    JsonPrimitive("refreshDummyToken")
                 jsonResponseKeyValueReplacements["refresh_token_expires_in"] = distantFutureEpoch
                 jsonResponseKeyValueReplacements["token"] = JsonPrimitive("dummyToken")
                 jsonResponseKeyValueReplacements["expires"] = distantFutureEpoch
@@ -174,8 +173,6 @@ class MockingJayTestWatcher(
 
     /**
      * Copies the database file from the test folder to the Android database path.
-     *
-     * @since 200.8.0
      */
     private fun copyDatabaseForTest(testDBName: String, testFolderSrc: String) {
         val testDatabase = context.getDatabasePath(testDBName)
@@ -193,8 +190,6 @@ class MockingJayTestWatcher(
 
     /**
      * Copies the database file from the Android database path to the specified test folder path.
-     *
-     * @since 200.8.0
      */
     private fun copyDatabaseToPath(testDBName: String, testFolderPath: String) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
@@ -202,7 +197,7 @@ class MockingJayTestWatcher(
         }
         val dbFile = context.getDatabasePath(testDBName)
         if (dbFile.exists()) {
-            Log.e("TAG", "copyDatabaseToPath: ${dbFile.path}", )
+            Log.e("TAG", "copyDatabaseToPath: ${dbFile.path}")
             val destination = File(testFolderPath, testDBName)
             dbFile.copyTo(destination, overwrite = true)
         } else {
@@ -212,8 +207,6 @@ class MockingJayTestWatcher(
 
     /**
      * Cleans up the MockingJay session and closes the ArcGIS HTTP client.
-     *
-     * @since 200.8.0
      */
     private fun teardownMockingJay(name: String, testFolderPath: String) {
         endSession(name, testFolderPath)
@@ -223,8 +216,6 @@ class MockingJayTestWatcher(
 
     /**
      * Ends the MockingJay session and copies the database file to the specified test folder path.
-     *
-     * @since 200.8.0
      */
     private fun endSession(name: String, testFolderPath: String) {
         val testName = "$name.db"
@@ -239,8 +230,6 @@ class MockingJayTestWatcher(
 
     /**
      * Removes the database file from the Android database path.
-     *
-     * @since 200.8.0
      */
     private fun removeDatabase(testDBName: String) {
         val testDatabase = context.getDatabasePath(testDBName)

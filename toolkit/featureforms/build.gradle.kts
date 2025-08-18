@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-
 /*
  *
  *  Copyright 2024 Esri
@@ -150,7 +148,6 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
     )
-
     ignoredClasses.addAll(composableSingletons)
 }
 

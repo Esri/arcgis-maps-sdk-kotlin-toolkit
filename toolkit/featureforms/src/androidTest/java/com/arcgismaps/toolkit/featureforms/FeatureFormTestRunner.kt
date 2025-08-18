@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
@@ -53,8 +52,7 @@ open class FeatureFormTestRunner(
     private val user: String = BuildConfig.webMapUser,
     private val password: String = BuildConfig.webMapPassword,
     private val layerName: String = "",
-    mockMode : MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback,
-    private val log : Boolean = false
+    mockMode : MockingJayConfiguration.Mode = MockingJayConfiguration.Mode.Playback
 ) : NetworkMockTestCase(mockMode = mockMode) {
 
     /**
@@ -65,19 +63,6 @@ open class FeatureFormTestRunner(
 
     @Before
     fun setup(): Unit = runTest {
-        if (log) {
-            ArcGISEnvironment.configureArcGISHttpClient {
-                interceptor { chain ->
-                    val request = chain.request()
-                    Log.e("FeatureFormTestRunner", ": --- Request --->",)
-                    Log.e("FeatureFormTestRunner", ": ${request.method} ${request.url}",)
-                    Log.e("FeatureFormTestRunner", ": ${request.headers}",)
-                    Log.e("FeatureFormTestRunner", ": ${request.parameters}",)
-                    Log.e("FeatureFormTestRunner", ": <--- END Request ---",)
-                    chain.proceed(request)
-                }
-            }
-        }
         // If the feature form is already initialized, return
         if (::featureForm.isInitialized) return@runTest
         // Set the authentication challenge handler
