@@ -16,7 +16,7 @@ internal fun Project.configureAndroidCompose(
         }
 
         composeOptions {
-            kotlinCompilerExtensionVersion = libs.findVersion("kotlinVersion").get().toString()
+            kotlinCompilerExtensionVersion = libs.findVersion("kotlin").get().toString()
         }
 
         dependencies {
@@ -30,8 +30,6 @@ internal fun Project.configureAndroidCompose(
             debugImplementation(libs.findLibrary("androidx-compose-ui-tooling").get())
             debugImplementation(libs.findLibrary("androidx-compose-ui-test-manifest").get())
             androidTestImplementation(libs.findLibrary("androidx-compose-ui-test").get())
-            androidTestImplementation(libs.findLibrary("androidx-compose-ui-test-junit4").get())
-
         }
     }
 }

@@ -37,24 +37,6 @@ val localProperties = java.util.Properties().apply {
     }
 }
 
-// The version of the ArcGIS Maps SDK for Kotlin dependency.
-// First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in gradle.properties.
-// CI builds pass -PversionNumber=${BUILDVER}
-val sdkVersionNumber: String =
-    providers.gradleProperty("versionNumber").orNull
-        ?: providers.gradleProperty("sdkVersionNumber").orNull
-        ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
-
-// The build number of the ArcGIS Maps SDK for Kotlin dependency.
-// First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in local.properties.
-// CI builds pass -PbuildNumber=${BUILDNUM}
-val sdkBuildNumber: String =
-    providers.gradleProperty("buildNumber").orNull
-        ?: localProperties.getProperty("sdkBuildNumber")
-        ?: ""
-
 // The Artifactory credentials for the ArcGIS Maps SDK for Kotlin repository.
 // First look for the credentials provided via command line (for CI builds), if not found,
 // take the one defined in local.properties.
@@ -94,28 +76,6 @@ dependencyResolutionManagement {
                     password = artifactoryPassword
                 }
             }
-        }
-    }
-
-    versionCatalogs {
-        create("arcgis") {
-            val versionAndBuild = if (finalBuild) {
-                logger.warn(
-                    "Requested release candidate for the SDK dependency $sdkVersionNumber"
-                )
-                sdkVersionNumber
-            } else {
-                if (sdkBuildNumber.isBlank()) {
-                    logger.warn("Maps SDK dependency: $sdkVersionNumber")
-                    sdkVersionNumber
-                } else {
-                    logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
-                    "$sdkVersionNumber-$sdkBuildNumber"
-                }
-            }
-
-            version("mapsSdk", versionAndBuild)
-            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
 }

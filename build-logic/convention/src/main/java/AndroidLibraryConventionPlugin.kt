@@ -13,8 +13,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.library")
-                apply("org.jetbrains.kotlin.android")
+                apply(libs.findPlugin("android-library").get().get().pluginId)
+                apply(libs.findPlugin("kotlin-android").get().get().pluginId)
             }
 
             extensions.configure<LibraryExtension> {
@@ -26,7 +26,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                         useSupportLibrary = true
                     }
                     minSdk = libs.findVersion("minSdk").get().toString().toInt()
-                    lint.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
+                    lint.targetSdk = libs.findVersion("compileSdk").get().toString().toInt()
+                    consumerProguardFiles("consumer-rules.pro")
                 }
 
                 buildTypes {
@@ -48,10 +49,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             dependencies {
                 testImplementation(kotlin("test"))
-                // External libraries
-                implementation(libs.findLibrary("androidx-constraintlayout").get())
-                implementation(libs.findLibrary("androidx-appcompat").get())
-                implementation(libs.findLibrary("android-material").get())
             }
         }
     }

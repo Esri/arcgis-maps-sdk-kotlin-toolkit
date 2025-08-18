@@ -139,6 +139,7 @@ binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibil
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "gradleSecrets"}
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -146,12 +147,13 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
 
 # Plugins defined by the project build-logic
-arcgismaps-android-application = { id = "arcgismaps.android.application", version = "unspecified" }
-arcgismaps-android-application-compose = { id = "arcgismaps.android.application.compose", version = "unspecified" }
-arcgismaps-android-library-compose = { id = "arcgismaps.android.library.compose", version = "unspecified" }
-arcgismaps-android-library = { id = "arcgismaps.android.library", version = "unspecified" }
-arcgismaps-kotlin-microapp = { id = "arcgismaps.kotlin.microapp", version = "unspecified" }
-arcgismaps-kotlin-toolkit = { id = "arcgismaps.kotlin.toolkit", version = "unspecified" }
+arcgismaps-android-application = { id = "arcgismaps.android.application" }
+arcgismaps-android-application-compose = { id = "arcgismaps.android.application.compose" }
+arcgismaps-android-library-compose = { id = "arcgismaps.android.library.compose" }
+arcgismaps-android-library = { id = "arcgismaps.android.library" }
+arcgismaps-kotlin-microapp = { id = "arcgismaps.kotlin.microapp" }
+arcgismaps-kotlin-toolkit = { id = "arcgismaps.kotlin.toolkit" }
+artifact-deploy = { id = "artifact-deploy" }
 
 [bundles]
 camerax = [

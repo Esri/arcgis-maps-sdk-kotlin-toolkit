@@ -6,27 +6,30 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
 
-class AndroidApplicationConventionPlugin: Plugin<Project> {
+class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.application")
-                apply("org.jetbrains.kotlin.android")
+                apply(libs.findPlugin("android-application").get().get().pluginId)
+                apply(libs.findPlugin("kotlin-android").get().get().pluginId)
             }
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
                 compileSdk = 35
                 defaultConfig {
-
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                     vectorDrawables {
                         useSupportLibrary = true
                     }
                     minSdk = libs.findVersion("minSdk").get().toString().toInt()
-                    targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
-                    versionCode = libs.findVersion("versionCode").get().toString().toInt()
-                    versionName = libs.findVersion("versionName").get().toString()
+                    targetSdk = libs.findVersion("compileSdk").get().toString().toInt()
+                    versionCode = 1
+                    versionName = "1.0"
+                }
+
+                buildFeatures {
+                    buildConfig = true
                 }
 
                 buildTypes {
