@@ -19,10 +19,18 @@
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
     alias(libs.plugins.artifact.deploy)
+    alias(libs.plugins.gradle.secrets)
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.utilitynetworks"
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 apiValidation {

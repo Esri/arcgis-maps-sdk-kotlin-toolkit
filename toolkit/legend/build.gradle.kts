@@ -38,4 +38,5 @@ apiValidation {
 
 dependencies {
     // Module-specific dependencies go here
+    androidTestImplementation(project(":geoview-compose"))
 }

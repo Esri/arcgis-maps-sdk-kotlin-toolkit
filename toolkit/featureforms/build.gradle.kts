@@ -19,11 +19,18 @@
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
     alias(libs.plugins.artifact.deploy)
+    alias(libs.plugins.gradle.secrets)
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
-    
+    buildFeatures {
+        buildConfig = true
+    }
     // Lint crashes on the latest Android studio
     // (Bug with Android Studio Meerkat | 2024.3.1)
     // TODO: Remove this when Android Studio lint checker is fixed

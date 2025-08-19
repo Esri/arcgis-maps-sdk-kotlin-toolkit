@@ -22,6 +22,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+hilt {
+    enableAggregatingTask = true
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
     
