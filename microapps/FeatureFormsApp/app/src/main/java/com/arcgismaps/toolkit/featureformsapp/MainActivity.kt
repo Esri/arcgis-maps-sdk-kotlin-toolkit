@@ -160,11 +160,10 @@ class MainActivity : ComponentActivity() {
         // create and set a NetworkCredentialStore that persists
         val networkCredentialStore = NetworkCredentialStore.createWithPersistence().getOrThrow()
         ArcGISEnvironment.authenticationManager.networkCredentialStore = networkCredentialStore
-        // get the portal settings url
-        val url = portalSettings.getPortalUrl()
         // check if any credentials are present for this portal
-        val credential =
-            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
+        val credential = portalSettings.getPortalUser()?.let { user ->
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(user.portal.url)
+        }
         appState.value = if (credential == null) {
             // if the portal connection type set it Anonymous, then the user has skipped sign in
             if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {

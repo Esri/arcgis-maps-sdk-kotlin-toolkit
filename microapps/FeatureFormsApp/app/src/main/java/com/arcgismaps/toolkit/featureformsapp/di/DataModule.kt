@@ -31,6 +31,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -60,9 +61,10 @@ class DataModule {
     @ItemRemoteSource
     internal fun provideItemRemoteDataSource(
         @IoDispatcher dispatcher: CoroutineDispatcher,
-        portalSettings: PortalSettings
+        portalSettings: PortalSettings,
+        @ApplicationScope scope: CoroutineScope,
     ): ItemRemoteDataSource {
-        return ItemRemoteDataSource(dispatcher, portalSettings.getPortalUrl())
+        return ItemRemoteDataSource(dispatcher, portalSettings, scope)
     }
 
 
@@ -85,7 +87,8 @@ class DataModule {
     @Provides
     internal fun providePortalSettings(
         @ApplicationContext context: Context,
-    ): PortalSettings = PortalSettings(context = context)
+        @ApplicationScope scope: CoroutineScope
+    ): PortalSettings = PortalSettings(context = context, scope = scope)
 
     @Singleton
     @Provides

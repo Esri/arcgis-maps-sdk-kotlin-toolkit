@@ -86,13 +86,14 @@ class LoginViewModel @Inject constructor(
                         )
                     )
                 else emptyList()
-            portalSettings.setPortalUrl(url)
-            portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
             portal.load().onFailure {
                 _loginState.value = LoginState.Failed(it.message ?: "")
             }.onSuccess {
-                _loginState.value = LoginState.Success
+                _loginState.value = portal.user?.let { user ->
+                    portalSettings.setPortalUser(user)
+                    LoginState.Success
+                } ?: LoginState.Failed("Failed to load portal user")
             }
         }
     }
@@ -102,7 +103,7 @@ class LoginViewModel @Inject constructor(
      */
     fun skipSignIn() {
         viewModelScope.launch {
-            portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
+            // Set the connection to anonymous to allow loading public content without authentication
             portalSettings.setPortalConnection(Portal.Connection.Anonymous)
             _loginState.value = LoginState.Success
         }
