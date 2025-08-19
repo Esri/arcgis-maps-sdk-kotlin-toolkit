@@ -20,7 +20,6 @@ logger.warn("WARNING: The module composable-map is deprecated. Please use the mo
 
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
-    alias(libs.plugins.artifact.deploy)
 }
 
 android {

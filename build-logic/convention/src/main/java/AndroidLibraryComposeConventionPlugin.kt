@@ -24,7 +24,7 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
             val extension = extensions.getByType<LibraryExtension>()
             configureKotlinAndroid(extension)
             configureAndroidCompose(extension)
-            
+
             // Add common Compose dependencies for library modules
             dependencies {
                 implementation(platform(libs.findLibrary("androidx-compose-bom").get()))
@@ -33,11 +33,10 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
                 implementation(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
                 implementation(libs.findLibrary("androidx-activity-compose").get())
                 implementation(libs.findLibrary("androidx-material-icons").get())
-
                 implementation(libs.findLibrary("kotlinx-serialization-json").get())
-                
                 testImplementation(libs.findBundle("unitTest").get())
                 androidTestImplementation(libs.findBundle("composeTest").get())
+                androidTestImplementation(libs.findBundle("androidXTest").get())
                 debugImplementation(libs.findBundle("debug").get())
             }
         }

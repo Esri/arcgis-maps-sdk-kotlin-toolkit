@@ -44,6 +44,4 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(libs.arcore)
     implementation(libs.play.services.location)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.truth)
 }

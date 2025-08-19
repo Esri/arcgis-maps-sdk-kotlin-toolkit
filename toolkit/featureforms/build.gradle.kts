@@ -86,6 +86,4 @@ dependencies {
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.compose.navigation)
-    implementation(libs.kotlinx.serialization.json)
-    androidTestImplementation(libs.truth)
 }

@@ -17,11 +17,9 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.dokka)
-    // put exposed dependencies in dokka's classpath
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
+    // put exposed dependencies in dokka's classpath
     alias(libs.plugins.arcgismaps.kotlin.sdk)
 }
 
@@ -69,7 +67,7 @@ tasks {
                     matchingRegex.set(".*internal.*")
                     suppress.set(true)
                 }
-                
+
                 perPackageOption {
                     reportUndocumented.set(true)
                 }
@@ -81,7 +79,7 @@ tasks {
 android {
     namespace = "com.arcgismaps.toolkit.doc"
     compileSdk = libs.versions.compileSdk.get().toInt()
-    
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
@@ -91,8 +89,4 @@ android {
 dependencies {
     // Puts the version in the KDoc
     dokkaPlugin(libs.dokka.versioning)
-    // put exposed dependencies in dokka's classpath
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
 }
-

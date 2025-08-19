@@ -27,8 +27,7 @@ internal fun Project.configureAndroidCompose(
             implementation(libs.findLibrary("androidx-compose-material3").get())
             implementation(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
             implementation(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
-            debugImplementation(libs.findLibrary("androidx-compose-ui-tooling").get())
-            debugImplementation(libs.findLibrary("androidx-compose-ui-test-manifest").get())
+            debugImplementation(libs.findBundle("debug").get())
             androidTestImplementation(libs.findLibrary("androidx-compose-ui-test").get())
         }
     }

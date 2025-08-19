@@ -22,6 +22,10 @@ object ArcGISMapsKotlinSDKDependency {
      */
     fun configureArcGISMapsDependencies(target: Project) {
         target.dependencies {
+            // For finalBuilds ignore the build number and pick up the released version of the SDK dependency
+            val finalBuild: Boolean = (target.providers.gradleProperty("finalBuild").orNull ?: "false")
+                .toBoolean()
+
             // First look for the version number provided via command line (for CI builds), if not found,
             // take the one defined in gradle.properties.
             // CI builds pass -PversionNumber=${BUILDVER}
@@ -40,16 +44,21 @@ object ArcGISMapsKotlinSDKDependency {
 
             // ArcGIS Maps SDK dependency with build override support
             if (sdkVersionNumber != null) {
-                // If a buildNumber is provided and not blank, append it to the version.
-                val dependencyVersion = if (!sdkBuildNumber.isNullOrBlank()) {
-                    "$sdkVersionNumber-$sdkBuildNumber"
-                } else {
+                val dependencyVersion = if (finalBuild) {
+                    // For a final build, use the version number directly
                     sdkVersionNumber
+                } else {
+                    // If a buildNumber is provided and not blank, append it to the version.
+                    if (!sdkBuildNumber.isNullOrBlank()) {
+                        "$sdkVersionNumber-$sdkBuildNumber"
+                    } else {
+                        sdkVersionNumber
+                    }
                 }
-                implementation("com.esri:arcgis-maps-kotlin:$dependencyVersion")
+                api("com.esri:arcgis-maps-kotlin:$dependencyVersion")
             } else {
                 // Use libs.versions.toml if no gradle property is provided
-                implementation(target.libs.findLibrary("arcgis-maps-kotlin").get())
+                api(target.libs.findLibrary("arcgis-maps-kotlin").get())
             }
         }
     }

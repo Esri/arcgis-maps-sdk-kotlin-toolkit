@@ -14,7 +14,11 @@ class ArcGISMapsKotlinToolkitConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply(libs.findPlugin("arcgismaps-android-library").get().get().pluginId)
                 apply(libs.findPlugin("arcgismaps-android-library-compose").get().get().pluginId)
-                apply(libs.findPlugin("binary-compatibility-validator").get().get().pluginId)
+                // Only apply binary compatibility validator if shouldValidateApi is true
+                val shouldValidateApi = target.findProperty("shouldValidateApi") as? Boolean ?: true
+                if (shouldValidateApi){
+                    apply(libs.findPlugin("binary-compatibility-validator").get().get().pluginId)
+                }
             }
 
             extensions.configure<LibraryExtension> {

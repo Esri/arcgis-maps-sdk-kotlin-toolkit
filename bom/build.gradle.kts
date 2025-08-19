@@ -17,8 +17,8 @@
  */
 
 plugins {
-    id("maven-publish")
-    id("java-platform")
+    `maven-publish`
+    `java-platform`
 }
 
 // Find these in properties passed through command line or read from GRADLE_HOME/gradle.properties
@@ -91,5 +91,3 @@ afterEvaluate {
         }
     }
 }
-
-

@@ -121,6 +121,23 @@ testAggregation {
 }
 
 /**
+ * Excludes specific modules from the 'apiDump' task.
+ * Add all modules to be excluded to the `excludedFromApiDump` set.
+ */
+subprojects {
+    // Define the modules to be excluded from apiDump
+    val excludedFromApiDump = setOf(
+        "bom",
+        "kdoc",
+        "template",
+        "microapps-lib",
+        "composable-map"
+    )
+    // Add this property to indicate whether this project should have API validation
+    ext.set("shouldValidateApi", project.name !in excludedFromApiDump)
+}
+
+/**
  * Returns all modules in this project, except the ones specified by [modulesToExclude].
  */
 fun getModulesExcept(vararg modulesToExclude: String): List<String> =
@@ -132,4 +149,3 @@ fun getModulesExcept(vararg modulesToExclude: String): List<String> =
             }
             .filter { !modulesToExclude.contains(it) } // exclude specified modules
     }
-

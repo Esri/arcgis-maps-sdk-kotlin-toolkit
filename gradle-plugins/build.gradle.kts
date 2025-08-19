@@ -14,11 +14,11 @@ gradlePlugin {
             group = "internal"
             id = "artifact-deploy"
             version = "1.0"
-            implementationClass = "deploy.ArtifactPublisher"
+            implementationClass = "com.arcgismaps.ArtifactPublisher"
         }
     }
 }
 
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
+    // Module-specific dependencies go here
 }

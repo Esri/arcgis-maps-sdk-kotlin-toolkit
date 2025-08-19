@@ -26,10 +26,4 @@ android {
 
 dependencies {
     // Module-specific dependencies go here
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
-    implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.activity.compose)
-    debugImplementation(libs.bundles.debug)
 }

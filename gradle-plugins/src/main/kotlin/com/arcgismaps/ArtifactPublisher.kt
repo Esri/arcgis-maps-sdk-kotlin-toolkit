@@ -16,14 +16,13 @@
  *
  */
 
-package deploy
+package com.arcgismaps
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
@@ -55,8 +54,8 @@ class ArtifactPublisher : Plugin<Project> {
         } else {
             "$versionNumber-$buildNumber"
         }
-        val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
-        
+        val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
+
         project.pluginManager.apply(MavenPublishPlugin::class.java)
         project.afterEvaluate {
             project.extensions.configure<PublishingExtension> {
@@ -77,7 +76,7 @@ class ArtifactPublisher : Plugin<Project> {
                         groupId = artifactoryGroupId
                         artifactId = artifactoryArtifactId
                         version = artifactVersion
-                        
+
                         from(project.components["release"])
                     }
                 }

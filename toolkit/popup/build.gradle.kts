@@ -23,6 +23,12 @@ plugins {
 
 android {
     namespace = "com.arcgismaps.toolkit.popup"
+
+    // Avoids an empty test report showing up in the CI integration test report.
+    // Remove this if tests will be added.
+    tasks.withType<Test> {
+        enabled = false
+    }
 }
 
 apiValidation {
