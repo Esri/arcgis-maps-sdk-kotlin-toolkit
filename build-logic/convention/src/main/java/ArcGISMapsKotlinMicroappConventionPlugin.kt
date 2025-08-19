@@ -36,12 +36,6 @@ class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
                 }
             }
 
-            // Avoids an empty test report showing up in the CI integration test report.
-            // Remove this if tests will be added.
-            tasks.withType<Test> {
-                enabled = false
-            }
-
             dependencies {
                 // Configure the ArcGIS Maps SDK dependency
                 ArcGISMapsKotlinSDKDependency.configureArcGISMapsDependencies(target)
