@@ -57,7 +57,7 @@ public suspend fun AuthenticationManager.signOut() {
  *
  * @since 200.2.0
  */
-@Deprecated (
+@Deprecated(
     message = "since 200.8.0. Use Activity.launchCustomTabs(BrowserAuthenticationChallenge) " +
             "instead as it provides support for IAP sign-in/sign-out.",
     replaceWith = ReplaceWith("Activity.launchCustomTabs(BrowserAuthenticationChallenge)")
@@ -102,9 +102,9 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
  * @since 200.2.0
  */
 internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boolean?) {
-    CustomTabsIntent.Builder().build().apply {
+    CustomTabsIntent.Builder().apply {
         if (useIncognito == true) {
-            intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
+            setEphemeralBrowsingEnabled(true)
         }
-    }.launchUrl(this, authorizeUrl.toUri())
+    }.build().launchUrl(this, authorizeUrl.toUri())
 }
