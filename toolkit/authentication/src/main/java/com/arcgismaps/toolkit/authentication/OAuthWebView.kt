@@ -267,7 +267,8 @@ private class OAuthWebViewClient(
 
     /**
      * Completes the WebView OAuth challenge by either passing back a [redirectUrl] or an [exception].
-     * if [OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
+     *
+     * If [com.arcgismaps.httpcore.authentication.OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
      * session.
      *
      * @since 200.3.0
