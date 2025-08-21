@@ -174,6 +174,7 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
         preferPrivateWebBrowserSession = true
     )
 ```
+Note: Private web browsing sessions (ephemeral mode) may not work in Chrome versions lower than 136, and support may vary across non-Chromium-based browsers. For best results, ensure your users have updated to a newer version of Chrome, and be aware that not all browsers may support this feature.
 
 ### Signing out
 
