@@ -39,6 +39,7 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.NetworkCredential
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import kotlinx.coroutines.CoroutineScope
@@ -268,7 +269,7 @@ private class OAuthWebViewClient(
     /**
      * Completes the WebView OAuth challenge by either passing back a [redirectUrl] or an [exception].
      *
-     * If [com.arcgismaps.httpcore.authentication.OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
+     * If [OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
      * session.
      *
      * @since 200.3.0
