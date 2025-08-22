@@ -99,7 +99,7 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
  * user credentials.
  * @param preferPrivateWebBrowserSession whether the [CustomTabsIntent] should use a private web browser session, if available.
  *
- * @since 200.2.0
+ * @since 200.8.1
  */
 internal fun Activity.launchCustomTabs(authorizeUrl: String, preferPrivateWebBrowserSession: Boolean?) {
     CustomTabsIntent.Builder().apply {

@@ -162,7 +162,7 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
     }
     ```
 
-### Launch OAuth Prompts in Private Browser Sessions (Ephemeral Mode)
+### Using Private Browser Sessions (Ephemeral mode) for OAuth Authentication
 
 To display OAuth sign-in prompts in a private browser session (ephemeral mode), set the `preferPrivateWebBrowserSession` property to `true` in your `OAuthUserConfiguration`. This ensures that the browser does not use any cached credentials, which is important for enterprise security.
 
