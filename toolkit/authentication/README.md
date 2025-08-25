@@ -162,20 +162,9 @@ If you want to launch a Custom Tab from your own app's activity, follow these st
     }
     ```
 
-### Launch OAuth Prompts in Incognito Mode
+### Using Private Browser Sessions (Ephemeral mode) for OAuth Authentication
 
-OAuth user sign-in prompts are launched in a Custom Tab. Therefore, any credentials saved in the browser's cache could be used to authenticate a device. For enterprise sign-ins, this behavior may be problematic. Unfortunately, there is no programmatic way to remedy this. However, the `Authenticator` can be configured to launch OAuth prompts in incognito mode (which will not store credentials in the browser cache) like so:
-
-- The device must have Chrome installed.
-- The device's Chrome browser must have the following flags set to true:
-
-```
-chrome://flags/#cct-incognito
-chrome://flags/#cct-incognito-available-to-third-party
-```
-
-- The Chrome browser must be relaunched for those flags to take effect.
-- The `AuthenticatorState.oAuthUserConfiguration` must have the `preferPrivateWebBrowserSession` property set to true:
+To display OAuth sign-in prompts in a private browser session (ephemeral mode), set the `preferPrivateWebBrowserSession` property to `true` in your `OAuthUserConfiguration`. This ensures that the browser does not use any cached credentials, which is important for enterprise security.
 
 ```kotlin
 authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
@@ -185,6 +174,7 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
         preferPrivateWebBrowserSession = true
     )
 ```
+Note: Private web browsing sessions (ephemeral mode) may not work in Chrome versions lower than 136, and support may vary across non-Chromium-based browsers. For best results, ensure your users have updated to a newer version of Chrome, and be aware that not all browsers may support this feature.
 
 ### Signing out
 
