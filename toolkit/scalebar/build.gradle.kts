@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  *
  *  Copyright 2025 Esri
@@ -24,6 +26,12 @@ plugins {
     id("artifact-deploy")
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("1.8")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.scalebar"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -43,9 +51,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true

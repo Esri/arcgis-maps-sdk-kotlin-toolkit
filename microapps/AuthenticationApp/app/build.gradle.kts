@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  *
  *  Copyright 2023 Esri
@@ -27,6 +29,13 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("1.8")
+        freeCompilerArgs.add("-Xcontext-receivers")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.authenticationapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -53,11 +62,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // context receivers are used by the MapInterface for gesture events
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
     }
     buildFeatures {
         compose = true

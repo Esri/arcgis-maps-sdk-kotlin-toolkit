@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  *
  *  Copyright 2024 Esri
@@ -31,6 +33,13 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("1.8")
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -60,11 +69,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true

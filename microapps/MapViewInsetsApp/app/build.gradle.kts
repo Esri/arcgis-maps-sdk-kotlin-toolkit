@@ -15,6 +15,7 @@
  *  limitations under the License.
  *
  */
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -26,6 +27,12 @@ plugins {
 secrets {
     // this file doesn't contain secrets, it just provides defaults which can be committed into git.
     defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("1.8")
+    }
 }
 
 android {
@@ -54,9 +61,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
