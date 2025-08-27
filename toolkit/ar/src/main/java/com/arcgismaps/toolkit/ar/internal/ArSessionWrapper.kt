@@ -53,6 +53,7 @@ internal class ArSessionWrapper(
     override fun onDestroy(owner: LifecycleOwner) {
         withLock { session, _ ->
             this.session = null
+            session?.pause()
             session?.close()
         }
     }
