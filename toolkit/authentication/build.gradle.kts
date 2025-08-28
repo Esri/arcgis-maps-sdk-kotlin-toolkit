@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /*
  *
@@ -26,8 +25,8 @@ plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 kotlin {
+    jvmToolchain(17)
     compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("1.8")
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
     }
 }

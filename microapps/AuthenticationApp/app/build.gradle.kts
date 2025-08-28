@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /*
  *
@@ -30,8 +29,8 @@ secrets {
 }
 
 kotlin {
+    jvmToolchain(17)
     compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("1.8")
         freeCompilerArgs.add("-Xcontext-receivers")
     }
 }
