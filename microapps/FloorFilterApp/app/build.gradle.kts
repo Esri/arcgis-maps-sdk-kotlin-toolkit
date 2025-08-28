@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -13,9 +11,7 @@ secrets {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("1.8")
-    }
+    jvmToolchain(17)
 }
 
 android {
@@ -41,10 +37,7 @@ android {
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true

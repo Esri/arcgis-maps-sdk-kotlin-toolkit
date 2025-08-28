@@ -31,9 +31,7 @@ secrets {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("1.8")
-    }
+    jvmToolchain(17)
 }
 
 android {

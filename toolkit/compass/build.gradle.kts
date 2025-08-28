@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 /*
  *
  *  Copyright 2023 Esri
@@ -27,9 +25,7 @@ plugins {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("1.8")
-    }
+    jvmToolchain(17)
 }
 
 android {
