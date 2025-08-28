@@ -25,9 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.ar.core.Config
 import com.google.ar.core.Config.PlaneFindingMode
 import com.google.ar.core.Session
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -54,7 +57,9 @@ internal class ArSessionWrapper(
         withLock { session, _ ->
             this.session = null
             session?.pause()
-            session?.close()
+            owner.lifecycleScope.launch(Dispatchers.Default) {
+                session?.close()
+            }
         }
     }
 
