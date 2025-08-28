@@ -1,4 +1,3 @@
-
 /*
  *
  *  Copyright CURRENT_YEAR Esri
