@@ -59,7 +59,7 @@ internal fun OAuthAuthenticator(
         // Note that this flag does not need to be reset to false. After the OAuth prompt completes, the OAuthAuthenticator
         // will leave the composition. On a subsequent OAuth challenge, the OAuthAuthenticator will re-enter the
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
-        var didLaunch by rememberSaveable { mutableStateOf(false) }
+        var didLaunch by rememberSaveable(oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
             rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { redirectUrl ->
                 redirectUrl?.let {
