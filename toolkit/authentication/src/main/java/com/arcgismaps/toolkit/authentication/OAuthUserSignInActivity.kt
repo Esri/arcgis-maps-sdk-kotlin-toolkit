@@ -106,9 +106,9 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
             // authorize URL should be a valid string since we are adding it in the ActivityResultContract
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
-            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+            val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
             authorizeUrl?.let {
-                launchCustomTabs(it, useIncognito)
+                launchCustomTabs(it, preferPrivateWebBrowserSession)
             }
         }
     }
