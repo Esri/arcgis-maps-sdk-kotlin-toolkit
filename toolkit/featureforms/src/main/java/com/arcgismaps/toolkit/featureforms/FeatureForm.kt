@@ -32,7 +32,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,6 +57,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElem
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
@@ -257,10 +257,12 @@ public fun FeatureForm(
         )
         onEditingEvent(event)
     }
-
+    // Get the current back stack entry as state
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    // Get the form data for the active entry (destination) in the back stack
+    val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     FeatureFormLayout(
         topBar = {
-            val backStackEntry by navController.currentBackStackEntryAsState()
             // Track if there is a back stack entry
             val hasBackStack = remember(backStackEntry) {
                 navController.previousBackStackEntry != null
@@ -301,6 +303,7 @@ public fun FeatureForm(
         colorScheme = colorScheme,
         typography = typography
     )
+    FeatureFormDialog(states = formData.stateCollection)
     DisposableEffect(state) {
         onDispose {
             // Clear the navigation actions when the composition is disposed

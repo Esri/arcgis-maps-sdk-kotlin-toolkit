@@ -35,8 +35,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
@@ -113,11 +111,6 @@ internal fun FeatureFormNavHost(
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)
                 },
-                onNavigateToAssociation = { stateId ->
-                    val route = NavigationRoute.UNAssociationDetailView(stateId = stateId)
-                    // Request the state to navigate to the association.
-                    navController.navigateSafely(backStackEntry, route)
-                },
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(formData) {
@@ -125,20 +118,6 @@ internal fun FeatureFormNavHost(
                 // form.
                 state.updateActiveFeatureForm()
             }
-        }
-
-        composable<NavigationRoute.UNAssociationDetailView> { backStackEntry ->
-            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetailView>()
-            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            // Get the selected UtilityAssociationsElementState from the state collection
-            val utilityAssociationsElementState = formData.stateCollection[route.stateId]
-                // guard against null value
-                as? UtilityAssociationsElementState ?: return@composable
-            // Display the association details
-            UtilityAssociationDetails(
-                state = utilityAssociationsElementState,
-                modifier = Modifier.fillMaxSize()
-            )
         }
     }
 }

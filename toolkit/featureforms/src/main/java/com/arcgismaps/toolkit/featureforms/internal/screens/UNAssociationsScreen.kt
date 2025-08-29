@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,11 +32,13 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
+import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberModalBottomSheetState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.launch
 
 /**
@@ -49,7 +52,6 @@ import kotlinx.coroutines.launch
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
- * @param onNavigateToAssociation The callback to be invoked when the user selects an association to navigate to.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
@@ -60,9 +62,9 @@ internal fun UNAssociationsScreen(
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
-    onNavigateToAssociation: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val featureForm = formStateData.featureForm
     val states = formStateData.stateCollection
     // Get the selected UtilityAssociationsElementState from the state collection
@@ -91,6 +93,9 @@ internal fun UNAssociationsScreen(
             }
         }
     }
+    var showDetails by rememberSaveable {
+        mutableStateOf(false)
+    }
     UtilityAssociations(
         groupResult = groupResult,
         isNavigationEnabled = isNavigationEnabled,
@@ -106,7 +111,8 @@ internal fun UNAssociationsScreen(
         onDetailsClick = { index ->
             val association = groupResult.associationResults[index]
             utilityAssociationsElementState.setSelectedAssociationResult(association)
-            onNavigateToAssociation(utilityAssociationsElementState.id)
+            // show the details sheet
+            showDetails = true
         },
         modifier = modifier
             .padding(16.dp)
@@ -137,5 +143,22 @@ internal fun UNAssociationsScreen(
             }
         )
     }
-    FeatureFormDialog(states)
+    if (showDetails) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showDetails = false
+                    }
+                }
+            },
+            sheetState = sheetState,
+            modifier = Modifier.systemBarsPadding()
+        ) {
+            UtilityAssociationDetails(
+                state = utilityAssociationsElementState,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }

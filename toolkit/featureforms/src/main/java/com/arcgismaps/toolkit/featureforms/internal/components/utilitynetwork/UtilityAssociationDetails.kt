@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
+import kotlinx.coroutines.launch
 
 /**
  * A composable that displays the details of a [UtilityAssociationResult].
@@ -55,6 +57,7 @@ internal fun UtilityAssociationDetails(
     state: UtilityAssociationsElementState,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
@@ -148,8 +151,10 @@ internal fun UtilityAssociationDetails(
         RemoveAssociationConfirmationDialog(
             onDismiss = { showConfirmationDialog = false },
             onRemove = {
-                showConfirmationDialog = false
-                // Remove the association when the API is available.
+                scope.launch {
+                    state.deleteAssociation(association)
+                    showConfirmationDialog = false
+                }
             }
         )
     }

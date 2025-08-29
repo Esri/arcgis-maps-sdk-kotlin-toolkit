@@ -20,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
-    element: UtilityAssociationsFormElement,
+    private val element: UtilityAssociationsFormElement,
     scope: CoroutineScope
 ) : FormElementState(
     id = element.hashCode(),
@@ -87,13 +88,22 @@ internal class UtilityAssociationsElementState(
     init {
         scope.launch {
             // fetch the associations filter results for the element
-            element.fetchAssociationsFilterResults()
-            _filters.value = element.associationsFilterResults.filter {
-                // filter out the results that have no associations
-                it.resultCount > 0
-            }
-            _loading.value = false
+            refreshResults()
         }
+    }
+
+    private suspend fun refreshResults() {
+        element.fetchAssociationsFilterResults()
+        _filters.value = element.associationsFilterResults.filter {
+            // filter out the results that have no associations
+            it.resultCount > 0
+        }
+        _loading.value = false
+    }
+
+    suspend fun deleteAssociation(association: UtilityAssociation) {
+        element.deleteAssociation(association)
+        refreshResults()
     }
 
     /**
