@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 
 import android.content.res.Configuration
