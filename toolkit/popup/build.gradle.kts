@@ -99,6 +99,8 @@ dependencies {
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)

@@ -48,12 +48,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
@@ -69,11 +71,30 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElement
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+
+//@Immutable
+//private data class PopupState(@Stable val popup: Popup)
 
 @Immutable
-private data class PopupState(@Stable val popup: Popup)
+public sealed class ValidationErrorVisibility {
+
+    /**
+     * Indicates that the validation errors are only visible for editable fields that have
+     * received focus.
+     */
+    public object Automatic : ValidationErrorVisibility()
+
+    /**
+     * Indicates the validation is run for all the editable fields regardless of their focus state,
+     * and any errors are shown.
+     */
+    public object Visible : ValidationErrorVisibility()
+}
 
 /**
  * A composable Popup toolkit component that enables users to see Popup content in a
@@ -93,6 +114,14 @@ private data class PopupState(@Stable val popup: Popup)
  */
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
+    val stateData = remember(popup) {
+        PopupState(popup)
+    }
+    Popup(stateData, modifier)
+}
+
+@Composable
+public fun Popup(popup: Popup, popupState: PopupState, modifier: Modifier = Modifier) {
     val stateData = remember(popup) {
         PopupState(popup)
     }
@@ -239,6 +268,12 @@ private fun PopupBody(
                     }
                 }
 
+                is UtilityAssociationsPopupElement -> {
+                    item(contentType = UtilityAssociationsFormElement::class.java) {
+
+                    }
+                }
+
                 else -> {
                     // other popup elements are not created
                 }
@@ -310,6 +345,13 @@ internal fun rememberStates(
                 states.add(
                     element,
                     rememberMediaElementState(element = element, popup = popup)
+                )
+            }
+
+            is UtilityAssociationsPopupElement -> {
+                states.add(
+                    element,
+                    UtilityAssociationsElementState(element., rememberCoroutineScope())
                 )
             }
 
