@@ -546,7 +546,7 @@ fun ErrorDialog(
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     )
 }
-
+@Suppress("DEPRECATION")
 fun getWindowSize(context: Context): WindowSizeClass {
     val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val width = metrics.bounds.width()

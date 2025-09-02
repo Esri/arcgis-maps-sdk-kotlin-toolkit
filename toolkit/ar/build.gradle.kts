@@ -24,6 +24,11 @@ plugins {
     id("artifact-deploy")
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.ar"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -39,13 +44,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true

@@ -46,31 +46,17 @@ val releasedSourceSetPaths = releasedModules.map { subproject ->
     File(rootDir, "toolkit/${subproject.name}/src/main/java").canonicalPath
 }
 
-tasks {
-    //./gradlew :kdoc:dokkaHtml
-    // doc output will be under `documentation/build/dokka/html`.
-    dokkaHtml {
-        pluginConfiguration<org.jetbrains.dokka.versioning.VersioningPlugin, org.jetbrains.dokka.versioning.VersioningConfiguration> {
-            version = versionNumber
-        }
-
-        moduleName.set("arcgis-maps-kotlin-toolkit")
-        dokkaSourceSets {
-            named("main") {
-                sourceRoots.from(releasedSourceSetPaths)
-            }
-
-            configureEach {
-                platform.set(org.jetbrains.dokka.Platform.jvm)
-                perPackageOption {
-                    matchingRegex.set(".*internal.*")
-                    suppress.set(true)
-                }
-                
-                perPackageOption {
-                    reportUndocumented.set(true)
-                }
-            }
+dokka {
+    moduleName.set("arcgis-maps-kotlin-toolkit")
+    moduleVersion.set(versionNumber)
+    dokkaSourceSets.main {
+        sourceRoots.from(releasedSourceSetPaths)
+    }
+    dokkaSourceSets.configureEach {
+        perPackageOption {
+            matchingRegex.set(".*internal.*")
+            suppress.set(true)
+            reportUndocumented = true
         }
     }
 }
@@ -94,3 +80,4 @@ dependencies {
     implementation(libs.bundles.composeCore)
 }
 
+//dokkaGenerate
