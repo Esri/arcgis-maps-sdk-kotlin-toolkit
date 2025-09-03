@@ -269,8 +269,11 @@ private fun PopupBody(
                 }
 
                 is UtilityAssociationsPopupElement -> {
-                    item(contentType = UtilityAssociationsFormElement::class.java) {
-
+                    item(contentType = UtilityAssociationsPopupElement::class.java) {
+                        UtilityAssociationsElement(
+                            entry.state as UtilityAssociationsElementState,
+                            onItemClick = { }
+                        )
                     }
                 }
 
@@ -351,7 +354,7 @@ internal fun rememberStates(
             is UtilityAssociationsPopupElement -> {
                 states.add(
                     element,
-                    UtilityAssociationsElementState(element., rememberCoroutineScope())
+                    UtilityAssociationsElementState(element, rememberCoroutineScope())
                 )
             }
 

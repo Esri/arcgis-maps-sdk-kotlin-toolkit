@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
@@ -34,13 +35,14 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
-    element: UtilityAssociationsFormElement,
+    element: UtilityAssociationsPopupElement,
     scope: CoroutineScope
 ) : PopupElementState() {
     override val id : Int = element.hashCode()
-    val label : String = element.label
+    val label : String = element.title
     val description: String = element.description
-    val isVisible : StateFlow<Boolean> = element.isVisible
+    //    val isVisible : StateFlow<Boolean> = element.isVisible
+
 
     private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
