@@ -25,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
@@ -34,6 +35,7 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,8 +45,17 @@ import kotlinx.coroutines.launch
 class MapViewModel : ViewModel() {
 
     val mapViewProxy = MapViewProxy()
+    val sceneViewProxy = SceneViewProxy()
 
     val arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+        initialViewpoint = Viewpoint(
+            latitude = 39.8,
+            longitude = -98.6,
+            scale = 10e7
+        )
+    }
+
+    val arcGISScene = ArcGISScene(BasemapStyle.ArcGISTopographic).apply {
         initialViewpoint = Viewpoint(
             latitude = 39.8,
             longitude = -98.6,
@@ -61,8 +72,12 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    private val _mapPoint = MutableStateFlow<Point?>(null)
-    val mapPoint: StateFlow<Point?> = _mapPoint.asStateFlow()
+
+    private val _isGeoViewMapView = MutableStateFlow(false)
+    val isGeoViewMapView: StateFlow<Boolean> = _isGeoViewMapView.asStateFlow()
+
+    private val _point = MutableStateFlow<Point?>(null)
+    val point: StateFlow<Point?> = _point.asStateFlow()
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement.asStateFlow()
@@ -76,34 +91,44 @@ class MapViewModel : ViewModel() {
     private val _offset = MutableStateFlow(Offset.Zero)
     val offset: StateFlow<Offset> = _offset
 
-    val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
+    private val _tapLocationGraphicsOverlay = MutableStateFlow(GraphicsOverlay())
+    val tapLocationGraphicsOverlay: StateFlow<GraphicsOverlay> = _tapLocationGraphicsOverlay.asStateFlow()
 
     private var currentIdentifyJob: Job? = null
 
-    fun clearMapPoint() {
-        _mapPoint.value = null
-        tapLocationGraphicsOverlay.graphics.clear()
+    fun clearPoint() {
+        _point.value = null
+        _tapLocationGraphicsOverlay.value.graphics.clear()
+        _tapLocationGraphicsOverlay.value = GraphicsOverlay()
     }
 
     fun setOffset(offset: Offset) {
         _offset.value = offset
     }
 
-    fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
-        _mapPoint.value = singleTapConfirmedEvent.mapPoint
+    fun setPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
+        if (_isGeoViewMapView.value)
+            _point.value = singleTapConfirmedEvent.mapPoint
+        else
+            _point.value = sceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
 
-        tapLocationGraphicsOverlay.graphics.clear()
-        tapLocationGraphicsOverlay.graphics.add(
+        _tapLocationGraphicsOverlay.value.graphics.clear()
+        _tapLocationGraphicsOverlay.value.graphics.add(
             Graphic(
-                geometry = _mapPoint.value,
+                geometry = _point.value,
                 symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 12.0f)
             )
         )
     }
 
+    fun toggleGeoView() {
+        clearPoint()
+        _isGeoViewMapView.value = !_isGeoViewMapView.value
+    }
+
     fun clearTapLocationAndGraphic() {
         _tapLocation.value = null
-        tapLocationGraphicsOverlay.graphics.clear()
+        _tapLocationGraphicsOverlay.value.graphics.clear()
     }
 
     fun clearSelectedGeoElement() {
@@ -113,8 +138,8 @@ class MapViewModel : ViewModel() {
     fun setTapLocation(tapLocation: Point?, nullTapLocation: Boolean) {
         _tapLocation.value = if (nullTapLocation) null else tapLocation
 
-        tapLocationGraphicsOverlay.graphics.clear()
-        tapLocationGraphicsOverlay.graphics.add(
+        _tapLocationGraphicsOverlay.value.graphics.clear()
+        _tapLocationGraphicsOverlay.value.graphics.add(
             Graphic(
                 geometry = tapLocation,
                 symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 12.0f)

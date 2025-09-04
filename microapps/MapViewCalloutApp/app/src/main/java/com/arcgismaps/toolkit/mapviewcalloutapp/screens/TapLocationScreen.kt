@@ -47,6 +47,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -68,7 +71,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
 
 /**
@@ -76,11 +82,16 @@ import kotlin.math.roundToInt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TapLocationScreen(viewModel: MapViewModel) {
-
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+fun TapLocationScreen(
+    viewModel: MapViewModel,
+    screenTitle: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit
+) {
+    val mapPoint = viewModel.point.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-
+    val tapLocationGraphicsOverlay = viewModel.tapLocationGraphicsOverlay.collectAsState().value
+    val isGeoViewMapView = viewModel.isGeoViewMapView.collectAsState().value
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -91,6 +102,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     }
 
     Scaffold(
+        topBar = { CalloutAppBar(screenTitle, canNavigateBack, navigateUp) },
         floatingActionButton = {
             Box(
                 Modifier
@@ -106,44 +118,61 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             }
         }
     ) { contentPadding ->
-        MapView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
-            arcGISMap = viewModel.arcGISMap,
-            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            content = {
-                val lastMapPoint = remember { Ref<Point>() }
-                lastMapPoint.value = mapPoint ?: lastMapPoint.value
+        @Composable
+        fun GeoViewScope.GeoViewScopeContent() {
+            val lastMapPoint = remember { Ref<Point>() }
+            lastMapPoint.value = mapPoint ?: lastMapPoint.value
 
-                AnimatedVisibility(
-                    calloutVisibleState,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    lastMapPoint.value?.let {
-                        Callout(
-                            modifier = Modifier.wrapContentSize(),
-                            location = it,
-                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                            offset = offset
-                        ) {
-                            Column(Modifier.padding(4.dp)) {
-                                HtmlText(
-                                    html = "<b>Tapped location</b>:<br>" +
-                                            "<i>x</i>    = ${it.x.roundToInt()}<br>" +
-                                            "<i>y</i>    = ${it.y.roundToInt()}<br>" +
-                                            "<i>wkid</i> = ${it.spatialReference?.wkid}",
-                                    htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT,
-                                    textColor = MaterialTheme.colorScheme.onBackground,
-                                )
-                            }
+            AnimatedVisibility(
+                calloutVisibleState,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                lastMapPoint.value?.let {
+                    Callout(
+                        modifier = Modifier.wrapContentSize(),
+                        location = it,
+                        leaderPosition = LeaderPosition.Automatic,
+                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                        offset = offset
+                    ) {
+                        Column(Modifier.padding(4.dp)) {
+                            HtmlText(
+                                html = "<b>Tapped location</b>:<br>" +
+                                        "<i>x</i>    = ${it.x.roundToInt()}<br>" +
+                                        "<i>y</i>    = ${it.y.roundToInt()}<br>" +
+                                        "<i>wkid</i> = ${it.spatialReference?.wkid}",
+                                htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT,
+                                textColor = MaterialTheme.colorScheme.onBackground,
+                            )
                         }
                     }
                 }
             }
-        )
+        }
+        if (isGeoViewMapView) {
+            MapView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                arcGISMap = viewModel.arcGISMap,
+                mapViewProxy = viewModel.mapViewProxy,
+                graphicsOverlays = listOf(tapLocationGraphicsOverlay),
+                onSingleTapConfirmed = viewModel::setPoint,
+                content = { GeoViewScopeContent() }
+            )
+        } else {
+            SceneView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                arcGISScene = viewModel.arcGISScene,
+                sceneViewProxy = viewModel.sceneViewProxy,
+                graphicsOverlays = listOf(tapLocationGraphicsOverlay),
+                onSingleTapConfirmed = viewModel::setPoint,
+                content = { GeoViewScopeContent() }
+            )
+        }
 
         if (showBottomSheet) {
             ModalBottomSheet(
@@ -153,13 +182,15 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             ) {
                 Box(Modifier.navigationBarsPadding()) {
                     CalloutOptions(
+                        isGeoViewMapView = isGeoViewMapView,
                         calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
                         mapPoint = mapPoint,
                         onOffsetChange = { viewModel.setOffset(it) },
+                        onGeoViewToggled = { viewModel.toggleGeoView() },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-                        onClearMapPointRequest = { viewModel.clearMapPoint() },
+                        onClearMapPointRequest = { viewModel.clearPoint() },
                         onCalloutOffsetRotationToggled = {
                             rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                         }
@@ -191,31 +222,68 @@ fun HtmlText(modifier: Modifier = Modifier, html: String, htmlFlag: Int, textCol
  */
 @Composable
 fun CalloutOptions(
+    isGeoViewMapView: Boolean,
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
     mapPoint: Point?,
+    onGeoViewToggled: () -> Unit,
     onVisibilityToggled: () -> Unit,
     onOffsetChange: (Offset) -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
     onClearMapPointRequest: () -> Unit,
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Select GeoView")
+            SingleChoiceSegmentedButtonRow {
+                SegmentedButton(
+                    onClick = onGeoViewToggled,
+                    selected = isGeoViewMapView,
+                    label = { Text("MapView") },
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = 0,
+                        count = 2
+                    )
+                )
+                SegmentedButton(
+                    onClick = onGeoViewToggled,
+                    selected = !isGeoViewMapView,
+                    label = { Text("SceneView") },
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = 1,
+                        count = 2
+                    )
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "Show Callout")
             Checkbox(
                 checked = calloutVisibility,
                 onCheckedChange = { onVisibilityToggled() }
             )
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "Rotate offset")
             Checkbox(
                 checked = isCalloutRotationEnabled,
                 onCheckedChange = { onCalloutOffsetRotationToggled() }
             )
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             OutlinedTextField(
                 modifier = Modifier.weight(1f),
                 value = offset.x.toString(),

@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 /**
@@ -66,7 +67,13 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeatureScreen(viewModel: MapViewModel) {
+fun FeatureScreen(
+    viewModel: MapViewModel,
+    screenTitle: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit
+) {
+    val tapLocationGraphicsOverlay = viewModel.tapLocationGraphicsOverlay.collectAsState().value
     val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
     val selectedLayerName = viewModel.selectedLayerName.collectAsState().value
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
@@ -75,6 +82,7 @@ fun FeatureScreen(viewModel: MapViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
+        topBar = { CalloutAppBar(screenTitle, canNavigateBack, navigateUp) },
         floatingActionButton = {
             Box(
                 Modifier
@@ -97,7 +105,7 @@ fun FeatureScreen(viewModel: MapViewModel) {
             arcGISMap = viewModel.arcGISMapWithFeatureLayer,
             mapViewProxy = viewModel.mapViewProxy,
             insets = PaddingValues(horizontal = 12.dp),
-            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
+            graphicsOverlays = remember { listOf(tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 viewModel.apply {
                     // clears the tapped location and graphic
@@ -116,6 +124,7 @@ fun FeatureScreen(viewModel: MapViewModel) {
                             .height(200.dp)
                             .widthIn(max = 300.dp),
                         geoElement = selectedGeoElement,
+                        leaderPosition = LeaderPosition.Automatic,
                         tapLocation = viewModel.tapLocation.value,
                     ) {
                         CalloutContent(

@@ -73,16 +73,23 @@ fun MainScreen() {
 
     CalloutAppNavHost(
         navController = navController,
-        calloutScreenNames = calloutAppScreens,
-        currentScreen = currentScreen
+        calloutScreenNames = calloutAppScreens
     ) {
         composable(route = calloutAppScreens[0]) {
             val tapLocationViewModel: MapViewModel = viewModel()
-            TapLocationScreen(tapLocationViewModel)
+            TapLocationScreen(
+                viewModel = tapLocationViewModel,
+                screenTitle = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() })
         }
         composable(route = calloutAppScreens[1]) {
             val featureViewModel: MapViewModel = viewModel()
-            FeatureScreen(featureViewModel)
+            FeatureScreen(
+                viewModel = featureViewModel,
+                screenTitle = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() })
         }
     }
 }
@@ -92,33 +99,22 @@ fun MainScreen() {
 fun CalloutAppNavHost(
     navController: NavHostController,
     calloutScreenNames: MutableList<String>,
-    currentScreen: String,
     builder: NavGraphBuilder.() -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            CalloutAppBar(
-                currentScreen = currentScreen,
-                canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = { navController.navigateUp() }
+    NavHost(
+        modifier = Modifier,
+        navController = navController,
+        startDestination = "Callout App",
+    ) {
+        composable(route = "Callout App") {
+            NavScreenSwitcher(
+                calloutScreenNames = calloutScreenNames,
+                onScreenSelected = { selectedScreen ->
+                    navController.navigate(selectedScreen)
+                }
             )
         }
-    ) { innerPadding ->
-        NavHost(
-            modifier = Modifier.padding(innerPadding),
-            navController = navController,
-            startDestination = "Callout App",
-        ) {
-            composable(route = "Callout App") {
-                NavScreenSwitcher(
-                    calloutScreenNames = calloutScreenNames,
-                    onScreenSelected = { selectedScreen ->
-                        navController.navigate(selectedScreen)
-                    }
-                )
-            }
-            builder.invoke(this)
-        }
+        builder.invoke(this)
     }
 }
 

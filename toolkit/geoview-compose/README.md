@@ -136,7 +136,8 @@ MapView(
                 colorScheme = CalloutDefaults.colors(
                     borderColor = MaterialTheme.colorScheme.outlineVariant,
                     backgroundColor = MaterialTheme.colorScheme.background
-                )
+                ),
+                leaderPosition = LeaderPosition.Automatic,
                 geoElement = selectedGeoElement,
                 tapLocation = tapLocation
             ) {
