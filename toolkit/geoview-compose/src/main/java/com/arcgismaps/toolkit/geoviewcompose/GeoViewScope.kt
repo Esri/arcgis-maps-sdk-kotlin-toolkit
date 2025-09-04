@@ -528,7 +528,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 val insetsX = if (geoView is MapView && geoView.isViewInsetsValid) {viewInsetLeft + viewInsetRight} else 0
                 val insetsY = if (geoView is MapView && geoView.isViewInsetsValid) {viewInsetTop + viewInsetBottom} else 0
                 val geoViewSize = IntSize(geoView.width, geoView.height)
-
                 val anchor = DoubleXY(leaderScreenCoordinate.x, leaderScreenCoordinate.y)
 
                 // Check sides and nudge the leader accordingly:
@@ -564,41 +563,49 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             when (actualLeaderPosition) {
                 LeaderPosition.LowerMiddle -> {
                     xCoords = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-                    yCoords  = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
                 }
+
                 LeaderPosition.UpperMiddle -> {
                     xCoords = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-                    yCoords  = leaderScreenCoordinate.y.toInt()
+                    yCoords = leaderScreenCoordinate.y.toInt()
                 }
+
                 LeaderPosition.RightMiddle -> {
                     xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords  = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    yCoords = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
                 }
+
                 LeaderPosition.LeftMiddle -> {
                     xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords  = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    yCoords = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
                 }
+
                 LeaderPosition.UpperLeftCorner -> {
                     xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords  = leaderScreenCoordinate.y.toInt()
+                    yCoords = leaderScreenCoordinate.y.toInt()
                 }
+
                 LeaderPosition.UpperRightCorner -> {
                     xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords  = leaderScreenCoordinate.y.toInt()
+                    yCoords = leaderScreenCoordinate.y.toInt()
                 }
+
                 LeaderPosition.LowerLeftCorner -> {
                     xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords  = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
                 }
+
                 LeaderPosition.LowerRightCorner -> {
                     xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords  = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
                 }
+
                 LeaderPosition.Automatic -> error("Actual leader position must never be Automatic")
             }
             // place the callout in the layout
             layout(layoutWidth, layoutHeight) {
-                calloutContainerPlaceable.place(xCoords,yCoords)
+                calloutContainerPlaceable.place(xCoords, yCoords)
             }
         }
     }
@@ -1141,7 +1148,7 @@ private fun calloutPath(
                 }
             }
 
-            LeaderPosition.Automatic -> { }
+            LeaderPosition.Automatic -> {}
         }
         close()
     }
