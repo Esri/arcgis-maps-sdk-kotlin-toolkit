@@ -133,17 +133,16 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
-            this.CalloutInternal(location, modifier, offset,rotateOffsetWithGeoView, LeaderPosition.LowerMiddle, colorScheme, shapes, content)
-
-            SideEffect {
-                // The SideEffect is executed after every successful (re)composition. This means that it runs at the
-                // end of the GeoView's content lambda from which this Callout function was called. Resetting at this point
-                // allows us to run the callout code at subsequent recomposition but also to prevent multiple callouts from
-                // being rendered within a single (re)composition pass.
-                reset()
-            }
-        }
+        Callout(
+            location = location,
+            modifier = modifier,
+            offset = offset,
+            leaderPosition = LeaderPosition.LowerMiddle,
+            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            content = content
+        )
     }
 
     /**
@@ -179,17 +178,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
-            this.CalloutInternal(geoElement, modifier, tapLocation, LeaderPosition.LowerMiddle, colorScheme, shapes, content)
-
-            SideEffect {
-                // The SideEffect is executed after every successful (re)composition. This means that it runs at the
-                // end of the GeoView's content lambda from which this Callout function was called. Resetting at this point
-                // allows us to run the callout code at subsequent recomposition but also to prevent multiple callouts from
-                // being rendered within a single (re)composition pass.
-                reset()
-            }
-        }
+        Callout(
+            geoElement = geoElement,
+            modifier = modifier,
+            tapLocation = tapLocation,
+            leaderPosition = LeaderPosition.LowerMiddle,
+            colorScheme = colorScheme,
+            shapes = shapes,
+            content = content
+        )
     }
 
     /**
