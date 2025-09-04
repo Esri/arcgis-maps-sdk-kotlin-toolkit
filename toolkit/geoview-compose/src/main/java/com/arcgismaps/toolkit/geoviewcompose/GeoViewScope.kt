@@ -1002,18 +1002,17 @@ private fun calloutPath(
         when (leaderPosition) {
             // Top side & corners:
             LeaderPosition.UpperMiddle -> {
-                lineTo(rect.right - cornerRadius, rect.top)
+                lineTo(x = (rect.width / 2f) - (leaderWidth / 2f), y = rect.top)
+                lineTo(x = (rect.width / 2f), y = rect.top - leaderHeight)
+                lineTo(x = (rect.width / 2f) + (leaderWidth / 2f), y = rect.top)
+                lineTo(x = rect.right - cornerRadius, y = rect.top)
                 arcAt(topRight, -90f, 90f)
-                lineTo(rect.right, rect.bottom - cornerRadius)
+                lineTo(x = rect.right, y = rect.bottom - cornerRadius)
                 arcAt(bottomRight, 0f, 90f)
                 lineTo(x = rect.left + cornerRadius, y = rect.bottom)
                 arcAt(bottomLeft, 90f, 90f)
-                // Upper leader
                 lineTo(x = rect.left, y = rect.top + cornerRadius)
                 arcAt(topLeft, 180f, 90f)
-                lineTo(x = (rect.width / 2f) - (leaderWidth / 2f), y = rect.top)
-                lineTo(x = rect.width / 2f, y = rect.top - leaderHeight)
-                lineTo(x = (rect.width / 2f) + (leaderWidth / 2f), y = rect.top)
             }
 
             // Bottom
