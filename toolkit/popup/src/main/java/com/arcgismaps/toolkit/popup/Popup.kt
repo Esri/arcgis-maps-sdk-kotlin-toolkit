@@ -114,64 +114,70 @@ public sealed class ValidationErrorVisibility {
  */
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val stateData = remember(popup) {
-        PopupState(popup)
+        PopupState(popup, scope)
     }
-    Popup(stateData, modifier)
+
+    Popup(popup, stateData, modifier)
 }
 
 @Composable
 public fun Popup(popup: Popup, popupState: PopupState, modifier: Modifier = Modifier) {
-    val stateData = remember(popup) {
-        PopupState(popup)
-    }
-    Popup(stateData, modifier)
-}
-
-/**
- * Maintain list of attachments outside of SDK
- * https://devtopia.esri.com/runtime/apollo/issues/681
- */
-private val attachments: MutableList<PopupAttachment> = mutableListOf()
-
-@Composable
-private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
-    val popup = popupState.popup
-    val dynamicEntity = (popup.geoElement as? DynamicEntity)
-    var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
-    var fetched by rememberSaveable(popup) { mutableStateOf(false) }
-    var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
-    if (dynamicEntity != null) {
-        LaunchedEffect(popup) {
-            dynamicEntity.dynamicEntityChangedEvent.collect {
-                // briefly show the initializing screen so it is clear the entity just pulsed
-                // and values may have changed.
-                popupState.popup.evaluateExpressions()
-                lastUpdatedEntityId = it.receivedObservation?.id ?: -1
-            }
-        }
-    }
     LaunchedEffect(popup) {
-        popupState.popup.evaluateExpressions()
-        if (!fetched) {
-            val element = popupState.popup.evaluatedElements
-                .filterIsInstance<AttachmentsPopupElement>()
-                .firstOrNull()
-
-            // make a copy of the attachments when first fetched.
-            attachments.clear()
-            element?.fetchAttachments()?.onSuccess {
-                attachments.addAll(element.attachments)
-            }
-
-            fetched = true
-        }
-
-        evaluated = true
+        popupState.evaluateExpressions()
     }
+    val states = rememberStates(popup, popupState.attachments)
+    popupState.setStates(states)
 
-    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
+//    Popup(popupState, modifier)
+    Popup(popupState, popupState.initialEvaluation.value, -1, modifier)
 }
+
+///**
+// * Maintain list of attachments outside of SDK
+// * https://devtopia.esri.com/runtime/apollo/issues/681
+// */
+//private val attachments: MutableList<PopupAttachment> = mutableListOf()
+//
+//@Composable
+//private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
+//    val popup = popupState.popup
+//    val dynamicEntity = (popup.geoElement as? DynamicEntity)
+//    var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
+//    var fetched by rememberSaveable(popup) { mutableStateOf(false) }
+//    var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
+//    if (dynamicEntity != null) {
+//        LaunchedEffect(popup) {
+//            dynamicEntity.dynamicEntityChangedEvent.collect {
+//                // briefly show the initializing screen so it is clear the entity just pulsed
+//                // and values may have changed.
+//                popupState.popup.evaluateExpressions()
+//                lastUpdatedEntityId = it.receivedObservation?.id ?: -1
+//            }
+//        }
+//    }
+//    LaunchedEffect(popup) {
+//        popupState.popup.evaluateExpressions()
+//        if (!fetched) {
+//            val element = popupState.popup.evaluatedElements
+//                .filterIsInstance<AttachmentsPopupElement>()
+//                .firstOrNull()
+//
+//            // make a copy of the attachments when first fetched.
+//            attachments.clear()
+//            element?.fetchAttachments()?.onSuccess {
+//                attachments.addAll(element.attachments)
+//            }
+//
+//            fetched = true
+//        }
+//
+//        evaluated = true
+//    }
+//
+//    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
+//}
 
 @Composable
 private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
@@ -222,9 +228,9 @@ private fun PopupBody(
     refreshed: Long,
     onFileClicked: (ViewableFile) -> Unit = {}
 ) {
-    val popup = popupState.popup
+//    val popup = popupState.popup
     val lazyListState = rememberLazyListState()
-    val states = rememberStates(popup, attachments)
+   val states = popupState.stateCollection
     LazyColumn(
         modifier = Modifier.semantics { contentDescription = "lazy column" },
         state = lazyListState
