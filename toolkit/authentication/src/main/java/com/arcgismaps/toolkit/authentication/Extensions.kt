@@ -47,29 +47,6 @@ public suspend fun AuthenticationManager.signOut() {
 }
 
 /**
- * Launches the custom tabs activity with the provided authorize URL. The resulting intent will
- * launch using a private web browser session if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
- * is true.
- *
- * @receiver an [Activity] used to launch the [CustomTabsIntent].
- * @param pendingSignIn the [OAuthUserSignIn] that requires completion, or a null value if there is no
- * longer a pending sign in.
- *
- * @since 200.2.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use Activity.launchCustomTabs(BrowserAuthenticationChallenge) " +
-            "instead as it provides support for IAP sign-in/sign-out.",
-    replaceWith = ReplaceWith("Activity.launchCustomTabs(BrowserAuthenticationChallenge)")
-)
-public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
-    launchCustomTabs(
-        pendingSignIn?.authorizeUrl ?: return,
-        pendingSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-    )
-}
-
-/**
  * Launches the custom tabs activity with the provided browser authentication challenge.
  *
  * This method determines the appropriate URL and whether to use a private web browser session based on the type of

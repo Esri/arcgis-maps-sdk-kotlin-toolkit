@@ -15,10 +15,9 @@
  *
  */
 
-@file:Suppress("DEPRECATION")
-
 package com.arcgismaps.toolkit.indoors
 
+import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -26,13 +25,11 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.toolkit.composablemap.MapInterface
-import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -152,15 +149,16 @@ class FloorFilterTests {
 
 class MapViewModel(
     arcGISMap: ArcGISMap
-) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
+) : ViewModel() {
+    private val mapProxy = MapViewProxy()
     val floorFilterState: FloorFilterState =
-        FloorFilterState(this.map.value, viewModelScope) { floorFilterSelection ->
+        FloorFilterState(geoModel = arcGISMap) { floorFilterSelection ->
             when (floorFilterSelection.type) {
                 is FloorFilterSelection.Type.FloorSite -> {
                     val floorFilterSelectionType =
                         floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
                     floorFilterSelectionType.site.geometry?.let {
-                        this.setViewpoint(Viewpoint(it))
+                        mapProxy.setViewpoint(Viewpoint(it))
                     }
                 }
 
@@ -168,11 +166,12 @@ class MapViewModel(
                     val floorFilterSelectionType =
                         floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
                     floorFilterSelectionType.facility.geometry?.let {
-                        this.setViewpoint(Viewpoint(it))
+                        mapProxy.setViewpoint(Viewpoint(it))
                     }
                 }
-
-                else -> {}
+                else -> {
+                    Log.e("ArcGIS Maps SDK", "Not Implemented")
+                }
             }
         }
 }

@@ -225,7 +225,6 @@ internal fun ColorSchemeKeyTokens.toColor(): Color {
     return MaterialTheme.colorScheme.fromToken(this)
 }
 
-@Suppress("DEPRECATION")
 internal fun copyAndSetFontPadding(
     style: TextStyle,
     includeFontPadding: Boolean
