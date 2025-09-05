@@ -29,9 +29,6 @@ secrets {
 
 kotlin {
     jvmToolchain(17)
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-    }
 }
 
 android {
