@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -63,11 +65,12 @@ internal fun UtilityAssociationDetails(
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
+    val scrollState = rememberScrollState()
     var showConfirmationDialog by remember {
         mutableStateOf(false)
     }
     Column(
-        modifier = modifier,
+        modifier = modifier.verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
