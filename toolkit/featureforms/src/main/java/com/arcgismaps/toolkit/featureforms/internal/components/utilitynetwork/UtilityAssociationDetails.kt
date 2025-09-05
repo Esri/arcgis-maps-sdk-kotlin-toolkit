@@ -50,11 +50,13 @@ import kotlinx.coroutines.launch
  * A composable that displays the details of a [UtilityAssociationResult].
  *
  * @param state The [UtilityAssociationsElementState] of the element.
+ * @param onDelete A callback that is called after the association is deleted.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun UtilityAssociationDetails(
     state: UtilityAssociationsElementState,
+    onDelete : (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -152,7 +154,10 @@ internal fun UtilityAssociationDetails(
             onDismiss = { showConfirmationDialog = false },
             onRemove = {
                 scope.launch {
-                    state.deleteAssociation(association)
+                    state.selectedGroupResult?.let { group ->
+                        val isGroupEmpty = group.delete(association)
+                        onDelete(isGroupEmpty)
+                    }
                     showConfirmationDialog = false
                 }
             }

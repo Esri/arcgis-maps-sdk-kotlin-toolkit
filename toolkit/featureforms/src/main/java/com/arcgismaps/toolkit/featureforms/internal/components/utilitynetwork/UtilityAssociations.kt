@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -70,8 +71,8 @@ import com.arcgismaps.utilitynetworks.UtilityElement
  */
 @Composable
 internal fun UtilityAssociationFilter(
-    groupResults: List<UtilityAssociationGroupResult>,
-    onGroupClick: (UtilityAssociationGroupResult) -> Unit,
+    groupResults: List<GroupResult>,
+    onGroupClick: (GroupResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // show the list of layers
@@ -79,6 +80,19 @@ internal fun UtilityAssociationFilter(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
+        if (groupResults.isEmpty()) {
+            // No associations found
+            Text(
+                text = stringResource(R.string.no_associations_found),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            return@Surface
+        }
         LazyColumn(modifier = Modifier) {
             groupResults.forEachIndexed { index, group ->
                 item {
@@ -123,13 +137,15 @@ internal fun UtilityAssociationFilter(
  */
 @Composable
 internal fun UtilityAssociations(
-    groupResult: UtilityAssociationGroupResult,
+    groupResult: GroupResult,
     isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
+    val associations = groupResult.associationResults
+    Log.e("TAG", "UtilityAssociations: ${associations.count()}", )
     Surface(
         modifier = modifier.wrapContentHeight(
             align = Alignment.Top
@@ -137,12 +153,24 @@ internal fun UtilityAssociations(
         shape = RoundedCornerShape(15.dp),
         color = MaterialTheme.colorScheme.surfaceContainer
     ) {
+//        if (groupResult.associationResults.isEmpty()) {
+//            // No associations found
+//            Text(
+//                text = stringResource(R.string.no_associations_found),
+//                modifier = Modifier
+//                    .padding(16.dp)
+//                    .fillMaxWidth(),
+//                style = MaterialTheme.typography.bodyMedium,
+//                fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
+//        }
         LazyColumn(
             modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
             state = lazyListState
         ) {
-            groupResult.associationResults.forEachIndexed { index, info ->
-                item(info.association.hashCode()) {
+            associations.forEachIndexed { index, info ->
+                item(key = info.association.globalId.toString()) {
                     AssociationItem(
                         title = info.title,
                         association = info.association,

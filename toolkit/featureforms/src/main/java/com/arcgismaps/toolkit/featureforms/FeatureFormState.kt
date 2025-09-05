@@ -175,6 +175,10 @@ public class FeatureFormState private constructor(
             if (it.state is AttachmentElementState) {
                 (it.state as AttachmentElementState).refreshAttachments()
             }
+
+            if (it.state is UtilityAssociationsElementState) {
+                (it.state as UtilityAssociationsElementState).refreshResults()
+            }
         }
         return formData.evaluateExpressions()
     }
@@ -421,7 +425,8 @@ internal fun createStates(
             is UtilityAssociationsFormElement -> {
                 val state = UtilityAssociationsElementState(
                     element = element,
-                    scope = scope
+                    scope = scope,
+                    evaluateExpressions = form::evaluateExpressions
                 )
                 states.add(element, state)
             }

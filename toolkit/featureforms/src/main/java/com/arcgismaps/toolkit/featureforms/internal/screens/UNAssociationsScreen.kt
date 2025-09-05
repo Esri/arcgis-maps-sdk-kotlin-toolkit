@@ -62,6 +62,7 @@ internal fun UNAssociationsScreen(
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -157,6 +158,17 @@ internal fun UNAssociationsScreen(
         ) {
             UtilityAssociationDetails(
                 state = utilityAssociationsElementState,
+                onDelete = { isGroupEmpty ->
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showDetails = false
+                            // If the group is empty after deletion, navigate back to the filter view
+                            if (isGroupEmpty) {
+                                onBack()
+                            }
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxSize()
             )
         }

@@ -111,6 +111,10 @@ internal fun FeatureFormNavHost(
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)
                 },
+                onBack = {
+                    // Navigate back to the filter view
+                    navController.popBackStack()
+                },
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(formData) {
