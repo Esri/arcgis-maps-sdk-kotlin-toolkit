@@ -425,8 +425,7 @@ internal fun createStates(
             is UtilityAssociationsFormElement -> {
                 val state = UtilityAssociationsElementState(
                     element = element,
-                    scope = scope,
-                    evaluateExpressions = form::evaluateExpressions
+                    scope = scope
                 )
                 states.add(element, state)
             }

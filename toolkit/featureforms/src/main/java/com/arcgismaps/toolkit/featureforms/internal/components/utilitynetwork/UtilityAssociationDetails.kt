@@ -71,7 +71,29 @@ internal fun UtilityAssociationDetails(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Association Type
         Card(modifier = Modifier.padding(24.dp)) {
+            PropertyRow(
+                title = stringResource(R.string.association_type),
+                value = filter.filterType.toString(),
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            )
+            if (association.associationType is UtilityAssociationType.Containment) {
+                HorizontalDivider()
+                ContentVisibleControl(
+                    value = association.isContainmentVisible,
+                    enabled = false,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 5.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
+        // From Element
+        Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             Column {
                 PropertyRow(
                     title = stringResource(R.string.from_element),
@@ -91,6 +113,7 @@ internal fun UtilityAssociationDetails(
                 }
             }
         }
+        // To Element
         Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             Column {
                 PropertyRow(
@@ -111,26 +134,6 @@ internal fun UtilityAssociationDetails(
                 }
             }
         }
-        Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
-            PropertyRow(
-                title = stringResource(R.string.association_type),
-                value = filter.filterType.toString(),
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
-            )
-            if (association.associationType is UtilityAssociationType.Containment) {
-                HorizontalDivider()
-                ContentVisibleControl(
-                    value = association.isContainmentVisible,
-                    enabled = false,
-                    onValueChange = {},
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 5.dp)
-                        .fillMaxWidth()
-                )
-            }
-        }
         associationResult.getFractionAlongEdge()?.let { fraction ->
             FractionAlongEdgeControl(
                 fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
@@ -143,11 +146,6 @@ internal fun UtilityAssociationDetails(
         Button(onClick = { showConfirmationDialog = true }) {
             Text(text = stringResource(R.string.remove_association))
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = stringResource(R.string.remove_association_tooltip),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
     if (showConfirmationDialog) {
         RemoveAssociationConfirmationDialog(
@@ -197,7 +195,7 @@ internal fun PropertyRow(
  * @param onRemove A callback that is called when the remove button is clicked.
  */
 @Composable
-private fun RemoveAssociationConfirmationDialog(
+internal fun RemoveAssociationConfirmationDialog(
     onDismiss: () -> Unit,
     onRemove: () -> Unit
 ) {

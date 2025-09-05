@@ -16,16 +16,12 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociation
@@ -44,8 +40,7 @@ import kotlinx.coroutines.launch
  */
 internal class UtilityAssociationsElementState(
     private val element: UtilityAssociationsFormElement,
-    private val scope: CoroutineScope,
-    private val evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
+    scope: CoroutineScope,
 ) : FormElementState(
     id = element.hashCode(),
     label = element.label,
@@ -54,7 +49,7 @@ internal class UtilityAssociationsElementState(
 ) {
     private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
-    private val _filters: SnapshotStateList<FilterResult> = SnapshotStateList()
+    private val _filters: SnapshotStateList<MutableFilterResult> = SnapshotStateList()
 
     /**
      * Indicates if the state is loading data to fetch the filters [filters].
@@ -70,27 +65,27 @@ internal class UtilityAssociationsElementState(
      *
      * This property is observable and if used within a composition it will be notified on every change.
      */
-    val filters: List<FilterResult>
+    val filters: List<MutableFilterResult>
         get() = _filters
 
-    private val _selectedFilterResult: MutableState<FilterResult?> =
+    private val _selectedFilterResult: MutableState<MutableFilterResult?> =
         mutableStateOf(null, policy = neverEqualPolicy())
 
     /**
      * The selected [UtilityAssociationsFilterResult] to display. Use [setSelectedFilterResult] to
      * set this value.
      */
-    val selectedFilterResult: FilterResult?
+    val selectedFilterResult: MutableFilterResult?
         get() = _selectedFilterResult.value
 
-    private val _selectedGroupResult: MutableState<GroupResult?> =
+    private val _selectedGroupResult: MutableState<MutableGroupResult?> =
         mutableStateOf(null, policy = neverEqualPolicy())
 
     /**
      * The selected [UtilityAssociationGroupResult] to display. Use [setSelectedGroupResult] to
      * set this value.
      */
-    val selectedGroupResult: GroupResult?
+    val selectedGroupResult: MutableGroupResult?
         get() = _selectedGroupResult.value
 
     /**
@@ -107,24 +102,26 @@ internal class UtilityAssociationsElementState(
         }
     }
 
+    /**
+     * Fetches the latest filter results from the [UtilityAssociationsFormElement] and updates
+     * the [filters] list.
+     */
     suspend fun refreshResults() {
         element.fetchAssociationsFilterResults()
         _filters.clear()
         element.associationsFilterResults.forEach {
-            val groupResults = mutableStateListOf<GroupResult>()
-            groupResults += it.groupResults.map {
-                GroupResult(it.associationResults, it.name)
+            val groupResults = it.groupResults.map {
+                MutableGroupResult(it.associationResults, it.name)
             }
-            _filters += FilterResult(
-                it.filter,
-                groupResults,
-                it.resultCount
-            ) { association ->
-                element.deleteAssociation(association)
-                scope.launch {
-                    evaluateExpressions()
+            _filters += MutableFilterResult(
+                filter = it.filter,
+                groupResults = groupResults,
+                resultCount = it.resultCount,
+                onDelete = { association ->
+                    // delete the association from the element when it is deleted from the state
+                    element.deleteAssociation(association)
                 }
-            }
+            )
         }
         // update the selections as the filter results may have changed
         val updatedFilter = _filters.find { it == selectedFilterResult }
@@ -146,14 +143,14 @@ internal class UtilityAssociationsElementState(
     /**
      * Sets the selected [UtilityAssociationsFilterResult] to display.
      */
-    fun setSelectedFilterResult(filterResult: FilterResult) {
+    fun setSelectedFilterResult(filterResult: MutableFilterResult) {
         _selectedFilterResult.value = filterResult
     }
 
     /**
      * Sets the selected [UtilityAssociationGroupResult] to display.
      */
-    fun setSelectedGroupResult(groupResult: GroupResult?) {
+    fun setSelectedGroupResult(groupResult: MutableGroupResult?) {
         _selectedGroupResult.value = groupResult
     }
 
@@ -165,13 +162,23 @@ internal class UtilityAssociationsElementState(
     }
 }
 
-internal class GroupResult(
+/**
+ * A mutable version of [UtilityAssociationGroupResult] that allows deleting associations.
+ *
+ * @param results The initial list of [UtilityAssociationResult] in this group.
+ * @param name The name of the group.
+ */
+internal class MutableGroupResult(
     results: List<UtilityAssociationResult>,
     val name: String
 ) {
     private val _associationResults: SnapshotStateList<UtilityAssociationResult> =
         mutableStateListOf<UtilityAssociationResult>().apply { addAll(results) }
 
+    /**
+     * The list of [UtilityAssociationResult] in this group. This list is observable can be modified
+     * by calling [delete].
+     */
     val associationResults: List<UtilityAssociationResult>
         get() = _associationResults
 
@@ -192,33 +199,66 @@ internal class GroupResult(
         return associationResults.isEmpty()
     }
 
+    /**
+     * Sets a listener that is called when an association is deleted from this group.
+     */
     fun setOnAssociationDeletedListener(listener: (UtilityAssociation) -> Unit) {
         onAssociationDeleted = listener
     }
 }
 
-internal class FilterResult(
+/**
+ * A mutable version of [UtilityAssociationsFilterResult] that allows deleting associations.
+ *
+ * @param filter The [UtilityAssociationsFilter] represented by this result.
+ * @param groupResults The initial list of [MutableGroupResult] in this filter result.
+ * @param resultCount The initial count of results in this filter result.
+ * @param onDelete A callback that is called after an association is deleted.
+ */
+internal class MutableFilterResult(
     val filter: UtilityAssociationsFilter,
-    val groupResults: SnapshotStateList<GroupResult>,
+    groupResults: List<MutableGroupResult>,
     resultCount: Int,
     onDelete: (UtilityAssociation) -> Unit
 ) {
-    private val _resultCount: MutableState<Int> = mutableIntStateOf(resultCount)
-    val resultCount: Int
-        get() = _resultCount.value
 
-    init {
-        groupResults.forEach {
-            it.setOnAssociationDeletedListener { association ->
-                _resultCount.value -= 1
-                if (it.associationResults.isEmpty()) {
-                    // when a group is empty, remove it from the list
-                    groupResults.remove(it)
+    /**
+     * Backing list for the [groupResults] property.
+     */
+    private val _groupResults: SnapshotStateList<MutableGroupResult> =
+        mutableStateListOf<MutableGroupResult>().apply {
+            groupResults.forEach {
+                // set a listener on each group result to handle deletions
+                it.setOnAssociationDeletedListener { association ->
+                    _resultCount.value -= 1
+                    if (it.associationResults.isEmpty()) {
+                        // when a group is empty, remove it from the list
+                        _groupResults.remove(it)
+                    }
+                    onDelete(association)
                 }
-                onDelete(association)
+                add(it)
             }
         }
-    }
+
+    /**
+     * The list of [MutableGroupResult] in this filter result. This list is observable and
+     * can be modified when associations are deleted.
+     */
+    val groupResults: List<MutableGroupResult>
+        get() = _groupResults
+
+    /**
+     * Backing state for the [resultCount] property.
+     */
+    private val _resultCount: MutableState<Int> = mutableIntStateOf(resultCount)
+
+    /**
+     * The count of results in this filter result. This value is observable and is updated
+     * when associations are deleted.
+     */
+    val resultCount: Int
+        get() = _resultCount.value
 
     override fun hashCode(): Int {
         return 31 * filter.title.hashCode() +
@@ -229,7 +269,7 @@ internal class FilterResult(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is FilterResult) return false
+        if (other !is MutableFilterResult) return false
 
         // Deep comparison of the `filter` property
         if (filter.title != other.filter.title) return false

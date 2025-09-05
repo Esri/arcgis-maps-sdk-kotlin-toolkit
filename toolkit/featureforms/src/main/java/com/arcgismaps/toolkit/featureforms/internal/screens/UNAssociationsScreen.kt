@@ -16,9 +16,18 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,11 +35,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberModalBottomSheetState
@@ -52,6 +64,7 @@ import kotlinx.coroutines.launch
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
+ * @param onBack The callback to invoke when the back action is triggered.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
@@ -156,6 +169,27 @@ internal fun UNAssociationsScreen(
             sheetState = sheetState,
             modifier = Modifier.systemBarsPadding()
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 16.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.association_settings),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                IconButton(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showDetails = false
+                        }
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close Details")
+                }
+            }
             UtilityAssociationDetails(
                 state = utilityAssociationsElementState,
                 onDelete = { isGroupEmpty ->

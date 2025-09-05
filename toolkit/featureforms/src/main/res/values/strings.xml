@@ -173,6 +173,7 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Visible Content</string>
     <string name="content">Content</string>
+    <string name="containment_visible_value">Visible: %1$s</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
         <item quantity="one">You have %1$d error that must be fixed before saving.</item>
