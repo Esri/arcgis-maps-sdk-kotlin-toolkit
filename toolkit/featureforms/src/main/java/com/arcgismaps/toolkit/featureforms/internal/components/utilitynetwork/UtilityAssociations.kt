@@ -299,7 +299,7 @@ private fun AssociationItem(
 
                     else -> MaterialTheme.colorScheme.surfaceContainerLow
                 },
-                label = "swipeable card item background color"
+                label = "item swipe background color animation"
             )
             Row(
                 modifier = Modifier

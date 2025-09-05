@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  */
 internal class UtilityAssociationsElementState(
     private val element: UtilityAssociationsFormElement,
-    scope: CoroutineScope,
+    scope: CoroutineScope
 ) : FormElementState(
     id = element.hashCode(),
     label = element.label,

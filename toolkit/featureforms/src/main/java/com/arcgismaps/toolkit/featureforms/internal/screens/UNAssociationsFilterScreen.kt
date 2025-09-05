@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -52,7 +51,6 @@ internal fun UNAssociationsFilterScreen(
         as? UtilityAssociationsElementState ?: return
     // Get the selected filter from the UtilityAssociationsElementState
     val filterResult = utilityAssociationsElementState.selectedFilterResult
-    Log.e("TAG", "UNAssociationsFilterScreen: $filterResult", )
     // guard against null value
     if (filterResult != null) {
         Column(
