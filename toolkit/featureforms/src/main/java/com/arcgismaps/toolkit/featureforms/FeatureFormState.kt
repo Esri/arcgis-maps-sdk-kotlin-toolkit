@@ -172,12 +172,14 @@ public class FeatureFormState private constructor(
         val formData = getActiveFormStateData()
         formData.featureForm.discardEdits()
         formData.stateCollection.forEach {
-            if (it.state is AttachmentElementState) {
-                (it.state as AttachmentElementState).refreshAttachments()
-            }
+            when(it.state) {
+                is AttachmentElementState -> {
+                    (it.state as AttachmentElementState).refreshAttachments()
+                }
 
-            if (it.state is UtilityAssociationsElementState) {
-                (it.state as UtilityAssociationsElementState).refreshResults()
+                is UtilityAssociationsElementState -> {
+                    (it.state as UtilityAssociationsElementState).refreshResults()
+                }
             }
         }
         return formData.evaluateExpressions()
