@@ -1726,6 +1726,7 @@ private enum class RangeSliderComponents {
  * Class that holds information about [Slider]'s and [RangeSlider]'s active track
  * and fractional positions where the discrete ticks should be drawn on the track.
  */
+@Suppress("DEPRECATION")
 @Deprecated("Not necessary with the introduction of Slider state")
 @Stable
 internal class SliderPositions(
