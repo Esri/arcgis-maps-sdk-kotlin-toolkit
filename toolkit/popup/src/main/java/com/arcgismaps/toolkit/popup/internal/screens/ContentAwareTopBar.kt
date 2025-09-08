@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.internal.screens
+package com.arcgismaps.toolkit.popup.internal.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -59,13 +59,12 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.FormStateData
-import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import com.arcgismaps.toolkit.popup.PopupState
+import com.arcgismaps.toolkit.popup.PopupStateData
+import com.arcgismaps.toolkit.popup.R
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.popup.internal.navigation.NavigationAction
+import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -89,19 +88,20 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun ContentAwareTopBar(
     backStackEntry: NavBackStackEntry,
-    state: FeatureFormState,
+    state: PopupState,
     hasBackStack: Boolean,
     showFormActions: Boolean,
     showCloseIcon: Boolean,
     isNavigationEnabled: Boolean,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-    onDiscardForm: suspend (Boolean) -> Unit,
+//    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+//    onDiscardForm: suspend (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+    val formData = remember(backStackEntry) { state.getActivePopupStateData() }
     val scope = rememberCoroutineScope()
-    val hasEdits by formData.featureForm.hasEdits.collectAsState()
+//    val hasEdits by formData.featureForm.hasEdits.collectAsState()
+    val hasEdits = false
     // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
         mutableStateOf(NavigationAction.None)
@@ -128,7 +128,7 @@ internal fun ContentAwareTopBar(
     }
     val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
-            entry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            entry.destination.hasRoute<NavigationRoute.PopupView>() -> {
                 // Run the navigation action if the current view is the form view
                 onNavigationAction(NavigationAction.NavigateBack, hasEdits)
             }
@@ -143,7 +143,7 @@ internal fun ContentAwareTopBar(
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
     val navigationEnabled = when {
         // If the current destination is the form view, only then check if navigation is enabled
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
             isNavigationEnabled
         }
         // For other destinations, always enable back navigation
@@ -163,22 +163,22 @@ internal fun ContentAwareTopBar(
             onClose = {
                 onNavigationAction(NavigationAction.Dismiss, hasEdits)
             },
-            onSave = {
-                scope.launch {
-                    onSaveForm(formData.featureForm, false)
-                }
-            },
-            onDiscard = {
-                scope.launch {
-                    onDiscardForm(false)
-                }
-            },
+//            onSave = {
+//                scope.launch {
+//                    onSaveForm(formData.featureForm, false)
+//                }
+//            },
+//            onDiscard = {
+//                scope.launch {
+//                    onDiscardForm(false)
+//                }
+//            },
             modifier = modifier
         )
-        InitializingExpressions(
-            modifier = Modifier.fillMaxWidth(),
-            evaluationProvider = { formData.isEvaluatingExpressions.value }
-        )
+//        InitializingExpressions(
+//            modifier = Modifier.fillMaxWidth(),
+//            evaluationProvider = { formData.isEvaluatingExpressions.value }
+//        )
     }
 //    if (pendingNavigationAction != NavigationAction.None) {
 //        SaveEditsDialog(
@@ -219,24 +219,24 @@ internal fun ContentAwareTopBar(
 @Composable
 private fun getTopBarTitleAndSubtitle(
     backStackEntry: NavBackStackEntry,
-    formData: FormStateData,
+    formData: PopupStateData,
 ): Pair<String, String> {
     var formTitle by remember(backStackEntry, formData) {
-        mutableStateOf(formData.featureForm.title.value)
+        mutableStateOf(formData.popup.title)
     }
 
-    LaunchedEffect(backStackEntry, formData) {
-        formData.featureForm.title.collectLatest {
-            formTitle = it
-        }
-    }
+//    LaunchedEffect(backStackEntry, formData) {
+//        formData.featureForm.title.collectLatest {
+//            formTitle = it
+//        }
+//    }
 
     val defaultTitle = stringResource(R.string.none_selected)
     return when {
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
             Pair(
                 formTitle,
-                formData.featureForm.description
+                "no description available" //formData.featureForm.description.value
             )
         }
 
@@ -302,8 +302,8 @@ private fun FeatureFormTitle(
     isNavigationEnabled: Boolean,
     onBackPressed: () -> Unit,
     onClose: () -> Unit,
-    onSave: () -> Unit,
-    onDiscard: () -> Unit,
+//    onSave: () -> Unit,
+//    onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -354,47 +354,47 @@ private fun FeatureFormTitle(
                 }
             }
         }
-        AnimatedVisibility(visible = hasEdits) {
-            Row(
-                modifier = Modifier.padding(top = 12.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(onClick = onSave) {
-                    Text(
-                        text = stringResource(R.string.save),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                FilledTonalButton(onClick = onDiscard) {
-                    Text(
-                        text = stringResource(R.string.discard),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-        }
+//        AnimatedVisibility(visible = hasEdits) {
+//            Row(
+//                modifier = Modifier.padding(top = 12.dp),
+//                horizontalArrangement = Arrangement.Start,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Button(onClick = onSave) {
+//                    Text(
+//                        text = stringResource(R.string.save),
+//                        style = MaterialTheme.typography.labelLarge
+//                    )
+//                }
+//                Spacer(Modifier.width(8.dp))
+//                FilledTonalButton(onClick = onDiscard) {
+//                    Text(
+//                        text = stringResource(R.string.discard),
+//                        style = MaterialTheme.typography.labelLarge
+//                    )
+//                }
+//            }
+//        }
     }
 }
 
-@Composable
-private fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    val alpha by animateFloatAsState(
-        if (evaluationProvider()) 1f else 0f,
-        label = "evaluation loading alpha"
-    )
-    Surface(
-        modifier = modifier.graphicsLayer {
-            this.alpha = alpha
-        }
-    ) {
-        LinearProgressIndicator(modifier)
-    }
-}
+//@Composable
+//private fun InitializingExpressions(
+//    modifier: Modifier = Modifier,
+//    evaluationProvider: () -> Boolean
+//) {
+//    val alpha by animateFloatAsState(
+//        if (evaluationProvider()) 1f else 0f,
+//        label = "evaluation loading alpha"
+//    )
+//    Surface(
+//        modifier = modifier.graphicsLayer {
+//            this.alpha = alpha
+//        }
+//    ) {
+//        LinearProgressIndicator(modifier)
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
@@ -408,8 +408,8 @@ private fun FeatureFormTitlePreview() {
         isNavigationEnabled = true,
         onBackPressed = {},
         onClose = {},
-        onSave = {},
-        onDiscard = {},
+//        onSave = {},
+//        onDiscard = {},
         modifier = Modifier.padding(8.dp)
     )
 }

@@ -24,28 +24,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.FormStateData
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationFilter
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
+import com.arcgismaps.toolkit.popup.PopupStateData
 
 /**
  * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
  *
- * @param formStateData The form state data.
+ * @param popupStateData The form state data.
  * @param route The [NavigationRoute.UNFilterView] route data of this screen.
  * @param onGroupSelected The callback that is invoked when a group is selected.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
 internal fun UNAssociationsFilterScreen(
-    formStateData: FormStateData,
+    popupStateData: PopupStateData,
     route : NavigationRoute.UNFilterView,
     onGroupSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val states = formStateData.stateCollection
+    val states = popupStateData.stateCollection
     // Get the selected UtilityAssociationsElementState from the state collection
     val utilityAssociationsElementState = states[route.stateId]
         // guard against null value
@@ -70,5 +69,5 @@ internal fun UNAssociationsFilterScreen(
             )
         }
     }
-    FeatureFormDialog(states)
+//    FeatureFormDialog(states)
 }

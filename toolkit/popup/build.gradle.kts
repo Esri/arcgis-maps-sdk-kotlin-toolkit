@@ -23,6 +23,7 @@ plugins {
     id("artifact-deploy")
     id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 android {
     namespace = "com.arcgismaps.toolkit.popup"

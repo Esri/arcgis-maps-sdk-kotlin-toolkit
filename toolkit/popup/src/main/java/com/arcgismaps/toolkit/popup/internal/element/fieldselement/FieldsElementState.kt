@@ -36,21 +36,29 @@ internal class FieldsElementState(
     val description: String,
     val fieldsToFormattedValues: Map<String, String>,
     override val id: Int
-) : Parcelable, PopupElementState()
+) : Parcelable, PopupElementState() {
 
-@Composable
-internal fun rememberFieldsElementState(
-    element: FieldsPopupElement,
-    popup: Popup
-): FieldsElementState = rememberSaveable(
-    inputs = arrayOf(popup, element)
-) {
-    val fieldNames = element.fields.map { it.label }
-    val fieldsToFormattedValuesMap = fieldNames.zip(element.formattedValues).toMap()
-    FieldsElementState(
+    constructor(element: FieldsPopupElement, popup: Popup) : this(
         title = element.title,
         description = element.description,
-        fieldsToFormattedValuesMap,
-        id = PopupElementState.createId()
+        fieldsToFormattedValues = element.fields.map { it.label }
+            .zip(element.formattedValues)
+            .toMap(),
+        id = createId()
     )
 }
+
+//internal fun createFieldsElementState(
+//    element: FieldsPopupElement,
+//    popup: Popup
+//): FieldsElementState {
+//    val fieldNames = element.fields.map { it.label }
+//    val fieldsToFormattedValuesMap = fieldNames.zip(element.formattedValues).toMap()
+//    return FieldsElementState(
+//        title = element.title,
+//        description = element.description,
+//        fieldsToFormattedValuesMap,
+//        id = PopupElementState.createId()
+//    )
+//}
+

@@ -35,17 +35,21 @@ import kotlinx.parcelize.Parcelize
 internal class TextElementState(
     val value: String,
     override val id: Int
-) : Parcelable, PopupElementState()
+) : Parcelable, PopupElementState() {
 
-@Composable
-internal fun rememberTextElementState(
-    element: TextPopupElement,
-    popup: Popup
-): TextElementState = rememberSaveable(
-    inputs = arrayOf(popup, element)
-) {
-    TextElementState(
+    constructor(element: TextPopupElement, popup: Popup) : this(
         value = element.text,
-        id = PopupElementState.createId()
+        id = createId()
     )
 }
+
+//internal fun createTextElementState(
+//    element: TextPopupElement,
+//    popup: Popup
+//): TextElementState {
+//    return TextElementState(
+//        value = element.text,
+//        id = PopupElementState.createId()
+//    )
+//}
+

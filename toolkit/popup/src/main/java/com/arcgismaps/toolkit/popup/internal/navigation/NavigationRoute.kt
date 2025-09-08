@@ -29,10 +29,10 @@ import kotlinx.serialization.Serializable
 internal sealed class NavigationRoute {
 
     /**
-     * Represents the [FeatureFormScreen].
+     * Represents the [com.arcgismaps.toolkit.popup.internal.screens.PopupScreen].
      */
     @Serializable
-    data object FormView : NavigationRoute()
+    data object PopupView : NavigationRoute()
 
     /**
      * Represents a view for the [UNAssociationsFilterScreen].

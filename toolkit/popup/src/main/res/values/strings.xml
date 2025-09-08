@@ -40,4 +40,6 @@
     <string name="remove_association_tooltip">Only removes the association. The feature remains.</string>
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
+    <string name="none_selected">None Selected</string>
+    <string name="association_settings">Association Settings</string>
 </resources>

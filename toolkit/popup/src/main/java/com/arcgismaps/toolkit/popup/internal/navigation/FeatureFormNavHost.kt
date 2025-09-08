@@ -37,7 +37,7 @@ import com.arcgismaps.toolkit.popup.ValidationErrorVisibility
 import com.arcgismaps.toolkit.popup.PopupState
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationDetails
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.popup.internal.screens.FeatureFormScreen
+import com.arcgismaps.toolkit.popup.internal.screens.PopupScreen
 import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 
@@ -45,52 +45,54 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: PopupState,
-    isNavigationEnabled: Boolean,
-    validationErrorVisibility: ValidationErrorVisibility,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-    onDiscardForm: suspend (Boolean) -> Unit,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+//    isNavigationEnabled: Boolean,
+//    validationErrorVisibility: ValidationErrorVisibility,
+//    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+//    onDiscardForm: suspend (Boolean) -> Unit,
+//    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController,
-        startDestination = NavigationRoute.FormView,
+        startDestination = NavigationRoute.PopupView,
         modifier = modifier,
         enterTransition = { slideInHorizontally { h -> h } },
         exitTransition = { fadeOut() },
         popEnterTransition = { fadeIn() },
         popExitTransition = { slideOutHorizontally { h -> h } }
     ) {
-        composable<NavigationRoute.FormView> { backStackEntry ->
-            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            FeatureFormScreen(
-                formStateData = formData,
-                onBarcodeButtonClick = onBarcodeButtonClick,
+        composable<NavigationRoute.PopupView> { backStackEntry ->
+            val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
+            PopupScreen(
+                state,
+                popupStateData,
+                popupStateData.initialEvaluation.value, -1,
                 onUtilityFilterSelected = { state ->
                     val newRoute = NavigationRoute.UNFilterView(stateId = state.id)
                     // Navigate to the filter view
                     navController.navigateSafely(backStackEntry, newRoute)
-                }
+                },
+                modifier
             )
-            LaunchedEffect(formData) {
+            LaunchedEffect(popupStateData) {
                 // Update the active feature form if we navigate back to this screen from another form.
-                state.updateActiveFeatureForm()
+                state.updateActivePopup()
             }
-            // launch a new side effect in a launched effect when validationErrorVisibility changes
-            // for a given form
-            LaunchedEffect(validationErrorVisibility, formData) {
-                // if it set to always show errors validate all fields
-                if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
-                    state.validateAllFields()
-                }
-            }
+//            // launch a new side effect in a launched effect when validationErrorVisibility changes
+//            // for a given form
+//            LaunchedEffect(validationErrorVisibility, formData) {
+//                // if it set to always show errors validate all fields
+//                if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
+//                    state.validateAllFields()
+//                }
+//            }
         }
 
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
             UNAssociationsFilterScreen(
-                formStateData = formData,
+                popupStateData = formData,
                 route = route,
                 onGroupSelected = { stateId ->
                     val newRoute = NavigationRoute.UNAssociationsView(stateId = stateId)
@@ -102,13 +104,13 @@ internal fun FeatureFormNavHost(
 
         composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
             UNAssociationsScreen(
-                formStateData = formData,
+                popupStateData = formData,
                 route = route,
-                isNavigationEnabled = isNavigationEnabled,
-                onSave = onSaveForm,
-                onDiscard = onDiscardForm,
+//                isNavigationEnabled = isNavigationEnabled,
+//                onSave = onSaveForm,
+//                onDiscard = onDiscardForm,
                 onNavigateToFeature = { feature ->
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)
@@ -121,15 +123,15 @@ internal fun FeatureFormNavHost(
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(formData) {
-                // Update the active feature form when we navigate back to this screen from another
-                // form.
-                state.updateActiveFeatureForm()
+                // Update the active popup when we navigate back to this screen from another
+                // popup.
+                state.updateActivePopup()
             }
         }
 
         composable<NavigationRoute.UNAssociationDetailView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetailView>()
-            val formData = remember(backStackEntry) { state.getActiveFormStateData() }
+            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
             // Get the selected UtilityAssociationsElementState from the state collection
             val utilityAssociationsElementState = formData.stateCollection[route.stateId]
                 // guard against null value

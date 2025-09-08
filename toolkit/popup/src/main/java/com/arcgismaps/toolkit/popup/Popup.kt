@@ -18,9 +18,12 @@
 
 package com.arcgismaps.toolkit.popup
 
+import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -40,14 +44,22 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
@@ -62,7 +74,7 @@ import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopup
 import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
+//import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.media.MediaElementState
 import com.arcgismaps.toolkit.popup.internal.element.media.MediaPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.media.rememberMediaElementState
@@ -70,12 +82,15 @@ import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateColl
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+//import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElement
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.popup.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
+import kotlinx.coroutines.CoroutineScope
 
 //@Immutable
 //private data class PopupState(@Stable val popup: Popup)
@@ -123,15 +138,107 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
 }
 
 @Composable
-public fun Popup(popup: Popup, popupState: PopupState, modifier: Modifier = Modifier) {
-    LaunchedEffect(popup) {
-        popupState.evaluateExpressions()
+public fun Popup(
+    popup: Popup,
+    popupState: PopupState,
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit = {},
+    showCloseIcon: Boolean = true,
+    showFormActions: Boolean = true,
+    isNavigationEnabled : Boolean = true,
+) {
+    // Add the provided state collection to the store.
+    val popupStateData = PopupStateData(popup)
+//    popupState.store.addLast(popupStateData)
+//    LaunchedEffect(popup) {
+//        popupState.evaluateExpressions()
+//    }
+//    val states = rememberStates(popup, popupState.attachments, rememberCoroutineScope())
+//    popupState.setStates(states)
+
+    val navController = rememberNavController(popupState)
+    popupState.setNavigationCallback { route ->
+        navController.navigate(route)
     }
-    val states = rememberStates(popup, popupState.attachments)
-    popupState.setStates(states)
+    popupState.setNavigateBack {
+        navController.navigateUp()
+    }
+
+    PopupLayout(
+        topBar = {
+            val backStackEntry by navController.currentBackStackEntryAsState()
+            // Track if there is a back stack entry
+            val hasBackStack = remember(backStackEntry) {
+                navController.previousBackStackEntry != null
+            }
+            backStackEntry?.let { entry ->
+                ContentAwareTopBar(
+                    backStackEntry = entry,
+                    state = popupState,
+//                    onSaveForm = ::saveForm,
+//                    onDiscardForm = ::discardForm,
+                    onDismissRequest = onDismiss,
+                    hasBackStack = hasBackStack,
+                    showFormActions = showFormActions,
+                    showCloseIcon = showCloseIcon,
+                    isNavigationEnabled = isNavigationEnabled,
+                    modifier = Modifier
+                        .padding(
+                            vertical = 8.dp,
+                            horizontal = if (hasBackStack) 8.dp else 16.dp
+                        )
+                        .fillMaxWidth(),
+                )
+            }
+        },
+        content = {
+            FeatureFormNavHost(
+                navController = navController,
+                state = popupState,
+//        isNavigationEnabled = isNavigationEnabled,
+//        validationErrorVisibility = validationErrorVisibility,
+//        onSaveForm = ::saveForm,
+//        onDiscardForm = ::discardForm,
+//        onBarcodeButtonClick = onBarcodeButtonClick,
+                modifier = Modifier.fillMaxSize()
+            )
+        },
+        modifier = modifier
+    )
+    DisposableEffect(popupState) {
+        onDispose {
+            // Clear the navigation actions when the composition is disposed
+            popupState.setNavigationCallback(null)
+            popupState.setNavigateBack(null)
+        }
+    }
+
+//    FeatureFormNavHost(
+//        navController = navController,
+//        state = popupState,
+////        isNavigationEnabled = isNavigationEnabled,
+////        validationErrorVisibility = validationErrorVisibility,
+////        onSaveForm = ::saveForm,
+////        onDiscardForm = ::discardForm,
+////        onBarcodeButtonClick = onBarcodeButtonClick,
+//        modifier = Modifier.fillMaxSize()
+//    )
 
 //    Popup(popupState, modifier)
-    Popup(popupState, popupState.initialEvaluation.value, -1, modifier)
+//    Popup(popupState, popupState.initialEvaluation.value, -1, modifier)
+}
+
+@Composable
+internal fun PopupLayout(
+    topBar: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        topBar()
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        content()
+    }
 }
 
 ///**
@@ -179,136 +286,136 @@ public fun Popup(popup: Popup, popupState: PopupState, modifier: Modifier = Modi
 //    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
 //}
 
-@Composable
-private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-    val popup = popupState.popup
-    val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
-    viewableFileState.value?.let { viewableFile ->
-        FileViewer(scope, fileState = viewableFile) {
-            viewableFileState.value = null
-        }
-    }
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = popup.title,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 15.dp)
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
-        )
-        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-            initialized
-        }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        if (initialized) {
-            PopupBody(popupState, refreshed) {
-                viewableFileState.value = it
-            }
-        }
-    }
-}
-
-/**
- * The body of the Popup composable
- *
- * @param popupState the immutable state object containing the Popup.
- * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
- * @param onFileClicked the callback to display an attachment or media image
- */
-@Composable
-private fun PopupBody(
-    popupState: PopupState,
-    refreshed: Long,
-    onFileClicked: (ViewableFile) -> Unit = {}
-) {
+//@Composable
+//private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
+//    val scope = rememberCoroutineScope()
 //    val popup = popupState.popup
-    val lazyListState = rememberLazyListState()
-   val states = popupState.stateCollection
-    LazyColumn(
-        modifier = Modifier.semantics { contentDescription = "lazy column" },
-        state = lazyListState
-    ) {
-        states.forEach { entry ->
-            val element = entry.popupElement
-            when (element) {
-                is TextPopupElement -> {
-                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
-                    item(contentType = TextPopupElement::class.java) {
-                        TextPopupElement(
-                            entry.state as TextElementState
-                        )
-                    }
-                }
-
-                is AttachmentsPopupElement -> {
-                    item(contentType = AttachmentsPopupElement::class.java) {
-                        AttachmentsPopupElement(
-                            state = entry.state as AttachmentsElementState,
-                            onSelectedAttachment = onFileClicked
-                        )
-                    }
-                }
-
-                is FieldsPopupElement -> {
-                    item(contentType = FieldsPopupElement::class.java) {
-                        FieldsPopupElement(
-                            state = entry.state as FieldsElementState,
-                            refreshed = refreshed
-                        )
-                    }
-                }
-
-                is MediaPopupElement -> {
-                    item(contentType = MediaPopupElement::class.java) {
-                        MediaPopupElement(
-                            entry.state as MediaElementState,
-                            onClickedMedia = onFileClicked
-                        )
-                    }
-                }
-
-                is UtilityAssociationsPopupElement -> {
-                    item(contentType = UtilityAssociationsPopupElement::class.java) {
-                        UtilityAssociationsElement(
-                            entry.state as UtilityAssociationsElementState,
-                            onItemClick = { }
-                        )
-                    }
-                }
-
-                else -> {
-                    // other popup elements are not created
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-internal fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    val alpha by animateFloatAsState(
-        if (evaluationProvider()) 0f else 1f,
-        label = "evaluation loading alpha"
-    )
-    Surface(
-        modifier = modifier.graphicsLayer {
-            this.alpha = alpha
-        }
-    ) {
-        LinearProgressIndicator(modifier)
-    }
-}
+//    val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
+//    viewableFileState.value?.let { viewableFile ->
+//        FileViewer(scope, fileState = viewableFile) {
+//            viewableFileState.value = null
+//        }
+//    }
+//    Column(
+//        modifier = modifier,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text(
+//            text = popup.title,
+//            color = MaterialTheme.colorScheme.onBackground,
+//            modifier = Modifier.padding(horizontal = 15.dp)
+//        )
+//        Spacer(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(15.dp)
+//        )
+//        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
+//            initialized
+//        }
+//        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+//        if (initialized) {
+//            PopupBody(popupState, refreshed) {
+//                viewableFileState.value = it
+//            }
+//        }
+//    }
+//}
+//
+///**
+// * The body of the Popup composable
+// *
+// * @param popupState the immutable state object containing the Popup.
+// * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
+// * @param onFileClicked the callback to display an attachment or media image
+// */
+//@Composable
+//private fun PopupBody(
+//    popupState: PopupState,
+//    refreshed: Long,
+//    onFileClicked: (ViewableFile) -> Unit = {}
+//) {
+////    val popup = popupState.popup
+//    val lazyListState = rememberLazyListState()
+//   val states = popupState.stateCollection
+//    LazyColumn(
+//        modifier = Modifier.semantics { contentDescription = "lazy column" },
+//        state = lazyListState
+//    ) {
+//        states.forEach { entry ->
+//            val element = entry.popupElement
+//            when (element) {
+//                is TextPopupElement -> {
+//                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
+//                    item(contentType = TextPopupElement::class.java) {
+//                        TextPopupElement(
+//                            entry.state as TextElementState
+//                        )
+//                    }
+//                }
+//
+//                is AttachmentsPopupElement -> {
+//                    item(contentType = AttachmentsPopupElement::class.java) {
+//                        AttachmentsPopupElement(
+//                            state = entry.state as AttachmentsElementState,
+//                            onSelectedAttachment = onFileClicked
+//                        )
+//                    }
+//                }
+//
+//                is FieldsPopupElement -> {
+//                    item(contentType = FieldsPopupElement::class.java) {
+//                        FieldsPopupElement(
+//                            state = entry.state as FieldsElementState,
+//                            refreshed = refreshed
+//                        )
+//                    }
+//                }
+//
+//                is MediaPopupElement -> {
+//                    item(contentType = MediaPopupElement::class.java) {
+//                        MediaPopupElement(
+//                            entry.state as MediaElementState,
+//                            onClickedMedia = onFileClicked
+//                        )
+//                    }
+//                }
+//
+//                is UtilityAssociationsPopupElement -> {
+//                    item(contentType = UtilityAssociationsPopupElement::class.java) {
+//                        UtilityAssociationsElement(
+//                            entry.state as UtilityAssociationsElementState,
+//                            onItemClick = { }
+//                        )
+//                    }
+//                }
+//
+//                else -> {
+//                    // other popup elements are not created
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//
+//@Composable
+//internal fun InitializingExpressions(
+//    modifier: Modifier = Modifier,
+//    evaluationProvider: () -> Boolean
+//) {
+//    val alpha by animateFloatAsState(
+//        if (evaluationProvider()) 0f else 1f,
+//        label = "evaluation loading alpha"
+//    )
+//    Surface(
+//        modifier = modifier.graphicsLayer {
+//            this.alpha = alpha
+//        }
+//    ) {
+//        LinearProgressIndicator(modifier)
+//    }
+//}
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the
@@ -317,10 +424,11 @@ internal fun InitializingExpressions(
  * @param popup the [Popup] to create the states for.
  * @return returns the [PopupElementStateCollection] created.
  */
-@Composable
+//@Composable
 internal fun rememberStates(
     popup: Popup,
-    attachments: List<PopupAttachment>
+    attachments: List<PopupAttachment>,
+    coroutineScope: CoroutineScope
 ): PopupElementStateCollection {
     val states = mutablePopupElementStateCollection()
     popup.evaluatedElements.forEach { element ->
@@ -328,39 +436,39 @@ internal fun rememberStates(
             is TextPopupElement -> {
                 states.add(
                     element,
-                    rememberTextElementState(element = element, popup = popup)
+                    TextElementState(element = element, popup = popup)
                 )
             }
 
-            is AttachmentsPopupElement -> {
-                states.add(
-                    element,
-                    rememberAttachmentsElementState(
-                        popup = popup,
-                        element = element,
-                        attachments = attachments
-                    )
-                )
-            }
+//            is AttachmentsPopupElement -> {
+//                states.add(
+//                    element,
+//                    rememberAttachmentsElementState(
+//                        popup = popup,
+//                        element = element,
+//                        attachments = attachments
+//                    )
+//                )
+//            }
 
             is FieldsPopupElement -> {
                 states.add(
                     element,
-                    rememberFieldsElementState(element = element, popup = popup)
+                    FieldsElementState(element = element, popup = popup)
                 )
             }
 
-            is MediaPopupElement -> {
-                states.add(
-                    element,
-                    rememberMediaElementState(element = element, popup = popup)
-                )
-            }
+//            is MediaPopupElement -> {
+//                states.add(
+//                    element,
+//                    rememberMediaElementState(element = element, popup = popup)
+//                )
+//            }
 
             is UtilityAssociationsPopupElement -> {
                 states.add(
                     element,
-                    UtilityAssociationsElementState(element, rememberCoroutineScope())
+                    UtilityAssociationsElementState(element, coroutineScope)
                 )
             }
 
@@ -372,4 +480,24 @@ internal fun rememberStates(
     }
 
     return states
+}
+
+@Composable
+internal fun rememberNavController(vararg inputs: Any): NavHostController {
+    val context = LocalContext.current
+    rememberNavController()
+    return rememberSaveable(
+        inputs = inputs, saver = Saver(
+            save = { it.saveState() },
+            restore = { createNavController(context).apply { restoreState(it) } }
+        )) {
+        createNavController(context)
+    }
+}
+
+private fun createNavController(context: Context): NavHostController {
+    return NavHostController(context).apply {
+        navigatorProvider.addNavigator(ComposeNavigator())
+        navigatorProvider.addNavigator(DialogNavigator())
+    }
 }
