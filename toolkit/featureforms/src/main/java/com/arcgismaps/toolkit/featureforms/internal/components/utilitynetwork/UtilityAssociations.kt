@@ -49,10 +49,10 @@ import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +72,6 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
-import kotlinx.coroutines.launch
 
 /**
  * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
@@ -230,22 +229,30 @@ private fun AssociationItem(
         mutableStateOf(false)
     }
     val density = LocalDensity.current
+    // State to track a pending swipe state. This is used to set the desired swipe value in
+    // a LaunchedEffect
+    var pendingSwipeValue by remember {
+        mutableStateOf<SwipeToDismissBoxValue?>(null)
+    }
     val swipeToDismissBoxState = remember {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
             density = density,
-            confirmValueChange = {
-                if (it == SwipeToDismissBoxValue.EndToStart) {
+            confirmValueChange = { value ->
+                if (value == SwipeToDismissBoxValue.EndToStart) {
                     showDeleteDialog = true
-                    true
-                } else false
+                    // Set a pending value instead of confirming the value change directly. There
+                    // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
+                    // not work after the first swipe, if we confirm the value change directly here.
+                    pendingSwipeValue = value
+                }
+                false
             },
             positionalThreshold = {
                 with(density) { 56.dp.toPx() }
             }
         )
     }
-    val scope = rememberCoroutineScope()
     val target = association.getTargetElement(associatedFeature)
     // Text to display below the title.
     var supportingText = ""
@@ -389,15 +396,20 @@ private fun AssociationItem(
         RemoveAssociationConfirmationDialog(
             onDismiss = {
                 showDeleteDialog = false
-                scope.launch {
-                    swipeToDismissBoxState.reset()
-                }
+                pendingSwipeValue = SwipeToDismissBoxValue.Settled
             },
             onRemove = {
                 showDeleteDialog = false
                 onDelete()
             },
         )
+    }
+    LaunchedEffect(pendingSwipeValue) {
+        // Set the desired swipe value when there is a pending value
+        pendingSwipeValue?.let {
+            swipeToDismissBoxState.dismiss(it)
+            pendingSwipeValue = null
+        }
     }
 }
 
