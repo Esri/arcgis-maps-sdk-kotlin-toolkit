@@ -169,9 +169,7 @@ class MapViewModel(
                         mapProxy.setViewpoint(Viewpoint(it))
                     }
                 }
-                else -> {
-                    Log.e("ArcGIS Maps SDK", "Not Implemented")
-                }
+                else -> {/* Do nothing for other FloorFilterSelection types */ }
             }
         }
 }
