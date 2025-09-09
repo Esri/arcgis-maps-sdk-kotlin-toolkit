@@ -85,6 +85,14 @@ android {
             // This is the default variant.
         }
     }
+    val toolkitTestsDir = project.findProperty("toolkitTestsDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTestsDir/ar")
+        print(file.absolutePath)
+        if (file.exists()) {
+            java.setSrcDirs(listOf(file))
+        }
+    }
 }
 
 apiValidation {
@@ -111,8 +119,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.play.services.location)
     testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.truth)
-    androidTestImplementation(libs.bundles.composeTest)
+    if (!(project.findProperty("toolkitTestsDir") as String?).isNullOrEmpty()) {
+        androidTestImplementation(libs.truth)
+        androidTestImplementation(libs.bundles.composeTest)
+        androidTestImplementation(libs.androidx.test.rules)
+    }
     debugImplementation(libs.bundles.debug)
 }
