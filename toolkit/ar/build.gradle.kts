@@ -90,7 +90,7 @@ android {
         var file = file("$toolkitTestsDir/ar")
         print(file.absolutePath)
         if (file.exists()) {
-            java.setSrcDirs(listOf(file))
+            java.setSrcDirs(java.srcDirs.plus(file))
         }
     }
 }
