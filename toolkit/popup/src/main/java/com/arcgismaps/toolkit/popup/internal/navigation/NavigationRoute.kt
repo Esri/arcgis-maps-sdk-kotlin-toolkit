@@ -23,7 +23,7 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 import kotlinx.serialization.Serializable
 
 /**
- * Navigation routes for the form.
+ * Navigation routes for the Popup.
  */
 @Serializable
 internal sealed class NavigationRoute {

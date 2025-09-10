@@ -17,31 +17,22 @@
 package com.arcgismaps.toolkit.popup.internal.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,36 +42,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.popup.PopupState
 import com.arcgismaps.toolkit.popup.PopupStateData
 import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * A dynamic action bar that adapts its content based on the current navigation state.
  *
  * @param backStackEntry The [NavBackStackEntry] representing the current navigation state.
- * @param state The [FeatureFormState] that holds the current form state data.
+ * @param state The [PopupState] that holds the current form state data.
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
  * @param showFormActions Indicates if the form actions (save, discard) should be shown.
  * @param showCloseIcon Indicates if the close icon should be displayed.
- * @param onSaveForm The callback to invoke when the save button is clicked. It takes the current
- * [FeatureForm] and a boolean indicating if the save is followed by a navigation action.
- * @param onDiscardForm The callback to invoke when the discard button is clicked. It takes a boolean
- * indicating if the discard is followed by a navigation action.
  * @param onDismissRequest The callback to invoke when the close button is clicked. If the form has
  * unsaved edits, this in invoked after the save or discard action is completed.
  * @param modifier The [Modifier] to apply to this layout.
@@ -93,8 +75,6 @@ internal fun ContentAwareTopBar(
     showFormActions: Boolean,
     showCloseIcon: Boolean,
     isNavigationEnabled: Boolean,
-//    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-//    onDiscardForm: suspend (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -163,53 +143,9 @@ internal fun ContentAwareTopBar(
             onClose = {
                 onNavigationAction(NavigationAction.Dismiss, hasEdits)
             },
-//            onSave = {
-//                scope.launch {
-//                    onSaveForm(formData.featureForm, false)
-//                }
-//            },
-//            onDiscard = {
-//                scope.launch {
-//                    onDiscardForm(false)
-//                }
-//            },
             modifier = modifier
         )
-//        InitializingExpressions(
-//            modifier = Modifier.fillMaxWidth(),
-//            evaluationProvider = { formData.isEvaluatingExpressions.value }
-//        )
     }
-//    if (pendingNavigationAction != NavigationAction.None) {
-//        SaveEditsDialog(
-//            onDismissRequest = {
-//                // Clear the pending action when the dialog is dismissed
-//                pendingNavigationAction = NavigationAction.None
-//            },
-//            onSave = {
-//                scope.launch(Dispatchers.Main) {
-//                    // Check if the pending action is to navigate back, since NavigateToAssociation
-//                    // is not triggered by the top bar
-//                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-//                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
-//                        // Execute the pending navigation action after saving
-//                        onNavigationAction(pendingNavigationAction, false)
-//                    }
-//                    pendingNavigationAction = NavigationAction.None
-//                }
-//            },
-//            onDiscard = {
-//                scope.launch(Dispatchers.Main) {
-//                    // Check if the pending action is to navigate back, since NavigateToAssociation
-//                    // is not triggered by the top bar
-//                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-//                    onDiscardForm(willNavigate)
-//                    onNavigationAction(pendingNavigationAction, false)
-//                    pendingNavigationAction = NavigationAction.None
-//                }
-//            }
-//        )
-//    }
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
         onBackAction(backStackEntry)
@@ -224,12 +160,6 @@ private fun getTopBarTitleAndSubtitle(
     var formTitle by remember(backStackEntry, formData) {
         mutableStateOf(formData.popup.title)
     }
-
-//    LaunchedEffect(backStackEntry, formData) {
-//        formData.featureForm.title.collectLatest {
-//            formTitle = it
-//        }
-//    }
 
     val defaultTitle = stringResource(R.string.none_selected)
     return when {
@@ -288,8 +218,6 @@ private fun getTopBarTitleAndSubtitle(
  * @param onBackPressed The callback to invoke when the back button is clicked.
  * @param onClose The callback to invoke when the close button is clicked. If null, the close button
  * is not displayed.
- * @param onSave The callback to invoke when the save button is clicked.
- * @param onDiscard The callback to invoke when the discard button is clicked.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
@@ -302,8 +230,6 @@ private fun FeatureFormTitle(
     isNavigationEnabled: Boolean,
     onBackPressed: () -> Unit,
     onClose: () -> Unit,
-//    onSave: () -> Unit,
-//    onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -354,47 +280,8 @@ private fun FeatureFormTitle(
                 }
             }
         }
-//        AnimatedVisibility(visible = hasEdits) {
-//            Row(
-//                modifier = Modifier.padding(top = 12.dp),
-//                horizontalArrangement = Arrangement.Start,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Button(onClick = onSave) {
-//                    Text(
-//                        text = stringResource(R.string.save),
-//                        style = MaterialTheme.typography.labelLarge
-//                    )
-//                }
-//                Spacer(Modifier.width(8.dp))
-//                FilledTonalButton(onClick = onDiscard) {
-//                    Text(
-//                        text = stringResource(R.string.discard),
-//                        style = MaterialTheme.typography.labelLarge
-//                    )
-//                }
-//            }
-//        }
     }
 }
-
-//@Composable
-//private fun InitializingExpressions(
-//    modifier: Modifier = Modifier,
-//    evaluationProvider: () -> Boolean
-//) {
-//    val alpha by animateFloatAsState(
-//        if (evaluationProvider()) 1f else 0f,
-//        label = "evaluation loading alpha"
-//    )
-//    Surface(
-//        modifier = modifier.graphicsLayer {
-//            this.alpha = alpha
-//        }
-//    ) {
-//        LinearProgressIndicator(modifier)
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
@@ -408,8 +295,6 @@ private fun FeatureFormTitlePreview() {
         isNavigationEnabled = true,
         onBackPressed = {},
         onClose = {},
-//        onSave = {},
-//        onDiscard = {},
         modifier = Modifier.padding(8.dp)
     )
 }

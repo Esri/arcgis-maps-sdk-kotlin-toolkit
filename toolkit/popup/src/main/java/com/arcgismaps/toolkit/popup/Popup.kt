@@ -50,7 +50,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateColl
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.popup.internal.navigation.FeatureFormNavHost
+import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
 import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
 import kotlinx.coroutines.CoroutineScope
 
@@ -135,7 +135,7 @@ public fun Popup(
             }
         },
         content = {
-            FeatureFormNavHost(
+            PopupNavHost(
                 navController = navController,
                 state = popupState,
                 modifier = Modifier.fillMaxSize()

@@ -64,7 +64,6 @@ import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 @Composable
 internal fun PopupScreen(
     popupState: PopupState,
-//    initialized: Boolean,
     popupStateData: PopupStateData,
     initialized: Boolean,
     refreshed: Long,
@@ -108,19 +107,17 @@ internal fun PopupScreen(
 /**
  * The body of the Popup composable
  *
- * @param popupState the immutable state object containing the Popup.
+ * @param popupStateData the immutable state object containing the Popup.
  * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
  * @param onFileClicked the callback to display an attachment or media image
  */
 @Composable
 private fun PopupBody(
-//    popupState: PopupState,
     popupStateData: PopupStateData,
     refreshed: Long,
     onUtilityAssociationFilterClick: (UtilityAssociationsElementState) -> Unit,
     onFileClicked: (ViewableFile) -> Unit = {}
 ) {
-//    val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = popupStateData.stateCollection
     LazyColumn(

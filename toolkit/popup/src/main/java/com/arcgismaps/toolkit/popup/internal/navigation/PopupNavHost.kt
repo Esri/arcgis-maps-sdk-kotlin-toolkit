@@ -39,7 +39,7 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 
 @Composable
-internal fun FeatureFormNavHost(
+internal fun PopupNavHost(
     navController: NavHostController,
     state: PopupState,
     modifier: Modifier = Modifier,
