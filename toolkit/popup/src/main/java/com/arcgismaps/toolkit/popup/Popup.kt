@@ -78,7 +78,7 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     }
 
     if (stateData.getActivePopupStateData().initialEvaluation.value) {
-        Popup(popup, stateData, modifier)
+        Popup(popup, stateData, modifier, showCloseIcon = false)
     }
 }
 
@@ -89,7 +89,6 @@ public fun Popup(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
-    showFormActions: Boolean = true,
     isNavigationEnabled : Boolean = true,
 ) {
     // Add the provided state collection to the store.
@@ -122,7 +121,6 @@ public fun Popup(
                     state = popupState,
                     onDismissRequest = onDismiss,
                     hasBackStack = hasBackStack,
-                    showFormActions = showFormActions,
                     showCloseIcon = showCloseIcon,
                     isNavigationEnabled = isNavigationEnabled,
                     modifier = Modifier

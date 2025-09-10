@@ -91,20 +91,9 @@ internal fun PopupScreen(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = popup.title,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 15.dp)
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
-        )
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
             initialized
         }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (initialized) {
             PopupBody(popupStateData, refreshed, onUtilityFilterSelected) {
                 viewableFileState.value = it

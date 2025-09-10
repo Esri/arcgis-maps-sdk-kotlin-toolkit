@@ -17,14 +17,10 @@
 package com.arcgismaps.toolkit.popup.internal.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -41,7 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,7 +56,6 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
  * @param backStackEntry The [NavBackStackEntry] representing the current navigation state.
  * @param state The [PopupState] that holds the current form state data.
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
- * @param showFormActions Indicates if the form actions (save, discard) should be shown.
  * @param showCloseIcon Indicates if the close icon should be displayed.
  * @param onDismissRequest The callback to invoke when the close button is clicked. If the form has
  * unsaved edits, this in invoked after the save or discard action is completed.
@@ -72,7 +66,6 @@ internal fun ContentAwareTopBar(
     backStackEntry: NavBackStackEntry,
     state: PopupState,
     hasBackStack: Boolean,
-    showFormActions: Boolean,
     showCloseIcon: Boolean,
     isNavigationEnabled: Boolean,
     onDismissRequest: () -> Unit,
@@ -81,36 +74,31 @@ internal fun ContentAwareTopBar(
     val formData = remember(backStackEntry) { state.getActivePopupStateData() }
     val scope = rememberCoroutineScope()
 //    val hasEdits by formData.featureForm.hasEdits.collectAsState()
-    val hasEdits = false
+//    val hasEdits = false
     // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
         mutableStateOf(NavigationAction.None)
     }
     // Callback to handle navigation actions based on the form's edit state
-    val onNavigationAction: (NavigationAction, Boolean) -> Unit = { action, formHasEdits ->
-        if (formHasEdits) {
-            // If the form has edits, store the pending action
-            pendingNavigationAction = action
-        } else {
-            // Otherwise, execute the action immediately
-            when (action) {
-                is NavigationAction.NavigateBack -> {
-                    state.popBackStack(backStackEntry)
-                }
-
-                is NavigationAction.Dismiss -> {
-                    onDismissRequest()
-                }
-
-                else -> {}
+    val onNavigationAction: (NavigationAction) -> Unit = { action ->
+        // execute the action immediately
+        when (action) {
+            is NavigationAction.NavigateBack -> {
+                state.popBackStack(backStackEntry)
             }
+
+            is NavigationAction.Dismiss -> {
+                onDismissRequest()
+            }
+
+            else -> {}
         }
     }
     val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
             entry.destination.hasRoute<NavigationRoute.PopupView>() -> {
                 // Run the navigation action if the current view is the form view
-                onNavigationAction(NavigationAction.NavigateBack, hasEdits)
+                onNavigationAction(NavigationAction.NavigateBack)
             }
 
             else -> {
@@ -133,7 +121,6 @@ internal fun ContentAwareTopBar(
         FeatureFormTitle(
             title = title,
             subTitle = subTitle,
-            hasEdits = if (showFormActions) hasEdits else false,
             showCloseIcon = showCloseIcon,
             showBackIcon = hasBackStack,
             isNavigationEnabled = navigationEnabled,
@@ -141,7 +128,7 @@ internal fun ContentAwareTopBar(
                 onBackAction(backStackEntry)
             },
             onClose = {
-                onNavigationAction(NavigationAction.Dismiss, hasEdits)
+                onNavigationAction(NavigationAction.Dismiss)
             },
             modifier = modifier
         )
@@ -166,7 +153,7 @@ private fun getTopBarTitleAndSubtitle(
         backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
             Pair(
                 formTitle,
-                "no description available" //formData.featureForm.description.value
+                "" // No subtitle for the main Popup view
             )
         }
 
@@ -211,8 +198,6 @@ private fun getTopBarTitleAndSubtitle(
  *
  * @param title The title to display.
  * @param subTitle The subtitle to display.
- * @param hasEdits Indicates if the form has unsaved edits. An unsaved edits indicator is displayed
- * along with the save and discard buttons if this is true.
  * @param showCloseIcon Indicates if the close icon should be displayed.
  * @param showBackIcon Indicates if the back icon should be displayed.
  * @param onBackPressed The callback to invoke when the back button is clicked.
@@ -224,7 +209,6 @@ private fun getTopBarTitleAndSubtitle(
 private fun FeatureFormTitle(
     title: String,
     subTitle: String,
-    hasEdits: Boolean,
     showCloseIcon: Boolean,
     showBackIcon: Boolean,
     isNavigationEnabled: Boolean,
@@ -255,21 +239,10 @@ private fun FeatureFormTitle(
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.weight(1f, fill = false)
                     )
-                    if (hasEdits) {
-                        Spacer(Modifier.width(8.dp))
-                        Canvas(modifier = Modifier.size(10.dp)) {
-                            drawCircle(color = Color(0xFFB3261E))
-                        }
-                    }
                 }
                 if (subTitle.isNotEmpty()) {
                     Text(
                         text = subTitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                } else if (hasEdits) {
-                    Text(
-                        text = "Unsaved Changes",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -289,7 +262,6 @@ private fun FeatureFormTitlePreview() {
     FeatureFormTitle(
         title = "Structure Boundary",
         subTitle = "Edit feature attributes",
-        hasEdits = true,
         showCloseIcon = true,
         showBackIcon = false,
         isNavigationEnabled = true,
