@@ -60,7 +60,16 @@ import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 
-
+/**
+ * Composable function that displays the Popup screen.
+ *
+ * @param popupState The popup state object containing the Popup.
+ * @param popupStateData The popup state data.
+ * @param initialized indicates whether the popup has been initialized.
+ * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
+ * @param onUtilityFilterSelected The callback to be invoked when a utility filter is selected.
+ * @param modifier The modifier to be applied to the layout.
+ */
 @Composable
 internal fun PopupScreen(
     popupState: PopupState,

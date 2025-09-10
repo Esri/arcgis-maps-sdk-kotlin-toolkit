@@ -180,36 +180,36 @@ internal fun ContentAwareTopBar(
             evaluationProvider = { formData.isEvaluatingExpressions.value }
         )
     }
-//    if (pendingNavigationAction != NavigationAction.None) {
-//        SaveEditsDialog(
-//            onDismissRequest = {
-//                // Clear the pending action when the dialog is dismissed
-//                pendingNavigationAction = NavigationAction.None
-//            },
-//            onSave = {
-//                scope.launch(Dispatchers.Main) {
-//                    // Check if the pending action is to navigate back, since NavigateToAssociation
-//                    // is not triggered by the top bar
-//                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-//                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
-//                        // Execute the pending navigation action after saving
-//                        onNavigationAction(pendingNavigationAction, false)
-//                    }
-//                    pendingNavigationAction = NavigationAction.None
-//                }
-//            },
-//            onDiscard = {
-//                scope.launch(Dispatchers.Main) {
-//                    // Check if the pending action is to navigate back, since NavigateToAssociation
-//                    // is not triggered by the top bar
-//                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-//                    onDiscardForm(willNavigate)
-//                    onNavigationAction(pendingNavigationAction, false)
-//                    pendingNavigationAction = NavigationAction.None
-//                }
-//            }
-//        )
-//    }
+    if (pendingNavigationAction != NavigationAction.None) {
+        SaveEditsDialog(
+            onDismissRequest = {
+                // Clear the pending action when the dialog is dismissed
+                pendingNavigationAction = NavigationAction.None
+            },
+            onSave = {
+                scope.launch(Dispatchers.Main) {
+                    // Check if the pending action is to navigate back, since NavigateToAssociation
+                    // is not triggered by the top bar
+                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                        // Execute the pending navigation action after saving
+                        onNavigationAction(pendingNavigationAction, false)
+                    }
+                    pendingNavigationAction = NavigationAction.None
+                }
+            },
+            onDiscard = {
+                scope.launch(Dispatchers.Main) {
+                    // Check if the pending action is to navigate back, since NavigateToAssociation
+                    // is not triggered by the top bar
+                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                    onDiscardForm(willNavigate)
+                    onNavigationAction(pendingNavigationAction, false)
+                    pendingNavigationAction = NavigationAction.None
+                }
+            }
+        )
+    }
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
         onBackAction(backStackEntry)
