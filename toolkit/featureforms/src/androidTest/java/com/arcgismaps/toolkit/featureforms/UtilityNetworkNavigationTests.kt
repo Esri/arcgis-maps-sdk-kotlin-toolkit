@@ -24,8 +24,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.junit.Rule
 import org.junit.Test
 
@@ -72,7 +70,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         groupNode.assertIsDisplayed()
         groupNode.performClick()
         val associationNode =
-            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Content"))
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Visible: false"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()
@@ -130,7 +128,7 @@ class UtilityNetworkNavigationTests : FeatureFormTestRunner(
         groupNode.assertIsDisplayed()
         groupNode.performClick()
         val associationNode =
-            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Content"))
+            composeTestRule.onNode(hasTextExactly("MediumVoltage", "Visible: false"))
         associationNode.assertIsDisplayed()
         // Navigate to a new Form
         associationNode.performClick()

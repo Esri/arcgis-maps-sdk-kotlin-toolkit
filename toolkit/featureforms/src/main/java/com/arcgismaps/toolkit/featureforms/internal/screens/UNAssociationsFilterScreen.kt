@@ -28,7 +28,6 @@ import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 
 /**
  * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
@@ -70,5 +69,4 @@ internal fun UNAssociationsFilterScreen(
             )
         }
     }
-    FeatureFormDialog(states)
 }

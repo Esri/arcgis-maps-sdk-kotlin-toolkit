@@ -16,34 +16,50 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,8 +83,8 @@ import com.arcgismaps.utilitynetworks.UtilityElement
  */
 @Composable
 internal fun UtilityAssociationFilter(
-    groupResults: List<UtilityAssociationGroupResult>,
-    onGroupClick: (UtilityAssociationGroupResult) -> Unit,
+    groupResults: List<MutableGroupResult>,
+    onGroupClick: (MutableGroupResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // show the list of layers
@@ -76,6 +92,19 @@ internal fun UtilityAssociationFilter(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp)
     ) {
+        if (groupResults.isEmpty()) {
+            // No associations found
+            Text(
+                text = stringResource(R.string.no_associations_found),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            return@Surface
+        }
         LazyColumn(modifier = Modifier) {
             groupResults.forEachIndexed { index, group ->
                 item {
@@ -89,9 +118,11 @@ internal fun UtilityAssociationFilter(
                                 modifier = Modifier.padding(end = 16.dp)
                             )
                         },
-                        modifier = Modifier.clickable {
-                            onGroupClick(group)
-                        },
+                        modifier = Modifier
+                            .clickable {
+                                onGroupClick(group)
+                            }
+                            .animateItem(),
                         colors = ListItemDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer
                         )
@@ -120,7 +151,7 @@ internal fun UtilityAssociationFilter(
  */
 @Composable
 internal fun UtilityAssociations(
-    groupResult: UtilityAssociationGroupResult,
+    groupResult: MutableGroupResult,
     isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
@@ -139,7 +170,7 @@ internal fun UtilityAssociations(
             state = lazyListState
         ) {
             groupResult.associationResults.forEachIndexed { index, info ->
-                item(info.association.hashCode()) {
+                item(key = info.association.globalId.toString()) {
                     AssociationItem(
                         title = info.title,
                         association = info.association,
@@ -151,7 +182,10 @@ internal fun UtilityAssociations(
                         onDetailsClick = {
                             onDetailsClick(index)
                         },
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                        onDelete = {
+                            groupResult.delete(info.association)
+                        },
+                        modifier = Modifier.animateItem()
                     )
                     if (index < groupResult.associationResults.count() - 1) {
                         HorizontalDivider(
@@ -188,18 +222,46 @@ private fun AssociationItem(
     enabled: Boolean,
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+    val density = LocalDensity.current
+    // State to track a pending swipe state. This is used to set the desired swipe value in
+    // a LaunchedEffect
+    var pendingSwipeValue by remember {
+        mutableStateOf<SwipeToDismissBoxValue?>(null)
+    }
+    val swipeToDismissBoxState = remember {
+        SwipeToDismissBoxState(
+            initialValue = SwipeToDismissBoxValue.Settled,
+            density = density,
+            confirmValueChange = { value ->
+                if (value == SwipeToDismissBoxValue.EndToStart) {
+                    showDeleteDialog = true
+                    // Set a pending value instead of confirming the value change directly. There
+                    // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
+                    // not work after the first swipe, if we confirm the value change directly here.
+                    pendingSwipeValue = value
+                }
+                false
+            },
+            positionalThreshold = {
+                with(density) { 56.dp.toPx() }
+            }
+        )
+    }
     val target = association.getTargetElement(associatedFeature)
-    // Text to display at the end of the row.
-    var trailingText = ""
     // Text to display below the title.
     var supportingText = ""
     when (association.associationType) {
         is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
-            trailingText = "${(association.fractionAlongEdge * 100).toInt()}%"
-            target.terminal?.let { terminal ->
-                supportingText = terminal.name
+            supportingText = if (target.terminal != null) {
+                "${target.terminal?.name}, ${(association.fractionAlongEdge * 100).toInt()}%"
+            } else {
+                "${(association.fractionAlongEdge * 100).toInt()}%"
             }
         }
 
@@ -213,11 +275,10 @@ private fun AssociationItem(
 
         is UtilityAssociationType.Containment -> {
             if (associatedFeature.globalId == association.toElement.globalId) {
-                supportingText = if (association.isContainmentVisible) {
-                    stringResource(R.string.visible_content)
-                } else {
-                    stringResource(R.string.content)
-                }
+                supportingText = stringResource(
+                    R.string.containment_visible_value,
+                    association.isContainmentVisible
+                )
             }
         }
 
@@ -228,58 +289,126 @@ private fun AssociationItem(
     } else {
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     }
-    Row(
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            // Cross-fade the background color as the drag gesture progresses.
+            val color by animateColorAsState(
+                when (swipeToDismissBoxState.targetValue) {
+                    SwipeToDismissBoxValue.EndToStart ->
+                        lerp(
+                            MaterialTheme.colorScheme.surfaceContainerLow,
+                            MaterialTheme.colorScheme.error,
+                            swipeToDismissBoxState.progress
+                        )
+
+                    else -> MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                label = "item swipe background color animation"
+            )
+            Row(
+                modifier = Modifier
+                    .background(color)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                when (swipeToDismissBoxState.dismissDirection) {
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        Spacer(modifier = Modifier)
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove item",
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier
+                                .padding(12.dp)
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+        },
         modifier = modifier
             .clickable(enabled = enabled, onClick = onClick)
-            .height(56.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .fillMaxWidth()
     ) {
-        association.getIcon()?.let { icon ->
-            Icon(
-                painter = icon,
-                contentDescription = "feature association icon",
-                modifier = Modifier.padding(
-                    end = 12.dp
-                )
-            )
-        }
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .heightIn(min = 56.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = title,
-                modifier = Modifier.padding(
-                    top = if (supportingText.isNotEmpty()) 6.dp else 0.dp,
-                ),
-                style = MaterialTheme.typography.bodyLarge,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                color = contentColor
-            )
-            if (supportingText.isNotEmpty()) {
+            association.getIcon()?.let { icon ->
+                Icon(
+                    painter = icon,
+                    contentDescription = "feature association icon",
+                    modifier = Modifier.padding(
+                        end = 12.dp
+                    )
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
                 Text(
-                    text = supportingText,
-                    modifier = Modifier
-                        .padding(
-                            bottom = 6.dp
-                        ),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = title,
+                    modifier = Modifier.padding(
+                        top = if (supportingText.isNotEmpty()) 6.dp else 0.dp,
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
+                    maxLines = 3,
                     color = contentColor
                 )
+                if (supportingText.isNotEmpty()) {
+                    Text(
+                        text = supportingText,
+                        modifier = Modifier
+                            .padding(
+                                top = 6.dp,
+                                bottom = 6.dp
+                            ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        color = contentColor
+                    )
+                }
+            }
+            // Details button
+            IconButton(onClick = onDetailsClick) {
+                Icon(Icons.Default.MoreHoriz, contentDescription = "details")
             }
         }
-        if (trailingText.isNotEmpty()) {
-            Card(modifier = Modifier.wrapContentSize()) {
-                Text(text = trailingText, modifier = Modifier.padding(8.dp))
-            }
+    }
+    if (showDeleteDialog) {
+        // Confirmation dialog to delete the association
+        RemoveAssociationConfirmationDialog(
+            onDismiss = {
+                showDeleteDialog = false
+                pendingSwipeValue = SwipeToDismissBoxValue.Settled
+            },
+            onRemove = {
+                showDeleteDialog = false
+                onDelete()
+            },
+        )
+    }
+    LaunchedEffect(pendingSwipeValue) {
+        // Set the desired swipe value when there is a pending value
+        pendingSwipeValue?.let {
+            swipeToDismissBoxState.dismiss(it)
+            pendingSwipeValue = null
         }
     }
 }

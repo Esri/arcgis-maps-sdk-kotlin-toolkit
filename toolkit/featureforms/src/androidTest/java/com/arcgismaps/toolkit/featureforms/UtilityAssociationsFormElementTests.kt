@@ -199,8 +199,9 @@ class UtilityAssociationsFormElementTests {
         val lazyColumnNode = composeTestRule.onNodeWithContentDescription("lazy column")
         lazyColumnNode.performScrollToNode(hasText("Associations")).assertIsDisplayed()
 
-        val containmentNode = composeTestRule.onNodeWithText("Content").assertIsDisplayed()
-        containmentNode.performClick()
+        val contentNode = composeTestRule.onNodeWithText("Content")
+        lazyColumnNode.performScrollToNode(hasText("Content"))
+        contentNode.performClick()
 
         // Verify the groups are displayed
         var listView = composeTestRule.onNode(hasScrollAction())
@@ -209,7 +210,7 @@ class UtilityAssociationsFormElementTests {
         // Verify the associations are displayed
         listView = composeTestRule.onNode(hasScrollAction())
         val firstElement = listView.onChildWithText("Circuit Breaker").assertIsDisplayed()
-        firstElement.assert(hasText("Content"))
+        firstElement.assert(hasText("Visible: false"))
     }
 
     /**

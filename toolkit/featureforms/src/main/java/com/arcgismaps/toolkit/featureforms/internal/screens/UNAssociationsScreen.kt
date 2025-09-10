@@ -16,8 +16,18 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,17 +35,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FormStateData
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
+import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberModalBottomSheetState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.launch
 
 /**
@@ -49,7 +64,7 @@ import kotlinx.coroutines.launch
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
- * @param onNavigateToAssociation The callback to be invoked when the user selects an association to navigate to.
+ * @param onBack The callback to invoke when the back action is triggered.
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
@@ -60,9 +75,10 @@ internal fun UNAssociationsScreen(
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
-    onNavigateToAssociation: (Int) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val featureForm = formStateData.featureForm
     val states = formStateData.stateCollection
     // Get the selected UtilityAssociationsElementState from the state collection
@@ -91,6 +107,9 @@ internal fun UNAssociationsScreen(
             }
         }
     }
+    var showDetails by rememberSaveable {
+        mutableStateOf(false)
+    }
     UtilityAssociations(
         groupResult = groupResult,
         isNavigationEnabled = isNavigationEnabled,
@@ -106,7 +125,8 @@ internal fun UNAssociationsScreen(
         onDetailsClick = { index ->
             val association = groupResult.associationResults[index]
             utilityAssociationsElementState.setSelectedAssociationResult(association)
-            onNavigateToAssociation(utilityAssociationsElementState.id)
+            // show the details sheet
+            showDetails = true
         },
         modifier = modifier
             .padding(16.dp)
@@ -137,5 +157,54 @@ internal fun UNAssociationsScreen(
             }
         )
     }
-    FeatureFormDialog(states)
+    if (showDetails) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showDetails = false
+                    }
+                }
+            },
+            sheetState = sheetState,
+            modifier = Modifier.systemBarsPadding()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 16.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.association_settings),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                IconButton(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showDetails = false
+                        }
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close Details")
+                }
+            }
+            UtilityAssociationDetails(
+                state = utilityAssociationsElementState,
+                onDelete = { isGroupEmpty ->
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showDetails = false
+                            // If the group is empty after deletion, navigate back to the filter view
+                            if (isGroupEmpty) {
+                                onBack()
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }
