@@ -31,9 +31,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.popup.ValidationErrorVisibility
 import com.arcgismaps.toolkit.popup.PopupState
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationDetails
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
@@ -45,11 +42,6 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 internal fun FeatureFormNavHost(
     navController: NavHostController,
     state: PopupState,
-//    isNavigationEnabled: Boolean,
-//    validationErrorVisibility: ValidationErrorVisibility,
-//    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
-//    onDiscardForm: suspend (Boolean) -> Unit,
-//    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -78,14 +70,6 @@ internal fun FeatureFormNavHost(
                 // Update the active feature form if we navigate back to this screen from another form.
                 state.updateActivePopup()
             }
-//            // launch a new side effect in a launched effect when validationErrorVisibility changes
-//            // for a given form
-//            LaunchedEffect(validationErrorVisibility, formData) {
-//                // if it set to always show errors validate all fields
-//                if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
-//                    state.validateAllFields()
-//                }
-//            }
         }
 
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
@@ -108,9 +92,6 @@ internal fun FeatureFormNavHost(
             UNAssociationsScreen(
                 popupStateData = formData,
                 route = route,
-//                isNavigationEnabled = isNavigationEnabled,
-//                onSave = onSaveForm,
-//                onDiscard = onDiscardForm,
                 onNavigateToFeature = { feature ->
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)

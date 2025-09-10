@@ -18,7 +18,6 @@ import com.arcgismaps.mapping.popup.PopupExpressionEvaluation
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.popup.internal.navigation.lifecycleIsResumed
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -28,9 +27,6 @@ public class PopupState(@Stable public val popup: Popup) {
     private val store: ArrayDeque<PopupStateData> = ArrayDeque()
 
     private lateinit var coroutineScope: CoroutineScope
-
-    internal lateinit var stateCollection: PopupElementStateCollection
-        private set
 
     internal val attachments: MutableList<PopupAttachment> = mutableListOf()
 
