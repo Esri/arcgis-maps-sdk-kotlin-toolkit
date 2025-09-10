@@ -95,6 +95,14 @@ android {
             // This is the default variant.
         }
     }
+
+    val sdkToolkitTestsDir = project.findProperty("sdkToolkitTestsDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$sdkToolkitTestsDir/${project.name}")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
 }
 
 apiValidation {
@@ -161,4 +169,8 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.bundles.androidXTest)
     debugImplementation(libs.bundles.debug)
+
+    if (file(project.findProperty("sdkToolkitTestsDir") as String).exists()) {
+        implementation(libs.mockingjay)
+    }
 }
