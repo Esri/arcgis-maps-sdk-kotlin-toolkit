@@ -34,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.data.Feature
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.layers.FeatureLayer
@@ -53,7 +54,7 @@ private fun unselectFeature(feature: GeoElement?, layer: Layer?) {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MapViewModel) {
+fun MainScreen(viewModel: MapViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 

@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.GeoElement
@@ -43,20 +44,11 @@ import java.io.Closeable
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Base class for context aware AndroidViewModel. This class must have only a single application
- * parameter.
- */
-open class BaseMapViewModel(application: Application) : AndroidViewModel(application)
-
-/**
  * Simple android view model for the Popup app map screen.
  */
-@Suppress("unused_parameter")
 class MapViewModel(
-    savedStateHandle: SavedStateHandle,
     application: Application,
-    coroutineScope: CoroutineScope = CloseableCoroutineScope()
-) : BaseMapViewModel(application) {
+) : AndroidViewModel(application) {
 
     private var _geoElement: GeoElement? = null
     val geoElement: GeoElement?
@@ -93,7 +85,7 @@ class MapViewModel(
     val proxy: MapViewProxy = MapViewProxy()
 
     init {
-        coroutineScope.launch {
+        viewModelScope.launch {
             map.load()
         }
     }
@@ -109,42 +101,5 @@ class MapViewModel(
     fun setPopup(popup: Popup?) {
         _popup.value = popup
     }
-    companion object {
-
-        /**
-         * The factory needed by the androidx ktx component activity to instantiate the view model.
-         * See onCreate() for usage.
-         */
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                // Get the Application object from extras
-                val application = checkNotNull(extras[APPLICATION_KEY])
-                // Create a SavedStateHandle for this ViewModel from extras
-                val savedStateHandle = extras.createSavedStateHandle()
-
-                return MapViewModel(
-                    savedStateHandle,
-                    application
-                ) as T
-            }
-        }
-    }
-
 }
 
-/**
- * a CoroutineScope used by the view model. It will by closed when the view model exits its
- * lifecycle.
- */
-class CloseableCoroutineScope(
-    context: CoroutineContext = SupervisorJob() + Dispatchers.Main.immediate
-) : Closeable, CoroutineScope {
-    override val coroutineContext: CoroutineContext = context
-    override fun close() {
-        coroutineContext.cancel()
-    }
-}

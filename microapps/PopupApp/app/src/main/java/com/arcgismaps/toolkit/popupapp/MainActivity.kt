@@ -37,7 +37,6 @@ import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel: MapViewModel by viewModels { MapViewModel.Factory }
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             TestArcGISAuthenticationChallengeHandler(
                 BuildConfig.webMapUser,
@@ -45,15 +44,15 @@ class MainActivity : ComponentActivity() {
             )
         setContent {
             PopupAppTheme {
-                PopupApp(viewModel)
+                PopupApp()
             }
         }
     }
 }
 
 @Composable
-fun PopupApp(viewModel: MapViewModel) {
-    MainScreen(viewModel)
+fun PopupApp() {
+    MainScreen()
 }
 
 class TestArcGISAuthenticationChallengeHandler(
