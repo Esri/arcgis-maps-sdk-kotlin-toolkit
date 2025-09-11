@@ -118,38 +118,6 @@ fun TapLocationScreen(
             }
         }
     ) { contentPadding ->
-        @Composable
-        fun GeoViewScope.GeoViewScopeContent() {
-            val lastMapPoint = remember { Ref<Point>() }
-            lastMapPoint.value = mapPoint ?: lastMapPoint.value
-
-            AnimatedVisibility(
-                calloutVisibleState,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                lastMapPoint.value?.let {
-                    Callout(
-                        modifier = Modifier.wrapContentSize(),
-                        location = it,
-                        leaderPosition = LeaderPosition.Automatic,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    ) {
-                        Column(Modifier.padding(4.dp)) {
-                            HtmlText(
-                                html = "<b>Tapped location</b>:<br>" +
-                                        "<i>x</i>    = ${it.x.roundToInt()}<br>" +
-                                        "<i>y</i>    = ${it.y.roundToInt()}<br>" +
-                                        "<i>wkid</i> = ${it.spatialReference?.wkid}",
-                                htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT,
-                                textColor = MaterialTheme.colorScheme.onBackground,
-                            )
-                        }
-                    }
-                }
-            }
-        }
         if (isGeoViewMapView) {
             MapView(
                 modifier = Modifier
@@ -159,7 +127,14 @@ fun TapLocationScreen(
                 mapViewProxy = viewModel.mapViewProxy,
                 graphicsOverlays = listOf(tapLocationGraphicsOverlay),
                 onSingleTapConfirmed = viewModel::setPoint,
-                content = { GeoViewScopeContent() }
+                content = {
+                    GeoViewScopeContent(
+                        mapPoint = mapPoint,
+                        calloutVisibleState = calloutVisibleState,
+                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                        offset = offset
+                    )
+                }
             )
         } else {
             SceneView(
@@ -170,7 +145,14 @@ fun TapLocationScreen(
                 sceneViewProxy = viewModel.sceneViewProxy,
                 graphicsOverlays = listOf(tapLocationGraphicsOverlay),
                 onSingleTapConfirmed = viewModel::setPoint,
-                content = { GeoViewScopeContent() }
+                content = {
+                    GeoViewScopeContent(
+                        mapPoint = mapPoint,
+                        calloutVisibleState = calloutVisibleState,
+                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                        offset = offset
+                    )
+                }
             )
         }
 
@@ -194,6 +176,51 @@ fun TapLocationScreen(
                         onCalloutOffsetRotationToggled = {
                             rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                         }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Displays the callout at the tapped location on the map or scene.
+ *
+ * This function is responsible for managing callout at the coordinates of the [mapPoint].
+ * It uses animated visibility to show or hide the callout based on the state provided.
+ */
+@Composable
+fun GeoViewScope.GeoViewScopeContent(
+    mapPoint: Point?,
+    calloutVisibleState: MutableTransitionState<Boolean>,
+    rotateOffsetWithGeoView: Boolean,
+    offset: Offset
+) {
+    val lastMapPoint = remember { Ref<Point>() }
+    lastMapPoint.value = mapPoint ?: lastMapPoint.value
+
+    AnimatedVisibility(
+        calloutVisibleState,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        lastMapPoint.value?.let {
+            Callout(
+                modifier = Modifier.wrapContentSize(),
+                location = it,
+                leaderPosition = LeaderPosition.Automatic,
+                rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                offset = offset
+            ) {
+                Column(Modifier.padding(4.dp)) {
+                    HtmlText(
+                        html = "<b>Tapped location</b>:<br>" +
+                                "<i>x</i>    = ${it.x.roundToInt()}<br>" +
+                                "<i>y</i>    = ${it.y.roundToInt()}<br>" +
+                                "<i>wkid</i> = ${it.spatialReference?.wkid}",
+                        htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT,
+                        textColor = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }
