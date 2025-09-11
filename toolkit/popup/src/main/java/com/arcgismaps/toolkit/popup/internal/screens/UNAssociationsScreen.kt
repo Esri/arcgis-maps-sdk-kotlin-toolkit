@@ -40,6 +40,7 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 internal fun UNAssociationsScreen(
     popupStateData: PopupStateData,
     route: NavigationRoute.UNAssociationsView,
+    isNavigationEnabled: Boolean,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
     onNavigateToAssociation: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -58,7 +59,7 @@ internal fun UNAssociationsScreen(
     }
     UtilityAssociations(
         groupResult = groupResult,
-        isNavigationEnabled = true,
+        isNavigationEnabled = isNavigationEnabled,
         onItemClick = { index ->
             val feature = groupResult.associationResults[index].associatedFeature
             // Navigate to the next popup if there are no edits.

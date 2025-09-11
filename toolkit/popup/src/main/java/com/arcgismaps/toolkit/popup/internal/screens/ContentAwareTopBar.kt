@@ -55,6 +55,7 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
  * @param state The [PopupState] that holds the current popup state data.
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
  * @param showCloseIcon Indicates if the close icon should be displayed.
+ * @param isNavigationEnabled Indicates if navigation actions are enabled.
  * @param onDismissRequest The callback to invoke when the close button is clicked.
  * @param modifier The [Modifier] to apply to this layout.
  */

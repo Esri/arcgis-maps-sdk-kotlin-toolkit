@@ -42,6 +42,7 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 internal fun PopupNavHost(
     navController: NavHostController,
     state: PopupState,
+    isNavigationEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -93,6 +94,7 @@ internal fun PopupNavHost(
             UNAssociationsScreen(
                 popupStateData = popupStateData,
                 route = route,
+                isNavigationEnabled = isNavigationEnabled,
                 onNavigateToFeature = { feature ->
                     // Request the state to navigate to the feature.
                     state.navigateTo(backStackEntry, feature)

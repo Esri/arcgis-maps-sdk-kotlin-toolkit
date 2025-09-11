@@ -40,6 +40,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
 import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
@@ -68,27 +69,40 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     }
 
     if (stateData.getActivePopupStateData().initialEvaluation.value) {
-        Popup(popup, stateData, modifier, showCloseIcon = false)
+        Popup(stateData, modifier, showCloseIcon = false)
     }
 }
 
+/**
+ * A composable Popup toolkit component that enables users to see Popup content in a
+ * layer that have been configured externally.
+ *
+ * Popups may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ *
+ * Note : Even though the [Popup] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
+ *
+ * @param popupState The [PopupState] object that holds the state of the Popup.
+ * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
+ * Popup.
+ * @param onDismiss Callback that is invoked when the user clicks the close icon in the top app bar.
+ * @param showCloseIcon Flag to indicate if the close icon should be shown in the top app bar. If true, the [onDismiss]
+ * callback will be invoked when the close icon is clicked. Default is true.
+ * @param isNavigationEnabled Indicates if the navigation is enabled for the popup when there are
+ * [UtilityAssociationsPopupElement]s present. When true, the user can navigate to associated features
+ * and back. If false, this navigation is disabled. Default is true
+ *
+ * @since 200.9.0
+ */
 @Composable
 public fun Popup(
-    popup: Popup,
     popupState: PopupState,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
-    isNavigationEnabled : Boolean = true,
+    isNavigationEnabled : Boolean = true
 ) {
-    // Add the provided state collection to the store.
-    val popupStateData = PopupStateData(popup)
-//    popupState.store.addLast(popupStateData)
-//    LaunchedEffect(popup) {
-//        popupState.evaluateExpressions()
-//    }
-//    val states = rememberStates(popup, popupState.attachments, rememberCoroutineScope())
-//    popupState.setStates(states)
 
     val navController = rememberNavController(popupState)
     popupState.setNavigationCallback { route ->
@@ -126,6 +140,7 @@ public fun Popup(
             PopupNavHost(
                 navController = navController,
                 state = popupState,
+                isNavigationEnabled = isNavigationEnabled,
                 modifier = Modifier.fillMaxSize()
             )
         },
