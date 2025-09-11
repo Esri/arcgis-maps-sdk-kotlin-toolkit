@@ -40,19 +40,9 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.Popup
-import com.arcgismaps.mapping.popup.PopupAttachment
-import com.arcgismaps.mapping.popup.TextPopupElement
-import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
-import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
-import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
 import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
-import kotlinx.coroutines.CoroutineScope
 
 /**
  * A composable Popup toolkit component that enables users to see Popup content in a

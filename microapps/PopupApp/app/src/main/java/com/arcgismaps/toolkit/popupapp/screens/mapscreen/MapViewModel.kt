@@ -20,13 +20,7 @@ import android.app.Application
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.PortalItem
@@ -35,13 +29,7 @@ import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.io.Closeable
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Simple android view model for the Popup app map screen.

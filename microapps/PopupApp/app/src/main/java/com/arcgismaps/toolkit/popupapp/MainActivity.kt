@@ -23,7 +23,6 @@ package com.arcgismaps.toolkit.popupapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -31,7 +30,6 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandl
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MainScreen
-import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MapViewModel
 import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
 class MainActivity : ComponentActivity() {
