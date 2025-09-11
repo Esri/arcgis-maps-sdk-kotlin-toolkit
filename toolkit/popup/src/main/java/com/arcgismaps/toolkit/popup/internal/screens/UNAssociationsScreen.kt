@@ -30,7 +30,7 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 /**
  * Screen that displays the selected group of associations.
  *
- * @param popupStateData The form state data.
+ * @param popupStateData The popup state data.
  * @param route The [NavigationRoute.UNAssociationsView] route data of this screen.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
  * @param onNavigateToAssociation The callback to be invoked when the user selects an association to navigate to.
@@ -61,7 +61,7 @@ internal fun UNAssociationsScreen(
         isNavigationEnabled = true,
         onItemClick = { index ->
             val feature = groupResult.associationResults[index].associatedFeature
-            // Navigate to the next form if there are no edits.
+            // Navigate to the next popup if there are no edits.
             onNavigateToFeature(feature)
         },
         onDetailsClick = { index ->

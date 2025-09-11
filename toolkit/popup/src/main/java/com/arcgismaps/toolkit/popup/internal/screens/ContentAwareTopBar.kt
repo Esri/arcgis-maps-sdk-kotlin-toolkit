@@ -32,8 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,11 +52,10 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
  * A dynamic action bar that adapts its content based on the current navigation state.
  *
  * @param backStackEntry The [NavBackStackEntry] representing the current navigation state.
- * @param state The [PopupState] that holds the current form state data.
+ * @param state The [PopupState] that holds the current popup state data.
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
  * @param showCloseIcon Indicates if the close icon should be displayed.
- * @param onDismissRequest The callback to invoke when the close button is clicked. If the form has
- * unsaved edits, this in invoked after the save or discard action is completed.
+ * @param onDismissRequest The callback to invoke when the close button is clicked.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
@@ -71,15 +68,9 @@ internal fun ContentAwareTopBar(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formData = remember(backStackEntry) { state.getActivePopupStateData() }
-    val scope = rememberCoroutineScope()
-//    val hasEdits by formData.featureForm.hasEdits.collectAsState()
-//    val hasEdits = false
-    // State to hold the pending navigation action when the form has unsaved edits
-    var pendingNavigationAction: NavigationAction by rememberSaveable {
-        mutableStateOf(NavigationAction.None)
-    }
-    // Callback to handle navigation actions based on the form's edit state
+    val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
+
+    // Callback to handle navigation actions
     val onNavigationAction: (NavigationAction) -> Unit = { action ->
         // execute the action immediately
         when (action) {
@@ -97,20 +88,20 @@ internal fun ContentAwareTopBar(
     val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
             entry.destination.hasRoute<NavigationRoute.PopupView>() -> {
-                // Run the navigation action if the current view is the form view
+                // Run the navigation action if the current view is the popup view
                 onNavigationAction(NavigationAction.NavigateBack)
             }
 
             else -> {
-                // Pop the back stack if the current view is not the form view
+                // Pop the back stack if the current view is not the popup view
                 state.popBackStack(backStackEntry)
             }
         }
     }
     // Get the title and subtitle for the top bar based on the current navigation state
-    val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
+    val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, popupStateData)
     val navigationEnabled = when {
-        // If the current destination is the form view, only then check if navigation is enabled
+        // If the current destination is the popup view, only then check if navigation is enabled
         backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
             isNavigationEnabled
         }
@@ -118,7 +109,7 @@ internal fun ContentAwareTopBar(
         else -> true
     }
     Column {
-        FeatureFormTitle(
+        PopupTitle(
             title = title,
             subTitle = subTitle,
             showCloseIcon = showCloseIcon,
@@ -142,17 +133,17 @@ internal fun ContentAwareTopBar(
 @Composable
 private fun getTopBarTitleAndSubtitle(
     backStackEntry: NavBackStackEntry,
-    formData: PopupStateData,
+    popupStateData: PopupStateData,
 ): Pair<String, String> {
-    var formTitle by remember(backStackEntry, formData) {
-        mutableStateOf(formData.popup.title)
+    var popupTitle by remember(backStackEntry, popupStateData) {
+        mutableStateOf(popupStateData.popup.title)
     }
 
     val defaultTitle = stringResource(R.string.none_selected)
     return when {
         backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
             Pair(
-                formTitle,
+                popupTitle,
                 "" // No subtitle for the main Popup view
             )
         }
@@ -160,19 +151,19 @@ private fun getTopBarTitleAndSubtitle(
         backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() -> {
             var title = defaultTitle
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-            (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
+            (popupStateData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedFilterResult?.filter?.let { filter ->
                     title = filter.title
                 }
             }
-            Pair(title, formTitle)
+            Pair(title, popupTitle)
         }
 
         backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
             var title = defaultTitle
             var subTitle = defaultTitle
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-            (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
+            (popupStateData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedGroupResult?.let { group ->
                     title = group.name
                 }
@@ -194,7 +185,7 @@ private fun getTopBarTitleAndSubtitle(
 }
 
 /**
- * Represents the title bar of the form.
+ * Represents the title bar of the popup.
  *
  * @param title The title to display.
  * @param subTitle The subtitle to display.
@@ -206,7 +197,7 @@ private fun getTopBarTitleAndSubtitle(
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-private fun FeatureFormTitle(
+private fun PopupTitle(
     title: String,
     subTitle: String,
     showCloseIcon: Boolean,
@@ -249,7 +240,7 @@ private fun FeatureFormTitle(
             }
             if (showCloseIcon) {
                 IconButton(onClick = onClose) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "close form")
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "close popup")
                 }
             }
         }
@@ -258,8 +249,8 @@ private fun FeatureFormTitle(
 
 @Preview(showBackground = true)
 @Composable
-private fun FeatureFormTitlePreview() {
-    FeatureFormTitle(
+private fun PopupTitlePreview() {
+    PopupTitle(
         title = "Structure Boundary",
         subTitle = "Edit feature attributes",
         showCloseIcon = true,

@@ -18,20 +18,18 @@ package com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
  * State holder for the [UtilityAssociationsElement].
  *
- * @param element The [UtilityAssociationsFormElement] to represent.
+ * @param element The [UtilityAssociationsPopupElement] to represent.
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(

@@ -17,7 +17,7 @@
 package com.arcgismaps.toolkit.popup.internal.navigation
 
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
-//import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
+import com.arcgismaps.toolkit.popup.internal.screens.PopupScreen
 import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterScreen
 import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 import kotlinx.serialization.Serializable
@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
 internal sealed class NavigationRoute {
 
     /**
-     * Represents the [com.arcgismaps.toolkit.popup.internal.screens.PopupScreen].
+     * Represents the [PopupScreen].
      */
     @Serializable
     data object PopupView : NavigationRoute()

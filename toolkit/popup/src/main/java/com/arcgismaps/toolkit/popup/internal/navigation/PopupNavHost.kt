@@ -68,16 +68,16 @@ internal fun PopupNavHost(
                 modifier
             )
             LaunchedEffect(popupStateData) {
-                // Update the active feature form if we navigate back to this screen from another form.
+                // Update the active popup if we navigate back to this screen from another popup.
                 state.updateActivePopup()
             }
         }
 
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
-            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
+            val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
             UNAssociationsFilterScreen(
-                popupStateData = formData,
+                popupStateData = popupStateData,
                 route = route,
                 onGroupSelected = { stateId ->
                     val newRoute = NavigationRoute.UNAssociationsView(stateId = stateId)
@@ -89,9 +89,9 @@ internal fun PopupNavHost(
 
         composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
-            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
+            val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
             UNAssociationsScreen(
-                popupStateData = formData,
+                popupStateData = popupStateData,
                 route = route,
                 onNavigateToFeature = { feature ->
                     // Request the state to navigate to the feature.
@@ -104,7 +104,7 @@ internal fun PopupNavHost(
                 },
                 modifier = Modifier.fillMaxSize()
             )
-            LaunchedEffect(formData) {
+            LaunchedEffect(popupStateData) {
                 // Update the active popup when we navigate back to this screen from another
                 // popup.
                 state.updateActivePopup()
@@ -113,9 +113,9 @@ internal fun PopupNavHost(
 
         composable<NavigationRoute.UNAssociationDetailView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationDetailView>()
-            val formData = remember(backStackEntry) { state.getActivePopupStateData() }
+            val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
             // Get the selected UtilityAssociationsElementState from the state collection
-            val utilityAssociationsElementState = formData.stateCollection[route.stateId]
+            val utilityAssociationsElementState = popupStateData.stateCollection[route.stateId]
                 // guard against null value
                 as? UtilityAssociationsElementState ?: return@composable
             // Display the association details

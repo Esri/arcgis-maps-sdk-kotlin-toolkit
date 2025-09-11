@@ -47,18 +47,3 @@ internal class FieldsElementState(
         id = createId()
     )
 }
-
-//internal fun createFieldsElementState(
-//    element: FieldsPopupElement,
-//    popup: Popup
-//): FieldsElementState {
-//    val fieldNames = element.fields.map { it.label }
-//    val fieldsToFormattedValuesMap = fieldNames.zip(element.formattedValues).toMap()
-//    return FieldsElementState(
-//        title = element.title,
-//        description = element.description,
-//        fieldsToFormattedValuesMap,
-//        id = PopupElementState.createId()
-//    )
-//}
-

@@ -42,14 +42,3 @@ internal class TextElementState(
         id = createId()
     )
 }
-
-//internal fun createTextElementState(
-//    element: TextPopupElement,
-//    popup: Popup
-//): TextElementState {
-//    return TextElementState(
-//        value = element.text,
-//        id = PopupElementState.createId()
-//    )
-//}
-

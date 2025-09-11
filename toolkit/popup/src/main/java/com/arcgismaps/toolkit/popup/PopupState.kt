@@ -10,12 +10,20 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
+import com.arcgismaps.mapping.popup.FieldsPopupElement
+import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
-import com.arcgismaps.mapping.popup.PopupExpressionEvaluation
+import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
+import com.arcgismaps.toolkit.popup.internal.element.media.MediaElementState
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.popup.internal.navigation.lifecycleIsResumed
 import kotlinx.coroutines.CoroutineScope
@@ -27,9 +35,6 @@ public class PopupState(@Stable public val popup: Popup) {
     private val store: ArrayDeque<PopupStateData> = ArrayDeque()
 
     private lateinit var coroutineScope: CoroutineScope
-
-    internal val attachments: MutableList<PopupAttachment> = mutableListOf()
-
 
     /**
      * A navigation callback that is called when navigating to a new [Popup]. This should
@@ -62,8 +67,8 @@ public class PopupState(@Stable public val popup: Popup) {
         this.coroutineScope = scope
         val popupStateData = PopupStateData(popup)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            popupStateData.evaluateExpressions()
-            val states = rememberStates(
+            val attachments = popupStateData.evaluateExpressionsAndGetAttachments()
+            val states = createStates(
                 popup = popup,
                 attachments = attachments,
                 coroutineScope = coroutineScope
@@ -96,26 +101,21 @@ public class PopupState(@Stable public val popup: Popup) {
      * called after navigating to a new popup or popping the current popup from the stack.
      *
      */
-    internal suspend fun updateActivePopup() {
+    internal fun updateActivePopup() {
         val popupStateData = getActivePopupStateData()
-        // Check if the active feature form is different from the current form.
+        // Check if the active popup is different from the current popup.
         if (_activePopup.value != popupStateData.popup) {
             _activePopup.value = popupStateData.popup
-//            // refresh the feature to ensure the latest data is loaded.
-//            formStateData.featureForm.feature.refresh()
-//            if (formStateData.initialEvaluation.value.not()) {
-//                formStateData.evaluateExpressions()
-//            }
         }
     }
 
     /**
-     * Adds a new [FeatureForm] to the local stack and navigates to it. [updateActiveFeatureForm]
-     * must be called after this to update the [activeFeatureForm], preferably after the navigation
+     * Adds a new [Popup] to the local stack and navigates to it. [updateActivePopup]
+     * must be called after this to update the [activePopup], preferably after the navigation
      * is complete.
      *
      * @param backStackEntry the [NavBackStackEntry] of the current destination.
-     * @param feature the [ArcGISFeature] to create the [FeatureForm] for.
+     * @param feature the [ArcGISFeature] to create the [Popup] for.
      */
     @MainThread
     internal fun navigateTo(backStackEntry: NavBackStackEntry, feature: ArcGISFeature): Boolean {
@@ -125,8 +125,8 @@ public class PopupState(@Stable public val popup: Popup) {
         val popup = feature.toPopup()
         val popupStateData = PopupStateData(popup)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            popupStateData.evaluateExpressions()
-            val states = rememberStates(
+            val attachments = popupStateData.evaluateExpressionsAndGetAttachments()
+            val states = createStates(
                 popup = popup,
                 attachments = attachments,
                 coroutineScope = coroutineScope
@@ -166,7 +166,7 @@ public class PopupState(@Stable public val popup: Popup) {
                 } else {
                     // Remove the current popup from the stack.
                     store.removeLast()
-                    // Navigate back to the popup view after popping the current form.
+                    // Navigate back to the popup view after popping the current popup.
                     navigate()
                 }
             }
@@ -216,30 +216,93 @@ internal data class PopupStateData(
     }
 
     /**
-     * Evaluates the expressions for the [popup] and returns the result. After a successful
+     * Evaluates the expressions for the [popup] and returns all the attachments. After a successful
      * evaluation, the [initialEvaluation] is set to true. While this function is running, the
      * [isEvaluatingExpressions] will be true.
      */
-    internal suspend fun evaluateExpressions() : Result<List<PopupExpressionEvaluation>> {
+    internal suspend fun evaluateExpressionsAndGetAttachments() : List<PopupAttachment>  {
         try {
             isEvaluatingExpressions.value = true
-            return popup.evaluateExpressions().onSuccess {
+            val attachments = mutableListOf<PopupAttachment>()
+            popup.evaluateExpressions().onSuccess {
                 val element = popup.evaluatedElements
                     .filterIsInstance<AttachmentsPopupElement>()
                     .firstOrNull()
 
-                // make a copy of the attachments when first fetched.
-//                attachments.clear()
-//                element?.fetchAttachments()?.onSuccess {
-//                    attachments.addAll(element.attachments)
-//                }
+                element?.fetchAttachments()?.onSuccess {
+                    attachments.addAll(element.attachments)
+                }
                 // Set the initial evaluation to true after the first successful evaluation.
                 initialEvaluation.value = true
             }
+            return attachments
         } finally {
             isEvaluatingExpressions.value = false
         }
     }
+}
+
+/**
+ * Creates state objects for all the supported element types that are part of the
+ * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
+ *
+ * @param popup the [Popup] to create the states for.
+ * @return returns the [PopupElementStateCollection] created.
+ */
+internal fun createStates(
+    popup: Popup,
+    attachments: List<PopupAttachment>,
+    coroutineScope: CoroutineScope
+): PopupElementStateCollection {
+    val states = mutablePopupElementStateCollection()
+    popup.evaluatedElements.forEach { element ->
+        when (element) {
+            is TextPopupElement -> {
+                states.add(
+                    element,
+                    TextElementState(element = element, popup = popup)
+                )
+            }
+
+            is AttachmentsPopupElement -> {
+                states.add(
+                    element,
+                    AttachmentsElementState(
+                        attachmentPopupElement = element,
+                        attachments = attachments
+                    )
+                )
+            }
+
+            is FieldsPopupElement -> {
+                states.add(
+                    element,
+                    FieldsElementState(element = element, popup = popup)
+                )
+            }
+
+            is MediaPopupElement -> {
+                states.add(
+                    element,
+                    MediaElementState(element = element, popup = popup)
+                )
+            }
+
+            is UtilityAssociationsPopupElement -> {
+                states.add(
+                    element,
+                    UtilityAssociationsElementState(element, coroutineScope)
+                )
+            }
+
+            else -> {
+                // TODO remove for release
+                println("encountered element of type ${element::class.java}")
+            }
+        }
+    }
+
+    return states
 }
 
 internal fun ArcGISFeature.toPopup(): Popup {

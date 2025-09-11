@@ -25,7 +25,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,13 +42,27 @@ internal fun MediaPopupElement(
     state: MediaElementState,
     onClickedMedia: (ViewableFile) -> Unit
 ) {
-    MediaPopupElement(
-        title = state.title,
-        description = state.description,
-        stateId = state.id,
-        media = state.media,
-        onClickedMedia = onClickedMedia
-    )
+    val scope = rememberCoroutineScope()
+    val mediaFolder = MediaElementDefaults.mediaFolder
+    val chartParams = MediaElementDefaults.chartParams
+    val context = LocalContext.current
+    LaunchedEffect(state) {
+        state.init(
+            scope = scope,
+            mediaFolder = mediaFolder,
+            chartParams = chartParams,
+            context = context
+        )
+    }
+    if (state.isInitialized.value) {
+        MediaPopupElement(
+            title = state.title,
+            description = state.description,
+            stateId = state.id,
+            media = state.media,
+            onClickedMedia = onClickedMedia
+        )
+    }
 }
 
 @Composable

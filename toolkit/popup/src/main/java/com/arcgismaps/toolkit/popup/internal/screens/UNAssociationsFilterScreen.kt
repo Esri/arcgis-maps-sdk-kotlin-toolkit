@@ -23,16 +23,16 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationFilter
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.popup.PopupStateData
 
 /**
- * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
+ * Screen that displays the selected filter for a [UtilityAssociationsPopupElement].
  *
- * @param popupStateData The form state data.
+ * @param popupStateData The popup state data.
  * @param route The [NavigationRoute.UNFilterView] route data of this screen.
  * @param onGroupSelected The callback that is invoked when a group is selected.
  * @param modifier The modifier to be applied to the layout.

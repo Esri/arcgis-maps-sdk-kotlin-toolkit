@@ -38,7 +38,7 @@ internal sealed class NavigationAction(val value: Int) : Parcelable {
     data object NavigateBack : NavigationAction(1)
 
     /**
-     * Indicates an action to dismiss the form.
+     * Indicates an action to dismiss the popup.
      */
     @Parcelize
     data object Dismiss : NavigationAction(2)

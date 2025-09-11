@@ -55,39 +55,6 @@ internal class AttachmentsElementState(
         title = attachmentPopupElement.title,
         attachments = attachments.map { PopupAttachmentState(it) }
     )
-
-    companion object {
-        fun Saver(
-            element: AttachmentsPopupElement,
-            attachments: List<PopupAttachment>
-        ): Saver<AttachmentsElementState, Any> = Saver(
-            save = { null },
-            restore = {
-                AttachmentsElementState(
-                    element,
-                    attachments
-                )
-            }
-        )
-
-    }
-}
-
-@Composable
-internal fun rememberAttachmentsElementState(
-    element: AttachmentsPopupElement,
-    popup: Popup,
-    attachments: List<PopupAttachment>
-): AttachmentsElementState {
-    return rememberSaveable(
-        inputs = arrayOf(popup, element),
-        saver = AttachmentsElementState.Saver(element, attachments)
-    ) {
-        AttachmentsElementState(
-            element,
-            attachments
-        )
-    }
 }
 
 /**
