@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -122,6 +123,10 @@ import java.time.Instant
  * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
  * @since 200.4.0
  */
+@Deprecated(
+    message = "Use the SceneView function with `grid` instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 public fun SceneView(
     arcGISScene: ArcGISScene,
@@ -133,6 +138,141 @@ public fun SceneView(
     sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    cameraController: CameraController = remember { GlobeCameraController() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    spaceEffect: SpaceEffect = SpaceEffect.Stars,
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
+    sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: (@Composable SceneViewScope.() -> Unit)? = null
+) {
+    // Just call through to the new SceneView function that takes grid
+    SceneView(
+        arcGISScene = arcGISScene,
+        modifier = modifier,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        graphicsOverlays = graphicsOverlays,
+        sceneViewProxy = sceneViewProxy,
+        sceneViewInteractionOptions = sceneViewInteractionOptions,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        grid = null,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        cameraController = cameraController,
+        analysisOverlays = analysisOverlays,
+        imageOverlays = imageOverlays,
+        atmosphereEffect = atmosphereEffect,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        spaceEffect = spaceEffect,
+        sunTime = sunTime,
+        sunLighting = sunLighting,
+        ambientLightColor = ambientLightColor,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onDrawStatusChanged = onDrawStatusChanged,
+        content = content
+    )
+}
+/**
+ * A compose equivalent of the view-based [SceneView].
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param modifier Modifier to be applied to the composable SceneView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
+ * @param graphicsOverlays graphics overlays used by this composable SceneView
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable SceneView
+ * @param grid represents the display of a coordinate system [Grid] on the composable SceneView
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable SceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
+ * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable SceneView
+ * @param atmosphereEffect the effect applied to the scene's atmosphere
+ * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
+ * @param spaceEffect the visual effect of outer space in the composable SceneView
+ * @param sunTime the position of the sun in the composable SceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the composable SceneView
+ * @param ambientLightColor the color of the composable SceneView's ambient light
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
+ * @param onDown lambda invoked when the user first presses on the composable SceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable SceneView
+ * @param onDoubleTap lambda invoked the user double taps on the composable SceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param content the content of the composable SceneView
+ * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-scene/">Display a scene tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
+ * @since 300.0.0
+ */
+@Composable
+public fun SceneView(
+    arcGISScene: ArcGISScene,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    sceneViewProxy: SceneViewProxy? = null,
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    grid: Grid? = null,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
@@ -178,6 +318,7 @@ public fun SceneView(
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties
+                it.grid = grid
                 it.setTimeExtent(timeExtent)
                 it.cameraController = cameraController
                 it.atmosphereEffect = atmosphereEffect
