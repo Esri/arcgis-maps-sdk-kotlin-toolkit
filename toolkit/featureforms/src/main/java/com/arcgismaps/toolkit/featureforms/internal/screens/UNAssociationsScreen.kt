@@ -128,6 +128,12 @@ internal fun UNAssociationsScreen(
             // show the details sheet
             showDetails = true
         },
+        onDelete = { isGroupEmpty ->
+            if (isGroupEmpty) {
+                // If the group is empty after deletion, navigate back to the filter view
+                onBack()
+            }
+        },
         modifier = modifier
             .padding(16.dp)
             .fillMaxSize()
