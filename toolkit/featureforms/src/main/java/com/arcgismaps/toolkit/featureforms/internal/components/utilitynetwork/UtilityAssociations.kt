@@ -145,8 +145,11 @@ internal fun UtilityAssociationFilter(
  * Displays the provided list of associations that are part of the [UtilityAssociationGroupResult].
  *
  * @param groupResult The [UtilityAssociationGroupResult] to display.
+ * @param isNavigationEnabled Whether navigation to the associated feature is enabled.
  * @param onItemClick A callback that is called when an association is clicked.
  * @param onDetailsClick A callback that is called when the details icon is clicked.
+ * @param onDelete A callback that is called when an association is deleted. The callback provides
+ * a boolean indicating whether the group is empty after deletion.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
@@ -155,6 +158,7 @@ internal fun UtilityAssociations(
     isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
+    onDelete: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -184,6 +188,7 @@ internal fun UtilityAssociations(
                         },
                         onDelete = {
                             groupResult.delete(info.association)
+                            onDelete(groupResult.associationResults.isEmpty())
                         },
                         modifier = Modifier.animateItem()
                     )
