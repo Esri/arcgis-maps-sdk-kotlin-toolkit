@@ -24,12 +24,15 @@ import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.test.espresso.Espresso
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
@@ -363,5 +366,141 @@ class UtilityAssociationsFormElementTests {
         discardButton.performClick()
         // Verify the initial association is displayed again
         firstElement.assertIsDisplayed()
+    }
+
+    /**
+     * Test case 12.6
+     *
+     * Given a `FeatureForm` with a `UtilityAssociationsFormElement`
+     * When the user deletes an associations
+     * Then the associations are removed from the list of associations
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-126-delete-association
+     */
+    @Test
+    fun testDeleteAssociations() = runTest {
+        val groupLayer = map.operationalLayers.first()
+        val layer = groupLayer.subLayerContents.value.find {
+            it.name == "Electric Distribution Device"
+        } as FeatureLayer?
+        assertThat(layer).isNotNull()
+        // Query for the feature with object ID 3321
+        val queryResult = layer!!.featureTable!!.queryFeatures(
+            QueryParameters().apply {
+                objectIds.add(3321)
+            }
+        ).getOrNull()
+        assertThat(queryResult).isNotNull()
+        // Get the feature from the query result
+        val feature = queryResult!!.firstOrNull() as? ArcGISFeature
+        assertThat(feature).isNotNull()
+        // Create the feature form and state
+        val featureForm = FeatureForm(feature!!)
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
+        // Set the content of the compose test rule to the feature form
+        composeTestRule.setContent {
+            FeatureForm(featureFormState = featureFormState)
+        }
+
+        // Find the utility associations form element
+        val element = featureForm.elements.first {
+            it is UtilityAssociationsFormElement
+        } as UtilityAssociationsFormElement
+        // Wait for the associations to load
+        composeTestRule.waitUntil(timeoutMillis = 20_000) {
+            element.associationsFilterResults.isNotEmpty()
+        }
+
+        // Find the associations element in the UI
+        val lazyColumnNode = composeTestRule.onNodeWithContentDescription("lazy column")
+        lazyColumnNode.performScrollToNode(hasText("Associations")).assertIsDisplayed()
+        // Click on the connected filter
+        val connectedNode = composeTestRule.onNodeWithText("Connected").assertIsDisplayed()
+        connectedNode.performClick()
+
+        // Verify the groups are displayed
+        var listView = composeTestRule.onNode(hasScrollAction())
+        // Click on the "Electric Distribution Device" group
+        listView.onChildWithText("Electric Distribution Device").assertIsDisplayed().performClick()
+        // Update the list view reference to the current one
+        listView = composeTestRule.onNode(hasScrollAction())
+
+        // Find the association with the title "Transformer"
+        var transformer = listView.onChildWithText("Transformer").assertIsDisplayed()
+        val detailsIcon = transformer.onChildWithContentDescription("details")
+        // Assert the details icon is displayed and has a click action
+        detailsIcon.assertIsDisplayed().assertHasClickAction()
+        detailsIcon.performClick()
+
+        // -- This section tests the delete association button --
+        // Find the dialog, there should only be one
+        var dialog = composeTestRule.onNode(isDialog())
+        dialog.assertIsDisplayed()
+        var removeButton = dialog.onChildWithText("Remove Association", recurse = true)
+        removeButton.assertIsDisplayed().assertHasClickAction()
+        removeButton.performClick()
+
+        // Find and click the cancel button
+        val cancelButton = composeTestRule.onNodeWithText("Cancel").assertIsDisplayed().performClick()
+        // Verify the dialog is dismissed by asserting the cancel button does not exist
+        cancelButton.assertDoesNotExist()
+
+        // Click the remove button again
+        removeButton.performClick()
+        // Find the confirmation dialog
+        composeTestRule.onNodeWithText("Remove").performClick()
+        // Verify the dialogs are dismissed
+        composeTestRule.onNodeWithText("Remove").assertDoesNotExist()
+        dialog.assertDoesNotExist()
+        // Verify the association is removed from the list
+        composeTestRule.onNodeWithText("Transformer").assertDoesNotExist()
+        // Also verify we are back at the group level since the last association was deleted
+        composeTestRule.onNodeWithText("Connected").assertIsDisplayed()
+
+        // Verify the save, discard buttons are shown
+        composeTestRule.onNodeWithText("Save").assertIsDisplayed().assertHasClickAction()
+        composeTestRule.onNodeWithText("Discard").assertIsDisplayed().performClick()
+        // Wait until the discard action is complete which is asynchronous
+        composeTestRule.waitUntil {
+            composeTestRule.onNode(hasScrollAction()).isDisplayed()
+        }
+        // Verify the groups are displayed
+        listView = composeTestRule.onNode(hasScrollAction())
+        // Verify the "Electric Distribution Device" group is displayed
+        listView.onChildWithText("Electric Distribution Device").isDisplayed()
+
+        // -- This section tests the swipe to delete --
+        listView.onChildWithText("Electric Distribution Device").performClick()
+        // Update the list view reference to the current one
+        listView = composeTestRule.onNode(hasScrollAction())
+        transformer = listView.onChildWithText("Transformer").assertIsDisplayed()
+        transformer.performTouchInput {
+            this.swipeLeft()
+        }
+        // Find and click the confirmation dialog remove button, there should only be one dialog
+        dialog = composeTestRule.onNode(isDialog())
+        dialog.assertIsDisplayed()
+        dialog.onChildWithText("Cancel", recurse = true).assertIsDisplayed().performClick()
+        dialog.assertDoesNotExist()
+
+        // Swipe left again to delete
+        transformer.performTouchInput {
+            this.swipeLeft()
+        }
+        // Click the remove button this time
+        dialog.assertIsDisplayed()
+        dialog.onChildWithText("Remove", recurse = true).assertIsDisplayed().performClick()
+        // Verify the dialog is dismissed
+        dialog.assertDoesNotExist()
+        // Verify the association is removed from the list
+        composeTestRule.onNodeWithText("Transformer").assertDoesNotExist()
+        // Also verify we are back at the group level since the last association was deleted
+        composeTestRule.onNodeWithText("Connected").assertIsDisplayed()
+        // Verify the save, discard buttons are also shown
+        composeTestRule.onNodeWithText("Save").assertIsDisplayed().assertHasClickAction()
+        composeTestRule.onNodeWithText("Discard").assertIsDisplayed().assertHasClickAction()
     }
 }
