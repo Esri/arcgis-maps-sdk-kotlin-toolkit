@@ -83,22 +83,22 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TapLocationScreen(
-    viewModel: MapViewModel,
+    viewModel: GeoViewModel,
     screenTitle: String,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit
 ) {
-    val mapPoint = viewModel.point.collectAsState().value
+    val point = viewModel.point.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
     val tapLocationGraphicsOverlay = viewModel.tapLocationGraphicsOverlay.collectAsState().value
-    val isGeoViewMapView = viewModel.isGeoViewMapView.collectAsState().value
+    val geoViewType = viewModel.geoViewType.collectAsState().value
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // animate to a visible transition state
     val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
-        targetState = mapPoint != null && calloutVisibility
+        targetState = point != null && calloutVisibility
     }
 
     Scaffold(
@@ -118,7 +118,7 @@ fun TapLocationScreen(
             }
         }
     ) { contentPadding ->
-        if (isGeoViewMapView) {
+        if (geoViewType == GeoViewType.MapViewType) {
             MapView(
                 modifier = Modifier
                     .fillMaxSize()
@@ -129,7 +129,7 @@ fun TapLocationScreen(
                 onSingleTapConfirmed = viewModel::setPoint,
                 content = {
                     GeoViewScopeContent(
-                        mapPoint = mapPoint,
+                        mapPoint = point,
                         calloutVisibleState = calloutVisibleState,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
@@ -147,7 +147,7 @@ fun TapLocationScreen(
                 onSingleTapConfirmed = viewModel::setPoint,
                 content = {
                     GeoViewScopeContent(
-                        mapPoint = mapPoint,
+                        mapPoint = point,
                         calloutVisibleState = calloutVisibleState,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
@@ -164,11 +164,11 @@ fun TapLocationScreen(
             ) {
                 Box(Modifier.navigationBarsPadding()) {
                     CalloutOptions(
-                        isGeoViewMapView = isGeoViewMapView,
+                        isGeoViewMapView = geoViewType == GeoViewType.MapViewType,
                         calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        mapPoint = mapPoint,
+                        mapPoint = point,
                         onOffsetChange = { viewModel.setOffset(it) },
                         onGeoViewToggled = { viewModel.toggleGeoView() },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },

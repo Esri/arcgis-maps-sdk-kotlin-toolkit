@@ -68,7 +68,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureScreen(
-    viewModel: MapViewModel,
+    viewModel: GeoViewModel,
     screenTitle: String,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit

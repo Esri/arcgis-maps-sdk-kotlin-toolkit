@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MapViewModel : ViewModel() {
+class GeoViewModel : ViewModel() {
 
     val mapViewProxy = MapViewProxy()
     val sceneViewProxy = SceneViewProxy()
@@ -73,8 +73,8 @@ class MapViewModel : ViewModel() {
     }
 
 
-    private val _isGeoViewMapView = MutableStateFlow(false)
-    val isGeoViewMapView: StateFlow<Boolean> = _isGeoViewMapView.asStateFlow()
+    private val _geoViewType = MutableStateFlow<GeoViewType>(GeoViewType.SceneViewType)
+    val geoViewType: StateFlow<GeoViewType> = _geoViewType.asStateFlow()
 
     private val _point = MutableStateFlow<Point?>(null)
     val point: StateFlow<Point?> = _point.asStateFlow()
@@ -107,7 +107,7 @@ class MapViewModel : ViewModel() {
     }
 
     fun setPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
-        if (_isGeoViewMapView.value)
+        if (_geoViewType.value == GeoViewType.MapViewType)
             _point.value = singleTapConfirmedEvent.mapPoint
         else
             _point.value = sceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
@@ -123,7 +123,10 @@ class MapViewModel : ViewModel() {
 
     fun toggleGeoView() {
         clearPoint()
-        _isGeoViewMapView.value = !_isGeoViewMapView.value
+        _geoViewType.value = if (_geoViewType.value == GeoViewType.MapViewType)
+            GeoViewType.SceneViewType
+        else
+            GeoViewType.MapViewType
     }
 
     fun clearTapLocationAndGraphic() {
@@ -170,4 +173,8 @@ class MapViewModel : ViewModel() {
             }
         }
     }
+}
+sealed class GeoViewType {
+    object MapViewType : GeoViewType()
+    object SceneViewType : GeoViewType()
 }

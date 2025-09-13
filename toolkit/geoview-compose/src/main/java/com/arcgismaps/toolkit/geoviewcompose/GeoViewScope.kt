@@ -530,75 +530,82 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 val geoViewSize = IntSize(geoView.width, geoView.height)
                 val anchor = DoubleXY(leaderScreenCoordinate.x, leaderScreenCoordinate.y)
 
-                // Check sides and nudge the leader accordingly:
-                // If Right overflow:
-                if (anchor.x + bounds.right > geoViewSize.width - (if (insetsX > 0) viewInsetRight else 0)) {
-                    moveLeader(LeaderMoveDirection.Right, actualLeaderPosition, geoViewSize, bounds, anchor)?.let {
-                        onActualLeaderPositionChanged(it)
-                    }
+                val direction = when {
+                    // If Right overflow:
+                    anchor.x + bounds.right > geoViewSize.width - (if (insetsX > 0) viewInsetRight else 0) -> LeaderMoveDirection.Right
+                    // If Left overflow:
+                    anchor.x + bounds.left < if (insetsX > 0) viewInsetLeft else 0 -> LeaderMoveDirection.Left
+                    // If Bottom overflow:
+                    anchor.y + bounds.bottom > geoViewSize.height - (if (insetsY > 0) viewInsetBottom else 0) -> LeaderMoveDirection.Down
+                    // If Top overflow:
+                    anchor.y + bounds.top < if (insetsY > 0) viewInsetTop else 0 -> LeaderMoveDirection.Up
+                    else -> null
                 }
-                // If Left overflow:
-                if (anchor.x + bounds.left < if (insetsX > 0) viewInsetLeft else 0) {
-                    moveLeader(LeaderMoveDirection.Left, actualLeaderPosition, geoViewSize, bounds, anchor)?.let {
-                        onActualLeaderPositionChanged(it)
-                    }
-                }
-                // If Bottom overflow:
-                if (anchor.y + bounds.bottom > geoViewSize.height - (if (insetsY > 0) viewInsetBottom else 0)) {
-                    moveLeader(LeaderMoveDirection.Down, actualLeaderPosition, geoViewSize, bounds, anchor)?.let {
-                        onActualLeaderPositionChanged(it)
-                    }
-                }
-                // If Top overflow:
-                if (anchor.y + bounds.top < if (insetsY > 0) viewInsetTop else 0) {
-                    moveLeader(LeaderMoveDirection.Up, actualLeaderPosition, geoViewSize, bounds, anchor)?.let {
-                        onActualLeaderPositionChanged(it)
+
+                direction?.let {
+                    // Nudge the leader according to the computed direction
+                    moveLeader(it, actualLeaderPosition, geoViewSize, bounds, anchor)?.let { newPosition ->
+                        onActualLeaderPositionChanged(newPosition)
                     }
                 }
             }
 
             // Compute the calloutContainerPlaceable coords such that the leader tip coincides with leaderScreenCoordinate:
-            val xCoords: Int
-            val yCoords: Int
-            when (actualLeaderPosition) {
+            val (xCoords, yCoords) = when (actualLeaderPosition) {
                 LeaderPosition.LowerMiddle -> {
-                    xCoords = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2),
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
                 }
 
                 LeaderPosition.UpperMiddle -> {
-                    xCoords = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-                    yCoords = leaderScreenCoordinate.y.toInt()
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2),
+                        leaderScreenCoordinate.y.toInt()
+                    )
                 }
 
                 LeaderPosition.RightMiddle -> {
-                    xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    )
                 }
 
                 LeaderPosition.LeftMiddle -> {
-                    xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords = leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt() - (calloutContainerPlaceable.height / 2)
+                    )
                 }
 
                 LeaderPosition.UpperLeftCorner -> {
-                    xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords = leaderScreenCoordinate.y.toInt()
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt()
+                    )
                 }
 
                 LeaderPosition.UpperRightCorner -> {
-                    xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords = leaderScreenCoordinate.y.toInt()
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt()
+                    )
                 }
 
                 LeaderPosition.LowerLeftCorner -> {
-                    xCoords = leaderScreenCoordinate.x.toInt()
-                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    Pair(
+                        leaderScreenCoordinate.x.toInt(),
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
                 }
 
                 LeaderPosition.LowerRightCorner -> {
-                    xCoords = leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width
-                    yCoords = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    Pair(
+                        leaderScreenCoordinate.x.toInt() - calloutContainerPlaceable.width,
+                        leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
+                    )
                 }
 
                 LeaderPosition.Automatic -> error("Actual leader position must never be Automatic")
@@ -1194,49 +1201,62 @@ private fun moveLeader(
     bounds: RectF,
     anchorPoint: DoubleXY
 ): LeaderPosition? {
+    val geoViewWidthF = geoViewSize.width.toFloat()
+    val geoViewHeightF = geoViewSize.height.toFloat()
+    val x = anchorPoint.x.toFloat()
+    val y = anchorPoint.y.toFloat()
+
     // Callout is 'narrow' if it's less than half the width of the GeoView
-    val narrowCallout = bounds.width() <= geoViewSize.width / 2f
+    val narrowCallout = bounds.width() <= geoViewWidthF / 2f
     // Callout is 'short' if it's less than half the height of the GeoView
-    val shortCallout = bounds.height() <= geoViewSize.height / 2f
+    val shortCallout = bounds.height() <= geoViewHeightF / 2f
+
+    val oneThirdWidth = geoViewWidthF / 3f
+    val halfWidth = geoViewWidthF / 2f
+    val twoThirdWidth = geoViewWidthF * 2f / 3f
+
+    val oneThirdHeight = geoViewHeightF / 3f
+    val halfHeight = geoViewHeightF / 2f
+    val twoThirdHeight = geoViewHeightF * 2f / 3f
 
     return when (direction) {
         // Bottom edge of callout is below bottom edge of map.
         is LeaderMoveDirection.Down -> when (actualLeaderPosition) {
-            LeaderPosition.UpperLeftCorner -> if (shortCallout || anchorPoint.y > geoViewSize.height / 3f) LeaderPosition.LeftMiddle else null
-            LeaderPosition.LeftMiddle -> if (shortCallout || anchorPoint.y > geoViewSize.height * 2f / 3f) LeaderPosition.LowerLeftCorner else null
-            LeaderPosition.UpperMiddle -> if (shortCallout || anchorPoint.y > geoViewSize.height / 2f) LeaderPosition.LowerMiddle else null
-            LeaderPosition.UpperRightCorner -> if (shortCallout || anchorPoint.y > geoViewSize.height / 3f) LeaderPosition.RightMiddle else null
-            LeaderPosition.RightMiddle -> if (shortCallout || anchorPoint.y > geoViewSize.height * 2f / 3f) LeaderPosition.LowerRightCorner else null
+            LeaderPosition.UpperLeftCorner -> if (shortCallout || y > oneThirdHeight) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LeftMiddle -> if (shortCallout || y > twoThirdHeight) LeaderPosition.LowerLeftCorner else null
+            LeaderPosition.UpperMiddle -> if (shortCallout || y > halfHeight) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperRightCorner -> if (shortCallout || y > oneThirdHeight) LeaderPosition.RightMiddle else null
+            LeaderPosition.RightMiddle -> if (shortCallout || y > twoThirdHeight) LeaderPosition.LowerRightCorner else null
             else -> null
         }
 
         // Top edge of callout is above top edge of map.
         is LeaderMoveDirection.Up -> when (actualLeaderPosition) {
-            LeaderPosition.LowerLeftCorner -> if (shortCallout || anchorPoint.y < geoViewSize.height * 2f / 3f) LeaderPosition.LeftMiddle else null
-            LeaderPosition.LeftMiddle -> if (shortCallout || anchorPoint.y < geoViewSize.height / 3f) LeaderPosition.UpperLeftCorner else null
-            LeaderPosition.LowerMiddle -> if (shortCallout || anchorPoint.y < geoViewSize.height / 2f) LeaderPosition.UpperMiddle else null
-            LeaderPosition.LowerRightCorner -> if (shortCallout || anchorPoint.y < geoViewSize.height * 2f / 3f) LeaderPosition.RightMiddle else null
-            LeaderPosition.RightMiddle -> if (shortCallout || anchorPoint.y < geoViewSize.height / 3f) LeaderPosition.UpperRightCorner else null
+            LeaderPosition.LowerLeftCorner -> if (shortCallout || y < twoThirdHeight) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LeftMiddle -> if (shortCallout || y < oneThirdHeight) LeaderPosition.UpperLeftCorner else null
+            LeaderPosition.LowerMiddle -> if (shortCallout || y < halfHeight) LeaderPosition.UpperMiddle else null
+            LeaderPosition.LowerRightCorner -> if (shortCallout || y < twoThirdHeight) LeaderPosition.RightMiddle else null
+            LeaderPosition.RightMiddle -> if (shortCallout || y < oneThirdHeight) LeaderPosition.UpperRightCorner else null
             else -> null
         }
 
         // Left edge of callout is left of left edge of map.
         is LeaderMoveDirection.Left -> when (actualLeaderPosition) {
-            LeaderPosition.UpperRightCorner -> if (narrowCallout || anchorPoint.x < geoViewSize.width * 2f / 3f) LeaderPosition.UpperMiddle else null
-            LeaderPosition.RightMiddle -> if (narrowCallout || anchorPoint.x < geoViewSize.width / 2f) LeaderPosition.LeftMiddle else null
-            LeaderPosition.LowerRightCorner -> if (narrowCallout || anchorPoint.x < geoViewSize.width * 2f / 3f) LeaderPosition.LowerMiddle else null
-            LeaderPosition.UpperMiddle -> if (narrowCallout || anchorPoint.x < geoViewSize.width / 3f) LeaderPosition.UpperLeftCorner else null
-            LeaderPosition.LowerMiddle -> if (narrowCallout || anchorPoint.x < geoViewSize.width / 3f) LeaderPosition.LowerLeftCorner else null
+            LeaderPosition.UpperRightCorner -> if (narrowCallout || x < twoThirdWidth) LeaderPosition.UpperMiddle else null
+            LeaderPosition.RightMiddle -> if (narrowCallout || x < halfWidth) LeaderPosition.LeftMiddle else null
+            LeaderPosition.LowerRightCorner -> if (narrowCallout || x < twoThirdWidth) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperMiddle -> if (narrowCallout || x < oneThirdWidth) LeaderPosition.UpperLeftCorner else null
+            LeaderPosition.LowerMiddle -> if (narrowCallout || x < oneThirdWidth) LeaderPosition.LowerLeftCorner else null
             else -> null
         }
 
         // Right edge of callout is right of right edge of map.
         is LeaderMoveDirection.Right -> when (actualLeaderPosition) {
-            LeaderPosition.UpperLeftCorner -> if (narrowCallout || anchorPoint.x > geoViewSize.width / 3f) LeaderPosition.UpperMiddle else null
-            LeaderPosition.LeftMiddle -> if (narrowCallout || anchorPoint.x > geoViewSize.width / 2f) LeaderPosition.RightMiddle else null
-            LeaderPosition.LowerLeftCorner -> if (narrowCallout || anchorPoint.x > geoViewSize.width / 3f) LeaderPosition.LowerMiddle else null
-            LeaderPosition.UpperMiddle -> if (narrowCallout || anchorPoint.x > geoViewSize.width * 2f / 3f) LeaderPosition.UpperRightCorner else null
-            LeaderPosition.LowerMiddle -> if (narrowCallout || anchorPoint.x > geoViewSize.width * 2f / 3f) LeaderPosition.LowerRightCorner else null
+            LeaderPosition.UpperLeftCorner -> if (narrowCallout || x > oneThirdWidth) LeaderPosition.UpperMiddle else null
+            LeaderPosition.LeftMiddle -> if (narrowCallout || x > halfWidth) LeaderPosition.RightMiddle else null
+            LeaderPosition.LowerLeftCorner -> if (narrowCallout || x > oneThirdWidth) LeaderPosition.LowerMiddle else null
+            LeaderPosition.UpperMiddle -> if (narrowCallout || x > twoThirdWidth) LeaderPosition.UpperRightCorner else null
+            LeaderPosition.LowerMiddle -> if (narrowCallout || x > twoThirdWidth) LeaderPosition.LowerRightCorner else null
             else -> null
         }
     }

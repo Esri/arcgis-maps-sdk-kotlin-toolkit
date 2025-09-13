@@ -76,7 +76,7 @@ fun MainScreen() {
         calloutScreenNames = calloutAppScreens
     ) {
         composable(route = calloutAppScreens[0]) {
-            val tapLocationViewModel: MapViewModel = viewModel()
+            val tapLocationViewModel: GeoViewModel = viewModel()
             TapLocationScreen(
                 viewModel = tapLocationViewModel,
                 screenTitle = currentScreen,
@@ -84,7 +84,7 @@ fun MainScreen() {
                 navigateUp = { navController.navigateUp() })
         }
         composable(route = calloutAppScreens[1]) {
-            val featureViewModel: MapViewModel = viewModel()
+            val featureViewModel: GeoViewModel = viewModel()
             FeatureScreen(
                 viewModel = featureViewModel,
                 screenTitle = currentScreen,
