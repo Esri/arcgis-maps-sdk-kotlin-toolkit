@@ -1,6 +1,10 @@
 package com.esri.arcgismaps.kotlin.build_logic.convention
 
 import com.android.build.api.dsl.CommonExtension
+import com.esri.arcgismaps.kotlin.build_logic.extensions.androidTestImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.debugImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 

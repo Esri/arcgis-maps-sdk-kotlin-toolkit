@@ -18,11 +18,14 @@
 
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
-    alias(libs.plugins.artifact.deploy)
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.popup"
+    kotlinOptions {
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
+    }
 }
 
 apiValidation {

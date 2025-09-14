@@ -19,10 +19,12 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
+    compileOnly(gradleApi())
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.android.tools.common)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
+    implementation(libs.dokka.gradle.plugin)
 }
 
 tasks {
@@ -61,6 +63,18 @@ gradlePlugin {
         register("arcGISMapsKotlinSDK") {
             id = "arcgismaps.kotlin.sdk"
             implementationClass = "ArcGISMapsKotlinSDKConventionPlugin"
+        }
+        register("arcGISMapsRootConventionPlugin") {
+            id = "arcgismaps.kotlin.root.convention"
+            implementationClass = "ArcGISMapsRootConventionPlugin"
+        }
+        register("arcGISMapsKdocConventionPlugin") {
+            id = "arcgismaps.kotlin.kdoc.convention"
+            implementationClass = "ArcGISMapsKdocConventionPlugin"
+        }
+        register("arcGISMapsBomConventionPlugin") {
+            id = "arcgismaps.kotlin.bom.convention"
+            implementationClass = "ArcGISMapsBomConventionPlugin"
         }
     }
 }

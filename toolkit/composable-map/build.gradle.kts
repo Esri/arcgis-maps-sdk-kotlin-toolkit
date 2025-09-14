@@ -26,6 +26,10 @@ android {
     namespace = "com.arcgismaps.toolkit.composablemap"
 }
 
+toolkit {
+    releasable = false
+}
+
 dependencies {
     // Module-specific dependencies go here
 }

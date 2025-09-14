@@ -18,7 +18,6 @@
 
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
-    alias(libs.plugins.artifact.deploy)
 }
 
 android {

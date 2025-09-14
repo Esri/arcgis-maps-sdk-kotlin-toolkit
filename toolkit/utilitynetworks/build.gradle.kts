@@ -18,7 +18,6 @@
 
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
-    alias(libs.plugins.artifact.deploy)
     alias(libs.plugins.gradle.secrets)
 }
 
@@ -30,6 +29,10 @@ android {
     namespace = "com.arcgismaps.toolkit.utilitynetworks"
     buildFeatures {
         buildConfig = true
+    }
+    kotlinOptions {
+        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
 }
 

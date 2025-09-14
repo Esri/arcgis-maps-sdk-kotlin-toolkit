@@ -1,8 +1,7 @@
 import com.android.build.gradle.LibraryExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.configureKotlinAndroid
-import com.esri.arcgismaps.kotlin.build_logic.convention.implementation
-import com.esri.arcgismaps.kotlin.build_logic.convention.libs
-import com.esri.arcgismaps.kotlin.build_logic.convention.testImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
+import com.esri.arcgismaps.kotlin.build_logic.extensions.testImplementation
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

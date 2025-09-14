@@ -18,6 +18,7 @@
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
+    alias(libs.plugins.arcgismaps.kotlin.root.convention)
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.binary.compatibility.validator) apply false
@@ -32,13 +33,6 @@ plugins {
 }
 
 buildscript {
-    dependencies {
-        // there doesn't appear to be a better way to provide this to subprojects.
-        // this is what lets us put the version number dropdown list in the generated dokka.
-        // it is a "dokka plugin" which is not a gradle plugin, it needs to be on the classpath
-        // before any dependent subproject uses its symbols to configure a dokka task.
-        classpath(libs.dokka.versioning)
-    }
     val localProperties = java.util.Properties().apply {
         val localPropertiesFile = file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -57,16 +51,23 @@ buildscript {
         ?: localProperties.getProperty("artifactoryPassword")
         ?: ""
 
+    val sdkVersionNumber = project.findProperty("sdkVersionNumber") as String?
+        ?: localProperties.getProperty("sdkVersionNumber")
+    val sdkBuildNumber = project.findProperty("sdkBuildNumber") as String?
+        ?: localProperties.getProperty("sdkBuildNumber")
+
     project.extra.set("artifactoryUrl", artifactoryUrl)
     project.extra.set("artifactoryUsername", artifactoryUsername)
     project.extra.set("artifactoryPassword", artifactoryPassword)
+    project.extra.set("sdkVersionNumber", sdkVersionNumber)
+    project.extra.set("sdkBuildNumber", sdkBuildNumber)
 
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }
 
     if (finalBuild) {
         check(project.hasProperty("versionNumber"))
-        project.logger.info("release candidate build requested version ${project.properties["versionNumber"]}")
+        project.logger.warn("release candidate build requested version ${project.properties["versionNumber"]}")
     } else if (!project.hasProperty("versionNumber") && !project.hasProperty("buildNum")) {
         // both version number and build number must be set
         java.util.Properties().run {
@@ -84,7 +85,7 @@ buildscript {
                 }
                 check(project.hasProperty("versionNumber"))
                 check(project.hasProperty("buildNumber"))
-                project.logger.info("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
+                project.logger.warn("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
             } catch (t: Throwable) {
                 // The buildnum file is not there. ignore it and log a warning.
                 project.logger.warn("the buildnum.txt file is missing or not readable")
@@ -94,9 +95,6 @@ buildscript {
         }
     }
 }
-
-// Path to the centralized folder in root directory where test reports for connected tests end up
-val connectedTestReportsPath by extra("${rootDir}/connectedTestReports")
 
 /**
  * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
@@ -109,43 +107,5 @@ val connectedTestReportsPath by extra("${rootDir}/connectedTestReports")
  * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
  */
 testAggregation {
-    getModulesExcept(
-        "bom",
-        "kdoc",
-        "template",
-        "microapps-lib",
-        "composable-map"
-    ).forEach {
-        this.modules.include(project(":$it"))
-    }
+    // TODO: getAllToolkitProjects(project).forEach { this.modules.include(project(":$it")) }
 }
-
-/**
- * Excludes specific modules from the 'apiDump' task.
- * Add all modules to be excluded to the `excludedFromApiDump` set.
- */
-subprojects {
-    // Define the modules to be excluded from apiDump
-    val excludedFromApiDump = setOf(
-        "bom",
-        "kdoc",
-        "template",
-        "microapps-lib",
-        "composable-map"
-    )
-    // Add this property to indicate whether this project should have API validation
-    ext.set("shouldValidateApi", project.name !in excludedFromApiDump)
-}
-
-/**
- * Returns all modules in this project, except the ones specified by [modulesToExclude].
- */
-fun getModulesExcept(vararg modulesToExclude: String): List<String> =
-    with(File("$rootDir/settings.gradle.kts")) {
-        readLines()
-            .filter { it.startsWith("include") }
-            .map {
-                it.removePrefix("include(\":").removeSuffix("\")")
-            }
-            .filter { !modulesToExclude.contains(it) } // exclude specified modules
-    }

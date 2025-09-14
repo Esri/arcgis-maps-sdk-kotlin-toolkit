@@ -1,14 +1,12 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.ArcGISMapsKotlinSDKDependency
-import com.esri.arcgismaps.kotlin.build_logic.convention.implementation
-import com.esri.arcgismaps.kotlin.build_logic.convention.libs
+import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.project
-import org.gradle.kotlin.dsl.withType
 
 class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

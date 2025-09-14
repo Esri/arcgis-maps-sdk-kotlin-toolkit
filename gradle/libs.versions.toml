@@ -1,7 +1,7 @@
 [versions]
 
 # ArcGIS Maps SDK for Kotlin version
-arcgisMapsKotlinVersion = "300.0.0-4695"
+arcgisMapsKotlinVersion = "200.8.0"
 
 ### Android versions
 androidGradlePlugin = "8.9.2"
@@ -114,7 +114,9 @@ coil-bom = { group = "io.coil-kt", name = "coil-bom", version.ref = "coilBOM" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose" }
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref="commonMark" }
 commonmark-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gfm-strikethrough", version.ref="commonMark" }
-dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
+dokka-all-modules = { module = "org.jetbrains.dokka:all-modules-page-plugin", version.ref = "dokka" }
+dokka-versioning    = { module = "org.jetbrains.dokka:versioning-plugin",   version.ref = "dokka" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -146,10 +148,12 @@ arcgismaps-android-application = { id = "arcgismaps.android.application" }
 arcgismaps-android-application-compose = { id = "arcgismaps.android.application.compose" }
 arcgismaps-android-library-compose = { id = "arcgismaps.android.library.compose" }
 arcgismaps-android-library = { id = "arcgismaps.android.library" }
+arcgismaps-kotlin-root-convention = { id = "arcgismaps.kotlin.root.convention" }
+arcgismaps-kotlin-kdoc-convention = { id = "arcgismaps.kotlin.kdoc.convention" }
+arcgismaps-kotlin-bom-convention = { id = "arcgismaps.kotlin.bom.convention" }
 arcgismaps-kotlin-sdk = { id = "arcgismaps.kotlin.sdk"}
 arcgismaps-kotlin-microapp = { id = "arcgismaps.kotlin.microapp" }
 arcgismaps-kotlin-toolkit = { id = "arcgismaps.kotlin.toolkit" }
-artifact-deploy = { id = "artifact-deploy" }
 
 [bundles]
 camerax = [

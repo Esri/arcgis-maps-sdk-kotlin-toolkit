@@ -18,13 +18,14 @@
 
 pluginManagement {
     includeBuild("build-logic")
-    includeBuild("gradle-plugins")
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
     }
 }
+
+rootProject.name = "arcgis-maps-sdk-kotlin-toolkit"
 
 val localProperties = java.util.Properties().apply {
     val localPropertiesFile = file("local.properties")

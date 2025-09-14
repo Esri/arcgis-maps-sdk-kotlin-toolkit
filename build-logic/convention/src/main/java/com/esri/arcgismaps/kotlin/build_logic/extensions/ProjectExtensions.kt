@@ -1,4 +1,4 @@
-package com.esri.arcgismaps.kotlin.build_logic.convention
+package com.esri.arcgismaps.kotlin.build_logic.extensions
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency

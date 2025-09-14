@@ -16,9 +16,9 @@
  *
  */
 
-package com.arcgismaps
+package com.esri.arcgismaps.kotlin.build_logic.convention
 
-import org.gradle.api.Plugin
+import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitRegistryExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -38,8 +38,8 @@ import java.net.URI
  *
  * @since 200.2.0
  */
-class ArtifactPublisher : Plugin<Project> {
-    override fun apply(project: Project) {
+object ArtifactPublisher {
+    fun configureArtifactPublisher(project: Project) {
         val artifactoryGroupId: String by project
         val artifactoryArtifactBaseId: String by project
         val artifactoryUrl: String by project
@@ -57,10 +57,15 @@ class ArtifactPublisher : Plugin<Project> {
         val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
 
         project.pluginManager.apply(MavenPublishPlugin::class.java)
+
         project.afterEvaluate {
+            val registry = rootProject.extensions.getByType(ToolkitRegistryExtension::class.java)
+            if (!registry.toolkitProjects.contains(project)) return@afterEvaluate
+
+
             project.extensions.configure<PublishingExtension> {
                 repositories {
-                    repositories.maven {
+                    maven {
                         url = URI.create(artifactoryUrl)
                         credentials {
                             username = artifactoryUsername
@@ -69,10 +74,7 @@ class ArtifactPublisher : Plugin<Project> {
                     }
                 }
                 publications {
-                    publications.create(
-                        project.name,
-                        MavenPublication::class.java
-                    ) {
+                    create(project.name, MavenPublication::class.java) {
                         groupId = artifactoryGroupId
                         artifactId = artifactoryArtifactId
                         version = artifactVersion
@@ -82,9 +84,9 @@ class ArtifactPublisher : Plugin<Project> {
                 }
             }
 
-            tasks.findByName("publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
+            project.tasks.findByName("publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
                 ?.dependsOn("assembleRelease")
-            tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
+            project.tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
         }
     }
 }

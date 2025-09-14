@@ -1,11 +1,11 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.configureAndroidCompose
 import com.esri.arcgismaps.kotlin.build_logic.convention.configureKotlinAndroid
-import com.esri.arcgismaps.kotlin.build_logic.convention.implementation
-import com.esri.arcgismaps.kotlin.build_logic.convention.libs
-import com.esri.arcgismaps.kotlin.build_logic.convention.testImplementation
-import com.esri.arcgismaps.kotlin.build_logic.convention.androidTestImplementation
-import com.esri.arcgismaps.kotlin.build_logic.convention.debugImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
+import com.esri.arcgismaps.kotlin.build_logic.extensions.testImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.androidTestImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.debugImplementation
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
