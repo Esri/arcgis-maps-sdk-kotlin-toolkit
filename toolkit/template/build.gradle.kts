@@ -90,7 +90,7 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 
-//    if (file(project.findProperty("sdkToolkitTestsDir") as String).exists()) {
+//    if (file(project.findProperty("internalToolkitTestsDir") as String).exists()) {
 //      androidTestImplementation(<INTERNAL_ONLY_DEPENDENCY>)
 //    }
 }
