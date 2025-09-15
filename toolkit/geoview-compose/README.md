@@ -136,7 +136,8 @@ MapView(
                 colorScheme = CalloutDefaults.colors(
                     borderColor = MaterialTheme.colorScheme.outlineVariant,
                     backgroundColor = MaterialTheme.colorScheme.background
-                )
+                ),
+                leaderPosition = LeaderPosition.Automatic,
                 geoElement = selectedGeoElement,
                 tapLocation = tapLocation
             ) {
@@ -149,7 +150,7 @@ MapView(
 )
 ```
 
-An example of how to use the Callout on a point or geo-element is available in the [MapView Callout App](../../microapps/MapViewCalloutApp/README.md).
+An example of how to use the Callout on a point or geo-element is available in the [Callout App](../../microapps/CalloutApp/README.md).
 
 ### Display an OverviewMap
 
@@ -242,7 +243,6 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Analysis Overlay App](../../microapps/SceneViewAnalysisOverlayApp/README.md) demonstrates the use of `AnalysisOverlay`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
-- [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demonstrates the use of Callout with the `MapView`
-- [SceneView CalloutApp](../../microapps/SceneViewCalloutApp/README.md) demonstrates the use of Callout with the `SceneView`
+- [CalloutApp](../../microapps/CalloutApp/README.md) demonstrates the use of Callout with the composable `MapView` or `SceneView`
 
 

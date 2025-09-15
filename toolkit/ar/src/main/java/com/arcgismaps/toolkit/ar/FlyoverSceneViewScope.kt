@@ -25,6 +25,7 @@ import androidx.compose.ui.geometry.Offset
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -59,6 +60,10 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      * @param content the content of the Callout
      * @since 200.8.0
      */
+    @Deprecated(
+        message = "Use the Callout function with `leaderPosition` instead. This deprecated function remains to maintain binary compatibility",
+        level = DeprecationLevel.HIDDEN,
+    )
     @Composable
     public fun Callout(
         location: Point,
@@ -68,10 +73,11 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
-    ): Unit = sceneViewScope.Callout(
+    ): Unit = Callout(
         location,
         modifier,
         offset,
+        LeaderPosition.LowerMiddle,
         rotateOffsetWithGeoView,
         colorScheme,
         shapes,
@@ -102,6 +108,10 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
      * @param content the content of the Callout
      * @since 200.8.0
      */
+    @Deprecated(
+        message = "Use the Callout function with `leaderPosition` instead. This deprecated function remains to maintain binary compatibility",
+        level = DeprecationLevel.HIDDEN,
+    )
     @Composable
     public fun Callout(
         geoElement: GeoElement,
@@ -111,5 +121,93 @@ public class FlyoverSceneViewScope internal constructor(private val sceneViewSco
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ): Unit =
-        sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+        Callout(geoElement, modifier, tapLocation, LeaderPosition.LowerMiddle, colorScheme, shapes, content)
+
+    /**
+     * Displays a Callout at the specified geographical location on the [FlyoverSceneView]. The Callout
+     * is a composable that can be used to display additional information about a location on the
+     * scene. The additional information is passed as a content composable that contains text and/or
+     * other content. It has a leader that points to the location that the Callout refers to. The body of
+     * the Callout is a rectangular area with curved corners that contains the content lambda provided
+     * by the application. A thin border line is drawn around the entire Callout.
+     *
+     * Note: Only one Callout can be displayed at a time on the FlyoverSceneView.
+     *
+     * @param location the geographical location at which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to
+     *        place the callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the
+     *        [FlyoverSceneView]. The Screen offset will be rotated with the [FlyoverSceneView] when
+     *        true, false otherwise. This is useful if you are showing the callout for elements with
+     *        symbology that does rotate with the [FlyoverSceneView]
+     * @param colorScheme the styling options for the Callout's color properties
+     * @param shapes the styling options for the Callout's container shape
+     * @param content the content of the Callout
+     * @since 300.0.0
+     */
+    @Composable
+    public fun Callout(
+        location: Point,
+        modifier: Modifier = Modifier,
+        offset: Offset = Offset.Zero,
+        leaderPosition: LeaderPosition = LeaderPosition.LowerMiddle,
+        rotateOffsetWithGeoView: Boolean = false,
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shapes: CalloutShapes = CalloutDefaults.shapes(),
+        content: @Composable BoxScope.() -> Unit
+    ): Unit = sceneViewScope.Callout(
+        location,
+        modifier,
+        offset,
+        leaderPosition,
+        rotateOffsetWithGeoView,
+        colorScheme,
+        shapes,
+        content
+    )
+
+    /**
+     * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the
+     * [FlyoverSceneView]. The Callout is a composable that can be used to display additional
+     * information about a location on the scene. The additional information is passed as a [content]
+     * composable that contains text and/or other content. It has a leader that points to the location
+     * that the Callout refers to. The body of the Callout is a rectangular area with curved corners that
+     * contains the [content] lambda provided by the application. A thin border line is drawn around
+     * the entire Callout.
+     *
+     * If the given [GeoElement] is a [DynamicEntity] then the Callout automatically updates its location
+     * everytime the DynamicEntity changes. The content of the Callout however will not be automatically
+     * updated.
+     *
+     * Note: Only one Callout can be displayed at a time on the FlyoverSceneView.
+     *
+     * @param geoElement the [GeoElement] for which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with
+     *        a tap
+     * @param leaderPosition the current position of the leader relative to the body of the Callout
+     * @param colorScheme the styling options for the Callout's shape and color properties
+     * @param shapes the styling options for the Callout's container shape
+     * @param content the content of the Callout
+     * @since 300.0.0
+     */
+    @Composable
+    public fun Callout(
+        geoElement: GeoElement,
+        modifier: Modifier = Modifier,
+        tapLocation: Point? = null,
+        leaderPosition: LeaderPosition = LeaderPosition.LowerMiddle,
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shapes: CalloutShapes = CalloutDefaults.shapes(),
+        content: @Composable BoxScope.() -> Unit
+    ): Unit = sceneViewScope.Callout(
+        geoElement,
+        modifier,
+        tapLocation,
+        leaderPosition,
+        colorScheme,
+        shapes,
+        content
+    )
 }
