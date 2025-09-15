@@ -43,46 +43,6 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
- * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
- * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [AuthenticationActivity].
- * @see DialogAuthenticator
- * @since 200.2.0
- */
-@Deprecated(
-    message = "as of 200.8.0 and will be removed in an upcoming release, use the Authenticator composable with " +
-            "BrowserAuthenticationChallenge instead.",
-    replaceWith = ReplaceWith(
-        "Authenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
-    ),
-    level = DeprecationLevel.WARNING
-)
-@Composable
-public fun Authenticator(
-    authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier,
-    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
-) {
-    Surface {
-        AuthenticatorDelegate(
-            authenticatorState = authenticatorState,
-            modifier = modifier,
-            onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
-        )
-    }
-}
-
-/**
- * Displays appropriate Authentication UI when an authentication challenge is issued.
- *
- * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
- * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
- *
- * This Composable will adapt to the size of its container, allowing flexible layout usage. For alternate behavior,
- * see [DialogAuthenticator].
- *
- * @param authenticatorState the object that holds the state to handle authentication challenges.
- * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingBrowserAuthenticationChallenge this will be called when an authentication challenge is pending
  * and the browser should be launched. Use this if you wish to handle browser challenges from your own
  * activity rather than using the [AuthenticationActivity], more information can be found in the
@@ -131,49 +91,6 @@ public fun Authenticator(
             modifier = modifier
         )
     }
-}
-
-
-/**
- * Displays appropriate Authentication UI when an authentication challenge is issued.
- *
- * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
- * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
- *
- * Server trust prompts and username/password prompts will be displayed in a dialog.
- * All other prompts will be displayed differently based on their type:
- * - OAuth and IAP challenges will be displayed in a browser.
- * - Client certificate challenges will be displayed using the Android certificate picker.
- *
- * For alternate behavior, see the [Authenticator] component.
- *
- * @param authenticatorState the object that holds the state to handle authentication challenges.
- * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
- * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
- * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [AuthenticationActivity].
- * @see Authenticator
- * @since 200.2.0
- */
-@Deprecated(
-    message = "as of 200.8.0 and will be removed in an upcoming release, use the DialogAuthenticator composable with " +
-            "BrowserAuthenticationChallenge instead.",
-    replaceWith = ReplaceWith("DialogAuthenticator(AuthenticatorState, Modifier, BrowserAuthenticationChallenge)"
-    ),
-    level = DeprecationLevel.WARNING
-)
-@Composable
-public fun DialogAuthenticator(
-    authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier,
-    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
-) {
-    AuthenticatorDelegate(
-        authenticatorState = authenticatorState,
-        modifier = modifier,
-        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
-        useDialog = true
-    )
 }
 
 /**
@@ -260,7 +177,6 @@ public fun DialogAuthenticator(
  * @since 200.8.0
  */
 @Composable
-@Suppress("DEPRECATION")
 private fun AuthenticatorDelegate(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier,
