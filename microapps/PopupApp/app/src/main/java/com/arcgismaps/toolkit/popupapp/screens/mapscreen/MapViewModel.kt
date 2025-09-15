@@ -29,6 +29,7 @@ import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.popup.PopupState
 import kotlinx.coroutines.launch
 
 /**
@@ -54,12 +55,12 @@ class MapViewModel(
     private val streamServiceMap = "aef32323d1f248368b1663cfc938995e"
 
     /**
-     * The Popup read by the composition is held as a state variable.
+     * The PopupState read by the composition is held as a state variable.
      * We want the composition to recompose when the Popup changes.
      */
-    private var _popup: MutableState<Popup?> = mutableStateOf(null)
-    val popup: Popup?
-        get() = _popup.value
+    private var _popupState: MutableState<PopupState?> = mutableStateOf(null)
+    val popupState: PopupState?
+        get() = _popupState.value
 
     val map = ArcGISMap(
         PortalItem(
@@ -86,8 +87,8 @@ class MapViewModel(
         _layer = layer
     }
 
-    fun setPopup(popup: Popup?) {
-        _popup.value = popup
+    fun updatePopupState(popup: Popup?) {
+        _popupState.value = PopupState(popup!!, viewModelScope)
     }
 }
 

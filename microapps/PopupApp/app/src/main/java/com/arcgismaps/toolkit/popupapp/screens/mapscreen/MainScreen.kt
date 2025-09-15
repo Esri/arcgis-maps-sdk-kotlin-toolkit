@@ -66,8 +66,8 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
     )
     BottomSheetScaffold(
         sheetContent = {
-            if (viewModel.popup != null) {
-                Popup(viewModel.popup!!, Modifier.animateContentSize())
+            if (viewModel.popupState != null) {
+                Popup(viewModel.popupState!!, Modifier.animateContentSize())
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -91,7 +91,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                     ).onSuccess { results ->
                         if (results.isEmpty()) {
                             unselectFeature(viewModel.geoElement, viewModel.layer)
-                            viewModel.setPopup(null)
+                            viewModel.updatePopupState(null)
                             viewModel.setLayer(null)
                             viewModel.setGeoElement(null)
                             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
@@ -165,7 +165,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                                             throw IllegalStateException("popups on sublayers are not supported by the PopupApp")
                                         }
                                     }
-                                    viewModel.setPopup(popup)
+                                    viewModel.updatePopupState(popup)
                                     scaffoldState.bottomSheetState.expand()
                                 }
                             } catch (e: Exception) {

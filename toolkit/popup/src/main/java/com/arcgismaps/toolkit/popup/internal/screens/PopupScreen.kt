@@ -80,7 +80,6 @@ internal fun PopupScreen(
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
-    val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
     viewableFileState.value?.let { viewableFile ->
         FileViewer(scope, fileState = viewableFile) {
