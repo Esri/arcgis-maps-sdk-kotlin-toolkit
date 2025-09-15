@@ -71,9 +71,9 @@ android {
     /**
      * Include this if any internal-only tests are required
      */
-    val sdkToolkitTestsDir = project.findProperty("sdkToolkitTestsDir") as String
+    val internalToolkitTestsDir = project.findProperty("internalToolkitTestsDir") as String
     sourceSets.getByName("androidTest") {
-        var file = file("$sdkToolkitTestsDir/${project.name}")
+        var file = file("$internalToolkitTestsDir/${project.name}")
         if (file.exists()) {
             java.setSrcDirs(java.srcDirs.plus(file))
         }
