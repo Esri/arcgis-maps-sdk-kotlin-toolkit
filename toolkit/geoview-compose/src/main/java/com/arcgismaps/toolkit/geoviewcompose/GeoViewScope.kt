@@ -78,6 +78,7 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsRenderingMode
+import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
@@ -459,6 +460,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             is SceneView -> geoView.locationToScreen(location)?.takeIf {
                 it.visibility == SceneLocationVisibility.Visible
             }?.screenPoint
+            is LocalSceneView -> TODO("Pending implementation support")
         }
         return locationToScreen?.let { screenCoordinate ->
             if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
@@ -770,6 +772,7 @@ internal class LeaderPointOffset internal constructor(
 private fun GeoView.rotation(): Double = when (this) {
     is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
     is MapView -> mapRotation.value
+    is LocalSceneView -> TODO("Pending implementation support")
 }
 
 /**
