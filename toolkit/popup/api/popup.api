@@ -1,5 +1,14 @@
 public final class com/arcgismaps/toolkit/popup/PopupKt {
-	public static final fun Popup (Lcom/arcgismaps/mapping/popup/Popup;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final synthetic fun Popup (Lcom/arcgismaps/mapping/popup/Popup;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Popup (Lcom/arcgismaps/toolkit/popup/PopupState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/arcgismaps/toolkit/popup/PopupState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/popup/Popup;)V
+	public fun <init> (Lcom/arcgismaps/mapping/popup/Popup;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getActivePopup ()Lcom/arcgismaps/mapping/popup/Popup;
+	public final fun getPopup ()Lcom/arcgismaps/mapping/popup/Popup;
 }
 
 public final class com/arcgismaps/toolkit/popup/internal/element/fieldselement/FieldsElementState$Creator : android/os/Parcelable$Creator {
@@ -15,6 +24,38 @@ public final class com/arcgismaps/toolkit/popup/internal/element/textelement/Tex
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/element/textelement/TextElementState;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/element/textelement/TextElementState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$Dismiss$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$Dismiss;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$Dismiss;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateBack$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateBack;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateBack;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateToFeature$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateToFeature;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$NavigateToFeature;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$None$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$None;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/navigation/NavigationAction$None;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

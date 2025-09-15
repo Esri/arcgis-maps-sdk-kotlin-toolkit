@@ -65,6 +65,10 @@ import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
  *
  * @since 200.5.0
  */
+@Deprecated(
+    message = "Maintained for binary compatibility. Use the overload that uses the PopupState object.",
+    level = DeprecationLevel.HIDDEN
+)
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
