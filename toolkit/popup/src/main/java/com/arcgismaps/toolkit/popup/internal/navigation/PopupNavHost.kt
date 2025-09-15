@@ -42,6 +42,7 @@ import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
 internal fun PopupNavHost(
     navController: NavHostController,
     state: PopupState,
+    refreshed: Long,
     isNavigationEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -60,7 +61,7 @@ internal fun PopupNavHost(
                 state,
                 popupStateData,
                 popupStateData.initialEvaluation.value,
-                -1,
+                refreshed,
                 onUtilityFilterSelected = { state ->
                     val newRoute = NavigationRoute.UNFilterView(stateId = state.id)
                     // Navigate to the filter view

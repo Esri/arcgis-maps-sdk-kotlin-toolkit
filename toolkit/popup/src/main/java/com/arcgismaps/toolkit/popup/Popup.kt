@@ -27,11 +27,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.mapping.popup.Popup
+import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
 import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
 
@@ -110,6 +114,21 @@ public fun Popup(
     showCloseIcon: Boolean = true,
     isNavigationEnabled : Boolean = true
 ) {
+    val popup = popupState.popup
+    val dynamicEntity = (popup.geoElement as? DynamicEntity)
+    // If the popup is for a dynamic entity, we want to refresh the popup periodically
+    // to get the latest data.
+    var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
+    if (dynamicEntity != null) {
+        LaunchedEffect(popup) {
+            dynamicEntity.dynamicEntityChangedEvent.collect {
+                // briefly show the initializing screen so it is clear the entity just pulsed
+                // and values may have changed.
+                popupState.popup.evaluateExpressions()
+                lastUpdatedEntityId = it.receivedObservation?.id ?: -1
+            }
+        }
+    }
 
     val navController = rememberNavController(popupState)
     popupState.setNavigationCallback { route ->
@@ -147,6 +166,7 @@ public fun Popup(
             PopupNavHost(
                 navController = navController,
                 state = popupState,
+                refreshed = lastUpdatedEntityId,
                 isNavigationEnabled = isNavigationEnabled,
                 modifier = Modifier.fillMaxSize()
             )
