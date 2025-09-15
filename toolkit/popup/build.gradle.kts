@@ -77,6 +77,10 @@ android {
         }
     }
 
+    lint {
+        disable += "MissingTranslation"
+    }
+
 }
 
 apiValidation {
