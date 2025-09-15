@@ -65,7 +65,14 @@ import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val stateData = remember(popup) {
-        PopupState(popup, scope)
+        PopupState(
+            popup,
+            scope,
+            // Ignore the UtilityAssociationsFormElement as it is not supported with this API
+            ignoreList = setOf(
+                UtilityAssociationsPopupElement::class.java
+            )
+        )
     }
 
     if (stateData.getActivePopupStateData().initialEvaluation.value) {

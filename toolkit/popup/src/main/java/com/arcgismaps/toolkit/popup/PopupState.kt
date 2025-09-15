@@ -15,6 +15,7 @@ import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
+import com.arcgismaps.mapping.popup.PopupElement
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
@@ -63,19 +64,32 @@ public class PopupState(@Stable public val popup: Popup) {
      */
     public val activePopup: Popup by _activePopup
 
-    public constructor(popup: Popup, scope: CoroutineScope) : this(popup) {
-        this.coroutineScope = scope
+    private fun initializePopupStateData(
+        popup: Popup,
+        ignoreList: Set<Class<out PopupElement>> = emptySet()
+    ) {
         val popupStateData = PopupStateData(popup)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             val attachments = popupStateData.evaluateExpressionsAndGetAttachments()
             val states = createStates(
                 popup = popup,
                 attachments = attachments,
-                coroutineScope = coroutineScope
+                coroutineScope = coroutineScope,
+                ignoreList = ignoreList
             )
             popupStateData.setStates(states)
         }
         store.addLast(popupStateData)
+    }
+
+    public constructor(popup: Popup, scope: CoroutineScope) : this(popup) {
+        this.coroutineScope = scope
+        initializePopupStateData(popup)
+    }
+
+    internal constructor(popup: Popup, scope: CoroutineScope, ignoreList: Set<Class<out PopupElement>>) : this(popup) {
+        this.coroutineScope = scope
+        initializePopupStateData(popup, ignoreList)
     }
 
     /**
@@ -183,6 +197,75 @@ public class PopupState(@Stable public val popup: Popup) {
     internal fun getActivePopupStateData(): PopupStateData {
         return store.last()
     }
+
+    /**
+     * Creates state objects for all the supported element types that are part of the
+     * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
+     *
+     * @param popup the [Popup] to create the states for.
+     * @return returns the [PopupElementStateCollection] created.
+     */
+    internal fun createStates(
+        popup: Popup,
+        attachments: List<PopupAttachment>,
+        coroutineScope: CoroutineScope,
+        ignoreList: Set<Class<out PopupElement>> = emptySet(),
+    ): PopupElementStateCollection {
+        val states = mutablePopupElementStateCollection()
+        val elements: List<PopupElement> = popup.evaluatedElements
+        // Filter out elements that are part of the ignore list.
+        val filteredElements = elements.filter { element ->
+            !ignoreList.contains(element::class.java)
+        }
+        filteredElements.forEach { element ->
+            when (element) {
+                is TextPopupElement -> {
+                    states.add(
+                        element,
+                        TextElementState(element = element, popup = popup)
+                    )
+                }
+
+                is AttachmentsPopupElement -> {
+                    states.add(
+                        element,
+                        AttachmentsElementState(
+                            attachmentPopupElement = element,
+                            attachments = attachments
+                        )
+                    )
+                }
+
+                is FieldsPopupElement -> {
+                    states.add(
+                        element,
+                        FieldsElementState(element = element, popup = popup)
+                    )
+                }
+
+                is MediaPopupElement -> {
+                    states.add(
+                        element,
+                        MediaElementState(element = element, popup = popup)
+                    )
+                }
+
+                is UtilityAssociationsPopupElement -> {
+                    states.add(
+                        element,
+                        UtilityAssociationsElementState(element, coroutineScope)
+                    )
+                }
+
+                else -> {
+                    // TODO remove for release
+                    println("encountered element of type ${element::class.java}")
+                }
+            }
+        }
+
+        return states
+    }
 }
 
 /**
@@ -240,69 +323,6 @@ internal data class PopupStateData(
             isEvaluatingExpressions.value = false
         }
     }
-}
-
-/**
- * Creates state objects for all the supported element types that are part of the
- * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
- *
- * @param popup the [Popup] to create the states for.
- * @return returns the [PopupElementStateCollection] created.
- */
-internal fun createStates(
-    popup: Popup,
-    attachments: List<PopupAttachment>,
-    coroutineScope: CoroutineScope
-): PopupElementStateCollection {
-    val states = mutablePopupElementStateCollection()
-    popup.evaluatedElements.forEach { element ->
-        when (element) {
-            is TextPopupElement -> {
-                states.add(
-                    element,
-                    TextElementState(element = element, popup = popup)
-                )
-            }
-
-            is AttachmentsPopupElement -> {
-                states.add(
-                    element,
-                    AttachmentsElementState(
-                        attachmentPopupElement = element,
-                        attachments = attachments
-                    )
-                )
-            }
-
-            is FieldsPopupElement -> {
-                states.add(
-                    element,
-                    FieldsElementState(element = element, popup = popup)
-                )
-            }
-
-            is MediaPopupElement -> {
-                states.add(
-                    element,
-                    MediaElementState(element = element, popup = popup)
-                )
-            }
-
-            is UtilityAssociationsPopupElement -> {
-                states.add(
-                    element,
-                    UtilityAssociationsElementState(element, coroutineScope)
-                )
-            }
-
-            else -> {
-                // TODO remove for release
-                println("encountered element of type ${element::class.java}")
-            }
-        }
-    }
-
-    return states
 }
 
 internal fun ArcGISFeature.toPopup(): Popup {
