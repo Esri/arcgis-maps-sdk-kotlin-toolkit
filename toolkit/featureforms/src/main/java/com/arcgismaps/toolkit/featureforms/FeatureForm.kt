@@ -185,6 +185,7 @@ public fun FeatureForm(
     level = DeprecationLevel.WARNING
 )
 @Composable
+@Suppress("DEPRECATION")
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
