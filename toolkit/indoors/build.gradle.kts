@@ -81,6 +81,6 @@ dependencies {
     implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
-    androidTestImplementation(project(mapOf("path" to ":composable-map")))
+    androidTestImplementation(project(":geoview-compose"))
     debugImplementation(libs.bundles.debug)
 }

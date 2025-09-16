@@ -114,7 +114,6 @@ testAggregation {
         "kdoc",
         "template",
         "microapps-lib",
-        "composable-map"
     ).forEach {
         this.modules.include(project(":$it"))
     }
