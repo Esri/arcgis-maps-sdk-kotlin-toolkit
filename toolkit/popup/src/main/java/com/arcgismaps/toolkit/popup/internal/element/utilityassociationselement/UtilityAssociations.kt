@@ -121,7 +121,6 @@ internal fun UtilityAssociationFilter(
 @Composable
 internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
-    isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -144,7 +143,6 @@ internal fun UtilityAssociations(
                         title = info.title,
                         association = info.association,
                         associatedFeature = info.associatedFeature,
-                        enabled = isNavigationEnabled,
                         onClick = {
                             onItemClick(index)
                         },
@@ -185,7 +183,6 @@ private fun AssociationItem(
     title: String,
     association: UtilityAssociation,
     associatedFeature: ArcGISFeature,
-    enabled: Boolean,
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -223,14 +220,10 @@ private fun AssociationItem(
 
         else -> {}
     }
-    val contentColor = if (enabled) {
-        LocalContentColor.current
-    } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    }
+    val contentColor = LocalContentColor.current
     Row(
         modifier = modifier
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(onClick = onClick)
             .height(56.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

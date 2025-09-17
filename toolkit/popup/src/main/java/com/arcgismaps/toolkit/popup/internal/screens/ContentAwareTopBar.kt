@@ -45,7 +45,6 @@ import com.arcgismaps.toolkit.popup.PopupState
 import com.arcgismaps.toolkit.popup.PopupStateData
 import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.popup.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 
 /**
@@ -55,7 +54,6 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
  * @param state The [PopupState] that holds the current popup state data.
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
  * @param showCloseIcon Indicates if the close icon should be displayed.
- * @param isNavigationEnabled Indicates if navigation actions are enabled.
  * @param onDismissRequest The callback to invoke when the close button is clicked.
  * @param modifier The [Modifier] to apply to this layout.
  */
@@ -65,69 +63,34 @@ internal fun ContentAwareTopBar(
     state: PopupState,
     hasBackStack: Boolean,
     showCloseIcon: Boolean,
-    isNavigationEnabled: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
 
-    // Callback to handle navigation actions
-    val onNavigationAction: (NavigationAction) -> Unit = { action ->
-        // execute the action immediately
-        when (action) {
-            is NavigationAction.NavigateBack -> {
-                state.popBackStack(backStackEntry)
-            }
+    val onBackAction = { state.popBackStack(backStackEntry) }
 
-            is NavigationAction.Dismiss -> {
-                onDismissRequest()
-            }
-
-            else -> {}
-        }
-    }
-    val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
-        when {
-            entry.destination.hasRoute<NavigationRoute.PopupView>() -> {
-                // Run the navigation action if the current view is the popup view
-                onNavigationAction(NavigationAction.NavigateBack)
-            }
-
-            else -> {
-                // Pop the back stack if the current view is not the popup view
-                state.popBackStack(backStackEntry)
-            }
-        }
-    }
     // Get the title and subtitle for the top bar based on the current navigation state
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, popupStateData)
-    val navigationEnabled = when {
-        // If the current destination is the popup view, only then check if navigation is enabled
-        backStackEntry.destination.hasRoute<NavigationRoute.PopupView>() -> {
-            isNavigationEnabled
-        }
-        // For other destinations, always enable back navigation
-        else -> true
-    }
+
     Column {
         PopupTitle(
             title = title,
             subTitle = subTitle,
             showCloseIcon = showCloseIcon,
             showBackIcon = hasBackStack,
-            isNavigationEnabled = navigationEnabled,
             onBackPressed = {
-                onBackAction(backStackEntry)
+                onBackAction()
             },
             onClose = {
-                onNavigationAction(NavigationAction.Dismiss)
+                onDismissRequest()
             },
             modifier = modifier
         )
     }
     // only enable back navigation if there is a previous route
     BackHandler(hasBackStack) {
-        onBackAction(backStackEntry)
+        onBackAction()
     }
 }
 
@@ -203,7 +166,6 @@ private fun PopupTitle(
     subTitle: String,
     showCloseIcon: Boolean,
     showBackIcon: Boolean,
-    isNavigationEnabled: Boolean,
     onBackPressed: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -214,7 +176,7 @@ private fun PopupTitle(
             horizontalArrangement = Arrangement.Start,
         ) {
             if (showBackIcon) {
-                IconButton(onClick = onBackPressed, enabled = isNavigationEnabled) {
+                IconButton(onClick = onBackPressed) {
                     Icon(
                         Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = "Navigate back"
@@ -256,7 +218,6 @@ private fun PopupTitlePreview() {
         subTitle = "Edit feature attributes",
         showCloseIcon = true,
         showBackIcon = false,
-        isNavigationEnabled = true,
         onBackPressed = {},
         onClose = {},
         modifier = Modifier.padding(8.dp)

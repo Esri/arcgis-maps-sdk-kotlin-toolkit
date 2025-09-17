@@ -102,9 +102,6 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
  * @param onDismiss Callback that is invoked when the user clicks the close icon in the top app bar.
  * @param showCloseIcon Flag to indicate if the close icon should be shown in the top app bar. If true, the [onDismiss]
  * callback will be invoked when the close icon is clicked. Default is true.
- * @param isNavigationEnabled Indicates if the navigation is enabled for the popup when there are
- * [UtilityAssociationsPopupElement]s present. When true, the user can navigate to associated features
- * and back. If false, this navigation is disabled. Default is true
  *
  * @since 300.0.0
  */
@@ -114,7 +111,6 @@ public fun Popup(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     showCloseIcon: Boolean = true,
-    isNavigationEnabled : Boolean = true
 ) {
     val popup = popupState.popup
     val dynamicEntity = (popup.geoElement as? DynamicEntity)
@@ -154,7 +150,6 @@ public fun Popup(
                     onDismissRequest = onDismiss,
                     hasBackStack = hasBackStack,
                     showCloseIcon = showCloseIcon,
-                    isNavigationEnabled = isNavigationEnabled,
                     modifier = Modifier
                         .padding(
                             vertical = 8.dp,
@@ -169,7 +164,6 @@ public fun Popup(
                 navController = navController,
                 state = popupState,
                 refreshed = lastUpdatedEntityId,
-                isNavigationEnabled = isNavigationEnabled,
                 modifier = Modifier.fillMaxSize()
             )
         },

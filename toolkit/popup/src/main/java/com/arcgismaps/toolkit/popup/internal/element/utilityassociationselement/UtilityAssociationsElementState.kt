@@ -39,8 +39,6 @@ internal class UtilityAssociationsElementState(
     override val id : Int = element.hashCode()
     val label : String = element.title
     val description: String = element.description
-    //    val isVisible : StateFlow<Boolean> = element.isVisible
-
 
     private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
