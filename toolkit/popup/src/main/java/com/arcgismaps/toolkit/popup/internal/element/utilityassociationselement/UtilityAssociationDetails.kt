@@ -58,9 +58,6 @@ internal fun UtilityAssociationDetails(
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
-    var showConfirmationDialog by remember {
-        mutableStateOf(false)
-    }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -134,24 +131,6 @@ internal fun UtilityAssociationDetails(
                 modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = { showConfirmationDialog = true }) {
-            Text(text = stringResource(R.string.remove_association))
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = stringResource(R.string.remove_association_tooltip),
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-    if (showConfirmationDialog) {
-        RemoveAssociationConfirmationDialog(
-            onDismiss = { showConfirmationDialog = false },
-            onRemove = {
-                showConfirmationDialog = false
-                // Remove the association when the API is available.
-            }
-        )
     }
 }
 
@@ -178,38 +157,6 @@ internal fun PropertyRow(
             )
         )
     }
-}
-
-/**
- * A composable that displays a confirmation dialog for removing an association.
- *
- * @param onDismiss A callback that is called when the dialog is dismissed.
- * @param onRemove A callback that is called when the remove button is clicked.
- */
-@Composable
-private fun RemoveAssociationConfirmationDialog(
-    onDismiss: () -> Unit,
-    onRemove: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = "${stringResource(R.string.remove_association)}?")
-        },
-        text = {
-            Text(text = stringResource(R.string.remove_association_tooltip))
-        },
-        confirmButton = {
-            TextButton(onRemove) {
-                Text(text = stringResource(R.string.remove))
-            }
-        },
-        dismissButton = {
-            TextButton(onDismiss) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        }
-    )
 }
 
 /**
