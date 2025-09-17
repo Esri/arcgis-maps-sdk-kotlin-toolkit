@@ -46,7 +46,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
-public class PopupState(@Stable public val popup: Popup) {
+/**
+ * The state object for a [Popup] used by the Popup composable. This class is
+ * responsible for managing the state of the Popup and its elements. Hoist this state out of the
+ * composition to ensure that the state is not lost during configuration changes.
+ *
+ * This class also provides a way to navigate between different [Popup]s of different [ArcGISFeature]s
+ * when viewing associations for an [UtilityAssociationsPopupElement], if it is part of the provided
+ * [Popup]. Use the [activePopup] property to get the currently active popup as it is
+ * is updated when navigating from one popup to another.
+ *
+ * [Popup.evaluateExpressions] is called automatically when navigating to a new [Popup]
+ * or when navigating back to a previous [Popup]. Expressions are also run when this class is
+ * created so you do not need to call [Popup.evaluateExpressions] manually.
+ *
+ * @since 300.0.0
+ */
+@Stable
+public class PopupState private constructor(internal val popup: Popup) {
 
     private val store: ArrayDeque<PopupStateData> = ArrayDeque()
 

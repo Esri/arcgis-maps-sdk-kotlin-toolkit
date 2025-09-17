@@ -66,8 +66,9 @@ import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
  * @since 200.5.0
  */
 @Deprecated(
-    message = "Maintained for binary compatibility. Use the overload that uses the PopupState object.",
-    level = DeprecationLevel.HIDDEN
+    message = "Use the overload that uses the PopupState object. This will become an error" +
+            " in a future release.",
+    level = DeprecationLevel.WARNING
 )
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
@@ -82,10 +83,7 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
             )
         )
     }
-
-    if (stateData.getActivePopupStateData().initialEvaluation.value) {
-        Popup(stateData, modifier, showCloseIcon = false)
-    }
+    Popup(stateData, modifier, showCloseIcon = false)
 }
 
 /**
@@ -108,7 +106,7 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
  * [UtilityAssociationsPopupElement]s present. When true, the user can navigate to associated features
  * and back. If false, this navigation is disabled. Default is true
  *
- * @since 200.9.0
+ * @since 300.0.0
  */
 @Composable
 public fun Popup(

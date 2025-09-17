@@ -88,7 +88,7 @@ class MapViewModel(
     }
 
     fun updatePopupState(popup: Popup?) {
-        _popupState.value = PopupState(popup!!, viewModelScope)
+        _popupState.value = popup?.let { PopupState(it, viewModelScope) }
     }
 }
 
