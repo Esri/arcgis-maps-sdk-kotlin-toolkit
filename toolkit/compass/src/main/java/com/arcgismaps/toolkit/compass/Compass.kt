@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Creates a Compass that shows the geographic orientation of a [ComposableMap] using the
+ * Creates a Compass that shows the geographic orientation of a Map using the
  * [rotation] property. By default, the compass hides when the map is pointing to its default
  * North orientation. This auto hide behavior can be changed using the [autoHide] property.
  * Size and color of the icon can be customized using [size] and [color]. Resetting behavior can

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+@file:Suppress("DEPRECATION")
 package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
 import android.content.res.Configuration
