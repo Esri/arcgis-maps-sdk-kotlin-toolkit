@@ -44,17 +44,15 @@ internal fun MediaPopupElement(
     val mediaFolder = MediaElementDefaults.mediaFolder
     val chartParams = MediaElementDefaults.chartParams
     val context = LocalContext.current
-    LaunchedEffect(state) {
-        if (state.isPopupMediaCreated) {
-            return@LaunchedEffect
+    if (!state.isPopupMediaCreated) {
+        LaunchedEffect(state) {
+            state.createPopupMedia(
+                mediaFolder = mediaFolder,
+                chartParams = chartParams,
+                context = context
+            )
         }
-        state.createPopupMedia(
-            mediaFolder = mediaFolder,
-            chartParams = chartParams,
-            context = context
-        )
-    }
-    if (state.isPopupMediaCreated) {
+    } else {
         MediaPopupElement(
             title = state.title,
             description = state.description,
