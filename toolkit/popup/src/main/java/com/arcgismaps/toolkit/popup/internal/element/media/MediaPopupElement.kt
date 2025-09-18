@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -42,19 +41,20 @@ internal fun MediaPopupElement(
     state: MediaElementState,
     onClickedMedia: (ViewableFile) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val mediaFolder = MediaElementDefaults.mediaFolder
     val chartParams = MediaElementDefaults.chartParams
     val context = LocalContext.current
     LaunchedEffect(state) {
-        state.init(
-            scope = scope,
+        if (state.isPopupMediaCreated) {
+            return@LaunchedEffect
+        }
+        state.createPopupMedia(
             mediaFolder = mediaFolder,
             chartParams = chartParams,
             context = context
         )
     }
-    if (state.isInitialized.value) {
+    if (state.isPopupMediaCreated) {
         MediaPopupElement(
             title = state.title,
             description = state.description,

@@ -59,7 +59,7 @@ internal fun PopupNavHost(
             PopupScreen(
                 state,
                 popupStateData,
-                popupStateData.initialEvaluation.value,
+                popupStateData.initialEvaluation,
                 refreshed,
                 onUtilityFilterSelected = { state ->
                     val newRoute = NavigationRoute.UNFilterView(stateId = state.id)

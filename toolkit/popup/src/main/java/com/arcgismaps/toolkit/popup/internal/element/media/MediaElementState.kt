@@ -21,7 +21,9 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.arcgismaps.mapping.ChartImageParameters
@@ -47,28 +49,26 @@ import java.util.UUID
 internal class MediaElementState(
     val element: MediaPopupElement,
     val popup: Popup,
+    val scope: CoroutineScope,
     override val id : Int = createId()
 ) : PopupElementState() {
 
-    lateinit var description: String
-    lateinit var title: String
+    val description: String = element.description
+    val title: String = element.title
     lateinit var media: List<PopupMediaState>
 
     /**
-     * Indicates if the evaluateExpression function for the [popup] has been run.
+     * Indicates if the media list for the [popup] has been created.
      */
-    internal var isInitialized : MutableState<Boolean> = mutableStateOf(false)
+    internal var isPopupMediaCreated: Boolean by mutableStateOf(false)
         private set
 
-    fun init(
-        scope: CoroutineScope,
+    fun createPopupMedia(
         mediaFolder: String,
         chartParams: ChartImageParameters,
         context: Context,
         models: List<String> = listOf()
     ) {
-        this.description = element.description
-        this.title = element.title
         this.media = element.media.mapIndexed { index, media ->
             val model = models.getOrNull(index) ?: ""
             if (media.type.isChart) {
@@ -84,7 +84,7 @@ internal class MediaElementState(
             // update chart providers to use the new instances of PopupMedia to reacquire updated charts.
             updateMediaElement(element, scope)
         }
-        isInitialized.value = true
+        isPopupMediaCreated = true
     }
 
 

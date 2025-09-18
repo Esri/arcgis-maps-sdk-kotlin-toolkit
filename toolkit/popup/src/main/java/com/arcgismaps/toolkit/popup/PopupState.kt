@@ -20,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -278,7 +279,7 @@ public class PopupState private constructor(internal val popup: Popup) {
                 is MediaPopupElement -> {
                     states.add(
                         element,
-                        MediaElementState(element = element, popup = popup)
+                        MediaElementState(element = element, popup = popup, scope = coroutineScope)
                     )
                 }
 
@@ -312,21 +313,21 @@ public class PopupState private constructor(internal val popup: Popup) {
 internal data class PopupStateData(
     val popup: Popup,
 ) {
-    internal lateinit var stateCollection: PopupElementStateCollection
+    lateinit var stateCollection: PopupElementStateCollection
         private set
     /**
      * Indicates if the evaluateExpression function for the [popup] has been run.
      */
-    internal var initialEvaluation : MutableState<Boolean> = mutableStateOf(false)
+    var initialEvaluation: Boolean by mutableStateOf(false)
         private set
 
     /**
      * Indicates if the expressions for the [popup] are currently being evaluated.
      */
-    internal var isEvaluatingExpressions: MutableState<Boolean> = mutableStateOf(false)
+    var isEvaluatingExpressions: Boolean by mutableStateOf(false)
         private set
 
-    internal fun setStates(stateCollection: PopupElementStateCollection) {
+    fun setStates(stateCollection: PopupElementStateCollection) {
         this.stateCollection = stateCollection
     }
 
@@ -335,9 +336,9 @@ internal data class PopupStateData(
      * evaluation, the [initialEvaluation] is set to true. While this function is running, the
      * [isEvaluatingExpressions] will be true.
      */
-    internal suspend fun evaluateExpressionsAndGetAttachments() : List<PopupAttachment>  {
+    suspend fun evaluateExpressionsAndGetAttachments() : List<PopupAttachment>  {
         try {
-            isEvaluatingExpressions.value = true
+            isEvaluatingExpressions = true
             val attachments = mutableListOf<PopupAttachment>()
             popup.evaluateExpressions().onSuccess {
                 val element = popup.evaluatedElements
@@ -348,11 +349,11 @@ internal data class PopupStateData(
                     attachments.addAll(element.attachments)
                 }
                 // Set the initial evaluation to true after the first successful evaluation.
-                initialEvaluation.value = true
+                initialEvaluation = true
             }
             return attachments
         } finally {
-            isEvaluatingExpressions.value = false
+            isEvaluatingExpressions = false
         }
     }
 }
