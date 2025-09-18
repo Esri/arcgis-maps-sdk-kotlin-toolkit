@@ -30,7 +30,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 
 /**
- * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
+ * Launches a Custom Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
  *
  * @see AuthenticationActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
@@ -59,7 +59,7 @@ internal fun OAuthAuthenticator(
         // Note that this flag does not need to be reset to false. After the OAuth prompt completes, the OAuthAuthenticator
         // will leave the composition. On a subsequent OAuth challenge, the OAuthAuthenticator will re-enter the
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
-        var didLaunch by rememberSaveable(key = oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
+        var didLaunch by rememberSaveable(oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
             rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { redirectUrl ->
                 redirectUrl?.let {

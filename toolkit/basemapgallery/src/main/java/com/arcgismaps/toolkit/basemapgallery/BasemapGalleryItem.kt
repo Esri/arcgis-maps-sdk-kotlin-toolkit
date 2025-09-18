@@ -71,25 +71,6 @@ public class BasemapGalleryItem(
      * If the [Item] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
      *
      * @param item the [Item]
-     * @since 200.7.0
-     */
-    @Deprecated(
-        "Use the constructor that takes Item and is3D instead. This deprecated constructor remains to maintain binary compatibility.",
-        level = DeprecationLevel.HIDDEN
-    )
-    public constructor(item: Item) : this(
-        item.title,
-        item,
-        false,
-        item.thumbnail
-    )
-
-    /**
-     * Construct a [BasemapGalleryItem] with an [Item].
-     *
-     * If the [Item] has a thumbnail, this is used for the thumbnail otherwise a default thumbnail is used.
-     *
-     * @param item the [Item]
      * @param is3D indicates if this item is a 3D basemap
      * @since 200.8.0
      */

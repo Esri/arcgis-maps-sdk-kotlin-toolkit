@@ -1,7 +1,6 @@
 public final class com/arcgismaps/toolkit/basemapgallery/BasemapGalleryItem {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/mapping/BasemapStyleInfo;)V
-	public synthetic fun <init> (Lcom/arcgismaps/mapping/Item;)V
 	public fun <init> (Lcom/arcgismaps/mapping/Item;Z)V
 	public synthetic fun <init> (Lcom/arcgismaps/mapping/Item;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Object;ZLkotlin/jvm/functions/Function1;)V
