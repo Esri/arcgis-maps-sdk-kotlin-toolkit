@@ -70,6 +70,7 @@ internal fun UNAssociationsScreen(
         },
         modifier = modifier
             .padding(16.dp)
-            .fillMaxSize()
+            .fillMaxSize(),
+        displayCount = utilityAssociationsElementState.displayCount
     )
 }

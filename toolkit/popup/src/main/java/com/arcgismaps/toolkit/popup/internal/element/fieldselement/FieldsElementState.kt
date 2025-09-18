@@ -36,8 +36,8 @@ internal class FieldsElementState(
     constructor(element: FieldsPopupElement, popup: Popup) : this(
         title = element.title,
         description = element.description,
-        fieldsToFormattedValues = element.fields.map { it.label }
-            .zip(element.formattedValues)
+        fieldsToFormattedValues = element.fields
+            .mapIndexed { index, field -> field.label to element.formattedValues[index] }
             .toMap(),
         id = createId()
     )

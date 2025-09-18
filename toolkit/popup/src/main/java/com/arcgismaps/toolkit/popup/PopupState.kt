@@ -365,7 +365,7 @@ internal fun ArcGISFeature.toPopup(): Popup {
 
         this.getFeatureSubtype() != null && this.featureTable is ArcGISFeatureTable -> {
             (this.featureTable as ArcGISFeatureTable).subtypeSubtables
-                .firstOrNull { it.name == this.getFeatureSubtype()?.name }
+                .firstOrNull { it.subtype == this.getFeatureSubtype()}
                 ?.popupDefinition
         }
 

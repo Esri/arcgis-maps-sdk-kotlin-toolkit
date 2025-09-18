@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Card
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -40,6 +42,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,19 +124,23 @@ internal fun UtilityAssociationFilter(
  * @param onItemClick A callback that is called when an association is clicked.
  * @param onDetailsClick A callback that is called when the details icon is clicked.
  * @param modifier The [Modifier] to apply to this layout.
+ * @param displayCount The number of associations to display.
  */
 @Composable
 internal fun UtilityAssociations(
     groupResult: UtilityAssociationGroupResult,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    displayCount: Int = 3
 ) {
+    val associationResults = groupResult.associationResults
+    var showAll by rememberSaveable { mutableStateOf(false) }
+    val itemsToShow = if (showAll) associationResults else associationResults.take(displayCount)
     val lazyListState = rememberLazyListState()
+
     Surface(
-        modifier = modifier.wrapContentHeight(
-            align = Alignment.Top
-        ),
+        modifier = modifier.wrapContentHeight(align = Alignment.Top),
         shape = RoundedCornerShape(15.dp),
         color = MaterialTheme.colorScheme.surfaceContainer
     ) {
@@ -137,24 +148,51 @@ internal fun UtilityAssociations(
             modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
             state = lazyListState
         ) {
-            groupResult.associationResults.forEachIndexed { index, info ->
+            itemsToShow.forEachIndexed { index, info ->
                 item(info.association.hashCode()) {
                     AssociationItem(
                         title = info.title,
                         association = info.association,
                         associatedFeature = info.associatedFeature,
-                        onClick = {
-                            onItemClick(index)
-                        },
-                        onDetailsClick = {
-                            onDetailsClick(index)
-                        },
+                        onClick = { onItemClick(index) },
+                        onDetailsClick = { onDetailsClick(index) },
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                     )
-                    if (index < groupResult.associationResults.count() - 1) {
+                    if (index < itemsToShow.size - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = DividerDefaults.color.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+            if (!showAll && associationResults.size > displayCount) {
+                item("show_all") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showAll = true }
+                            .padding(vertical = 12.dp, horizontal = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.show_all),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Total: ${associationResults.size}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "List bullet",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                     }
                 }

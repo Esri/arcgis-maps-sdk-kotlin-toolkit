@@ -42,4 +42,5 @@
     <string name="cancel">Cancel</string>
     <string name="none_selected">None Selected</string>
     <string name="association_settings">Association Settings</string>
+    <string name="show_all">Show all</string>
 </resources>
