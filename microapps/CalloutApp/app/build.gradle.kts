@@ -21,10 +21,10 @@ plugins {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.mapviewcalloutapp"
+    namespace = "com.arcgismaps.toolkit.calloutapp"
     
     defaultConfig {
-        applicationId = "com.arcgismaps.toolkit.mapviewcalloutapp"
+        applicationId = "com.arcgismaps.toolkit.calloutapp"
     }
 }
 
