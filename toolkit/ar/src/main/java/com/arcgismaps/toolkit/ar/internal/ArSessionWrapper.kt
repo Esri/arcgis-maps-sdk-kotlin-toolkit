@@ -146,7 +146,7 @@ internal fun rememberArSessionWrapper(
     applicationContext: Context,
     onError: (Throwable) -> Unit = {},
     useGeospatial: Boolean = false,
-    planeFindingMode: Config.PlaneFindingMode
+    planeFindingMode: PlaneFindingMode
 ): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
     val arSessionWrapper = remember {
