@@ -55,7 +55,7 @@ internal class MediaElementState(
 
     val description: String = element.description
     val title: String = element.title
-    lateinit var media: List<PopupMediaState>
+    var media: List<PopupMediaState> = emptyList()
 
     /**
      * Indicates if the media list for the [popup] has been created.

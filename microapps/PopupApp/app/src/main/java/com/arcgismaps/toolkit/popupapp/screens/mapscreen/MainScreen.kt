@@ -67,7 +67,11 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
     BottomSheetScaffold(
         sheetContent = {
             if (viewModel.popupState != null) {
-                Popup(viewModel.popupState!!, Modifier.animateContentSize(), showCloseIcon = false)
+                Popup(
+                    viewModel.popupState!!,
+                    Modifier.animateContentSize(),
+                    onDismiss = { scope.launch { scaffoldState.bottomSheetState.partialExpand() } }
+                )
             }
         },
         modifier = Modifier.fillMaxSize(),

@@ -115,6 +115,13 @@ public class PopupState private constructor(internal val popup: Popup) {
         store.addLast(popupStateData)
     }
 
+    /**
+     * Represents the state of the Popup.
+     *
+     * @param popup the [Popup] to create the state for.
+     * @param scope a [CoroutineScope] to use for asynchronous operations.
+     * @since 300.0.0
+     */
     public constructor(popup: Popup, scope: CoroutineScope) : this(popup) {
         this.coroutineScope = scope
         initializePopupStateData(popup)
