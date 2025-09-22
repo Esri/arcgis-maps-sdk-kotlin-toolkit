@@ -45,4 +45,5 @@
     <string name="show_all">Show all</string>
     <string name="filter_by_feature_title">Filter by feature title</string>
     <string name="containment_visible_value">Visible: %1$s</string>
+    <string name="associations">Associations</string>
 </resources>

@@ -124,7 +124,7 @@ private fun ElementHeader(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = label,
+                text = label.ifEmpty { stringResource(R.string.associations) },
                 style = MaterialTheme.typography.titleMedium
             )
             if (description.isNotEmpty()) {
