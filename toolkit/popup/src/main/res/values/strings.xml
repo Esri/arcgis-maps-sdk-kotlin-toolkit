@@ -44,4 +44,5 @@
     <string name="association_settings">Association Settings</string>
     <string name="show_all">Show all</string>
     <string name="filter_by_feature_title">Filter by feature title</string>
+    <string name="containment_visible_value">Visible: %1$s</string>
 </resources>

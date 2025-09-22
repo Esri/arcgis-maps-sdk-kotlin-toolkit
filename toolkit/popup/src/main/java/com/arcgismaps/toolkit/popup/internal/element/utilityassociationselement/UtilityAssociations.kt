@@ -151,7 +151,10 @@ internal fun UtilityAssociations(
         // Search bar
         OutlinedTextField(
             value = searchQuery,
-            onValueChange = { searchQuery = it },
+            onValueChange = { newValue ->
+                searchQuery = newValue
+                showAll = true
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.filter_by_feature_title)) },
@@ -270,9 +273,10 @@ private fun AssociationItem(
     var supportingText = ""
     when (association.associationType) {
         is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
-            trailingText = "${(association.fractionAlongEdge * 100).toInt()}%"
-            target.terminal?.let { terminal ->
-                supportingText = terminal.name
+            supportingText = if (target.terminal != null) {
+                "${target.terminal?.name}, ${(association.fractionAlongEdge * 100).toInt()}%"
+            } else {
+                "${(association.fractionAlongEdge * 100).toInt()}%"
             }
         }
 
@@ -286,11 +290,10 @@ private fun AssociationItem(
 
         is UtilityAssociationType.Containment -> {
             if (associatedFeature.globalId == association.toElement.globalId) {
-                supportingText = if (association.isContainmentVisible) {
-                    stringResource(R.string.visible_content)
-                } else {
-                    stringResource(R.string.content)
-                }
+                supportingText = stringResource(
+                    R.string.containment_visible_value,
+                    association.isContainmentVisible
+                )
             }
         }
 
