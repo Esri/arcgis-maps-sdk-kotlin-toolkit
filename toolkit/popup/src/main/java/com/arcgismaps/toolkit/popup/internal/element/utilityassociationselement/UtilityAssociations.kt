@@ -20,6 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,14 +32,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -135,64 +140,98 @@ internal fun UtilityAssociations(
 ) {
     val associationResults = groupResult.associationResults
     var showAll by rememberSaveable { mutableStateOf(false) }
-    val itemsToShow = if (showAll) associationResults else associationResults.take(displayCount)
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val filteredResults = associationResults.filter {
+        it.title.contains(searchQuery, ignoreCase = true)
+    }
+    val itemsToShow = if (showAll) filteredResults else filteredResults.take(displayCount)
     val lazyListState = rememberLazyListState()
 
-    Surface(
-        modifier = modifier.wrapContentHeight(align = Alignment.Top),
-        shape = RoundedCornerShape(15.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
-    ) {
-        LazyColumn(
-            modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
-            state = lazyListState
-        ) {
-            itemsToShow.forEachIndexed { index, info ->
-                item(info.association.hashCode()) {
-                    AssociationItem(
-                        title = info.title,
-                        association = info.association,
-                        associatedFeature = info.associatedFeature,
-                        onClick = { onItemClick(index) },
-                        onDetailsClick = { onDetailsClick(index) },
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                    )
-                    if (index < itemsToShow.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = DividerDefaults.color.copy(alpha = 0.7f)
+    Column(modifier = modifier) {
+        // Search bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier
+                .fillMaxWidth(),
+            placeholder = { Text(stringResource(R.string.filter_by_feature_title)) },
+            singleLine = true,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search"
+                )
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Clear search"
                         )
                     }
                 }
             }
-            if (!showAll && associationResults.size > displayCount) {
-                item("show_all") {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showAll = true }
-                            .padding(vertical = 12.dp, horizontal = 24.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.show_all),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Surface(
+            modifier = Modifier.wrapContentHeight(align = Alignment.Top),
+            shape = RoundedCornerShape(15.dp),
+            color = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            Column {
+                LazyColumn(
+                    modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
+                    state = lazyListState
+                ) {
+                    itemsToShow.forEachIndexed { index, info ->
+                        item(info.association.hashCode()) {
+                            AssociationItem(
+                                title = info.title,
+                                association = info.association,
+                                associatedFeature = info.associatedFeature,
+                                onClick = { onItemClick(index) },
+                                onDetailsClick = { onDetailsClick(index) },
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                             )
-                            Text(
-                                text = "Total: ${associationResults.size}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
+                            if (index < itemsToShow.size - 1) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = DividerDefaults.color.copy(alpha = 0.7f)
+                                )
+                            }
                         }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "List bullet",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
+                    }
+                    if (!showAll && filteredResults.size > displayCount) {
+                        item("show_all") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showAll = true }
+                                    .padding(vertical = 12.dp, horizontal = 24.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.show_all),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Total: ${filteredResults.size}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.List,
+                                    contentDescription = "List bullet",
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
                     }
                 }
             }
