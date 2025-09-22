@@ -30,6 +30,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -50,6 +51,11 @@ internal class UtilityAssociationsElementState(
     private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
     private val _filters: SnapshotStateList<MutableFilterResult> = SnapshotStateList()
+
+    /**
+     * Indicates if the field is editable.
+     */
+    val isEditable: StateFlow<Boolean> = element.isEditable
 
     /**
      * Indicates if the state is loading data to fetch the filters [filters].

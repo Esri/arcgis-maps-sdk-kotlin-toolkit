@@ -19,7 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.navigation
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsGroupScreen
 import kotlinx.serialization.Serializable
 
 /**
@@ -46,7 +46,7 @@ internal sealed class NavigationRoute {
     ) : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsScreen].
+     * Represents a view for the [UNAssociationsGroupScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected group of associations.

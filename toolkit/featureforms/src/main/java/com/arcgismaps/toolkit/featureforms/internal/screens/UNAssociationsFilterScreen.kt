@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.FormStateData
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 
@@ -57,7 +57,7 @@ internal fun UNAssociationsFilterScreen(
             modifier = modifier,
             verticalArrangement = Arrangement.Top
         ) {
-            UtilityAssociationFilter(
+            UtilityAssociationsFilter(
                 groupResults = filterResult.groupResults,
                 onGroupClick = { groupResult ->
                     utilityAssociationsElementState.setSelectedGroupResult(groupResult)

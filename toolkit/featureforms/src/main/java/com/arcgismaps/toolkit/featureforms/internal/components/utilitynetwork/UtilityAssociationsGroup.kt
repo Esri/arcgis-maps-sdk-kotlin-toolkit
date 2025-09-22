@@ -39,8 +39,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -70,76 +68,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
-import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
-
-/**
- * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
- * list of its groups as given by [UtilityAssociationsFilterResult.groupResults].
- *
- * @param groupResults The [UtilityAssociationsFilterResult] to display.
- * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
- * @param modifier The [Modifier] to apply to this layout.
- */
-@Composable
-internal fun UtilityAssociationFilter(
-    groupResults: List<MutableGroupResult>,
-    onGroupClick: (MutableGroupResult) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // show the list of layers
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(15.dp)
-    ) {
-        if (groupResults.isEmpty()) {
-            // No associations found
-            Text(
-                text = stringResource(R.string.no_associations_found),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium,
-                fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            return@Surface
-        }
-        LazyColumn(modifier = Modifier) {
-            groupResults.forEachIndexed { index, group ->
-                item {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = group.name, modifier = Modifier.padding(start = 16.dp))
-                        },
-                        trailingContent = {
-                            Text(
-                                text = "${group.associationResults.count()}",
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        },
-                        modifier = Modifier
-                            .clickable {
-                                onGroupClick(group)
-                            }
-                            .animateItem(),
-                        colors = ListItemDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        )
-                    )
-                    if (index < groupResults.count() - 1) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceContainer
-                        ) {
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 /**
  * Displays the provided list of associations that are part of the [UtilityAssociationGroupResult].
@@ -153,8 +82,9 @@ internal fun UtilityAssociationFilter(
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun UtilityAssociations(
+internal fun UtilityAssociationsGroup(
     groupResult: MutableGroupResult,
+    isEditable : Boolean,
     isNavigationEnabled: Boolean,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
@@ -179,6 +109,7 @@ internal fun UtilityAssociations(
                         title = info.title,
                         association = info.association,
                         associatedFeature = info.associatedFeature,
+                        isEditable = isEditable,
                         enabled = isNavigationEnabled,
                         onClick = {
                             onItemClick(index)
@@ -224,6 +155,7 @@ private fun AssociationItem(
     title: String,
     association: UtilityAssociation,
     associatedFeature: ArcGISFeature,
+    isEditable: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
@@ -297,7 +229,7 @@ private fun AssociationItem(
     SwipeToDismissBox(
         state = swipeToDismissBoxState,
         enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
+        enableDismissFromEndToStart = isEditable,
         backgroundContent = {
             // Cross-fade the background color as the drag gesture progresses.
             val color by animateColorAsState(

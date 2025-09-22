@@ -177,7 +177,7 @@ internal fun ContentAwareTopBar(
         )
         InitializingExpressions(
             modifier = Modifier.fillMaxWidth(),
-            evaluationProvider = { formData.isEvaluatingExpressions.value }
+            evaluationProvider = { formData.isEvaluatingExpressions }
         )
     }
     if (pendingNavigationAction != NavigationAction.None) {

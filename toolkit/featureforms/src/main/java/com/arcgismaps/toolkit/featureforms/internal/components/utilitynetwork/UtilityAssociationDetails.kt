@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,7 @@ internal fun UtilityAssociationDetails(
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
+    val isEditable by state.isEditable.collectAsState()
     val scrollState = rememberScrollState()
     var showConfirmationDialog by remember {
         mutableStateOf(false)
@@ -146,7 +148,10 @@ internal fun UtilityAssociationDetails(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = { showConfirmationDialog = true }) {
+        Button(
+            onClick = { showConfirmationDialog = true },
+            enabled = isEditable
+        ) {
             Text(text = stringResource(R.string.remove_association))
         }
     }
