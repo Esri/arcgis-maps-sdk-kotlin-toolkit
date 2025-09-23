@@ -68,6 +68,14 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
             skipHiddenState = false
         )
     )
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden) {
+            unselectFeature(viewModel.geoElement, viewModel.layer)
+            viewModel.updatePopupState(null)
+            viewModel.setGeoElement(null)
+        }
+    }
+
     BottomSheetScaffold(
         sheetContent = {
             if (viewModel.popupState != null) {
@@ -77,6 +85,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                     onDismiss = { scope.launch {
                         viewModel.updatePopupState(null)
                         unselectFeature(viewModel.geoElement, viewModel.layer)
+                        viewModel.setGeoElement(null)
                         scaffoldState.bottomSheetState.hide()
                     } }
                 )
