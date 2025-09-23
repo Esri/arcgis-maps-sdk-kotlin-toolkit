@@ -36,8 +36,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsGroupScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
 
 @Composable
 internal fun FeatureFormNavHost(
@@ -87,7 +87,7 @@ internal fun FeatureFormNavHost(
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            UNAssociationsFilterScreen(
+            UNAssociationsFilterResultScreen(
                 formStateData = formData,
                 route = route,
                 onGroupSelected = { stateId ->
@@ -101,7 +101,7 @@ internal fun FeatureFormNavHost(
         composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
             val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-            UNAssociationsGroupScreen(
+            UNAssociationGroupResultScreen(
                 formStateData = formData,
                 route = route,
                 isNavigationEnabled = isNavigationEnabled,

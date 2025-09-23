@@ -35,15 +35,16 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
 /**
- * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
- * list of its groups as given by [UtilityAssociationsFilterResult.groupResults].
+ * Displays the provided [com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult].
+ * The filter result is displayed as a list of its groups as given by
+ * [UtilityAssociationsFilterResult.groupResults].
  *
  * @param groupResults The [UtilityAssociationsFilterResult] to display.
  * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun UtilityAssociationsFilter(
+internal fun UtilityAssociationsFilterResult(
     groupResults: List<MutableGroupResult>,
     onGroupClick: (MutableGroupResult) -> Unit,
     modifier: Modifier = Modifier

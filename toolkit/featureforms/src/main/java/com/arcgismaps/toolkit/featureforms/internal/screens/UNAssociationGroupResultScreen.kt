@@ -47,7 +47,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEdits
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberModalBottomSheetState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsGroup
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
@@ -68,7 +68,7 @@ import kotlinx.coroutines.launch
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
-internal fun UNAssociationsGroupScreen(
+internal fun UNAssociationGroupResultScreen(
     formStateData: FormStateData,
     route: NavigationRoute.UNAssociationsView,
     isNavigationEnabled: Boolean,
@@ -109,7 +109,7 @@ internal fun UNAssociationsGroupScreen(
     var showDetails by rememberSaveable {
         mutableStateOf(false)
     }
-    UtilityAssociationsGroup(
+    UtilityAssociationGroupResult(
         groupResult = groupResult,
         isEditable = isEditable,
         isNavigationEnabled = isNavigationEnabled,

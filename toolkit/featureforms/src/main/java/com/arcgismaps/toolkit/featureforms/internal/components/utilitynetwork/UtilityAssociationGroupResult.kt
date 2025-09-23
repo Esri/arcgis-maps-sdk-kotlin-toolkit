@@ -66,12 +66,12 @@ import com.arcgismaps.Guid
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
-import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityElement
 
 /**
- * Displays the provided list of associations that are part of the [UtilityAssociationGroupResult].
+ * Displays the provided list of associations that are part of the
+ * [com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult].
  *
  * @param groupResult The [UtilityAssociationGroupResult] to display.
  * @param isNavigationEnabled Whether navigation to the associated feature is enabled.
@@ -82,7 +82,7 @@ import com.arcgismaps.utilitynetworks.UtilityElement
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun UtilityAssociationsGroup(
+internal fun UtilityAssociationGroupResult(
     groupResult: MutableGroupResult,
     isEditable : Boolean,
     isNavigationEnabled: Boolean,
