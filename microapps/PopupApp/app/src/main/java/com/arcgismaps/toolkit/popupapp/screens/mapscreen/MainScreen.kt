@@ -70,9 +70,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
     )
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden) {
-            unselectFeature(viewModel.geoElement, viewModel.layer)
-            viewModel.updatePopupState(null)
-            viewModel.setGeoElement(null)
+            resetSelection(viewModel)
         }
     }
 
@@ -83,9 +81,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                     viewModel.popupState!!,
                     Modifier.animateContentSize(),
                     onDismiss = { scope.launch {
-                        viewModel.updatePopupState(null)
-                        unselectFeature(viewModel.geoElement, viewModel.layer)
-                        viewModel.setGeoElement(null)
+                        resetSelection(viewModel)
                         scaffoldState.bottomSheetState.hide()
                     } }
                 )
@@ -207,6 +203,12 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
             }
         )
     }
+}
+
+private fun resetSelection(viewModel: MapViewModel) {
+    viewModel.updatePopupState(null)
+    unselectFeature(viewModel.geoElement, viewModel.layer)
+    viewModel.setGeoElement(null)
 }
 
 private fun GeoElement?.sameSelection(other: GeoElement): Boolean =
