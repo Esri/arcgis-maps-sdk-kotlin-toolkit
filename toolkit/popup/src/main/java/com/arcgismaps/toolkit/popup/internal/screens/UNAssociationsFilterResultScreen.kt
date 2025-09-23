@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationFilter
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsFilterResult
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 import com.arcgismaps.toolkit.popup.PopupStateData
@@ -38,7 +38,7 @@ import com.arcgismaps.toolkit.popup.PopupStateData
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
-internal fun UNAssociationsFilterScreen(
+internal fun UNAssociationsFilterResultScreen(
     popupStateData: PopupStateData,
     route : NavigationRoute.UNFilterView,
     onGroupSelected: (Int) -> Unit,
@@ -57,7 +57,7 @@ internal fun UNAssociationsFilterScreen(
             modifier = modifier,
             verticalArrangement = Arrangement.Top
         ) {
-            UtilityAssociationFilter(
+            UtilityAssociationsFilterResult(
                 groupResults = filterResult.groupResults,
                 onGroupClick = { groupResult ->
                     utilityAssociationsElementState.setSelectedGroupResult(groupResult)

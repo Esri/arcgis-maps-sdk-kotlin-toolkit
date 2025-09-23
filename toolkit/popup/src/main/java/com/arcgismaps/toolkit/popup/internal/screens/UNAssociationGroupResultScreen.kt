@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.popup.PopupStateData
-import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociations
+import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
 
@@ -37,7 +37,7 @@ import com.arcgismaps.toolkit.popup.internal.navigation.NavigationRoute
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
-internal fun UNAssociationsScreen(
+internal fun UNAssociationGroupResultScreen(
     popupStateData: PopupStateData,
     route: NavigationRoute.UNAssociationsView,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
@@ -48,15 +48,13 @@ internal fun UNAssociationsScreen(
     // Get the selected UtilityAssociationsElementState from the state collection
     val utilityAssociationsElementState = states[route.stateId] as?
         UtilityAssociationsElementState ?: return
-    // Get the selected filter from the UtilityAssociationsElementState
-    val filterResult = utilityAssociationsElementState.selectedFilterResult
     // Get the selected group from the filter
     val groupResult = utilityAssociationsElementState.selectedGroupResult
-    if (filterResult == null || groupResult == null) {
+    if (groupResult == null) {
         // guard against null values
         return
     }
-    UtilityAssociations(
+    UtilityAssociationGroupResult(
         groupResult = groupResult,
         onItemClick = { index ->
             val feature = groupResult.associationResults[index].associatedFeature

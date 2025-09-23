@@ -91,7 +91,8 @@ apiValidation {
         "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt",
         "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt",
         "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationDetailsKt",
-        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationsFilterResultKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationGroupResultKt",
         "com.arcgismaps.toolkit.popup.internal.screens.ComposableSingletons\$ContentAwareTopBarKt"
     )
 

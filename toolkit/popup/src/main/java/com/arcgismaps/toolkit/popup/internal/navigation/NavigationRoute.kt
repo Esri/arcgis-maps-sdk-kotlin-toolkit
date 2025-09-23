@@ -18,8 +18,8 @@ package com.arcgismaps.toolkit.popup.internal.navigation
 
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.screens.PopupScreen
-import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterScreen
-import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
+import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterResultScreen
+import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationGroupResultScreen
 import kotlinx.serialization.Serializable
 
 /**
@@ -35,7 +35,7 @@ internal sealed class NavigationRoute {
     data object PopupView : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsFilterScreen].
+     * Represents a view for the [UNAssociationsFilterResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected filter.
@@ -46,7 +46,7 @@ internal sealed class NavigationRoute {
     ) : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsScreen].
+     * Represents a view for the [UNAssociationGroupResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected group of associations.

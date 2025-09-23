@@ -39,8 +39,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -65,64 +63,11 @@ import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
-import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 import com.arcgismaps.utilitynetworks.UtilityElement
 
 /**
- * Displays the provided [UtilityAssociationsFilterResult]. The filter result is displayed as a
- * list of its groups as given by [UtilityAssociationsFilterResult.groupResults].
- *
- * @param groupResults The [UtilityAssociationsFilterResult] to display.
- * @param onGroupClick A callback that is called when a group is clicked with the index of the group.
- * @param modifier The [Modifier] to apply to this layout.
- */
-@Composable
-internal fun UtilityAssociationFilter(
-    groupResults: List<UtilityAssociationGroupResult>,
-    onGroupClick: (UtilityAssociationGroupResult) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // show the list of layers
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(15.dp)
-    ) {
-        LazyColumn(modifier = Modifier) {
-            groupResults.forEachIndexed { index, group ->
-                item {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = group.name, modifier = Modifier.padding(start = 16.dp))
-                        },
-                        trailingContent = {
-                            Text(
-                                text = "${group.associationResults.count()}",
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            onGroupClick(group)
-                        },
-                        colors = ListItemDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        )
-                    )
-                    if (index < groupResults.count() - 1) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceContainer
-                        ) {
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Displays the provided list of associations that are part of the [UtilityAssociationGroupResult].
+ * Displays the provided list of associations that are part of the
+ * [com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult].
  *
  * @param groupResult The [UtilityAssociationGroupResult] to display.
  * @param onItemClick A callback that is called when an association is clicked.
@@ -131,7 +76,7 @@ internal fun UtilityAssociationFilter(
  * @param displayCount The number of associations to display.
  */
 @Composable
-internal fun UtilityAssociations(
+internal fun UtilityAssociationGroupResult(
     groupResult: UtilityAssociationGroupResult,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,

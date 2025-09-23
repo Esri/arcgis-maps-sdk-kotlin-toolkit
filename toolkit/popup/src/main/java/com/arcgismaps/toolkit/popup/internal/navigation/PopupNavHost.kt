@@ -35,8 +35,8 @@ import com.arcgismaps.toolkit.popup.PopupState
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationDetails
 import com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.popup.internal.screens.PopupScreen
-import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterScreen
-import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsScreen
+import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationsFilterResultScreen
+import com.arcgismaps.toolkit.popup.internal.screens.UNAssociationGroupResultScreen
 
 @Composable
 internal fun PopupNavHost(
@@ -77,7 +77,7 @@ internal fun PopupNavHost(
         composable<NavigationRoute.UNFilterView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
             val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
-            UNAssociationsFilterScreen(
+            UNAssociationsFilterResultScreen(
                 popupStateData = popupStateData,
                 route = route,
                 onGroupSelected = { stateId ->
@@ -91,7 +91,7 @@ internal fun PopupNavHost(
         composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
             val popupStateData = remember(backStackEntry) { state.getActivePopupStateData() }
-            UNAssociationsScreen(
+            UNAssociationGroupResultScreen(
                 popupStateData = popupStateData,
                 route = route,
                 onNavigateToFeature = { feature ->
