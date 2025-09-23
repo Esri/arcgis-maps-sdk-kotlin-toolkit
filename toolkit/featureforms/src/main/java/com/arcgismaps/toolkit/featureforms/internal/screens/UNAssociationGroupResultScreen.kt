@@ -47,7 +47,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEdits
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberModalBottomSheetState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociations
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
@@ -68,7 +68,7 @@ import kotlinx.coroutines.launch
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
-internal fun UNAssociationsScreen(
+internal fun UNAssociationGroupResultScreen(
     formStateData: FormStateData,
     route: NavigationRoute.UNAssociationsView,
     isNavigationEnabled: Boolean,
@@ -84,15 +84,14 @@ internal fun UNAssociationsScreen(
     // Get the selected UtilityAssociationsElementState from the state collection
     val utilityAssociationsElementState = states[route.stateId] as?
         UtilityAssociationsElementState ?: return
-    // Get the selected filter from the UtilityAssociationsElementState
-    val filterResult = utilityAssociationsElementState.selectedFilterResult
     // Get the selected group from the filter
     val groupResult = utilityAssociationsElementState.selectedGroupResult
-    if (filterResult == null || groupResult == null) {
+    if (groupResult == null) {
         // guard against null values
         return
     }
     val hasEdits by featureForm.hasEdits.collectAsState()
+    val isEditable by utilityAssociationsElementState.isEditable.collectAsState()
     val scope = rememberCoroutineScope()
     // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
@@ -110,8 +109,9 @@ internal fun UNAssociationsScreen(
     var showDetails by rememberSaveable {
         mutableStateOf(false)
     }
-    UtilityAssociations(
+    UtilityAssociationGroupResult(
         groupResult = groupResult,
+        isEditable = isEditable,
         isNavigationEnabled = isNavigationEnabled,
         onItemClick = { index ->
             if (hasEdits) {

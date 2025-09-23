@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.FormStateData
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationFilter
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsFilterResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 
@@ -38,7 +38,7 @@ import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
  * @param modifier The modifier to be applied to the layout.
  */
 @Composable
-internal fun UNAssociationsFilterScreen(
+internal fun UNAssociationsFilterResultScreen(
     formStateData: FormStateData,
     route : NavigationRoute.UNFilterView,
     onGroupSelected: (Int) -> Unit,
@@ -57,7 +57,7 @@ internal fun UNAssociationsFilterScreen(
             modifier = modifier,
             verticalArrangement = Arrangement.Top
         ) {
-            UtilityAssociationFilter(
+            UtilityAssociationsFilterResult(
                 groupResults = filterResult.groupResults,
                 onGroupClick = { groupResult ->
                     utilityAssociationsElementState.setSelectedGroupResult(groupResult)
