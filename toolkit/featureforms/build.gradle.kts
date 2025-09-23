@@ -121,7 +121,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsFilterKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsGroupKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
@@ -131,7 +132,7 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.material3.ComposableSingletons\$ModalBottomSheetKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsScreenKt"
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsGroupScreenKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
