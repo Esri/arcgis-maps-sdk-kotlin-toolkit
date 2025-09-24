@@ -177,7 +177,7 @@ dependencies {
     debugImplementation(libs.bundles.debug)
 
     // Include only if internal tests are required
-    if (file(project.findProperty("toolkitTestsDir") as String).exists()) {
+    if (file(project.findProperty("toolkitTestDir") as String?)?.exists() ?: false) {
         androidTestImplementation(libs.mockingjay)
     }
 }
