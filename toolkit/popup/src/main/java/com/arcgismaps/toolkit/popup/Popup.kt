@@ -18,62 +18,36 @@
 
 package com.arcgismaps.toolkit.popup
 
-import androidx.compose.animation.core.animateFloatAsState
+import android.content.Context
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.popup.AttachmentsPopupElement
-import com.arcgismaps.mapping.popup.FieldsPopupElement
-import com.arcgismaps.mapping.popup.MediaPopupElement
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.mapping.popup.Popup
-import com.arcgismaps.mapping.popup.PopupAttachment
-import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.realtime.DynamicEntity
-import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
-import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
-import com.arcgismaps.toolkit.popup.internal.element.media.MediaElementState
-import com.arcgismaps.toolkit.popup.internal.element.media.MediaPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.media.rememberMediaElementState
-import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
-import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
-import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
-
-@Immutable
-private data class PopupState(@Stable val popup: Popup)
+import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
+import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
 
 /**
  * A composable Popup toolkit component that enables users to see Popup content in a
@@ -91,26 +65,57 @@ private data class PopupState(@Stable val popup: Popup)
  *
  * @since 200.5.0
  */
+@Deprecated(
+    message = "Use the overload that uses the PopupState object. This will become an error" +
+            " in a future release.",
+    level = DeprecationLevel.WARNING
+)
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val stateData = remember(popup) {
-        PopupState(popup)
+        PopupState(
+            popup,
+            scope,
+            // Ignore the UtilityAssociationsFormElement as it is not supported with this API
+            ignoreList = setOf(
+                UtilityAssociationsPopupElement::class.java
+            )
+        )
     }
-    Popup(stateData, modifier)
+    Popup(stateData, modifier, showCloseIcon = false)
 }
 
 /**
- * Maintain list of attachments outside of SDK
- * https://devtopia.esri.com/runtime/apollo/issues/681
+ * A composable Popup toolkit component that enables users to see Popup content in a
+ * layer that have been configured externally.
+ *
+ * Popups may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ *
+ * Note : Even though the [Popup] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
+ *
+ * @param popupState The [PopupState] object that holds the state of the Popup.
+ * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
+ * Popup.
+ * @param onDismiss Callback that is invoked when the user clicks the close icon in the top app bar.
+ * @param showCloseIcon Flag to indicate if the close icon should be shown in the top app bar. If true, the [onDismiss]
+ * callback will be invoked when the close icon is clicked. Default is true.
+ *
+ * @since 300.0.0
  */
-private val attachments: MutableList<PopupAttachment> = mutableListOf()
-
 @Composable
-private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
+public fun Popup(
+    popupState: PopupState,
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit = {},
+    showCloseIcon: Boolean = true,
+) {
     val popup = popupState.popup
     val dynamicEntity = (popup.geoElement as? DynamicEntity)
-    var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
-    var fetched by rememberSaveable(popup) { mutableStateOf(false) }
+    // If the popup is for a dynamic entity, we want to refresh the popup periodically
+    // to get the latest data.
     var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
     if (dynamicEntity != null) {
         LaunchedEffect(popup) {
@@ -122,203 +127,87 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
             }
         }
     }
-    LaunchedEffect(popup) {
-        popupState.popup.evaluateExpressions()
-        if (!fetched) {
-            val element = popupState.popup.evaluatedElements
-                .filterIsInstance<AttachmentsPopupElement>()
-                .firstOrNull()
 
-            // make a copy of the attachments when first fetched.
-            attachments.clear()
-            element?.fetchAttachments()?.onSuccess {
-                attachments.addAll(element.attachments)
+    val navController = rememberNavController(popupState)
+    popupState.setNavigationCallback { route ->
+        navController.navigate(route)
+    }
+    popupState.setNavigateBack {
+        navController.navigateUp()
+    }
+
+    PopupLayout(
+        topBar = {
+            val backStackEntry by navController.currentBackStackEntryAsState()
+            // Track if there is a back stack entry
+            val hasBackStack = remember(backStackEntry) {
+                navController.previousBackStackEntry != null
             }
-
-            fetched = true
-        }
-
-        evaluated = true
-    }
-
-    Popup(popupState, evaluated && fetched, lastUpdatedEntityId, modifier)
-}
-
-@Composable
-private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-    val popup = popupState.popup
-    val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
-    viewableFileState.value?.let { viewableFile ->
-        FileViewer(scope, fileState = viewableFile) {
-            viewableFileState.value = null
-        }
-    }
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = popup.title,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 15.dp)
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
-        )
-        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-            initialized
-        }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        if (initialized) {
-            PopupBody(popupState, refreshed) {
-                viewableFileState.value = it
+            backStackEntry?.let { entry ->
+                ContentAwareTopBar(
+                    backStackEntry = entry,
+                    state = popupState,
+                    onDismissRequest = onDismiss,
+                    hasBackStack = hasBackStack,
+                    showCloseIcon = showCloseIcon,
+                    modifier = Modifier
+                        .padding(
+                            vertical = 8.dp,
+                            horizontal = if (hasBackStack) 8.dp else 16.dp
+                        )
+                        .fillMaxWidth(),
+                )
             }
-        }
-    }
-}
-
-/**
- * The body of the Popup composable
- *
- * @param popupState the immutable state object containing the Popup.
- * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
- * @param onFileClicked the callback to display an attachment or media image
- */
-@Composable
-private fun PopupBody(
-    popupState: PopupState,
-    refreshed: Long,
-    onFileClicked: (ViewableFile) -> Unit = {}
-) {
-    val popup = popupState.popup
-    val lazyListState = rememberLazyListState()
-    val states = rememberStates(popup, attachments)
-    LazyColumn(
-        modifier = Modifier.semantics { contentDescription = "lazy column" },
-        state = lazyListState
-    ) {
-        states.forEach { entry ->
-            val element = entry.popupElement
-            when (element) {
-                is TextPopupElement -> {
-                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
-                    item(contentType = TextPopupElement::class.java) {
-                        TextPopupElement(
-                            entry.state as TextElementState
-                        )
-                    }
-                }
-
-                is AttachmentsPopupElement -> {
-                    item(contentType = AttachmentsPopupElement::class.java) {
-                        AttachmentsPopupElement(
-                            state = entry.state as AttachmentsElementState,
-                            onSelectedAttachment = onFileClicked
-                        )
-                    }
-                }
-
-                is FieldsPopupElement -> {
-                    item(contentType = FieldsPopupElement::class.java) {
-                        FieldsPopupElement(
-                            state = entry.state as FieldsElementState,
-                            refreshed = refreshed
-                        )
-                    }
-                }
-
-                is MediaPopupElement -> {
-                    item(contentType = MediaPopupElement::class.java) {
-                        MediaPopupElement(
-                            entry.state as MediaElementState,
-                            onClickedMedia = onFileClicked
-                        )
-                    }
-                }
-
-                else -> {
-                    // other popup elements are not created
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-internal fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    val alpha by animateFloatAsState(
-        if (evaluationProvider()) 0f else 1f,
-        label = "evaluation loading alpha"
+        },
+        content = {
+            PopupNavHost(
+                navController = navController,
+                state = popupState,
+                refreshed = lastUpdatedEntityId,
+                modifier = Modifier.fillMaxSize()
+            )
+        },
+        modifier = modifier
     )
-    Surface(
-        modifier = modifier.graphicsLayer {
-            this.alpha = alpha
+    DisposableEffect(popupState) {
+        onDispose {
+            // Clear the navigation actions when the composition is disposed
+            popupState.setNavigationCallback(null)
+            popupState.setNavigateBack(null)
         }
-    ) {
-        LinearProgressIndicator(modifier)
+    }
+
+}
+
+@Composable
+internal fun PopupLayout(
+    topBar: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        topBar()
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        content()
     }
 }
 
-/**
- * Creates and remembers state objects for all the supported element types that are part of the
- * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
- *
- * @param popup the [Popup] to create the states for.
- * @return returns the [PopupElementStateCollection] created.
- */
 @Composable
-internal fun rememberStates(
-    popup: Popup,
-    attachments: List<PopupAttachment>
-): PopupElementStateCollection {
-    val states = mutablePopupElementStateCollection()
-    popup.evaluatedElements.forEach { element ->
-        when (element) {
-            is TextPopupElement -> {
-                states.add(
-                    element,
-                    rememberTextElementState(element = element, popup = popup)
-                )
-            }
-
-            is AttachmentsPopupElement -> {
-                states.add(
-                    element,
-                    rememberAttachmentsElementState(
-                        popup = popup,
-                        element = element,
-                        attachments = attachments
-                    )
-                )
-            }
-
-            is FieldsPopupElement -> {
-                states.add(
-                    element,
-                    rememberFieldsElementState(element = element, popup = popup)
-                )
-            }
-
-            is MediaPopupElement -> {
-                states.add(
-                    element,
-                    rememberMediaElementState(element = element, popup = popup)
-                )
-            }
-
-            else -> {
-                // TODO remove for release
-                println("encountered element of type ${element::class.java}")
-            }
-        }
+internal fun rememberNavController(vararg inputs: Any): NavHostController {
+    val context = LocalContext.current
+    rememberNavController()
+    return rememberSaveable(
+        inputs = inputs, saver = Saver(
+            save = { it.saveState() },
+            restore = { createNavController(context).apply { restoreState(it) } }
+        )) {
+        createNavController(context)
     }
+}
 
-    return states
+private fun createNavController(context: Context): NavHostController {
+    return NavHostController(context).apply {
+        navigatorProvider.addNavigator(ComposeNavigator())
+        navigatorProvider.addNavigator(DialogNavigator())
+    }
 }
