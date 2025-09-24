@@ -33,21 +33,22 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 
 /**
  * A composable that displays the details of a [UtilityAssociationResult].
  *
- * @param state The [UtilityAssociationsElementState] of the element.
+ * @param associationResult The [UtilityAssociationResult] to display details for.
+ * @param filter The [UtilityAssociationsFilter] used to obtain the association result.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun UtilityAssociationDetails(
-    state: UtilityAssociationsElementState,
+    associationResult: UtilityAssociationResult,
+    filter: UtilityAssociationsFilter,
     modifier: Modifier = Modifier
 ) {
-    val associationResult = state.selectedAssociationResult ?: return
-    val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
     Column(
         modifier = modifier,
@@ -116,7 +117,7 @@ internal fun UtilityAssociationDetails(
         }
         associationResult.getFractionAlongEdge()?.let { fraction ->
             FractionAlongEdgeControl(
-                fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
+                fraction = fraction.toFloat(),
                 enabled = false,
                 onValueChanged = {},
                 modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)

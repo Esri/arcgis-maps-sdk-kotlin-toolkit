@@ -76,9 +76,10 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
 
     BottomSheetScaffold(
         sheetContent = {
-            if (viewModel.popupState != null) {
+            val state = viewModel.popupState
+            if (state != null) {
                 Popup(
-                    viewModel.popupState!!,
+                    state,
                     Modifier.animateContentSize(),
                     onDismiss = { scope.launch {
                         resetSelection(viewModel)

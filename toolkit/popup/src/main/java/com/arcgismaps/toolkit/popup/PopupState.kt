@@ -298,8 +298,7 @@ public class PopupState private constructor(internal val popup: Popup) {
                 }
 
                 else -> {
-                    // TODO remove for release
-                    println("encountered element of type ${element::class.java}")
+                    // Unsupported element type.
                 }
             }
         }

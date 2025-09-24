@@ -43,9 +43,6 @@ internal class UtilityAssociationsElementState(
 
     private var _loading: MutableState<Boolean> = mutableStateOf(true)
 
-    private var _filters: MutableState<List<UtilityAssociationsFilterResult>> =
-        mutableStateOf(emptyList())
-
     /**
      * Indicates if the state is loading data to fetch the filters [filters].
      *
@@ -53,6 +50,9 @@ internal class UtilityAssociationsElementState(
      */
     val loading: Boolean
         get() = _loading.value
+
+    private var _filters: MutableState<List<UtilityAssociationsFilterResult>> =
+        mutableStateOf(emptyList())
 
     /**
      * The list of [UtilityAssociationsFilterResult] to display. This is empty until the data is fetched

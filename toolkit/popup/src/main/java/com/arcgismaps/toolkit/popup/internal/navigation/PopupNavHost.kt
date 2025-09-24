@@ -119,11 +119,18 @@ internal fun PopupNavHost(
             val utilityAssociationsElementState = popupStateData.stateCollection[route.stateId]
                 // guard against null value
                 as? UtilityAssociationsElementState ?: return@composable
-            // Display the association details
-            UtilityAssociationDetails(
-                state = utilityAssociationsElementState,
-                modifier = Modifier.fillMaxSize()
-            )
+
+            val associationResult = utilityAssociationsElementState.selectedAssociationResult
+            val filter = utilityAssociationsElementState.selectedFilterResult?.filter
+
+            if (associationResult != null && filter != null) {
+                // Display the association details
+                UtilityAssociationDetails(
+                    associationResult = associationResult,
+                    filter = filter,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
