@@ -18,13 +18,12 @@
 
 package com.esri.arcgismaps.kotlin.build_logic.convention
 
-import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitRegistryExtension
+import com.esri.arcgismaps.kotlin.build_logic.registry.ToolkitRegistry
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
 import java.net.URI
 
@@ -45,23 +44,17 @@ object ArtifactPublisher {
         val artifactoryUrl: String by project
         val artifactoryUsername: String by project
         val artifactoryPassword: String by project
-        val versionNumber: String by project
-        val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
-            .run { this == "true" }
-        val buildNumber: String by project
-        val artifactVersion: String = if (finalBuild) {
-            versionNumber
-        } else {
-            "$versionNumber-$buildNumber"
-        }
+
+        // Use centralized version provider
+        val artifactVersion = VersionProvider.getArtifactVersion(project)
+        // Built the artifact id for the given project
         val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
 
         project.pluginManager.apply(MavenPublishPlugin::class.java)
-
         project.afterEvaluate {
-            val registry = rootProject.extensions.getByType(ToolkitRegistryExtension::class.java)
-            if (!registry.toolkitProjects.contains(project)) return@afterEvaluate
-
+            // Check if this module is releasable
+            val isReleasable = ToolkitRegistry.isModuleReleasable(project).get()
+            if (!isReleasable) { return@afterEvaluate }
 
             project.extensions.configure<PublishingExtension> {
                 repositories {
@@ -77,9 +70,9 @@ object ArtifactPublisher {
                     create(project.name, MavenPublication::class.java) {
                         groupId = artifactoryGroupId
                         artifactId = artifactoryArtifactId
-                        version = artifactVersion
+                        version = artifactVersion.get()
 
-                        from(project.components["release"])
+                        from(project.components.getByName("release"))
                     }
                 }
             }

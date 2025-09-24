@@ -1,16 +1,15 @@
-import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitRegistryExtension
+import com.esri.arcgismaps.kotlin.build_logic.convention.VersionProvider
 import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
 import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
+import com.esri.arcgismaps.kotlin.build_logic.registry.ToolkitRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaVersioningPluginParameters
-import java.io.File
 
 class ArcGISMapsKdocConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -29,20 +28,12 @@ class ArcGISMapsKdocConventionPlugin : Plugin<Project> {
             implementation(libs.findBundle("composeCore").get())
         }
 
-        val versionNumber: String by project
-        // Create the toolkit sources provider
-        val registry = rootProject.extensions.getByType(ToolkitRegistryExtension::class.java)
-        val sourceRootsProvider = providers.provider {
-            registry.toolkitProjects.map { p ->
-                File(rootDir, "toolkit/${p.name}/src/main/java").canonicalPath
-            }
-        }
-
         //./gradlew :kdoc:dokkaGenerate
         // doc output will be under `kdoc/build/dokka/html`
         extensions.configure<DokkaExtension> {
             pluginsConfiguration.withType<DokkaVersioningPluginParameters>().configureEach {
-                version.set(versionNumber)
+                // Use centralized version provider
+                version.set(VersionProvider.getArtifactVersion(project))
             }
 
             moduleName.set("arcgis-maps-kotlin-toolkit")
@@ -53,14 +44,20 @@ class ArcGISMapsKdocConventionPlugin : Plugin<Project> {
                 }
 
                 named("main") {
-                    sourceRoots.from(files(sourceRootsProvider))
+                    // Get source roots directly and convert to files
+                    val toolkitConfigProvider = ToolkitRegistry.getReleasableModules(rootProject)
+                    sourceRoots.from(
+                        toolkitConfigProvider.map { toolkitRegistryModuleConfigs ->
+                            toolkitRegistryModuleConfigs.map { config ->
+                                rootProject.file(config.sourceRoot)
+                            }
+                        }
+                    )
                 }
                 configureEach {
                     perPackageOption {
                         matchingRegex.set(".*internal.*")
                         suppress.set(true)
-                    }
-                    perPackageOption {
                         reportUndocumented.set(true)
                     }
                 }

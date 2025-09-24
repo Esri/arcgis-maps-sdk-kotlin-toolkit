@@ -64,10 +64,6 @@ gradlePlugin {
             id = "arcgismaps.kotlin.sdk"
             implementationClass = "ArcGISMapsKotlinSDKConventionPlugin"
         }
-        register("arcGISMapsRootConventionPlugin") {
-            id = "arcgismaps.kotlin.root.convention"
-            implementationClass = "ArcGISMapsRootConventionPlugin"
-        }
         register("arcGISMapsKdocConventionPlugin") {
             id = "arcgismaps.kotlin.kdoc.convention"
             implementationClass = "ArcGISMapsKdocConventionPlugin"

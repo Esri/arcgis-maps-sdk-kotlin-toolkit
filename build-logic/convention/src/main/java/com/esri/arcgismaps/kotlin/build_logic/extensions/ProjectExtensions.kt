@@ -10,9 +10,6 @@ import org.gradle.kotlin.dsl.getByType
 fun DependencyHandler.testImplementation(dependencyNotation: Any): Dependency? =
     add("testImplementation", dependencyNotation)
 
-fun DependencyHandler.testRuntimeOnly(dependencyNotation: Any): Dependency? =
-    add("testRuntimeOnly", dependencyNotation)
-
 fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? =
     add("implementation", dependencyNotation)
 

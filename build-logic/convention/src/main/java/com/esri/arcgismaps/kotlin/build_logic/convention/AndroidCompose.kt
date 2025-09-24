@@ -27,12 +27,12 @@ internal fun Project.configureAndroidCompose(
             val composeBom = libs.findLibrary("androidx-compose-bom").get()
             implementation(platform(composeBom))
             androidTestImplementation(platform(composeBom))
+            androidTestImplementation(libs.findLibrary("androidx-compose-ui-test").get())
             implementation(libs.findLibrary("androidx-activity-compose").get())
             implementation(libs.findLibrary("androidx-compose-material3").get())
             implementation(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
             implementation(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
             debugImplementation(libs.findBundle("debug").get())
-            androidTestImplementation(libs.findLibrary("androidx-compose-ui-test").get())
         }
     }
 }

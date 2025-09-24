@@ -2,7 +2,6 @@ import com.android.build.api.dsl.LibraryExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.ArcGISMapsKotlinSDKDependency
 import com.esri.arcgismaps.kotlin.build_logic.convention.ArtifactPublisher
 import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitModuleExtension
-import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitRegistryExtension
 import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -17,6 +16,7 @@ import java.io.File
 class ArcGISMapsKotlinToolkitConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            // Create extension with default releasable = true
             val toolkitExt = extensions.create<ToolkitModuleExtension>("toolkit").apply {
                 applyDefaults() // releasable = true by default
             }
@@ -24,21 +24,16 @@ class ArcGISMapsKotlinToolkitConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply(libs.findPlugin("arcgismaps-android-library").get().get().pluginId)
                 apply(libs.findPlugin("arcgismaps-android-library-compose").get().get().pluginId)
-                if (toolkitExt.releasable.get()) {
-                    apply(libs.findPlugin("binary-compatibility-validator").get().get().pluginId)
-                }
+                apply(libs.findPlugin("binary-compatibility-validator").get().get().pluginId)
             }
-            // Provide maven publication for releasable toolkit projects
+
+            // Configure artifact publishing for toolkit modules
             ArtifactPublisher.configureArtifactPublisher(this)
 
+            // Log configuration after evaluation
             afterEvaluate {
-                val registry = rootProject.extensions.getByType(ToolkitRegistryExtension::class.java)
-                if (toolkitExt.releasable.orNull == true) {
-                    logger.warn("SETTING RELEASABLE: ${this.name}")
-                    registry.toolkitProjects.add(this)
-                } else {
-                    registry.toolkitProjects.remove(this)
-                }
+                val isReleasable = toolkitExt.releasable.getOrElse(true)
+                logger.info("Toolkit module '${target.name}' configured as ${if (isReleasable) "releasable" else "non-releasable"}")
             }
 
             extensions.configure<LibraryExtension> {
@@ -53,8 +48,9 @@ class ArcGISMapsKotlinToolkitConventionPlugin : Plugin<Project> {
 
                 testOptions {
                     targetSdk = libs.findVersion("compileSdk").get().toString().toInt()
-                    val connectedTestReportsPath = target.findProperty("connectedTestReportsPath") as? String
-                        ?: "${target.rootProject.rootDir}/connectedTestReports"
+                    val connectedTestReportsPath =
+                        target.findProperty("connectedTestReportsPath") as? String
+                            ?: "${target.rootProject.rootDir}/connectedTestReports"
                     reportDir = "$connectedTestReportsPath/${target.name}"
                 }
 

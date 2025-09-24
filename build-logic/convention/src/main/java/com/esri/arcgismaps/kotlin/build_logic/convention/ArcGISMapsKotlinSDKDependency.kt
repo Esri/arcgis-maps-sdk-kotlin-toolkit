@@ -4,7 +4,6 @@ import com.esri.arcgismaps.kotlin.build_logic.extensions.api
 import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
-import java.io.File
 
 /**
  * A helper object to configure the logic for applying the ArcGIS Maps SDK dependency,
@@ -26,33 +25,26 @@ object ArcGISMapsKotlinSDKDependency {
     fun configureArcGISMapsDependencies(target: Project) {
         target.dependencies {
 
-            val localProperties = java.util.Properties().apply {
-                val localPropertiesFile = File("local.properties")
-                if (localPropertiesFile.exists()) {
-                    load(localPropertiesFile.inputStream())
-                }
-            }
-
             // For finalBuilds ignore the build number and pick up the released version of the SDK dependency
             val finalBuild: Boolean = (target.rootProject.providers.gradleProperty("finalBuild").orNull ?: "false")
                 .toBoolean()
 
             // First look for the version number provided via command line (for CI builds), if not found,
-            // take the one defined in gradle.properties.
+            // take the one from project extras (which includes local.properties values).
             // CI builds pass -PversionNumber=${BUILDVER}
             val sdkVersionNumber: String? =
                 target.rootProject.providers.gradleProperty("versionNumber").orNull
                     ?: target.rootProject.providers.gradleProperty("sdkVersionNumber").orNull
-                    ?: localProperties["sdkVersionNumber"] as? String
+                    ?: target.rootProject.extensions.extraProperties.get("sdkVersionNumber") as? String
 
             // The build number of the ArcGIS Maps SDK for Kotlin dependency.
             // First look for the version number provided via command line (for CI builds), if not found,
-            // take the one defined in local.properties.
+            // take the one from project extras (which includes local.properties values).
             // CI builds pass -PbuildNumber=${BUILDNUM}
             val sdkBuildNumber: String? =
                 target.rootProject.providers.gradleProperty("buildNumber").orNull
                     ?: target.rootProject.providers.gradleProperty("sdkBuildNumber").orNull
-                    ?: localProperties["sdkBuildNumber"] as? String
+                    ?: target.rootProject.extensions.extraProperties.get("sdkBuildNumber") as? String
 
             // ArcGIS Maps SDK dependency with build override support
             if (sdkVersionNumber != null) {
@@ -69,7 +61,7 @@ object ArcGISMapsKotlinSDKDependency {
                 }
                 api("com.esri:arcgis-maps-kotlin:$dependencyVersion")
             } else {
-                // Use libs.versions.toml if no gradle property is provided
+                // Use libs.versions.toml if no gradle property is provided - for `main` branch.
                 api(target.libs.findLibrary("arcgis-maps-kotlin").get())
             }
         }

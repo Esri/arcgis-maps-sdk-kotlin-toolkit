@@ -1,11 +1,10 @@
-import com.esri.arcgismaps.kotlin.build_logic.extensions.ToolkitRegistryExtension
-import com.esri.arcgismaps.kotlin.build_logic.extensions.api
+import com.esri.arcgismaps.kotlin.build_logic.convention.VersionProvider
+import com.esri.arcgismaps.kotlin.build_logic.registry.ToolkitRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
 
 class ArcGISMapsBomConventionPlugin : Plugin<Project> {
@@ -21,23 +20,25 @@ class ArcGISMapsBomConventionPlugin : Plugin<Project> {
         val artifactoryUrl: String by project
         val artifactoryUsername: String by project
         val artifactoryPassword: String by project
-        val versionNumber: String by project
-        val buildNumber: String by project
-        val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false").toString() == "true"
-        val artifactVersion = if (finalBuild) versionNumber else "$versionNumber-$buildNumber"
+
+        // Use centralized version provider
+        val versionConfig = VersionProvider.getVersionConfig(project)
+        val artifactVersion = versionConfig.map { it.artifactVersion }
         val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
 
-        // now find projects which are publishable based on their inclusion  of the toolkit plugin,
-        // and add them as api dependencies.
-        afterEvaluate {
+        // Use toolkit registry to find projects which are releasable
+        // Wait until all projects are evaluated before discovering modules
+        gradle.projectsEvaluated {
             dependencies {
                 constraints {
-                    // grab the populated set
-                    val registry = rootProject.extensions.getByType(ToolkitRegistryExtension::class.java)
-                    registry.toolkitProjects.forEach { p ->
-                        val moduleArtifactId = "$artifactoryArtifactBaseId-${p.name}"
+                    // Get releasable modules and version after all projects are evaluated
+                    val releasableModules = ToolkitRegistry.getReleasableModules(rootProject).get()
+                    val resolvedVersion = artifactVersion.get()
+                    releasableModules.forEach { moduleConfig ->
+                        val moduleArtifactId = "$artifactoryArtifactBaseId-${moduleConfig.name}"
+                        val dependency = "$artifactoryGroupId:$moduleArtifactId:$resolvedVersion"
                         // add the toolkit project as api
-                        api("$artifactoryGroupId:$moduleArtifactId:$artifactVersion")
+                        add("api", dependency)
                     }
                 }
             }
@@ -55,9 +56,9 @@ class ArcGISMapsBomConventionPlugin : Plugin<Project> {
                 create("bom", MavenPublication::class.java) {
                     groupId = artifactoryGroupId
                     artifactId = artifactoryArtifactId
-                    version = artifactVersion
+                    version = artifactVersion.get()
 
-                    from(components["javaPlatform"])
+                    from(components.getByName("javaPlatform"))
                 }
             }
             repositories {
