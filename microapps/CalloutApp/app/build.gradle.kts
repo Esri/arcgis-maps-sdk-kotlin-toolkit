@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ plugins {
 }
 
 secrets {
+    // this file doesn't contain secrets, it just provides defaults which can be committed into git.
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
@@ -32,11 +33,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.authenticationapp"
+    namespace = "com.arcgismaps.toolkit.calloutapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.authenticationapp"
+        applicationId ="com.arcgismaps.toolkit.calloutapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
@@ -73,7 +74,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":authentication"))
+    implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
@@ -81,6 +82,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.compose.navigation)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)

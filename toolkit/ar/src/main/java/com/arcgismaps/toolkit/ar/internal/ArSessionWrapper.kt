@@ -25,9 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.ar.core.Config
 import com.google.ar.core.Config.PlaneFindingMode
 import com.google.ar.core.Session
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -51,9 +55,19 @@ internal class ArSessionWrapper(
     private var shouldInitializeDisplay = true
 
     override fun onDestroy(owner: LifecycleOwner) {
+        var sessionRef: Session? = null
         withLock { session, _ ->
             this.session = null
-            session?.close()
+            sessionRef = session
+        }
+        // Call pause() before close(), even if running on the same thread.
+        // This ensures proper cleanup before closing the session.
+        sessionRef?.pause()
+        // Close the session on a background thread as recommended in the official docs:
+        // https://developers.google.com/ar/reference/java/com/google/ar/core/Session#close()
+        // Using NonCancellable so the close operation runs even if the coroutine scope is cancelled.
+        owner.lifecycleScope.launch(Dispatchers.Default + NonCancellable) {
+            sessionRef?.close()
         }
     }
 
@@ -132,7 +146,7 @@ internal fun rememberArSessionWrapper(
     applicationContext: Context,
     onError: (Throwable) -> Unit = {},
     useGeospatial: Boolean = false,
-    planeFindingMode: Config.PlaneFindingMode
+    planeFindingMode: PlaneFindingMode
 ): ArSessionWrapper {
     val lifecycleOwner = LocalLifecycleOwner.current
     val arSessionWrapper = remember {

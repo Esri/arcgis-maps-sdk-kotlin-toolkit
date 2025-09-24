@@ -74,15 +74,14 @@ import com.arcgismaps.mapping.floor.FloorFacility
  *
  * The simplest workflow is for the app to instantiate a [FloorFilter] using an instance of
  * the [FloorFilterState] to ideally display it within the GeoView. The [Modifier] properties of
- * [Box],[Column] or [Row] could be used to position the [FloorFilter] inside of a Composable Map.
+ * [Box],[Column] or [Row] could be used to position the [FloorFilter] inside of a composable MapView.
  *
  * _Workflow example:_
  *
  * ```
- *  val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
- *  ComposableMap(
+ *  MapView(
  *      modifier = Modifier.fillMaxSize(),
- *      mapInterface = mapViewModel
+ *      arcGISMap = mapViewModel.floorAwareWebMap
  *  ) {
  *      Box(
  *          modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
