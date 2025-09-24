@@ -103,6 +103,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                 .padding(padding)
                 .fillMaxSize(),
             onSingleTapConfirmed = {
+                resetSelection(viewModel)
                 scope.launch {
                     viewModel.proxy.identifyLayers(
                         screenCoordinate = it.screenCoordinate,
@@ -110,10 +111,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                         returnPopupsOnly = true
                     ).onSuccess { results ->
                         if (results.isEmpty()) {
-                            unselectFeature(viewModel.geoElement, viewModel.layer)
-                            viewModel.updatePopupState(null)
                             viewModel.setLayer(null)
-                            viewModel.setGeoElement(null)
                             if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                                 scaffoldState.bottomSheetState.hide()
                             }
@@ -154,11 +152,6 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
                                         ).show()
                                     }
                                 } else {
-                                    unselectFeature(
-                                        viewModel.geoElement,
-                                        viewModel.layer
-                                    )
-
                                     when (newLayer) {
                                         is FeatureLayer -> {
                                             // the Popup exists on a FeatureLayer
