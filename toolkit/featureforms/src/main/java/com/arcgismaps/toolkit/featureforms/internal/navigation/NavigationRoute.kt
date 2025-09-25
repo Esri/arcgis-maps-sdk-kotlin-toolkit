@@ -55,4 +55,47 @@ internal sealed class NavigationRoute {
     data class UNAssociationsView(
         val stateId: Int
     ) : NavigationRoute()
+
+    /**
+     * Represents a view for adding an association from a source feature. This is represented as
+     * a nested navigation graph. See [AddFromSourceNavRoute] for the routes in this graph.
+     *
+     * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
+     * selected association to add from source.
+     */
+    @Serializable
+    data class AddUNAssociationFromSourceView(
+        val stateId: Int
+    ) : NavigationRoute()
+}
+
+/**
+ * Navigation routes for the "Add from Source" nested navigation graph.
+ */
+@Serializable
+internal sealed class AddFromSourceNavRoute {
+
+    /**
+     * Represents the screen to select a source.
+     */
+    @Serializable
+    data object SelectSource : AddFromSourceNavRoute()
+
+    /**
+     * Represents the screen to select an asset group.
+     */
+    @Serializable
+    data object SelectAssetType : AddFromSourceNavRoute()
+
+    /**
+     * Represents the screen to select a feature from the source.
+     */
+    @Serializable
+    data object SelectFeature : AddFromSourceNavRoute()
+
+    /**
+     * Represents the review screen before adding the association.
+     */
+    @Serializable
+    data object Review : AddFromSourceNavRoute()
 }

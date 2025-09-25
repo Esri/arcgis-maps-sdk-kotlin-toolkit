@@ -64,6 +64,7 @@ import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.AddFromSourceNavRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import kotlinx.coroutines.Dispatchers
@@ -149,70 +150,73 @@ internal fun ContentAwareTopBar(
         // For other destinations, always enable back navigation
         else -> true
     }
-    Column {
-        FeatureFormTitle(
-            title = title,
-            subTitle = subTitle,
-            hasEdits = if (showFormActions) hasEdits else false,
-            showCloseIcon = showCloseIcon,
-            showBackIcon = hasBackStack,
-            isNavigationEnabled = navigationEnabled,
-            onBackPressed = {
-                onBackAction(backStackEntry)
-            },
-            onClose = {
-                onNavigationAction(NavigationAction.Dismiss, hasEdits)
-            },
-            onSave = {
-                scope.launch {
-                    onSaveForm(formData.featureForm, false)
-                }
-            },
-            onDiscard = {
-                scope.launch {
-                    onDiscardForm(false)
-                }
-            },
-            modifier = modifier
-        )
-        InitializingExpressions(
-            modifier = Modifier.fillMaxWidth(),
-            evaluationProvider = { formData.isEvaluatingExpressions }
-        )
-    }
-    if (pendingNavigationAction != NavigationAction.None) {
-        SaveEditsDialog(
-            onDismissRequest = {
-                // Clear the pending action when the dialog is dismissed
-                pendingNavigationAction = NavigationAction.None
-            },
-            onSave = {
-                scope.launch(Dispatchers.Main) {
-                    // Check if the pending action is to navigate back, since NavigateToAssociation
-                    // is not triggered by the top bar
-                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
-                        // Execute the pending navigation action after saving
-                        onNavigationAction(pendingNavigationAction, false)
+    // Only show the top bar for certain destinations
+    if (backStackEntry.shouldEnableTopBar()) {
+        Column {
+            FeatureFormTitle(
+                title = title,
+                subTitle = subTitle,
+                hasEdits = if (showFormActions) hasEdits else false,
+                showCloseIcon = showCloseIcon,
+                showBackIcon = hasBackStack,
+                isNavigationEnabled = navigationEnabled,
+                onBackPressed = {
+                    onBackAction(backStackEntry)
+                },
+                onClose = {
+                    onNavigationAction(NavigationAction.Dismiss, hasEdits)
+                },
+                onSave = {
+                    scope.launch {
+                        onSaveForm(formData.featureForm, false)
                     }
+                },
+                onDiscard = {
+                    scope.launch {
+                        onDiscardForm(false)
+                    }
+                },
+                modifier = modifier
+            )
+            InitializingExpressions(
+                modifier = Modifier.fillMaxWidth(),
+                evaluationProvider = { formData.isEvaluatingExpressions }
+            )
+        }
+        if (pendingNavigationAction != NavigationAction.None) {
+            SaveEditsDialog(
+                onDismissRequest = {
+                    // Clear the pending action when the dialog is dismissed
                     pendingNavigationAction = NavigationAction.None
+                },
+                onSave = {
+                    scope.launch(Dispatchers.Main) {
+                        // Check if the pending action is to navigate back, since NavigateToAssociation
+                        // is not triggered by the top bar
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                            // Execute the pending navigation action after saving
+                            onNavigationAction(pendingNavigationAction, false)
+                        }
+                        pendingNavigationAction = NavigationAction.None
+                    }
+                },
+                onDiscard = {
+                    scope.launch(Dispatchers.Main) {
+                        // Check if the pending action is to navigate back, since NavigateToAssociation
+                        // is not triggered by the top bar
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onDiscardForm(willNavigate)
+                        onNavigationAction(pendingNavigationAction, false)
+                        pendingNavigationAction = NavigationAction.None
+                    }
                 }
-            },
-            onDiscard = {
-                scope.launch(Dispatchers.Main) {
-                    // Check if the pending action is to navigate back, since NavigateToAssociation
-                    // is not triggered by the top bar
-                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                    onDiscardForm(willNavigate)
-                    onNavigationAction(pendingNavigationAction, false)
-                    pendingNavigationAction = NavigationAction.None
-                }
-            }
-        )
-    }
-    // only enable back navigation if there is a previous route
-    BackHandler(hasBackStack) {
-        onBackAction(backStackEntry)
+            )
+        }
+        // only enable back navigation if there is a previous route
+        BackHandler(hasBackStack) {
+            onBackAction(backStackEntry)
+        }
     }
 }
 
@@ -389,6 +393,13 @@ private fun InitializingExpressions(
         }
     ) {
         LinearProgressIndicator(modifier)
+    }
+}
+
+private fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
+    return when {
+        this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSourceView>() == true -> false
+        else -> true
     }
 }
 

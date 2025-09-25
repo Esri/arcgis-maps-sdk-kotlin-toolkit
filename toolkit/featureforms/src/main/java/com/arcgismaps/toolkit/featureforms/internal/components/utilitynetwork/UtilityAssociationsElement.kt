@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -125,7 +126,7 @@ private fun ElementHeader(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
             if (description.isNotEmpty()) {
                 Text(
@@ -174,7 +175,7 @@ private fun Filters(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = filterResult.resultCount.toString())
-                            Image(
+                            Icon(
                                 imageVector = Icons.AutoMirrored.Default.ArrowRight,
                                 contentDescription = null,
                                 modifier = Modifier.padding(start = 8.dp)

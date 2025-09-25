@@ -402,7 +402,7 @@ public object FeatureFormDefaults {
      */
     @Composable
     public fun attachmentsElementTypography(
-        labelStyle: TextStyle = MaterialTheme.typography.titleLarge,
+        labelStyle: TextStyle = MaterialTheme.typography.headlineSmall,
         supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
         tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
             textAlign = TextAlign.Center
