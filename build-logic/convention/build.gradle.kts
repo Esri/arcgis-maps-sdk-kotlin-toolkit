@@ -36,7 +36,7 @@ tasks {
 
 gradlePlugin {
     plugins {
-        register("androidApplicationComposing") {
+        register("androidApplicationCompose") {
             id = "arcgismaps.android.application.compose"
             implementationClass = "AndroidApplicationComposeConventionPlugin"
         }
@@ -64,13 +64,17 @@ gradlePlugin {
             id = "arcgismaps.kotlin.sdk"
             implementationClass = "ArcGISMapsKotlinSDKConventionPlugin"
         }
-        register("arcGISMapsKdocConventionPlugin") {
+        register("arcGISMapsKdoc") {
             id = "arcgismaps.kotlin.kdoc.convention"
             implementationClass = "ArcGISMapsKdocConventionPlugin"
         }
-        register("arcGISMapsBomConventionPlugin") {
+        register("arcGISMapsBom") {
             id = "arcgismaps.kotlin.bom.convention"
             implementationClass = "ArcGISMapsBomConventionPlugin"
+        }
+        register("arcGISMapsRoot") {
+            id = "arcgismaps.kotlin.root.convention"
+            implementationClass = "ArcGISMapsRootConventionPlugin"
         }
     }
 }

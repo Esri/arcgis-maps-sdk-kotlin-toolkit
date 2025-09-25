@@ -18,6 +18,7 @@
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
+    alias(libs.plugins.arcgismaps.kotlin.root.convention)
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.binary.compatibility.validator) apply false
@@ -27,7 +28,6 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka) apply false
-    alias(libs.plugins.gmazzo.test.aggregation)
     alias(libs.plugins.compose.compiler) apply false
 }
 
@@ -94,14 +94,3 @@ buildscript {
         }
     }
 }
-
-/**
- * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
- * with all local tests to be aggregated into a single test report.
- * Note: This works only for local tests, not for connected tests.
- * To run aggregated local tests, run the following at the root folder of the project:
- * ```
- * ./gradlew testAggregatedReport --continue
- * ```
- * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
- */
