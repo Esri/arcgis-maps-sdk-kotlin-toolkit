@@ -18,6 +18,7 @@
 
 plugins {
     alias(libs.plugins.arcgismaps.kotlin.toolkit)
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 android {
@@ -35,7 +36,11 @@ apiValidation {
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.popup.internal.ui.ComposableSingletons\$ExpandableCardKt",
         "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt",
-        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
+        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationDetailsKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationsFilterResultKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationGroupResultKt",
+        "com.arcgismaps.toolkit.popup.internal.screens.ComposableSingletons\$ContentAwareTopBarKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
@@ -45,7 +50,19 @@ dependencies {
     // Module-specific dependencies go here
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.composeCore)
+    implementation(libs.bundles.core)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.material.icons)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(libs.bundles.composeTest)
+    debugImplementation(libs.bundles.debug)
 }

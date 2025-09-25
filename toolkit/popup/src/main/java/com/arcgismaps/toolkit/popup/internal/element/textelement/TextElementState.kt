@@ -16,14 +16,10 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.textelement
 
-import android.os.Parcelable
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
-import kotlinx.parcelize.Parcelize
 
 /**
  * A class to handle the state of a [TextPopupElement].
@@ -31,21 +27,13 @@ import kotlinx.parcelize.Parcelize
  * @param value the text of the element.
  */
 @Immutable
-@Parcelize
 internal class TextElementState(
     val value: String,
     override val id: Int
-) : Parcelable, PopupElementState()
+) : PopupElementState() {
 
-@Composable
-internal fun rememberTextElementState(
-    element: TextPopupElement,
-    popup: Popup
-): TextElementState = rememberSaveable(
-    inputs = arrayOf(popup, element)
-) {
-    TextElementState(
+    constructor(element: TextPopupElement, popup: Popup) : this(
         value = element.text,
-        id = PopupElementState.createId()
+        id = createId()
     )
 }

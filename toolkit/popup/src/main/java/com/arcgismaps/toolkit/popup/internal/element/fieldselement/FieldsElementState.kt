@@ -15,14 +15,10 @@
  */
 package com.arcgismaps.toolkit.popup.internal.element.fieldselement
 
-import android.os.Parcelable
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
-import kotlinx.parcelize.Parcelize
 
 /**
  * A class to handle the state of a [FieldsPopupElement].
@@ -30,27 +26,19 @@ import kotlinx.parcelize.Parcelize
  * @since 200.5.0
  */
 @Immutable
-@Parcelize
 internal class FieldsElementState(
     val title: String,
     val description: String,
     val fieldsToFormattedValues: Map<String, String>,
     override val id: Int
-) : Parcelable, PopupElementState()
+) : PopupElementState() {
 
-@Composable
-internal fun rememberFieldsElementState(
-    element: FieldsPopupElement,
-    popup: Popup
-): FieldsElementState = rememberSaveable(
-    inputs = arrayOf(popup, element)
-) {
-    val fieldNames = element.fields.map { it.label }
-    val fieldsToFormattedValuesMap = fieldNames.zip(element.formattedValues).toMap()
-    FieldsElementState(
+    constructor(element: FieldsPopupElement, popup: Popup) : this(
         title = element.title,
         description = element.description,
-        fieldsToFormattedValuesMap,
-        id = PopupElementState.createId()
+        fieldsToFormattedValues = element.fields
+            .mapIndexed { index, field -> field.label to element.formattedValues[index] }
+            .toMap(),
+        id = createId()
     )
 }
