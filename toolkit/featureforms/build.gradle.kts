@@ -25,14 +25,15 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+    compilerOptions { freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility") }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     buildFeatures {
         buildConfig = true
-    }
-    kotlinOptions {
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     // Lint crashes on the latest Android studio
     // (Bug with Android Studio Meerkat | 2024.3.1)

@@ -24,6 +24,11 @@ android {
     namespace = "com.arcgismaps.toolkit.authentication"
 }
 
+kotlin {
+    // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+    compilerOptions { freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility") }
+}
+
 apiValidation {
     ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74

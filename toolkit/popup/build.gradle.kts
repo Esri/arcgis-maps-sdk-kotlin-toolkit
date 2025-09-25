@@ -21,12 +21,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply true
 }
 
+kotlin {
+    // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
+    compilerOptions { freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility") }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.popup"
-    kotlinOptions {
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
-    }
 }
 
 apiValidation {
