@@ -35,7 +35,6 @@ import io.mockk.verify
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -106,8 +105,6 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    @Suppress("DEPRECATION")
-    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun loginButtonEnabledState() = runTest {
         composeTestRule.setContent {
             UsernamePasswordAuthenticator(
@@ -156,13 +153,10 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    @Suppress("DEPRECATION")
-    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun keyboardActions() = runTest {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
         every { usernamePasswordChallengeMock.cause } returns null
-        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
         composeTestRule.setContent {
@@ -219,13 +213,10 @@ class UsernamePasswordTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    @Suppress("DEPRECATION")
-    // TODO: Remove when deprecated UsernamePasswordAuthenticator fun is removed
     fun testPasswordVisibility() = runTest {
         val password = "helloWorld"
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
-        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.cause } returns null
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
@@ -268,10 +259,6 @@ class UsernamePasswordTests {
         val hostname = "arcgis.com"
         every { usernamePasswordChallengeMock.hostname } returns hostname
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
-        every {
-            @Suppress("DEPRECATION")
-            usernamePasswordChallengeMock.additionalMessage
-        } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.cause } returns null
 
         composeTestRule.setContent {
@@ -301,15 +288,10 @@ class UsernamePasswordTests {
         val mockCause = mockk<ArcGISAuthenticationException>()
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
-        every {
-            @Suppress("DEPRECATION")
-            usernamePasswordChallengeMock.additionalMessage
-        } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
         every { usernamePasswordChallengeMock.cause } returns mockCause
 
         composeTestRule.setContent {
-            @Suppress("DEPRECATION")
             UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
         }
 
@@ -336,10 +318,6 @@ class UsernamePasswordTests {
 
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
-        every {
-            @Suppress("DEPRECATION")
-            usernamePasswordChallengeMock.additionalMessage
-        } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
         every { usernamePasswordChallengeMock.cause } returns IllegalStateException("Test")
 

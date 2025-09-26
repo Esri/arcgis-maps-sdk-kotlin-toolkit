@@ -45,7 +45,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -105,7 +104,6 @@ private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewM
  * @param onLoadPortal called when the [url] should be loaded
  * @since 200.2.0
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun PortalDetails(
     url: String,
