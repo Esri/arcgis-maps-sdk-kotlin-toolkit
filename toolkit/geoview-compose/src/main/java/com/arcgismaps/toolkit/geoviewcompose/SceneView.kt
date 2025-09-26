@@ -320,7 +320,6 @@ public fun SceneView(
                 it.selectionProperties = selectionProperties
                 it.grid = grid
                 it.setTimeExtent(timeExtent)
-                it.cameraController = cameraController
                 it.atmosphereEffect = atmosphereEffect
                 it.spaceEffect = spaceEffect
                 it.sunTime = sunTime
@@ -345,6 +344,7 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
+                it.cameraController = cameraController
             })
 
         val sceneViewScope = remember { SceneViewScope(sceneView) }
