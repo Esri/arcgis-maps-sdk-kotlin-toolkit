@@ -18,8 +18,8 @@ package com.arcgismaps.toolkit.featureforms.internal.navigation
 
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
 import kotlinx.serialization.Serializable
 
 /**
@@ -91,7 +91,7 @@ internal sealed class AddFromSourceNavRoute {
      * Represents the screen to select a feature from the source.
      */
     @Serializable
-    data object SelectFeature : AddFromSourceNavRoute()
+    data object SelectAssociatedFeature : AddFromSourceNavRoute()
 
     /**
      * Represents the review screen before adding the association.

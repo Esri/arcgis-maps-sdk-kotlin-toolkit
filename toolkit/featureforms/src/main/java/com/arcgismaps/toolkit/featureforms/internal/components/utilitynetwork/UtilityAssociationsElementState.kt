@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
-    private val element: UtilityAssociationsFormElement,
+    val element: UtilityAssociationsFormElement,
     scope: CoroutineScope
 ) : FormElementState(
     id = element.hashCode(),
@@ -94,12 +94,15 @@ internal class UtilityAssociationsElementState(
     val selectedGroupResult: MutableGroupResult?
         get() = _selectedGroupResult.value
 
+    private val _selectedAssociationResult: MutableState<UtilityAssociationResult?> =
+        mutableStateOf(null, policy = neverEqualPolicy())
+
     /**
      * The selected [UtilityAssociationResult] to display. Use [setSelectedAssociationResult] to
      * set this value.
      */
-    var selectedAssociationResult: UtilityAssociationResult? = null
-        private set
+    val selectedAssociationResult: UtilityAssociationResult?
+        get() = _selectedAssociationResult.value
 
     init {
         scope.launch {
@@ -164,7 +167,7 @@ internal class UtilityAssociationsElementState(
      * Sets the selected [UtilityAssociationResult] to display.
      */
     fun setSelectedAssociationResult(associationResult: UtilityAssociationResult?) {
-        selectedAssociationResult = associationResult
+        _selectedAssociationResult.value = associationResult
     }
 }
 

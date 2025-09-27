@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,12 +35,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +58,6 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.SheetState
@@ -64,13 +66,12 @@ import com.arcgismaps.toolkit.featureforms.internal.components.material3.remembe
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberSheetState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsFilterResult
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
+import kotlinx.coroutines.launch
 
 /**
  * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
  *
- * @param formStateData The form state data.
- * @param route The [NavigationRoute.UNFilterView] route data of this screen.
+ * @param state The [UtilityAssociationsElementState] that holds the state.
  * @param onGroupSelected The callback that is invoked when a group is selected.
  * @param onAddFromSourceClick The callback that is invoked when the user wants to add associations
  * from a source.
@@ -78,19 +79,13 @@ import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
  */
 @Composable
 internal fun UNAssociationsFilterResultScreen(
-    formStateData: FormStateData,
-    route: NavigationRoute.UNFilterView,
+    state: UtilityAssociationsElementState,
     onGroupSelected: (Int) -> Unit,
     onAddFromSourceClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val states = formStateData.stateCollection
-    // Get the selected UtilityAssociationsElementState from the state collection
-    val utilityAssociationsElementState = states[route.stateId]
-        // guard against null value
-        as? UtilityAssociationsElementState ?: return
-    // Get the selected filter from the UtilityAssociationsElementState
-    val filterResult = utilityAssociationsElementState.selectedFilterResult
+    val filterResult = state.selectedFilterResult ?: return
+    val isEditable by state.isEditable.collectAsState()
     // Determine if we should show the add action as a sheet or a dropdown menu
     // based on the current window size class
     val showAsSheet = getWindowSize(LocalContext.current)
@@ -98,8 +93,7 @@ internal fun UNAssociationsFilterResultScreen(
         .not()
     var showAddAssociationAction by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-    // guard against null value
-    if (filterResult == null) return
+    val scope = rememberCoroutineScope()
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -108,8 +102,8 @@ internal fun UNAssociationsFilterResultScreen(
         UtilityAssociationsFilterResult(
             groupResults = filterResult.groupResults,
             onGroupClick = { groupResult ->
-                utilityAssociationsElementState.setSelectedGroupResult(groupResult)
-                onGroupSelected(utilityAssociationsElementState.id)
+                state.setSelectedGroupResult(groupResult)
+                onGroupSelected(state.id)
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -126,7 +120,7 @@ internal fun UNAssociationsFilterResultScreen(
                 onClick = {
                     showAddAssociationAction = true
                 },
-                modifier = Modifier
+                enabled = isEditable
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Associations")
                 Text(text = "Add Associations", modifier = Modifier.padding(horizontal = 12.dp))
@@ -139,8 +133,7 @@ internal fun UNAssociationsFilterResultScreen(
                         // Currently not supported
                     },
                     onSelectFromNetworkDataSource = {
-                        onAddFromSourceClick(utilityAssociationsElementState.id)
-
+                        onAddFromSourceClick(state.id)
                     }
                 )
             }
@@ -155,7 +148,12 @@ internal fun UNAssociationsFilterResultScreen(
                 // Currently not supported
             },
             onSelectFromNetworkDataSource = {
-                onAddFromSourceClick(utilityAssociationsElementState.id)
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showAddAssociationAction = false
+                        onAddFromSourceClick(state.id)
+                    }
+                }
             }
         )
     }
@@ -175,27 +173,35 @@ private fun AddActionSheet(
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .height(52.dp)
+                    .fillMaxWidth()
                     .clickable(enabled = false) {
                         onSelectFromMap()
-                    },
+                    }
+                    .padding(horizontal = 32.dp)
+                    .height(52.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Outlined.Map, contentDescription = "On Map")
-                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                Text(
-                    text = stringResource(R.string.on_map),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.38f
+                    )
+                ) {
+                    Icon(Icons.Outlined.Map, contentDescription = "On Map")
+                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(
+                        text = stringResource(R.string.on_map),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
             }
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .height(52.dp)
+                    .fillMaxWidth()
                     .clickable {
                         onSelectFromNetworkDataSource()
-                    },
+                    }
+                    .padding(horizontal = 32.dp)
+                    .height(52.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(

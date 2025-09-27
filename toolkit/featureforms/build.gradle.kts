@@ -142,8 +142,7 @@ apiValidation {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(libs.bundles.commonmark)
-    implementation(platform(libs.coil.bom))
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.window)
@@ -157,6 +156,7 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.paging.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -19,6 +19,7 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

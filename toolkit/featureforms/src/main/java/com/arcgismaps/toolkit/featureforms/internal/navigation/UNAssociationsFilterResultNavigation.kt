@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
 
 internal fun NavGraphBuilder.associationsFilterResultDestination(
@@ -35,17 +36,26 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
     composable<NavigationRoute.UNFilterView> { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-        UNAssociationsFilterResultScreen(
-            formStateData = formData,
-            route = route,
-            onGroupSelected = { stateId ->
-                onGroupSelected(backStackEntry, stateId)
-            },
-            onAddFromSourceClick = { stateId ->
-                onAddFromSourceClick(backStackEntry, stateId)
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+        val states = formData.stateCollection
+        // Get the selected UtilityAssociationsElementState from the state collection
+        val utilityAssociationsElementState = states[route.stateId]
+            // guard against null value
+            as? UtilityAssociationsElementState
+        // Get the selected filter from the UtilityAssociationsElementState
+        val filterResult = utilityAssociationsElementState?.selectedFilterResult
+        // guard against null value
+        if (filterResult != null) {
+            UNAssociationsFilterResultScreen(
+                state = utilityAssociationsElementState,
+                onGroupSelected = { stateId ->
+                    onGroupSelected(backStackEntry, stateId)
+                },
+                onAddFromSourceClick = { stateId ->
+                    onAddFromSourceClick(backStackEntry, stateId)
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 

@@ -28,10 +28,11 @@ import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
 
 internal fun NavGraphBuilder.associationGroupResultDestination(
-    state : FeatureFormState,
+    state: FeatureFormState,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
@@ -41,22 +42,30 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     composable<NavigationRoute.UNAssociationsView> { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
-        UNAssociationGroupResultScreen(
-            formStateData = formData,
-            route = route,
-            isNavigationEnabled = isNavigationEnabled,
-            onSave = onSave,
-            onDiscard = onDiscard,
-            onNavigateToFeature = { feature ->
-                onNavigateToFeature(backStackEntry, feature)
-            },
-            onBack = onBack,
-            modifier = Modifier.fillMaxSize()
-        )
-        LaunchedEffect(formData) {
-            // Update the active feature form when we navigate back to this screen from another
-            // form.
-            state.updateActiveFeatureForm()
+        val states = formData.stateCollection
+        // Get the selected UtilityAssociationsElementState from the state collection
+        val utilityAssociationsElementState =
+            states[route.stateId] as? UtilityAssociationsElementState
+        // Get the selected group from the filter
+        val groupResult = utilityAssociationsElementState?.selectedGroupResult
+        if (groupResult != null) {
+            UNAssociationGroupResultScreen(
+                state = utilityAssociationsElementState,
+                featureForm = formData.featureForm,
+                isNavigationEnabled = isNavigationEnabled,
+                onSave = onSave,
+                onDiscard = onDiscard,
+                onNavigateToFeature = { feature ->
+                    onNavigateToFeature(backStackEntry, feature)
+                },
+                onBack = onBack,
+                modifier = Modifier.fillMaxSize()
+            )
+            LaunchedEffect(formData) {
+                // Update the active feature form when we navigate back to this screen from another
+                // form.
+                state.updateActiveFeatureForm()
+            }
         }
     }
 }

@@ -16,47 +16,94 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import android.util.Log
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssociatedFeatureScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.SelectNetworkSourceScreen
 
 internal fun NavGraphBuilder.selectSourceDestination(
-    onSourceSelected : (NavBackStackEntry) -> Unit,
-    state : FeatureFormState
+    onSourceSelected: (NavBackStackEntry) -> Unit,
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
+    onBackPressed: (NavBackStackEntry) -> Unit,
+    state: FeatureFormState
 ) {
-    composable<AddFromSourceNavRoute.SelectSource> { backStackEntry ->
+    composable<AddFromSourceNavRoute.SelectSource>(
+        enterTransition = { slideInVertically { h -> h } },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutVertically { h -> h } }
+    ) { backStackEntry ->
+        val parent = remember(backStackEntry) {
+            onGetParentEntry(backStackEntry)
+        }
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val stateId = backStackEntry.arguments?.getInt("stateId") ?: -1
-        val state = formData.stateCollection[stateId] ?: return@composable
-        Column {
-            Text(text = backStackEntry.destination.route.toString())
-            Button(
-                onClick = {
+        val state = formData.stateCollection[stateId] as? UtilityAssociationsElementState
+        if (state != null) {
+            val viewModel: AddAssociationFromSourceViewModel = viewModel(
+                viewModelStoreOwner = parent,
+                factory = AddAssociationFromSourceViewModel.Factory(
+                    element = state.element,
+                    filter = state.selectedFilterResult!!.filter,
+                    onAssociationAdded = {
+                    }
+                )
+            )
+            SelectNetworkSourceScreen(
+                viewModel = viewModel,
+                onNetworkSourceSelected = {
                     onSourceSelected(backStackEntry)
-                }
-            ) {
-                Text("Go to Select Asset Type for stateId $state")
-            }
+                },
+                onBackPressed = {
+                    onBackPressed(backStackEntry)
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
 
-internal fun NavGraphBuilder.selectAssetTypeDestination() {
+internal fun NavGraphBuilder.selectAssetTypeDestination(
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
+) {
     composable<AddFromSourceNavRoute.SelectAssetType> { backStackEntry ->
-        Log.d(
-            "FeatureFormNavHost",
-            "In SelectAssetType: ${backStackEntry.destination.route}"
-        )
-        val parent = backStackEntry.destination.parent?.route
-        Log.e("TAG", "FeatureFormNavHost: parent $parent")
+        val parent = remember(backStackEntry) {
+            onGetParentEntry(backStackEntry)
+        }
+        val viewModel: AddAssociationFromSourceViewModel = viewModel(parent)
         Text(text = backStackEntry.destination.route.toString())
+    }
+}
+
+internal fun NavGraphBuilder.selectFeatureDestination(
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
+    onBackPressed: (NavBackStackEntry) -> Unit
+) {
+    composable<AddFromSourceNavRoute.SelectAssociatedFeature> { backStackEntry ->
+        val parent = remember(backStackEntry) {
+            onGetParentEntry(backStackEntry)
+        }
+        SelectAssociatedFeatureScreen(
+            viewModel = viewModel(parent),
+            onBackPressed = {
+                onBackPressed(backStackEntry)
+            },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
@@ -73,5 +120,12 @@ internal fun NavHostController.navigateToSelectAssetType(
     backStackEntry: NavBackStackEntry
 ) {
     val newRoute = AddFromSourceNavRoute.SelectAssetType
+    navigateSafely(backStackEntry, newRoute)
+}
+
+internal fun NavHostController.navigateToSelectAssociatedFeature(
+    backStackEntry: NavBackStackEntry
+) {
+    val newRoute = AddFromSourceNavRoute.SelectAssociatedFeature
     navigateSafely(backStackEntry, newRoute)
 }

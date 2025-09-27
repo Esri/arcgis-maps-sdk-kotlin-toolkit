@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -182,6 +183,7 @@ internal fun ContentAwareTopBar(
                 modifier = Modifier.fillMaxWidth(),
                 evaluationProvider = { formData.isEvaluatingExpressions }
             )
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         }
         if (pendingNavigationAction != NavigationAction.None) {
             SaveEditsDialog(
@@ -268,6 +270,14 @@ private fun getTopBarTitleAndSubtitle(
                 }
             }
             Pair(title, subTitle)
+        }
+
+        backStackEntry.destination.hasRoute<AddFromSourceNavRoute.SelectSource>() -> {
+            Pair("Network Data Source", "")
+        }
+
+        backStackEntry.destination.hasRoute<AddFromSourceNavRoute.SelectAssetType>() -> {
+            Pair("Network Data Source", "")
         }
 
         else -> {

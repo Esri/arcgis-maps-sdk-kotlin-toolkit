@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -151,7 +150,10 @@ private fun Filters(
     onClick: (MutableFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier = modifier) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surfaceBright
+    ) {
         Column {
             filterResults.forEachIndexed { i, filterResult ->
                 ListItem(
@@ -183,11 +185,15 @@ private fun Filters(
                         }
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
+                    ),
+                    tonalElevation = (-1).dp
                 )
                 if (i < filterResults.size - 1) {
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
                 }
             }
         }

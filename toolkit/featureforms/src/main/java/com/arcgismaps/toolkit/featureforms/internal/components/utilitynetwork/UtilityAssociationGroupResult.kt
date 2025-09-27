@@ -35,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,7 +96,7 @@ internal fun UtilityAssociationGroupResult(
             align = Alignment.Top
         ),
         shape = RoundedCornerShape(15.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         LazyColumn(
             modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
@@ -126,7 +125,7 @@ internal fun UtilityAssociationGroupResult(
                     if (index < groupResult.associationResults.count() - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            color = DividerDefaults.color.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     }
                 }
@@ -274,7 +273,7 @@ private fun AssociationItem(
     ) {
         Row(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(MaterialTheme.colorScheme.surfaceBright)
                 .padding(horizontal = 24.dp, vertical = 8.dp)
                 .fillMaxWidth()
                 .heightIn(min = 56.dp),

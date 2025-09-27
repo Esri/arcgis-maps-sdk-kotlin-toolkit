@@ -79,11 +79,30 @@ internal fun FeatureFormNavHost(
             startDestination = AddFromSourceNavRoute.SelectSource,
         ) {
             selectSourceDestination(
-                onSourceSelected = navController::navigateToSelectAssetType,
+                onSourceSelected = navController::navigateToSelectAssociatedFeature,
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                },
+                onBackPressed = { backStackEntry ->
+                    state.popBackStack(backStackEntry)
+                },
                 state = state
             )
 
-            selectAssetTypeDestination()
+            selectAssetTypeDestination(
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                }
+            )
+
+            selectFeatureDestination(
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                },
+                onBackPressed = { backStackEntry ->
+                    state.popBackStack(backStackEntry)
+                }
+            )
         }
     }
 }
