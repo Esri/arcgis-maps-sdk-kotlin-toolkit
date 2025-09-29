@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 internal class AddAssociationFromSourceViewModel(
@@ -61,14 +60,14 @@ internal class AddAssociationFromSourceViewModel(
     val featureSources: List<UtilityAssociationFeatureSource>
         get() = _featureSources.value
 
-    private val _selectedSourceIndex: MutableState<Int?> = mutableStateOf(null)
+    private val _selectedSource: MutableState<UtilityAssociationFeatureSource?> =
+        mutableStateOf(null)
 
     /**
-     * The index of the currently selected [UtilityAssociationFeatureSource] in the
-     * [featureSources] list, or `null` if no source is selected.
+     * The currently selected [UtilityAssociationFeatureSource], or `null` if no source is selected.
      */
-    val selectedSourceIndex: Int?
-        get() = _selectedSourceIndex.value
+    val selectedSource: UtilityAssociationFeatureSource?
+        get() = _selectedSource.value
 
     /**
      * A [Flow] of [PagingData] containing [UtilityAssociationFeatureCandidate] objects. This flow
@@ -77,11 +76,7 @@ internal class AddAssociationFromSourceViewModel(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val featureCandidateFlow: Flow<PagingData<UtilityAssociationFeatureCandidate>> = snapshotFlow {
-        _selectedSourceIndex.value
-    }.map { index ->
-        index?.let {
-            featureSources.getOrNull(index)
-        }
+        _selectedSource.value
     }.distinctUntilChanged().flatMapLatest { source ->
         if (source == null) {
             flowOf(PagingData.empty())
@@ -103,6 +98,16 @@ internal class AddAssociationFromSourceViewModel(
         }
     }.cachedIn(viewModelScope)
 
+    private val _selectedFeatureCandidate =
+        mutableStateOf<UtilityAssociationFeatureCandidate?>(null)
+
+    /**
+     * The currently selected [UtilityAssociationFeatureCandidate], or `null` if no candidate is
+     * selected.
+     */
+    val selectedFeatureCandidate: UtilityAssociationFeatureCandidate?
+        get() = _selectedFeatureCandidate.value
+
     /**
      * Fetches the list of [UtilityAssociationFeatureSource] objects that can be used to create
      * new associations for the given [filter] and stores them in the [featureSources] map.
@@ -119,16 +124,23 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     /**
-     * Sets the selected source index to the given [index].
+     * Sets the currently selected [UtilityAssociationFeatureSource].
      *
-     * @param index The index of the source to select.
+     * @param source The [UtilityAssociationFeatureSource] to select, or `null` to clear the
+     * selection.
      */
-    fun selectSource(index: Int) {
-        if (index in featureSources.indices) {
-            _selectedSourceIndex.value = index
-        } else {
-            _selectedSourceIndex.value = null
-        }
+    fun selectSource(source: UtilityAssociationFeatureSource?) {
+        _selectedSource.value = source
+    }
+
+    /**
+     * Sets the currently selected [UtilityAssociationFeatureCandidate].
+     *
+     * @param candidate The [UtilityAssociationFeatureCandidate] to select, or `null` to clear the
+     * selection.
+     */
+    fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate?) {
+        _selectedFeatureCandidate.value = candidate
     }
 
     // Define ViewModel factory in a companion object

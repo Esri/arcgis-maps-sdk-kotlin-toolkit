@@ -82,7 +82,7 @@ internal fun SelectNetworkSourceScreen(
                 itemsIndexed(sources) { index, source ->
                     ListItem(
                         modifier = Modifier.clickable {
-                            viewModel.selectSource(index)
+                            viewModel.selectSource(source)
                             onNetworkSourceSelected()
                         },
                         headlineContent = {

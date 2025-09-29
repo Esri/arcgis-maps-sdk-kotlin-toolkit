@@ -97,5 +97,5 @@ internal sealed class AddFromSourceNavRoute {
      * Represents the review screen before adding the association.
      */
     @Serializable
-    data object Review : AddFromSourceNavRoute()
+    data object CreateAssociation : AddFromSourceNavRoute()
 }

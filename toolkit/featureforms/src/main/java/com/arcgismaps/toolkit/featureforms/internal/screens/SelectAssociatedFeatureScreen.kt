@@ -55,7 +55,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -67,7 +66,6 @@ import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.mapping.symbology.Symbol
-import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
 
@@ -85,6 +83,7 @@ internal fun SelectAssociatedFeatureScreen(
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
+    val title = viewModel.selectedSource?.name ?: ""
     val pagedData = viewModel.featureCandidateFlow.collectAsLazyPagingItems()
     val context = LocalContext.current
     val imageLoader = remember {
@@ -92,7 +91,7 @@ internal fun SelectAssociatedFeatureScreen(
     }
     Column(modifier = modifier) {
         AddWorkflowTopBar(
-            title = stringResource(R.string.available_features, pagedData.itemCount),
+            title = title,
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
