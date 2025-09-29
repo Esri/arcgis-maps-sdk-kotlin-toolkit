@@ -20,7 +20,7 @@ object ArcGISMapsKotlinSDKDependency {
      */
     fun configureArcGISMapsDependencies(target: Project) {
         target.dependencies {
-            val sdkVersionNumber = target.rootProject.properties["versionNumberInternal"].toString()
+            val sdkVersionNumber = target.rootProject.properties["versionNumber"].toString()
             // ArcGIS Maps SDK dependency with build override support
             if (sdkVersionNumber.isNotBlank() && sdkVersionNumber != "0.0.0") {
                 // Use centralized version provider

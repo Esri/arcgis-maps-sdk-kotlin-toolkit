@@ -36,7 +36,7 @@ object VersionProvider {
         isInternal: Boolean
     ): String {
         if (isInternal) {
-            rootProject.getExtraProperty("versionNumberInternal")
+            rootProject.getExtraProperty("versionNumber")
                 ?.takeIf { it.toString().isNotBlank() }
                 ?.let { return it.toString() }
         }
@@ -49,7 +49,7 @@ object VersionProvider {
 
     private fun resolveBuildNumber(rootProject: Project, isInternal: Boolean): String? {
         if (isInternal) {
-            rootProject.getExtraProperty("buildNumberInternal")
+            rootProject.getExtraProperty("buildNumber")
                 ?.takeIf { it.toString().isNotBlank() }
                 ?.let { return it.toString() }
         }

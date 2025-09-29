@@ -80,19 +80,19 @@ buildscript {
                         load(it)
                     }
                 this["BUILDVER"]?.let {
-                    project.extra.set("versionNumberInternal", it)
+                    project.extra.set("versionNumber", it)
                 }
                 this["BUILDNUM"]?.let {
-                    project.extra.set("buildNumberInternal", it)
+                    project.extra.set("buildNumber", it)
                 }
-                check(project.hasProperty("versionNumberInternal"))
-                check(project.hasProperty("buildNumberInternal"))
-                project.logger.warn("version and build number set from buildnum.txt to ${project.properties["versionNumberInternal"]}-${project.properties["buildNumberInternal"]}")
+                check(project.hasProperty("versionNumber"))
+                check(project.hasProperty("buildNumber"))
+                project.logger.warn("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
             } catch (_: Throwable) {
                 // The buildnum file is not there. ignore it and log a warning.
                 project.logger.warn("the buildnum.txt file is missing or not readable")
-                project.extra.set("versionNumberInternal", "0.0.0")
-                project.extra.set("buildNumberInternal", "SNAPSHOT")
+                project.extra.set("versionNumber", "0.0.0")
+                project.extra.set("buildNumber", "SNAPSHOT")
             }
         }
     }
