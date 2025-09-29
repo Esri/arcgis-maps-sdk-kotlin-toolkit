@@ -77,6 +77,10 @@ dependencyResolutionManagement {
     }
 }
 
+// fixes https://devtopia.esri.com/runtime/kotlin/issues/3863#issuecomment-4715101
+// fixes https://issuetracker.google.com/issues/315023802
+// gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
+
 // This enables the "Type Safe Project Accessors" feature
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 

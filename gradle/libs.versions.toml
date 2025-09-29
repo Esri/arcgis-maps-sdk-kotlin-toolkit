@@ -76,7 +76,6 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 ### Kotlin libs
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 ### Compose libs
@@ -103,7 +102,6 @@ androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.r
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidXTestRules" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidXTestRunner" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 
@@ -122,11 +120,12 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ext = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 
-# Dependencies of the included build-logic
+# Gradle Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 android-tools-common = { group = "com.android.tools", name = "common", version.ref = "androidTools" }
+secrets-gradlePlugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "gradleSecrets" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -188,12 +187,6 @@ composeTest = [
 debug = [
     "androidx-compose-ui-tooling",
     "androidx-compose-ui-test-manifest"
-]
-
-unitTest = [
-    "junit",
-    "kotlinx-coroutines-test",
-    "truth"
 ]
 
 androidXTest = [

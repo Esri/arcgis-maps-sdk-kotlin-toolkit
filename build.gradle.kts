@@ -40,20 +40,23 @@ buildscript {
     }
     // Find these in properties passed through command line or read from local.properties and
     // set them as project properties
-    val artifactoryUrl: String? = project.findProperty("artifactoryUrl") as String?
+    val artifactoryUrl = providers.gradleProperty("artifactoryUrl").orNull
         ?: localProperties.getProperty("artifactoryUrl")
         ?: "https://esri.jfrog.io/artifactory/arcgis"
-    val artifactoryUsername: String? = project.findProperty("artifactoryUsername") as String?
+    val artifactoryUsername = providers.gradleProperty("artifactoryUsername").orNull
         ?: localProperties.getProperty("artifactoryUsername")
         ?: ""
-    val artifactoryPassword: String? = project.findProperty("artifactoryPassword") as String?
+    val artifactoryPassword = providers.gradleProperty("artifactoryPassword").orNull
         ?: localProperties.getProperty("artifactoryPassword")
         ?: ""
 
-    val sdkVersionNumber = project.findProperty("sdkVersionNumber") as String?
+    val sdkVersionNumber = providers.gradleProperty("versionNumber").orNull
         ?: localProperties.getProperty("sdkVersionNumber")
-    val sdkBuildNumber = project.findProperty("sdkBuildNumber") as String?
+        ?: libs.versions.arcgisMapsKotlinVersion.get()
+
+    val sdkBuildNumber = providers.gradleProperty("buildNumber").orNull
         ?: localProperties.getProperty("sdkBuildNumber")
+        ?: ""
 
     project.extra.set("artifactoryUrl", artifactoryUrl)
     project.extra.set("artifactoryUsername", artifactoryUsername)
@@ -66,7 +69,7 @@ buildscript {
 
     if (finalBuild) {
         check(project.hasProperty("versionNumber"))
-        project.logger.warn("release candidate build requested version ${project.properties["versionNumber"]}")
+        project.logger.info("release candidate build requested version ${project.properties["versionNumber"]}")
     } else if (!project.hasProperty("versionNumber") && !project.hasProperty("buildNum")) {
         // both version number and build number must be set
         java.util.Properties().run {
@@ -77,20 +80,23 @@ buildscript {
                         load(it)
                     }
                 this["BUILDVER"]?.let {
-                    project.extra.set("versionNumber", it)
+                    project.extra.set("versionNumberInternal", it)
                 }
                 this["BUILDNUM"]?.let {
-                    project.extra.set("buildNumber", it)
+                    project.extra.set("buildNumberInternal", it)
                 }
-                check(project.hasProperty("versionNumber"))
-                check(project.hasProperty("buildNumber"))
-                project.logger.warn("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
-            } catch (t: Throwable) {
+                check(project.hasProperty("versionNumberInternal"))
+                check(project.hasProperty("buildNumberInternal"))
+                project.logger.warn("version and build number set from buildnum.txt to ${project.properties["versionNumberInternal"]}-${project.properties["buildNumberInternal"]}")
+            } catch (_: Throwable) {
                 // The buildnum file is not there. ignore it and log a warning.
                 project.logger.warn("the buildnum.txt file is missing or not readable")
-                project.extra.set("versionNumber", "0.0.0")
-                project.extra.set("buildNumber", "SNAPSHOT")
+                project.extra.set("versionNumberInternal", "0.0.0")
+                project.extra.set("buildNumberInternal", "SNAPSHOT")
             }
         }
     }
 }
+
+// Path to the centralized folder in root directory where test reports for connected tests end up
+project.extra.set("connectedTestReportsPath", "${rootDir}/connectedTestReports")

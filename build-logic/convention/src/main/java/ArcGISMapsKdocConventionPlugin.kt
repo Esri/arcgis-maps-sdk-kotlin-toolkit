@@ -1,12 +1,11 @@
 import com.esri.arcgismaps.kotlin.build_logic.convention.VersionProvider
 import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
 import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
-import com.esri.arcgismaps.kotlin.build_logic.registry.ToolkitRegistry
+import com.esri.arcgismaps.kotlin.build_logic.registry.getToolkitRegistryServiceProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaVersioningPluginParameters
@@ -33,34 +32,29 @@ class ArcGISMapsKdocConventionPlugin : Plugin<Project> {
         extensions.configure<DokkaExtension> {
             pluginsConfiguration.withType<DokkaVersioningPluginParameters>().configureEach {
                 // Use centralized version provider
-                version.set(VersionProvider.getArtifactVersion(project))
+                version.set(VersionProvider.artifactVersionProvider(project))
             }
 
             moduleName.set("arcgis-maps-kotlin-toolkit")
 
-            dokkaSourceSets {
-                if (findByName("main") == null) {
-                    register("main")
+            dokkaSourceSets.named("main") {
+                // Get the toolkit registry provider
+                val registryServiceProvider = getToolkitRegistryServiceProvider(target)
+                // Lazily get releasable modules from the service provider
+                val releasableModulesProvider = registryServiceProvider.map { service ->
+                    service.toolkitModules.get().filter { it.releasable }
                 }
-
-                named("main") {
-                    // Get source roots directly and convert to files
-                    val toolkitConfigProvider = ToolkitRegistry.getReleasableModules(rootProject)
-                    sourceRoots.from(
-                        toolkitConfigProvider.map { toolkitRegistryModuleConfigs ->
-                            toolkitRegistryModuleConfigs.map { config ->
-                                rootProject.file(config.sourceRoot)
-                            }
-                        }
-                    )
+                // Build the provider for source roots of all releasable modules
+                val sourceRootFilesProvider = releasableModulesProvider.map { configs ->
+                    configs.map { config -> rootProject.file(config.getSourceRoot(rootProject)) }
                 }
-                configureEach {
-                    perPackageOption {
-                        matchingRegex.set(".*internal.*")
-                        suppress.set(true)
-                        reportUndocumented.set(true)
-                    }
+                // Add the source roots using a provider string list
+                sourceRoots.from(sourceRootFilesProvider)
+                perPackageOption {
+                    matchingRegex.set(".*internal.*")
+                    suppress.set(true)
                 }
+                reportUndocumented.set(true)
             }
         }
     }

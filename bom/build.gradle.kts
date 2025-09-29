@@ -17,7 +17,5 @@
  */
 
 plugins {
-    `maven-publish`
-    `java-platform`
     alias(libs.plugins.arcgismaps.kotlin.bom.convention)
 }

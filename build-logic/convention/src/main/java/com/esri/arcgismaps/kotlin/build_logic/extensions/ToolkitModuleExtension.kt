@@ -4,9 +4,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-
 abstract class ToolkitModuleExtension @Inject constructor(objects: ObjectFactory) {
-
     /** Can/should this module be published as an artifact? */
     val releasable: Property<Boolean> = objects.property(Boolean::class.java)
 
@@ -14,4 +12,7 @@ abstract class ToolkitModuleExtension @Inject constructor(objects: ObjectFactory
         releasable.convention(true)
     }
 
+    companion object {
+        const val NAME = "toolkit"
+    }
 }

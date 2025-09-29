@@ -45,8 +45,6 @@ apiValidation {
 dependencies {
     // Module-specific dependencies go here
     implementation(libs.androidx.browser)
-    implementation(libs.androidx.material.icons)
-    // uiautomator
     androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.mockk.android)
 }

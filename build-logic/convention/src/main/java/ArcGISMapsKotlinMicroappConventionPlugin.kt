@@ -1,4 +1,4 @@
-import com.android.build.api.dsl.ApplicationExtension
+import com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPluginExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.ArcGISMapsKotlinSDKDependency
 import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
 import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
@@ -17,21 +17,9 @@ class ArcGISMapsKotlinMicroappConventionPlugin : Plugin<Project> {
                 apply(libs.findPlugin("gradle-secrets").get().get().pluginId)
             }
 
-
-            // Configure secrets plugin defaults and custom BuildConfig fields
-            extensions.configure<ApplicationExtension> {
-                val defaultPropertiesFile = rootProject.file("secrets.defaults.properties")
-                if (defaultPropertiesFile.exists()) {
-                    val properties = java.util.Properties()
-                    defaultPropertiesFile.inputStream().use { properties.load(it) }
-                    defaultConfig {
-                        // Add each property as a BuildConfig field
-                        properties.forEach { (key, value) ->
-                            val escapedValue = value.toString().replace("\"", "\\\"")
-                            buildConfigField("String", key.toString(), "\"${escapedValue}\"")
-                        }
-                    }
-                }
+            // Configure the secrets-gradle-plugin using its dedicated extension.
+            extensions.configure<SecretsPluginExtension> {
+                defaultPropertiesFileName = "secrets.defaults.properties"
             }
 
             dependencies {

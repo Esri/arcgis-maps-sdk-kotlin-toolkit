@@ -1,11 +1,10 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.esri.arcgismaps.kotlin.build_logic.convention.configureAndroidCompose
 import com.esri.arcgismaps.kotlin.build_logic.convention.configureKotlinAndroid
-import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
-import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
-import com.esri.arcgismaps.kotlin.build_logic.extensions.testImplementation
 import com.esri.arcgismaps.kotlin.build_logic.extensions.androidTestImplementation
 import com.esri.arcgismaps.kotlin.build_logic.extensions.debugImplementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.implementation
+import com.esri.arcgismaps.kotlin.build_logic.extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
@@ -34,7 +33,6 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
                 implementation(libs.findLibrary("androidx-activity-compose").get())
                 implementation(libs.findLibrary("androidx-material-icons").get())
                 implementation(libs.findLibrary("kotlinx-serialization-json").get())
-                testImplementation(libs.findBundle("unitTest").get())
                 androidTestImplementation(libs.findBundle("composeTest").get())
                 androidTestImplementation(libs.findBundle("androidXTest").get())
                 debugImplementation(libs.findBundle("debug").get())

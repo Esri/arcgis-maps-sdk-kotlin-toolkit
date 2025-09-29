@@ -22,6 +22,10 @@ fun DependencyHandler.androidTestImplementation(dependencyNotation: Any): Depend
 fun DependencyHandler.debugImplementation(dependencyNotation: Any): Dependency? =
     add("debugImplementation", dependencyNotation)
 
+fun Project.getExtraProperty(name: String): Any? {
+    return this.extensions.extraProperties.get(name)
+}
+
 val Project.libs
     get(): VersionCatalog = extensions
         .getByType<VersionCatalogsExtension>()
