@@ -344,6 +344,10 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
+                // Set the camera controller last, to ensure other dependend SceneView properties are already set.
+                // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
+                // set on the SceneView at this point.
+                // https://devtopia.esri.com/runtime/kotlin/issues/6623
                 it.cameraController = cameraController
             })
 
