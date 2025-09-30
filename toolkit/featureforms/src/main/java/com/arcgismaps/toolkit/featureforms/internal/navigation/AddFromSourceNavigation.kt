@@ -32,13 +32,14 @@ import androidx.navigation.compose.composable
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.screens.CreateAssociationScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssociatedFeatureScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectNetworkSourceScreen
 
 internal fun NavGraphBuilder.selectSourceDestination(
-    onSourceSelected: (NavBackStackEntry) -> Unit,
-    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
     onBackPressed: (NavBackStackEntry) -> Unit,
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
+    onSourceSelected: (NavBackStackEntry) -> Unit,
     state: FeatureFormState
 ) {
     composable<AddFromSourceNavRoute.SelectSource>(
@@ -58,8 +59,10 @@ internal fun NavGraphBuilder.selectSourceDestination(
                 viewModelStoreOwner = parent,
                 factory = AddAssociationFromSourceViewModel.Factory(
                     element = state.element,
+                    featureForm = formData.featureForm,
                     filter = state.selectedFilterResult!!.filter,
                     onAssociationAdded = {
+                        state.refreshResults()
                     }
                 )
             )
@@ -90,8 +93,9 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
 }
 
 internal fun NavGraphBuilder.selectFeatureDestination(
+    onBackPressed: (NavBackStackEntry) -> Unit,
+    onFeatureCandidateSelected: (NavBackStackEntry) -> Unit,
     onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
-    onBackPressed: (NavBackStackEntry) -> Unit
 ) {
     composable<AddFromSourceNavRoute.SelectAssociatedFeature> { backStackEntry ->
         val parent = remember(backStackEntry) {
@@ -99,6 +103,31 @@ internal fun NavGraphBuilder.selectFeatureDestination(
         }
         SelectAssociatedFeatureScreen(
             viewModel = viewModel(parent),
+            onBackPressed = {
+                onBackPressed(backStackEntry)
+            },
+            onFeatureCandidateSelected = {
+                onFeatureCandidateSelected(backStackEntry)
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+internal fun NavGraphBuilder.createAssociationDestination(
+    onAssociationCreated: (NavBackStackEntry) -> Unit,
+    onBackPressed: (NavBackStackEntry) -> Unit,
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
+) {
+    composable<AddFromSourceNavRoute.CreateAssociation> { backStackEntry ->
+        val parent = remember(backStackEntry) {
+            onGetParentEntry(backStackEntry)
+        }
+        CreateAssociationScreen(
+            viewModel = viewModel(parent),
+            onAssociationCreated = {
+                onAssociationCreated(backStackEntry)
+            },
             onBackPressed = {
                 onBackPressed(backStackEntry)
             },
@@ -127,5 +156,12 @@ internal fun NavHostController.navigateToSelectAssociatedFeature(
     backStackEntry: NavBackStackEntry
 ) {
     val newRoute = AddFromSourceNavRoute.SelectAssociatedFeature
+    navigateSafely(backStackEntry, newRoute)
+}
+
+internal fun NavHostController.navigateToCreateAssociation(
+    backStackEntry: NavBackStackEntry
+) {
+    val newRoute = AddFromSourceNavRoute.CreateAssociation
     navigateSafely(backStackEntry, newRoute)
 }

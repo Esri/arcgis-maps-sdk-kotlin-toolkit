@@ -103,7 +103,7 @@ internal fun UtilityAssociationGroupResult(
             state = lazyListState
         ) {
             groupResult.associationResults.forEachIndexed { index, info ->
-                item(key = info.association.globalId.toString()) {
+                item {
                     AssociationItem(
                         title = info.title,
                         association = info.association,

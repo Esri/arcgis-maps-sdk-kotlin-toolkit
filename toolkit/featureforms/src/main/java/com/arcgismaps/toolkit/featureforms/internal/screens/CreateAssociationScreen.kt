@@ -16,15 +16,218 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ContentVisibleControl
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FractionAlongEdgeControl
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.PropertyRow
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityTerminalControl
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getTerminalById
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun CreateAssociationScreen(
     viewModel: AddAssociationFromSourceViewModel,
-    onAssociationCreated : () -> Unit,
+    onAssociationCreated: () -> Unit,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    val associationOptions = viewModel.newAssociationOptions
+    var selectedTerminalId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+    var isContainmentVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var fractionAlongEdge by rememberSaveable {
+        mutableStateOf<Double?>(null)
+    }
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AddWorkflowTopBar(
+                title = "New Association",
+                onBackPressed = onBackPressed,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        viewModel.addAssociation(
+                            isContainmentVisible = isContainmentVisible,
+                            fromTerminalId = selectedTerminalId,
+                            toTerminalId = null,
+                            fractionAlongEdge = fractionAlongEdge
+                        ).onSuccess {
+                            onAssociationCreated()
+                        }.onFailure {
+                            snackbarHostState.showSnackbar(
+                                message = "Failed to create association. Please check the selected configuration.",
+                                duration = SnackbarDuration.Long,
+                                actionLabel = "OK"
+                            )
+                            Log.e("CreateAssociation", "Failed to create association.", it)
+                        }
+                    }
+                },
+                enabled = associationOptions != null,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            ) {
+                Text(text = "Add")
+            }
+        }
+        associationOptions?.let {
+            val candidate = it.candidate
+            val options = it.options
+            val filterType = it.type
+            // First show the association type
+            // If containment/content show boolean control
 
+            // Association Type
+            Card(
+                modifier = Modifier.padding(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
+                )
+            ) {
+                PropertyRow(
+                    title = stringResource(R.string.association_type),
+                    value = filterType.toString(),
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                )
+                if (filterType is UtilityAssociationsFilterType.Container
+                    || filterType is UtilityAssociationsFilterType.Content
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
+                    ContentVisibleControl(
+                        value = false,
+                        enabled = true,
+                        onValueChange = {},
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp, vertical = 5.dp)
+                            .fillMaxWidth()
+                    )
+                }
+            }
+
+            // -- Space --
+
+            // Show From Element
+            // if terminal config is available show terminal selection
+            Card(
+                modifier = Modifier.padding(24.dp), colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
+                )
+            ) {
+                PropertyRow(
+                    title = stringResource(R.string.from_element),
+                    value = viewModel.featureForm.title.collectAsState().value,
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                )
+            }
+
+            // Show To Element
+            // if terminal config is available show terminal selection
+            Card(
+                modifier = Modifier.padding(24.dp), colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
+                )
+            ) {
+                PropertyRow(
+                    title = stringResource(R.string.to_element),
+                    value = candidate.title,
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                )
+                options.terminalConfiguration?.let { terminalConfig ->
+                    UtilityTerminalControl(
+                        name = selectedTerminalId?.let { id ->
+                            terminalConfig.getTerminalById(id)?.name
+                        } ?: "Select",
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .fillMaxWidth(),
+                        options = terminalConfig.terminals,
+                        onTerminalSelected = { selected ->
+                            selectedTerminalId = selected.terminalId
+                        },
+                        enabled = true,
+                    )
+                }
+            }
+
+            // If isFractionAlongEdgeValid and no spatial feature show
+            // fraction along edge control
+
+            if (options.isFractionAlongEdgeValid) {
+                Card(modifier = Modifier.padding(24.dp)) {
+                    FractionAlongEdgeControl(
+                        fraction = 0f,
+                        enabled = true,
+                        onValueChanged = { fraction ->
+                            fractionAlongEdge = fraction.toDouble()
+                        }
+                    )
+                }
+            }
+        }
+    }
+    Box(
+        modifier = Modifier.fillMaxSize().padding(24.dp)
+    ) {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
 }

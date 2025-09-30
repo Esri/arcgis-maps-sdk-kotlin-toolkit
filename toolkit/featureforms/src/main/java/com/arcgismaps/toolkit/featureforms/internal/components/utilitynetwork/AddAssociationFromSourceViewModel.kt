@@ -31,10 +31,16 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import com.arcgismaps.data.QueryParameters
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
+import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
+import com.arcgismaps.utilitynetworks.UtilityTerminal
+import com.arcgismaps.utilitynetworks.UtilityTerminalConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,9 +50,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 
 internal class AddAssociationFromSourceViewModel(
+    val featureForm : FeatureForm,
     private val element: UtilityAssociationsFormElement,
     private val filter: UtilityAssociationsFilter,
-    private val onAssociationAdded: () -> Unit
+    private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 
     private val _featureSources: MutableState<List<UtilityAssociationFeatureSource>> =
@@ -71,7 +78,7 @@ internal class AddAssociationFromSourceViewModel(
 
     /**
      * A [Flow] of [PagingData] containing [UtilityAssociationFeatureCandidate] objects. This flow
-     * is updated whenever the [selectedSourceIndex] changes. If no source is selected, this flow
+     * is updated whenever the [selectedSource] changes. If no source is selected, this flow
      * will be empty.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -98,15 +105,15 @@ internal class AddAssociationFromSourceViewModel(
         }
     }.cachedIn(viewModelScope)
 
-    private val _selectedFeatureCandidate =
-        mutableStateOf<UtilityAssociationFeatureCandidate?>(null)
+    private val _newAssociationOptions =
+        mutableStateOf<NewAssociationOptions?>(null)
 
     /**
-     * The currently selected [UtilityAssociationFeatureCandidate], or `null` if no candidate is
-     * selected.
+     * Options for creating a new association based on the currently selected feature candidate.
+     * This will be `null` if no candidate is selected or if the options have not been fetched yet.
      */
-    val selectedFeatureCandidate: UtilityAssociationFeatureCandidate?
-        get() = _selectedFeatureCandidate.value
+    val newAssociationOptions: NewAssociationOptions?
+        get() = _newAssociationOptions.value
 
     /**
      * Fetches the list of [UtilityAssociationFeatureSource] objects that can be used to create
@@ -124,6 +131,106 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     /**
+     * Sets the currently selected [UtilityAssociationFeatureCandidate].
+     *
+     * @param candidate The [UtilityAssociationFeatureCandidate] to select, or `null` to clear the
+     * selection.
+     */
+    suspend fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
+        element.getOptionsForAssociationCandidate(candidate.feature).onSuccess {
+            _newAssociationOptions.value = NewAssociationOptions(
+                candidate = candidate,
+                options = it,
+                type = filter.filterType
+            )
+        }
+    }
+
+    /**
+     * Adds a new association to the [element] using the provided [feature] and parameters. If the
+     * proper parameters for the association type are not provided, the result will be a failure.
+     */
+    suspend fun addAssociation(
+        isContainmentVisible: Boolean? = null,
+        fromTerminalId : Int? = null,
+        toTerminalId : Int? = null,
+        fractionAlongEdge: Double? = null
+    ) : Result<UtilityAssociationResult> = runCatching {
+        val feature = newAssociationOptions?.candidate?.feature
+        require(feature != null)
+        val fromTerminal = fromTerminalId?.let { id ->
+            newAssociationOptions?.options?.terminalConfiguration.getTerminalById(id)
+        }
+        val toTerminal = toTerminalId?.let { id ->
+            newAssociationOptions?.options?.terminalConfiguration.getTerminalById(id)
+        }
+        val canAddAssociation = element.canAddAssociation(
+            feature,
+            filter
+        ).getOrThrow()
+        if (canAddAssociation.not())  {
+            throw IllegalStateException("Cannot add association with the provided feature and filter")
+        }
+
+        val result = when (filter.filterType) {
+            is UtilityAssociationsFilterType.Container,
+            is UtilityAssociationsFilterType.Content -> {
+                if (isContainmentVisible == null) {
+                    element.addAssociation(feature, filter)
+                } else {
+                    element.addAssociation(
+                        feature,
+                        filter = filter,
+                        isContainmentVisible = isContainmentVisible
+                    )
+                }
+            }
+
+            is UtilityAssociationsFilterType.Structure,
+            is UtilityAssociationsFilterType.Attachment -> {
+                element.addAssociation(feature, filter)
+            }
+
+            is UtilityAssociationsFilterType.Connectivity -> {
+                if (fractionAlongEdge != null) {
+                    // between junction and edge
+                    val terminal = fromTerminal ?: toTerminal
+                    if (terminal == null) {
+                        element.addAssociation(
+                            feature = feature,
+                            filter = filter,
+                            fractionAlongEdge = fractionAlongEdge
+                        )
+                    } else {
+                        element.addAssociation(
+                            feature = feature,
+                            filter = filter,
+                            fractionAlongEdge = fractionAlongEdge,
+                            terminal = terminal
+                        )
+                    }
+                } else {
+                    // junction to junction
+                    require(fromTerminal != null)
+                    require(toTerminal != null)
+                    element.addAssociation(
+                        feature = feature,
+                        featureTerminal = fromTerminal,
+                        filter = filter,
+                        currentFeatureTerminal = toTerminal
+                    )
+                }
+            }
+        }
+        if (result.isSuccess) {
+            // If successful, raise the callback to notify the association was added so the receiver
+            // can refresh its state
+            onAssociationAdded()
+        }
+        result.getOrThrow()
+    }
+
+    /**
      * Sets the currently selected [UtilityAssociationFeatureSource].
      *
      * @param source The [UtilityAssociationFeatureSource] to select, or `null` to clear the
@@ -133,25 +240,16 @@ internal class AddAssociationFromSourceViewModel(
         _selectedSource.value = source
     }
 
-    /**
-     * Sets the currently selected [UtilityAssociationFeatureCandidate].
-     *
-     * @param candidate The [UtilityAssociationFeatureCandidate] to select, or `null` to clear the
-     * selection.
-     */
-    fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate?) {
-        _selectedFeatureCandidate.value = candidate
-    }
-
-    // Define ViewModel factory in a companion object
     companion object {
         fun Factory(
+            featureForm: FeatureForm,
             element: UtilityAssociationsFormElement,
             filter: UtilityAssociationsFilter,
-            onAssociationAdded: () -> Unit
+            onAssociationAdded: suspend () -> Unit
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 AddAssociationFromSourceViewModel(
+                    featureForm,
                     element,
                     filter,
                     onAssociationAdded
@@ -160,6 +258,12 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 }
+
+internal data class NewAssociationOptions(
+    val candidate: UtilityAssociationFeatureCandidate,
+    val options: UtilityAssociationFeatureOptions,
+    val type: UtilityAssociationsFilterType
+)
 
 /**
  * A [PagingSource] that loads [UtilityAssociationFeatureCandidate] objects from a given
@@ -206,4 +310,8 @@ internal class AssociationFeatureCandidatePagingSource(
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
+}
+
+internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
+    return this?.terminals?.find { it.terminalId == id }
 }

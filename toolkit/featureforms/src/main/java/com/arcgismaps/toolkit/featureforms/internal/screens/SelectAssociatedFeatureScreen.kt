@@ -46,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -68,6 +69,7 @@ import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
+import kotlinx.coroutines.launch
 
 /**
  * A screen that displays a list of features that can be associated with a utility network feature.
@@ -80,8 +82,10 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
 internal fun SelectAssociatedFeatureScreen(
     viewModel: AddAssociationFromSourceViewModel,
     onBackPressed: () -> Unit,
+    onFeatureCandidateSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val title = viewModel.selectedSource?.name ?: ""
     val pagedData = viewModel.featureCandidateFlow.collectAsLazyPagingItems()
@@ -127,7 +131,10 @@ internal fun SelectAssociatedFeatureScreen(
                                 if (item != null) {
                                     ListItem(
                                         modifier = Modifier.clickable {
-                                            // TODO: Handle feature selection
+                                            scope.launch {
+                                                viewModel.selectFeatureCandidate(item)
+                                                onFeatureCandidateSelected()
+                                            }
                                         },
                                         headlineContent = {
                                             Text(

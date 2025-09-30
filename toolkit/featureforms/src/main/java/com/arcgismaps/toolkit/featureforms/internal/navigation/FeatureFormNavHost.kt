@@ -79,13 +79,13 @@ internal fun FeatureFormNavHost(
             startDestination = AddFromSourceNavRoute.SelectSource,
         ) {
             selectSourceDestination(
-                onSourceSelected = navController::navigateToSelectAssociatedFeature,
-                onGetParentEntry = {
-                    navController.getBackStackEntry(it.destination.parent!!.id)
-                },
                 onBackPressed = { backStackEntry ->
                     state.popBackStack(backStackEntry)
                 },
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                },
+                onSourceSelected = navController::navigateToSelectAssociatedFeature,
                 state = state
             )
 
@@ -96,11 +96,26 @@ internal fun FeatureFormNavHost(
             )
 
             selectFeatureDestination(
+                onBackPressed = { backStackEntry ->
+                    state.popBackStack(backStackEntry)
+                },
+                onFeatureCandidateSelected = { backStackEntry ->
+                  navController.navigateToCreateAssociation(backStackEntry)
+                },
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
+                }
+            )
+
+            createAssociationDestination(
+                onAssociationCreated = {
+                    navController.popBackStack<NavigationRoute.UNFilterView>(inclusive = false)
                 },
                 onBackPressed = { backStackEntry ->
                     state.popBackStack(backStackEntry)
+                },
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
                 }
             )
         }
