@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright 2025 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.esri.arcgismaps.kotlin.build_logic.registry
 
 import org.gradle.api.Project
@@ -36,7 +54,7 @@ data class ModuleConfig(
     /**
      * Returns the source root path for documentation.
      */
-    fun getSourceRoot(rootProject: Project): String =
+    fun sourceRoot(rootProject: Project): String =
         rootProject.project(path).projectDir.resolve("src/main/java").path
 }
 
@@ -45,7 +63,7 @@ data class ModuleConfig(
  * Obtain a provider for the shared build service. [BuildServiceRegistry.registerIfAbsent] ensures
  * only one instance of the service is created for the entire build.
  */
-fun getToolkitRegistryServiceProvider(target: Project): Provider<ToolkitRegistryService> {
+fun toolkitRegistryServiceProvider(target: Project): Provider<ToolkitRegistryService> {
     return target.gradle.sharedServices.registerIfAbsent(
         /* name = */ ToolkitRegistryService.NAME,
         /* implementationType = */ ToolkitRegistryService::class.java

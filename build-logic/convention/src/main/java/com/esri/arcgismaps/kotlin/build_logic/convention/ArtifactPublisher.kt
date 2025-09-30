@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2025 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package com.esri.arcgismaps.kotlin.build_logic.convention
 
-import com.esri.arcgismaps.kotlin.build_logic.registry.getToolkitRegistryServiceProvider
+import com.esri.arcgismaps.kotlin.build_logic.registry.toolkitRegistryServiceProvider
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -53,7 +53,7 @@ object ArtifactPublisher {
         project.pluginManager.apply(MavenPublishPlugin::class.java)
         project.afterEvaluate {
             // Check if this module is releasable
-            val registryService = getToolkitRegistryServiceProvider(this).get()
+            val registryService = toolkitRegistryServiceProvider(this).get()
             val isReleasable = registryService.isModuleReleasable(this).get()
             if (!isReleasable) return@afterEvaluate
 
