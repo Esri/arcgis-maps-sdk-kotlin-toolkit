@@ -36,6 +36,7 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
@@ -76,6 +77,15 @@ internal class AddAssociationFromSourceViewModel(
     val selectedSource: UtilityAssociationFeatureSource?
         get() = _selectedSource.value
 
+    private val _selectedAssetType: MutableState<UtilityAssetType?> =
+        mutableStateOf(null)
+
+    /**
+     * The currently selected [UtilityAssetType], or `null` if no asset type is selected.
+     */
+    val selectedAssetType: UtilityAssetType?
+        get() = _selectedAssetType.value
+
     /**
      * A [Flow] of [PagingData] containing [UtilityAssociationFeatureCandidate] objects. This flow
      * is updated whenever the [selectedSource] changes. If no source is selected, this flow
@@ -83,13 +93,16 @@ internal class AddAssociationFromSourceViewModel(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val featureCandidateFlow: Flow<PagingData<UtilityAssociationFeatureCandidate>> = snapshotFlow {
-        _selectedSource.value
-    }.distinctUntilChanged().flatMapLatest { source ->
-        if (source == null) {
+        _selectedAssetType.value
+    }.distinctUntilChanged().flatMapLatest { assetType ->
+        val source = selectedSource
+        // If no source is selected, return an empty flow
+        if (source == null || assetType == null) {
             flowOf(PagingData.empty())
         } else {
             val pagingSource = AssociationFeatureCandidatePagingSource(
                 featureSource = source,
+                assetType = assetType,
                 queryParamsProvider = {
                     QueryParameters().apply {
                         whereClause = "1=1"
@@ -159,10 +172,10 @@ internal class AddAssociationFromSourceViewModel(
         val feature = newAssociationOptions?.candidate?.feature
         require(feature != null)
         val fromTerminal = fromTerminalId?.let { id ->
-            newAssociationOptions?.options?.terminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.options?.formFeatureTerminalConfiguration.getTerminalById(id)
         }
         val toTerminal = toTerminalId?.let { id ->
-            newAssociationOptions?.options?.terminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.options?.candidateFeatureTerminalConfiguration.getTerminalById(id)
         }
         val canAddAssociation = element.canAddAssociation(
             feature,
@@ -240,6 +253,13 @@ internal class AddAssociationFromSourceViewModel(
         _selectedSource.value = source
     }
 
+    /**
+     * Sets the currently selected [UtilityAssetType].
+     */
+    fun selectAssetType(assetType: UtilityAssetType?) {
+        _selectedAssetType.value = assetType
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -274,6 +294,7 @@ internal data class NewAssociationOptions(
  */
 internal class AssociationFeatureCandidatePagingSource(
     private val featureSource: UtilityAssociationFeatureSource,
+    private val assetType: UtilityAssetType,
     private val queryParamsProvider: () -> QueryParameters
 ) : PagingSource<Int, UtilityAssociationFeatureCandidate>() {
 
@@ -288,7 +309,7 @@ internal class AssociationFeatureCandidatePagingSource(
                     this.maxFeatures = pageSize
                 }
                 // Query the feature source for candidates
-                val result = featureSource.queryFeatures(queryParams).getOrThrow()
+                val result = featureSource.queryFeatures(assetType, queryParams).getOrThrow()
                 val candidates = result.candidates
                 // Determine the next and previous keys
                 val nextKey = if (candidates.size < pageSize) null else page + 1

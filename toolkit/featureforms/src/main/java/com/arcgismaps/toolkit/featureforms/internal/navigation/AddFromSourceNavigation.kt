@@ -33,8 +33,10 @@ import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.CreateAssociationScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssetTypeScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssociatedFeatureScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectNetworkSourceScreen
+import com.arcgismaps.utilitynetworks.UtilityAssetType
 
 internal fun NavGraphBuilder.selectSourceDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
@@ -81,6 +83,8 @@ internal fun NavGraphBuilder.selectSourceDestination(
 }
 
 internal fun NavGraphBuilder.selectAssetTypeDestination(
+    onAssetTypeSelected: (NavBackStackEntry) -> Unit,
+    onBackPressed: (NavBackStackEntry) -> Unit,
     onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
 ) {
     composable<AddFromSourceNavRoute.SelectAssetType> { backStackEntry ->
@@ -88,7 +92,16 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
             onGetParentEntry(backStackEntry)
         }
         val viewModel: AddAssociationFromSourceViewModel = viewModel(parent)
-        Text(text = backStackEntry.destination.route.toString())
+        SelectAssetTypeScreen(
+            viewModel = viewModel,
+            onBackPressed = {
+                onBackPressed(backStackEntry)
+            },
+            onAssetTypeSelected = {
+                onAssetTypeSelected(backStackEntry)
+            },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 

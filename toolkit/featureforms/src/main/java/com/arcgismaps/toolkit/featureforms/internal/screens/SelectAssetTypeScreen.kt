@@ -20,56 +20,55 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 
 @Composable
-internal fun SelectNetworkSourceScreen(
+internal fun SelectAssetTypeScreen(
     viewModel: AddAssociationFromSourceViewModel,
-    onNetworkSourceSelected: () -> Unit,
     onBackPressed: () -> Unit,
+    onAssetTypeSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sources = viewModel.featureSources
-    val lazyListState = rememberLazyListState()
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.End
-    ) {
+    val networkSource = viewModel.selectedSource
+    val assetTypes = networkSource?.assetTypes ?: emptyList()
+    Column(modifier = modifier) {
         AddWorkflowTopBar(
-            title = "Network Data Source",
+            title = "${networkSource?.name}",
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
-        Text(
-            text = "Count ${viewModel.featureSources.count()}",
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding( horizontal = 16.dp),
+            verticalAlignment = CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Available Asset Types",
+                style = MaterialTheme.typography.labelSmall
+            )
+            Text(
+                text = "Count ${assetTypes.count()}",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
         Surface(
             modifier = Modifier
                 .wrapContentSize()
@@ -77,16 +76,16 @@ internal fun SelectNetworkSourceScreen(
             shape = RoundedCornerShape(15.dp),
             color = MaterialTheme.colorScheme.surfaceBright
         ) {
-            LazyColumn(state = lazyListState) {
-                itemsIndexed(sources) { index, source ->
+            LazyColumn {
+                itemsIndexed(assetTypes) { index, assetType ->
                     ListItem(
                         modifier = Modifier.clickable {
-                            viewModel.selectSource(source)
-                            onNetworkSourceSelected()
+                            viewModel.selectAssetType(assetType)
+                            onAssetTypeSelected()
                         },
                         headlineContent = {
                             Text(
-                                text = source.name,
+                                text = assetType.name,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         },
@@ -94,48 +93,12 @@ internal fun SelectNetworkSourceScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceBright,
                         )
                     )
-                    if (index < sources.count() - 1) {
+                    if (index < assetTypes.count() - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     }
-                }
-            }
-        }
-    }
-    LaunchedEffect(viewModel) {
-        viewModel.fetchFeatureSources()
-    }
-}
-
-@Composable
-internal fun AddWorkflowTopBar(
-    title: String,
-    onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.padding(horizontal = 8.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-        ) {
-            IconButton(onClick = onBackPressed) {
-                Icon(
-                    Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Navigate back"
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
                 }
             }
         }

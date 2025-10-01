@@ -79,26 +79,24 @@ internal fun FeatureFormNavHost(
             startDestination = AddFromSourceNavRoute.SelectSource,
         ) {
             selectSourceDestination(
-                onBackPressed = { backStackEntry ->
-                    state.popBackStack(backStackEntry)
-                },
+                onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 },
-                onSourceSelected = navController::navigateToSelectAssociatedFeature,
+                onSourceSelected = navController::navigateToSelectAssetType,
                 state = state
             )
 
             selectAssetTypeDestination(
+                onAssetTypeSelected = navController::navigateToSelectAssociatedFeature,
+                onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 }
             )
 
             selectFeatureDestination(
-                onBackPressed = { backStackEntry ->
-                    state.popBackStack(backStackEntry)
-                },
+                onBackPressed = state::popBackStack,
                 onFeatureCandidateSelected = { backStackEntry ->
                   navController.navigateToCreateAssociation(backStackEntry)
                 },
@@ -111,9 +109,7 @@ internal fun FeatureFormNavHost(
                 onAssociationCreated = {
                     navController.popBackStack<NavigationRoute.UNFilterView>(inclusive = false)
                 },
-                onBackPressed = { backStackEntry ->
-                    state.popBackStack(backStackEntry)
-                },
+                onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 }
@@ -121,8 +117,6 @@ internal fun FeatureFormNavHost(
         }
     }
 }
-
-
 
 /**
  * If the lifecycle is not resumed it means this NavBackStackEntry already processed a nav event.

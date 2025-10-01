@@ -67,12 +67,14 @@ internal fun CreateAssociationScreen(
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val snackbarHostState = remember {
         SnackbarHostState()
     }
     val associationOptions = viewModel.newAssociationOptions
-    var selectedTerminalId by rememberSaveable {
+    var selectedFormFeatureTerminalId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+    var selectedCandidateFeatureTerminalId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
     var isContainmentVisible by rememberSaveable {
@@ -97,8 +99,8 @@ internal fun CreateAssociationScreen(
                     scope.launch {
                         viewModel.addAssociation(
                             isContainmentVisible = isContainmentVisible,
-                            fromTerminalId = selectedTerminalId,
-                            toTerminalId = null,
+                            fromTerminalId = selectedFormFeatureTerminalId,
+                            toTerminalId = selectedCandidateFeatureTerminalId,
                             fractionAlongEdge = fractionAlongEdge
                         ).onSuccess {
                             onAssociationCreated()
@@ -162,7 +164,8 @@ internal fun CreateAssociationScreen(
             // Show From Element
             // if terminal config is available show terminal selection
             Card(
-                modifier = Modifier.padding(24.dp), colors = CardDefaults.cardColors(
+                modifier = Modifier.padding(24.dp),
+                colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceBright
                 )
             ) {
@@ -173,6 +176,21 @@ internal fun CreateAssociationScreen(
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
+                options.formFeatureTerminalConfiguration?.let { terminalConfig ->
+                    UtilityTerminalControl(
+                        name = selectedFormFeatureTerminalId?.let { id ->
+                            terminalConfig.getTerminalById(id)?.name
+                        } ?: "Select",
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .fillMaxWidth(),
+                        options = terminalConfig.terminals,
+                        onTerminalSelected = { selected ->
+                            selectedFormFeatureTerminalId = selected.terminalId
+                        },
+                        enabled = true,
+                    )
+                }
             }
 
             // Show To Element
@@ -189,9 +207,9 @@ internal fun CreateAssociationScreen(
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
-                options.terminalConfiguration?.let { terminalConfig ->
+                options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
                     UtilityTerminalControl(
-                        name = selectedTerminalId?.let { id ->
+                        name = selectedCandidateFeatureTerminalId?.let { id ->
                             terminalConfig.getTerminalById(id)?.name
                         } ?: "Select",
                         modifier = Modifier
@@ -199,7 +217,7 @@ internal fun CreateAssociationScreen(
                             .fillMaxWidth(),
                         options = terminalConfig.terminals,
                         onTerminalSelected = { selected ->
-                            selectedTerminalId = selected.terminalId
+                            selectedCandidateFeatureTerminalId = selected.terminalId
                         },
                         enabled = true,
                     )
