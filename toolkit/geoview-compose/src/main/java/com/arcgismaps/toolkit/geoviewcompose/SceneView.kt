@@ -179,7 +179,6 @@ public fun SceneView(
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties
                 it.setTimeExtent(timeExtent)
-                it.cameraController = cameraController
                 it.atmosphereEffect = atmosphereEffect
                 it.spaceEffect = spaceEffect
                 it.sunTime = sunTime
@@ -204,6 +203,11 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
+                // Set the camera controller last, to ensure other dependend SceneView properties are already set.
+                // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
+                // set on the SceneView at this point.
+                // https://devtopia.esri.com/runtime/kotlin/issues/6623
+                it.cameraController = cameraController
             })
 
         val sceneViewScope = remember { SceneViewScope(sceneView) }
