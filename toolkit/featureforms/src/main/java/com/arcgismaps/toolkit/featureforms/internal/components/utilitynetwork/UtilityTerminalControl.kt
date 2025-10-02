@@ -46,10 +46,10 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 
 @Composable
 internal fun UtilityTerminalControl(
-    name: String,
+    selected: UtilityTerminal?,
     modifier: Modifier = Modifier,
     options: List<UtilityTerminal> = emptyList(),
-    onTerminalSelected : (UtilityTerminal) -> Unit = {},
+    onTerminalSelected: (UtilityTerminal) -> Unit = {},
     enabled: Boolean = true,
 ) {
     var expanded by remember {
@@ -69,9 +69,12 @@ internal fun UtilityTerminalControl(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = name,
+                text = selected?.name ?: "Select Terminal",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
+                color = if (selected != null)
+                    MaterialTheme.colorScheme.outline
+                else
+                    MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Right
             )
         }
@@ -93,7 +96,7 @@ internal fun UtilityTerminalControl(
                         expanded = false
                     },
                     trailingIcon = {
-                        if (option.name == name) {
+                        if (option.terminalId == selected?.terminalId) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Selected",
@@ -110,9 +113,8 @@ internal fun UtilityTerminalControl(
 @Preview(showBackground = true)
 @Composable
 private fun UtilityTerminalControlPreview() {
-    val name = "SS"
     UtilityTerminalControl(
-        name = name,
+        selected = null,
         modifier = Modifier.fillMaxWidth()
     )
 }

@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociation
@@ -119,8 +120,12 @@ internal class UtilityAssociationsElementState(
         element.fetchAssociationsFilterResults()
         _filters.clear()
         element.associationsFilterResults.forEach {
-            val groupResults = it.groupResults.map {
-                MutableGroupResult(it.associationResults, it.name)
+            val groupResults = it.groupResults.map { groupResult ->
+                MutableGroupResult(
+                    results = groupResult.associationResults,
+                    name = groupResult.name,
+                    source = groupResult.featureFormSource
+                )
             }
             _filters += MutableFilterResult(
                 filter = it.filter,
@@ -139,12 +144,11 @@ internal class UtilityAssociationsElementState(
             _selectedFilterResult.value = updatedFilter
             // update the selected group result if it exists in the new filter results
             val updatedGroup = updatedFilter.groupResults.find {
-                it.name == selectedGroupResult?.name
+                it.source == selectedGroupResult?.source
             }
-            if (updatedGroup != null) {
-                // update the selected group result to trigger recomposition
-                _selectedGroupResult.value = updatedGroup
-            }
+            // update the selected group result to trigger recomposition
+            // this may be null if the group no longer exists (e.g. all associations deleted)
+            _selectedGroupResult.value = updatedGroup
         }
         _loading.value = false
     }
@@ -179,7 +183,8 @@ internal class UtilityAssociationsElementState(
  */
 internal class MutableGroupResult(
     results: List<UtilityAssociationResult>,
-    val name: String
+    val name: String,
+    val source : FeatureFormSource
 ) {
     private val _associationResults: SnapshotStateList<UtilityAssociationResult> =
         mutableStateListOf<UtilityAssociationResult>().apply { addAll(results) }

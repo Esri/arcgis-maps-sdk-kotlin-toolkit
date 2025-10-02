@@ -139,11 +139,11 @@ internal fun UtilityAssociationGroupResult(
  *
  * The spec for displaying the association is based on the following rules:
  *
- * - If the association is of type JunctionEdgeObjectConnectivityMidspan, then only the fractionAlongEdge
- * is displayed.
+ * - If the association is of type JunctionEdgeObjectConnectivityMidspan,
+ * JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
+ * then fractionAlongEdge and the terminal (if present) is displayed.
  *
- * - If the association is of type JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
- * or Connectivity then fractionAlongEdge and the terminal (if present) is displayed.
+ * - For a Connectivity association, the terminal (if present) is displayed.
  *
  * - For a Containment association, the isContainmentVisible property is displayed if the associated
  * feature is the toElement.
@@ -170,7 +170,7 @@ private fun AssociationItem(
     var pendingSwipeValue by remember {
         mutableStateOf<SwipeToDismissBoxValue?>(null)
     }
-    val swipeToDismissBoxState = remember {
+    val swipeToDismissBoxState = remember(association) {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
             density = density,
@@ -193,7 +193,10 @@ private fun AssociationItem(
     // Text to display below the title.
     var supportingText = ""
     when (association.associationType) {
-        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide
+            -> {
             supportingText = if (target.terminal != null) {
                 "${target.terminal?.name}, ${(association.fractionAlongEdge * 100).toInt()}%"
             } else {
@@ -201,9 +204,7 @@ private fun AssociationItem(
             }
         }
 
-        is UtilityAssociationType.Connectivity,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+        is UtilityAssociationType.Connectivity -> {
             target.terminal?.let { terminal ->
                 supportingText = terminal.name
             }

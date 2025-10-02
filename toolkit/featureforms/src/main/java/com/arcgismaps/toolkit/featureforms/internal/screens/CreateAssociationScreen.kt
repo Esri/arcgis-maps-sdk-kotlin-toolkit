@@ -80,8 +80,13 @@ internal fun CreateAssociationScreen(
     var isContainmentVisible by rememberSaveable {
         mutableStateOf(false)
     }
-    var fractionAlongEdge by rememberSaveable {
-        mutableStateOf<Double?>(null)
+    var fractionAlongEdge by rememberSaveable(associationOptions) {
+        val initialValue = if (associationOptions?.options?.isFractionAlongEdgeValid == true) {
+            0f
+        } else {
+            null
+        }
+        mutableStateOf(initialValue)
     }
     Column(modifier = modifier) {
         Row(
@@ -91,6 +96,7 @@ internal fun CreateAssociationScreen(
         ) {
             AddWorkflowTopBar(
                 title = "New Association",
+                subTitle = "",
                 onBackPressed = onBackPressed,
                 modifier = Modifier.weight(1f),
             )
@@ -149,9 +155,11 @@ internal fun CreateAssociationScreen(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     ContentVisibleControl(
-                        value = false,
+                        value = isContainmentVisible,
                         enabled = true,
-                        onValueChange = {},
+                        onValueChange = { value ->
+                            isContainmentVisible = value
+                        },
                         modifier = Modifier
                             .padding(horizontal = 20.dp, vertical = 5.dp)
                             .fillMaxWidth()
@@ -178,9 +186,9 @@ internal fun CreateAssociationScreen(
                 )
                 options.formFeatureTerminalConfiguration?.let { terminalConfig ->
                     UtilityTerminalControl(
-                        name = selectedFormFeatureTerminalId?.let { id ->
-                            terminalConfig.getTerminalById(id)?.name
-                        } ?: "Select",
+                        selected = selectedFormFeatureTerminalId?.let { id ->
+                            terminalConfig.getTerminalById(id)
+                        },
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),
@@ -209,9 +217,9 @@ internal fun CreateAssociationScreen(
                 )
                 options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
                     UtilityTerminalControl(
-                        name = selectedCandidateFeatureTerminalId?.let { id ->
-                            terminalConfig.getTerminalById(id)?.name
-                        } ?: "Select",
+                        selected = selectedCandidateFeatureTerminalId?.let { id ->
+                            terminalConfig.getTerminalById(id)
+                        },
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),
@@ -230,10 +238,10 @@ internal fun CreateAssociationScreen(
             if (options.isFractionAlongEdgeValid) {
                 Card(modifier = Modifier.padding(24.dp)) {
                     FractionAlongEdgeControl(
-                        fraction = 0f,
+                        fraction = fractionAlongEdge ?: 0f,
                         enabled = true,
                         onValueChanged = { fraction ->
-                            fractionAlongEdge = fraction.toDouble()
+                            fractionAlongEdge = fraction
                         }
                     )
                 }

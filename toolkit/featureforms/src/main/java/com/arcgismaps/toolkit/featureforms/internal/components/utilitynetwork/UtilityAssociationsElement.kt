@@ -158,7 +158,7 @@ private fun Filters(
             filterResults.forEachIndexed { i, filterResult ->
                 ListItem(
                     headlineContent = {
-                        Text(text = filterResult.filter.title)
+                        Text(text = filterResult.filter.title, modifier = Modifier.padding(start = 16.dp))
                     },
                     modifier = Modifier.clickable {
                         onClick(filterResult)

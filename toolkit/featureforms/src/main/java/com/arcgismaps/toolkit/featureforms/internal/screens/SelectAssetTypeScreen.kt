@@ -50,6 +50,7 @@ internal fun SelectAssetTypeScreen(
     Column(modifier = modifier) {
         AddWorkflowTopBar(
             title = "${networkSource?.name}",
+            subTitle = "",
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )

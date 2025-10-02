@@ -66,6 +66,10 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 // form.
                 state.updateActiveFeatureForm()
             }
+        } else {
+            // If we don't have a valid state or group, navigate back to the previous screen.
+            // This could happen if the group was deleted.
+            state.popBackStack(backStackEntry)
         }
     }
 }

@@ -128,7 +128,7 @@ internal fun UtilityAssociationDetails(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     UtilityTerminalControl(
-                        name = association.fromElement.terminal!!.name,
+                        selected = association.fromElement.terminal!!,
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),
@@ -156,7 +156,7 @@ internal fun UtilityAssociationDetails(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     UtilityTerminalControl(
-                        name = association.toElement.terminal!!.name,
+                        selected = association.toElement.terminal!!,
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),

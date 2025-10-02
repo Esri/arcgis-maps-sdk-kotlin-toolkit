@@ -164,10 +164,10 @@ internal class AddAssociationFromSourceViewModel(
      * proper parameters for the association type are not provided, the result will be a failure.
      */
     suspend fun addAssociation(
-        isContainmentVisible: Boolean? = null,
+        isContainmentVisible: Boolean,
+        fractionAlongEdge: Float? = null,
         fromTerminalId : Int? = null,
         toTerminalId : Int? = null,
-        fractionAlongEdge: Double? = null
     ) : Result<UtilityAssociationResult> = runCatching {
         val feature = newAssociationOptions?.candidate?.feature
         require(feature != null)
@@ -177,26 +177,23 @@ internal class AddAssociationFromSourceViewModel(
         val toTerminal = toTerminalId?.let { id ->
             newAssociationOptions?.options?.candidateFeatureTerminalConfiguration.getTerminalById(id)
         }
+        // First check if we can add an association to the feature with the provided filter
         val canAddAssociation = element.canAddAssociation(
             feature,
             filter
         ).getOrThrow()
         if (canAddAssociation.not())  {
-            throw IllegalStateException("Cannot add association with the provided feature and filter")
+            throw IllegalStateException("Cannot add an association to the provided feature")
         }
-
+        // Capture the result of adding the association based on the filter type
         val result = when (filter.filterType) {
             is UtilityAssociationsFilterType.Container,
             is UtilityAssociationsFilterType.Content -> {
-                if (isContainmentVisible == null) {
-                    element.addAssociation(feature, filter)
-                } else {
-                    element.addAssociation(
-                        feature,
-                        filter = filter,
-                        isContainmentVisible = isContainmentVisible
-                    )
-                }
+                element.addAssociation(
+                    feature,
+                    filter = filter,
+                    isContainmentVisible = isContainmentVisible
+                )
             }
 
             is UtilityAssociationsFilterType.Structure,
@@ -212,13 +209,13 @@ internal class AddAssociationFromSourceViewModel(
                         element.addAssociation(
                             feature = feature,
                             filter = filter,
-                            fractionAlongEdge = fractionAlongEdge
+                            fractionAlongEdge = fractionAlongEdge.toDouble()
                         )
                     } else {
                         element.addAssociation(
                             feature = feature,
                             filter = filter,
-                            fractionAlongEdge = fractionAlongEdge,
+                            fractionAlongEdge = fractionAlongEdge.toDouble(),
                             terminal = terminal
                         )
                     }

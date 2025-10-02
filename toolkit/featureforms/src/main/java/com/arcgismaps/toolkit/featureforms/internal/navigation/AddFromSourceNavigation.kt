@@ -132,7 +132,12 @@ internal fun NavGraphBuilder.createAssociationDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
     onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
 ) {
-    composable<AddFromSourceNavRoute.CreateAssociation> { backStackEntry ->
+    composable<AddFromSourceNavRoute.CreateAssociation>(
+        enterTransition = { slideInVertically { h -> h } },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutVertically { h -> h } }
+    ) { backStackEntry ->
         val parent = remember(backStackEntry) {
             onGetParentEntry(backStackEntry)
         }

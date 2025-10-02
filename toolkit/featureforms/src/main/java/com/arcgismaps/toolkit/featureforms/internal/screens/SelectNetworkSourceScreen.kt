@@ -62,6 +62,7 @@ internal fun SelectNetworkSourceScreen(
     ) {
         AddWorkflowTopBar(
             title = "Network Data Source",
+            subTitle = "",
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -112,6 +113,7 @@ internal fun SelectNetworkSourceScreen(
 @Composable
 internal fun AddWorkflowTopBar(
     title: String,
+    subTitle : String,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -134,6 +136,13 @@ internal fun AddWorkflowTopBar(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                }
+                if (subTitle.isNotEmpty()) {
+                    Text(
+                        text = subTitle,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f, fill = false)
                     )
                 }

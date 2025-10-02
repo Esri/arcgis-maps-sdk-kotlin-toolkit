@@ -87,7 +87,8 @@ internal fun SelectAssociatedFeatureScreen(
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val title = viewModel.selectedSource?.name ?: ""
+    val title = viewModel.selectedAssetType?.name ?: ""
+    val subTitle = viewModel.selectedSource?.name ?: ""
     val pagedData = viewModel.featureCandidateFlow.collectAsLazyPagingItems()
     val context = LocalContext.current
     val imageLoader = remember {
@@ -96,6 +97,7 @@ internal fun SelectAssociatedFeatureScreen(
     Column(modifier = modifier) {
         AddWorkflowTopBar(
             title = title,
+            subTitle = subTitle,
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
