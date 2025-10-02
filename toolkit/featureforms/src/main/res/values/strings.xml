@@ -176,6 +176,10 @@
     <string name="containment_visible_value">Visible: %1$s</string>
     <string name="from_network_data_source">From Network Data Source</string>
     <string name="on_map">On Map</string>
+    <string name="network_data_source">Network Data Source</string>
+    <string name="available_asset_types">Available Asset Types</string>
+    <string name="count">Count %1$d</string>
+    <string name="new_association">New Association</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
         <item quantity="one">You have %1$d error that must be fixed before saving.</item>

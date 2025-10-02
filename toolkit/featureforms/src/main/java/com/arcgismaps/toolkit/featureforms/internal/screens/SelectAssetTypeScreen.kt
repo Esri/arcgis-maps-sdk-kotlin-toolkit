@@ -35,7 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 
 @Composable
@@ -57,16 +59,16 @@ internal fun SelectAssetTypeScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding( horizontal = 16.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Available Asset Types",
+                text = stringResource(R.string.available_asset_types),
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
-                text = "Count ${assetTypes.count()}",
+                text = stringResource(R.string.count, assetTypes.count()),
                 style = MaterialTheme.typography.labelSmall
             )
         }

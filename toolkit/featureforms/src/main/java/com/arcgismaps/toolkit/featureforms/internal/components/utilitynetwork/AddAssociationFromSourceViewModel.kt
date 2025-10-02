@@ -50,6 +50,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 
+/**
+ * A [ViewModel] that manages the state for adding utility associations from a selected feature
+ * source. This includes fetching available feature sources, managing the selected source and
+ * asset type, loading feature candidates, and creating new associations based on user input.
+ *
+ * @param featureForm The [FeatureForm] containing the utility associations form element.
+ * @param element The [UtilityAssociationsFormElement] to which new associations will be added.
+ * @param filter The [UtilityAssociationsFilter] defining the type of association to add.
+ * @param onAssociationAdded A callback that is invoked whenever a new association is successfully
+ * added. This can be used to refresh the UI or perform other actions in response to the addition.
+ */
 internal class AddAssociationFromSourceViewModel(
     val featureForm : FeatureForm,
     private val element: UtilityAssociationsFormElement,
@@ -160,8 +171,16 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     /**
-     * Adds a new association to the [element] using the provided [feature] and parameters. If the
-     * proper parameters for the association type are not provided, the result will be a failure.
+     * Adds a new association to the [element] using the provided parameters. If the proper
+     * parameters for the association type are not provided, the result will be a failure.
+     *
+     * @param isContainmentVisible Whether the containment is visible. This is only applicable for
+     * [UtilityAssociationsFilterType.Container] and [UtilityAssociationsFilterType.Content] types.
+     * @param fractionAlongEdge The fraction along the edge for connectivity associations.
+     * @param fromTerminalId The terminal ID on the feature being edited.
+     * @param toTerminalId The terminal ID on the candidate feature.
+     * @return A [Result] containing the [UtilityAssociationResult] if the association was
+     * successfully added, or an error if the operation failed.
      */
     suspend fun addAssociation(
         isContainmentVisible: Boolean,
@@ -276,6 +295,13 @@ internal class AddAssociationFromSourceViewModel(
     }
 }
 
+/**
+ * Holds the options for creating a new association based on a selected candidate feature.
+ *
+ * @param candidate The selected [UtilityAssociationFeatureCandidate].
+ * @param options The [UtilityAssociationFeatureOptions] for the candidate feature.
+ * @param type The [UtilityAssociationsFilterType] defining the type of association to create
+ */
 internal data class NewAssociationOptions(
     val candidate: UtilityAssociationFeatureCandidate,
     val options: UtilityAssociationFeatureOptions,
