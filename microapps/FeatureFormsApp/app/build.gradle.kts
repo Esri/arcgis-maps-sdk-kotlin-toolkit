@@ -17,90 +17,36 @@
  */
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.arcgismaps.kotlin.microapp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
-secrets {
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
-kotlin {
-    jvmToolchain(17)
+hilt {
+    enableAggregatingTask = true
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
+    
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.featureformsapp"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner ="androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-    }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
-        }
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    // Avoids an empty test report showing up in the CI integration test report.
-    // Remove this if tests will be added.
-    tasks.withType<Test> {
-        enabled = false
+        applicationId = "com.arcgismaps.toolkit.featureformsapp"
     }
 }
 
 dependencies {
+    // Module-specific dependencies go here
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
-    // sdk
-    implementation(arcgis.mapsSdk)
-    // hilt
+    implementation(libs.androidx.compose.navigation)
     implementation(libs.hilt.android.core)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
-    // room
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     ksp(libs.room.compiler)
-    // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
-    // compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
-    implementation(libs.bundles.core)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.navigation)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    testImplementation(libs.bundles.unitTest)
-    testImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.bundles.composeTest)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    debugImplementation(libs.bundles.debug)
 }

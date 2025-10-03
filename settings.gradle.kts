@@ -17,6 +17,7 @@
  */
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         google()
@@ -24,9 +25,7 @@ pluginManagement {
     }
 }
 
-// For finalBuilds ignore the build number and pick up the released version of the SDK dependency
-val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
-    .run { this == "true" }
+rootProject.name = "arcgis-maps-sdk-kotlin-toolkit"
 
 val localProperties = java.util.Properties().apply {
     val localPropertiesFile = file("local.properties")
@@ -34,24 +33,6 @@ val localProperties = java.util.Properties().apply {
         load(localPropertiesFile.inputStream())
     }
 }
-
-// The version of the ArcGIS Maps SDK for Kotlin dependency.
-// First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in gradle.properties.
-// CI builds pass -PversionNumber=${BUILDVER}
-val sdkVersionNumber: String =
-    providers.gradleProperty("versionNumber").orNull
-        ?: providers.gradleProperty("sdkVersionNumber").orNull
-        ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
-
-// The build number of the ArcGIS Maps SDK for Kotlin dependency.
-// First look for the version number provided via command line (for CI builds), if not found,
-// take the one defined in local.properties.
-// CI builds pass -PbuildNumber=${BUILDNUM}
-val sdkBuildNumber: String =
-    providers.gradleProperty("buildNumber").orNull
-        ?: localProperties.getProperty("sdkBuildNumber")
-        ?: ""
 
 // The Artifactory credentials for the ArcGIS Maps SDK for Kotlin repository.
 // First look for the credentials provided via command line (for CI builds), if not found,
@@ -94,33 +75,14 @@ dependencyResolutionManagement {
             }
         }
     }
-
-    versionCatalogs {
-        create("arcgis") {
-            val versionAndBuild = if (finalBuild) {
-                logger.warn(
-                    "Requested release candidate for the SDK dependency $sdkVersionNumber"
-                )
-                sdkVersionNumber
-            } else {
-                if (sdkBuildNumber.isBlank()) {
-                    logger.warn("Maps SDK dependency: $sdkVersionNumber")
-                    sdkVersionNumber
-                } else {
-                    logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
-                    "$sdkVersionNumber-$sdkBuildNumber"
-                }
-            }
-
-            version("mapsSdk", versionAndBuild)
-            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
-        }
-    }
 }
 
 // fixes https://devtopia.esri.com/runtime/kotlin/issues/3863#issuecomment-4715101
 // fixes https://issuetracker.google.com/issues/315023802
-gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
+// gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
+
+// This enables the "Type Safe Project Accessors" feature
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
@@ -203,4 +165,3 @@ include(":offlinemapareas-app")
 project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
-

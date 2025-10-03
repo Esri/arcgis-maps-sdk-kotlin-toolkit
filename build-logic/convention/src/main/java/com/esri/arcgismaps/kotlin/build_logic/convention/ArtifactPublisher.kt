@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2025 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
  *
  */
 
-package deploy
+package com.esri.arcgismaps.kotlin.build_logic.convention
 
-import org.gradle.api.Plugin
+import com.esri.arcgismaps.kotlin.build_logic.registry.toolkitRegistryServiceProvider
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.provideDelegate
 import java.net.URI
 
@@ -39,29 +37,29 @@ import java.net.URI
  *
  * @since 200.2.0
  */
-class ArtifactPublisher : Plugin<Project> {
-    override fun apply(project: Project) {
+object ArtifactPublisher {
+    fun configureArtifactPublisher(project: Project) {
         val artifactoryGroupId: String by project
         val artifactoryArtifactBaseId: String by project
         val artifactoryUrl: String by project
         val artifactoryUsername: String by project
         val artifactoryPassword: String by project
-        val versionNumber: String by project
-        val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
-            .run { this == "true" }
-        val buildNumber: String by project
-        val artifactVersion: String = if (finalBuild) {
-            versionNumber
-        } else {
-            "$versionNumber-$buildNumber"
-        }
-        val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
-        
+
+        // Use centralized version provider, publish using internal `buildnum.txt` as source
+        val artifactVersionProvider = VersionProvider.artifactVersionProvider(project, true)
+        // Built the artifact id for the given project
+        val artifactoryArtifactId = "$artifactoryArtifactBaseId-${project.name}"
+
         project.pluginManager.apply(MavenPublishPlugin::class.java)
         project.afterEvaluate {
-            project.extensions.configure<PublishingExtension> {
+            // Check if this module is releasable
+            val registryService = toolkitRegistryServiceProvider(this).get()
+            val isReleasable = registryService.isModuleReleasable(this).get()
+            if (!isReleasable) return@afterEvaluate
+
+            extensions.configure<PublishingExtension> {
                 repositories {
-                    repositories.maven {
+                    maven {
                         url = URI.create(artifactoryUrl)
                         credentials {
                             username = artifactoryUsername
@@ -70,20 +68,17 @@ class ArtifactPublisher : Plugin<Project> {
                     }
                 }
                 publications {
-                    publications.create(
-                        project.name,
-                        MavenPublication::class.java
-                    ) {
+                    create(name, MavenPublication::class.java) {
                         groupId = artifactoryGroupId
                         artifactId = artifactoryArtifactId
-                        version = artifactVersion
-                        
-                        from(project.components["release"])
+                        version = artifactVersionProvider.get()
+
+                        from(components.getByName("release"))
                     }
                 }
             }
 
-            tasks.findByName("publish${project.name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
+            tasks.findByName("publish${name.replaceFirstChar { it.uppercase() }}PublicationToMavenRepository")
                 ?.dependsOn("assembleRelease")
             tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
         }

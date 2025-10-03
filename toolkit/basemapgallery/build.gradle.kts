@@ -16,59 +16,12 @@
  *
  */
 
-
 plugins {
-    alias(libs.plugins.binary.compatibility.validator) apply true
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("artifact-deploy")
-    id("org.jetbrains.kotlin.plugin.compose")
-}
-kotlin {
-    jvmToolchain(17)
+    alias(libs.plugins.arcgismaps.kotlin.toolkit)
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.basemapgallery"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-        }
-    }
-
-    // Avoids an empty test report showing up in the CI integration test report.
-    // Remove this if tests will be added.
-    tasks.withType<Test> {
-        enabled = false
-    }
-
-    publishing {
-        singleVariant("release") {
-            // This is the default variant.
-        }
-    }
 }
 
 apiValidation {
@@ -83,12 +36,5 @@ apiValidation {
 }
 
 dependencies {
-    api(arcgis.mapsSdk)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
-    implementation(libs.bundles.core)
-    implementation(libs.androidx.activity.compose)
-    testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(libs.bundles.composeTest)
-    debugImplementation(libs.bundles.debug)
+    // Module-specific dependencies go here
 }

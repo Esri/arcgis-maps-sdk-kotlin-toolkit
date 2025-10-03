@@ -17,49 +17,13 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-}
-
-kotlin {
-    jvmToolchain(17)
+    alias(libs.plugins.arcgismaps.android.library.compose)
 }
 
 android {
     namespace = "com.esri.microappslib"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        targetSdk = libs.versions.compileSdk.get().toInt()
-    }
 }
 
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
-    implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.activity.compose)
-    debugImplementation(libs.bundles.debug)
+    // Module-specific dependencies go here
 }

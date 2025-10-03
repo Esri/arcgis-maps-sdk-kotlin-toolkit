@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2025 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,24 +16,21 @@
  *
  */
 
-repositories {
-    google()
-    mavenCentral()
-}
+package com.esri.arcgismaps.kotlin.build_logic.extensions
 
-plugins {
-    `kotlin-dsl`
-    `maven-publish`
-}
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import javax.inject.Inject
 
-version = "1.0"
+abstract class ToolkitModuleExtension @Inject constructor(objects: ObjectFactory) {
+    /** Can/should this module be published as an artifact? */
+    val releasable: Property<Boolean> = objects.property(Boolean::class.java)
 
-gradlePlugin {
-    plugins {
-        create("artifactDeploy") {
-            group = "internal"
-            id = "artifact-deploy"
-            implementationClass = "deploy.ArtifactPublisher"
-        }
+    internal fun applyDefaults() {
+        releasable.convention(true)
+    }
+
+    companion object {
+        const val NAME = "toolkit"
     }
 }

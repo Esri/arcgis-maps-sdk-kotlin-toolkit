@@ -17,67 +17,14 @@
  */
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.dokka) apply true
-}
-
-val versionNumber: String by project
-
-// make this project get evaluated after all the other projects
-// so that we can be sure the logic to determine released components
-// below works
-rootProject.subprojects.filter {
-    it.name != project.name && it.name != "bom"
-}.forEach {
-    evaluationDependsOn(":${it.name}")
-}
-
-// only run kdoc on components which are released. Only modules that apply
-// the `artifact-deploy` plugin are released.
-// TODO: flag released modules directly.
-val releasedModules = project.rootProject.subprojects.filter {
-    it.plugins.findPlugin("artifact-deploy") != null
-}
-
-// determine the released toolkit components
-val releasedSourceSetPaths = releasedModules.map { subproject ->
-    // add all the intended library projects as sourceSets below
-    File(rootDir, "toolkit/${subproject.name}/src/main/java").canonicalPath
-}
-
-dokka {
-    moduleName.set("arcgis-maps-kotlin-toolkit")
-    moduleVersion.set(versionNumber)
-    dokkaSourceSets.main {
-        sourceRoots.from(releasedSourceSetPaths)
-    }
-    dokkaSourceSets.configureEach {
-        perPackageOption {
-            matchingRegex.set(".*internal.*")
-            suppress.set(true)
-            reportUndocumented = true
-        }
-    }
+    alias(libs.plugins.arcgismaps.kotlin.kdoc.convention)
 }
 
 android {
     namespace = "com.arcgismaps.toolkit.doc"
     compileSdk = libs.versions.compileSdk.get().toInt()
-    
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         consumerProguardFiles("consumer-rules.pro")
     }
 }
-
-dependencies {
-    // Puts the version in the KDoc
-    dokkaPlugin(libs.dokka.versioning)
-    // put exposed dependencies in dokka's classpath
-    implementation(arcgis.mapsSdk)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.composeCore)
-}
-
-//dokkaGenerate
