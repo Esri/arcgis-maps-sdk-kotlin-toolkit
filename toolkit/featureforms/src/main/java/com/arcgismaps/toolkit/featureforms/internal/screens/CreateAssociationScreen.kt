@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
@@ -61,6 +63,7 @@ internal fun CreateAssociationScreen(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -83,6 +86,9 @@ internal fun CreateAssociationScreen(
         }
         mutableStateOf(initialValue)
     }
+    val cardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceBright
+    )
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -107,9 +113,12 @@ internal fun CreateAssociationScreen(
                             onAssociationCreated()
                         }.onFailure {
                             snackbarHostState.showSnackbar(
-                                message = "Failed to create association. ${it.localizedMessage}",
+                                message = context.getString(
+                                    R.string.failed_to_create_association,
+                                    it.localizedMessage
+                                ),
                                 duration = SnackbarDuration.Long,
-                                actionLabel = "OK"
+                                actionLabel = context.getString(R.string.ok)
                             )
                         }
                     }
@@ -117,127 +126,127 @@ internal fun CreateAssociationScreen(
                 enabled = associationOptions != null,
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
-                Text(text = "Add")
+                Text(text = stringResource(R.string.add))
             }
         }
         associationOptions?.let {
             val candidate = it.candidate
             val options = it.options
             val filterType = it.type
-            // First show the association type
-            // If containment/content show boolean control
-
-            // Association Type
-            Card(
-                modifier = Modifier.padding(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceBright
-                )
-            ) {
-                PropertyRow(
-                    title = stringResource(R.string.association_type),
-                    value = filterType.toString(),
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                )
-                if (filterType is UtilityAssociationsFilterType.Container
-                    || filterType is UtilityAssociationsFilterType.Content
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                    ContentVisibleControl(
-                        value = isContainmentVisible,
-                        enabled = true,
-                        onValueChange = { value ->
-                            isContainmentVisible = value
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp, vertical = 5.dp)
-                            .fillMaxWidth()
-                    )
-                }
-            }
-
-            // -- Space --
-
-            // Show From Element
-            // if terminal config is available show terminal selection
-            Card(
-                modifier = Modifier.padding(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceBright
-                )
-            ) {
-                PropertyRow(
-                    title = stringResource(R.string.from_element),
-                    value = viewModel.featureForm.title.collectAsState().value,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                )
-                options.formFeatureTerminalConfiguration?.let { terminalConfig ->
-                    UtilityTerminalControl(
-                        selected = selectedFormFeatureTerminalId?.let { id ->
-                            terminalConfig.getTerminalById(id)
-                        },
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxWidth(),
-                        options = terminalConfig.terminals,
-                        onTerminalSelected = { selected ->
-                            selectedFormFeatureTerminalId = selected.terminalId
-                        },
-                        enabled = true,
-                    )
-                }
-            }
-
-            // Show To Element
-            // if terminal config is available show terminal selection
-            Card(
-                modifier = Modifier.padding(24.dp), colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceBright
-                )
-            ) {
-                PropertyRow(
-                    title = stringResource(R.string.to_element),
-                    value = candidate.title,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                )
-                options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
-                    UtilityTerminalControl(
-                        selected = selectedCandidateFeatureTerminalId?.let { id ->
-                            terminalConfig.getTerminalById(id)
-                        },
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxWidth(),
-                        options = terminalConfig.terminals,
-                        onTerminalSelected = { selected ->
-                            selectedCandidateFeatureTerminalId = selected.terminalId
-                        },
-                        enabled = true,
-                    )
-                }
-            }
-
-            // If isFractionAlongEdgeValid and no spatial feature show
-            // fraction along edge control
-
-            if (options.isFractionAlongEdgeValid) {
-                Card(modifier = Modifier.padding(24.dp)) {
-                    FractionAlongEdgeControl(
-                        fraction = fractionAlongEdge ?: 0f,
-                        enabled = true,
-                        onValueChanged = { fraction ->
-                            fractionAlongEdge = fraction
+            
+            LazyColumn {
+                item {
+                    // First show the Association Type
+                    Card(
+                        modifier = Modifier.padding(24.dp),
+                        colors = cardColors
+                    ) {
+                        PropertyRow(
+                            title = stringResource(R.string.association_type),
+                            value = filterType.toString(),
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth()
+                        )
+                        if (filterType is UtilityAssociationsFilterType.Container
+                            || filterType is UtilityAssociationsFilterType.Content
+                        ) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
+                            // If containment/content show boolean control
+                            ContentVisibleControl(
+                                value = isContainmentVisible,
+                                enabled = true,
+                                onValueChange = { value ->
+                                    isContainmentVisible = value
+                                },
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp, vertical = 5.dp)
+                                    .fillMaxWidth()
+                            )
                         }
-                    )
+                    }
+                }
+
+                item {
+                    // Show From Element
+                    Card(
+                        modifier = Modifier.padding(24.dp),
+                        colors = cardColors
+                    ) {
+                        PropertyRow(
+                            title = stringResource(R.string.from_element),
+                            value = viewModel.featureForm.title.collectAsState().value,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth()
+                        )
+                        // if terminal config is available show terminal selection
+                        options.formFeatureTerminalConfiguration?.let { terminalConfig ->
+                            UtilityTerminalControl(
+                                selected = selectedFormFeatureTerminalId?.let { id ->
+                                    terminalConfig.getTerminalById(id)
+                                },
+                                modifier = Modifier
+                                    .padding(20.dp)
+                                    .fillMaxWidth(),
+                                options = terminalConfig.terminals,
+                                onTerminalSelected = { selected ->
+                                    selectedFormFeatureTerminalId = selected.terminalId
+                                },
+                                enabled = true,
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    // Show To Element
+                    Card(
+                        modifier = Modifier.padding(24.dp),
+                        colors = cardColors
+                    ) {
+                        PropertyRow(
+                            title = stringResource(R.string.to_element),
+                            value = candidate.title,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth()
+                        )
+                        // if terminal config is available show terminal selection
+                        options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
+                            UtilityTerminalControl(
+                                selected = selectedCandidateFeatureTerminalId?.let { id ->
+                                    terminalConfig.getTerminalById(id)
+                                },
+                                modifier = Modifier
+                                    .padding(20.dp)
+                                    .fillMaxWidth(),
+                                options = terminalConfig.terminals,
+                                onTerminalSelected = { selected ->
+                                    selectedCandidateFeatureTerminalId = selected.terminalId
+                                },
+                                enabled = true,
+                            )
+                        }
+                    }
+                }
+
+                // If isFractionAlongEdgeValid show fraction along edge control
+                if (options.isFractionAlongEdgeValid) {
+                    item {
+                        Card(modifier = Modifier.padding(24.dp)) {
+                            FractionAlongEdgeControl(
+                                fraction = fractionAlongEdge ?: 0f,
+                                enabled = true,
+                                onValueChanged = { fraction ->
+                                    fractionAlongEdge = fraction
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
