@@ -66,13 +66,13 @@ internal fun CreateAssociationScreen(
         SnackbarHostState()
     }
     val associationOptions = viewModel.newAssociationOptions
-    var selectedFormFeatureTerminalId by rememberSaveable {
+    var selectedFormFeatureTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
-    var selectedCandidateFeatureTerminalId by rememberSaveable {
+    var selectedCandidateFeatureTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
-    var isContainmentVisible by rememberSaveable {
+    var isContainmentVisible by rememberSaveable(associationOptions) {
         mutableStateOf(false)
     }
     var fractionAlongEdge by rememberSaveable(associationOptions) {

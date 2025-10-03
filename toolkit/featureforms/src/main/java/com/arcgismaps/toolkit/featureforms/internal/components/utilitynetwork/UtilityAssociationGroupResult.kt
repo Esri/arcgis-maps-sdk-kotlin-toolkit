@@ -304,7 +304,7 @@ private fun AssociationItem(
                     ),
                     style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 3,
+                    maxLines = 5,
                     color = contentColor
                 )
                 if (supportingText.isNotEmpty()) {

@@ -189,7 +189,9 @@ internal class AddAssociationFromSourceViewModel(
         toTerminalId : Int? = null,
     ) : Result<UtilityAssociationResult> = runCatching {
         val feature = newAssociationOptions?.candidate?.feature
-        require(feature != null)
+        require(feature != null) {
+            "No feature candidate selected"
+        }
         val fromTerminal = fromTerminalId?.let { id ->
             newAssociationOptions?.options?.formFeatureTerminalConfiguration.getTerminalById(id)
         }
@@ -221,33 +223,64 @@ internal class AddAssociationFromSourceViewModel(
             }
 
             is UtilityAssociationsFilterType.Connectivity -> {
-                if (fractionAlongEdge != null) {
-                    // between junction and edge
-                    val terminal = fromTerminal ?: toTerminal
-                    if (terminal == null) {
+                when {
+                    // If both terminals are provided
+                    fromTerminal != null && toTerminal != null -> {
+                        // junction to junction
                         element.addAssociation(
                             feature = feature,
+                            featureTerminal = toTerminal,
                             filter = filter,
-                            fractionAlongEdge = fractionAlongEdge.toDouble()
-                        )
-                    } else {
-                        element.addAssociation(
-                            feature = feature,
-                            filter = filter,
-                            fractionAlongEdge = fractionAlongEdge.toDouble(),
-                            terminal = terminal
+                            currentFeatureTerminal = fromTerminal
                         )
                     }
-                } else {
-                    // junction to junction
-                    require(fromTerminal != null)
-                    require(toTerminal != null)
-                    element.addAssociation(
-                        feature = feature,
-                        featureTerminal = fromTerminal,
-                        filter = filter,
-                        currentFeatureTerminal = toTerminal
-                    )
+                    // junction (with the terminal) to edge
+                    fromTerminal != null -> {
+                        // these two methods can be defaulted at the sdk level
+                        if (fractionAlongEdge != null) {
+                            element.addAssociation(
+                                feature = feature,
+                                filter = filter,
+                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                terminal = fromTerminal
+                            )
+                        } else {
+                            element.addAssociation(
+                                feature = feature,
+                                featureTerminal = null,
+                                filter = filter,
+                                currentFeatureTerminal = fromTerminal
+                            )
+                        }
+                    }
+
+                    // edge to junction (with the terminal)
+                    toTerminal != null -> {
+                        // these two methods can be defaulted at the sdk level
+                        if (fractionAlongEdge != null) {
+                            element.addAssociation(
+                                feature = feature,
+                                filter = filter,
+                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                terminal = toTerminal
+                            )
+                        } else {
+                            element.addAssociation(
+                                feature = feature,
+                                featureTerminal = toTerminal,
+                                filter = filter,
+                                currentFeatureTerminal = null
+                            )
+                        }
+                    }
+
+                    // edge to edge or junction to junction without terminals
+                    else -> {
+                        element.addAssociation(
+                            feature = feature,
+                            filter = filter
+                        )
+                    }
                 }
             }
         }
