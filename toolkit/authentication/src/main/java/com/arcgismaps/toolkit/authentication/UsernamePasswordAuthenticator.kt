@@ -73,13 +73,8 @@ import com.arcgismaps.exceptions.ArcGISAuthenticationException
  * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
  * @since 200.2.0
  */
-@Deprecated(
-    message = "This function will be removed with the next major version change of the toolkit and should not be used directly." +
-            "The Authenticator composable displays UsernamePasswordAuthenticator automatically.",
-    level = DeprecationLevel.WARNING
-)
 @Composable
-public fun UsernamePasswordAuthenticator(
+internal fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier
 ) {
@@ -265,7 +260,6 @@ private fun UsernamePasswordAuthenticatorImplPreview() {
 
 @Preview
 @Composable
-@Suppress("DEPRECATION")
 private fun UsernamePasswordAuthenticatorPreview() {
     val modifier = Modifier
     UsernamePasswordAuthenticator(

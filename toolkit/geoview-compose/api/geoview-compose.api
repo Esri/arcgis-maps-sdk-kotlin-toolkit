@@ -23,8 +23,87 @@ public abstract class com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 public abstract class com/arcgismaps/toolkit/geoviewcompose/GeoViewScope {
 	public static final field $stable I
 	public synthetic fun <init> (Lcom/arcgismaps/mapping/view/GeoView;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun Callout (Lcom/arcgismaps/mapping/GeoElement;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/geometry/Point;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
-	public final fun Callout-jHo2IpA (Lcom/arcgismaps/geometry/Point;Landroidx/compose/ui/Modifier;JZLcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final fun Callout (Lcom/arcgismaps/mapping/GeoElement;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/geometry/Point;Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final synthetic fun Callout (Lcom/arcgismaps/mapping/GeoElement;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/geometry/Point;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final fun Callout-NZnvHFc (Lcom/arcgismaps/geometry/Point;Landroidx/compose/ui/Modifier;JLcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition;ZLcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public final synthetic fun Callout-jHo2IpA (Lcom/arcgismaps/geometry/Point;Landroidx/compose/ui/Modifier;JZLcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutColors;Lcom/arcgismaps/toolkit/geoviewcompose/theme/CalloutShapes;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$Automatic : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$Automatic;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LeftMiddle : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LeftMiddle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerLeftCorner : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerLeftCorner;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerMiddle : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerMiddle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerRightCorner : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$LowerRightCorner;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$RightMiddle : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$RightMiddle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperLeftCorner : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperLeftCorner;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperMiddle : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperMiddle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperRightCorner : com/arcgismaps/toolkit/geoviewcompose/LeaderPosition {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperRightCorner;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/MapViewDefaults {
@@ -35,7 +114,6 @@ public final class com/arcgismaps/toolkit/geoviewcompose/MapViewDefaults {
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/MapViewKt {
-	public static final synthetic fun MapView (Lcom/arcgismaps/mapping/ArcGISMap;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/geoviewcompose/ViewpointPersistence;Ljava/util/List;Lcom/arcgismaps/mapping/view/LocationDisplay;Lcom/arcgismaps/mapping/view/geometryeditor/GeometryEditor;Lcom/arcgismaps/toolkit/geoviewcompose/MapViewProxy;Lcom/arcgismaps/mapping/view/MapViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;Landroidx/compose/foundation/layout/PaddingValues;Lcom/arcgismaps/mapping/view/Grid;Lcom/arcgismaps/mapping/view/BackgroundGrid;Lcom/arcgismaps/mapping/view/WrapAroundMode;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
 	public static final fun MapView (Lcom/arcgismaps/mapping/ArcGISMap;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/geoviewcompose/ViewpointPersistence;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/LocationDisplay;Lcom/arcgismaps/mapping/view/geometryeditor/GeometryEditor;Lcom/arcgismaps/toolkit/geoviewcompose/MapViewProxy;Lcom/arcgismaps/mapping/view/MapViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;Landroidx/compose/foundation/layout/PaddingValues;Lcom/arcgismaps/mapping/view/Grid;Lcom/arcgismaps/mapping/view/BackgroundGrid;Lcom/arcgismaps/mapping/view/WrapAroundMode;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIIII)V
 	public static final fun rememberLocationDisplay (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/mapping/view/LocationDisplay;
 }
@@ -72,7 +150,8 @@ public final class com/arcgismaps/toolkit/geoviewcompose/SceneViewDefaults {
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/SceneViewKt {
-	public static final fun SceneView-DjQMdAY (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/geoviewcompose/SceneViewProxy;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/CameraController;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final fun SceneView-8uDLsko (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/geoviewcompose/SceneViewProxy;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;Lcom/arcgismaps/mapping/view/Grid;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/CameraController;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
+	public static final synthetic fun SceneView-DjQMdAY (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lcom/arcgismaps/toolkit/geoviewcompose/SceneViewProxy;Lcom/arcgismaps/mapping/view/SceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/ViewLabelProperties;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/CameraController;Ljava/util/List;Ljava/util/List;Lcom/arcgismaps/mapping/view/AtmosphereEffect;Lcom/arcgismaps/mapping/TimeExtent;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/SpaceEffect;Ljava/time/Instant;Lcom/arcgismaps/mapping/view/LightingMode;JLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIIIII)V
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/SceneViewProxy : com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {

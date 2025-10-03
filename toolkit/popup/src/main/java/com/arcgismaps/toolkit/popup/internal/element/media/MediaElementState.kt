@@ -18,23 +18,15 @@ package com.arcgismaps.toolkit.popup.internal.element.media
 
 import android.content.Context
 import android.graphics.drawable.BitmapDrawable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.setValue
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.arcgismaps.mapping.ChartImageParameters
-import com.arcgismaps.mapping.ChartImageStyle
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
@@ -55,23 +47,29 @@ import java.util.UUID
  */
 @Immutable
 internal class MediaElementState(
-    val description: String,
-    val title: String,
-    val media: List<PopupMediaState>,
+    val element: MediaPopupElement,
+    val popup: Popup,
+    val scope: CoroutineScope,
     override val id : Int = createId()
 ) : PopupElementState() {
 
-    constructor(
-        mediaPopupElement: MediaPopupElement,
-        scope: CoroutineScope,
+    val description: String = element.description
+    val title: String = element.title
+    var media: List<PopupMediaState> = emptyList()
+
+    /**
+     * Indicates if the media list for the [popup] has been created.
+     */
+    internal var isPopupMediaCreated: Boolean by mutableStateOf(false)
+        private set
+
+    fun createPopupMedia(
         mediaFolder: String,
         chartParams: ChartImageParameters,
         context: Context,
         models: List<String> = listOf()
-    ) : this(
-        description = mediaPopupElement.description,
-        title = mediaPopupElement.title,
-        media = mediaPopupElement.media.mapIndexed { index, media ->
+    ) {
+        this.media = element.media.mapIndexed { index, media ->
             val model = models.getOrNull(index) ?: ""
             if (media.type.isChart) {
                 PopupMediaState.createChartMediaState(media, model, scope, mediaFolder, chartParams)
@@ -79,7 +77,16 @@ internal class MediaElementState(
                 PopupMediaState.createImageMediaState(media, model, scope, mediaFolder, context)
             }
         }
-    )
+
+        val geoElement = this.popup.geoElement
+        if (geoElement is DynamicEntity) {
+            // For dynamic entities
+            // update chart providers to use the new instances of PopupMedia to reacquire updated charts.
+            updateMediaElement(element, scope)
+        }
+        isPopupMediaCreated = true
+    }
+
 
     /**
      * Update the PopupMedia so that a new chart image can be acquired. Only necessary
@@ -93,84 +100,6 @@ internal class MediaElementState(
             if (medium.type.isChart) {
                 media.getOrNull(index)?.updateMedia(medium, scope)
             }
-        }
-    }
-
-    companion object {
-        internal fun Saver(
-            element: MediaPopupElement,
-            scope: CoroutineScope,
-            chartFolder: String,
-            chartParams: ChartImageParameters,
-            context: Context
-        ): Saver<MediaElementState, Any> = listSaver(
-            save = { it.media.map { media -> media.imageUri.value } },
-            restore = {
-                MediaElementState(
-                    element, scope, chartFolder, chartParams, context
-                )
-            }
-        )
-
-    }
-}
-
-/**
- * Creates a state object for a PopupMediaElement.
- *
- * @param element a MediaPopupElement
- * @param popup the Popup which contains the element
- */
-@Composable
-internal fun rememberMediaElementState(
-    element: MediaPopupElement,
-    popup: Popup
-): MediaElementState {
-    val scope = rememberCoroutineScope()
-    val darkMode = isSystemInDarkTheme()
-    val defaults = MediaElementDefaults.shapes()
-    val localDensity = LocalDensity.current
-    val width = with(localDensity) {
-        defaults.tileWidth.roundToPx()
-    }
-    val height = with(localDensity) {
-        defaults.tileHeight.roundToPx()
-    }
-
-    // The chart image parameters are created here so they can use
-    // composition locals to access screen density, dark theme, etc.
-    val chartParams = remember(isSystemInDarkTheme()) {
-        ChartImageParameters(width, height).apply {
-            style = if (darkMode) {
-                ChartImageStyle.Dark
-            } else {
-                ChartImageStyle.Light
-            }
-
-            this.screenScale = localDensity.density
-        }
-    }
-    // the composition local context provides the cacheDir to be ultimately passed into
-    // the chart provider so charts can be saved to disk.
-    val mediaFolder = "${LocalContext.current.cacheDir.canonicalPath}/popup_media"
-    val context = LocalContext.current
-    return rememberSaveable(
-        inputs = arrayOf(popup, element.toJson()),
-        saver = MediaElementState.Saver(element, scope, mediaFolder, chartParams, context)
-    ) {
-        MediaElementState(
-            element,
-            scope,
-            mediaFolder,
-            chartParams,
-            context
-        )
-    }.apply {
-        val geoElement = popup.geoElement
-        if (geoElement is DynamicEntity) {
-            // For dynamic entities
-            // update chart providers to use the new instances of PopupMedia to reacquire updated charts.
-            updateMediaElement(element, scope)
         }
     }
 }

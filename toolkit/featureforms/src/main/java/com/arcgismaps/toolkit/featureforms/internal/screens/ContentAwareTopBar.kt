@@ -177,7 +177,7 @@ internal fun ContentAwareTopBar(
         )
         InitializingExpressions(
             modifier = Modifier.fillMaxWidth(),
-            evaluationProvider = { formData.isEvaluatingExpressions.value }
+            evaluationProvider = { formData.isEvaluatingExpressions }
         )
     }
     if (pendingNavigationAction != NavigationAction.None) {
@@ -264,10 +264,6 @@ private fun getTopBarTitleAndSubtitle(
                 }
             }
             Pair(title, subTitle)
-        }
-
-        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationDetailView>() -> {
-            Pair(stringResource(R.string.association_settings), "")
         }
 
         else -> {

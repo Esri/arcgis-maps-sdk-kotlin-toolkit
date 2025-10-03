@@ -41,9 +41,7 @@ internal fun ExpandableCardWithLabel(
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             labelText,

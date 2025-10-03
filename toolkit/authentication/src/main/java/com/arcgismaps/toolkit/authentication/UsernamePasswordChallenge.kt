@@ -38,36 +38,9 @@ public class UsernamePasswordChallenge(
     public val cause: Throwable? = null,
     onCancel: () -> Unit
 ) {
-    /**
-     * Represents an authentication challenge requiring a username and password.
-     *
-     * @property url the name of the server that initiated this challenge
-     * @property onUsernamePasswordReceived called when the username and password should be submitted
-     * @property onCancel called when the challenge should be cancelled
-     *
-     * @since 200.2.0
-     */
-    @Deprecated(
-        message = "Use the constructor with `cause` instead. Ths deprecated method remains to maintain binary compatibility",
-        level = DeprecationLevel.HIDDEN,
-    )
-    public constructor(
-        url: String,
-        onUsernamePasswordReceived: (username: String, password: String) -> Unit,
-        onCancel: () -> Unit,
-    ) : this(
-        url, onUsernamePasswordReceived, cause = null, onCancel
-    )
-
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    @Deprecated(
-        message = "The `additionalMessage` property is no longer in use. Please use the `cause` property to display relevant error messages instead.",
-        level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith("cause")
-    )
-    public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
     public val hostname: String by lazy {
         url.toUri().host ?: url
     }
@@ -92,19 +65,5 @@ public class UsernamePasswordChallenge(
     public fun cancel(): Unit {
         onCancel?.invoke()
         onCancel = null
-    }
-
-    /**
-     * Emits an additional message to [additionalMessage] to be displayed in the prompt as an error.
-     * A null value is intended to remove the error message.
-     *
-     * @since 200.2.0
-     */
-    @Deprecated(
-        message = "The `additionalMessage` property is no longer in use. Please use the `cause` property to display relevant error messages instead.",
-        level = DeprecationLevel.WARNING,
-    )
-    public fun setAdditionalMessage(message: String?) {
-        _additionalMessage.value = message
     }
 }

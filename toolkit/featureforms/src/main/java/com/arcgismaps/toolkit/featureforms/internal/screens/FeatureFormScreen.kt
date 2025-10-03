@@ -49,7 +49,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 
 /**
  * Composable function that displays the feature form screen.
@@ -72,7 +71,6 @@ internal fun FeatureFormScreen(
         onUtilityAssociationFilterClick = onUtilityFilterSelected,
         modifier = modifier
     )
-    FeatureFormDialog(formStateData.stateCollection)
 }
 
 @Composable

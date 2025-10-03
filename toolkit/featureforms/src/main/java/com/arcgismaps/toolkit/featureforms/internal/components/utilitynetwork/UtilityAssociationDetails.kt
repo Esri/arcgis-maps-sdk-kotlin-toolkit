@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,9 +33,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,30 +47,58 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
+import kotlinx.coroutines.launch
 
 /**
  * A composable that displays the details of a [UtilityAssociationResult].
  *
  * @param state The [UtilityAssociationsElementState] of the element.
+ * @param onDelete A callback that is called after the association is deleted.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun UtilityAssociationDetails(
     state: UtilityAssociationsElementState,
+    onDelete : (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
+    val isEditable by state.isEditable.collectAsState()
+    val scrollState = rememberScrollState()
     var showConfirmationDialog by remember {
         mutableStateOf(false)
     }
     Column(
-        modifier = modifier,
+        modifier = modifier.verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Association Type
         Card(modifier = Modifier.padding(24.dp)) {
+            PropertyRow(
+                title = stringResource(R.string.association_type),
+                value = filter.filterType.toString(),
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            )
+            if (association.associationType is UtilityAssociationType.Containment) {
+                HorizontalDivider()
+                ContentVisibleControl(
+                    value = association.isContainmentVisible,
+                    enabled = false,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 5.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
+        // From Element
+        Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             Column {
                 PropertyRow(
                     title = stringResource(R.string.from_element),
@@ -86,6 +118,7 @@ internal fun UtilityAssociationDetails(
                 }
             }
         }
+        // To Element
         Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
             Column {
                 PropertyRow(
@@ -106,26 +139,6 @@ internal fun UtilityAssociationDetails(
                 }
             }
         }
-        Card(modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
-            PropertyRow(
-                title = stringResource(R.string.association_type),
-                value = filter.filterType.toString(),
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
-            )
-            if (association.associationType is UtilityAssociationType.Containment) {
-                HorizontalDivider()
-                ContentVisibleControl(
-                    value = association.isContainmentVisible,
-                    enabled = false,
-                    onValueChange = {},
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 5.dp)
-                        .fillMaxWidth()
-                )
-            }
-        }
         associationResult.getFractionAlongEdge()?.let { fraction ->
             FractionAlongEdgeControl(
                 fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
@@ -135,21 +148,24 @@ internal fun UtilityAssociationDetails(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = { showConfirmationDialog = true }) {
+        Button(
+            onClick = { showConfirmationDialog = true },
+            enabled = isEditable
+        ) {
             Text(text = stringResource(R.string.remove_association))
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = stringResource(R.string.remove_association_tooltip),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
     if (showConfirmationDialog) {
         RemoveAssociationConfirmationDialog(
             onDismiss = { showConfirmationDialog = false },
             onRemove = {
-                showConfirmationDialog = false
-                // Remove the association when the API is available.
+                scope.launch {
+                    state.selectedGroupResult?.let { group ->
+                        val isGroupEmpty = group.delete(association)
+                        onDelete(isGroupEmpty)
+                    }
+                    showConfirmationDialog = false
+                }
             }
         )
     }
@@ -187,7 +203,7 @@ internal fun PropertyRow(
  * @param onRemove A callback that is called when the remove button is clicked.
  */
 @Composable
-private fun RemoveAssociationConfirmationDialog(
+internal fun RemoveAssociationConfirmationDialog(
     onDismiss: () -> Unit,
     onRemove: () -> Unit
 ) {

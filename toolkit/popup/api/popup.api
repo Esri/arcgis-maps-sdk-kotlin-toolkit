@@ -1,28 +1,11 @@
 public final class com/arcgismaps/toolkit/popup/PopupKt {
 	public static final fun Popup (Lcom/arcgismaps/mapping/popup/Popup;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Popup (Lcom/arcgismaps/toolkit/popup/PopupState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/runtime/Composer;II)V
 }
 
-public final class com/arcgismaps/toolkit/popup/internal/element/fieldselement/FieldsElementState$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/element/fieldselement/FieldsElementState;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/element/fieldselement/FieldsElementState;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/arcgismaps/toolkit/popup/internal/element/textelement/TextElementState$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/element/textelement/TextElementState;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/element/textelement/TextElementState;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/arcgismaps/toolkit/popup/internal/ui/fileviewer/ViewableFile$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/arcgismaps/toolkit/popup/internal/ui/fileviewer/ViewableFile;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/arcgismaps/toolkit/popup/internal/ui/fileviewer/ViewableFile;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public final class com/arcgismaps/toolkit/popup/PopupState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/popup/Popup;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getActivePopup ()Lcom/arcgismaps/mapping/popup/Popup;
 }
 

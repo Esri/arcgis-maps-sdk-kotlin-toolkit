@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.PortalItem
@@ -50,6 +51,14 @@ class PortalContentViewModel @Inject constructor(
     private val navigator: Navigator
 ) : ViewModel() {
 
+    private val _username = mutableStateOf<String?>(null)
+
+    /**
+     * Username of the currently logged in user.
+     */
+    val username: String?
+        get() = _username.value
+
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
 
@@ -70,6 +79,7 @@ class PortalContentViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            _username.value = portalItemRepository.getUsername()
             // if the data is empty, refresh it
             // this is used to identify first launch
             if (portalItemRepository.getItemCount(null) == 0) {
@@ -77,11 +87,6 @@ class PortalContentViewModel @Inject constructor(
             }
         }
     }
-
-    /**
-     * Returns the username of the currently signed-in user.
-     */
-    fun getUsername(): String? = portalItemRepository.getUsername()
 
     /**
      * Refreshes the data.
