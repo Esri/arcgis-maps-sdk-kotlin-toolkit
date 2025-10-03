@@ -51,6 +51,7 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
                 implementation(libs.findLibrary("androidx-activity-compose").get())
                 implementation(libs.findLibrary("androidx-material-icons").get())
                 implementation(libs.findLibrary("kotlinx-serialization-json").get())
+                androidTestImplementation(libs.findLibrary("mockingjay").get())
                 androidTestImplementation(libs.findBundle("composeTest").get())
                 androidTestImplementation(libs.findBundle("androidXTest").get())
                 debugImplementation(libs.findBundle("debug").get())

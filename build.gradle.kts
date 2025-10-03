@@ -63,6 +63,7 @@ buildscript {
     project.extra.set("artifactoryPassword", artifactoryPassword)
     project.extra.set("sdkVersionNumber", sdkVersionNumber)
     project.extra.set("sdkBuildNumber", sdkBuildNumber)
+    project.extra.set("toolkitTestDir", projectDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests")
 
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }

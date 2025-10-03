@@ -44,6 +44,20 @@ android {
         disable += "MissingTranslation"
         disable += "MissingQuantity"
     }
+
+    val toolkitTests = project.findProperty("toolkitTestDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
+    sourceSets.getByName("test") {
+        var file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
 }
 
 apiValidation {

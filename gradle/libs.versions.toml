@@ -47,6 +47,7 @@ gradleSecrets = "2.0.1"
 mockkAndroid = "1.14.5"
 truth = "1.4.4"
 uiautomator = "2.3.0"
+mockingjay = "2.0.0"
 
 ### Third party versions
 coilBOM = "2.7.0"
@@ -104,6 +105,7 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+mockingjay = { module = "com.esri:mockingjay", version.ref = "mockingjay" }
 
 ### Third party libs
 coil = { group = "io.coil-kt", name = "coil" }
