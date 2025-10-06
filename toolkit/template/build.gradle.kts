@@ -67,6 +67,23 @@ android {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
+
+    /**
+     * Include this if any internal-only tests are required
+     */
+    val toolkitTests = project.findProperty("toolkitTestDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
+    sourceSets.getByName("test") {
+        var file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
 }
 
 dependencies {
@@ -78,4 +95,11 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
+
+    /**
+     * Include this if any internal-only test dependencies are required
+     */
+    if (file(project.findProperty("toolkitTestDir") as String).exists()) {
+      androidTestImplementation(libs.mockingjay)
+    }
 }
