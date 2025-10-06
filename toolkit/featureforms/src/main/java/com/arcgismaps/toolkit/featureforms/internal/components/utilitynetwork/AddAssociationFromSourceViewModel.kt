@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
@@ -24,13 +25,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
-import androidx.paging.cachedIn
-import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
@@ -42,13 +36,8 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
 import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTerminalConfiguration
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 /**
  * A [ViewModel] that manages the state for adding utility associations from a selected feature
@@ -97,37 +86,15 @@ internal class AddAssociationFromSourceViewModel(
     val selectedAssetType: UtilityAssetType?
         get() = _selectedAssetType.value
 
+
+    private val _featureCandidates = mutableStateOf(
+        FeatureCandidatesUiState(isLoading = true)
+    )
+
     /**
-     * A [Flow] of [PagingData] containing [UtilityAssociationFeatureCandidate] objects. This flow
-     * is updated whenever the [selectedSource] changes. If no source is selected, this flow
-     * will be empty.
+     * The current state of feature candidates being loaded from the selected source and asset type.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val featureCandidateFlow: Flow<PagingData<UtilityAssociationFeatureCandidate>> = snapshotFlow {
-        _selectedAssetType.value
-    }.distinctUntilChanged().flatMapLatest { assetType ->
-        val source = selectedSource
-        // If no source is selected, return an empty flow
-        if (source == null || assetType == null) {
-            flowOf(PagingData.empty())
-        } else {
-            val pagingSource = AssociationFeatureCandidatePagingSource(
-                featureSource = source,
-                assetType = assetType,
-                queryParamsProvider = {
-                    QueryParameters().apply {
-                        whereClause = "1=1"
-                    }
-                }
-            )
-            Pager(
-                config = PagingConfig(
-                    pageSize = 20
-                ),
-                pagingSourceFactory = { pagingSource }
-            ).flow
-        }
-    }.cachedIn(viewModelScope)
+    val featureCandidates: State<FeatureCandidatesUiState> = _featureCandidates
 
     private val _newAssociationOptions =
         mutableStateOf<NewAssociationOptions?>(null)
@@ -138,6 +105,42 @@ internal class AddAssociationFromSourceViewModel(
      */
     val newAssociationOptions: NewAssociationOptions?
         get() = _newAssociationOptions.value
+
+    init {
+        viewModelScope.launch {
+            // Whenever the selected source or asset type changes, reload the feature candidates
+            snapshotFlow {
+                _selectedAssetType.value
+            }.distinctUntilChanged().collect { assetType ->
+                val source = selectedSource
+                // If no source is selected, return an empty list
+                if (source == null || assetType == null) {
+                    _featureCandidates.value = FeatureCandidatesUiState(
+                        isLoading = false,
+                        error = IllegalStateException(
+                            "No source or asset type selected"
+                        )
+                    )
+                } else {
+                    _featureCandidates.value = FeatureCandidatesUiState(isLoading = true)
+                    // Load the candidates from the selected source and asset type
+                    source.queryFeatures(
+                        assetType = assetType
+                    ).onSuccess { result ->
+                        _featureCandidates.value = FeatureCandidatesUiState(
+                            isLoading = false,
+                            candidates = result.candidates
+                        )
+                    }.onFailure { error ->
+                        _featureCandidates.value = FeatureCandidatesUiState(
+                            isLoading = false,
+                            error = error
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Fetches the list of [UtilityAssociationFeatureSource] objects that can be used to create
@@ -341,53 +344,11 @@ internal data class NewAssociationOptions(
     val type: UtilityAssociationsFilterType
 )
 
-/**
- * A [PagingSource] that loads [UtilityAssociationFeatureCandidate] objects from a given
- * [UtilityAssociationFeatureSource] using provided [QueryParameters].
- *
- * @param featureSource The [UtilityAssociationFeatureSource] to load candidates from.
- * @param queryParamsProvider A lambda that provides the [QueryParameters] to use for each query.
- */
-internal class AssociationFeatureCandidatePagingSource(
-    private val featureSource: UtilityAssociationFeatureSource,
-    private val assetType: UtilityAssetType,
-    private val queryParamsProvider: () -> QueryParameters
-) : PagingSource<Int, UtilityAssociationFeatureCandidate>() {
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UtilityAssociationFeatureCandidate> =
-        withContext(Dispatchers.IO) {
-            return@withContext try {
-                val page = params.key ?: 0
-                val pageSize = params.loadSize
-                // Create query parameters with pagination
-                val queryParams = queryParamsProvider().apply {
-                    this.resultOffset = page * pageSize
-                    this.maxFeatures = pageSize
-                }
-                // Query the feature source for candidates
-                val result = featureSource.queryFeatures(assetType, queryParams).getOrThrow()
-                val candidates = result.candidates
-                // Determine the next and previous keys
-                val nextKey = if (candidates.size < pageSize) null else page + 1
-                val prevKey = if (page == 0) null else page - 1
-                // return the loaded page
-                LoadResult.Page(
-                    data = candidates,
-                    prevKey = prevKey,
-                    nextKey = nextKey
-                )
-            } catch (e: Exception) {
-                LoadResult.Error(e)
-            }
-        }
-
-    override fun getRefreshKey(state: PagingState<Int, UtilityAssociationFeatureCandidate>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-        }
-    }
-}
+internal data class FeatureCandidatesUiState(
+    val isLoading: Boolean = false,
+    val error: Throwable? = null,
+    val candidates: List<UtilityAssociationFeatureCandidate> = emptyList()
+)
 
 internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
     return this?.terminals?.find { it.terminalId == id }

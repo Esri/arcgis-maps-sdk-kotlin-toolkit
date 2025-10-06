@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -56,17 +58,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
 import kotlinx.coroutines.launch
@@ -87,9 +89,16 @@ internal fun SelectAssociatedFeatureScreen(
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val title = viewModel.selectedAssetType?.name ?: ""
-    val subTitle = viewModel.selectedSource?.name ?: ""
-    val pagedData = viewModel.featureCandidateFlow.collectAsLazyPagingItems()
+    val state by viewModel.featureCandidates
+    val count = rememberSaveable(state) {
+        state.candidates.count()
+    }
+    val title = if (state.isLoading){
+        stringResource(R.string.loading2)
+    } else {
+        stringResource(R.string.available_features, count)
+    }
+    val subTitle = viewModel.selectedAssetType?.name ?: ""
     val context = LocalContext.current
     val imageLoader = remember {
         SharedImageLoader.get(context)
@@ -102,14 +111,23 @@ internal fun SelectAssociatedFeatureScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         AnimatedContent(
-            targetState = pagedData.loadState.refresh
-        ) { loadState ->
-            when (loadState) {
-                is LoadState.Loading -> {
+            targetState = state
+        ) { state ->
+            when {
+                state.isLoading -> {
                     LoadingRow(modifier = Modifier.fillMaxWidth())
                 }
 
-                is LoadState.NotLoading -> {
+                state.error != null -> {
+                    ErrorRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        message = "${state.error.localizedMessage}"
+                    )
+                }
+
+                else -> {
                     Surface(
                         modifier = Modifier
                             .wrapContentSize()
@@ -128,88 +146,58 @@ internal fun SelectAssociatedFeatureScreen(
                                 autoHide = true
                             )
                         ) {
-                            items(count = pagedData.itemCount) { index ->
-                                val item = pagedData[index]
-                                if (item != null) {
-                                    ListItem(
-                                        modifier = Modifier.clickable {
-                                            scope.launch {
-                                                viewModel.selectFeatureCandidate(item)
-                                                onFeatureCandidateSelected()
-                                            }
-                                        },
-                                        headlineContent = {
-                                            Text(
-                                                text = item.title,
-                                                modifier = Modifier.padding(
-                                                    start = 4.dp,
-                                                    top = 4.dp,
-                                                    bottom = 4.dp
-                                                )
+                            itemsIndexed(state.candidates) { index, item ->
+                                ListItem(
+                                    modifier = Modifier.clickable {
+                                        scope.launch {
+                                            viewModel.selectFeatureCandidate(item)
+                                            onFeatureCandidateSelected()
+                                        }
+                                    },
+                                    headlineContent = {
+                                        Text(
+                                            text = item.title,
+                                            modifier = Modifier.padding(
+                                                start = 4.dp,
+                                                top = 4.dp,
+                                                bottom = 4.dp
                                             )
-                                        },
-                                        leadingContent = {
-                                            AsyncImage(
-                                                model = item.feature.getSymbol(),
-                                                contentDescription = "Feature Symbol",
-                                                imageLoader = imageLoader,
-                                                modifier = Modifier.padding(start = 12.dp)
-                                            )
-                                        },
-                                        trailingContent = {
-                                            IconButton(
-                                                onClick = {
-                                                    // TODO: Handle locate feature on map
-                                                }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Outlined.LocationSearching,
-                                                    contentDescription = "Locate Feature",
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            }
-                                        },
-                                        colors = ListItemDefaults.colors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceBright,
                                         )
+                                    },
+                                    leadingContent = {
+                                        AsyncImage(
+                                            model = item.feature.getSymbol(),
+                                            contentDescription = "Feature Symbol",
+                                            imageLoader = imageLoader,
+                                            modifier = Modifier.padding(start = 12.dp)
+                                        )
+                                    },
+                                    trailingContent = {
+                                        IconButton(
+                                            onClick = {
+                                                // TODO: Handle locate feature on map
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.LocationSearching,
+                                                contentDescription = "Locate Feature",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    },
+                                    colors = ListItemDefaults.colors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
-                                    if (index < pagedData.itemCount - 1) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            color = MaterialTheme.colorScheme.surfaceContainerHigh
-                                        )
-                                    }
-                                }
-                            }
-
-                            if (pagedData.loadState.append is LoadState.Loading) {
-                                item {
-                                    LoadingRow(modifier = Modifier.fillMaxWidth())
-                                }
-                            }
-
-                            if (pagedData.loadState.append is LoadState.Error) {
-                                item {
-                                    val loadState = (pagedData.loadState.append as LoadState.Error)
-                                    ErrorRow(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(24.dp),
-                                        message = "${loadState.error.localizedMessage}"
+                                )
+                                if (index < state.candidates.count() - 1) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                                     )
                                 }
                             }
                         }
                     }
-                }
-
-                is LoadState.Error -> {
-                    ErrorRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        message = "${loadState.error.localizedMessage}"
-                    )
                 }
             }
         }

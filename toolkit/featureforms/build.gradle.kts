@@ -160,7 +160,6 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.androidx.paging.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

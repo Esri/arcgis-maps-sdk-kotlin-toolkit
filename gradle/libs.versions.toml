@@ -14,7 +14,6 @@ androidxTestExt = "1.3.0"
 androidXTestRunner = "1.7.0"
 androidXTestRules = "1.7.0"
 androidxWindow = "1.4.0"
-pagingCompose = "3.3.6"
 workVersion = "2.10.3"
 binaryCompatibilityValidator = "0.18.1"
 compileSdk = "36"
@@ -67,7 +66,6 @@ androidx-material-icons = { group = "androidx.compose.material", name = "materia
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Exoplayer" }
 androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3Exoplayer" }
-androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
 androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidXTestRunner" }
