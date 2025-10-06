@@ -136,7 +136,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsFilterResultScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$CreateAssociationScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectAssociatedFeatureScreenKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt"
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
