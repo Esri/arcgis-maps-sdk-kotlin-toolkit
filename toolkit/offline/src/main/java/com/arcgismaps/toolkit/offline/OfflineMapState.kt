@@ -238,7 +238,7 @@ public class OfflineMapState {
                 preplannedMapAreas.addAll(
                     elements = offlineMapTask.getPreplannedMapAreas().getOrNull() ?: emptyList()
                 )
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 preplannedMapAreas.clear()
             }
             preplannedMapAreas.let { preplannedMapArea ->
@@ -342,7 +342,9 @@ public class OfflineMapState {
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = (mmpk.item as? LocalItem) ?: return null
+        val item = (mmpk.item as? LocalItem)?.apply {
+            itemId = portalItem.itemId
+        } ?: return null
 
         val preplannedMapAreaState = PreplannedMapAreaState(
             context = context,
