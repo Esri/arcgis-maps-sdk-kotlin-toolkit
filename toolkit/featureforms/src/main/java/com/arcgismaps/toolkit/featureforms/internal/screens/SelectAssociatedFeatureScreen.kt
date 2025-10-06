@@ -56,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -70,6 +71,8 @@ import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
 import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 
 /**
  * A screen that displays a list of features that can be associated with a utility network feature.
@@ -101,6 +104,12 @@ internal fun SelectAssociatedFeatureScreen(
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
+        SearchBar(
+            value = viewModel.associatedFeaturesFilterQuery,
+            onValueChange = { viewModel.onAssociatedFeaturesFilterQueryChanged(it) },
+            placeholder = stringResource(R.string.search_features)
+        )
+
         AnimatedContent(
             targetState = pagedData.loadState.refresh
         ) { loadState ->
@@ -328,7 +337,7 @@ internal fun Modifier.verticalScrollbar(
                 if (scrollbarHeight >= size.height) return@drawWithContent
                 // Calculate the Y offset of the scrollbar
                 val scrollBarOffsetY = (size.height / totalHeight) *
-                    (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
+                        (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
                 // Calculate the X offset of the scrollbar
                 val scrollBarOffsetX = size.width + width.toPx() - offsetX.toPx()
 

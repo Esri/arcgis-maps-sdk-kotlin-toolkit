@@ -68,6 +68,14 @@ internal class AddAssociationFromSourceViewModel(
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 
+    private val _associatedFeaturesFilterQuery: MutableState<String> = mutableStateOf("")
+    val associatedFeaturesFilterQuery: String
+        get() = _associatedFeaturesFilterQuery.value
+
+    fun onAssociatedFeaturesFilterQueryChanged(query: String) {
+        _associatedFeaturesFilterQuery.value = query
+    }
+
     private val _featureSources: MutableState<List<UtilityAssociationFeatureSource>> =
         mutableStateOf(emptyList())
 
@@ -104,8 +112,8 @@ internal class AddAssociationFromSourceViewModel(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val featureCandidateFlow: Flow<PagingData<UtilityAssociationFeatureCandidate>> = snapshotFlow {
-        _selectedAssetType.value
-    }.distinctUntilChanged().flatMapLatest { assetType ->
+        _selectedAssetType.value to _associatedFeaturesFilterQuery.value
+    }.distinctUntilChanged().flatMapLatest { (assetType, query) ->
         val source = selectedSource
         // If no source is selected, return an empty flow
         if (source == null || assetType == null) {
@@ -118,7 +126,8 @@ internal class AddAssociationFromSourceViewModel(
                     QueryParameters().apply {
                         whereClause = "1=1"
                     }
-                }
+                },
+                filterString = query
             )
             Pager(
                 config = PagingConfig(
@@ -351,7 +360,8 @@ internal data class NewAssociationOptions(
 internal class AssociationFeatureCandidatePagingSource(
     private val featureSource: UtilityAssociationFeatureSource,
     private val assetType: UtilityAssetType,
-    private val queryParamsProvider: () -> QueryParameters
+    private val queryParamsProvider: () -> QueryParameters,
+    private val filterString: String? = null
 ) : PagingSource<Int, UtilityAssociationFeatureCandidate>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UtilityAssociationFeatureCandidate> =
@@ -359,14 +369,31 @@ internal class AssociationFeatureCandidatePagingSource(
             return@withContext try {
                 val page = params.key ?: 0
                 val pageSize = params.loadSize
-                // Create query parameters with pagination
                 val queryParams = queryParamsProvider().apply {
-                    this.resultOffset = page * pageSize
-                    this.maxFeatures = pageSize
+                    if (!filterString.isNullOrBlank()) {
+                        // No pagination: fetch all
+                        this.resultOffset = 0
+                        this.maxFeatures = Int.MAX_VALUE
+                    } else {
+                        // Paginated
+                        this.resultOffset = page * pageSize
+                        this.maxFeatures = pageSize
+                    }
                 }
                 // Query the feature source for candidates
                 val result = featureSource.queryFeatures(assetType, queryParams).getOrThrow()
-                val candidates = result.candidates
+                var candidates = result.candidates
+                // Apply filtering logic
+                if (!filterString.isNullOrBlank()) {
+                    candidates = candidates.filter { candidate ->
+                        candidate.title.contains(filterString, ignoreCase = true)
+                    }
+                }
+
+                if (candidates.isEmpty()) {
+                    throw NoSuchElementException("No features found. Refine your search or choose a different Network Source.")
+                }
+
                 // Determine the next and previous keys
                 val nextKey = if (candidates.size < pageSize) null else page + 1
                 val prevKey = if (page == 0) null else page - 1
