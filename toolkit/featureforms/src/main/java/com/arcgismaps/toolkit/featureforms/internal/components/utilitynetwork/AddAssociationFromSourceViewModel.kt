@@ -370,15 +370,9 @@ internal class AssociationFeatureCandidatePagingSource(
                 val page = params.key ?: 0
                 val pageSize = params.loadSize
                 val queryParams = queryParamsProvider().apply {
-                    if (!filterString.isNullOrBlank()) {
-                        // No pagination: fetch all
-                        this.resultOffset = 0
-                        this.maxFeatures = Int.MAX_VALUE
-                    } else {
-                        // Paginated
-                        this.resultOffset = page * pageSize
-                        this.maxFeatures = pageSize
-                    }
+                    // Paginated
+                    this.resultOffset = page * pageSize
+                    this.maxFeatures = pageSize
                 }
                 // Query the feature source for candidates
                 val result = featureSource.queryFeatures(assetType, queryParams).getOrThrow()
