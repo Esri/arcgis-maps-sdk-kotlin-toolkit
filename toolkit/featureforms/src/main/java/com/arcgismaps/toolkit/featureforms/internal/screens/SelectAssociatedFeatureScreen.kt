@@ -89,7 +89,7 @@ internal fun SelectAssociatedFeatureScreen(
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val state by viewModel.featureCandidates
+    val state by viewModel.featureCandidatesUiState
     val count = rememberSaveable(state) {
         state.candidates.count()
     }

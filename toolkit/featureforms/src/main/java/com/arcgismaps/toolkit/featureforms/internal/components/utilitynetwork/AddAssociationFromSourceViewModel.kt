@@ -87,14 +87,14 @@ internal class AddAssociationFromSourceViewModel(
         get() = _selectedAssetType.value
 
 
-    private val _featureCandidates = mutableStateOf(
+    private val _featureCandidatesUiState = mutableStateOf(
         FeatureCandidatesUiState(isLoading = true)
     )
 
     /**
      * The current state of feature candidates being loaded from the selected source and asset type.
      */
-    val featureCandidates: State<FeatureCandidatesUiState> = _featureCandidates
+    val featureCandidatesUiState: State<FeatureCandidatesUiState> = _featureCandidatesUiState
 
     private val _newAssociationOptions =
         mutableStateOf<NewAssociationOptions?>(null)
@@ -110,29 +110,31 @@ internal class AddAssociationFromSourceViewModel(
         viewModelScope.launch {
             // Whenever the selected source or asset type changes, reload the feature candidates
             snapshotFlow {
-                _selectedAssetType.value
-            }.distinctUntilChanged().collect { assetType ->
-                val source = selectedSource
-                // If no source is selected, return an empty list
-                if (source == null || assetType == null) {
-                    _featureCandidates.value = FeatureCandidatesUiState(
+                _selectedSource.value to _selectedAssetType.value
+            }.distinctUntilChanged().collect { pair ->
+                val source = pair.first
+                val assetType = pair.second
+                // If no source, asset type is selected or the asset type is not valid for the source,
+                // clear the candidates and return an error state
+                if (source == null || assetType == null || (assetType in source.assetTypes).not()) {
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(
                         isLoading = false,
                         error = IllegalStateException(
                             "No source or asset type selected"
                         )
                     )
                 } else {
-                    _featureCandidates.value = FeatureCandidatesUiState(isLoading = true)
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(isLoading = true)
                     // Load the candidates from the selected source and asset type
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
-                        _featureCandidates.value = FeatureCandidatesUiState(
+                        _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates
                         )
                     }.onFailure { error ->
-                        _featureCandidates.value = FeatureCandidatesUiState(
+                        _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             error = error
                         )
