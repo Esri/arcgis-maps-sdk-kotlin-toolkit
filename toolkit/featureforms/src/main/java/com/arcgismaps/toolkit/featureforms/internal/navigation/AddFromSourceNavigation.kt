@@ -114,9 +114,11 @@ internal fun NavGraphBuilder.selectFeatureDestination(
         val parent = remember(backStackEntry) {
             onGetParentEntry(backStackEntry)
         }
+        val viewModel: AddAssociationFromSourceViewModel = viewModel(parent)
         SelectAssociatedFeatureScreen(
-            viewModel = viewModel(parent),
+            viewModel = viewModel,
             onBackPressed = {
+                viewModel.clearAssociatedFeaturesFilterQuery()
                 onBackPressed(backStackEntry)
             },
             onFeatureCandidateSelected = {

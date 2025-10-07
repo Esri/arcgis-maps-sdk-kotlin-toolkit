@@ -182,6 +182,8 @@
     <string name="new_association">New Association</string>
     <string name="add">Add</string>
     <string name="failed_to_create_association">Failed to create association. %1$s</string>
+    <string name="available_features">%1$d Available Features</string>
+    <string name="loading2">Loading..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">You have %1$d errors that must be fixed before saving.</item>
         <item quantity="one">You have %1$d error that must be fixed before saving.</item>
