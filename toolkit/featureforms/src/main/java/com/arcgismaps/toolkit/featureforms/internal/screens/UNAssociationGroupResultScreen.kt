@@ -41,7 +41,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
@@ -50,14 +49,14 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ut
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationGroupResult
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
-import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import kotlinx.coroutines.launch
 
 /**
  * Screen that displays the selected group of associations.
  *
- * @param formStateData The form state data.
- * @param route The [NavigationRoute.UNAssociationsView] route data of this screen.
+ * @param state The state of the utility associations element.
+ * @param featureForm The feature form associated with the current feature.
+ * @param isNavigationEnabled Flag indicating whether navigation to associated features is enabled.
  * @param onSave The callback to be invoked when the save button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation. The callback should
  * return a [Result] that indicates the success or failure of the save operation.
@@ -69,8 +68,8 @@ import kotlinx.coroutines.launch
  */
 @Composable
 internal fun UNAssociationGroupResultScreen(
-    formStateData: FormStateData,
-    route: NavigationRoute.UNAssociationsView,
+    state: UtilityAssociationsElementState,
+    featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
@@ -78,20 +77,10 @@ internal fun UNAssociationGroupResultScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val featureForm = formStateData.featureForm
-    val states = formStateData.stateCollection
-    // Get the selected UtilityAssociationsElementState from the state collection
-    val utilityAssociationsElementState = states[route.stateId] as?
-        UtilityAssociationsElementState ?: return
-    // Get the selected group from the filter
-    val groupResult = utilityAssociationsElementState.selectedGroupResult
-    if (groupResult == null) {
-        // guard against null values
-        return
-    }
+    val groupResult = state.selectedGroupResult ?: return
     val hasEdits by featureForm.hasEdits.collectAsState()
-    val isEditable by utilityAssociationsElementState.isEditable.collectAsState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val isEditable by state.isEditable.collectAsState()
     val scope = rememberCoroutineScope()
     // State to hold the pending navigation action when the form has unsaved edits
     var pendingNavigationAction: NavigationAction by rememberSaveable {
@@ -124,7 +113,7 @@ internal fun UNAssociationGroupResultScreen(
         },
         onDetailsClick = { index ->
             val association = groupResult.associationResults[index]
-            utilityAssociationsElementState.setSelectedAssociationResult(association)
+            state.setSelectedAssociationResult(association)
             // show the details sheet
             showDetails = true
         },
@@ -197,7 +186,7 @@ internal fun UNAssociationGroupResultScreen(
                 }
             }
             UtilityAssociationDetails(
-                state = utilityAssociationsElementState,
+                state = state,
                 onDelete = { isGroupEmpty ->
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {

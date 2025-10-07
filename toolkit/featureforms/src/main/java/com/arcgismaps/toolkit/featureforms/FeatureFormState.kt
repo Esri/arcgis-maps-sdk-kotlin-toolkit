@@ -244,7 +244,7 @@ public class FeatureFormState private constructor(
         // Add the new form to the stack.
         store.addLast(FormStateData(form, states))
         // Navigate to the form view.
-        navigateTo(NavigationRoute.FormView)
+        navigateTo(NavigationRoute.Form)
         return true
     }
 
@@ -267,7 +267,7 @@ public class FeatureFormState private constructor(
         if (backStackEntry.lifecycleIsResumed().not()) return false
         // Check the current destination and pop the stack accordingly.
         return when {
-            backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
                 // Check if the stack has more than one form.
                 if (store.size <= 1) {
                     false

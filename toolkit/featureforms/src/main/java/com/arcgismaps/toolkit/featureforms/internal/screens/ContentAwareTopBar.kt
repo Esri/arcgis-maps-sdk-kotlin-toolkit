@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -64,6 +65,7 @@ import com.arcgismaps.toolkit.featureforms.FormStateData
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.navigation.AddFromSourceNavRoute
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction
 import com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationRoute
 import kotlinx.coroutines.Dispatchers
@@ -128,7 +130,7 @@ internal fun ContentAwareTopBar(
     }
     val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
-            entry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            entry.destination.hasRoute<NavigationRoute.Form>() -> {
                 // Run the navigation action if the current view is the form view
                 onNavigationAction(NavigationAction.NavigateBack, hasEdits)
             }
@@ -143,76 +145,80 @@ internal fun ContentAwareTopBar(
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
     val navigationEnabled = when {
         // If the current destination is the form view, only then check if navigation is enabled
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
             isNavigationEnabled
         }
         // For other destinations, always enable back navigation
         else -> true
     }
-    Column {
-        FeatureFormTitle(
-            title = title,
-            subTitle = subTitle,
-            hasEdits = if (showFormActions) hasEdits else false,
-            showCloseIcon = showCloseIcon,
-            showBackIcon = hasBackStack,
-            isNavigationEnabled = navigationEnabled,
-            onBackPressed = {
-                onBackAction(backStackEntry)
-            },
-            onClose = {
-                onNavigationAction(NavigationAction.Dismiss, hasEdits)
-            },
-            onSave = {
-                scope.launch {
-                    onSaveForm(formData.featureForm, false)
-                }
-            },
-            onDiscard = {
-                scope.launch {
-                    onDiscardForm(false)
-                }
-            },
-            modifier = modifier
-        )
-        InitializingExpressions(
-            modifier = Modifier.fillMaxWidth(),
-            evaluationProvider = { formData.isEvaluatingExpressions }
-        )
-    }
-    if (pendingNavigationAction != NavigationAction.None) {
-        SaveEditsDialog(
-            onDismissRequest = {
-                // Clear the pending action when the dialog is dismissed
-                pendingNavigationAction = NavigationAction.None
-            },
-            onSave = {
-                scope.launch(Dispatchers.Main) {
-                    // Check if the pending action is to navigate back, since NavigateToAssociation
-                    // is not triggered by the top bar
-                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                    onSaveForm(formData.featureForm, willNavigate).onSuccess {
-                        // Execute the pending navigation action after saving
-                        onNavigationAction(pendingNavigationAction, false)
+    // Only show the top bar for certain destinations
+    if (backStackEntry.shouldEnableTopBar()) {
+        Column {
+            FeatureFormTitle(
+                title = title,
+                subTitle = subTitle,
+                hasEdits = if (showFormActions) hasEdits else false,
+                showCloseIcon = showCloseIcon,
+                showBackIcon = hasBackStack,
+                isNavigationEnabled = navigationEnabled,
+                onBackPressed = {
+                    onBackAction(backStackEntry)
+                },
+                onClose = {
+                    onNavigationAction(NavigationAction.Dismiss, hasEdits)
+                },
+                onSave = {
+                    scope.launch {
+                        onSaveForm(formData.featureForm, false)
                     }
+                },
+                onDiscard = {
+                    scope.launch {
+                        onDiscardForm(false)
+                    }
+                },
+                modifier = modifier
+            )
+            InitializingExpressions(
+                modifier = Modifier.fillMaxWidth(),
+                evaluationProvider = { formData.isEvaluatingExpressions }
+            )
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        }
+        if (pendingNavigationAction != NavigationAction.None) {
+            SaveEditsDialog(
+                onDismissRequest = {
+                    // Clear the pending action when the dialog is dismissed
                     pendingNavigationAction = NavigationAction.None
+                },
+                onSave = {
+                    scope.launch(Dispatchers.Main) {
+                        // Check if the pending action is to navigate back, since NavigateToAssociation
+                        // is not triggered by the top bar
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                            // Execute the pending navigation action after saving
+                            onNavigationAction(pendingNavigationAction, false)
+                        }
+                        pendingNavigationAction = NavigationAction.None
+                    }
+                },
+                onDiscard = {
+                    scope.launch(Dispatchers.Main) {
+                        // Check if the pending action is to navigate back, since NavigateToAssociation
+                        // is not triggered by the top bar
+                        val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
+                        onDiscardForm(willNavigate)
+                        onNavigationAction(pendingNavigationAction, false)
+                        pendingNavigationAction = NavigationAction.None
+                    }
                 }
-            },
-            onDiscard = {
-                scope.launch(Dispatchers.Main) {
-                    // Check if the pending action is to navigate back, since NavigateToAssociation
-                    // is not triggered by the top bar
-                    val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                    onDiscardForm(willNavigate)
-                    onNavigationAction(pendingNavigationAction, false)
-                    pendingNavigationAction = NavigationAction.None
-                }
-            }
-        )
-    }
-    // only enable back navigation if there is a previous route
-    BackHandler(hasBackStack) {
-        onBackAction(backStackEntry)
+            )
+        }
+        // only enable back navigation if there is a previous route
+        BackHandler(hasBackStack) {
+            onBackAction(backStackEntry)
+        }
     }
 }
 
@@ -233,16 +239,16 @@ private fun getTopBarTitleAndSubtitle(
 
     val defaultTitle = stringResource(R.string.none_selected)
     return when {
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
             Pair(
                 formTitle,
                 formData.featureForm.description
             )
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsFilterResult>() -> {
             var title = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsFilterResult>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedFilterResult?.filter?.let { filter ->
                     title = filter.title
@@ -251,10 +257,10 @@ private fun getTopBarTitleAndSubtitle(
             Pair(title, formTitle)
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationGroupResult>() -> {
             var title = defaultTitle
             var subTitle = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedGroupResult?.let { group ->
                     title = group.name
@@ -264,6 +270,14 @@ private fun getTopBarTitleAndSubtitle(
                 }
             }
             Pair(title, subTitle)
+        }
+
+        backStackEntry.destination.hasRoute<AddFromSourceNavRoute.SelectSource>() -> {
+            Pair("Network Data Source", "")
+        }
+
+        backStackEntry.destination.hasRoute<AddFromSourceNavRoute.SelectAssetType>() -> {
+            Pair("Network Data Source", "")
         }
 
         else -> {
@@ -389,6 +403,13 @@ private fun InitializingExpressions(
         }
     ) {
         LinearProgressIndicator(modifier)
+    }
+}
+
+private fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
+    return when {
+        this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSource>() == true -> false
+        else -> true
     }
 }
 

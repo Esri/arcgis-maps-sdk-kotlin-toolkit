@@ -65,21 +65,6 @@ internal fun FeatureFormScreen(
     onUtilityFilterSelected: (UtilityAssociationsElementState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    FormContent(
-        formStateData = formStateData,
-        onBarcodeButtonClick = onBarcodeButtonClick,
-        onUtilityAssociationFilterClick = onUtilityFilterSelected,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun FormContent(
-    formStateData: FormStateData,
-    modifier: Modifier = Modifier,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityAssociationFilterClick: (UtilityAssociationsElementState) -> Unit,
-) {
     val density = LocalDensity.current
     val view = LocalView.current
     val lazyListState = rememberSaveable(
@@ -147,7 +132,7 @@ private fun FormContent(
                             onItemClick = { selected ->
                                 // Set the selected filter result in the state
                                 state.setSelectedFilterResult(selected)
-                                onUtilityAssociationFilterClick(state)
+                                onUtilityFilterSelected(state)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
