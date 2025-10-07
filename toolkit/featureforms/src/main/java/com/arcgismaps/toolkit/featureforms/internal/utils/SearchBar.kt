@@ -18,7 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -35,7 +35,7 @@ internal fun SearchBar(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = CircleShape,
     surfaceColor: Color = MaterialTheme.colorScheme.surfaceBright,
     topSpacer: Dp = 4.dp,
     bottomSpacer: Dp = 14.dp
@@ -48,7 +48,7 @@ internal fun SearchBar(
         shape = shape,
         color = surfaceColor
     ) {
-        OutlinedTextField(
+        TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
@@ -70,7 +70,15 @@ internal fun SearchBar(
                         )
                     }
                 }
-            }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            )
         )
     }
     Spacer(modifier = Modifier.height(bottomSpacer))
