@@ -246,9 +246,9 @@ private fun getTopBarTitleAndSubtitle(
             )
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNFilter>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsFilterResult>() -> {
             var title = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNFilter>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsFilterResult>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedFilterResult?.filter?.let { filter ->
                     title = filter.title
@@ -257,10 +257,10 @@ private fun getTopBarTitleAndSubtitle(
             Pair(title, formTitle)
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociations>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationGroupResult>() -> {
             var title = defaultTitle
             var subTitle = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNAssociations>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedGroupResult?.let { group ->
                     title = group.name

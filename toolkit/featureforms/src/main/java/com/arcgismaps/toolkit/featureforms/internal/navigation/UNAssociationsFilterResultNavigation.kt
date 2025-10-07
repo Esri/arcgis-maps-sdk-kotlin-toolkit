@@ -33,8 +33,8 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
     onAddFromSourceClick: (NavBackStackEntry, Int) -> Unit,
     state: FeatureFormState,
 ) {
-    composable<NavigationRoute.UNFilter> { backStackEntry ->
-        val route = backStackEntry.toRoute<NavigationRoute.UNFilter>()
+    composable<NavigationRoute.UNAssociationsFilterResult> { backStackEntry ->
+        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsFilterResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
         // Get the selected UtilityAssociationsElementState from the state collection
@@ -59,11 +59,11 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
     }
 }
 
-internal fun NavHostController.navigateToAssociationsFilterResultView(
+internal fun NavHostController.navigateToUNAssociationsFilterResult(
     backStackEntry: NavBackStackEntry,
     stateId: Int
 ) {
-    val newRoute = NavigationRoute.UNFilter(stateId = stateId)
+    val newRoute = NavigationRoute.UNAssociationsFilterResult(stateId = stateId)
     // Navigate to the filter view
     navigateSafely(backStackEntry, newRoute)
 }

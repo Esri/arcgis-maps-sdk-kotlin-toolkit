@@ -56,12 +56,12 @@ internal fun FeatureFormNavHost(
         featureFormDestination(
             state = state,
             onBarcodeButtonClick = onBarcodeButtonClick,
-            onUtilityFilterSelected = navController::navigateToAssociationsFilterResultView,
+            onUtilityFilterSelected = navController::navigateToUNAssociationsFilterResult,
             validationErrorVisibility = validationErrorVisibility
         )
 
         associationsFilterResultDestination(
-            onGroupSelected =  navController::navigateToAssociationGroupResultView,
+            onGroupSelected =  navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             state = state
         )
@@ -107,7 +107,7 @@ internal fun FeatureFormNavHost(
 
             createAssociationDestination(
                 onAssociationCreated = {
-                    navController.popBackStack<NavigationRoute.UNFilter>(inclusive = false)
+                    navController.popBackStack<NavigationRoute.UNAssociationsFilterResult>(inclusive = false)
                 },
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {

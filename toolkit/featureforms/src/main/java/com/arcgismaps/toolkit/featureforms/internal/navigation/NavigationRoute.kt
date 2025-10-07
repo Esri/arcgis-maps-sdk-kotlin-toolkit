@@ -41,7 +41,7 @@ internal sealed class NavigationRoute {
      * selected filter.
      */
     @Serializable
-    data class UNFilter(
+    data class UNAssociationsFilterResult(
         val stateId: Int
     ) : NavigationRoute()
 
@@ -52,7 +52,7 @@ internal sealed class NavigationRoute {
      * selected group of associations.
      */
     @Serializable
-    data class UNAssociations(
+    data class UNAssociationGroupResult(
         val stateId: Int
     ) : NavigationRoute()
 

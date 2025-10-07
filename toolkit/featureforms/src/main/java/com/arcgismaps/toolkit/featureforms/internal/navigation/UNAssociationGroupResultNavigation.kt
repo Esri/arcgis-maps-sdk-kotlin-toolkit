@@ -39,8 +39,8 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     onBack: () -> Unit,
     isNavigationEnabled: Boolean,
 ) {
-    composable<NavigationRoute.UNAssociations> { backStackEntry ->
-        val route = backStackEntry.toRoute<NavigationRoute.UNAssociations>()
+    composable<NavigationRoute.UNAssociationGroupResult> { backStackEntry ->
+        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
         // Get the selected UtilityAssociationsElementState from the state collection
@@ -74,10 +74,10 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     }
 }
 
-internal fun NavHostController.navigateToAssociationGroupResultView(
+internal fun NavHostController.navigateToUNAssociationGroupResult(
     backStackEntry: NavBackStackEntry,
     stateId: Int
 ) {
-    val newRoute = NavigationRoute.UNAssociations(stateId = stateId)
+    val newRoute = NavigationRoute.UNAssociationGroupResult(stateId = stateId)
     navigateSafely(backStackEntry, newRoute)
 }
