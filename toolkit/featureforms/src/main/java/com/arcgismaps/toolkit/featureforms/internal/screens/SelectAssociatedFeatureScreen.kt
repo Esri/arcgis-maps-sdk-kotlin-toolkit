@@ -99,9 +99,7 @@ internal fun SelectAssociatedFeatureScreen(
         it.title.contains(searchQuery, ignoreCase = true)
     }
 
-    val count = rememberSaveable(state, filteredCandidates) {
-        filteredCandidates.count()
-    }
+    val count = filteredCandidates.count()
     val title = if (state.isLoading){
         stringResource(R.string.loading2)
     } else {

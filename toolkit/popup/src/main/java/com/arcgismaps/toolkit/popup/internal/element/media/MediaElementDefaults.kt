@@ -16,12 +16,17 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.media
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.ChartImageParameters
+import com.arcgismaps.mapping.ChartImageStyle
 
 /**
  * A central place for theming values. To be promoted to a public theme type.
@@ -50,6 +55,30 @@ internal object MediaElementDefaults {
         tileTextBackgroundColor = MaterialTheme.colorScheme.onBackground,
         tileTextColor = MaterialTheme.colorScheme.background
     )
+
+    val tileWidthForLocalDensity: Int
+        @Composable
+        get() = with(LocalDensity.current) { shapes().tileWidth.roundToPx() }
+
+    val tileHeightForLocalDensity: Int
+        @Composable
+        get() = with(LocalDensity.current) { shapes().tileHeight.roundToPx() }
+
+    val chartParams: ChartImageParameters
+        @Composable
+        get() = ChartImageParameters(tileWidthForLocalDensity, tileHeightForLocalDensity).apply {
+            style = if (isSystemInDarkTheme()) {
+                ChartImageStyle.Dark
+            } else {
+                ChartImageStyle.Light
+            }
+            this.screenScale = LocalDensity.current.density
+        }
+
+    val mediaFolder: String
+        @Composable
+        get() = "${LocalContext.current.cacheDir.canonicalPath}/popup_media"
+
 }
 
 internal data class MediaElementShapes(

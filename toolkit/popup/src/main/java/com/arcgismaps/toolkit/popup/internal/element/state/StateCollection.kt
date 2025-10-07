@@ -25,9 +25,20 @@ import com.arcgismaps.mapping.popup.PopupElement
  */
 @Immutable
 internal interface PopupElementStateCollection : Iterable<PopupElementStateCollection.Entry> {
+
+    /**
+     * Provides the bracket operator to the collection.
+     *
+     * @param id the unique identifier [PopupElementState.id]
+     * @return the [PopupElementState] associated with the id, or null if none.
+     */
+    operator fun get(id: Int): PopupElementState?
+
     interface Entry {
         val popupElement: PopupElement
         val state: PopupElementState
+        override fun equals(other: Any?): Boolean
+        override fun hashCode(): Int
     }
 }
 
@@ -65,11 +76,32 @@ private class MutablePopupElementStateCollectionImpl : MutablePopupElementStateC
         entries.add(EntryImpl(popupElement, state))
     }
 
+    override operator fun get(id: Int): PopupElementState? {
+        entries.forEach { entry ->
+            if (entry.state.id == id) {
+                return entry.state
+            }
+        }
+        return null
+    }
+
     /**
      * Default implementation for a [PopupElementStateCollection.Entry].
      */
     class EntryImpl(
         override val popupElement: PopupElement,
         override val state: PopupElementState
-    ) : PopupElementStateCollection.Entry
+    ) : PopupElementStateCollection.Entry {
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || javaClass != other.javaClass) return false
+
+            other as EntryImpl
+
+            return popupElement == other.popupElement
+        }
+
+        override fun hashCode(): Int = popupElement.hashCode()
+    }
 }
