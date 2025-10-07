@@ -92,7 +92,7 @@ internal fun SelectAssociatedFeatureScreen(
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val state by viewModel.featureCandidates
+    val state by viewModel.featureCandidatesUiState
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val filteredCandidates = state.candidates.filter {

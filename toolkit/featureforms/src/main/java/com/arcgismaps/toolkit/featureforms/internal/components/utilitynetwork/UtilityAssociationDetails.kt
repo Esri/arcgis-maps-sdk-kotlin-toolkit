@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
-import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 import kotlinx.coroutines.launch
 
 /**
@@ -122,13 +121,13 @@ internal fun UtilityAssociationDetails(
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
-                if (association.fromElement.terminal != null) {
+                association.fromElement.terminal?.let { terminal ->
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     UtilityTerminalControl(
-                        selected = association.fromElement.terminal!!,
+                        selected = terminal,
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),
@@ -150,13 +149,13 @@ internal fun UtilityAssociationDetails(
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
-                if (association.toElement.terminal != null) {
+                association.toElement.terminal?.let { terminal ->
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     UtilityTerminalControl(
-                        selected = association.toElement.terminal!!,
+                        selected = terminal,
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),

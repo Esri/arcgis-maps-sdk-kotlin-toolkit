@@ -32,7 +32,7 @@ internal fun NavGraphBuilder.featureFormDestination(
     state : FeatureFormState,
     validationErrorVisibility : ValidationErrorVisibility
 ) {
-    composable<NavigationRoute.FormView> { backStackEntry ->
+    composable<NavigationRoute.Form> { backStackEntry ->
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         FeatureFormScreen(
             formStateData = formData,

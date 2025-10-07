@@ -152,11 +152,11 @@ internal fun NavGraphBuilder.createAssociationDestination(
     }
 }
 
-internal fun NavHostController.navigateToAddUNAssociationFromSourceView(
+internal fun NavHostController.navigateToAddUNAssociationFromSource(
     backStackEntry: NavBackStackEntry,
     stateId: Int
 ) {
-    val newRoute = NavigationRoute.AddUNAssociationFromSourceView(stateId = stateId)
+    val newRoute = NavigationRoute.AddUNAssociationFromSource(stateId = stateId)
     // Navigate to the add from source view
     navigateSafely(backStackEntry, newRoute)
 }
