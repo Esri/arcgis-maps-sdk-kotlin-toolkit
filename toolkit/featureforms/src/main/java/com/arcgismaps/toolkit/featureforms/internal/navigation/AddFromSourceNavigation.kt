@@ -89,9 +89,8 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
         val parent = remember(backStackEntry) {
             onGetParentEntry(backStackEntry)
         }
-        val viewModel: AddAssociationFromSourceViewModel = viewModel(parent)
         SelectAssetTypeScreen(
-            viewModel = viewModel,
+            viewModel = viewModel(parent),
             onBackPressed = {
                 onBackPressed(backStackEntry)
             },
