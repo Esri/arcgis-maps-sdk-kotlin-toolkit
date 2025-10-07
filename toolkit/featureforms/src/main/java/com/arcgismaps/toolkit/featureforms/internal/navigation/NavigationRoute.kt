@@ -29,42 +29,42 @@ import kotlinx.serialization.Serializable
 internal sealed class NavigationRoute {
 
     /**
-     * Represents the [FeatureFormScreen].
+     * Represents a route for the [FeatureFormScreen].
      */
     @Serializable
-    data object FormView : NavigationRoute()
+    data object Form : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationsFilterResultScreen].
+     * Represents a route for the [UNAssociationsFilterResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected filter.
      */
     @Serializable
-    data class UNFilterView(
+    data class UNFilter(
         val stateId: Int
     ) : NavigationRoute()
 
     /**
-     * Represents a view for the [UNAssociationGroupResultScreen].
+     * Represents a route for the [UNAssociationGroupResultScreen].
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected group of associations.
      */
     @Serializable
-    data class UNAssociationsView(
+    data class UNAssociations(
         val stateId: Int
     ) : NavigationRoute()
 
     /**
-     * Represents a view for adding an association from a source feature. This is represented as
-     * a nested navigation graph. See [AddFromSourceNavRoute] for the routes in this graph.
+     * Represents a route for adding an association from a source feature. This is represented as
+     * a nested navigation graph. See [AddFromSourceNavRoute] for the routes in this nested graph.
      *
      * @param stateId The state ID of the [UtilityAssociationsElementState] which contains the
      * selected association to add from source.
      */
     @Serializable
-    data class AddUNAssociationFromSourceView(
+    data class AddUNAssociationFromSource(
         val stateId: Int
     ) : NavigationRoute()
 }

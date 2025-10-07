@@ -45,7 +45,7 @@ internal fun FeatureFormNavHost(
 ) {
     NavHost(
         navController,
-        startDestination = NavigationRoute.FormView,
+        startDestination = NavigationRoute.Form,
         modifier = modifier,
         enterTransition = { slideInHorizontally { h -> h } },
         exitTransition = { fadeOut() },
@@ -62,7 +62,7 @@ internal fun FeatureFormNavHost(
 
         associationsFilterResultDestination(
             onGroupSelected =  navController::navigateToAssociationGroupResultView,
-            onAddFromSourceClick = navController::navigateToAddUNAssociationFromSourceView,
+            onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             state = state
         )
 
@@ -75,7 +75,7 @@ internal fun FeatureFormNavHost(
             onBack =  navController::popBackStack,
         )
 
-        navigation<NavigationRoute.AddUNAssociationFromSourceView>(
+        navigation<NavigationRoute.AddUNAssociationFromSource>(
             startDestination = AddFromSourceNavRoute.SelectSource,
         ) {
             selectSourceDestination(
@@ -107,7 +107,7 @@ internal fun FeatureFormNavHost(
 
             createAssociationDestination(
                 onAssociationCreated = {
-                    navController.popBackStack<NavigationRoute.UNFilterView>(inclusive = false)
+                    navController.popBackStack<NavigationRoute.UNFilter>(inclusive = false)
                 },
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {

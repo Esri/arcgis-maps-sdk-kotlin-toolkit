@@ -130,7 +130,7 @@ internal fun ContentAwareTopBar(
     }
     val onBackAction: (NavBackStackEntry) -> Unit = { entry ->
         when {
-            entry.destination.hasRoute<NavigationRoute.FormView>() -> {
+            entry.destination.hasRoute<NavigationRoute.Form>() -> {
                 // Run the navigation action if the current view is the form view
                 onNavigationAction(NavigationAction.NavigateBack, hasEdits)
             }
@@ -145,7 +145,7 @@ internal fun ContentAwareTopBar(
     val (title, subTitle) = getTopBarTitleAndSubtitle(backStackEntry, formData)
     val navigationEnabled = when {
         // If the current destination is the form view, only then check if navigation is enabled
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
             isNavigationEnabled
         }
         // For other destinations, always enable back navigation
@@ -239,16 +239,16 @@ private fun getTopBarTitleAndSubtitle(
 
     val defaultTitle = stringResource(R.string.none_selected)
     return when {
-        backStackEntry.destination.hasRoute<NavigationRoute.FormView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.Form>() -> {
             Pair(
                 formTitle,
                 formData.featureForm.description
             )
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNFilterView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNFilter>() -> {
             var title = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNFilterView>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNFilter>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedFilterResult?.filter?.let { filter ->
                     title = filter.title
@@ -257,10 +257,10 @@ private fun getTopBarTitleAndSubtitle(
             Pair(title, formTitle)
         }
 
-        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociationsView>() -> {
+        backStackEntry.destination.hasRoute<NavigationRoute.UNAssociations>() -> {
             var title = defaultTitle
             var subTitle = defaultTitle
-            val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsView>()
+            val route = backStackEntry.toRoute<NavigationRoute.UNAssociations>()
             (formData.stateCollection[route.stateId] as? UtilityAssociationsElementState)?.let { state ->
                 state.selectedGroupResult?.let { group ->
                     title = group.name
@@ -408,7 +408,7 @@ private fun InitializingExpressions(
 
 private fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
     return when {
-        this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSourceView>() == true -> false
+        this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSource>() == true -> false
         else -> true
     }
 }

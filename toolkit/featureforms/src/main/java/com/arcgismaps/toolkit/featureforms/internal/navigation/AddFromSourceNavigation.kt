@@ -21,7 +21,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +35,6 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.CreateAssociationScr
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssetTypeScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssociatedFeatureScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectNetworkSourceScreen
-import com.arcgismaps.utilitynetworks.UtilityAssetType
 
 internal fun NavGraphBuilder.selectSourceDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
@@ -154,11 +152,11 @@ internal fun NavGraphBuilder.createAssociationDestination(
     }
 }
 
-internal fun NavHostController.navigateToAddUNAssociationFromSourceView(
+internal fun NavHostController.navigateToAddUNAssociationFromSource(
     backStackEntry: NavBackStackEntry,
     stateId: Int
 ) {
-    val newRoute = NavigationRoute.AddUNAssociationFromSourceView(stateId = stateId)
+    val newRoute = NavigationRoute.AddUNAssociationFromSource(stateId = stateId)
     // Navigate to the add from source view
     navigateSafely(backStackEntry, newRoute)
 }
