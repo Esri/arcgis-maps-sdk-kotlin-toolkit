@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -47,9 +46,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -89,15 +90,17 @@ internal fun SelectAssociatedFeatureScreen(
     onFeatureCandidateSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BackHandler {
-        viewModel.clearAssociatedFeaturesFilterQuery()
-        onBackPressed()
-    }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val state by viewModel.featureCandidates
-    val count = rememberSaveable(state) {
-        state.candidates.count()
+
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val filteredCandidates = state.candidates.filter {
+        it.title.contains(searchQuery, ignoreCase = true)
+    }
+
+    val count = rememberSaveable(state, filteredCandidates) {
+        filteredCandidates.count()
     }
     val title = if (state.isLoading){
         stringResource(R.string.loading2)
@@ -117,8 +120,8 @@ internal fun SelectAssociatedFeatureScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         SearchBar(
-            value = viewModel.associatedFeaturesFilterQuery,
-            onValueChange = { viewModel.onAssociatedFeaturesFilterQueryChanged(it) },
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
             placeholder = stringResource(R.string.search_features)
         )
 
@@ -158,7 +161,7 @@ internal fun SelectAssociatedFeatureScreen(
                                 autoHide = true
                             )
                         ) {
-                            itemsIndexed(state.candidates) { index, item ->
+                            itemsIndexed(filteredCandidates) { index, item ->
                                 ListItem(
                                     modifier = Modifier.clickable {
                                         scope.launch {
@@ -201,7 +204,7 @@ internal fun SelectAssociatedFeatureScreen(
                                         containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
                                 )
-                                if (index < state.candidates.count() - 1) {
+                                if (index < filteredCandidates.count() - 1) {
                                     HorizontalDivider(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh

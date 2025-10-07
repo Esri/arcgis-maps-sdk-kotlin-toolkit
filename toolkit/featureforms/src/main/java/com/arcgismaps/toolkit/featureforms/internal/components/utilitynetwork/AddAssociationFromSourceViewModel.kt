@@ -57,23 +57,6 @@ internal class AddAssociationFromSourceViewModel(
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 
-    private val _associatedFeaturesFilterQuery: MutableState<String> = mutableStateOf("")
-    val associatedFeaturesFilterQuery: String
-        get() = _associatedFeaturesFilterQuery.value
-
-    private var allFeatureCandidates: List<UtilityAssociationFeatureCandidate> = emptyList()
-
-    fun onAssociatedFeaturesFilterQueryChanged(query: String) {
-        _associatedFeaturesFilterQuery.value = query
-        // If the query is blank, show all candidates
-        val filteredCandidates = if (query.isBlank()) {
-            allFeatureCandidates
-        } else {
-            allFeatureCandidates.filter { it.title.contains(query, ignoreCase = true) }
-        }
-        _featureCandidates.value = _featureCandidates.value.copy(candidates = filteredCandidates)
-    }
-
     private val _featureSources: MutableState<List<UtilityAssociationFeatureSource>> =
         mutableStateOf(emptyList())
 
@@ -144,7 +127,6 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
-                        allFeatureCandidates = result.candidates
                         _featureCandidates.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates
@@ -328,10 +310,6 @@ internal class AddAssociationFromSourceViewModel(
      */
     fun selectAssetType(assetType: UtilityAssetType?) {
         _selectedAssetType.value = assetType
-    }
-
-    fun clearAssociatedFeaturesFilterQuery() {
-        _associatedFeaturesFilterQuery.value = ""
     }
 
     companion object {
