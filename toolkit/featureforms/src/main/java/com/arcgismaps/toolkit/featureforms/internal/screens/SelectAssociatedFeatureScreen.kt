@@ -23,9 +23,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -41,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
@@ -90,10 +94,9 @@ internal fun SelectAssociatedFeatureScreen(
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val state by viewModel.featureCandidatesUiState
-    val filteredCandidates = viewModel.filteredFeatureCandidates.collectAsState().value
-
-    val count = filteredCandidates.count()
+    val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
+    val candidates = state.candidates
+    val count = candidates.count()
     val title = if (state.isLoading){
         stringResource(R.string.loading2)
     } else {
@@ -116,7 +119,20 @@ internal fun SelectAssociatedFeatureScreen(
             onValueChange = { viewModel.setAssociatedFeaturesFilterText(it) },
             placeholder = stringResource(R.string.search_features)
         )
-
+        if (candidates.count() > 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.choose_to_add),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
         AnimatedContent(
             targetState = state
         ) { state ->
@@ -132,6 +148,10 @@ internal fun SelectAssociatedFeatureScreen(
                             .padding(24.dp),
                         message = "${state.error.localizedMessage}"
                     )
+                }
+
+                state.candidates.count() == 0 -> {
+                    EmptyResultsRow(modifier = Modifier.fillMaxSize())
                 }
 
                 else -> {
@@ -153,7 +173,7 @@ internal fun SelectAssociatedFeatureScreen(
                                 autoHide = true
                             )
                         ) {
-                            itemsIndexed(filteredCandidates) { index, item ->
+                            itemsIndexed(candidates) { index, item ->
                                 ListItem(
                                     modifier = Modifier.clickable {
                                         scope.launch {
@@ -196,7 +216,7 @@ internal fun SelectAssociatedFeatureScreen(
                                         containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
                                 )
-                                if (index < filteredCandidates.count() - 1) {
+                                if (index < candidates.count() - 1) {
                                     HorizontalDivider(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -208,6 +228,33 @@ internal fun SelectAssociatedFeatureScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyResultsRow(modifier: Modifier = Modifier) {
+    val color = LocalContentColor.current
+    Column (
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.no_features_found),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(8.dp),
+            color = color
+        )
+        Text(
+            text = stringResource(R.string.refine_your_search_tip),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(8.dp)
+                .width(280.dp),
+            color = color.copy(alpha = 0.6f)
+        )
     }
 }
 
@@ -323,7 +370,7 @@ internal fun Modifier.verticalScrollbar(
                 if (scrollbarHeight >= size.height) return@drawWithContent
                 // Calculate the Y offset of the scrollbar
                 val scrollBarOffsetY = (size.height / totalHeight) *
-                        (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
+                    (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
                 // Calculate the X offset of the scrollbar
                 val scrollBarOffsetX = size.width + width.toPx() - offsetX.toPx()
 

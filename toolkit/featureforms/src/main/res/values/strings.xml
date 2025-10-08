@@ -193,4 +193,7 @@
         <item quantity="other">You have %1$d errors that must be fixed before saving</item>
     </plurals>
     <string name="search_features">Search features</string>
+    <string name="choose_to_add">Choose to add</string>
+    <string name="no_features_found">No features found</string>
+    <string name="refine_your_search_tip">Refine your search or choose a different Network Source.</string>
 </resources>

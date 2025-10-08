@@ -167,20 +167,24 @@ internal class AddAssociationFromSourceViewModel(
     )
 
     /**
-     * A flow that emits a list of [UtilityAssociationFeatureCandidate]s based on the current search text.
+     * A flow that emits a [FeatureCandidatesUiState] based on the current search text.
      */
-    val filteredFeatureCandidates: StateFlow<List<UtilityAssociationFeatureCandidate>> = snapshotFlow {
+    val filteredFeatureCandidatesUiState: StateFlow<FeatureCandidatesUiState> = snapshotFlow {
         associatedFeaturesFilterText to _featureCandidatesUiState.value
     }.map { (text, _) ->
         return@map if (text.isNotEmpty()) {
-            filterFeatureCandidates(text)
+            val filteredList = filterFeatureCandidates(text)
+            FeatureCandidatesUiState(
+                isLoading = false,
+                candidates = filteredList
+            )
         } else {
-            _featureCandidatesUiState.value.candidates
+            _featureCandidatesUiState.value
         }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
-        initialValue = _featureCandidatesUiState.value.candidates
+        initialValue = FeatureCandidatesUiState(isLoading = true)
     )
 
     init {
