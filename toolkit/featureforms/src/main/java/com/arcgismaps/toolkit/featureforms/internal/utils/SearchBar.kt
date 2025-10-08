@@ -16,18 +16,27 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
-import androidx.compose.material3.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun SearchBar(
@@ -37,10 +46,8 @@ internal fun SearchBar(
     modifier: Modifier = Modifier,
     shape: Shape = CircleShape,
     surfaceColor: Color = MaterialTheme.colorScheme.surfaceBright,
-    topSpacer: Dp = 4.dp,
-    bottomSpacer: Dp = 14.dp
 ) {
-    Spacer(modifier = Modifier.height(topSpacer))
+    val focusManager = LocalFocusManager.current
     Surface(
         modifier = modifier
             .wrapContentSize()
@@ -52,7 +59,7 @@ internal fun SearchBar(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(placeholder) },
+            placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyLarge) },
             singleLine = true,
             leadingIcon = {
                 Icon(
@@ -66,7 +73,8 @@ internal fun SearchBar(
                     IconButton(onClick = { onValueChange("") }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Clear search"
+                            contentDescription = "Clear search",
+                            modifier = Modifier.padding(18.dp)
                         )
                     }
                 }
@@ -78,8 +86,10 @@ internal fun SearchBar(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() }
             )
         )
     }
-    Spacer(modifier = Modifier.height(bottomSpacer))
 }

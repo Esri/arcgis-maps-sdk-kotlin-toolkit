@@ -434,6 +434,8 @@ internal class AddAssociationFromSourceViewModel(
      */
     fun selectSource(source: UtilityAssociationFeatureSource?) {
         _selectedSource.value = source
+        // Clear previously set filter text
+        setFeatureSourcesFilterText("")
     }
 
     /**
@@ -441,6 +443,9 @@ internal class AddAssociationFromSourceViewModel(
      */
     fun selectAssetType(assetType: UtilityAssetType?) {
         _selectedAssetType.value = assetType
+        // Clear previously set filter text
+        setAssetTypesFilterText("")
+        setAssociatedFeaturesFilterText("")
     }
 
     companion object {
