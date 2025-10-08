@@ -39,12 +39,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 
 @Composable
 internal fun SelectNetworkSourceScreen(
@@ -53,7 +55,7 @@ internal fun SelectNetworkSourceScreen(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sources = viewModel.featureSources
+    val filteredSources = viewModel.filteredFeatureSources.collectAsState().value
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier,
@@ -66,8 +68,13 @@ internal fun SelectNetworkSourceScreen(
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
+        SearchBar(
+            value = viewModel.featureSourcesFilterText,
+            onValueChange = { viewModel.setFeatureSourcesFilterText(it) },
+            placeholder = stringResource(R.string.search)
+        )
         Text(
-            text = stringResource(R.string.count, sources.count()),
+            text = stringResource(R.string.count, filteredSources.count()),
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -79,7 +86,7 @@ internal fun SelectNetworkSourceScreen(
             color = MaterialTheme.colorScheme.surfaceBright
         ) {
             LazyColumn(state = lazyListState) {
-                itemsIndexed(sources) { index, source ->
+                itemsIndexed(filteredSources) { index, source ->
                     ListItem(
                         modifier = Modifier.clickable {
                             viewModel.selectSource(source)
@@ -95,7 +102,7 @@ internal fun SelectNetworkSourceScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceBright,
                         )
                     )
-                    if (index < sources.count() - 1) {
+                    if (index < filteredSources.count() - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh

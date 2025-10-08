@@ -33,12 +33,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 
 @Composable
 internal fun SelectAssetTypeScreen(
@@ -48,13 +50,19 @@ internal fun SelectAssetTypeScreen(
     modifier: Modifier = Modifier
 ) {
     val networkSource = viewModel.selectedSource
-    val assetTypes = networkSource?.assetTypes ?: emptyList()
+    val filteredAssetTypes = viewModel.filteredAssetTypes.collectAsState().value
+
     Column(modifier = modifier) {
         AddWorkflowTopBar(
             title = "${networkSource?.name}",
             subTitle = "",
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
+        )
+        SearchBar(
+            value = viewModel.assetTypesFilterText,
+            onValueChange = { viewModel.setAssetTypesFilterText(it) },
+            placeholder = stringResource(R.string.search)
         )
         Row(
             modifier = Modifier
@@ -68,7 +76,7 @@ internal fun SelectAssetTypeScreen(
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
-                text = stringResource(R.string.count, assetTypes.count()),
+                text = stringResource(R.string.count, filteredAssetTypes.count()),
                 style = MaterialTheme.typography.labelSmall
             )
         }
@@ -80,7 +88,7 @@ internal fun SelectAssetTypeScreen(
             color = MaterialTheme.colorScheme.surfaceBright
         ) {
             LazyColumn {
-                itemsIndexed(assetTypes) { index, assetType ->
+                itemsIndexed(filteredAssetTypes) { index, assetType ->
                     ListItem(
                         modifier = Modifier.clickable {
                             viewModel.selectAssetType(assetType)
@@ -96,7 +104,7 @@ internal fun SelectAssetTypeScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceBright,
                         )
                     )
-                    if (index < assetTypes.count() - 1) {
+                    if (index < filteredAssetTypes.count() - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh

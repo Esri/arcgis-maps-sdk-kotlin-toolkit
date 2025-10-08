@@ -45,10 +45,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -70,6 +70,7 @@ import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
 import kotlinx.coroutines.launch
 
@@ -90,9 +91,9 @@ internal fun SelectAssociatedFeatureScreen(
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val state by viewModel.featureCandidatesUiState
-    val count = rememberSaveable(state) {
-        state.candidates.count()
-    }
+    val filteredCandidates = viewModel.filteredFeatureCandidates.collectAsState().value
+
+    val count = filteredCandidates.count()
     val title = if (state.isLoading){
         stringResource(R.string.loading2)
     } else {
@@ -110,6 +111,12 @@ internal fun SelectAssociatedFeatureScreen(
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
+        SearchBar(
+            value = viewModel.associatedFeaturesFilterText,
+            onValueChange = { viewModel.setAssociatedFeaturesFilterText(it) },
+            placeholder = stringResource(R.string.search_features)
+        )
+
         AnimatedContent(
             targetState = state
         ) { state ->
@@ -146,7 +153,7 @@ internal fun SelectAssociatedFeatureScreen(
                                 autoHide = true
                             )
                         ) {
-                            itemsIndexed(state.candidates) { index, item ->
+                            itemsIndexed(filteredCandidates) { index, item ->
                                 ListItem(
                                     modifier = Modifier.clickable {
                                         scope.launch {
@@ -189,7 +196,7 @@ internal fun SelectAssociatedFeatureScreen(
                                         containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
                                 )
-                                if (index < state.candidates.count() - 1) {
+                                if (index < filteredCandidates.count() - 1) {
                                     HorizontalDivider(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -316,7 +323,7 @@ internal fun Modifier.verticalScrollbar(
                 if (scrollbarHeight >= size.height) return@drawWithContent
                 // Calculate the Y offset of the scrollbar
                 val scrollBarOffsetY = (size.height / totalHeight) *
-                    (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
+                        (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
                 // Calculate the X offset of the scrollbar
                 val scrollBarOffsetX = size.width + width.toPx() - offsetX.toPx()
 
