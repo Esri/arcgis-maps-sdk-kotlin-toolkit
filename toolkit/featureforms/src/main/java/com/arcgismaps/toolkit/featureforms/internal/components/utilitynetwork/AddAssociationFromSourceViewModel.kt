@@ -435,7 +435,6 @@ internal class AddAssociationFromSourceViewModel(
     fun selectSource(source: UtilityAssociationFeatureSource?) {
         _selectedSource.value = source
         // Clear previously set filter text
-        setFeatureSourcesFilterText("")
         setAssetTypesFilterText("")
     }
 
