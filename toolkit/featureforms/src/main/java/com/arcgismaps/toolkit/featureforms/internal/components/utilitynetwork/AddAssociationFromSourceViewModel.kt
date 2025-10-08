@@ -26,7 +26,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
@@ -224,7 +223,7 @@ internal class AddAssociationFromSourceViewModel(
 
     /**
      * Filters the list of [UtilityAssociationFeatureSource] objects based on the provided
-     * [filterString], returning only those whose names contain the filter string (case-insensitive
+     * [filterString], returning only those whose names contain the filter string (case-insensitive).
      */
     private fun filterFeatureSources(filterString: String): List<UtilityAssociationFeatureSource> {
         return _featureSources.value.filter { featureSource ->
@@ -245,7 +244,7 @@ internal class AddAssociationFromSourceViewModel(
 
     /**
      * Filters the list of [UtilityAssociationFeatureCandidate] objects based on the provided
-     * [filterString], returning only those whose titles contain the filter string (case-insensitive
+     * [filterString], returning only those whose titles contain the filter string (case-insensitive).
      */
     private fun filterFeatureCandidates(filterString: String): List<UtilityAssociationFeatureCandidate> {
         return _featureCandidatesUiState.value.candidates.filter { candidate ->
