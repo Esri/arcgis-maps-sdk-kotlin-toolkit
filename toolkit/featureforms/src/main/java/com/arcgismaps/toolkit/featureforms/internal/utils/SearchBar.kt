@@ -63,6 +63,7 @@ internal fun SearchBar(
             singleLine = true,
             leadingIcon = {
                 Icon(
+                    modifier = Modifier.padding(start = 16.dp),
                     imageVector = Icons.Filled.Search,
                     contentDescription = "Search"
                 )
@@ -73,8 +74,7 @@ internal fun SearchBar(
                     IconButton(onClick = { onValueChange("") }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Clear search",
-                            modifier = Modifier.padding(18.dp)
+                            contentDescription = "Clear search"
                         )
                     }
                 }

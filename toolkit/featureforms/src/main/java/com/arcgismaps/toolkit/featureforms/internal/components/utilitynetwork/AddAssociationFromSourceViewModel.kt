@@ -436,6 +436,7 @@ internal class AddAssociationFromSourceViewModel(
         _selectedSource.value = source
         // Clear previously set filter text
         setFeatureSourcesFilterText("")
+        setAssetTypesFilterText("")
     }
 
     /**
@@ -444,7 +445,6 @@ internal class AddAssociationFromSourceViewModel(
     fun selectAssetType(assetType: UtilityAssetType?) {
         _selectedAssetType.value = assetType
         // Clear previously set filter text
-        setAssetTypesFilterText("")
         setAssociatedFeaturesFilterText("")
     }
 
