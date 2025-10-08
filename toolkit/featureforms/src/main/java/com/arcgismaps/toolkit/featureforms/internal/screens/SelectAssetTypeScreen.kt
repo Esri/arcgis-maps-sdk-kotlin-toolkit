@@ -33,10 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -53,11 +50,7 @@ internal fun SelectAssetTypeScreen(
     modifier: Modifier = Modifier
 ) {
     val networkSource = viewModel.selectedSource
-    val assetTypes = networkSource?.assetTypes ?: emptyList()
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    val filteredAssetTypes = assetTypes.filter {
-        it.name.contains(searchQuery, ignoreCase = true)
-    }
+    val filteredAssetTypes = viewModel.filteredAssetTypes.collectAsState().value
 
     Column(modifier = modifier) {
         AddWorkflowTopBar(
@@ -67,8 +60,8 @@ internal fun SelectAssetTypeScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         SearchBar(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = viewModel.assetTypesFilterText,
+            onValueChange = { viewModel.setAssetTypesFilterText(it) },
             placeholder = stringResource(R.string.search)
         )
         Row(

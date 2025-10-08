@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
@@ -36,7 +38,11 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
 import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTerminalConfiguration
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -56,6 +62,27 @@ internal class AddAssociationFromSourceViewModel(
     private val filter: UtilityAssociationsFilter,
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
+
+    private val _featureSourcesFilterText: MutableState<String> = mutableStateOf("")
+    /**
+     * The current text used to filter the list of feature sources. This can be set via
+     * [setFeatureSourcesFilterText].
+     */
+    val featureSourcesFilterText by _featureSourcesFilterText
+
+    private val _assetTypesFilterText: MutableState<String> = mutableStateOf("")
+    /**
+     * The current text used to filter the list of asset types. This can be set via
+     * [setAssetTypesFilterText].
+     */
+    val assetTypesFilterText by _assetTypesFilterText
+
+    private val _associatedFeaturesFilterText: MutableState<String> = mutableStateOf("")
+    /**
+     * The current text used to filter the list of associated feature candidates. This can be set
+     * via [setAssociatedFeaturesFilterText].
+     */
+    val associatedFeaturesFilterText by _associatedFeaturesFilterText
 
     private val _featureSources: MutableState<List<UtilityAssociationFeatureSource>> =
         mutableStateOf(emptyList())
@@ -106,6 +133,57 @@ internal class AddAssociationFromSourceViewModel(
     val newAssociationOptions: NewAssociationOptions?
         get() = _newAssociationOptions.value
 
+    /**
+     * A flow that emits a list of [UtilityAssociationFeatureSource]s based on the current search text.
+     */
+    val filteredFeatureSources: StateFlow<List<UtilityAssociationFeatureSource>> = snapshotFlow {
+        featureSourcesFilterText to featureSources
+    }.map { (text, _) ->
+        return@map if (text.isNotEmpty()) {
+            filterFeatureSources(text)
+        } else {
+            _featureSources.value
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = _featureSources.value
+    )
+
+    /**
+     * A flow that emits a list of [UtilityAssetType]s based on the current search text.
+     */
+    val filteredAssetTypes: StateFlow<List<UtilityAssetType>> = snapshotFlow {
+        assetTypesFilterText to selectedSource
+    }.map { (text, _) ->
+        return@map if (text.isNotEmpty()) {
+            filterAssetTypes(text)
+        } else {
+            _selectedSource.value?.assetTypes ?: emptyList()
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = _selectedSource.value?.assetTypes ?: emptyList()
+    )
+
+    /**
+     * A flow that emits a list of [UtilityAssociationFeatureCandidate]s based on the current search text.
+     */
+    val filteredFeatureCandidates: StateFlow<List<UtilityAssociationFeatureCandidate>> = snapshotFlow {
+        associatedFeaturesFilterText to _featureCandidatesUiState.value
+    }.map { (text, _) ->
+        return@map if (text.isNotEmpty()) {
+            filterFeatureCandidates(text)
+        } else {
+            _featureCandidatesUiState.value.candidates
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = _featureCandidatesUiState.value.candidates
+    )
+
     init {
         viewModelScope.launch {
             // Whenever the selected source or asset type changes, reload the feature candidates
@@ -142,6 +220,58 @@ internal class AddAssociationFromSourceViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Filters the list of [UtilityAssociationFeatureSource] objects based on the provided
+     * [filterString], returning only those whose names contain the filter string (case-insensitive
+     */
+    private fun filterFeatureSources(filterString: String): List<UtilityAssociationFeatureSource> {
+        return _featureSources.value.filter { featureSource ->
+            featureSource.name.contains(filterString, ignoreCase = true)
+        }
+    }
+
+    /**
+     * Filters the list of [UtilityAssetType] objects from the currently selected source based on
+     * the provided [filterString], returning only those whose names contain the filter string
+     * (case-insensitive).
+     */
+    private fun filterAssetTypes(filterString: String): List<UtilityAssetType> {
+        return _selectedSource.value?.assetTypes?.filter { assetType ->
+            assetType.name.contains(filterString, ignoreCase = true)
+        } ?: emptyList()
+    }
+
+    /**
+     * Filters the list of [UtilityAssociationFeatureCandidate] objects based on the provided
+     * [filterString], returning only those whose titles contain the filter string (case-insensitive
+     */
+    private fun filterFeatureCandidates(filterString: String): List<UtilityAssociationFeatureCandidate> {
+        return _featureCandidatesUiState.value.candidates.filter { candidate ->
+            candidate.title.contains(filterString, ignoreCase = true)
+        }
+    }
+
+    /**
+     * Sets the text for [featureSourcesFilterText].
+     */
+    fun setFeatureSourcesFilterText(text: String) {
+        _featureSourcesFilterText.value = text
+    }
+
+    /**
+     * Sets the text for [assetTypesFilterText].
+     */
+    fun setAssetTypesFilterText(text: String) {
+        _assetTypesFilterText.value = text
+    }
+
+    /**
+     * Sets the text for [associatedFeaturesFilterText].
+     */
+    fun setAssociatedFeaturesFilterText(text: String) {
+        _associatedFeaturesFilterText.value = text
     }
 
     /**

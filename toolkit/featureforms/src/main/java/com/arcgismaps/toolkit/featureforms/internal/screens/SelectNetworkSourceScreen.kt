@@ -39,10 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -58,9 +55,7 @@ internal fun SelectNetworkSourceScreen(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    val sources = viewModel.featureSources
-    val filteredSources = sources.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredSources = viewModel.filteredFeatureSources.collectAsState().value
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier,
@@ -74,8 +69,8 @@ internal fun SelectNetworkSourceScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         SearchBar(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = viewModel.featureSourcesFilterText,
+            onValueChange = { viewModel.setFeatureSourcesFilterText(it) },
             placeholder = stringResource(R.string.search)
         )
         Text(
