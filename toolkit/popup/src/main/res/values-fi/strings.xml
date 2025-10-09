@@ -24,4 +24,24 @@
     <string name="other">Muu</string>
     <string name="close">Takaisin</string>
     <string name="attachment_thumbnail">liitteen pikkukuva</string>
+    <string name="terminal">Å_Terminal_________________ö</string>
+    <string name="no_associations_found">Å_No associations found______________________ö</string>
+    <string name="visible_content">Å_Visible Content________________ö</string>
+    <string name="content">Å_Content_______________ö</string>
+    <string name="containment_visible">Å_Containment Visible____________________ö</string>
+    <string name="fraction_along_edge">Å_Fraction Along Edge____________________ö</string>
+    <string name="percent_along_edge">Å_%1$d %%_______________ö</string>
+    <string name="from_element">Å_From Element_____________ö</string>
+    <string name="to_element">Å_To Element_____________________ö</string>
+    <string name="association_type">Å_Association Type_________________ö</string>
+    <string name="remove_association">Å_Remove Association___________________ö</string>
+    <string name="remove_association_tooltip">Å_Only removes the association. The feature remains__________________________ö.</string>
+    <string name="remove">Å_Remove_____________ö</string>
+    <string name="cancel">Å_Cancel_____________ö</string>
+    <string name="none_selected">Å_None Selected______________ö</string>
+    <string name="association_settings">Å_Association Settings_____________________ö</string>
+    <string name="show_all">Å_Show all_________________ö</string>
+    <string name="filter_by_feature_title">Å_Filter by feature title________________________ö</string>
+    <string name="containment_visible_value">Å_Visible: %1$s______________ö</string>
+    <string name="associations">Å_Associations_____________ö</string>
 </resources>

@@ -24,4 +24,24 @@
     <string name="other">อื่น ๆ</string>
     <string name="close">กลับ</string>
     <string name="attachment_thumbnail">ภาพตัวอย่างไฟล์แนบ</string>
+    <string name="terminal">ก้_Terminal_________________ษฺ</string>
+    <string name="no_associations_found">ก้_No associations found______________________ษฺ</string>
+    <string name="visible_content">ก้_Visible Content________________ษฺ</string>
+    <string name="content">ก้_Content_______________ษฺ</string>
+    <string name="containment_visible">ก้_Containment Visible____________________ษฺ</string>
+    <string name="fraction_along_edge">ก้_Fraction Along Edge____________________ษฺ</string>
+    <string name="percent_along_edge">ก้_%1$d %%_______________ษฺ</string>
+    <string name="from_element">ก้_From Element_____________ษฺ</string>
+    <string name="to_element">ก้_To Element_____________________ษฺ</string>
+    <string name="association_type">ก้_Association Type_________________ษฺ</string>
+    <string name="remove_association">ก้_Remove Association___________________ษฺ</string>
+    <string name="remove_association_tooltip">ก้_Only removes the association. The feature remains__________________________ษฺ.</string>
+    <string name="remove">ก้_Remove_____________ษฺ</string>
+    <string name="cancel">ก้_Cancel_____________ษฺ</string>
+    <string name="none_selected">ก้_None Selected______________ษฺ</string>
+    <string name="association_settings">ก้_Association Settings_____________________ษฺ</string>
+    <string name="show_all">ก้_Show all_________________ษฺ</string>
+    <string name="filter_by_feature_title">ก้_Filter by feature title________________________ษฺ</string>
+    <string name="containment_visible_value">ก้_Visible: %1$s______________ษฺ</string>
+    <string name="associations">ก้_Associations_____________ษฺ</string>
 </resources>

@@ -24,4 +24,24 @@
     <string name="other">Ostalo</string>
     <string name="close">Nazad</string>
     <string name="attachment_thumbnail">sličica priloga</string>
+    <string name="terminal">Č_Terminal_________________ž</string>
+    <string name="no_associations_found">Č_No associations found______________________ž</string>
+    <string name="visible_content">Č_Visible Content________________ž</string>
+    <string name="content">Č_Content_______________ž</string>
+    <string name="containment_visible">Č_Containment Visible____________________ž</string>
+    <string name="fraction_along_edge">Č_Fraction Along Edge____________________ž</string>
+    <string name="percent_along_edge">Č_%1$d %%_______________ž</string>
+    <string name="from_element">Č_From Element_____________ž</string>
+    <string name="to_element">Č_To Element_____________________ž</string>
+    <string name="association_type">Č_Association Type_________________ž</string>
+    <string name="remove_association">Č_Remove Association___________________ž</string>
+    <string name="remove_association_tooltip">Č_Only removes the association. The feature remains__________________________ž.</string>
+    <string name="remove">Č_Remove_____________ž</string>
+    <string name="cancel">Č_Cancel_____________ž</string>
+    <string name="none_selected">Č_None Selected______________ž</string>
+    <string name="association_settings">Č_Association Settings_____________________ž</string>
+    <string name="show_all">Č_Show all_________________ž</string>
+    <string name="filter_by_feature_title">Č_Filter by feature title________________________ž</string>
+    <string name="containment_visible_value">Č_Visible: %1$s______________ž</string>
+    <string name="associations">Č_Associations_____________ž</string>
 </resources>

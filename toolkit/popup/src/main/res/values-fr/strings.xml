@@ -24,4 +24,24 @@
     <string name="other">Autre</string>
     <string name="close">Retour</string>
     <string name="attachment_thumbnail">miniature de la pièce jointe</string>
+    <string name="terminal">æ_Terminal_________________Â</string>
+    <string name="no_associations_found">æ_No associations found______________________Â</string>
+    <string name="visible_content">æ_Visible Content________________Â</string>
+    <string name="content">æ_Content_______________Â</string>
+    <string name="containment_visible">æ_Containment Visible____________________Â</string>
+    <string name="fraction_along_edge">æ_Fraction Along Edge____________________Â</string>
+    <string name="percent_along_edge">æ_%1$d %%_______________Â</string>
+    <string name="from_element">æ_From Element_____________Â</string>
+    <string name="to_element">æ_To Element_____________________Â</string>
+    <string name="association_type">æ_Association Type_________________Â</string>
+    <string name="remove_association">æ_Remove Association___________________Â</string>
+    <string name="remove_association_tooltip">æ_Only removes the association. The feature remains__________________________Â.</string>
+    <string name="remove">æ_Remove_____________Â</string>
+    <string name="cancel">æ_Cancel_____________Â</string>
+    <string name="none_selected">æ_None Selected______________Â</string>
+    <string name="association_settings">æ_Association Settings_____________________Â</string>
+    <string name="show_all">æ_Show all_________________Â</string>
+    <string name="filter_by_feature_title">æ_Filter by feature title________________________Â</string>
+    <string name="containment_visible_value">æ_Visible: %1$s______________Â</string>
+    <string name="associations">æ_Associations_____________Â</string>
 </resources>

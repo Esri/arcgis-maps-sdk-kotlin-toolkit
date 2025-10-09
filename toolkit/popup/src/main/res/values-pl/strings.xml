@@ -24,4 +24,24 @@
     <string name="other">Inne</string>
     <string name="close">Powrót</string>
     <string name="attachment_thumbnail">miniatura załącznika</string>
+    <string name="terminal">ł_Terminal_________________ą</string>
+    <string name="no_associations_found">ł_No associations found______________________ą</string>
+    <string name="visible_content">ł_Visible Content________________ą</string>
+    <string name="content">ł_Content_______________ą</string>
+    <string name="containment_visible">ł_Containment Visible____________________ą</string>
+    <string name="fraction_along_edge">ł_Fraction Along Edge____________________ą</string>
+    <string name="percent_along_edge">ł_%1$d %%_______________ą</string>
+    <string name="from_element">ł_From Element_____________ą</string>
+    <string name="to_element">ł_To Element_____________________ą</string>
+    <string name="association_type">ł_Association Type_________________ą</string>
+    <string name="remove_association">ł_Remove Association___________________ą</string>
+    <string name="remove_association_tooltip">ł_Only removes the association. The feature remains__________________________ą.</string>
+    <string name="remove">ł_Remove_____________ą</string>
+    <string name="cancel">ł_Cancel_____________ą</string>
+    <string name="none_selected">ł_None Selected______________ą</string>
+    <string name="association_settings">ł_Association Settings_____________________ą</string>
+    <string name="show_all">ł_Show all_________________ą</string>
+    <string name="filter_by_feature_title">ł_Filter by feature title________________________ą</string>
+    <string name="containment_visible_value">ł_Visible: %1$s______________ą</string>
+    <string name="associations">ł_Associations_____________ą</string>
 </resources>

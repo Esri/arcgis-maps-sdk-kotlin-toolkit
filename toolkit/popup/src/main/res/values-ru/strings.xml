@@ -24,4 +24,24 @@
     <string name="other">Прочее</string>
     <string name="close">Назад</string>
     <string name="attachment_thumbnail">образец вложения</string>
+    <string name="terminal">Ж_Terminal_________________Я</string>
+    <string name="no_associations_found">Ж_No associations found______________________Я</string>
+    <string name="visible_content">Ж_Visible Content________________Я</string>
+    <string name="content">Ж_Content_______________Я</string>
+    <string name="containment_visible">Ж_Containment Visible____________________Я</string>
+    <string name="fraction_along_edge">Ж_Fraction Along Edge____________________Я</string>
+    <string name="percent_along_edge">Ж_%1$d %%_______________Я</string>
+    <string name="from_element">Ж_From Element_____________Я</string>
+    <string name="to_element">Ж_To Element_____________________Я</string>
+    <string name="association_type">Ж_Association Type_________________Я</string>
+    <string name="remove_association">Ж_Remove Association___________________Я</string>
+    <string name="remove_association_tooltip">Ж_Only removes the association. The feature remains__________________________Я.</string>
+    <string name="remove">Ж_Remove_____________Я</string>
+    <string name="cancel">Ж_Cancel_____________Я</string>
+    <string name="none_selected">Ж_None Selected______________Я</string>
+    <string name="association_settings">Ж_Association Settings_____________________Я</string>
+    <string name="show_all">Ж_Show all_________________Я</string>
+    <string name="filter_by_feature_title">Ж_Filter by feature title________________________Я</string>
+    <string name="containment_visible_value">Ж_Visible: %1$s______________Я</string>
+    <string name="associations">Ж_Associations_____________Я</string>
 </resources>

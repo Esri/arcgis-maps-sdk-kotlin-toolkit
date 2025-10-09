@@ -24,4 +24,24 @@
     <string name="other">Altres</string>
     <string name="close">Enrere</string>
     <string name="attachment_thumbnail">miniatura del fitxer adjunt</string>
+    <string name="terminal">ó_Terminal_________________à</string>
+    <string name="no_associations_found">ó_No associations found______________________à</string>
+    <string name="visible_content">ó_Visible Content________________à</string>
+    <string name="content">ó_Content_______________à</string>
+    <string name="containment_visible">ó_Containment Visible____________________à</string>
+    <string name="fraction_along_edge">ó_Fraction Along Edge____________________à</string>
+    <string name="percent_along_edge">ó_%1$d %%_______________à</string>
+    <string name="from_element">ó_From Element_____________à</string>
+    <string name="to_element">ó_To Element_____________________à</string>
+    <string name="association_type">ó_Association Type_________________à</string>
+    <string name="remove_association">ó_Remove Association___________________à</string>
+    <string name="remove_association_tooltip">ó_Only removes the association. The feature remains__________________________à.</string>
+    <string name="remove">ó_Remove_____________à</string>
+    <string name="cancel">ó_Cancel_____________à</string>
+    <string name="none_selected">ó_None Selected______________à</string>
+    <string name="association_settings">ó_Association Settings_____________________à</string>
+    <string name="show_all">ó_Show all_________________à</string>
+    <string name="filter_by_feature_title">ó_Filter by feature title________________________à</string>
+    <string name="containment_visible_value">ó_Visible: %1$s______________à</string>
+    <string name="associations">ó_Associations_____________à</string>
 </resources>

@@ -24,4 +24,24 @@
     <string name="other">Altro</string>
     <string name="close">Indietro</string>
     <string name="attachment_thumbnail">thumbnail allegato</string>
+    <string name="terminal">é_Terminal_________________È</string>
+    <string name="no_associations_found">é_No associations found______________________È</string>
+    <string name="visible_content">é_Visible Content________________È</string>
+    <string name="content">é_Content_______________È</string>
+    <string name="containment_visible">é_Containment Visible____________________È</string>
+    <string name="fraction_along_edge">é_Fraction Along Edge____________________È</string>
+    <string name="percent_along_edge">é_%1$d %%_______________È</string>
+    <string name="from_element">é_From Element_____________È</string>
+    <string name="to_element">é_To Element_____________________È</string>
+    <string name="association_type">é_Association Type_________________È</string>
+    <string name="remove_association">é_Remove Association___________________È</string>
+    <string name="remove_association_tooltip">é_Only removes the association. The feature remains__________________________È.</string>
+    <string name="remove">é_Remove_____________È</string>
+    <string name="cancel">é_Cancel_____________È</string>
+    <string name="none_selected">é_None Selected______________È</string>
+    <string name="association_settings">é_Association Settings_____________________È</string>
+    <string name="show_all">é_Show all_________________È</string>
+    <string name="filter_by_feature_title">é_Filter by feature title________________________È</string>
+    <string name="containment_visible_value">é_Visible: %1$s______________È</string>
+    <string name="associations">é_Associations_____________È</string>
 </resources>

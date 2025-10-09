@@ -24,4 +24,24 @@
     <string name="other">기타</string>
     <string name="close">뒤로</string>
     <string name="attachment_thumbnail">첨부 파일 썸네일</string>
+    <string name="terminal">한_Terminal_________________빠</string>
+    <string name="no_associations_found">한_No associations found______________________빠</string>
+    <string name="visible_content">한_Visible Content________________빠</string>
+    <string name="content">한_Content_______________빠</string>
+    <string name="containment_visible">한_Containment Visible____________________빠</string>
+    <string name="fraction_along_edge">한_Fraction Along Edge____________________빠</string>
+    <string name="percent_along_edge">한_%1$d %%_______________빠</string>
+    <string name="from_element">한_From Element_____________빠</string>
+    <string name="to_element">한_To Element_____________________빠</string>
+    <string name="association_type">한_Association Type_________________빠</string>
+    <string name="remove_association">한_Remove Association___________________빠</string>
+    <string name="remove_association_tooltip">한_Only removes the association. The feature remains__________________________빠.</string>
+    <string name="remove">한_Remove_____________빠</string>
+    <string name="cancel">한_Cancel_____________빠</string>
+    <string name="none_selected">한_None Selected______________빠</string>
+    <string name="association_settings">한_Association Settings_____________________빠</string>
+    <string name="show_all">한_Show all_________________빠</string>
+    <string name="filter_by_feature_title">한_Filter by feature title________________________빠</string>
+    <string name="containment_visible_value">한_Visible: %1$s______________빠</string>
+    <string name="associations">한_Associations_____________빠</string>
 </resources>
