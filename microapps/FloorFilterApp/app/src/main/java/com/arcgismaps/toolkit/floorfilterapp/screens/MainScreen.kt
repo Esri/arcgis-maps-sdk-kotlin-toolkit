@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.indoors.FloorFilter
 fun MainScreen(modifier: Modifier = Modifier, viewModel: FloorFilterViewModel = viewModel()) {
 
     MapView(
-        viewModel.floorAwareWebMap,
+        arcGISMap = viewModel.floorAwareWebMap,
         modifier = modifier.fillMaxSize(),
         mapViewProxy = viewModel.mapViewProxy
     )

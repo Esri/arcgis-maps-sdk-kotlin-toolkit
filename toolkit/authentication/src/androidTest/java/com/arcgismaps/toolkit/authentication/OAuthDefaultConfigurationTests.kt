@@ -216,13 +216,15 @@ class OAuthDefaultConfigurationTests {
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
         val authenticatorState = AuthenticatorState().apply {
-            oAuthUserConfiguration = OAuthUserConfiguration(
-                "https://arcgis.com",
-                // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-                // create your own client ID. For more info see:
-                // https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-                "uITYQG1POJsrluOP",
-                "kotlin-authentication-test-1://auth"
+            oAuthUserConfigurations = listOf(
+                OAuthUserConfiguration(
+                    "https://arcgis.com",
+                    // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+                    // create your own client ID. For more info see:
+                    // https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+                    "uITYQG1POJsrluOP",
+                    "kotlin-authentication-test-1://auth"
+                )
             )
         }
         composeTestRule.setContent {

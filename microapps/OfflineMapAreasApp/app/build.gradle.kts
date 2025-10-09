@@ -30,6 +30,10 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.offlinemapareasapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -51,13 +55,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 
     buildFeatures {

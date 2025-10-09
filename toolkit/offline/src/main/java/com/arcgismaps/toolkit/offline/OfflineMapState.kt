@@ -342,9 +342,7 @@ public class OfflineMapState {
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = (mmpk.item as? LocalItem)?.apply {
-            itemId = portalItem.itemId
-        } ?: return null
+        val item = (mmpk.item as? LocalItem) ?: return null
 
         val preplannedMapAreaState = PreplannedMapAreaState(
             context = context,
@@ -389,9 +387,7 @@ public class OfflineMapState {
         val mmpk = MobileMapPackage(areaDir.absolutePath).apply {
             load().getOrElse { return null }
         }
-        val item = (mmpk.item as? LocalItem)?.apply {
-            itemId = portalItem.itemId
-        } ?: return null
+        val item = (mmpk.item as? LocalItem) ?: return null
 
         val onDemandMapAreasState = OnDemandMapAreasState(
             context = context,

@@ -429,29 +429,6 @@ public enum class ButtonPosition {
  * Factory function for the creating FloorFilterState.
  *
  * @param geoModel the floor aware geoModel that drives the [FloorFilter]
- * @param coroutineScope scope for [FloorFilterState] that it can use to load the [GeoModel] and the
- *        FloorManager
- * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
- * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
- *        with the Site or Facilities extent whenever a new Site or Facility is selected
- * @since 200.2.0
- */
-@Deprecated(
-    "Use the factory function without the coroutineScope parameter",
-    ReplaceWith("FloorFilterState(geoModel, uiProperties, onSelectionChangedListener)")
-)
-public fun FloorFilterState(
-    geoModel: GeoModel,
-    coroutineScope: CoroutineScope,
-    uiProperties: UIProperties = UIProperties(),
-    onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
-): FloorFilterState =
-    FloorFilterStateImpl(geoModel, uiProperties, onSelectionChangedListener)
-
-/**
- * Factory function for the creating FloorFilterState.
- *
- * @param geoModel the floor aware geoModel that drives the [FloorFilter]
  * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
  * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
  *        with the Site or Facilities extent whenever a new Site or Facility is selected
