@@ -23,6 +23,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 secrets {
     // this file doesn't contain secrets, it just provides defaults which can be committed into git.
     defaultPropertiesFileName = "secrets.defaults.properties"
@@ -55,13 +59,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 
     buildFeatures {

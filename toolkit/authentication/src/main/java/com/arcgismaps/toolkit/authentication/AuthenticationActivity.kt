@@ -128,8 +128,8 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         url?.let {
-            val shouldUseIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            launchCustomTabs(it, shouldUseIncognito)
+            val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+            launchCustomTabs(it, preferPrivateWebBrowserSession)
         }
     }
 

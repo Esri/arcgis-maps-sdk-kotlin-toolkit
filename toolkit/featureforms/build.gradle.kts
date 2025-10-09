@@ -31,6 +31,13 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -56,15 +63,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
     buildFeatures {
         compose = true
@@ -95,6 +93,20 @@ android {
     publishing {
         singleVariant("release") {
             // This is the default variant.
+        }
+    }
+
+    val toolkitTests = project.findProperty("toolkitTestDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
+    sourceSets.getByName("test") {
+        var file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
         }
     }
 }
@@ -163,4 +175,9 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.bundles.androidXTest)
     debugImplementation(libs.bundles.debug)
+
+    // Include only if internal tests are required
+    if (file(project.findProperty("toolkitTestDir") as String).exists()) {
+        androidTestImplementation(libs.mockingjay)
+    }
 }

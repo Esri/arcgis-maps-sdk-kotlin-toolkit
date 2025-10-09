@@ -23,6 +23,12 @@ plugins {
     id("artifact-deploy")
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
+}
 
 android {
     namespace = "com.arcgismaps.toolkit.authentication"
@@ -39,13 +45,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
