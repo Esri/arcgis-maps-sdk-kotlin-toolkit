@@ -195,9 +195,8 @@ internal class AddAssociationFromSourceViewModel(
             }.distinctUntilChanged().collect { pair ->
                 val source = pair.first
                 val assetType = pair.second
-                // If no source, asset type is selected or the asset type is not valid for the source,
-                // clear the candidates and return an error state
-                if (source == null || assetType == null || (assetType in source.assetTypes).not()) {
+                // If no source, asset type is selected return an error state
+                if (source == null || assetType == null) {
                     _featureCandidatesUiState.value = FeatureCandidatesUiState(
                         isLoading = false,
                         error = IllegalStateException(
