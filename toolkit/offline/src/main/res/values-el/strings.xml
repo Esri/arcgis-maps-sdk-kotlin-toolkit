@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">π_Map Areas___________________Ω</string>
+    <string name="add_map_area">π_Add Map Area_____________Ω</string>
+    <string name="thumbnail_description">π_PortalItem Thumbnail_____________________Ω</string>
+    <string name="download">π_Download_________________Ω</string>
+    <string name="open">π_Open_________Ω</string>
+    <string name="error">π_Error___________Ω</string>
+    <string name="loading">π_Loading_______________Ω</string>
+    <string name="loading_failed">π_Loading failed_______________Ω</string>
+    <string name="ready_to_download">π_Ready to download__________________Ω</string>
+    <string name="packaging">π_Packaging___________________Ω</string>
+    <string name="packaging_failed">π_Packaging failed_________________Ω</string>
+    <string name="downloaded">π_Downloaded_____________________Ω</string>
+    <string name="downloading">π_Downloading____________Ω</string>
+    <string name="download_failed">π_Download Failed________________Ω</string>
+    <string name="currently_open">π_Currently Open_______________Ω</string>
+    <string name="description">π_Description____________Ω</string>
+    <string name="download_map_area">π_Download Map Area__________________Ω</string>
+    <string name="remove_download">π_Remove Download________________Ω</string>
+    <string name="delete_download">π_Delete Download________________Ω</string>
+    <string name="no_image_available">π_No Image Available___________________Ω</string>
+    <string name="refresh">π_Refresh_______________Ω</string>
+    <string name="cancelled">π_Cancelled___________________Ω</string>
+    <string name="cancel">π_Cancel_____________Ω</string>
+    <string name="confirm">π_OK_____Ω</string>
+    <string name="rename">π_Rename_____________Ω</string>
+    <string name="enter_a_name">π_Enter a name_____________Ω</string>
+    <string name="select_area">π_Select area____________Ω</string>
+    <string name="pan_and_zoom_text">π_Pan and zoom to define the area_________________Ω</string>
+    <string name="unique_name_text">π_The name for the map area must be unique_____________________Ω</string>
+    <string name="next_on_demand_area_title">π_Area %1$s___________________Ω</string>
+    <string name="directory_size">π_Size: %1$s_____________________Ω</string>
+    <string name="no_internet_connection_error_message">π_No Internet Connection_______________________Ω</string>
+    <string name="no_internet_error_message">π_No internet connection. Showing downloaded areas only____________________________Ω.</string>
+    <string name="no_map_areas_error_message">π_Could not retrieve map areas for this map______________________Ω.</string>
+    <string name="no_offline_map_areas_error_message">π_There are no map areas for this map___________________Ω.</string>
+    <string name="error_fetching_areas">π_Error Fetching Map Areas_________________________Ω</string>
+    <string name="error_fetching_areas_message">π_An error occurred while fetching map areas_______________________Ω.</string>
+    <string name="no_map_areas">π_No Map Areas_____________Ω</string>
+    <string name="empty_on_demand_message">π_There are no map areas for this map. Tap the button below to get started______________________________________Ω.</string>
+    <string name="offline_disabled">π_Offline Disabled_________________Ω</string>
+    <string name="offline_disabled_message">π_The map is not enabled for offline use_____________________Ω.</string>
+    <string name="level_of_detail">π_Level of detail________________Ω</string>
+    <string name="room">π_Room_________Ω</string>
+    <string name="rooms">π_Rooms___________Ω</string>
+    <string name="house_property">π_House Property_______________Ω</string>
+    <string name="houses">π_Houses_____________Ω</string>
+    <string name="small_building">π_Small Building_______________Ω</string>
+    <string name="building">π_Building_________________Ω</string>
+    <string name="buildings">π_Buildings___________________Ω</string>
+    <string name="street">π_Street_____________Ω</string>
+    <string name="streets">π_Streets_______________Ω</string>
+    <string name="neighborhood">π_Neighborhood_____________Ω</string>
+    <string name="town">π_Town_________Ω</string>
+    <string name="city">π_City_________Ω</string>
+    <string name="cities">π_Cities_____________Ω</string>
+    <string name="metropolitan_area">π_Metropolitan Area__________________Ω</string>
+    <string name="county">π_County_____________Ω</string>
+    <string name="counties">π_Counties_________________Ω</string>
+    <string name="state_province">π_State/Province_______________Ω</string>
+    <string name="states_provinces">π_States/Provinces_________________Ω</string>
+    <string name="countries_small">π_Countries (Small)__________________Ω</string>
+    <string name="countries_big">π_Countries (Big)________________Ω</string>
+    <string name="continent">π_Continent___________________Ω</string>
+    <string name="world_small">π_World (Small)______________Ω</string>
+    <string name="world_big">π_World (Big)____________Ω</string>
+    <string name="world">π_World___________Ω</string>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">试_Map Areas___________________验</string>
+    <string name="add_map_area">试_Add Map Area_____________验</string>
+    <string name="thumbnail_description">试_PortalItem Thumbnail_____________________验</string>
+    <string name="download">试_Download_________________验</string>
+    <string name="open">试_Open_________验</string>
+    <string name="error">试_Error___________验</string>
+    <string name="loading">试_Loading_______________验</string>
+    <string name="loading_failed">试_Loading failed_______________验</string>
+    <string name="ready_to_download">试_Ready to download__________________验</string>
+    <string name="packaging">试_Packaging___________________验</string>
+    <string name="packaging_failed">试_Packaging failed_________________验</string>
+    <string name="downloaded">试_Downloaded_____________________验</string>
+    <string name="downloading">试_Downloading____________验</string>
+    <string name="download_failed">试_Download Failed________________验</string>
+    <string name="currently_open">试_Currently Open_______________验</string>
+    <string name="description">试_Description____________验</string>
+    <string name="download_map_area">试_Download Map Area__________________验</string>
+    <string name="remove_download">试_Remove Download________________验</string>
+    <string name="delete_download">试_Delete Download________________验</string>
+    <string name="no_image_available">试_No Image Available___________________验</string>
+    <string name="refresh">试_Refresh_______________验</string>
+    <string name="cancelled">试_Cancelled___________________验</string>
+    <string name="cancel">试_Cancel_____________验</string>
+    <string name="confirm">试_OK_____验</string>
+    <string name="rename">试_Rename_____________验</string>
+    <string name="enter_a_name">试_Enter a name_____________验</string>
+    <string name="select_area">试_Select area____________验</string>
+    <string name="pan_and_zoom_text">试_Pan and zoom to define the area_________________验</string>
+    <string name="unique_name_text">试_The name for the map area must be unique_____________________验</string>
+    <string name="next_on_demand_area_title">试_Area %1$s___________________验</string>
+    <string name="directory_size">试_Size: %1$s_____________________验</string>
+    <string name="no_internet_connection_error_message">试_No Internet Connection_______________________验</string>
+    <string name="no_internet_error_message">试_No internet connection. Showing downloaded areas only____________________________验.</string>
+    <string name="no_map_areas_error_message">试_Could not retrieve map areas for this map______________________验.</string>
+    <string name="no_offline_map_areas_error_message">试_There are no map areas for this map___________________验.</string>
+    <string name="error_fetching_areas">试_Error Fetching Map Areas_________________________验</string>
+    <string name="error_fetching_areas_message">试_An error occurred while fetching map areas_______________________验.</string>
+    <string name="no_map_areas">试_No Map Areas_____________验</string>
+    <string name="empty_on_demand_message">试_There are no map areas for this map. Tap the button below to get started______________________________________验.</string>
+    <string name="offline_disabled">试_Offline Disabled_________________验</string>
+    <string name="offline_disabled_message">试_The map is not enabled for offline use_____________________验.</string>
+    <string name="level_of_detail">试_Level of detail________________验</string>
+    <string name="room">试_Room_________验</string>
+    <string name="rooms">试_Rooms___________验</string>
+    <string name="house_property">试_House Property_______________验</string>
+    <string name="houses">试_Houses_____________验</string>
+    <string name="small_building">试_Small Building_______________验</string>
+    <string name="building">试_Building_________________验</string>
+    <string name="buildings">试_Buildings___________________验</string>
+    <string name="street">试_Street_____________验</string>
+    <string name="streets">试_Streets_______________验</string>
+    <string name="neighborhood">试_Neighborhood_____________验</string>
+    <string name="town">试_Town_________验</string>
+    <string name="city">试_City_________验</string>
+    <string name="cities">试_Cities_____________验</string>
+    <string name="metropolitan_area">试_Metropolitan Area__________________验</string>
+    <string name="county">试_County_____________验</string>
+    <string name="counties">试_Counties_________________验</string>
+    <string name="state_province">试_State/Province_______________验</string>
+    <string name="states_provinces">试_States/Provinces_________________验</string>
+    <string name="countries_small">试_Countries (Small)__________________验</string>
+    <string name="countries_big">试_Countries (Big)________________验</string>
+    <string name="continent">试_Continent___________________验</string>
+    <string name="world_small">试_World (Small)______________验</string>
+    <string name="world_big">试_World (Big)____________验</string>
+    <string name="world">试_World___________验</string>
+</resources>

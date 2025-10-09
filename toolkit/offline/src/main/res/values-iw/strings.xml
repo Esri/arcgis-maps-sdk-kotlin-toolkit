@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">כן_Map Areas___________________ש</string>
+    <string name="add_map_area">כן_Add Map Area_____________ש</string>
+    <string name="thumbnail_description">כן_PortalItem Thumbnail_____________________ש</string>
+    <string name="download">כן_Download_________________ש</string>
+    <string name="open">כן_Open_________ש</string>
+    <string name="error">כן_Error___________ש</string>
+    <string name="loading">כן_Loading_______________ש</string>
+    <string name="loading_failed">כן_Loading failed_______________ש</string>
+    <string name="ready_to_download">כן_Ready to download__________________ש</string>
+    <string name="packaging">כן_Packaging___________________ש</string>
+    <string name="packaging_failed">כן_Packaging failed_________________ש</string>
+    <string name="downloaded">כן_Downloaded_____________________ש</string>
+    <string name="downloading">כן_Downloading____________ש</string>
+    <string name="download_failed">כן_Download Failed________________ש</string>
+    <string name="currently_open">כן_Currently Open_______________ש</string>
+    <string name="description">כן_Description____________ש</string>
+    <string name="download_map_area">כן_Download Map Area__________________ש</string>
+    <string name="remove_download">כן_Remove Download________________ש</string>
+    <string name="delete_download">כן_Delete Download________________ש</string>
+    <string name="no_image_available">כן_No Image Available___________________ש</string>
+    <string name="refresh">כן_Refresh_______________ש</string>
+    <string name="cancelled">כן_Cancelled___________________ש</string>
+    <string name="cancel">כן_Cancel_____________ש</string>
+    <string name="confirm">כן_OK_____ש</string>
+    <string name="rename">כן_Rename_____________ש</string>
+    <string name="enter_a_name">כן_Enter a name_____________ש</string>
+    <string name="select_area">כן_Select area____________ש</string>
+    <string name="pan_and_zoom_text">כן_Pan and zoom to define the area_________________ש</string>
+    <string name="unique_name_text">כן_The name for the map area must be unique_____________________ש</string>
+    <string name="next_on_demand_area_title">כן_Area %1$s___________________ש</string>
+    <string name="directory_size">כן_Size: %1$s_____________________ש</string>
+    <string name="no_internet_connection_error_message">כן_No Internet Connection_______________________ש</string>
+    <string name="no_internet_error_message">כן_No internet connection. Showing downloaded areas only____________________________ש.</string>
+    <string name="no_map_areas_error_message">כן_Could not retrieve map areas for this map______________________ש.</string>
+    <string name="no_offline_map_areas_error_message">כן_There are no map areas for this map___________________ש.</string>
+    <string name="error_fetching_areas">כן_Error Fetching Map Areas_________________________ש</string>
+    <string name="error_fetching_areas_message">כן_An error occurred while fetching map areas_______________________ש.</string>
+    <string name="no_map_areas">כן_No Map Areas_____________ש</string>
+    <string name="empty_on_demand_message">כן_There are no map areas for this map. Tap the button below to get started______________________________________ש.</string>
+    <string name="offline_disabled">כן_Offline Disabled_________________ש</string>
+    <string name="offline_disabled_message">כן_The map is not enabled for offline use_____________________ש.</string>
+    <string name="level_of_detail">כן_Level of detail________________ש</string>
+    <string name="room">כן_Room_________ש</string>
+    <string name="rooms">כן_Rooms___________ש</string>
+    <string name="house_property">כן_House Property_______________ש</string>
+    <string name="houses">כן_Houses_____________ש</string>
+    <string name="small_building">כן_Small Building_______________ש</string>
+    <string name="building">כן_Building_________________ש</string>
+    <string name="buildings">כן_Buildings___________________ש</string>
+    <string name="street">כן_Street_____________ש</string>
+    <string name="streets">כן_Streets_______________ש</string>
+    <string name="neighborhood">כן_Neighborhood_____________ש</string>
+    <string name="town">כן_Town_________ש</string>
+    <string name="city">כן_City_________ש</string>
+    <string name="cities">כן_Cities_____________ש</string>
+    <string name="metropolitan_area">כן_Metropolitan Area__________________ש</string>
+    <string name="county">כן_County_____________ש</string>
+    <string name="counties">כן_Counties_________________ש</string>
+    <string name="state_province">כן_State/Province_______________ש</string>
+    <string name="states_provinces">כן_States/Provinces_________________ש</string>
+    <string name="countries_small">כן_Countries (Small)__________________ש</string>
+    <string name="countries_big">כן_Countries (Big)________________ש</string>
+    <string name="continent">כן_Continent___________________ש</string>
+    <string name="world_small">כן_World (Small)______________ש</string>
+    <string name="world_big">כן_World (Big)____________ש</string>
+    <string name="world">כן_World___________ש</string>
+</resources>

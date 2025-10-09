@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">بيت_Map Areas___________________لاحقة</string>
+    <string name="add_map_area">بيت_Add Map Area_____________لاحقة</string>
+    <string name="thumbnail_description">بيت_PortalItem Thumbnail_____________________لاحقة</string>
+    <string name="download">بيت_Download_________________لاحقة</string>
+    <string name="open">بيت_Open_________لاحقة</string>
+    <string name="error">بيت_Error___________لاحقة</string>
+    <string name="loading">بيت_Loading_______________لاحقة</string>
+    <string name="loading_failed">بيت_Loading failed_______________لاحقة</string>
+    <string name="ready_to_download">بيت_Ready to download__________________لاحقة</string>
+    <string name="packaging">بيت_Packaging___________________لاحقة</string>
+    <string name="packaging_failed">بيت_Packaging failed_________________لاحقة</string>
+    <string name="downloaded">بيت_Downloaded_____________________لاحقة</string>
+    <string name="downloading">بيت_Downloading____________لاحقة</string>
+    <string name="download_failed">بيت_Download Failed________________لاحقة</string>
+    <string name="currently_open">بيت_Currently Open_______________لاحقة</string>
+    <string name="description">بيت_Description____________لاحقة</string>
+    <string name="download_map_area">بيت_Download Map Area__________________لاحقة</string>
+    <string name="remove_download">بيت_Remove Download________________لاحقة</string>
+    <string name="delete_download">بيت_Delete Download________________لاحقة</string>
+    <string name="no_image_available">بيت_No Image Available___________________لاحقة</string>
+    <string name="refresh">بيت_Refresh_______________لاحقة</string>
+    <string name="cancelled">بيت_Cancelled___________________لاحقة</string>
+    <string name="cancel">بيت_Cancel_____________لاحقة</string>
+    <string name="confirm">بيت_OK_____لاحقة</string>
+    <string name="rename">بيت_Rename_____________لاحقة</string>
+    <string name="enter_a_name">بيت_Enter a name_____________لاحقة</string>
+    <string name="select_area">بيت_Select area____________لاحقة</string>
+    <string name="pan_and_zoom_text">بيت_Pan and zoom to define the area_________________لاحقة</string>
+    <string name="unique_name_text">بيت_The name for the map area must be unique_____________________لاحقة</string>
+    <string name="next_on_demand_area_title">بيت_Area %1$s___________________لاحقة</string>
+    <string name="directory_size">بيت_Size: %1$s_____________________لاحقة</string>
+    <string name="no_internet_connection_error_message">بيت_No Internet Connection_______________________لاحقة</string>
+    <string name="no_internet_error_message">بيت_No internet connection. Showing downloaded areas only____________________________لاحقة.</string>
+    <string name="no_map_areas_error_message">بيت_Could not retrieve map areas for this map______________________لاحقة.</string>
+    <string name="no_offline_map_areas_error_message">بيت_There are no map areas for this map___________________لاحقة.</string>
+    <string name="error_fetching_areas">بيت_Error Fetching Map Areas_________________________لاحقة</string>
+    <string name="error_fetching_areas_message">بيت_An error occurred while fetching map areas_______________________لاحقة.</string>
+    <string name="no_map_areas">بيت_No Map Areas_____________لاحقة</string>
+    <string name="empty_on_demand_message">بيت_There are no map areas for this map. Tap the button below to get started______________________________________لاحقة.</string>
+    <string name="offline_disabled">بيت_Offline Disabled_________________لاحقة</string>
+    <string name="offline_disabled_message">بيت_The map is not enabled for offline use_____________________لاحقة.</string>
+    <string name="level_of_detail">بيت_Level of detail________________لاحقة</string>
+    <string name="room">بيت_Room_________لاحقة</string>
+    <string name="rooms">بيت_Rooms___________لاحقة</string>
+    <string name="house_property">بيت_House Property_______________لاحقة</string>
+    <string name="houses">بيت_Houses_____________لاحقة</string>
+    <string name="small_building">بيت_Small Building_______________لاحقة</string>
+    <string name="building">بيت_Building_________________لاحقة</string>
+    <string name="buildings">بيت_Buildings___________________لاحقة</string>
+    <string name="street">بيت_Street_____________لاحقة</string>
+    <string name="streets">بيت_Streets_______________لاحقة</string>
+    <string name="neighborhood">بيت_Neighborhood_____________لاحقة</string>
+    <string name="town">بيت_Town_________لاحقة</string>
+    <string name="city">بيت_City_________لاحقة</string>
+    <string name="cities">بيت_Cities_____________لاحقة</string>
+    <string name="metropolitan_area">بيت_Metropolitan Area__________________لاحقة</string>
+    <string name="county">بيت_County_____________لاحقة</string>
+    <string name="counties">بيت_Counties_________________لاحقة</string>
+    <string name="state_province">بيت_State/Province_______________لاحقة</string>
+    <string name="states_provinces">بيت_States/Provinces_________________لاحقة</string>
+    <string name="countries_small">بيت_Countries (Small)__________________لاحقة</string>
+    <string name="countries_big">بيت_Countries (Big)________________لاحقة</string>
+    <string name="continent">بيت_Continent___________________لاحقة</string>
+    <string name="world_small">بيت_World (Small)______________لاحقة</string>
+    <string name="world_big">بيت_World (Big)____________لاحقة</string>
+    <string name="world">بيت_World___________لاحقة</string>
+</resources>

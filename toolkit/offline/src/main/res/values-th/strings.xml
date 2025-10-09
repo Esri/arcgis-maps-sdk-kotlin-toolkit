@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">ก้_Map Areas___________________ษฺ</string>
+    <string name="add_map_area">ก้_Add Map Area_____________ษฺ</string>
+    <string name="thumbnail_description">ก้_PortalItem Thumbnail_____________________ษฺ</string>
+    <string name="download">ก้_Download_________________ษฺ</string>
+    <string name="open">ก้_Open_________ษฺ</string>
+    <string name="error">ก้_Error___________ษฺ</string>
+    <string name="loading">ก้_Loading_______________ษฺ</string>
+    <string name="loading_failed">ก้_Loading failed_______________ษฺ</string>
+    <string name="ready_to_download">ก้_Ready to download__________________ษฺ</string>
+    <string name="packaging">ก้_Packaging___________________ษฺ</string>
+    <string name="packaging_failed">ก้_Packaging failed_________________ษฺ</string>
+    <string name="downloaded">ก้_Downloaded_____________________ษฺ</string>
+    <string name="downloading">ก้_Downloading____________ษฺ</string>
+    <string name="download_failed">ก้_Download Failed________________ษฺ</string>
+    <string name="currently_open">ก้_Currently Open_______________ษฺ</string>
+    <string name="description">ก้_Description____________ษฺ</string>
+    <string name="download_map_area">ก้_Download Map Area__________________ษฺ</string>
+    <string name="remove_download">ก้_Remove Download________________ษฺ</string>
+    <string name="delete_download">ก้_Delete Download________________ษฺ</string>
+    <string name="no_image_available">ก้_No Image Available___________________ษฺ</string>
+    <string name="refresh">ก้_Refresh_______________ษฺ</string>
+    <string name="cancelled">ก้_Cancelled___________________ษฺ</string>
+    <string name="cancel">ก้_Cancel_____________ษฺ</string>
+    <string name="confirm">ก้_OK_____ษฺ</string>
+    <string name="rename">ก้_Rename_____________ษฺ</string>
+    <string name="enter_a_name">ก้_Enter a name_____________ษฺ</string>
+    <string name="select_area">ก้_Select area____________ษฺ</string>
+    <string name="pan_and_zoom_text">ก้_Pan and zoom to define the area_________________ษฺ</string>
+    <string name="unique_name_text">ก้_The name for the map area must be unique_____________________ษฺ</string>
+    <string name="next_on_demand_area_title">ก้_Area %1$s___________________ษฺ</string>
+    <string name="directory_size">ก้_Size: %1$s_____________________ษฺ</string>
+    <string name="no_internet_connection_error_message">ก้_No Internet Connection_______________________ษฺ</string>
+    <string name="no_internet_error_message">ก้_No internet connection. Showing downloaded areas only____________________________ษฺ.</string>
+    <string name="no_map_areas_error_message">ก้_Could not retrieve map areas for this map______________________ษฺ.</string>
+    <string name="no_offline_map_areas_error_message">ก้_There are no map areas for this map___________________ษฺ.</string>
+    <string name="error_fetching_areas">ก้_Error Fetching Map Areas_________________________ษฺ</string>
+    <string name="error_fetching_areas_message">ก้_An error occurred while fetching map areas_______________________ษฺ.</string>
+    <string name="no_map_areas">ก้_No Map Areas_____________ษฺ</string>
+    <string name="empty_on_demand_message">ก้_There are no map areas for this map. Tap the button below to get started______________________________________ษฺ.</string>
+    <string name="offline_disabled">ก้_Offline Disabled_________________ษฺ</string>
+    <string name="offline_disabled_message">ก้_The map is not enabled for offline use_____________________ษฺ.</string>
+    <string name="level_of_detail">ก้_Level of detail________________ษฺ</string>
+    <string name="room">ก้_Room_________ษฺ</string>
+    <string name="rooms">ก้_Rooms___________ษฺ</string>
+    <string name="house_property">ก้_House Property_______________ษฺ</string>
+    <string name="houses">ก้_Houses_____________ษฺ</string>
+    <string name="small_building">ก้_Small Building_______________ษฺ</string>
+    <string name="building">ก้_Building_________________ษฺ</string>
+    <string name="buildings">ก้_Buildings___________________ษฺ</string>
+    <string name="street">ก้_Street_____________ษฺ</string>
+    <string name="streets">ก้_Streets_______________ษฺ</string>
+    <string name="neighborhood">ก้_Neighborhood_____________ษฺ</string>
+    <string name="town">ก้_Town_________ษฺ</string>
+    <string name="city">ก้_City_________ษฺ</string>
+    <string name="cities">ก้_Cities_____________ษฺ</string>
+    <string name="metropolitan_area">ก้_Metropolitan Area__________________ษฺ</string>
+    <string name="county">ก้_County_____________ษฺ</string>
+    <string name="counties">ก้_Counties_________________ษฺ</string>
+    <string name="state_province">ก้_State/Province_______________ษฺ</string>
+    <string name="states_provinces">ก้_States/Provinces_________________ษฺ</string>
+    <string name="countries_small">ก้_Countries (Small)__________________ษฺ</string>
+    <string name="countries_big">ก้_Countries (Big)________________ษฺ</string>
+    <string name="continent">ก้_Continent___________________ษฺ</string>
+    <string name="world_small">ก้_World (Small)______________ษฺ</string>
+    <string name="world_big">ก้_World (Big)____________ษฺ</string>
+    <string name="world">ก้_World___________ษฺ</string>
+</resources>

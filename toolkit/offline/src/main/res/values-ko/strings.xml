@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">한_Map Areas___________________빠</string>
+    <string name="add_map_area">한_Add Map Area_____________빠</string>
+    <string name="thumbnail_description">한_PortalItem Thumbnail_____________________빠</string>
+    <string name="download">한_Download_________________빠</string>
+    <string name="open">한_Open_________빠</string>
+    <string name="error">한_Error___________빠</string>
+    <string name="loading">한_Loading_______________빠</string>
+    <string name="loading_failed">한_Loading failed_______________빠</string>
+    <string name="ready_to_download">한_Ready to download__________________빠</string>
+    <string name="packaging">한_Packaging___________________빠</string>
+    <string name="packaging_failed">한_Packaging failed_________________빠</string>
+    <string name="downloaded">한_Downloaded_____________________빠</string>
+    <string name="downloading">한_Downloading____________빠</string>
+    <string name="download_failed">한_Download Failed________________빠</string>
+    <string name="currently_open">한_Currently Open_______________빠</string>
+    <string name="description">한_Description____________빠</string>
+    <string name="download_map_area">한_Download Map Area__________________빠</string>
+    <string name="remove_download">한_Remove Download________________빠</string>
+    <string name="delete_download">한_Delete Download________________빠</string>
+    <string name="no_image_available">한_No Image Available___________________빠</string>
+    <string name="refresh">한_Refresh_______________빠</string>
+    <string name="cancelled">한_Cancelled___________________빠</string>
+    <string name="cancel">한_Cancel_____________빠</string>
+    <string name="confirm">한_OK_____빠</string>
+    <string name="rename">한_Rename_____________빠</string>
+    <string name="enter_a_name">한_Enter a name_____________빠</string>
+    <string name="select_area">한_Select area____________빠</string>
+    <string name="pan_and_zoom_text">한_Pan and zoom to define the area_________________빠</string>
+    <string name="unique_name_text">한_The name for the map area must be unique_____________________빠</string>
+    <string name="next_on_demand_area_title">한_Area %1$s___________________빠</string>
+    <string name="directory_size">한_Size: %1$s_____________________빠</string>
+    <string name="no_internet_connection_error_message">한_No Internet Connection_______________________빠</string>
+    <string name="no_internet_error_message">한_No internet connection. Showing downloaded areas only____________________________빠.</string>
+    <string name="no_map_areas_error_message">한_Could not retrieve map areas for this map______________________빠.</string>
+    <string name="no_offline_map_areas_error_message">한_There are no map areas for this map___________________빠.</string>
+    <string name="error_fetching_areas">한_Error Fetching Map Areas_________________________빠</string>
+    <string name="error_fetching_areas_message">한_An error occurred while fetching map areas_______________________빠.</string>
+    <string name="no_map_areas">한_No Map Areas_____________빠</string>
+    <string name="empty_on_demand_message">한_There are no map areas for this map. Tap the button below to get started______________________________________빠.</string>
+    <string name="offline_disabled">한_Offline Disabled_________________빠</string>
+    <string name="offline_disabled_message">한_The map is not enabled for offline use_____________________빠.</string>
+    <string name="level_of_detail">한_Level of detail________________빠</string>
+    <string name="room">한_Room_________빠</string>
+    <string name="rooms">한_Rooms___________빠</string>
+    <string name="house_property">한_House Property_______________빠</string>
+    <string name="houses">한_Houses_____________빠</string>
+    <string name="small_building">한_Small Building_______________빠</string>
+    <string name="building">한_Building_________________빠</string>
+    <string name="buildings">한_Buildings___________________빠</string>
+    <string name="street">한_Street_____________빠</string>
+    <string name="streets">한_Streets_______________빠</string>
+    <string name="neighborhood">한_Neighborhood_____________빠</string>
+    <string name="town">한_Town_________빠</string>
+    <string name="city">한_City_________빠</string>
+    <string name="cities">한_Cities_____________빠</string>
+    <string name="metropolitan_area">한_Metropolitan Area__________________빠</string>
+    <string name="county">한_County_____________빠</string>
+    <string name="counties">한_Counties_________________빠</string>
+    <string name="state_province">한_State/Province_______________빠</string>
+    <string name="states_provinces">한_States/Provinces_________________빠</string>
+    <string name="countries_small">한_Countries (Small)__________________빠</string>
+    <string name="countries_big">한_Countries (Big)________________빠</string>
+    <string name="continent">한_Continent___________________빠</string>
+    <string name="world_small">한_World (Small)______________빠</string>
+    <string name="world_big">한_World (Big)____________빠</string>
+    <string name="world">한_World___________빠</string>
+</resources>

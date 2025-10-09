@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">æ_Map Areas___________________Â</string>
+    <string name="add_map_area">æ_Add Map Area_____________Â</string>
+    <string name="thumbnail_description">æ_PortalItem Thumbnail_____________________Â</string>
+    <string name="download">æ_Download_________________Â</string>
+    <string name="open">æ_Open_________Â</string>
+    <string name="error">æ_Error___________Â</string>
+    <string name="loading">æ_Loading_______________Â</string>
+    <string name="loading_failed">æ_Loading failed_______________Â</string>
+    <string name="ready_to_download">æ_Ready to download__________________Â</string>
+    <string name="packaging">æ_Packaging___________________Â</string>
+    <string name="packaging_failed">æ_Packaging failed_________________Â</string>
+    <string name="downloaded">æ_Downloaded_____________________Â</string>
+    <string name="downloading">æ_Downloading____________Â</string>
+    <string name="download_failed">æ_Download Failed________________Â</string>
+    <string name="currently_open">æ_Currently Open_______________Â</string>
+    <string name="description">æ_Description____________Â</string>
+    <string name="download_map_area">æ_Download Map Area__________________Â</string>
+    <string name="remove_download">æ_Remove Download________________Â</string>
+    <string name="delete_download">æ_Delete Download________________Â</string>
+    <string name="no_image_available">æ_No Image Available___________________Â</string>
+    <string name="refresh">æ_Refresh_______________Â</string>
+    <string name="cancelled">æ_Cancelled___________________Â</string>
+    <string name="cancel">æ_Cancel_____________Â</string>
+    <string name="confirm">æ_OK_____Â</string>
+    <string name="rename">æ_Rename_____________Â</string>
+    <string name="enter_a_name">æ_Enter a name_____________Â</string>
+    <string name="select_area">æ_Select area____________Â</string>
+    <string name="pan_and_zoom_text">æ_Pan and zoom to define the area_________________Â</string>
+    <string name="unique_name_text">æ_The name for the map area must be unique_____________________Â</string>
+    <string name="next_on_demand_area_title">æ_Area %1$s___________________Â</string>
+    <string name="directory_size">æ_Size: %1$s_____________________Â</string>
+    <string name="no_internet_connection_error_message">æ_No Internet Connection_______________________Â</string>
+    <string name="no_internet_error_message">æ_No internet connection. Showing downloaded areas only____________________________Â.</string>
+    <string name="no_map_areas_error_message">æ_Could not retrieve map areas for this map______________________Â.</string>
+    <string name="no_offline_map_areas_error_message">æ_There are no map areas for this map___________________Â.</string>
+    <string name="error_fetching_areas">æ_Error Fetching Map Areas_________________________Â</string>
+    <string name="error_fetching_areas_message">æ_An error occurred while fetching map areas_______________________Â.</string>
+    <string name="no_map_areas">æ_No Map Areas_____________Â</string>
+    <string name="empty_on_demand_message">æ_There are no map areas for this map. Tap the button below to get started______________________________________Â.</string>
+    <string name="offline_disabled">æ_Offline Disabled_________________Â</string>
+    <string name="offline_disabled_message">æ_The map is not enabled for offline use_____________________Â.</string>
+    <string name="level_of_detail">æ_Level of detail________________Â</string>
+    <string name="room">æ_Room_________Â</string>
+    <string name="rooms">æ_Rooms___________Â</string>
+    <string name="house_property">æ_House Property_______________Â</string>
+    <string name="houses">æ_Houses_____________Â</string>
+    <string name="small_building">æ_Small Building_______________Â</string>
+    <string name="building">æ_Building_________________Â</string>
+    <string name="buildings">æ_Buildings___________________Â</string>
+    <string name="street">æ_Street_____________Â</string>
+    <string name="streets">æ_Streets_______________Â</string>
+    <string name="neighborhood">æ_Neighborhood_____________Â</string>
+    <string name="town">æ_Town_________Â</string>
+    <string name="city">æ_City_________Â</string>
+    <string name="cities">æ_Cities_____________Â</string>
+    <string name="metropolitan_area">æ_Metropolitan Area__________________Â</string>
+    <string name="county">æ_County_____________Â</string>
+    <string name="counties">æ_Counties_________________Â</string>
+    <string name="state_province">æ_State/Province_______________Â</string>
+    <string name="states_provinces">æ_States/Provinces_________________Â</string>
+    <string name="countries_small">æ_Countries (Small)__________________Â</string>
+    <string name="countries_big">æ_Countries (Big)________________Â</string>
+    <string name="continent">æ_Continent___________________Â</string>
+    <string name="world_small">æ_World (Small)______________Â</string>
+    <string name="world_big">æ_World (Big)____________Â</string>
+    <string name="world">æ_World___________Â</string>
+</resources>
