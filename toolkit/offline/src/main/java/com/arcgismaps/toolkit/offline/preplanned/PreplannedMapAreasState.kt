@@ -58,6 +58,7 @@ import java.util.UUID
 internal class PreplannedMapAreaState(
     private val context: Context,
     private val item: Item,
+    private val portalItemID: String,
     internal val preplannedMapArea: PreplannedMapArea? = null,
     private val offlineMapTask: OfflineMapTask? = null,
     private val onSelectionChanged: (ArcGISMap) -> Unit
@@ -205,7 +206,7 @@ internal class PreplannedMapAreaState(
         // Define the path where the map will be saved
         val preplannedMapAreaDownloadDirectory = OfflineRepository.createPendingPreplannedJobPath(
             context = context,
-            portalItemID = item.itemId,
+            portalItemID = portalItemID,
             preplannedMapAreaID = preplannedMapArea.portalItem.itemId
         )
 
@@ -241,7 +242,7 @@ internal class PreplannedMapAreaState(
         )
         workerUUID = OfflineRepository.createPreplannedMapAreaRequestAndQueueDownload(
             context = context,
-            portalItemId = item.itemId,
+            portalItemId = portalItemID,
             mapAreaItemId = preplannedMapAreaId,
             jsonJobPath = jsonJobFile.path,
             preplannedMapAreaTitle = item.title
@@ -269,7 +270,7 @@ internal class PreplannedMapAreaState(
             if (shouldRemoveOfflineMapInfo()) {
                 OfflineRepository.removeOfflineMapInfo(
                     context = context,
-                    portalItemID = item.itemId
+                    portalItemID = portalItemID
                 )
             }
             val localScope = CoroutineScope(Dispatchers.IO)
