@@ -52,7 +52,8 @@ internal fun UtilityAssociationsFilterResult(
     // show the list of layers
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(15.dp)
+        shape = RoundedCornerShape(15.dp),
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         if (groupResults.isEmpty()) {
             // No associations found
@@ -86,16 +87,14 @@ internal fun UtilityAssociationsFilterResult(
                             }
                             .animateItem(),
                         colors = ListItemDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            containerColor = MaterialTheme.colorScheme.surfaceBright,
                         )
                     )
                     if (index < groupResults.count() - 1) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceContainer
-                        ) {
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
                     }
                 }
             }

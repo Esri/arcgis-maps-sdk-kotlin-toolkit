@@ -153,14 +153,19 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationGroupResultKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToFeature\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.components.material3.ComposableSingletons\$ModalBottomSheetKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationGroupResultScreenKt"
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationGroupResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsFilterResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$CreateAssociationScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectAssociatedFeatureScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
     ignoredClasses.addAll(composableSingletons)
 }
@@ -172,8 +177,7 @@ dependencies {
     implementation(libs.mockingjay)
     //
     implementation(libs.bundles.commonmark)
-    implementation(platform(libs.coil.bom))
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.window)

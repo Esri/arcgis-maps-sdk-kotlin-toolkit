@@ -327,7 +327,6 @@ internal fun FeatureFormLayout(
     ) {
         Column(modifier = modifier) {
             topBar()
-            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
             content()
         }
     }

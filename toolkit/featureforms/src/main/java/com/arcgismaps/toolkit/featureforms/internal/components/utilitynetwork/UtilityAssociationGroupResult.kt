@@ -35,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,14 +96,14 @@ internal fun UtilityAssociationGroupResult(
             align = Alignment.Top
         ),
         shape = RoundedCornerShape(15.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         LazyColumn(
             modifier = Modifier.clip(shape = RoundedCornerShape(15.dp)),
             state = lazyListState
         ) {
             groupResult.associationResults.forEachIndexed { index, info ->
-                item(key = info.association.globalId.toString()) {
+                item {
                     AssociationItem(
                         title = info.title,
                         association = info.association,
@@ -126,7 +125,7 @@ internal fun UtilityAssociationGroupResult(
                     if (index < groupResult.associationResults.count() - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            color = DividerDefaults.color.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     }
                 }
@@ -140,11 +139,11 @@ internal fun UtilityAssociationGroupResult(
  *
  * The spec for displaying the association is based on the following rules:
  *
- * - If the association is of type JunctionEdgeObjectConnectivityMidspan, then only the fractionAlongEdge
- * is displayed.
+ * - If the association is of type JunctionEdgeObjectConnectivityMidspan,
+ * JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
+ * then fractionAlongEdge and the terminal (if present) is displayed.
  *
- * - If the association is of type JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
- * or Connectivity then fractionAlongEdge and the terminal (if present) is displayed.
+ * - For a Connectivity association, the terminal (if present) is displayed.
  *
  * - For a Containment association, the isContainmentVisible property is displayed if the associated
  * feature is the toElement.
@@ -171,7 +170,7 @@ private fun AssociationItem(
     var pendingSwipeValue by remember {
         mutableStateOf<SwipeToDismissBoxValue?>(null)
     }
-    val swipeToDismissBoxState = remember {
+    val swipeToDismissBoxState = remember(association) {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
             density = density,
@@ -194,7 +193,10 @@ private fun AssociationItem(
     // Text to display below the title.
     var supportingText = ""
     when (association.associationType) {
-        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
+        is UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
+        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide
+            -> {
             supportingText = if (target.terminal != null) {
                 "${target.terminal?.name}, ${(association.fractionAlongEdge * 100).toInt()}%"
             } else {
@@ -202,9 +204,7 @@ private fun AssociationItem(
             }
         }
 
-        is UtilityAssociationType.Connectivity,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+        is UtilityAssociationType.Connectivity -> {
             target.terminal?.let { terminal ->
                 supportingText = terminal.name
             }
@@ -274,7 +274,7 @@ private fun AssociationItem(
     ) {
         Row(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(MaterialTheme.colorScheme.surfaceBright)
                 .padding(horizontal = 24.dp, vertical = 8.dp)
                 .fillMaxWidth()
                 .heightIn(min = 56.dp),
@@ -304,7 +304,7 @@ private fun AssociationItem(
                     ),
                     style = MaterialTheme.typography.bodyLarge,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 3,
+                    maxLines = 5,
                     color = contentColor
                 )
                 if (supportingText.isNotEmpty()) {

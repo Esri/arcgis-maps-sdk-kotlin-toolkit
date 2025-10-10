@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.utilitynetworks.UtilityAssociation
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
-    private val element: UtilityAssociationsFormElement,
+    val element: UtilityAssociationsFormElement,
     scope: CoroutineScope
 ) : FormElementState(
     id = element.hashCode(),
@@ -94,12 +95,15 @@ internal class UtilityAssociationsElementState(
     val selectedGroupResult: MutableGroupResult?
         get() = _selectedGroupResult.value
 
+    private val _selectedAssociationResult: MutableState<UtilityAssociationResult?> =
+        mutableStateOf(null, policy = neverEqualPolicy())
+
     /**
      * The selected [UtilityAssociationResult] to display. Use [setSelectedAssociationResult] to
      * set this value.
      */
-    var selectedAssociationResult: UtilityAssociationResult? = null
-        private set
+    val selectedAssociationResult: UtilityAssociationResult?
+        get() = _selectedAssociationResult.value
 
     init {
         scope.launch {
@@ -116,8 +120,12 @@ internal class UtilityAssociationsElementState(
         element.fetchAssociationsFilterResults()
         _filters.clear()
         element.associationsFilterResults.forEach {
-            val groupResults = it.groupResults.map {
-                MutableGroupResult(it.associationResults, it.name)
+            val groupResults = it.groupResults.map { groupResult ->
+                MutableGroupResult(
+                    results = groupResult.associationResults,
+                    name = groupResult.name,
+                    source = groupResult.featureFormSource
+                )
             }
             _filters += MutableFilterResult(
                 filter = it.filter,
@@ -136,12 +144,11 @@ internal class UtilityAssociationsElementState(
             _selectedFilterResult.value = updatedFilter
             // update the selected group result if it exists in the new filter results
             val updatedGroup = updatedFilter.groupResults.find {
-                it.name == selectedGroupResult?.name
+                it.source == selectedGroupResult?.source
             }
-            if (updatedGroup != null) {
-                // update the selected group result to trigger recomposition
-                _selectedGroupResult.value = updatedGroup
-            }
+            // update the selected group result to trigger recomposition
+            // this may be null if the group no longer exists (e.g. all associations deleted)
+            _selectedGroupResult.value = updatedGroup
         }
         _loading.value = false
     }
@@ -164,7 +171,7 @@ internal class UtilityAssociationsElementState(
      * Sets the selected [UtilityAssociationResult] to display.
      */
     fun setSelectedAssociationResult(associationResult: UtilityAssociationResult?) {
-        selectedAssociationResult = associationResult
+        _selectedAssociationResult.value = associationResult
     }
 }
 
@@ -176,7 +183,8 @@ internal class UtilityAssociationsElementState(
  */
 internal class MutableGroupResult(
     results: List<UtilityAssociationResult>,
-    val name: String
+    val name: String,
+    val source : FeatureFormSource
 ) {
     private val _associationResults: SnapshotStateList<UtilityAssociationResult> =
         mutableStateListOf<UtilityAssociationResult>().apply { addAll(results) }
