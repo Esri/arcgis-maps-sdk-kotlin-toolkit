@@ -173,9 +173,6 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
-    // mocking jay
-    implementation(libs.mockingjay)
-    //
     implementation(libs.bundles.commonmark)
     implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
