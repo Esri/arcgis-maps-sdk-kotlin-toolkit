@@ -23,6 +23,7 @@ package com.arcgismaps.toolkit.popupapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -34,6 +35,7 @@ import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             TestArcGISAuthenticationChallengeHandler(
