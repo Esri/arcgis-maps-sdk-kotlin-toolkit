@@ -45,6 +45,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
+internal object PopupConstants {
+    const val USER_AGENT = "ArcGIS Maps SDK for Kotlin Toolkit"
+}
+
 /**
  * Represents the state of an [MediaPopupElement]
  */
@@ -215,12 +219,18 @@ internal class PopupMediaState(
                 ) {
                     val request = ImageRequest.Builder(context)
                         .data(srcUrl)
-                        .addHeader("User-Agent", "ArcGIS Maps SDK for Kotlin Toolkit")
+                        .addHeader("User-Agent", PopupConstants.USER_AGENT)
                         .crossfade(true)
                         .build()
                     (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
                         ?: ContextCompat.getDrawable(context, R.drawable.no_image_32)?.toBitmap()
-                        ?: throw IllegalStateException("couldn't load image at $srcUrl or placeholder drawable")
+                        ?: throw IllegalStateException(
+                            if (srcUrl.isNullOrEmpty()) {
+                                "couldn't load image: sourceUrl is missing or empty, and placeholder drawable could not be loaded"
+                            } else {
+                                "couldn't load image at $srcUrl, and placeholder drawable could not be loaded"
+                            }
+                        )
                 }
             ).apply {
                 if (refreshInterval > 0) {
