@@ -24,6 +24,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.arcgismaps.mapping.ChartImageParameters
@@ -32,6 +34,7 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
@@ -120,9 +123,9 @@ internal class MediaElementState(
 internal class PopupMediaState(
     val title: String,
     val caption: String,
-    @Suppress("unused") private val refreshInterval: Long,
+    private val refreshInterval: Long,
     @Suppress("unused") private val linkUrl: String,
-    private val sourceUrl: String,
+    @Suppress("unused") private val sourceUrl: String,
     val type: PopupMediaType,
     uri: String,
     scope: CoroutineScope,
@@ -201,7 +204,7 @@ internal class PopupMediaState(
             context: Context
         ): PopupMediaState {
             val srcUrl = media.value?.sourceUrl
-                ?: throw IllegalArgumentException("null sourceUrl for popup media")
+                ?: ""
             return PopupMediaState(
                 media,
                 scope,
@@ -212,10 +215,12 @@ internal class PopupMediaState(
                 ) {
                     val request = ImageRequest.Builder(context)
                         .data(srcUrl)
+                        .addHeader("User-Agent", "ArcGIS Maps SDK for Kotlin Toolkit")
                         .crossfade(true)
                         .build()
                     (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
-                        ?: throw IllegalStateException("couldn't load image at $srcUrl")
+                        ?: ContextCompat.getDrawable(context, R.drawable.no_image_32)?.toBitmap()
+                        ?: throw IllegalStateException("couldn't load image at $srcUrl or placeholder drawable")
                 }
             ).apply {
                 if (refreshInterval > 0) {
