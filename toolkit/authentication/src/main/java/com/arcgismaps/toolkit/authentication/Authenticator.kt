@@ -295,7 +295,7 @@ private fun AuthenticatorDelegate(
             }
         } else {
             IapSignInAuthenticator(
-                authorizeUrl = iapSignIn.authorizeUrl,
+                authorizeUrl = iapSignIn.authorizeUrlEncoded,
                 onComplete = iapSignIn::complete,
                 onCancel = iapSignIn::cancel
             )
@@ -309,7 +309,7 @@ private fun AuthenticatorDelegate(
             }
         } else {
             IapSignOutAuthenticator(
-                iapSignOutUrl = iapSignOut.signOutUrl,
+                iapSignOutUrl = iapSignOut.signOutUrlEncoded,
                 onCompleteSignOut = iapSignOut::complete,
                 onCancelSignOut = iapSignOut::cancel
             )
