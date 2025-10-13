@@ -31,7 +31,7 @@ import androidx.compose.runtime.setValue
  * with the provided authorization URL. It uses an activity result launcher to handle the redirect
  * URL upon successful authentication or cancellation.
  *
- * @param authorizeUrl The authorization URL to load in the browser for IAP authentication.
+ * @param authorizeUrl The authorization URL to load in the browser for IAP authentication, this should be encoded.
  * @param onComplete Callback function that gets invoked with the redirect URL upon successful authentication.
  * @param onCancel Callback function that gets invoked when the authentication is cancelled.
  * @since 200.8.0
@@ -85,7 +85,7 @@ internal fun IapSignInAuthenticator(
 /**
  * Composable function that handles invalidating an IAP session by launching the provided [iapSignOutUrl] in a browser.
  *
- * @param iapSignOutUrl The URL that will be launched guiding the user to sign-out of the IAP session.
+ * @param iapSignOutUrl The URL that will be launched guiding the user to sign-out of the IAP session, this should be encoded.
  * @param onCompleteSignOut Callback function that gets invoked with a boolean indicating success or failure of the sign-out.
  * @param onCancelSignOut Callback function that gets invoked with an exception if the sign-out is cancelled.
  * @since 200.8.0

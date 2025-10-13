@@ -201,7 +201,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
+                putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrlEncoded)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 

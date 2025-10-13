@@ -50,7 +50,7 @@ import java.net.URL
 import javax.net.ssl.SSLException
 
 /**
- * Launches a WebView using the [OAuthUserSignIn.authorizeUrl] and calls [OAuthUserSignIn.complete] or
+ * Launches a WebView using the [OAuthUserSignIn.authorizeUrlEncoded] and calls [OAuthUserSignIn.complete] or
  * [OAuthUserSignIn.cancel] on completion.
  *
  * @param oAuthUserSignIn the [OAuthUserSignIn] pending completion.
@@ -76,7 +76,7 @@ internal fun OAuthWebView(
             val scope = rememberCoroutineScope()
             webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
         }.also { webView ->
-            webView.loadUrl(oAuthUserSignIn.authorizeUrl)
+            webView.loadUrl(oAuthUserSignIn.authorizeUrlEncoded)
         }
     AndroidView(factory = { webView }, update = { webView = it })
 
