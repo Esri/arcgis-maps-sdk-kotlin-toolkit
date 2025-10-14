@@ -24,4 +24,24 @@
     <string name="other">Diğer</string>
     <string name="close">Geri</string>
     <string name="attachment_thumbnail">ek küçük resim</string>
+    <string name="terminal">ı_Terminal_________________İ</string>
+    <string name="no_associations_found">ı_No associations found______________________İ</string>
+    <string name="visible_content">ı_Visible Content________________İ</string>
+    <string name="content">ı_Content_______________İ</string>
+    <string name="containment_visible">ı_Containment Visible____________________İ</string>
+    <string name="fraction_along_edge">ı_Fraction Along Edge____________________İ</string>
+    <string name="percent_along_edge">ı_%1$d %%_______________İ</string>
+    <string name="from_element">ı_From Element_____________İ</string>
+    <string name="to_element">ı_To Element_____________________İ</string>
+    <string name="association_type">ı_Association Type_________________İ</string>
+    <string name="remove_association">ı_Remove Association___________________İ</string>
+    <string name="remove_association_tooltip">ı_Only removes the association. The feature remains__________________________İ.</string>
+    <string name="remove">ı_Remove_____________İ</string>
+    <string name="cancel">ı_Cancel_____________İ</string>
+    <string name="none_selected">ı_None Selected______________İ</string>
+    <string name="association_settings">ı_Association Settings_____________________İ</string>
+    <string name="show_all">ı_Show all_________________İ</string>
+    <string name="filter_by_feature_title">ı_Filter by feature title________________________İ</string>
+    <string name="containment_visible_value">ı_Visible: %1$s______________İ</string>
+    <string name="associations">ı_Associations_____________İ</string>
 </resources>

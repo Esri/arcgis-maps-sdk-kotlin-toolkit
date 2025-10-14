@@ -24,4 +24,24 @@
     <string name="other">Άλλο</string>
     <string name="close">Πίσω</string>
     <string name="attachment_thumbnail">μικρογραφία συνημμένου</string>
+    <string name="terminal">π_Terminal_________________Ω</string>
+    <string name="no_associations_found">π_No associations found______________________Ω</string>
+    <string name="visible_content">π_Visible Content________________Ω</string>
+    <string name="content">π_Content_______________Ω</string>
+    <string name="containment_visible">π_Containment Visible____________________Ω</string>
+    <string name="fraction_along_edge">π_Fraction Along Edge____________________Ω</string>
+    <string name="percent_along_edge">π_%1$d %%_______________Ω</string>
+    <string name="from_element">π_From Element_____________Ω</string>
+    <string name="to_element">π_To Element_____________________Ω</string>
+    <string name="association_type">π_Association Type_________________Ω</string>
+    <string name="remove_association">π_Remove Association___________________Ω</string>
+    <string name="remove_association_tooltip">π_Only removes the association. The feature remains__________________________Ω.</string>
+    <string name="remove">π_Remove_____________Ω</string>
+    <string name="cancel">π_Cancel_____________Ω</string>
+    <string name="none_selected">π_None Selected______________Ω</string>
+    <string name="association_settings">π_Association Settings_____________________Ω</string>
+    <string name="show_all">π_Show all_________________Ω</string>
+    <string name="filter_by_feature_title">π_Filter by feature title________________________Ω</string>
+    <string name="containment_visible_value">π_Visible: %1$s______________Ω</string>
+    <string name="associations">π_Associations_____________Ω</string>
 </resources>

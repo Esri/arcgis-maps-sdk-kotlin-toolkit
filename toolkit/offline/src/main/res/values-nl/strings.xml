@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Ĳ_Map Areas___________________ä</string>
+    <string name="add_map_area">Ĳ_Add Map Area_____________ä</string>
+    <string name="thumbnail_description">Ĳ_PortalItem Thumbnail_____________________ä</string>
+    <string name="download">Ĳ_Download_________________ä</string>
+    <string name="open">Ĳ_Open_________ä</string>
+    <string name="error">Ĳ_Error___________ä</string>
+    <string name="loading">Ĳ_Loading_______________ä</string>
+    <string name="loading_failed">Ĳ_Loading failed_______________ä</string>
+    <string name="ready_to_download">Ĳ_Ready to download__________________ä</string>
+    <string name="packaging">Ĳ_Packaging___________________ä</string>
+    <string name="packaging_failed">Ĳ_Packaging failed_________________ä</string>
+    <string name="downloaded">Ĳ_Downloaded_____________________ä</string>
+    <string name="downloading">Ĳ_Downloading____________ä</string>
+    <string name="download_failed">Ĳ_Download Failed________________ä</string>
+    <string name="currently_open">Ĳ_Currently Open_______________ä</string>
+    <string name="description">Ĳ_Description____________ä</string>
+    <string name="download_map_area">Ĳ_Download Map Area__________________ä</string>
+    <string name="remove_download">Ĳ_Remove Download________________ä</string>
+    <string name="delete_download">Ĳ_Delete Download________________ä</string>
+    <string name="no_image_available">Ĳ_No Image Available___________________ä</string>
+    <string name="refresh">Ĳ_Refresh_______________ä</string>
+    <string name="cancelled">Ĳ_Cancelled___________________ä</string>
+    <string name="cancel">Ĳ_Cancel_____________ä</string>
+    <string name="confirm">Ĳ_OK_____ä</string>
+    <string name="rename">Ĳ_Rename_____________ä</string>
+    <string name="enter_a_name">Ĳ_Enter a name_____________ä</string>
+    <string name="select_area">Ĳ_Select area____________ä</string>
+    <string name="pan_and_zoom_text">Ĳ_Pan and zoom to define the area_________________ä</string>
+    <string name="unique_name_text">Ĳ_The name for the map area must be unique_____________________ä</string>
+    <string name="next_on_demand_area_title">Ĳ_Area %1$s___________________ä</string>
+    <string name="directory_size">Ĳ_Size: %1$s_____________________ä</string>
+    <string name="no_internet_connection_error_message">Ĳ_No Internet Connection_______________________ä</string>
+    <string name="no_internet_error_message">Ĳ_No internet connection. Showing downloaded areas only____________________________ä.</string>
+    <string name="no_map_areas_error_message">Ĳ_Could not retrieve map areas for this map______________________ä.</string>
+    <string name="no_offline_map_areas_error_message">Ĳ_There are no map areas for this map___________________ä.</string>
+    <string name="error_fetching_areas">Ĳ_Error Fetching Map Areas_________________________ä</string>
+    <string name="error_fetching_areas_message">Ĳ_An error occurred while fetching map areas_______________________ä.</string>
+    <string name="no_map_areas">Ĳ_No Map Areas_____________ä</string>
+    <string name="empty_on_demand_message">Ĳ_There are no map areas for this map. Tap the button below to get started______________________________________ä.</string>
+    <string name="offline_disabled">Ĳ_Offline Disabled_________________ä</string>
+    <string name="offline_disabled_message">Ĳ_The map is not enabled for offline use_____________________ä.</string>
+    <string name="level_of_detail">Ĳ_Level of detail________________ä</string>
+    <string name="room">Ĳ_Room_________ä</string>
+    <string name="rooms">Ĳ_Rooms___________ä</string>
+    <string name="house_property">Ĳ_House Property_______________ä</string>
+    <string name="houses">Ĳ_Houses_____________ä</string>
+    <string name="small_building">Ĳ_Small Building_______________ä</string>
+    <string name="building">Ĳ_Building_________________ä</string>
+    <string name="buildings">Ĳ_Buildings___________________ä</string>
+    <string name="street">Ĳ_Street_____________ä</string>
+    <string name="streets">Ĳ_Streets_______________ä</string>
+    <string name="neighborhood">Ĳ_Neighborhood_____________ä</string>
+    <string name="town">Ĳ_Town_________ä</string>
+    <string name="city">Ĳ_City_________ä</string>
+    <string name="cities">Ĳ_Cities_____________ä</string>
+    <string name="metropolitan_area">Ĳ_Metropolitan Area__________________ä</string>
+    <string name="county">Ĳ_County_____________ä</string>
+    <string name="counties">Ĳ_Counties_________________ä</string>
+    <string name="state_province">Ĳ_State/Province_______________ä</string>
+    <string name="states_provinces">Ĳ_States/Provinces_________________ä</string>
+    <string name="countries_small">Ĳ_Countries (Small)__________________ä</string>
+    <string name="countries_big">Ĳ_Countries (Big)________________ä</string>
+    <string name="continent">Ĳ_Continent___________________ä</string>
+    <string name="world_small">Ĳ_World (Small)______________ä</string>
+    <string name="world_big">Ĳ_World (Big)____________ä</string>
+    <string name="world">Ĳ_World___________ä</string>
+</resources>

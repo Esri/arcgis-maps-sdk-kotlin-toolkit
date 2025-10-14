@@ -24,4 +24,24 @@
     <string name="other">أخرى</string>
     <string name="close">السابق</string>
     <string name="attachment_thumbnail">صورة مصغرة للمرفق</string>
+    <string name="terminal">بيت_Terminal_________________لاحقة</string>
+    <string name="no_associations_found">بيت_No associations found______________________لاحقة</string>
+    <string name="visible_content">بيت_Visible Content________________لاحقة</string>
+    <string name="content">بيت_Content_______________لاحقة</string>
+    <string name="containment_visible">بيت_Containment Visible____________________لاحقة</string>
+    <string name="fraction_along_edge">بيت_Fraction Along Edge____________________لاحقة</string>
+    <string name="percent_along_edge">بيت_%1$d %%_______________لاحقة</string>
+    <string name="from_element">بيت_From Element_____________لاحقة</string>
+    <string name="to_element">بيت_To Element_____________________لاحقة</string>
+    <string name="association_type">بيت_Association Type_________________لاحقة</string>
+    <string name="remove_association">بيت_Remove Association___________________لاحقة</string>
+    <string name="remove_association_tooltip">بيت_Only removes the association. The feature remains__________________________لاحقة.</string>
+    <string name="remove">بيت_Remove_____________لاحقة</string>
+    <string name="cancel">بيت_Cancel_____________لاحقة</string>
+    <string name="none_selected">بيت_None Selected______________لاحقة</string>
+    <string name="association_settings">بيت_Association Settings_____________________لاحقة</string>
+    <string name="show_all">بيت_Show all_________________لاحقة</string>
+    <string name="filter_by_feature_title">بيت_Filter by feature title________________________لاحقة</string>
+    <string name="containment_visible_value">بيت_Visible: %1$s______________لاحقة</string>
+    <string name="associations">بيت_Associations_____________لاحقة</string>
 </resources>

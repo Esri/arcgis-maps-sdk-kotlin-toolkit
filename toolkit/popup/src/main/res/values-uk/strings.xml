@@ -24,4 +24,24 @@
     <string name="other">Інше</string>
     <string name="close">Назад</string>
     <string name="attachment_thumbnail">зразок прикріплення</string>
+    <string name="terminal">ґ_Terminal_________________Ї</string>
+    <string name="no_associations_found">ґ_No associations found______________________Ї</string>
+    <string name="visible_content">ґ_Visible Content________________Ї</string>
+    <string name="content">ґ_Content_______________Ї</string>
+    <string name="containment_visible">ґ_Containment Visible____________________Ї</string>
+    <string name="fraction_along_edge">ґ_Fraction Along Edge____________________Ї</string>
+    <string name="percent_along_edge">ґ_%1$d %%_______________Ї</string>
+    <string name="from_element">ґ_From Element_____________Ї</string>
+    <string name="to_element">ґ_To Element_____________________Ї</string>
+    <string name="association_type">ґ_Association Type_________________Ї</string>
+    <string name="remove_association">ґ_Remove Association___________________Ї</string>
+    <string name="remove_association_tooltip">ґ_Only removes the association. The feature remains__________________________Ї.</string>
+    <string name="remove">ґ_Remove_____________Ї</string>
+    <string name="cancel">ґ_Cancel_____________Ї</string>
+    <string name="none_selected">ґ_None Selected______________Ї</string>
+    <string name="association_settings">ґ_Association Settings_____________________Ї</string>
+    <string name="show_all">ґ_Show all_________________Ї</string>
+    <string name="filter_by_feature_title">ґ_Filter by feature title________________________Ї</string>
+    <string name="containment_visible_value">ґ_Visible: %1$s______________Ї</string>
+    <string name="associations">ґ_Associations_____________Ї</string>
 </resources>

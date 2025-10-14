@@ -24,4 +24,24 @@
     <string name="other">Drugo</string>
     <string name="close">Nazaj</string>
     <string name="attachment_thumbnail">sličica priloge</string>
+    <string name="terminal">Š_Terminal_________________č</string>
+    <string name="no_associations_found">Š_No associations found______________________č</string>
+    <string name="visible_content">Š_Visible Content________________č</string>
+    <string name="content">Š_Content_______________č</string>
+    <string name="containment_visible">Š_Containment Visible____________________č</string>
+    <string name="fraction_along_edge">Š_Fraction Along Edge____________________č</string>
+    <string name="percent_along_edge">Š_%1$d %%_______________č</string>
+    <string name="from_element">Š_From Element_____________č</string>
+    <string name="to_element">Š_To Element_____________________č</string>
+    <string name="association_type">Š_Association Type_________________č</string>
+    <string name="remove_association">Š_Remove Association___________________č</string>
+    <string name="remove_association_tooltip">Š_Only removes the association. The feature remains__________________________č.</string>
+    <string name="remove">Š_Remove_____________č</string>
+    <string name="cancel">Š_Cancel_____________č</string>
+    <string name="none_selected">Š_None Selected______________č</string>
+    <string name="association_settings">Š_Association Settings_____________________č</string>
+    <string name="show_all">Š_Show all_________________č</string>
+    <string name="filter_by_feature_title">Š_Filter by feature title________________________č</string>
+    <string name="containment_visible_value">Š_Visible: %1$s______________č</string>
+    <string name="associations">Š_Associations_____________č</string>
 </resources>

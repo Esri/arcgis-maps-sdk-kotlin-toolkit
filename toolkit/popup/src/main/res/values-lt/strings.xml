@@ -24,4 +24,24 @@
     <string name="other">Kita</string>
     <string name="close">Atgal</string>
     <string name="attachment_thumbnail">priedo miniatiūra</string>
+    <string name="terminal">Į_Terminal_________________š</string>
+    <string name="no_associations_found">Į_No associations found______________________š</string>
+    <string name="visible_content">Į_Visible Content________________š</string>
+    <string name="content">Į_Content_______________š</string>
+    <string name="containment_visible">Į_Containment Visible____________________š</string>
+    <string name="fraction_along_edge">Į_Fraction Along Edge____________________š</string>
+    <string name="percent_along_edge">Į_%1$d %%_______________š</string>
+    <string name="from_element">Į_From Element_____________š</string>
+    <string name="to_element">Į_To Element_____________________š</string>
+    <string name="association_type">Į_Association Type_________________š</string>
+    <string name="remove_association">Į_Remove Association___________________š</string>
+    <string name="remove_association_tooltip">Į_Only removes the association. The feature remains__________________________š.</string>
+    <string name="remove">Į_Remove_____________š</string>
+    <string name="cancel">Į_Cancel_____________š</string>
+    <string name="none_selected">Į_None Selected______________š</string>
+    <string name="association_settings">Į_Association Settings_____________________š</string>
+    <string name="show_all">Į_Show all_________________š</string>
+    <string name="filter_by_feature_title">Į_Filter by feature title________________________š</string>
+    <string name="containment_visible_value">Į_Visible: %1$s______________š</string>
+    <string name="associations">Į_Associations_____________š</string>
 </resources>

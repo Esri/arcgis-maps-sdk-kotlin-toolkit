@@ -24,4 +24,24 @@
     <string name="other">Jiné</string>
     <string name="close">Zpět</string>
     <string name="attachment_thumbnail">miniatura přílohy</string>
+    <string name="terminal">Ř_Terminal_________________ů</string>
+    <string name="no_associations_found">Ř_No associations found______________________ů</string>
+    <string name="visible_content">Ř_Visible Content________________ů</string>
+    <string name="content">Ř_Content_______________ů</string>
+    <string name="containment_visible">Ř_Containment Visible____________________ů</string>
+    <string name="fraction_along_edge">Ř_Fraction Along Edge____________________ů</string>
+    <string name="percent_along_edge">Ř_%1$d %%_______________ů</string>
+    <string name="from_element">Ř_From Element_____________ů</string>
+    <string name="to_element">Ř_To Element_____________________ů</string>
+    <string name="association_type">Ř_Association Type_________________ů</string>
+    <string name="remove_association">Ř_Remove Association___________________ů</string>
+    <string name="remove_association_tooltip">Ř_Only removes the association. The feature remains__________________________ů.</string>
+    <string name="remove">Ř_Remove_____________ů</string>
+    <string name="cancel">Ř_Cancel_____________ů</string>
+    <string name="none_selected">Ř_None Selected______________ů</string>
+    <string name="association_settings">Ř_Association Settings_____________________ů</string>
+    <string name="show_all">Ř_Show all_________________ů</string>
+    <string name="filter_by_feature_title">Ř_Filter by feature title________________________ů</string>
+    <string name="containment_visible_value">Ř_Visible: %1$s______________ů</string>
+    <string name="associations">Ř_Associations_____________ů</string>
 </resources>
