@@ -203,4 +203,5 @@ include(":offlinemapareas-app")
 project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
-
+include(":localsceneview-app")
+project(":localsceneview-app").projectDir = File(rootDir, "microapps/LocalSceneViewApp/app")
