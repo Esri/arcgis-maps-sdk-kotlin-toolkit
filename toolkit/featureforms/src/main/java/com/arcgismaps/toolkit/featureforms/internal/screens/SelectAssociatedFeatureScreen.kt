@@ -51,7 +51,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -76,7 +75,6 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
-import kotlinx.coroutines.launch
 
 /**
  * A screen that displays a list of features that can be associated with a utility network feature.
@@ -92,7 +90,6 @@ internal fun SelectAssociatedFeatureScreen(
     onFeatureCandidateSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
     val candidates = state.candidates
@@ -176,10 +173,8 @@ internal fun SelectAssociatedFeatureScreen(
                             itemsIndexed(candidates) { index, item ->
                                 ListItem(
                                     modifier = Modifier.clickable {
-                                        scope.launch {
-                                            viewModel.selectFeatureCandidate(item)
-                                            onFeatureCandidateSelected()
-                                        }
+                                        viewModel.selectFeatureCandidate(item)
+                                        onFeatureCandidateSelected()
                                     },
                                     headlineContent = {
                                         Text(

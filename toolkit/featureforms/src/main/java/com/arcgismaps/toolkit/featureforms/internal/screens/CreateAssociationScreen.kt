@@ -54,7 +54,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Pr
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityTerminalControl
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getTerminalById
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun CreateAssociationScreen(
@@ -110,7 +112,10 @@ internal fun CreateAssociationScreen(
                             toTerminalId = selectedCandidateFeatureTerminalId,
                             fractionAlongEdge = fractionAlongEdge
                         ).onSuccess {
-                            onAssociationCreated()
+                            // switch to the main thread to invoke the navigation callback
+                            withContext(Dispatchers.Main) {
+                                onAssociationCreated()
+                            }
                         }.onFailure {
                             snackbarHostState.showSnackbar(
                                 message = context.getString(
