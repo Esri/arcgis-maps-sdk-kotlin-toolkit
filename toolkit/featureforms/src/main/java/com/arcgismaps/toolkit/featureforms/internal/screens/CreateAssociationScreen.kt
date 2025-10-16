@@ -138,7 +138,24 @@ internal fun CreateAssociationScreen(
             val candidate = it.candidate
             val options = it.options
             val filterType = it.type
-            
+            val isContainerOrStructure = filterType is UtilityAssociationsFilterType.Container ||
+                filterType is UtilityAssociationsFilterType.Structure
+            val (fromElement, fromTerminalConfig) = if (isContainerOrStructure) {
+                candidate.title to
+                    options.candidateFeatureTerminalConfiguration
+            } else {
+                viewModel.featureForm.title.collectAsState().value to
+                    options.formFeatureTerminalConfiguration
+            }
+            val (toElement, toTerminalConfig) = if (isContainerOrStructure) {
+                viewModel.featureForm.title.collectAsState().value to
+                    options.formFeatureTerminalConfiguration
+
+            } else {
+                candidate.title to
+                    options.candidateFeatureTerminalConfiguration
+            }
+
             LazyColumn {
                 item {
                     // First show the Association Type
@@ -183,13 +200,13 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.from_element),
-                            value = viewModel.featureForm.title.collectAsState().value,
+                            value = fromElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        options.formFeatureTerminalConfiguration?.let { terminalConfig ->
+                        fromTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
                                 selected = selectedFormFeatureTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
@@ -215,13 +232,13 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.to_element),
-                            value = candidate.title,
+                            value = toElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
+                        toTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
                                 selected = selectedCandidateFeatureTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
