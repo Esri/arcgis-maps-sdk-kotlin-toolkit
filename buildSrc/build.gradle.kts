@@ -35,5 +35,10 @@ gradlePlugin {
             id = "artifact-deploy"
             implementationClass = "deploy.ArtifactPublisher"
         }
+
+        create("grantTestPermissions") {
+            id = "grant-test-permissions"
+            implementationClass = "GrantTestPermissions"
+        }
     }
 }

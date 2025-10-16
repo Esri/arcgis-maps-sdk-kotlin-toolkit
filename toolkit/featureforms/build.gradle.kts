@@ -23,6 +23,7 @@ plugins {
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
+    id("grant-test-permissions")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
@@ -51,14 +52,14 @@ android {
         disable += "MissingTranslation"
         disable += "MissingQuantity"
     }
-    
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        
+        testApplicationId = "com.arcgismaps.toolkit.featureforms.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -111,6 +112,19 @@ android {
     }
 }
 
+grantTestPermissionsConfig {
+    packageName.set(android.defaultConfig.testApplicationId)
+    adbPath.set(android.adbExecutable.absoluteFile)
+    permissions.set(
+        listOf(
+            "android.permission.CAMERA",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.MANAGE_EXTERNAL_STORAGE"
+        )
+    )
+}
+
 apiValidation {
     ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
@@ -153,7 +167,6 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
-
     ignoredClasses.addAll(composableSingletons)
 }
 

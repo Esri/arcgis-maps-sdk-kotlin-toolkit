@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -25,7 +24,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.requestFocus
-import androidx.test.rule.GrantPermissionRule
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.google.common.truth.Truth.assertThat
@@ -40,11 +38,6 @@ class BarcodeTests : FeatureFormTestRunner(
 ) {
     @get:Rule
     val composeTestRule = createComposeRule()
-
-    // Grant camera permission for barcode scanning
-    @get:Rule
-    val runtimePermissionRule: GrantPermissionRule =
-        GrantPermissionRule.grant(Manifest.permission.CAMERA)
 
     /**
      * Test case 11.1:

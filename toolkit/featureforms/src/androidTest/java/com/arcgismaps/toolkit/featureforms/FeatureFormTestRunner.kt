@@ -21,8 +21,6 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
-import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.ServerTrust
@@ -54,8 +52,9 @@ open class FeatureFormTestRunner(
     private val objectId: Long,
     private val user: String = BuildConfig.webMapUser,
     private val password: String = BuildConfig.webMapPassword,
-    private val layerName: String = ""
+    private val layerName: String = "",
 ) {
+
     /**
      * The feature form for the feature with the given [objectId].
      */
