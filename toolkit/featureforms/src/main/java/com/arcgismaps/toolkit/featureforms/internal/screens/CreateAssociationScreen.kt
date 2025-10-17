@@ -34,7 +34,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,10 +70,10 @@ internal fun CreateAssociationScreen(
         SnackbarHostState()
     }
     val associationOptions = viewModel.newAssociationOptions
-    var selectedFormFeatureTerminalId by rememberSaveable(associationOptions) {
+    var selectedFromTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
-    var selectedCandidateFeatureTerminalId by rememberSaveable(associationOptions) {
+    var selectedToTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
     var isContainmentVisible by rememberSaveable(associationOptions) {
@@ -108,8 +107,8 @@ internal fun CreateAssociationScreen(
                     scope.launch {
                         viewModel.addAssociation(
                             isContainmentVisible = isContainmentVisible,
-                            fromTerminalId = selectedFormFeatureTerminalId,
-                            toTerminalId = selectedCandidateFeatureTerminalId,
+                            fromTerminalId = selectedFromTerminalId,
+                            toTerminalId = selectedToTerminalId,
                             fractionAlongEdge = fractionAlongEdge
                         ).onSuccess {
                             // switch to the main thread to invoke the navigation callback
@@ -140,20 +139,28 @@ internal fun CreateAssociationScreen(
             val filterType = it.type
             val isContainerOrStructure = filterType is UtilityAssociationsFilterType.Container ||
                 filterType is UtilityAssociationsFilterType.Structure
-            val (fromElement, fromTerminalConfig) = if (isContainerOrStructure) {
-                candidate.title to
-                    options.candidateFeatureTerminalConfiguration
-            } else {
-                viewModel.featureForm.title.collectAsState().value to
-                    options.formFeatureTerminalConfiguration
+            val (fromElement, fromTerminalConfig) = remember(associationOptions) {
+                if (isContainerOrStructure) {
+                    candidate.title to
+                        options.candidateFeatureTerminalConfiguration
+                } else {
+                    viewModel.featureForm.title.value to
+                        options.formFeatureTerminalConfiguration
+                }
+            }.also { pair ->
+                selectedFromTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
             }
-            val (toElement, toTerminalConfig) = if (isContainerOrStructure) {
-                viewModel.featureForm.title.collectAsState().value to
-                    options.formFeatureTerminalConfiguration
+            val (toElement, toTerminalConfig) = remember(associationOptions) {
+                if (isContainerOrStructure) {
+                    viewModel.featureForm.title.value to
+                        options.formFeatureTerminalConfiguration
 
-            } else {
-                candidate.title to
-                    options.candidateFeatureTerminalConfiguration
+                } else {
+                    candidate.title to
+                        options.candidateFeatureTerminalConfiguration
+                }
+            }.also { pair ->
+                selectedToTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
             }
 
             LazyColumn {
@@ -208,7 +215,7 @@ internal fun CreateAssociationScreen(
                         // if terminal config is available show terminal selection
                         fromTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
-                                selected = selectedFormFeatureTerminalId?.let { id ->
+                                selected = selectedFromTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
                                 },
                                 modifier = Modifier
@@ -216,7 +223,7 @@ internal fun CreateAssociationScreen(
                                     .fillMaxWidth(),
                                 options = terminalConfig.terminals,
                                 onTerminalSelected = { selected ->
-                                    selectedFormFeatureTerminalId = selected.terminalId
+                                    selectedFromTerminalId = selected.terminalId
                                 },
                                 enabled = true,
                             )
@@ -240,7 +247,7 @@ internal fun CreateAssociationScreen(
                         // if terminal config is available show terminal selection
                         toTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
-                                selected = selectedCandidateFeatureTerminalId?.let { id ->
+                                selected = selectedToTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
                                 },
                                 modifier = Modifier
@@ -248,7 +255,7 @@ internal fun CreateAssociationScreen(
                                     .fillMaxWidth(),
                                 options = terminalConfig.terminals,
                                 onTerminalSelected = { selected ->
-                                    selectedCandidateFeatureTerminalId = selected.terminalId
+                                    selectedToTerminalId = selected.terminalId
                                 },
                                 enabled = true,
                             )

@@ -87,6 +87,9 @@ class UtilityAssociationsFormElementAddTests {
         }
     }
 
+    /**
+     * Helper method to get a FeatureForm for a given object ID and layer name.
+     */
     suspend fun getFeatureFormForObjectId(
         objectId: Long,
         layerName: String
@@ -114,6 +117,8 @@ class UtilityAssociationsFormElementAddTests {
      * Given a FeatureForm with a UtilityAssociationsFormElement
      * When the user adds an connected association from a network data source
      * Then the association should be added to the group
+     *
+     * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-131-add-an-association
      *
      * @since 300.0.0
      */
@@ -179,6 +184,8 @@ class UtilityAssociationsFormElementAddTests {
         composeTestRule.waitUntil {
             listView.onChildren().fetchSemanticsNodes().isNotEmpty()
         }
+        // Might have to scroll to find the asset type
+        listView.performScrollToNode(hasText("Cabinet Fuse"))
         val assetType = listView.onChildWithText("Cabinet Fuse").assertIsDisplayed()
         assetType.performClick()
 
@@ -223,6 +230,8 @@ class UtilityAssociationsFormElementAddTests {
      * Given a FeatureForm with a UtilityAssociationsFormElement
      * When the user adds a connected association from a network data source with terminal and fraction
      * Then the association should be added to the group
+     *
+     * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-132-add-connectivity-association-with-terminal-and-fraction-along
      *
      * @since 300.0.0
      */
@@ -324,12 +333,13 @@ class UtilityAssociationsFormElementAddTests {
         composeTestRule.onNodeWithText("To Element").assertIsDisplayed()
         composeTestRule.onNodeWithText("Low Voltage").assertIsDisplayed()
         // Verify the terminal info is displayed
-        val terminalControl = composeTestRule.onNode(hasTextExactly("Terminal", "Select Terminal"))
+        val terminalControl = composeTestRule.onNode(hasTextExactly("Terminal", "High"))
         terminalControl.assertIsDisplayed()
         // Verify the fraction control is displayed
         composeTestRule.onNodeWithText("Fraction Along Edge").assertIsDisplayed()
         composeTestRule.onNodeWithText("0 %").assertIsDisplayed()
-        val fractionControl = composeTestRule.onNodeWithContentDescription("fraction along edge slider")
+        val fractionControl =
+            composeTestRule.onNodeWithContentDescription("fraction along edge slider")
         fractionControl.assertIsDisplayed()
         // Verify the slider has the correct initial state
         fractionControl.assertRangeInfoEquals(ProgressBarRangeInfo(0.0f, 0.0f..1.0f, 0))
@@ -366,6 +376,8 @@ class UtilityAssociationsFormElementAddTests {
      * Given a FeatureForm with a UtilityAssociationsFormElement
      * When the user adds a containment association from a network data source
      * Then the association should be added to the group
+     *
+     * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-133-add-containment-association-with-content-visible-option
      *
      * @since 300.0.0
      */
