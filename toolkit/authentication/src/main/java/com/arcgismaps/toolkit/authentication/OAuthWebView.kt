@@ -247,18 +247,24 @@ private class OAuthWebViewClient(
         exception: Exception,
         networkAuthenticationType: NetworkAuthenticationType
     ): NetworkCredential? {
+        // Check if we have a stored credential for this host
         val credentialList =
             ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrNull()
         val credential: NetworkCredential? =
             if (!credentialList.isNullOrEmpty()) {
                 credentialList.first()
             } else {
+                // If no stored credential, raise a NetworkAuthenticationChallenge to prompt for one
                 val credentialChallenge = NetworkAuthenticationChallenge(
                     host,
                     networkAuthenticationType,
                     exception
                 )
-                when (val response = authenticatorState.handleNetworkAuthenticationChallenge(credentialChallenge)) {
+                // If the challenge handler is null, null is returned to the caller which will cancel the request with the
+                // exception provided
+                val response = ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler
+                    ?.handleNetworkAuthenticationChallenge(credentialChallenge)
+                when (response) {
                     is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
                     else -> null
                 }
