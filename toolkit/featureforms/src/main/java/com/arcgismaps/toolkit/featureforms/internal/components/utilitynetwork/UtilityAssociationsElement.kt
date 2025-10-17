@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +57,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 @Composable
 internal fun UtilityAssociationsElement(
     state: UtilityAssociationsElementState,
-    onItemClick: (UtilityAssociationsFilterResult) -> Unit,
+    onItemClick: (MutableFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -125,7 +125,7 @@ private fun ElementHeader(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
             if (description.isNotEmpty()) {
                 Text(
@@ -146,16 +146,19 @@ private fun ElementHeader(
  */
 @Composable
 private fun Filters(
-    filterResults: List<UtilityAssociationsFilterResult>,
-    onClick: (UtilityAssociationsFilterResult) -> Unit,
+    filterResults: List<MutableFilterResult>,
+    onClick: (MutableFilterResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier = modifier) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surfaceBright
+    ) {
         Column {
             filterResults.forEachIndexed { i, filterResult ->
                 ListItem(
                     headlineContent = {
-                        Text(text = filterResult.filter.title)
+                        Text(text = filterResult.filter.title, modifier = Modifier.padding(start = 16.dp))
                     },
                     modifier = Modifier.clickable {
                         onClick(filterResult)
@@ -174,7 +177,7 @@ private fun Filters(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = filterResult.resultCount.toString())
-                            Image(
+                            Icon(
                                 imageVector = Icons.AutoMirrored.Default.ArrowRight,
                                 contentDescription = null,
                                 modifier = Modifier.padding(start = 8.dp)
@@ -182,11 +185,15 @@ private fun Filters(
                         }
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
+                    ),
+                    tonalElevation = (-1).dp
                 )
                 if (i < filterResults.size - 1) {
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
                 }
             }
         }

@@ -32,7 +32,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,6 +57,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElem
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
@@ -103,132 +103,6 @@ public sealed class FeatureFormEditingEvent {
      */
     public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
         FeatureFormEditingEvent()
-}
-
-@Deprecated(
-    message = "Maintained for binary compatibility. Use the overload that accepts a colorScheme and typography.",
-    level = DeprecationLevel.HIDDEN
-)
-@Suppress("DEPRECATION")
-@Composable
-public fun FeatureForm(
-    featureForm: FeatureForm,
-    modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
-) {
-    FeatureForm(
-        featureForm = featureForm,
-        modifier = modifier,
-        validationErrorVisibility = validationErrorVisibility,
-        colorScheme = FeatureFormDefaults.colorScheme(),
-        typography = FeatureFormDefaults.typography(),
-        onBarcodeButtonClick = null
-    )
-}
-
-@Deprecated(
-    message = "Maintained for binary compatibility. Use the overload that provides the barcode accessory tap callback.",
-    level = DeprecationLevel.HIDDEN
-)
-@Composable
-@Suppress("DEPRECATION")
-public fun FeatureForm(
-    featureForm: FeatureForm,
-    modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-) {
-    FeatureForm(
-        featureForm = featureForm,
-        modifier = modifier,
-        validationErrorVisibility = validationErrorVisibility,
-        colorScheme = colorScheme,
-        typography = typography,
-        onBarcodeButtonClick = null
-    )
-}
-
-/**
- * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using a [FeatureForm] that has been configured externally.
- *
- * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
- * - [AttachmentsFormElement]
- * - [FieldFormElement] with the following [FormInput] types -
- *     * [BarcodeScannerFormInput]
- *     * [ComboBoxFormInput]
- *     * [DateTimePickerFormInput]
- *     * [RadioButtonsFormInput]
- *     * [SwitchFormInput]
- *     * [TextAreaFormInput]
- *     * [TextBoxFormInput]
- * - [GroupFormElement]
- * - [TextFormElement]
- *
- * @param featureForm the [FeatureForm] object to use
- * @param modifier the modifier to apply to this layout.
- * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
- * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
- * indicates errors are only visible once the respective field gains focus.
- * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
- * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
- * default barcode scanner is used.
- * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
- * @param typography The [FeatureFormTypography] to use for the FeatureForm.
- *
- * @since 200.4.0
- */
-@Deprecated(
-    message = "Use the overload that uses the FeatureFormState object. This will become an error" +
-        " in a future release.",
-    level = DeprecationLevel.WARNING
-)
-@Composable
-@Suppress("DEPRECATION")
-public fun FeatureForm(
-    featureForm: FeatureForm,
-    modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
-    typography: FeatureFormTypography = FeatureFormDefaults.typography(),
-) {
-    val scope = rememberCoroutineScope()
-    // Hold the list of form elements.
-    val formElements: List<FormElement> = remember(featureForm) {
-        // Add the default attachments element, if present.
-        featureForm.elements + listOfNotNull(featureForm.defaultAttachmentsElement)
-    }
-    val states = remember(featureForm) {
-        createStates(
-            form = featureForm,
-            elements = formElements,
-            // Ignore the UtilityAssociationsFormElement as it is not supported with this API
-            ignoreList = setOf(
-                UtilityAssociationsFormElement::class.java
-            ),
-            scope = scope
-        )
-    }
-    val state = remember(featureForm) {
-        FeatureFormState(
-            featureForm = featureForm,
-            stateCollection = states,
-            coroutineScope = scope
-        )
-    }
-    FeatureForm(
-        featureFormState = state,
-        modifier = modifier,
-        // Hide the close and action bar in the form since it is not supported via this API
-        showCloseIcon = false,
-        showFormActions = false,
-        validationErrorVisibility = validationErrorVisibility,
-        onBarcodeButtonClick = onBarcodeButtonClick,
-        colorScheme = colorScheme,
-        typography = typography,
-    )
 }
 
 /**
@@ -383,10 +257,12 @@ public fun FeatureForm(
         )
         onEditingEvent(event)
     }
-
+    // Get the current back stack entry as state
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    // Get the form data for the active entry (destination) in the back stack
+    val formData = remember(backStackEntry) { state.getActiveFormStateData() }
     FeatureFormLayout(
         topBar = {
-            val backStackEntry by navController.currentBackStackEntryAsState()
             // Track if there is a back stack entry
             val hasBackStack = remember(backStackEntry) {
                 navController.previousBackStackEntry != null
@@ -427,6 +303,7 @@ public fun FeatureForm(
         colorScheme = colorScheme,
         typography = typography
     )
+    FeatureFormDialog(states = formData.stateCollection)
     DisposableEffect(state) {
         onDispose {
             // Clear the navigation actions when the composition is disposed
@@ -450,7 +327,6 @@ internal fun FeatureFormLayout(
     ) {
         Column(modifier = modifier) {
             topBar()
-            HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
             content()
         }
     }

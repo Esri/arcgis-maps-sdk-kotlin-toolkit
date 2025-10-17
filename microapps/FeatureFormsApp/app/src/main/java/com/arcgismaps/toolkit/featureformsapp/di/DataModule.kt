@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.featureformsapp.di
 import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
+import com.arcgismaps.toolkit.featureformsapp.data.local.FolderCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
@@ -30,6 +31,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -57,8 +59,14 @@ class DataModule {
      */
     @Provides
     @ItemRemoteSource
-    internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
-        ItemRemoteDataSource(dispatcher)
+    internal fun provideItemRemoteDataSource(
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        portalSettings: PortalSettings,
+        @ApplicationScope scope: CoroutineScope,
+    ): ItemRemoteDataSource {
+        return ItemRemoteDataSource(dispatcher, portalSettings, scope)
+    }
+
 
     /**
      * The provider of the PortalItemRepository.
@@ -70,15 +78,17 @@ class DataModule {
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
         @ItemCache itemCacheDao: ItemCacheDao,
-        @ApplicationContext context: Context
+        @FolderCache folderCacheDao: FolderCacheDao,
+        portalSettings: PortalSettings
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
+        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, folderCacheDao, portalSettings)
 
     @Singleton
     @Provides
     internal fun providePortalSettings(
         @ApplicationContext context: Context,
-    ): PortalSettings = PortalSettings(context = context)
+        @ApplicationScope scope: CoroutineScope
+    ): PortalSettings = PortalSettings(context = context, scope = scope)
 
     @Singleton
     @Provides

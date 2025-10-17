@@ -49,7 +49,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElement
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 
 /**
  * Composable function that displays the feature form screen.
@@ -65,22 +64,6 @@ internal fun FeatureFormScreen(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (UtilityAssociationsElementState) -> Unit,
     modifier: Modifier = Modifier
-) {
-    FormContent(
-        formStateData = formStateData,
-        onBarcodeButtonClick = onBarcodeButtonClick,
-        onUtilityAssociationFilterClick = onUtilityFilterSelected,
-        modifier = modifier
-    )
-    FeatureFormDialog(formStateData.stateCollection)
-}
-
-@Composable
-private fun FormContent(
-    formStateData: FormStateData,
-    modifier: Modifier = Modifier,
-    onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onUtilityAssociationFilterClick: (UtilityAssociationsElementState) -> Unit,
 ) {
     val density = LocalDensity.current
     val view = LocalView.current
@@ -149,7 +132,7 @@ private fun FormContent(
                             onItemClick = { selected ->
                                 // Set the selected filter result in the state
                                 state.setSelectedFilterResult(selected)
-                                onUtilityAssociationFilterClick(state)
+                                onUtilityFilterSelected(state)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

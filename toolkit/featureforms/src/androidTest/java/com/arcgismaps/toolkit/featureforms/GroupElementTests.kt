@@ -46,8 +46,12 @@ class GroupElementTests : FeatureFormTestRunner(
 
     @Before
     fun setContent() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
     }
 
@@ -66,13 +70,15 @@ class GroupElementTests : FeatureFormTestRunner(
         groupElement1.assertIsDisplayed()
         // assert description is displayed
         groupElement1.assertTextContains(groupFormElement1.description)
-        assert(groupElement1.isToggled())
+        // assert that the group is expanded
+        assert(groupElement1.onParent().isToggled())
         // assert this group has children including the header
         assert(groupElement1.onParent().onChildren().fetchSemanticsNodes().count() > 1)
 
         val groupElement2 = composeTestRule.onNodeWithText("Group with Multiple Form Elements 2")
         groupElement2.assertIsDisplayed()
-        assert(!groupElement2.isToggled())
+        // assert the group is expanded
+        assert(!groupElement2.onParent().isToggled())
         // assert that only the header is displayed
         assert(groupElement2.onParent().onChildren().fetchSemanticsNodes().count() == 1)
     }
