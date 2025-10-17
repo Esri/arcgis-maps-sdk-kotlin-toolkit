@@ -97,6 +97,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.layers.ArcGISSublayer
@@ -114,6 +115,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottom
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -215,6 +217,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     state = rememberedForm,
                     isNavigationEnabled = mapViewModel.navigationEnabled,
+                    onFeatureLocateRequest = { feature ->
+                        scope.launch {
+                            mapViewModel.locateFeature(feature)
+                        }
+                    },
                     onDismiss = {
                         mapViewModel.setDefaultState()
                     },
@@ -399,16 +406,22 @@ fun FeatureItem(
 fun FeatureFormSheet(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
+    onFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
+    // determine if the device is in compact width
+    val isCompact = windowSize.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    ).not()
     val bottomSheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
         confirmValueChange = { it != SheetValue.Hidden },
         skipHiddenState = false
     )
+    val scope = rememberCoroutineScope()
     SheetLayout(
         windowSizeClass = windowSize,
         sheetOffsetY = { bottomSheetState.requireOffset() },
@@ -430,6 +443,17 @@ fun FeatureFormSheet(
                 featureFormState = state,
                 modifier = Modifier.fillMaxSize(),
                 isNavigationEnabled = isNavigationEnabled,
+                onFeatureLocateRequest = { feature ->
+                    scope.launch {
+                        if (isCompact) {
+                            // minimize the sheet on compact devices
+                            bottomSheetState.animateTo(SheetValue.Minimized)
+                        }
+                    }.invokeOnCompletion {
+                        // invoke the locate request after minimizing the sheet
+                        onFeatureLocateRequest(feature)
+                    }
+                },
                 onDismiss = onDismiss,
                 onEditingEvent = onEditingEvent
             )
@@ -443,7 +467,7 @@ fun TopFormBar(
     title: String,
     isEditing: Boolean,
     isNavigationEnabled: Boolean,
-    onToggleNavigation : () -> Unit = {},
+    onToggleNavigation: () -> Unit = {},
     onBackPressed: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -548,13 +572,16 @@ fun ErrorDialog(
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     )
 }
-@Suppress("DEPRECATION")
+
 fun getWindowSize(context: Context): WindowSizeClass {
     val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val width = metrics.bounds.width()
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
-    return WindowSizeClass.compute(width / density, height / density)
+    return WindowSizeClass.Companion.BREAKPOINTS_V1.computeWindowSizeClass(
+        widthDp = width / density,
+        heightDp = height / density
+    )
 }
 
 /**

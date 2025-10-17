@@ -51,6 +51,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -170,7 +171,7 @@ class MapViewModel @Inject constructor(
      * The current location of the identify task. This is used to indicate if there is an
      * identify task in progress for the given location.
      */
-    val identifyTaskLocation : State<Point?>
+    val identifyTaskLocation: State<Point?>
         get() = _identifyTaskLocation
 
     /**
@@ -206,7 +207,7 @@ class MapViewModel @Inject constructor(
                 map.clearSelection()
                 // if there is an active feature form then select the feature
                 if (featureForm != null) {
-                    featureForm.selectFeature()
+                    featureForm.feature.selectFeature()
                     featureForm.feature.geometry?.let { geometry ->
                         // set the viewpoint to the feature geometry
                         proxy.setViewpointAnimated(
@@ -226,6 +227,7 @@ class MapViewModel @Inject constructor(
      * Sets the UI state to not editing.
      */
     fun setDefaultState() {
+        map.clearSelection()
         clearErrors()
         _uiState.value = UIState.NotEditing
     }
@@ -423,6 +425,30 @@ class MapViewModel @Inject constructor(
     }
 
     /**
+     * Locates the given [feature] on the map by setting the viewpoint to the feature geometry
+     * and flashing the feature.
+     *
+     * @param feature the feature to locate
+     */
+    suspend fun locateFeature(feature: ArcGISFeature) {
+        feature.geometry?.let { geometry ->
+            // set the viewpoint to the feature geometry
+            proxy.setViewpointAnimated(
+                viewpoint = Viewpoint(geometry)
+            ).onSuccess {
+                feature.layer?.maxScale?.let {
+                    // clamp the scale to be at least 0.1 to avoid zooming in too close
+                    val scale = if (it > 0) it else 0.1
+                    // set the viewpoint scale to the layer's max scale
+                    proxy.setViewpointScale(scale)
+                }
+                // flash the feature to highlight it
+                feature.flashFeature()
+            }
+        }
+    }
+
+    /**
      * Applies the edits in the [featureForm]'s table to the service and sets the UI state to error
      * if there are any errors.
      *
@@ -532,14 +558,35 @@ fun ArcGISMap.clearSelection() {
 }
 
 /**
- * Selects the [FeatureForm.feature] on its corresponding layer.
+ * Returns the [FeatureLayer] associated with this [ArcGISFeature], or null if the feature's
+ * table is not associated with a [FeatureLayer].
  */
-fun FeatureForm.selectFeature() {
-    val table = feature.featureTable as? ArcGISFeatureTable ?: return
-    val layer = when (table.layer) {
-        is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
-        is FeatureLayer -> table.layer as FeatureLayer
-        else -> return
+val ArcGISFeature.layer: FeatureLayer?
+    get() {
+        val table = featureTable as? ArcGISFeatureTable ?: return null
+        return when (table.layer) {
+            is SubtypeFeatureLayer -> table.layer as SubtypeFeatureLayer
+            is FeatureLayer -> table.layer as FeatureLayer
+            else -> null
+        }
     }
-    layer.selectFeature(feature)
+
+/**
+ * Selects this feature in its associated layer, if any.
+ */
+fun ArcGISFeature.selectFeature() = layer?.selectFeature(this)
+
+/**
+ * Flashes this feature in its associated layer, if any, by selecting and unselecting it
+ * a given number of [times] with a delay of [delayMs] milliseconds between each selection
+ * and unselection.
+ */
+suspend fun ArcGISFeature.flashFeature(times: Int = 4, delayMs: Long = 500) {
+    val layer = layer ?: return
+    repeat(times) {
+        layer.selectFeature(this)
+        delay(delayMs)
+        layer.unselectFeature(this)
+        delay(delayMs)
+    }
 }

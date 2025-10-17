@@ -27,6 +27,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
@@ -41,6 +42,7 @@ internal fun FeatureFormNavHost(
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+    onFeatureLocateRequest: (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -100,6 +102,7 @@ internal fun FeatureFormNavHost(
                 onFeatureCandidateSelected = { backStackEntry ->
                   navController.navigateToCreateAssociation(backStackEntry)
                 },
+                onFeatureCandidateLocateRequest = onFeatureLocateRequest,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 }

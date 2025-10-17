@@ -28,6 +28,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
@@ -105,6 +106,7 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
 internal fun NavGraphBuilder.selectFeatureDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
     onFeatureCandidateSelected: (NavBackStackEntry) -> Unit,
+    onFeatureCandidateLocateRequest : (ArcGISFeature) -> Unit,
     onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
 ) {
     composable<AddFromSourceNavRoute.SelectAssociatedFeature> { backStackEntry ->
@@ -119,6 +121,7 @@ internal fun NavGraphBuilder.selectFeatureDestination(
             onFeatureCandidateSelected = {
                 onFeatureCandidateSelected(backStackEntry)
             },
+            onFeatureCandidateLocateRequest = onFeatureCandidateLocateRequest,
             modifier = Modifier.fillMaxSize()
         )
     }
