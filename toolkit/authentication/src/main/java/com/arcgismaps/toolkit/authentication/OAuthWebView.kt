@@ -97,7 +97,7 @@ private class OAuthWebViewClient(
 ) : WebViewClient() {
 
     /**
-     * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
+     * Takes control of the page loading in the `WebView` if the URL in the [request] contains the approval code
      * and calls [OAuthUserSignIn.complete] with the redirect URL.
      *
      * @param view the WebView that is initiating this callback.
