@@ -260,6 +260,7 @@ private class OAuthWebViewClient(
                     networkAuthenticationType,
                     exception
                 )
+                // Invoke the network challenge handler on AuthenticationManager instead of the one on AuthenticatorState, to allow intercepting clients to get their own challenge handler invoked. 
                 // If the challenge handler is null, null is returned to the caller which will cancel the request with the
                 // exception provided
                 val response = ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler
