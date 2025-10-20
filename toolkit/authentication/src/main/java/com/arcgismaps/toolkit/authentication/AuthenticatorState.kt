@@ -40,6 +40,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -386,24 +387,33 @@ private class AuthenticatorStateImpl(
      */
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
+            val hasResumed = AtomicBoolean(false)
+
+            /**
+             * Local function to resume the continuation only once.
+             * @param value the alias to resume with, or null if cancelling.
+             */
+            fun resumeOnce(value: String?) {
+                if (hasResumed.getAndSet(true)) return
+                _pendingClientCertificateChallenge.value = null
+                continuation.resume(value) { _, _, _ -> }
+            }
+
             val aliasCallback = KeyChainAliasCallback { alias ->
-                _pendingClientCertificateChallenge.value = null
-                continuation.resume(alias) { _, _, _ -> }
+                resumeOnce(alias)
             }
-            _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback) {
-                _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
-            }
-            continuation.invokeOnCancellation {
-                _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
-            }
+
+            _pendingClientCertificateChallenge.value =
+                ClientCertificateChallenge(
+                    aliasCallback,
+                    onCancel = { resumeOnce(null) }
+                )
+
+            continuation.invokeOnCancellation { resumeOnce(null) }
         }
         return if (selectedAlias != null) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                CertificateCredential(
-                    selectedAlias
-                )
+                CertificateCredential(selectedAlias)
             )
         } else {
             NetworkAuthenticationChallengeResponse.Cancel
