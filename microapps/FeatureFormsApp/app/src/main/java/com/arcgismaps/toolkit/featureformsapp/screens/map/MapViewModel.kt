@@ -40,6 +40,8 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.IdentifyLayerResult
@@ -545,12 +547,20 @@ val List<FeatureEditResult>.errors: List<Throwable>
  */
 fun ArcGISMap.clearSelection() {
     operationalLayers.forEach { layer ->
-        when (layer) {
-            is FeatureLayer -> {
-                layer.clearSelection()
-            }
+        layer.clearSelection()
+    }
+}
 
-            else -> {}
+/**
+ * Clears any previously selected features in this [Layer] by clearing the selection on all
+ * sub layers if this is a [GroupLayer].
+ */
+fun Layer.clearSelection() {
+    if (this is FeatureLayer) {
+        this.clearSelection()
+    } else if (this is GroupLayer) {
+        this.layers.forEach { subLayer ->
+            subLayer.clearSelection()
         }
     }
 }
