@@ -41,6 +41,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
+import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -56,6 +57,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * A UI state class that indicates the current editing state for a feature form.
@@ -432,16 +434,12 @@ class MapViewModel @Inject constructor(
      */
     suspend fun locateFeature(feature: ArcGISFeature) {
         feature.geometry?.let { geometry ->
-            // set the viewpoint to the feature geometry
+            // set the viewpoint to the feature geometry extent
             proxy.setViewpointAnimated(
-                viewpoint = Viewpoint(geometry)
+                Viewpoint(geometry.extent),
+                1.seconds,
+                AnimationCurve.EaseInOutCubic
             ).onSuccess {
-                feature.layer?.maxScale?.let {
-                    // clamp the scale to be at least 0.1 to avoid zooming in too close
-                    val scale = if (it > 0) it else 0.1
-                    // set the viewpoint scale to the layer's max scale
-                    proxy.setViewpointScale(scale)
-                }
                 // flash the feature to highlight it
                 feature.flashFeature()
             }
