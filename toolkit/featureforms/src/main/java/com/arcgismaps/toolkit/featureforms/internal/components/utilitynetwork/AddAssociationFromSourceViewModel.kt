@@ -411,6 +411,16 @@ internal class AddAssociationFromSourceViewModel(
                         }
                     }
 
+                    // no terminals, but fraction along edge provided
+                    fractionAlongEdge != null -> {
+                        // edge to edge
+                        element.addAssociation(
+                            feature = feature,
+                            filter = filter,
+                            fractionAlongEdge = fractionAlongEdge.toDouble()
+                        )
+                    }
+
                     // edge to edge or junction to junction without terminals
                     else -> {
                         element.addAssociation(
