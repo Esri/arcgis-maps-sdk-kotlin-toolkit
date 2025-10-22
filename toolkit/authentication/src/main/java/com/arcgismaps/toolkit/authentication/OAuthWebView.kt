@@ -97,7 +97,7 @@ private class OAuthWebViewClient(
 ) : WebViewClient() {
 
     /**
-     * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
+     * Takes control of the page loading in the `WebView` if the URL in the [request] contains the approval code
      * and calls [OAuthUserSignIn.complete] with the redirect URL.
      *
      * @param view the WebView that is initiating this callback.
@@ -247,18 +247,25 @@ private class OAuthWebViewClient(
         exception: Exception,
         networkAuthenticationType: NetworkAuthenticationType
     ): NetworkCredential? {
+        // Check if we have a stored credential for this host
         val credentialList =
             ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrNull()
         val credential: NetworkCredential? =
             if (!credentialList.isNullOrEmpty()) {
                 credentialList.first()
             } else {
+                // If no stored credential, raise a NetworkAuthenticationChallenge to prompt for one
                 val credentialChallenge = NetworkAuthenticationChallenge(
                     host,
                     networkAuthenticationType,
                     exception
                 )
-                when (val response = authenticatorState.handleNetworkAuthenticationChallenge(credentialChallenge)) {
+                // Invoke the network challenge handler on AuthenticationManager instead of the one on AuthenticatorState, to allow intercepting clients to get their own challenge handler invoked. 
+                // If the challenge handler is null, null is returned to the caller which will cancel the request with the
+                // exception provided
+                val response = ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler
+                    ?.handleNetworkAuthenticationChallenge(credentialChallenge)
+                when (response) {
                     is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
                     else -> null
                 }

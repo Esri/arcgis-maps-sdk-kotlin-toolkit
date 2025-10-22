@@ -23,6 +23,7 @@ plugins {
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-parcelize")
+    id("grant-test-permissions")
     alias(libs.plugins.binary.compatibility.validator) apply true
     alias(libs.plugins.kotlin.serialization) apply true
 }
@@ -51,14 +52,14 @@ android {
         disable += "MissingTranslation"
         disable += "MissingQuantity"
     }
-    
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        
+        testApplicationId = "com.arcgismaps.toolkit.featureforms.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -111,6 +112,19 @@ android {
     }
 }
 
+grantTestPermissionsConfig {
+    packageName.set(android.defaultConfig.testApplicationId)
+    adbPath.set(android.adbExecutable.absoluteFile)
+    permissions.set(
+        listOf(
+            "android.permission.CAMERA",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.MANAGE_EXTERNAL_STORAGE"
+        )
+    )
+}
+
 apiValidation {
     ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
@@ -135,18 +149,24 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeScannerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.barcode.ComposableSingletons\$BarcodeTextFieldKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsElementKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationsFilterResultKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationGroupResultKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ComposableSingletons\$UtilityAssociationDetailsKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt",
-        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToFeature\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateToAssociation\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$Dismiss\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$NavigateBack\$Creator",
         "com.arcgismaps.toolkit.featureforms.internal.navigation.NavigationAction\$None\$Creator",
-        "com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ComposableSingletons\$ConfirmationDialogsKt"
+        "com.arcgismaps.toolkit.featureforms.internal.components.material3.ComposableSingletons\$ModalBottomSheetKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$ContentAwareTopBarKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationGroupResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UNAssociationsFilterResultScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$CreateAssociationScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectAssociatedFeatureScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
-    
     ignoredClasses.addAll(composableSingletons)
 }
 
@@ -154,8 +174,7 @@ apiValidation {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(libs.bundles.commonmark)
-    implementation(platform(libs.coil.bom))
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.window)

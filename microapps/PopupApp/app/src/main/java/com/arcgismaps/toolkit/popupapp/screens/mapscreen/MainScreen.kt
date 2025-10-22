@@ -24,9 +24,13 @@ import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
@@ -37,6 +41,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.data.Feature
@@ -74,17 +80,36 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
         }
     }
 
+    val navBarHeight = with(LocalDensity.current) {
+        WindowInsets.navigationBars.getBottom(this).toDp()
+    }
+    // ensure a minimum bottom inset of 48.dp when there is no navigation bar
+    // this ensures that the peek height is always at least 96.dp
+    val bottomInset = maxOf(navBarHeight, 48.dp)
+
+    val statusBarHeightDp = with(LocalDensity.current) {
+        WindowInsets.statusBars.getTop(this).toDp()
+    }
+
+    val maxPopupHeight = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.height.toDp() - (statusBarHeightDp + bottomInset)
+    }
+
     BottomSheetScaffold(
         sheetContent = {
             val state = viewModel.popupState
             if (state != null) {
                 Popup(
                     state,
-                    Modifier.animateContentSize(),
-                    onDismiss = { scope.launch {
-                        resetSelection(viewModel)
-                        scaffoldState.bottomSheetState.hide()
-                    } }
+                    Modifier
+                        .animateContentSize()
+                        .heightIn(max = maxPopupHeight),
+                    onDismiss = {
+                        scope.launch {
+                            resetSelection(viewModel)
+                            scaffoldState.bottomSheetState.hide()
+                        }
+                    }
                 )
             }
         },
@@ -92,6 +117,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
             .fillMaxSize()
             .padding(WindowInsets.safeDrawing.asPaddingValues()),
         scaffoldState = scaffoldState,
+        sheetPeekHeight = bottomInset.times(2),
         sheetSwipeEnabled = true,
         topBar = null
     ) { padding ->
@@ -100,7 +126,7 @@ fun MainScreen(viewModel: MapViewModel = viewModel()) {
             arcGISMap = viewModel.map,
             mapViewProxy = viewModel.proxy,
             modifier = Modifier
-                .padding(padding)
+                .consumeWindowInsets(padding)
                 .fillMaxSize(),
             onSingleTapConfirmed = {
                 resetSelection(viewModel)

@@ -23,6 +23,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
@@ -91,6 +92,12 @@ dependencies {
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
+    // kotlinx serialization
+    implementation(libs.kotlinx.serialization.json)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+    // coil
+    implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
