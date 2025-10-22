@@ -39,6 +39,9 @@ playServicesLocation = "21.3.0"
 gmazzo = "2.4.6"
 gradleSecrets = "2.0.1"
 workVersion = "2.10.3"
+junitVersion = "1.3.0"
+appcompat = "1.6.1"
+material = "1.10.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -95,6 +98,9 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -108,6 +114,7 @@ gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradl
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
+android-fusedlibrary = { id = "com.android.fused-library", version.ref = "androidGradlePlugin" }
 
 [bundles]
 camerax = [

@@ -29,6 +29,7 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.gmazzo.test.aggregation)
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.android.fusedlibrary) apply false
 }
 
 buildscript {

@@ -23,6 +23,7 @@ pluginManagement {
         mavenCentral()
     }
 }
+include(":sharedlibs")
 
 // For finalBuilds ignore the build number and pick up the released version of the SDK dependency
 val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
@@ -203,4 +204,3 @@ include(":offlinemapareas-app")
 project(":offlinemapareas-app").projectDir = File(rootDir, "microapps/OfflineMapAreasApp/app")
 include(":ar-flyover-app")
 project(":ar-flyover-app").projectDir = File(rootDir, "microapps/ArFlyoverApp/app")
-
