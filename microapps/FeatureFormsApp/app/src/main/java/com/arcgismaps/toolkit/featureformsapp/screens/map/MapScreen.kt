@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.map
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -105,6 +106,7 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormEditingEvent
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
@@ -230,6 +232,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                 mapViewModel.commitEdits(featureForm = event.featureForm)
                             }
                         }
+                    },
+                    onNavigationEvent = {
+                        Log.e("TAG", "MapScreen Nav Event: $it", )
                     },
                     modifier = Modifier.padding(padding)
                 )
@@ -408,6 +413,7 @@ fun FeatureFormSheet(
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -454,7 +460,8 @@ fun FeatureFormSheet(
                     }
                 },
                 onDismiss = onDismiss,
-                onEditingEvent = onEditingEvent
+                onEditingEvent = onEditingEvent,
+                onNavigationEvent = onNavigationEvent
             )
         }
     }

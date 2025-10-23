@@ -68,6 +68,7 @@ internal fun FeatureFormNavHost(
         associationsFilterResultDestination(
             onGroupSelected =  navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
+            onNavigationEvent = onNavigationEvent,
             state = state
         )
 
@@ -76,8 +77,21 @@ internal fun FeatureFormNavHost(
             onSave = onSaveForm,
             onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
+            onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature =  state::navigateTo,
+            onNavigationEvent = onNavigationEvent,
             onBack =  navController::popBackStack,
+        )
+
+        associationDetailsDestination(
+            onDeleteAssociation = { isGroupEmpty ->
+                // If the group is empty after deletion, navigate back to the filter view
+                if (isGroupEmpty) {
+                    navController.popBackStack<NavigationRoute.UNAssociationsFilterResult>(inclusive = false)
+                }
+            },
+            onNavigationEvent = onNavigationEvent,
+            state = state,
         )
 
         navigation<NavigationRoute.AddUNAssociationFromSource>(
@@ -89,6 +103,7 @@ internal fun FeatureFormNavHost(
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 },
                 onSourceSelected = navController::navigateToSelectAssetType,
+                onNavigationEvent = onNavigationEvent,
                 state = state
             )
 
@@ -97,7 +112,8 @@ internal fun FeatureFormNavHost(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
 
             selectFeatureDestination(
@@ -108,7 +124,8 @@ internal fun FeatureFormNavHost(
                 onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
 
             createAssociationDestination(
@@ -118,7 +135,8 @@ internal fun FeatureFormNavHost(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
         }
     }

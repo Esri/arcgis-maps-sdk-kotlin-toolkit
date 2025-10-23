@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
@@ -36,7 +36,9 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     state: FeatureFormState,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
+    onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
     onBack: () -> Unit,
     isNavigationEnabled: Boolean,
 ) {
@@ -56,6 +58,9 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 isNavigationEnabled = isNavigationEnabled,
                 onSave = onSave,
                 onDiscard = onDiscard,
+                onNavigateToAssociation = {
+                    onNavigateToAssociation(backStackEntry, utilityAssociationsElementState.id)
+                },
                 onNavigateToFeature = { feature ->
                     onNavigateToFeature(backStackEntry, feature)
                 },
@@ -68,7 +73,11 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state.updateActiveFeatureForm()
             }
             LaunchedEffect(groupResult) {
-                Log.e("TAG", "associationGroupResultDestination: $groupResult", )
+                val eventData = FeatureFormNavigationEvent.UtilityAssociationsGroupResultNav(
+                    element = utilityAssociationsElementState.element,
+                    utilityAssociationGroupResult = groupResult.groupResult
+                )
+                onNavigationEvent(eventData)
             }
         } else {
             // If we don't have a valid state or group, navigate back to the previous screen.

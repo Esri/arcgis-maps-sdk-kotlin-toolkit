@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.R
@@ -73,6 +74,7 @@ internal fun UNAssociationGroupResultScreen(
     isNavigationEnabled: Boolean,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
+    onNavigateToAssociation : () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -115,7 +117,8 @@ internal fun UNAssociationGroupResultScreen(
             val association = groupResult.associationResults[index]
             state.setSelectedAssociationResult(association)
             // show the details sheet
-            showDetails = true
+            // showDetails = true
+            onNavigateToAssociation()
         },
         onDelete = { isGroupEmpty ->
             if (isGroupEmpty) {

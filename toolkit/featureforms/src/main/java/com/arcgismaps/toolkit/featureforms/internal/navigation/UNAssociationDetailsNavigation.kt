@@ -27,53 +27,44 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
-import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
 
-internal fun NavGraphBuilder.associationsFilterResultDestination(
-    onGroupSelected: (NavBackStackEntry, Int) -> Unit,
-    onAddFromSourceClick: (NavBackStackEntry, Int) -> Unit,
+internal fun NavGraphBuilder.associationDetailsDestination(
+    onDeleteAssociation: (isGroupEmpty: Boolean) -> Unit,
     onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
     state: FeatureFormState,
 ) {
-    composable<NavigationRoute.UNAssociationsFilterResult> { backStackEntry ->
-        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationsFilterResult>()
+    composable<NavigationRoute.UNAssociationDetails> { backStackEntry ->
+        val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
         // Get the selected UtilityAssociationsElementState from the state collection
-        val utilityAssociationsElementState = states[route.stateId]
-            // guard against null value
-            as? UtilityAssociationsElementState
-        // Get the selected filter from the UtilityAssociationsElementState
-        val filterResult = utilityAssociationsElementState?.selectedFilterResult
-        // guard against null value
-        if (filterResult != null) {
-            UNAssociationsFilterResultScreen(
+        val utilityAssociationsElementState =
+            states[route.stateId] as? UtilityAssociationsElementState
+        if (utilityAssociationsElementState != null) {
+            UtilityAssociationDetails(
                 state = utilityAssociationsElementState,
-                onGroupSelected = { stateId ->
-                    onGroupSelected(backStackEntry, stateId)
-                },
-                onAddFromSourceClick = { stateId ->
-                    onAddFromSourceClick(backStackEntry, stateId)
-                },
+                onDelete = onDeleteAssociation,
                 modifier = Modifier.fillMaxSize()
             )
-            LaunchedEffect(filterResult) {
-                val eventData = FeatureFormNavigationEvent.UtilityAssociationsFilterResultNav(
-                    element = utilityAssociationsElementState.element,
-                    utilityAssociationsFilterResult = filterResult.filterResult
-                )
-                onNavigationEvent(eventData)
+            LaunchedEffect(utilityAssociationsElementState.selectedAssociationResult) {
+                utilityAssociationsElementState.selectedAssociationResult?.let { result ->
+                    val eventData = FeatureFormNavigationEvent.UtilityAssociationResultView(
+                        element = utilityAssociationsElementState.element,
+                        utilityAssociationResult = result
+                    )
+                    onNavigationEvent(eventData)
+                }
             }
         }
     }
 }
 
-internal fun NavHostController.navigateToUNAssociationsFilterResult(
+internal fun NavHostController.navigateToUNAssociationDetails(
     backStackEntry: NavBackStackEntry,
     stateId: Int
 ) {
-    val newRoute = NavigationRoute.UNAssociationsFilterResult(stateId = stateId)
-    // Navigate to the filter view
+    val newRoute = NavigationRoute.UNAssociationDetails(stateId = stateId)
     navigateSafely(backStackEntry, newRoute)
 }

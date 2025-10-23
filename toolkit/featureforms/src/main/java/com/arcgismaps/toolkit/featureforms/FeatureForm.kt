@@ -267,7 +267,7 @@ public fun FeatureForm(
     isNavigationEnabled : Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onShowOnMapRequest : ((ArcGISFeature) -> Unit)? = null,
+    onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     onNavigationEvent: (FeatureFormNavigationEvent) -> Unit = {},
@@ -365,9 +365,8 @@ public fun FeatureForm(
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
-                onShowOnMapRequest = { feature ->
-                    onShowOnMapRequest?.invoke(feature)
-                },
+                onShowOnMapRequest = onShowOnMapRequest,
+                onNavigationEvent = onNavigationEvent,
                 modifier = Modifier.fillMaxSize()
             )
         },
@@ -385,7 +384,7 @@ public fun FeatureForm(
     }
     LaunchedEffect(navController, featureFormState) {
         navController.currentBackStackEntryFlow.collect { entry ->
-            Log.e("TAG", "FeatureForm: $entry.", )
+            //Log.e("TAG", "FeatureForm: $entry.", )
         }
     }
 }
