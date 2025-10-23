@@ -72,7 +72,7 @@ class SafeSuspendableCancellableTest {
      * @since 200.8.1
      */
     @Test
-    fun ignoresSecondResumeCancelThenSuccess() = runTest {
+    fun throwExceptionFirstThenReturnValueIsIgnored() = runTest {
         var safeResult: String? = null
         val res = runCatching {
             safeResult = safeSuspendableCancellable<String> { cont ->
