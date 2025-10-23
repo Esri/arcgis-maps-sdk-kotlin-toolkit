@@ -42,7 +42,7 @@ internal fun FeatureFormNavHost(
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
-    onFeatureLocateRequest: (ArcGISFeature) -> Unit,
+    onShowOnMapRequest: (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -102,7 +102,7 @@ internal fun FeatureFormNavHost(
                 onFeatureCandidateSelected = { backStackEntry ->
                   navController.navigateToCreateAssociation(backStackEntry)
                 },
-                onFeatureCandidateLocateRequest = onFeatureLocateRequest,
+                onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 }

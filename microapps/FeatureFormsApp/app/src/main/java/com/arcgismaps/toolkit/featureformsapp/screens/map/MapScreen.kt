@@ -443,7 +443,7 @@ fun FeatureFormSheet(
                 featureFormState = state,
                 modifier = Modifier.fillMaxSize(),
                 isNavigationEnabled = isNavigationEnabled,
-                onFeatureLocateRequest = { feature ->
+                onShowOnMapRequest = { feature ->
                     scope.launch {
                         if (isCompact) {
                             // minimize the sheet on compact devices

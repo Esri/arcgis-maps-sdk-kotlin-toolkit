@@ -181,7 +181,7 @@ public sealed class FeatureFormEditingEvent {
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
- * @param onFeatureLocateRequest A callback that is invoked when a request to locate a feature is made.
+ * @param onShowOnMapRequest A callback that is invoked when a request to highlight a feature is made.
  * Invoked when the locate icon is tapped on a [UtilityAssociationFeatureCandidate] inside a
  * [UtilityAssociationsFormElement] during new association candidate selection. This can be used to
  * highlight the feature in the map view, helping visually confirm the correct feature to associate.
@@ -206,7 +206,7 @@ public fun FeatureForm(
     isNavigationEnabled : Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onFeatureLocateRequest : ((ArcGISFeature) -> Unit)? = null,
+    onShowOnMapRequest : ((ArcGISFeature) -> Unit)? = null,
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
@@ -303,8 +303,8 @@ public fun FeatureForm(
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
-                onFeatureLocateRequest = { feature ->
-                    onFeatureLocateRequest?.invoke(feature)
+                onShowOnMapRequest = { feature ->
+                    onShowOnMapRequest?.invoke(feature)
                 },
                 modifier = Modifier.fillMaxSize()
             )
