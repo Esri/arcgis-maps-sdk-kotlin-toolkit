@@ -75,11 +75,6 @@ android {
             // This is the default variant.
         }
     }
-
-    lint {
-        disable += "MissingTranslation"
-    }
-
 }
 
 apiValidation {
