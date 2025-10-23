@@ -115,7 +115,6 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottom
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -217,9 +216,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 FeatureFormSheet(
                     state = rememberedForm,
                     isNavigationEnabled = mapViewModel.navigationEnabled,
-                    onFeatureLocateRequest = { feature ->
+                    onShowOnMapRequest = { feature ->
                         scope.launch {
-                            mapViewModel.locateFeature(feature)
+                            mapViewModel.highlightFeature(feature)
                         }
                     },
                     onDismiss = {
@@ -406,7 +405,7 @@ fun FeatureItem(
 fun FeatureFormSheet(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
-    onFeatureLocateRequest: (ArcGISFeature) -> Unit,
+    onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -451,7 +450,7 @@ fun FeatureFormSheet(
                         }
                     }.invokeOnCompletion {
                         // invoke the locate request after minimizing the sheet
-                        onFeatureLocateRequest(feature)
+                        onShowOnMapRequest(feature)
                     }
                 },
                 onDismiss = onDismiss,

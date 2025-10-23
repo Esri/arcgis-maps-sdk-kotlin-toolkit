@@ -434,7 +434,7 @@ class MapViewModel @Inject constructor(
      *
      * @param feature the feature to locate
      */
-    suspend fun locateFeature(feature: ArcGISFeature) {
+    suspend fun highlightFeature(feature: ArcGISFeature) {
         feature.geometry?.let { geometry ->
             // set the viewpoint to the feature geometry extent
             proxy.setViewpointAnimated(
