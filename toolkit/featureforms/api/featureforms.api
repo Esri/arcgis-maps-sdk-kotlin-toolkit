@@ -31,7 +31,7 @@ public final class com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$S
 }
 
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormKt {
-	public static final fun FeatureForm (Lcom/arcgismaps/toolkit/featureforms/FeatureFormState;Landroidx/compose/ui/Modifier;ZZZLcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;III)V
+	public static final fun FeatureForm (Lcom/arcgismaps/toolkit/featureforms/FeatureFormState;Landroidx/compose/ui/Modifier;ZZZLcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormState {

@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +43,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -53,6 +53,7 @@ import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
@@ -180,6 +181,11 @@ public sealed class FeatureFormEditingEvent {
  * @param onBarcodeButtonClick A callback that is invoked when the barcode accessory is clicked.
  * The callback is invoked with the [FieldFormElement] that has the barcode accessory. If null, the
  * default barcode scanner is used.
+ * @param onShowOnMapRequest A callback that is invoked when a request to highlight a feature is made.
+ * Invoked when the locate icon is tapped on a [UtilityAssociationFeatureCandidate] inside a
+ * [UtilityAssociationsFormElement] during new association candidate selection. This can be used to
+ * highlight the feature in the map view, helping visually confirm the correct feature to associate.
+ * Note that this in only invoked for spatial features that have a geometry.
  * @param onDismiss A callback that is invoked when the close icon is visible and is clicked.
  * @param onEditingEvent A callback that is invoked when an editing event occurs in the form. This
  * is triggered when the edits are saved or discarded using the save or discard buttons, respectively.
@@ -200,6 +206,7 @@ public fun FeatureForm(
     isNavigationEnabled : Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
+    onShowOnMapRequest : ((ArcGISFeature) -> Unit)? = null,
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
@@ -296,6 +303,9 @@ public fun FeatureForm(
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
+                onShowOnMapRequest = { feature ->
+                    onShowOnMapRequest?.invoke(feature)
+                },
                 modifier = Modifier.fillMaxSize()
             )
         },

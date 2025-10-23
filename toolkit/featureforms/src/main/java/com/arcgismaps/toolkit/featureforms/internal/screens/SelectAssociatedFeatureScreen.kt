@@ -90,6 +90,7 @@ internal fun SelectAssociatedFeatureScreen(
     viewModel: AddAssociationFromSourceViewModel,
     onBackPressed: () -> Unit,
     onFeatureCandidateSelected: () -> Unit,
+    onFeatureCandidateLocateRequest : (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -97,7 +98,7 @@ internal fun SelectAssociatedFeatureScreen(
     val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
     val candidates = state.candidates
     val count = candidates.count()
-    val title = if (state.isLoading){
+    val title = if (state.isLoading) {
         stringResource(R.string.loading2)
     } else {
         stringResource(R.string.available_features, count)
@@ -199,19 +200,21 @@ internal fun SelectAssociatedFeatureScreen(
                                             modifier = Modifier.padding(start = 12.dp)
                                         )
                                     },
-                                    trailingContent = {
-                                        IconButton(
-                                            onClick = {
-                                                // TODO: Handle locate feature on map
+                                    trailingContent = if (item.feature.geometry != null) {
+                                        {
+                                            IconButton(
+                                                onClick = {
+                                                    onFeatureCandidateLocateRequest(item.feature)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.LocationSearching,
+                                                    contentDescription = "Locate Feature",
+                                                    modifier = Modifier.size(24.dp)
+                                                )
                                             }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.LocationSearching,
-                                                contentDescription = "Locate Feature",
-                                                modifier = Modifier.size(24.dp)
-                                            )
                                         }
-                                    },
+                                    } else null,
                                     colors = ListItemDefaults.colors(
                                         containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
@@ -234,7 +237,7 @@ internal fun SelectAssociatedFeatureScreen(
 @Composable
 private fun EmptyResultsRow(modifier: Modifier = Modifier) {
     val color = LocalContentColor.current
-    Column (
+    Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
