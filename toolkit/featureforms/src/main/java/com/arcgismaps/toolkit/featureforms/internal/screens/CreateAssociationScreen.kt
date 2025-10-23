@@ -34,7 +34,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +53,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Pr
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityTerminalControl
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getTerminalById
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun CreateAssociationScreen(
@@ -69,10 +70,10 @@ internal fun CreateAssociationScreen(
         SnackbarHostState()
     }
     val associationOptions = viewModel.newAssociationOptions
-    var selectedFormFeatureTerminalId by rememberSaveable(associationOptions) {
+    var selectedFromTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
-    var selectedCandidateFeatureTerminalId by rememberSaveable(associationOptions) {
+    var selectedToTerminalId by rememberSaveable(associationOptions) {
         mutableStateOf<Int?>(null)
     }
     var isContainmentVisible by rememberSaveable(associationOptions) {
@@ -106,11 +107,14 @@ internal fun CreateAssociationScreen(
                     scope.launch {
                         viewModel.addAssociation(
                             isContainmentVisible = isContainmentVisible,
-                            fromTerminalId = selectedFormFeatureTerminalId,
-                            toTerminalId = selectedCandidateFeatureTerminalId,
+                            fromTerminalId = selectedFromTerminalId,
+                            toTerminalId = selectedToTerminalId,
                             fractionAlongEdge = fractionAlongEdge
                         ).onSuccess {
-                            onAssociationCreated()
+                            // switch to the main thread to invoke the navigation callback
+                            withContext(Dispatchers.Main) {
+                                onAssociationCreated()
+                            }
                         }.onFailure {
                             snackbarHostState.showSnackbar(
                                 message = context.getString(
@@ -133,7 +137,32 @@ internal fun CreateAssociationScreen(
             val candidate = it.candidate
             val options = it.options
             val filterType = it.type
-            
+            val isContainerOrStructure = filterType is UtilityAssociationsFilterType.Container ||
+                filterType is UtilityAssociationsFilterType.Structure
+            val (fromElement, fromTerminalConfig) = remember(associationOptions) {
+                if (isContainerOrStructure) {
+                    candidate.title to
+                        options.candidateFeatureTerminalConfiguration
+                } else {
+                    viewModel.featureForm.title.value to
+                        options.formFeatureTerminalConfiguration
+                }
+            }.also { pair ->
+                selectedFromTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
+            }
+            val (toElement, toTerminalConfig) = remember(associationOptions) {
+                if (isContainerOrStructure) {
+                    viewModel.featureForm.title.value to
+                        options.formFeatureTerminalConfiguration
+
+                } else {
+                    candidate.title to
+                        options.candidateFeatureTerminalConfiguration
+                }
+            }.also { pair ->
+                selectedToTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
+            }
+
             LazyColumn {
                 item {
                     // First show the Association Type
@@ -178,15 +207,15 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.from_element),
-                            value = viewModel.featureForm.title.collectAsState().value,
+                            value = fromElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        options.formFeatureTerminalConfiguration?.let { terminalConfig ->
+                        fromTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
-                                selected = selectedFormFeatureTerminalId?.let { id ->
+                                selected = selectedFromTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
                                 },
                                 modifier = Modifier
@@ -194,7 +223,7 @@ internal fun CreateAssociationScreen(
                                     .fillMaxWidth(),
                                 options = terminalConfig.terminals,
                                 onTerminalSelected = { selected ->
-                                    selectedFormFeatureTerminalId = selected.terminalId
+                                    selectedFromTerminalId = selected.terminalId
                                 },
                                 enabled = true,
                             )
@@ -210,15 +239,15 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.to_element),
-                            value = candidate.title,
+                            value = toElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        options.candidateFeatureTerminalConfiguration?.let { terminalConfig ->
+                        toTerminalConfig?.let { terminalConfig ->
                             UtilityTerminalControl(
-                                selected = selectedCandidateFeatureTerminalId?.let { id ->
+                                selected = selectedToTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
                                 },
                                 modifier = Modifier
@@ -226,7 +255,7 @@ internal fun CreateAssociationScreen(
                                     .fillMaxWidth(),
                                 options = terminalConfig.terminals,
                                 onTerminalSelected = { selected ->
-                                    selectedCandidateFeatureTerminalId = selected.terminalId
+                                    selectedToTerminalId = selected.terminalId
                                 },
                                 enabled = true,
                             )
