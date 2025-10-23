@@ -22,6 +22,7 @@ import com.arcgismaps.toolkit.authentication.utils.suspendWithSafeContinuation
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -98,12 +99,13 @@ class SafeSuspendableCancellableTest {
         val invoked = AtomicBoolean(false)
         val deferred = async {
             suspendWithSafeContinuation<String> { cont ->
-                // simulate long operation; do not resume
+                // simulate cancellation handler
                 cont.invokeOnCancellation {
                     invoked.set(true)
                 }
             }
         }
+        delay(100)
         deferred.cancel()
         var caught: Throwable? = null
         try {
