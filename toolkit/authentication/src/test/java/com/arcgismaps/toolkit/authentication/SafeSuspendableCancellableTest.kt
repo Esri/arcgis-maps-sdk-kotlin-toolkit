@@ -18,7 +18,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import com.arcgismaps.toolkit.authentication.utils.safeSuspendableCancellable
+import com.arcgismaps.toolkit.authentication.utils.suspendWithSafeContinuation
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -27,6 +27,10 @@ import org.junit.Ignore
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * Tests for [suspendWithSafeContinuation].
+ * @since 200.8.1
+ */
 class SafeSuspendableCancellableTest {
 
     /**
@@ -38,7 +42,7 @@ class SafeSuspendableCancellableTest {
     @Test
     fun returnsValueOnSuccess() = runTest {
 
-        val result = safeSuspendableCancellable<String> { cont ->
+        val result = suspendWithSafeContinuation<String> { cont ->
             cont.resumeSafely("value")
         }
         assertThat(result).isEqualTo("value")
@@ -55,7 +59,7 @@ class SafeSuspendableCancellableTest {
         val ex = RuntimeException("boom")
         var caught: Throwable? = null
         try {
-            safeSuspendableCancellable<Unit> { _ ->
+            suspendWithSafeContinuation<Unit> { _ ->
                 throw ex
             }
         } catch (t: Throwable) {
@@ -67,34 +71,14 @@ class SafeSuspendableCancellableTest {
 
     /**
      * Given a safeSuspendableCancellable block
-     * When the block attempts to resume after throwing an exception
-     * Then the resume is ignored and the exception is propagated
-     * @since 200.8.1
-     */
-    @Test
-    fun throwExceptionFirstThenReturnValueIsIgnored() = runTest {
-        var safeResult: String? = null
-        val res = runCatching {
-            safeResult = safeSuspendableCancellable<String> { cont ->
-                throw IllegalStateException("This should be called first")
-                cont.resumeSafely("late") // ignored
-            }
-        }
-        assertThat(res.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        assertThat(res.exceptionOrNull()?.message).isEqualTo("This should be called first")
-        assertThat(safeResult).isNull()
-
-    }
-
-    /**
-     * Given a safeSuspendableCancellable block
      * When the block attempts to resume multiple times
      * Then only the first resume is effective
+     * And no "Multiple resume" errors occur.
      * @since 200.8.1
      */
     @Test
     fun testIgnoresSubsequentSignals() = runTest {
-        val safeResult = safeSuspendableCancellable<String> { cont ->
+        val safeResult = suspendWithSafeContinuation<String> { cont ->
             cont.resumeSafely("first")
             cont.resumeSafely("ignored") // ignored
             cont.resumeSafely("also ignored") // ignored
@@ -109,12 +93,11 @@ class SafeSuspendableCancellableTest {
      * And the cancellation handler is invoked
      * @since 200.8.1
      */
-    @Ignore("TODO() this test fails")
     @Test
     fun parentCancellationResultsInCancellationOutcome() = runTest {
         val invoked = AtomicBoolean(false)
         val deferred = async {
-            safeSuspendableCancellable<String> { cont ->
+            suspendWithSafeContinuation<String> { cont ->
                 // simulate long operation; do not resume
                 cont.invokeOnCancellation {
                     invoked.set(true)

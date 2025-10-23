@@ -40,7 +40,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
-import com.arcgismaps.toolkit.authentication.utils.safeSuspendableCancellable
+import com.arcgismaps.toolkit.authentication.utils.suspendWithSafeContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -385,7 +385,7 @@ private class AuthenticatorStateImpl(
      * @since 200.2.0
      */
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
-        val selectedAlias = safeSuspendableCancellable<String?> { safeContinuation ->
+        val selectedAlias = suspendWithSafeContinuation<String?> { safeContinuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
                 _pendingClientCertificateChallenge.value = null
                 safeContinuation.resumeSafely(alias)
@@ -422,12 +422,14 @@ private class AuthenticatorStateImpl(
     private suspend fun awaitServerTrustChallengeResponse(
         networkAuthenticationChallenge: NetworkAuthenticationChallenge
     ): NetworkAuthenticationChallengeResponse {
-        val response = safeSuspendableCancellable<Boolean?> { safeContinuation ->
+        val shouldTrustServer = suspendWithSafeContinuation<Boolean?> { safeContinuation ->
             val serverTrustChallenge = ServerTrustChallenge(
-                networkAuthenticationChallenge, onUserResponseReceived = { shouldTrustServer ->
+                challenge = networkAuthenticationChallenge,
+                onUserResponseReceived = { response ->
                     _pendingServerTrustChallenge.value = null
-                    safeContinuation.resumeSafely(shouldTrustServer)
-                })
+                    safeContinuation.resumeSafely(response)
+                }
+            )
 
             _pendingServerTrustChallenge.value = serverTrustChallenge
 
@@ -437,7 +439,7 @@ private class AuthenticatorStateImpl(
             }
         }
 
-        return if (response == true) {
+        return if (shouldTrustServer == true) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
         } else {
             NetworkAuthenticationChallengeResponse.Cancel

@@ -22,7 +22,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.CoroutineContext
 
 /**
- * A continuation that can be safely resumed only once.
+ * A coroutine continuation that can be safely resumed only once.
  *
  * This is useful for callback-style APIs that may invoke completion more than once.
  *
@@ -31,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
 internal class SafeContinuation<T> {
     /**
      *  The underlying cancellable continuation.
-     *  It is initialized when [suspendCancellable] is called, which should be set before
+     *  It is initialized when [suspendCancellableCoroutine] is called, which should be set before
      *  [resumeSafely] or [invokeOnCancellation] is called.
      */
     private lateinit var continuation: CancellableContinuation<T>
@@ -66,7 +66,7 @@ internal class SafeContinuation<T> {
      */
     fun <R : T> resumeSafely(
         value: R,
-        onCancellation: ((cause: Throwable, value: R, context: CoroutineContext) -> Unit) = { _, _, _ -> }
+        onCancellation: ((cause: Throwable, value: R, context: CoroutineContext) -> Unit)? = null
     ) {
         if (hasResumed.compareAndSet(false, true)) {
             continuation.resume(value, onCancellation)
@@ -77,11 +77,11 @@ internal class SafeContinuation<T> {
     /**
      * Registers a handler to be invoked if the continuation is cancelled.
      *
-     * @param block The block to invoke on cancellation.
+     * @param handler The cancellation handler to be invoked with the cancellation cause.
      * @since 200.8.1
      */
-    fun invokeOnCancellation(block: () -> Unit) {
-        continuation.invokeOnCancellation { block() }
+    fun invokeOnCancellation(handler: (Throwable?) -> Unit) {
+        continuation.invokeOnCancellation(handler)
     }
 }
 
@@ -95,7 +95,7 @@ internal class SafeContinuation<T> {
  * @return the successful value.
  * @since 200.8.1
  */
-internal suspend inline fun <T> safeSuspendableCancellable(
+internal suspend inline fun <T> suspendWithSafeContinuation(
     crossinline block: (SafeContinuation<T>) -> Unit
 ): T = SafeContinuation<T>().suspendCancellable {
     block(it)
