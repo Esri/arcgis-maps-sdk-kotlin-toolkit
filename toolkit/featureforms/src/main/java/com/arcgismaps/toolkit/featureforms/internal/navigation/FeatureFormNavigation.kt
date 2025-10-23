@@ -22,6 +22,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
@@ -29,6 +30,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.FeatureFormScreen
 internal fun NavGraphBuilder.featureFormDestination(
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onUtilityFilterSelected: (NavBackStackEntry, Int) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
     state : FeatureFormState,
     validationErrorVisibility : ValidationErrorVisibility
 ) {
@@ -44,6 +46,7 @@ internal fun NavGraphBuilder.featureFormDestination(
         LaunchedEffect(formData) {
             // Update the active feature form if we navigate back to this screen from another form.
             state.updateActiveFeatureForm()
+            onNavigationEvent(FeatureFormNavigationEvent.FeatureForm)
         }
         // launch a new side effect in a launched effect when validationErrorVisibility changes
         // for a given form

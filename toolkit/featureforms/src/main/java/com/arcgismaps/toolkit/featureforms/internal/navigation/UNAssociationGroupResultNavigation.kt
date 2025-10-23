@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -65,6 +66,9 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 // Update the active feature form when we navigate back to this screen from another
                 // form.
                 state.updateActiveFeatureForm()
+            }
+            LaunchedEffect(groupResult) {
+                Log.e("TAG", "associationGroupResultDestination: $groupResult", )
             }
         } else {
             // If we don't have a valid state or group, navigate back to the previous screen.

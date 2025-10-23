@@ -16,7 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
@@ -24,6 +26,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilterResultScreen
@@ -31,6 +34,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationsFilter
 internal fun NavGraphBuilder.associationsFilterResultDestination(
     onGroupSelected: (NavBackStackEntry, Int) -> Unit,
     onAddFromSourceClick: (NavBackStackEntry, Int) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
     state: FeatureFormState,
 ) {
     composable<NavigationRoute.UNAssociationsFilterResult> { backStackEntry ->
@@ -55,6 +59,12 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            LaunchedEffect(filterResult) {
+                val eventData = FeatureFormNavigationEvent.UtilityAssociationsFilterResultNav(
+                    element = utilityAssociationsElementState.element,
+                    utilityAssociationsFilterResult = filterResult.filter
+                )
+            }
         }
     }
 }

@@ -138,7 +138,7 @@ internal class UtilityAssociationsElementState(
             )
         }
         // update the selections as the filter results may have changed
-        val updatedFilter = _filters.find { it == selectedFilterResult }
+        val updatedFilter = _filters.find { it.filter == selectedFilterResult?.filter }
         // if the filter was found, update the selected filter result
         if (updatedFilter != null) {
             _selectedFilterResult.value = updatedFilter
@@ -273,24 +273,4 @@ internal class MutableFilterResult(
      */
     val resultCount: Int
         get() = _resultCount.value
-
-    override fun hashCode(): Int {
-        return 31 * filter.title.hashCode() +
-            filter.description.hashCode() +
-            filter.filterType.hashCode() +
-            filter.assetGroup.hashCode()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is MutableFilterResult) return false
-
-        // Deep comparison of the `filter` property
-        if (filter.title != other.filter.title) return false
-        if (filter.description != other.filter.description) return false
-        if (filter.filterType != other.filter.filterType) return false
-        if (filter.assetGroup != other.filter.assetGroup) return false
-        if (filter.assetType != other.filter.assetType) return false
-        return true
-    }
 }

@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -54,7 +56,9 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
+import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -64,8 +68,17 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
+import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociation
+import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
+/**
+ * Defines the visibility behavior of validation errors in a [FeatureForm].
+ *
+ * @since 200.4.0
+ */
 @Immutable
 public sealed class ValidationErrorVisibility {
 
@@ -84,6 +97,8 @@ public sealed class ValidationErrorVisibility {
 
 /**
  * Indicates an event that occurs during the editing of a feature form.
+ *
+ * @since 200.8.0
  */
 public sealed class FeatureFormEditingEvent {
 
@@ -104,6 +119,52 @@ public sealed class FeatureFormEditingEvent {
      */
     public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
         FeatureFormEditingEvent()
+}
+
+/**
+ * Indicates a navigation event that occurs within the [FeatureForm] composable.
+ *
+ * @since 300.0.0
+ */
+public sealed class FeatureFormNavigationEvent {
+
+    public data object FeatureForm : FeatureFormNavigationEvent()
+
+    public data class UtilityAssociationsFilterResultNav(
+        val element: UtilityAssociationsFormElement,
+        val utilityAssociationsFilterResult: UtilityAssociationsFilterResult
+    ) : FeatureFormNavigationEvent()
+
+    public data class UtilityAssociationsGroupResultNav(
+        val element: UtilityAssociationsFormElement,
+        val utilityAssociationGroupResult: UtilityAssociationGroupResult
+    ) : FeatureFormNavigationEvent()
+
+    public data class UtilityAssociationResultView(
+        val element: UtilityAssociationsFormElement,
+        val utilityAssociationResult: UtilityAssociationResult
+    ) : FeatureFormNavigationEvent()
+
+    public data class SelectUtilityAssociationFeatureSource(
+        val element: UtilityAssociationsFormElement
+    ) : FeatureFormNavigationEvent()
+
+    public data class SelectUtilityAssetType(
+        val element: UtilityAssociationsFormElement,
+        val featureSource: UtilityAssociationFeatureSource
+    ) : FeatureFormNavigationEvent()
+
+    public data class SelectUtilityAssociationFeatureCandidate(
+        val element: UtilityAssociationsFormElement,
+        val featureSource: UtilityAssociationFeatureSource,
+        val assetType: UtilityAssetType
+    ) : FeatureFormNavigationEvent()
+
+    public data class CreateNewUtilityAssociation(
+        val element: UtilityAssociationsFormElement,
+        val featureSource: UtilityAssociationFeatureSource,
+        val candidate: UtilityAssociationFeatureCandidate
+    ) : FeatureFormNavigationEvent()
 }
 
 /**
@@ -209,6 +270,7 @@ public fun FeatureForm(
     onShowOnMapRequest : ((ArcGISFeature) -> Unit)? = null,
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
+    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
@@ -319,6 +381,11 @@ public fun FeatureForm(
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
             state.setNavigateBack(null)
+        }
+    }
+    LaunchedEffect(navController, featureFormState) {
+        navController.currentBackStackEntryFlow.collect { entry ->
+            Log.e("TAG", "FeatureForm: $entry.", )
         }
     }
 }
