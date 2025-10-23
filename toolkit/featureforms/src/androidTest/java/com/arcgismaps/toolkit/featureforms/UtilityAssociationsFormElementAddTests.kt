@@ -47,6 +47,7 @@ import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -115,7 +116,7 @@ class UtilityAssociationsFormElementAddTests {
 
     /**
      * Given a FeatureForm with a UtilityAssociationsFormElement
-     * When the user adds an connected association from a network data source
+     * When the user adds an connected association from a [UtilityAssociationFeatureSource]
      * Then the association should be added to the group
      *
      * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-131-add-an-association
@@ -123,7 +124,7 @@ class UtilityAssociationsFormElementAddTests {
      * @since 300.0.0
      */
     @Test
-    fun addAssociationAndDiscard() = runTest {
+    fun addAssociation() = runTest {
         val featureForm = getFeatureFormForObjectId(
             objectId = 3321,
             layerName = "Electric Distribution Device"
@@ -228,7 +229,7 @@ class UtilityAssociationsFormElementAddTests {
 
     /**
      * Given a FeatureForm with a UtilityAssociationsFormElement
-     * When the user adds a connected association from a network data source with terminal and fraction
+     * When the user adds a connected association from a [UtilityAssociationFeatureSource] with terminal and fraction
      * Then the association should be added to the group
      *
      * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-132-add-connectivity-association-with-terminal-and-fraction-along
@@ -367,6 +368,14 @@ class UtilityAssociationsFormElementAddTests {
             ).isDisplayed()
         }
 
+        composeTestRule.onNode(
+            hasTextExactly("Electric Distribution Junction", "5")
+        ).isDisplayed()
+
+        composeTestRule.onNode(
+            hasTextExactly("Electric Distribution Device", "2")
+        ).isDisplayed()
+
         // Assert the save and discard buttons are enabled
         composeTestRule.onNodeWithText("Save").assertIsDisplayed()
         composeTestRule.onNodeWithText("Discard").assertIsDisplayed()
@@ -374,7 +383,7 @@ class UtilityAssociationsFormElementAddTests {
 
     /**
      * Given a FeatureForm with a UtilityAssociationsFormElement
-     * When the user adds a containment association from a network data source
+     * When the user adds a containment association from a [UtilityAssociationFeatureSource]
      * Then the association should be added to the group
      *
      * Design : https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-133-add-containment-association-with-content-visible-option
@@ -382,7 +391,7 @@ class UtilityAssociationsFormElementAddTests {
      * @since 300.0.0
      */
     @Test
-    fun addContainmentAssociation() = runTest {
+    fun addContainmentAssociationWithContentVisible() = runTest {
         val featureForm = getFeatureFormForObjectId(
             objectId = 311,
             layerName = "Electric Distribution Junction"
