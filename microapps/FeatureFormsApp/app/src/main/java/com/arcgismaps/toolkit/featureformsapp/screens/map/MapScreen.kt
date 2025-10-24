@@ -106,7 +106,7 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormEditingEvent
-import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
@@ -413,7 +413,7 @@ fun FeatureFormSheet(
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
     onEditingEvent: (FeatureFormEditingEvent) -> Unit,
-    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit = {},
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)

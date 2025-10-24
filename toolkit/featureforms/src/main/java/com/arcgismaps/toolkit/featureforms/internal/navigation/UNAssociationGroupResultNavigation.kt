@@ -27,7 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
@@ -38,8 +38,8 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
-    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
-    onBack: () -> Unit,
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
+    onBack: (NavBackStackEntry) -> Unit,
     isNavigationEnabled: Boolean,
 ) {
     composable<NavigationRoute.UNAssociationGroupResult> { backStackEntry ->
@@ -64,7 +64,9 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 onNavigateToFeature = { feature ->
                     onNavigateToFeature(backStackEntry, feature)
                 },
-                onBack = onBack,
+                onBack = {
+                    onBack(backStackEntry)
+                },
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(formData) {
@@ -73,7 +75,7 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state.updateActiveFeatureForm()
             }
             LaunchedEffect(groupResult) {
-                val eventData = FeatureFormNavigationEvent.UtilityAssociationsGroupResultNav(
+                val eventData = FeatureFormNavigationRoute.GroupResult(
                     element = utilityAssociationsElementState.element,
                     utilityAssociationGroupResult = groupResult.groupResult
                 )

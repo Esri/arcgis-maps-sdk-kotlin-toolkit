@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -282,12 +283,16 @@ internal class AddAssociationFromSourceViewModel(
      * If the sources have already been fetched for the filter, this method does nothing.
      */
     suspend fun fetchFeatureSources() {
+        Log.e("TAG", "fetchFeatureSources: fetching..", )
         if (_featureSources.value.isNotEmpty()) {
             // already fetched
             return
         }
         element.getAssociationFeatureSources(filter).onSuccess { sources ->
+            Log.e("TAG", "fetchFeatureSources: $sources", )
             _featureSources.value = sources
+        }.onFailure {
+            Log.e("TAG", "fetchFeatureSources: failure", it)
         }
     }
 

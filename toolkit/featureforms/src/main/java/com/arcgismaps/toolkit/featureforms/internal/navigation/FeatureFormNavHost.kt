@@ -30,7 +30,7 @@ import androidx.navigation.navigation
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 
@@ -44,7 +44,7 @@ internal fun FeatureFormNavHost(
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
-    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -80,7 +80,7 @@ internal fun FeatureFormNavHost(
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature =  state::navigateTo,
             onNavigationEvent = onNavigationEvent,
-            onBack =  navController::popBackStack,
+            onBack =  state::popBackStack,
         )
 
         associationDetailsDestination(
@@ -89,6 +89,9 @@ internal fun FeatureFormNavHost(
                 if (isGroupEmpty) {
                     navController.popBackStack<NavigationRoute.UNAssociationsFilterResult>(inclusive = false)
                 }
+            },
+            onClose = { entry ->
+                state.popBackStack(entry)
             },
             onNavigationEvent = onNavigationEvent,
             state = state,

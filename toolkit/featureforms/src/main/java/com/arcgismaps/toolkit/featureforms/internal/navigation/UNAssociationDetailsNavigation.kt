@@ -16,6 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -25,17 +29,23 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationEvent
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationDetails
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
+import com.arcgismaps.toolkit.featureforms.internal.screens.UtilityAssociationDetailsScreen
 
 internal fun NavGraphBuilder.associationDetailsDestination(
     onDeleteAssociation: (isGroupEmpty: Boolean) -> Unit,
-    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit,
+    onClose: (NavBackStackEntry) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     state: FeatureFormState,
 ) {
-    composable<NavigationRoute.UNAssociationDetails> { backStackEntry ->
+    composable<NavigationRoute.UNAssociationDetails>(
+        enterTransition = { slideInVertically { h -> h } },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutVertically { h -> h } }
+    ) { backStackEntry ->
         val route = backStackEntry.toRoute<NavigationRoute.UNAssociationGroupResult>()
         val formData = remember(backStackEntry) { state.getActiveFormStateData() }
         val states = formData.stateCollection
@@ -43,14 +53,17 @@ internal fun NavGraphBuilder.associationDetailsDestination(
         val utilityAssociationsElementState =
             states[route.stateId] as? UtilityAssociationsElementState
         if (utilityAssociationsElementState != null) {
-            UtilityAssociationDetails(
-                state = utilityAssociationsElementState,
+            UtilityAssociationDetailsScreen(
                 onDelete = onDeleteAssociation,
+                onClose = {
+                    onClose(backStackEntry)
+                },
+                state = utilityAssociationsElementState,
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(utilityAssociationsElementState.selectedAssociationResult) {
                 utilityAssociationsElementState.selectedAssociationResult?.let { result ->
-                    val eventData = FeatureFormNavigationEvent.UtilityAssociationResultView(
+                    val eventData = FeatureFormNavigationRoute.AssociationResult(
                         element = utilityAssociationsElementState.element,
                         utilityAssociationResult = result
                     )

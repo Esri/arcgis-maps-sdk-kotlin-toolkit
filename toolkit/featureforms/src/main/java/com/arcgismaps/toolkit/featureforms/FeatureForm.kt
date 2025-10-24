@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -58,7 +56,6 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -122,49 +119,116 @@ public sealed class FeatureFormEditingEvent {
 }
 
 /**
- * Indicates a navigation event that occurs within the [FeatureForm] composable.
+ * Indicates the navigation route within a [FeatureForm] when dealing with [UtilityAssociation]s.
  *
  * @since 300.0.0
  */
-public sealed class FeatureFormNavigationEvent {
+public sealed class FeatureFormNavigationRoute {
 
-    public data object FeatureForm : FeatureFormNavigationEvent()
+    /**
+     * Indicates the route for the main [FeatureForm] screen. The associated [FeatureForm] can be
+     * obtained from the [FeatureFormState.activeFeatureForm] property.
+     *
+     * @since 300.0.0
+     */
+    public data object FeatureForm : FeatureFormNavigationRoute()
 
-    public data class UtilityAssociationsFilterResultNav(
+    /**
+     * Indicates the route for [UtilityAssociationsFilterResult] screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the filter result.
+     * @param utilityAssociationsFilterResult The selected [UtilityAssociationsFilterResult].
+     *
+     * @since 300.0.0
+     */
+    public data class FilterResult(
         val element: UtilityAssociationsFormElement,
         val utilityAssociationsFilterResult: UtilityAssociationsFilterResult
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
-    public data class UtilityAssociationsGroupResultNav(
+    /**
+     * Indicates the route for [UtilityAssociationGroupResult] screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the group result.
+     * @param utilityAssociationGroupResult The selected [UtilityAssociationGroupResult].
+     *
+     * @since 300.0.0
+     */
+    public data class GroupResult(
         val element: UtilityAssociationsFormElement,
         val utilityAssociationGroupResult: UtilityAssociationGroupResult
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
-    public data class UtilityAssociationResultView(
+    /**
+     * Indicates the route for [UtilityAssociationResult] details screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the association result.
+     * @param utilityAssociationResult The selected [UtilityAssociationResult].
+     *
+     * @since 300.0.0
+     */
+    public data class AssociationResult(
         val element: UtilityAssociationsFormElement,
         val utilityAssociationResult: UtilityAssociationResult
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
-    public data class SelectUtilityAssociationFeatureSource(
+    /**
+     * Indicates the route for selecting a [UtilityAssociationFeatureSource] when adding a new
+     * association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     *
+     * @since 300.0.0
+     */
+    public data class SelectAssociationFeatureSource(
         val element: UtilityAssociationsFormElement
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
+    /**
+     * Indicates the route for selecting a [UtilityAssetType] from a [UtilityAssociationFeatureSource]
+     * when adding a new association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param featureSource The selected [UtilityAssociationFeatureSource].
+     *
+     * @since 300.0.0
+     */
     public data class SelectUtilityAssetType(
         val element: UtilityAssociationsFormElement,
         val featureSource: UtilityAssociationFeatureSource
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
-    public data class SelectUtilityAssociationFeatureCandidate(
+    /**
+     * Indicates the route for selecting a [UtilityAssociationFeatureCandidate] from a
+     * [UtilityAssetType] when adding a new association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param featureSource The selected [UtilityAssociationFeatureSource] the asset type belongs to.
+     * @param assetType The selected [UtilityAssetType].
+     *
+     * @since 300.0.0
+     */
+    public data class SelectAssociationFeatureCandidate(
         val element: UtilityAssociationsFormElement,
         val featureSource: UtilityAssociationFeatureSource,
         val assetType: UtilityAssetType
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 
-    public data class CreateNewUtilityAssociation(
+    /**
+     * Indicates the route for creating a new association with the selected
+     * [UtilityAssociationFeatureCandidate].
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param featureSource The selected [UtilityAssociationFeatureSource] the candidate belongs to.
+     * @param candidate The selected [UtilityAssociationFeatureCandidate].
+     *
+     * @since 300.0.0
+     */
+    public data class CreateAssociation(
         val element: UtilityAssociationsFormElement,
         val featureSource: UtilityAssociationFeatureSource,
         val candidate: UtilityAssociationFeatureCandidate
-    ) : FeatureFormNavigationEvent()
+    ) : FeatureFormNavigationRoute()
 }
 
 /**
@@ -253,6 +317,10 @@ public sealed class FeatureFormNavigationEvent {
  * If the edit action is triggered by navigating to another form, the `willNavigate` parameter will
  * be true. Note that if the action happens due to the close button, the `willNavigate` parameter
  * will be false.
+ * @param onNavigationEvent A callback that is invoked when a navigation event occurs in the form.
+ * This is triggered when the user navigates to different screens within the form, currently when
+ * dealing with [UtilityAssociation]s. The specific [FeatureFormNavigationRoute] is provided which
+ * contains the relevant data for the route.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
@@ -270,7 +338,7 @@ public fun FeatureForm(
     onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
-    onNavigationEvent: (FeatureFormNavigationEvent) -> Unit = {},
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
@@ -380,11 +448,6 @@ public fun FeatureForm(
             // Clear the navigation actions when the composition is disposed
             state.setNavigationCallback(null)
             state.setNavigateBack(null)
-        }
-    }
-    LaunchedEffect(navController, featureFormState) {
-        navController.currentBackStackEntryFlow.collect { entry ->
-            //Log.e("TAG", "FeatureForm: $entry.", )
         }
     }
 }
