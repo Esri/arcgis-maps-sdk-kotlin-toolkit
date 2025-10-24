@@ -37,6 +37,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
@@ -93,6 +95,8 @@ internal fun SelectAssetTypeScreen(
                         modifier = Modifier.clickable {
                             viewModel.selectAssetType(assetType)
                             onAssetTypeSelected()
+                        }.semantics{
+                            this.contentDescription = "${assetType.name}:${assetType.code}"
                         },
                         headlineContent = {
                             Text(

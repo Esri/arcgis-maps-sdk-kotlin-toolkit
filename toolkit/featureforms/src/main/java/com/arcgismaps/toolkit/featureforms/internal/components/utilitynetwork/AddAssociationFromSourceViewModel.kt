@@ -292,18 +292,21 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     /**
-     * Sets the currently selected [UtilityAssociationFeatureCandidate].
+     * Sets the currently selected [UtilityAssociationFeatureCandidate] and fetches the
+     * [UtilityAssociationFeatureOptions] for the candidate feature. [newAssociationOptions] will
+     * be updated once the options are fetched. This is an asynchronous operation.
      *
-     * @param candidate The [UtilityAssociationFeatureCandidate] to select, or `null` to clear the
-     * selection.
+     * @param candidate The [UtilityAssociationFeatureCandidate] to select.
      */
-    suspend fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
-        element.getOptionsForAssociationCandidate(candidate.feature).onSuccess {
-            _newAssociationOptions.value = NewAssociationOptions(
-                candidate = candidate,
-                options = it,
-                type = filter.filterType
-            )
+    fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
+        viewModelScope.launch {
+            element.getOptionsForAssociationCandidate(candidate.feature).onSuccess {
+                _newAssociationOptions.value = NewAssociationOptions(
+                    candidate = candidate,
+                    options = it,
+                    type = filter.filterType
+                )
+            }
         }
     }
 
