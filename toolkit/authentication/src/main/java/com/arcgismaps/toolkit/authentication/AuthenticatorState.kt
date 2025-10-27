@@ -40,6 +40,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import com.arcgismaps.toolkit.authentication.utils.suspendWithSafeContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -50,7 +51,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -385,20 +385,20 @@ private class AuthenticatorStateImpl(
      * @since 200.2.0
      */
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
-        val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
+        val selectedAlias = suspendWithSafeContinuation<String?> { safeContinuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(alias) { _, _, _ -> }
+                safeContinuation.resumeSafely(alias)
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback) {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
+                safeContinuation.resumeSafely(null)
             }
-            continuation.invokeOnCancellation {
+            safeContinuation.invokeOnCancellation {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
             }
         }
+
         return if (selectedAlias != null) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
                 CertificateCredential(
@@ -418,29 +418,31 @@ private class AuthenticatorStateImpl(
      * @return [NetworkAuthenticationChallengeResponse] based on user response.
      * @since 200.2.0
      */
-    private suspend fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse =
-        suspendCancellableCoroutine { continuation ->
-            _pendingServerTrustChallenge.value =
-                ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
+    private suspend fun awaitServerTrustChallengeResponse(
+        networkAuthenticationChallenge: NetworkAuthenticationChallenge
+    ): NetworkAuthenticationChallengeResponse {
+        val shouldTrustServer = suspendWithSafeContinuation<Boolean?> { safeContinuation ->
+            val serverTrustChallenge = ServerTrustChallenge(
+                challenge = networkAuthenticationChallenge,
+                onUserResponseReceived = { response ->
                     _pendingServerTrustChallenge.value = null
-                    if (shouldTrustServer) continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                                ServerTrust
-                            )
-                        )
-                    )
-                    else continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.Cancel
-                        )
-                    )
+                    safeContinuation.resumeSafely(response)
                 }
-            continuation.invokeOnCancellation {
+            )
+
+            _pendingServerTrustChallenge.value = serverTrustChallenge
+
+            safeContinuation.invokeOnCancellation {
                 _pendingServerTrustChallenge.value = null
-                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }
         }
+
+        return if (shouldTrustServer == true) {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+        } else {
+            NetworkAuthenticationChallengeResponse.Cancel
+        }
+    }
 
     /**
      * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and returns any responses
