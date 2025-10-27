@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Tests for [suspendWithSafeContinuation].
- * @since 200.8.1
+ * @since 300.0.0
  */
 class SafeSuspendableCancellableTest {
 
@@ -38,7 +38,7 @@ class SafeSuspendableCancellableTest {
      * Given a safeSuspendableCancellable block
      * When the block resumes successfully
      * Then the value is returned
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun returnsValueOnSuccess() = runTest {
@@ -53,7 +53,7 @@ class SafeSuspendableCancellableTest {
      * Given a safeSuspendableCancellable block
      * When the block throws an exception
      * Then the exception is propagated
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun throwsOnFailure() = runTest {
@@ -75,7 +75,7 @@ class SafeSuspendableCancellableTest {
      * When the block attempts to resume multiple times
      * Then only the first resume is effective
      * And no "Multiple resume" errors occur.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testIgnoresSubsequentSignals() = runTest {
@@ -92,7 +92,7 @@ class SafeSuspendableCancellableTest {
      * When the parent coroutine is cancelled
      * Then the continuation resumes with cancellation
      * And the cancellation handler is invoked
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun parentCancellationResultsInCancellationOutcome() = runTest {

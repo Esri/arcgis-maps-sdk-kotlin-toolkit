@@ -30,7 +30,7 @@ import org.junit.Test
 /**
  * Tests for server trust challenge handling.
  *
- * @since 200.8.1
+ * @since 300.0.0
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServerTrustChallengeTest {
@@ -38,7 +38,7 @@ class ServerTrustChallengeTest {
      * Given a server trust challenge,
      * When both the trust and distrust callbacks are invoked nearly simultaneously,
      * Then only the first callback to be invoked is processed and the other is ignored.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testServerTrustChallengeWithTrustFirstIsResumedOnlyOnce() = runTest {
@@ -71,7 +71,7 @@ class ServerTrustChallengeTest {
      * Given a server trust challenge,
      * When both the distrust and trust callbacks are invoked nearly simultaneously,
      * Then only the first callback to be invoked is processed and the other is ignored.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testServerTrustChallengeWithDistrustFirstIsResumedOnlyOnce() = runTest {
@@ -103,7 +103,7 @@ class ServerTrustChallengeTest {
      * When the parent coroutine is cancelled before responding,
      * Then a CancellationException is thrown
      * And the pending challenge is cleared.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testServerTrustChallengeParentCoroutineCancellationReturnsCancel() = runTest {

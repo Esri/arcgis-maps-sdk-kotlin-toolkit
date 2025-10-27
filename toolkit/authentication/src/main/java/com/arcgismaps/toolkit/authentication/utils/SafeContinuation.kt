@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
  *
  * This is useful for callback-style APIs that may invoke completion more than once.
  *
- * @since 200.8.1
+ * @since 300.0.0
  */
 internal class SafeContinuation<T> {
     /**
@@ -48,7 +48,7 @@ internal class SafeContinuation<T> {
      *
      * @param block Invoked immediately with this [SafeContinuation] to hook into external callbacks.
      * @return the successful value.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     suspend inline fun suspendCancellable(
         crossinline block: (SafeContinuation<T>) -> Unit
@@ -62,7 +62,7 @@ internal class SafeContinuation<T> {
      *
      * @param value The value to resume the continuation with.
      * @param onCancellation Optional lambda to be invoked if the continuation is cancelled after resuming.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     fun <R : T> resumeSafely(
         value: R,
@@ -78,7 +78,7 @@ internal class SafeContinuation<T> {
      * Registers a handler to be invoked if the continuation is cancelled.
      *
      * @param handler The cancellation handler to be invoked with the cancellation cause.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     fun invokeOnCancellation(handler: (Throwable?) -> Unit) {
         continuation.invokeOnCancellation(handler)
@@ -93,7 +93,7 @@ internal class SafeContinuation<T> {
  *
  * @param block Invoked immediately with a [SafeContinuation] to hook into external callbacks.
  * @return the successful value.
- * @since 200.8.1
+ * @since 300.0.0
  */
 internal suspend inline fun <T> suspendWithSafeContinuation(
     crossinline block: (SafeContinuation<T>) -> Unit

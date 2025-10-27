@@ -30,7 +30,7 @@ import org.junit.Test
 /**
  * Tests for certificate authentication handling.
  *
- * @since 200.8.1
+ * @since 300.0.0
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClientCertificateChallengeTest {
@@ -39,7 +39,7 @@ class ClientCertificateChallengeTest {
      * Given a certificate challenge,
      * When both the alias callback and cancel callback are invoked nearly simultaneously,
      * Then only the first callback to be invoked is processed and the other is ignored.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testCertificateChallengeCallbackIsResumedOnlyOnce() = runTest {
@@ -72,7 +72,7 @@ class ClientCertificateChallengeTest {
      * Given a certificate challenge,
      * When the cancel callback is invoked before the alias callback,
      * Then only the cancel callback is processed and the alias callback is ignored.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testCertificateChallengeCancelCallbackIsResumedOnlyOnce() = runTest {
@@ -104,7 +104,7 @@ class ClientCertificateChallengeTest {
      * When the parent coroutine is cancelled before responding to the challenge,
      * Then the challenge handling resumes with cancellation
      * And the pending challenge is cleared.
-     * @since 200.8.1
+     * @since 300.0.0
      */
     @Test
     fun testClientCertChallengeParentCoroutineCancellationReturnsCancel() = runTest {
