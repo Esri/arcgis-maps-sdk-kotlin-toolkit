@@ -21,9 +21,7 @@ package com.arcgismaps.toolkit.authentication
 import android.app.Activity
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
-import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import androidx.core.net.toUri
 
 /**

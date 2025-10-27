@@ -31,7 +31,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -43,48 +42,10 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.navigation.PopupNavHost
 import com.arcgismaps.toolkit.popup.internal.screens.ContentAwareTopBar
-
-/**
- * A composable Popup toolkit component that enables users to see Popup content in a
- * layer that have been configured externally.
- *
- * Popups may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
- * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
- *
- * Note : Even though the [Popup] class is not stable, there exists an internal mechanism to
- * enable smart recompositions.
- *
- * @param popup The [Popup] configuration.
- * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
- * Popup.
- *
- * @since 200.5.0
- */
-@Deprecated(
-    message = "Use the overload that uses the PopupState object. This will become an error" +
-            " in a future release.",
-    level = DeprecationLevel.WARNING
-)
-@Composable
-public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-    val stateData = remember(popup) {
-        PopupState(
-            popup,
-            scope,
-            // Ignore the UtilityAssociationsFormElement as it is not supported with this API
-            ignoreList = setOf(
-                UtilityAssociationsPopupElement::class.java
-            )
-        )
-    }
-    Popup(stateData, modifier, showCloseIcon = false)
-}
 
 /**
  * A composable Popup toolkit component that enables users to see Popup content in a
