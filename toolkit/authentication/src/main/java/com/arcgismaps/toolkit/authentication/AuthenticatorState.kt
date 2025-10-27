@@ -396,7 +396,6 @@ private class AuthenticatorStateImpl(
             }
             safeContinuation.invokeOnCancellation {
                 _pendingClientCertificateChallenge.value = null
-                safeContinuation.resumeSafely(null)
             }
         }
 
@@ -435,7 +434,6 @@ private class AuthenticatorStateImpl(
 
             safeContinuation.invokeOnCancellation {
                 _pendingServerTrustChallenge.value = null
-                safeContinuation.resumeSafely(null)
             }
         }
 
