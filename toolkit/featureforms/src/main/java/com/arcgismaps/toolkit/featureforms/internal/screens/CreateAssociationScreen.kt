@@ -34,6 +34,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,7 +81,7 @@ internal fun CreateAssociationScreen(
         mutableStateOf(false)
     }
     var fractionAlongEdge by rememberSaveable(associationOptions) {
-        val initialValue = if (associationOptions?.options?.isFractionAlongEdgeValid == true) {
+        val initialValue = if (associationOptions?.isFractionAlongEdgeValid == true) {
             0f
         } else {
             null
@@ -133,36 +134,8 @@ internal fun CreateAssociationScreen(
                 Text(text = stringResource(R.string.add))
             }
         }
-        associationOptions?.let {
-            val candidate = it.candidate
-            val options = it.options
-            val filterType = it.type
-            val isContainerOrStructure = filterType is UtilityAssociationsFilterType.Container ||
-                filterType is UtilityAssociationsFilterType.Structure
-            val (fromElement, fromTerminalConfig) = remember(associationOptions) {
-                if (isContainerOrStructure) {
-                    candidate.title to
-                        options.candidateFeatureTerminalConfiguration
-                } else {
-                    viewModel.featureForm.title.value to
-                        options.formFeatureTerminalConfiguration
-                }
-            }.also { pair ->
-                selectedFromTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
-            }
-            val (toElement, toTerminalConfig) = remember(associationOptions) {
-                if (isContainerOrStructure) {
-                    viewModel.featureForm.title.value to
-                        options.formFeatureTerminalConfiguration
-
-                } else {
-                    candidate.title to
-                        options.candidateFeatureTerminalConfiguration
-                }
-            }.also { pair ->
-                selectedToTerminalId = pair.second?.terminals?.firstOrNull()?.terminalId
-            }
-
+        associationOptions?.let { options ->
+            val filterType = options.type
             LazyColumn {
                 item {
                     // First show the Association Type
@@ -207,13 +180,13 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.from_element),
-                            value = fromElement,
+                            value = options.fromElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        fromTerminalConfig?.let { terminalConfig ->
+                        options.fromTerminalConfiguration?.let { terminalConfig ->
                             UtilityTerminalControl(
                                 selected = selectedFromTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
@@ -239,13 +212,13 @@ internal fun CreateAssociationScreen(
                     ) {
                         PropertyRow(
                             title = stringResource(R.string.to_element),
-                            value = toElement,
+                            value = options.toElement,
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
                         )
                         // if terminal config is available show terminal selection
-                        toTerminalConfig?.let { terminalConfig ->
+                        options.toTerminalConfiguration?.let { terminalConfig ->
                             UtilityTerminalControl(
                                 selected = selectedToTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
@@ -289,5 +262,18 @@ internal fun CreateAssociationScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+    }
+    LaunchedEffect(associationOptions) {
+        // set initial terminal selections if available
+        associationOptions?.let { options ->
+            if (options.fromTerminalConfiguration != null) {
+                selectedFromTerminalId =
+                    options.fromTerminalConfiguration.terminals.firstOrNull()?.terminalId
+            }
+            if (options.toTerminalConfiguration != null) {
+                selectedToTerminalId =
+                    options.toTerminalConfiguration.terminals.firstOrNull()?.terminalId
+            }
+        }
     }
 }
