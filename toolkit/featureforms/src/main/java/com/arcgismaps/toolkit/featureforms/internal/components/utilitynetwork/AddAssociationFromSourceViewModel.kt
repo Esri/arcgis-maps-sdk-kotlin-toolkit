@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 internal class AddAssociationFromSourceViewModel(
     val featureForm : FeatureForm,
     val element: UtilityAssociationsFormElement,
-    private val filter: UtilityAssociationsFilter,
+    val filter: UtilityAssociationsFilter,
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 

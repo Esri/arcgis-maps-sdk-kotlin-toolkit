@@ -69,6 +69,7 @@ import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
 /**
@@ -177,11 +178,13 @@ public sealed class FeatureFormNavigationRoute {
      * association.
      *
      * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
      *
      * @since 300.0.0
      */
     public data class SelectAssociationFeatureSource(
-        val element: UtilityAssociationsFormElement
+        val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter
     ) : FeatureFormNavigationRoute()
 
     /**
@@ -189,12 +192,14 @@ public sealed class FeatureFormNavigationRoute {
      * when adding a new association.
      *
      * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
      * @param featureSource The selected [UtilityAssociationFeatureSource].
      *
      * @since 300.0.0
      */
     public data class SelectUtilityAssetType(
         val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource
     ) : FeatureFormNavigationRoute()
 
@@ -203,6 +208,7 @@ public sealed class FeatureFormNavigationRoute {
      * [UtilityAssetType] when adding a new association.
      *
      * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
      * @param featureSource The selected [UtilityAssociationFeatureSource] the asset type belongs to.
      * @param assetType The selected [UtilityAssetType].
      *
@@ -210,6 +216,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class SelectAssociationFeatureCandidate(
         val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val assetType: UtilityAssetType
     ) : FeatureFormNavigationRoute()
@@ -219,6 +226,7 @@ public sealed class FeatureFormNavigationRoute {
      * [UtilityAssociationFeatureCandidate].
      *
      * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
      * @param featureSource The selected [UtilityAssociationFeatureSource] the candidate belongs to.
      * @param candidate The selected [UtilityAssociationFeatureCandidate].
      *
@@ -226,6 +234,7 @@ public sealed class FeatureFormNavigationRoute {
      */
     public data class CreateAssociation(
         val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
         val featureSource: UtilityAssociationFeatureSource,
         val candidate: UtilityAssociationFeatureCandidate
     ) : FeatureFormNavigationRoute()

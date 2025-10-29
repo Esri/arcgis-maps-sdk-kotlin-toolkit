@@ -82,7 +82,8 @@ internal fun NavGraphBuilder.selectSourceDestination(
             )
             LaunchedEffect(state) {
                 val eventData = FeatureFormNavigationRoute.SelectAssociationFeatureSource(
-                    element = state.element
+                    element = state.element,
+                    filter = viewModel.filter
                 )
                 onNavigationEvent(eventData)
             }
@@ -116,6 +117,7 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
                 // only send event if we have a selected source
                 val eventData = FeatureFormNavigationRoute.SelectUtilityAssetType(
                     element = viewModel.element,
+                    filter = viewModel.filter,
                     featureSource = source
                 )
                 onNavigationEvent(eventData)
@@ -153,6 +155,7 @@ internal fun NavGraphBuilder.selectFeatureDestination(
                     val eventData =
                         FeatureFormNavigationRoute.SelectAssociationFeatureCandidate(
                             element = viewModel.element,
+                            filter = viewModel.filter,
                             featureSource = source,
                             assetType = assetType
                         )
@@ -194,6 +197,7 @@ internal fun NavGraphBuilder.createAssociationDestination(
                 viewModel.newAssociationOptions?.let { options ->
                     val eventData = FeatureFormNavigationRoute.CreateAssociation(
                         element = viewModel.element,
+                        filter = viewModel.filter,
                         featureSource = source,
                         candidate = options.candidate
                     )
