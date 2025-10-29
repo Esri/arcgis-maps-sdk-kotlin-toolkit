@@ -138,13 +138,13 @@ public sealed class FeatureFormNavigationRoute {
      * Indicates the route for [UtilityAssociationsFilterResult] screen.
      *
      * @param element The [UtilityAssociationsFormElement] associated with the filter result.
-     * @param filterResult The selected [UtilityAssociationsFilterResult].
+     * @param result The selected [UtilityAssociationsFilterResult].
      *
      * @since 300.0.0
      */
     public data class AssociationsFilterResult(
         val element: UtilityAssociationsFormElement,
-        val filterResult: UtilityAssociationsFilterResult
+        val result: UtilityAssociationsFilterResult
     ) : FeatureFormNavigationRoute()
 
     /**
@@ -152,14 +152,14 @@ public sealed class FeatureFormNavigationRoute {
      *
      * @param element The [UtilityAssociationsFormElement] associated with the group result.
      * @param filter The selected [UtilityAssociationsFilter].
-     * @param groupResult The selected [UtilityAssociationGroupResult].
+     * @param result The selected [UtilityAssociationGroupResult].
      *
      * @since 300.0.0
      */
     public data class AssociationGroupResult(
         val element: UtilityAssociationsFormElement,
         val filter: UtilityAssociationsFilter,
-        val groupResult: UtilityAssociationGroupResult
+        val result: UtilityAssociationGroupResult
     ) : FeatureFormNavigationRoute()
 
     /**

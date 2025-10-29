@@ -147,7 +147,7 @@ class EventTests {
         }
         var filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.result.filter).isEqualTo(filterResult.filter)
 
         val groupResult = filterResult.groupResults.first()
 
@@ -159,8 +159,8 @@ class EventTests {
         }
         var groupEvent = lastEvent as FeatureFormNavigationRoute.AssociationGroupResult
         assertThat(groupEvent.element).isEqualTo(element)
-        assertThat(groupEvent.groupResult.name).isEqualTo(groupResult.name)
-        assertThat(groupEvent.groupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
+        assertThat(groupEvent.result.name).isEqualTo(groupResult.name)
+        assertThat(groupEvent.result.featureFormSource).isEqualTo(groupResult.featureFormSource)
 
         val associationResult = groupResult.associationResults.first()
         var listView = composeTestRule.onNode(hasScrollAction())
@@ -189,8 +189,8 @@ class EventTests {
         }
         groupEvent = lastEvent as FeatureFormNavigationRoute.AssociationGroupResult
         assertThat(groupEvent.element).isEqualTo(element)
-        assertThat(groupEvent.groupResult.name).isEqualTo(groupResult.name)
-        assertThat(groupEvent.groupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
+        assertThat(groupEvent.result.name).isEqualTo(groupResult.name)
+        assertThat(groupEvent.result.featureFormSource).isEqualTo(groupResult.featureFormSource)
 
         Espresso.pressBack()
 
@@ -200,7 +200,7 @@ class EventTests {
         }
         filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.result.filter).isEqualTo(filterResult.filter)
 
         // Get and click the add button
         val addButton = composeTestRule.onNodeWithContentDescription("Add Associations")
@@ -290,6 +290,6 @@ class EventTests {
         }
         filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.result.filter).isEqualTo(filterResult.filter)
     }
 }

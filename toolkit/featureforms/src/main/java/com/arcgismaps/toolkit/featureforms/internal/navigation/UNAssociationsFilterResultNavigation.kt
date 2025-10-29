@@ -61,7 +61,7 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
             LaunchedEffect(filterResult) {
                 val eventData = FeatureFormNavigationRoute.AssociationsFilterResult(
                     element = utilityAssociationsElementState.element,
-                    filterResult = filterResult.filterResult
+                    result = filterResult.filterResult
                 )
                 onNavigationEvent(eventData)
             }

@@ -78,7 +78,7 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 val eventData = FeatureFormNavigationRoute.AssociationGroupResult(
                     element = utilityAssociationsElementState.element,
                     filter = utilityAssociationsElementState.selectedFilterResult!!.filter,
-                    groupResult = groupResult.groupResult
+                    result = groupResult.groupResult
                 )
                 onNavigationEvent(eventData)
             }
