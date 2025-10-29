@@ -63,6 +63,7 @@ internal class AddAssociationFromSourceViewModel(
 ) : ViewModel() {
 
     private val _featureSourcesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of feature sources. This can be set via
      * [setFeatureSourcesFilterText].
@@ -70,6 +71,7 @@ internal class AddAssociationFromSourceViewModel(
     val featureSourcesFilterText by _featureSourcesFilterText
 
     private val _assetTypesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of asset types. This can be set via
      * [setAssetTypesFilterText].
@@ -77,6 +79,7 @@ internal class AddAssociationFromSourceViewModel(
     val assetTypesFilterText by _assetTypesFilterText
 
     private val _associatedFeaturesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of associated feature candidates. This can be set
      * via [setAssociatedFeaturesFilterText].
@@ -300,10 +303,38 @@ internal class AddAssociationFromSourceViewModel(
      */
     fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
         viewModelScope.launch {
-            element.getOptionsForAssociationCandidate(candidate.feature).onSuccess {
+            element.getOptionsForAssociationCandidate(candidate.feature).onSuccess { options ->
+                val (fromEndPoint, toEndPoint) = when (filter.filterType) {
+                    is UtilityAssociationsFilterType.Connectivity -> {
+                        AssociationEndpoint(
+                            featureForm.title.value,
+                            options.formFeatureTerminalConfiguration
+                        ) to
+                            AssociationEndpoint(
+                                candidate.title,
+                                options.candidateFeatureTerminalConfiguration
+                            )
+                    }
+
+                    is UtilityAssociationsFilterType.Container,
+                    is UtilityAssociationsFilterType.Structure -> {
+                        AssociationEndpoint(name = candidate.title) to
+                            AssociationEndpoint(featureForm.title.value)
+                    }
+
+                    else -> {
+                        AssociationEndpoint(featureForm.title.value) to
+                            AssociationEndpoint(candidate.title)
+                    }
+                }
+
                 _newAssociationOptions.value = NewAssociationOptions(
                     candidate = candidate,
-                    options = it,
+                    fromElement = fromEndPoint.name,
+                    fromTerminalConfiguration = fromEndPoint.terminalConfiguration,
+                    toElement = toEndPoint.name,
+                    toTerminalConfiguration = toEndPoint.terminalConfiguration,
+                    isFractionAlongEdgeValid = options.isFractionAlongEdgeValid,
                     type = filter.filterType
                 )
             }
@@ -325,25 +356,25 @@ internal class AddAssociationFromSourceViewModel(
     suspend fun addAssociation(
         isContainmentVisible: Boolean,
         fractionAlongEdge: Float? = null,
-        fromTerminalId : Int? = null,
-        toTerminalId : Int? = null,
-    ) : Result<UtilityAssociationResult> = runCatching {
+        fromTerminalId: Int? = null,
+        toTerminalId: Int? = null,
+    ): Result<UtilityAssociationResult> = runCatching {
         val feature = newAssociationOptions?.candidate?.feature
         require(feature != null) {
             "No feature candidate selected"
         }
         val fromTerminal = fromTerminalId?.let { id ->
-            newAssociationOptions?.options?.formFeatureTerminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.fromTerminalConfiguration.getTerminalById(id)
         }
         val toTerminal = toTerminalId?.let { id ->
-            newAssociationOptions?.options?.candidateFeatureTerminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.toTerminalConfiguration.getTerminalById(id)
         }
         // First check if we can add an association to the feature with the provided filter
         val canAddAssociation = element.canAddAssociation(
             feature,
             filter
         ).getOrThrow()
-        if (canAddAssociation.not())  {
+        if (canAddAssociation.not()) {
             throw IllegalStateException("Cannot add an association to the provided feature")
         }
         // Capture the result of adding the association based on the filter type
@@ -486,21 +517,48 @@ internal class AddAssociationFromSourceViewModel(
  * Holds the options for creating a new association based on a selected candidate feature.
  *
  * @param candidate The selected [UtilityAssociationFeatureCandidate].
- * @param options The [UtilityAssociationFeatureOptions] for the candidate feature.
+ * @param fromElement The name of the "from" element in the association.
+ * @param fromTerminalConfiguration The [UtilityTerminalConfiguration] for the "from" element,
+ * if applicable.
+ * @param toElement The name of the "to" element in the association.
+ * @param toTerminalConfiguration The [UtilityTerminalConfiguration] for the "to" element,
+ * if applicable.
+ * @param isFractionAlongEdgeValid Whether the fraction along edge is valid for connectivity
+ * associations.
  * @param type The [UtilityAssociationsFilterType] defining the type of association to create
  */
 internal data class NewAssociationOptions(
     val candidate: UtilityAssociationFeatureCandidate,
-    val options: UtilityAssociationFeatureOptions,
+    val fromElement: String,
+    val fromTerminalConfiguration: UtilityTerminalConfiguration?,
+    val toElement: String,
+    val toTerminalConfiguration: UtilityTerminalConfiguration?,
+    val isFractionAlongEdgeValid: Boolean,
     val type: UtilityAssociationsFilterType
 )
 
+/**
+ * Represents the UI state for loading feature candidates, including loading status,
+ * any errors encountered, and the list of loaded candidates.
+ */
 internal data class FeatureCandidatesUiState(
     val isLoading: Boolean = false,
     val error: Throwable? = null,
     val candidates: List<UtilityAssociationFeatureCandidate> = emptyList()
 )
 
+/**
+ * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
+ */
 internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
     return this?.terminals?.find { it.terminalId == id }
 }
+
+/**
+ * Holds information about an association endpoint, including its name and optional terminal
+ * configuration.
+ */
+private data class AssociationEndpoint(
+    val name: String,
+    val terminalConfiguration: UtilityTerminalConfiguration? = null
+)
