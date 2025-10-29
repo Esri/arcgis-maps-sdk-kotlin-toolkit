@@ -50,6 +50,7 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.LocalSceneView
+import com.arcgismaps.mapping.view.LocalSceneViewInteractionOptions
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
@@ -72,6 +73,7 @@ public fun LocalSceneView(
     modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -100,10 +102,11 @@ public fun LocalSceneView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = "MapView" },
+                .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
                 it.scene = scene
+                it.interactionOptions = interactionOptions
             }
         )
 
