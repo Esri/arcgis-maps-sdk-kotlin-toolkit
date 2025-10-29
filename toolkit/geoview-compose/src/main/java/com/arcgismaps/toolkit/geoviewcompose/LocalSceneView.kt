@@ -61,6 +61,11 @@ import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * A compose equivalent of the view-based [LocalSceneView].
+ *
+ * @since 300.0.0
+ */
 @Composable
 public fun LocalSceneView(
     scene: ArcGISScene,
