@@ -24,8 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +41,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -49,6 +55,7 @@ import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +65,8 @@ import kotlinx.coroutines.launch
 public fun LocalSceneView(
     scene: ArcGISScene,
     modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -132,10 +141,19 @@ public fun LocalSceneView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
+
+    ViewpointHandler(
+        localSceneView = localSceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
+    )
 }
 
 /**
  * Sets up the callbacks for all the view-based [LocalSceneView] events.
+ *
+ * @since 300.0.0
  */
 @Composable
 private fun LocalSceneViewEventHandler(
@@ -260,6 +278,85 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+    }
+}
+
+/**
+ * Handles viewpoint change events and persistence for a [LocalSceneView].
+ *
+ * @since 300.0.0
+ */
+@Composable
+private fun ViewpointHandler(
+    localSceneView: LocalSceneView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)?
+) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
+    val currentOnCurrentViewpointCameraChanged by rememberUpdatedState(
+        onCurrentViewpointCameraChanged
+    )
+
+    var persistedCamera by rememberSaveable(
+        saver = Saver(
+            save = {
+                val camera = it.value ?: return@Saver null
+                listOf(
+                    camera.transformationMatrix.quaternionX,
+                    camera.transformationMatrix.quaternionY,
+                    camera.transformationMatrix.quaternionZ,
+                    camera.transformationMatrix.quaternionW,
+                    camera.transformationMatrix.translationX,
+                    camera.transformationMatrix.translationY,
+                    camera.transformationMatrix.translationZ
+                )
+            },
+            restore = { matrixValues ->
+                if (matrixValues.isEmpty()) return@Saver mutableStateOf(null)
+                val camera = Camera(
+                    TransformationMatrix.createWithQuaternionAndTranslation(
+                        quaternionX = matrixValues[0],
+                        quaternionY = matrixValues[1],
+                        quaternionZ = matrixValues[2],
+                        quaternionW = matrixValues[3],
+                        translationX = matrixValues[4],
+                        translationY = matrixValues[5],
+                        translationZ = matrixValues[6]
+                    )
+                )
+                mutableStateOf(camera)
+            }
+        )
+    ) {
+        mutableStateOf<Camera?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
+        persistedCamera?.let { localSceneView.setViewpoint(it) }
+        launch {
+            localSceneView.viewpointChanged.collect {
+                val currentViewpointCamera = localSceneView.getCurrentViewpointCamera()
+                persistedCamera = currentViewpointCamera
+                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    val currentViewpoint =
+                        localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    currentViewpoint?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    val currentViewpoint =
+                        localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    currentViewpoint?.let(callback)
+                }
             }
         }
     }
