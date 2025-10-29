@@ -118,7 +118,7 @@ class EventTests {
 
         // Wait for the initial FeatureForm event
         composeTestRule.waitUntil {
-            lastEvent == FeatureFormNavigationRoute.FeatureForm
+            lastEvent == FeatureFormNavigationRoute.Form
         }
 
         val element = featureForm.elements.first {
@@ -143,11 +143,11 @@ class EventTests {
 
         // Verify that the UtilityAssociationsFilterResultNav event is received
         composeTestRule.waitUntil {
-            lastEvent is FeatureFormNavigationRoute.FilterResult
+            lastEvent is FeatureFormNavigationRoute.AssociationsFilterResult
         }
-        var filterEvent = lastEvent as FeatureFormNavigationRoute.FilterResult
+        var filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.utilityAssociationsFilterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
 
         val groupResult = filterResult.groupResults.first()
 
@@ -155,12 +155,12 @@ class EventTests {
         groupNode.performClick()
 
         composeTestRule.waitUntil {
-            lastEvent is FeatureFormNavigationRoute.GroupResult
+            lastEvent is FeatureFormNavigationRoute.AssociationGroupResult
         }
-        var groupEvent = lastEvent as FeatureFormNavigationRoute.GroupResult
+        var groupEvent = lastEvent as FeatureFormNavigationRoute.AssociationGroupResult
         assertThat(groupEvent.element).isEqualTo(element)
-        assertThat(groupEvent.utilityAssociationGroupResult.name).isEqualTo(groupResult.name)
-        assertThat(groupEvent.utilityAssociationGroupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
+        assertThat(groupEvent.groupResult.name).isEqualTo(groupResult.name)
+        assertThat(groupEvent.groupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
 
         val associationResult = groupResult.associationResults.first()
         var listView = composeTestRule.onNode(hasScrollAction())
@@ -173,11 +173,11 @@ class EventTests {
         }
         val associationEvent = lastEvent as FeatureFormNavigationRoute.AssociationResult
         assertThat(associationEvent.element).isEqualTo(element)
-        assertThat(associationEvent.utilityAssociationResult.title).isEqualTo(associationResult.title)
-        assertThat(associationEvent.utilityAssociationResult.association.globalId).isEqualTo(
+        assertThat(associationEvent.associationResult.title).isEqualTo(associationResult.title)
+        assertThat(associationEvent.associationResult.association.globalId).isEqualTo(
             associationResult.association.globalId
         )
-        assertThat(associationEvent.utilityAssociationResult.associatedFeature).isEqualTo(
+        assertThat(associationEvent.associationResult.associatedFeature).isEqualTo(
             associationResult.associatedFeature
         )
 
@@ -185,22 +185,22 @@ class EventTests {
 
         // Verify that we are back on the group result screen and the event is fired again
         composeTestRule.waitUntil {
-            lastEvent is FeatureFormNavigationRoute.GroupResult
+            lastEvent is FeatureFormNavigationRoute.AssociationGroupResult
         }
-        groupEvent = lastEvent as FeatureFormNavigationRoute.GroupResult
+        groupEvent = lastEvent as FeatureFormNavigationRoute.AssociationGroupResult
         assertThat(groupEvent.element).isEqualTo(element)
-        assertThat(groupEvent.utilityAssociationGroupResult.name).isEqualTo(groupResult.name)
-        assertThat(groupEvent.utilityAssociationGroupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
+        assertThat(groupEvent.groupResult.name).isEqualTo(groupResult.name)
+        assertThat(groupEvent.groupResult.featureFormSource).isEqualTo(groupResult.featureFormSource)
 
         Espresso.pressBack()
 
         // Verify that we are back on the filter result screen and the event is fired again
         composeTestRule.waitUntil {
-            lastEvent is FeatureFormNavigationRoute.FilterResult
+            lastEvent is FeatureFormNavigationRoute.AssociationsFilterResult
         }
-        filterEvent = lastEvent as FeatureFormNavigationRoute.FilterResult
+        filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.utilityAssociationsFilterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
 
         // Get and click the add button
         val addButton = composeTestRule.onNodeWithContentDescription("Add Associations")
@@ -286,10 +286,10 @@ class EventTests {
 
         // Verify that we are back on the filter result screen and the event is fired again
         composeTestRule.waitUntil(timeoutMillis = 2_000) {
-            lastEvent is FeatureFormNavigationRoute.FilterResult
+            lastEvent is FeatureFormNavigationRoute.AssociationsFilterResult
         }
-        filterEvent = lastEvent as FeatureFormNavigationRoute.FilterResult
+        filterEvent = lastEvent as FeatureFormNavigationRoute.AssociationsFilterResult
         assertThat(filterEvent.element).isEqualTo(element)
-        assertThat(filterEvent.utilityAssociationsFilterResult.filter).isEqualTo(filterResult.filter)
+        assertThat(filterEvent.filterResult.filter).isEqualTo(filterResult.filter)
     }
 }

@@ -65,7 +65,7 @@ internal fun NavGraphBuilder.associationDetailsDestination(
                 utilityAssociationsElementState.selectedAssociationResult?.let { result ->
                     val eventData = FeatureFormNavigationRoute.AssociationResult(
                         element = utilityAssociationsElementState.element,
-                        utilityAssociationResult = result
+                        associationResult = result
                     )
                     onNavigationEvent(eventData)
                 }

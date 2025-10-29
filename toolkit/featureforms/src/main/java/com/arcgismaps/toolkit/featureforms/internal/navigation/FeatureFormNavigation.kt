@@ -46,7 +46,7 @@ internal fun NavGraphBuilder.featureFormDestination(
         LaunchedEffect(formData) {
             // Update the active feature form if we navigate back to this screen from another form.
             state.updateActiveFeatureForm()
-            onNavigationEvent(FeatureFormNavigationRoute.FeatureForm)
+            onNavigationEvent(FeatureFormNavigationRoute.Form)
         }
         // launch a new side effect in a launched effect when validationErrorVisibility changes
         // for a given form

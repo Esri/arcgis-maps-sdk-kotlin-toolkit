@@ -75,9 +75,10 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 state.updateActiveFeatureForm()
             }
             LaunchedEffect(groupResult) {
-                val eventData = FeatureFormNavigationRoute.GroupResult(
+                val eventData = FeatureFormNavigationRoute.AssociationGroupResult(
                     element = utilityAssociationsElementState.element,
-                    utilityAssociationGroupResult = groupResult.groupResult
+                    filter = utilityAssociationsElementState.selectedFilterResult!!.filter,
+                    groupResult = groupResult.groupResult
                 )
                 onNavigationEvent(eventData)
             }

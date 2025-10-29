@@ -59,9 +59,9 @@ internal fun NavGraphBuilder.associationsFilterResultDestination(
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(filterResult) {
-                val eventData = FeatureFormNavigationRoute.FilterResult(
+                val eventData = FeatureFormNavigationRoute.AssociationsFilterResult(
                     element = utilityAssociationsElementState.element,
-                    utilityAssociationsFilterResult = filterResult.filterResult
+                    filterResult = filterResult.filterResult
                 )
                 onNavigationEvent(eventData)
             }
