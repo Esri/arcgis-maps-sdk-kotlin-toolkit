@@ -56,9 +56,9 @@ import kotlinx.coroutines.launch
  * added. This can be used to refresh the UI or perform other actions in response to the addition.
  */
 internal class AddAssociationFromSourceViewModel(
-    val featureForm: FeatureForm,
-    private val element: UtilityAssociationsFormElement,
-    private val filter: UtilityAssociationsFilter,
+    val featureForm : FeatureForm,
+    val element: UtilityAssociationsFormElement,
+    val filter: UtilityAssociationsFilter,
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 

@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
+import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
@@ -64,8 +65,18 @@ import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
+import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociation
+import com.arcgismaps.utilitynetworks.UtilityAssociationGroupResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationResult
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
+import com.arcgismaps.utilitynetworks.UtilityAssociationsFilterResult
 
+/**
+ * Defines the visibility behavior of validation errors in a [FeatureForm].
+ *
+ * @since 200.4.0
+ */
 @Immutable
 public sealed class ValidationErrorVisibility {
 
@@ -84,6 +95,8 @@ public sealed class ValidationErrorVisibility {
 
 /**
  * Indicates an event that occurs during the editing of a feature form.
+ *
+ * @since 200.8.0
  */
 public sealed class FeatureFormEditingEvent {
 
@@ -104,6 +117,129 @@ public sealed class FeatureFormEditingEvent {
      */
     public data class SavedEdits(val featureForm: FeatureForm, val willNavigate: Boolean) :
         FeatureFormEditingEvent()
+}
+
+/**
+ * Indicates the navigation route within a [FeatureForm] when dealing with [UtilityAssociation]s.
+ *
+ * @since 300.0.0
+ */
+public sealed class FeatureFormNavigationRoute {
+
+    /**
+     * Indicates the route for the main [FeatureForm] screen. The associated [FeatureForm] can be
+     * obtained from the [FeatureFormState.activeFeatureForm] property.
+     *
+     * @since 300.0.0
+     */
+    public data object Form : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for [UtilityAssociationsFilterResult] screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the filter result.
+     * @param filterResult The selected [UtilityAssociationsFilterResult].
+     *
+     * @since 300.0.0
+     */
+    public data class AssociationsFilterResult(
+        val element: UtilityAssociationsFormElement,
+        val filterResult: UtilityAssociationsFilterResult
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for [UtilityAssociationGroupResult] screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the group result.
+     * @param filter The selected [UtilityAssociationsFilter].
+     * @param groupResult The selected [UtilityAssociationGroupResult].
+     *
+     * @since 300.0.0
+     */
+    public data class AssociationGroupResult(
+        val element: UtilityAssociationsFormElement,
+        val filter: UtilityAssociationsFilter,
+        val groupResult: UtilityAssociationGroupResult
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for [UtilityAssociationResult] details screen.
+     *
+     * @param element The [UtilityAssociationsFormElement] associated with the association result.
+     * @param result The selected [UtilityAssociationResult].
+     *
+     * @since 300.0.0
+     */
+    public data class AssociationResult(
+        val element: UtilityAssociationsFormElement,
+        val result: UtilityAssociationResult
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for selecting a [UtilityAssociationFeatureSource] when adding a new
+     * association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
+     *
+     * @since 300.0.0
+     */
+    public data class SelectAssociationFeatureSource(
+        val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for selecting a [UtilityAssetType] from a [UtilityAssociationFeatureSource]
+     * when adding a new association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
+     * @param featureSource The selected [UtilityAssociationFeatureSource].
+     *
+     * @since 300.0.0
+     */
+    public data class SelectUtilityAssetType(
+        val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
+        val featureSource: UtilityAssociationFeatureSource
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for selecting a [UtilityAssociationFeatureCandidate] from a
+     * [UtilityAssetType] when adding a new association.
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
+     * @param featureSource The selected [UtilityAssociationFeatureSource] the asset type belongs to.
+     * @param assetType The selected [UtilityAssetType].
+     *
+     * @since 300.0.0
+     */
+    public data class SelectAssociationFeatureCandidate(
+        val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
+        val featureSource: UtilityAssociationFeatureSource,
+        val assetType: UtilityAssetType
+    ) : FeatureFormNavigationRoute()
+
+    /**
+     * Indicates the route for creating a new association with the selected
+     * [UtilityAssociationFeatureCandidate].
+     *
+     * @param element The [UtilityAssociationsFormElement] where the association is being added.
+     * @param filter The selected [UtilityAssociationsFilter].
+     * @param featureSource The selected [UtilityAssociationFeatureSource] the candidate belongs to.
+     * @param candidate The selected [UtilityAssociationFeatureCandidate].
+     *
+     * @since 300.0.0
+     */
+    public data class CreateAssociation(
+        val element: UtilityAssociationsFormElement,
+        val filter : UtilityAssociationsFilter,
+        val featureSource: UtilityAssociationFeatureSource,
+        val candidate: UtilityAssociationFeatureCandidate
+    ) : FeatureFormNavigationRoute()
 }
 
 /**
@@ -192,6 +328,10 @@ public sealed class FeatureFormEditingEvent {
  * If the edit action is triggered by navigating to another form, the `willNavigate` parameter will
  * be true. Note that if the action happens due to the close button, the `willNavigate` parameter
  * will be false.
+ * @param onNavigationEvent A callback that is invoked when a navigation event occurs in the form.
+ * This is triggered when the user navigates to different screens within the form, currently when
+ * dealing with [UtilityAssociation]s. The specific [FeatureFormNavigationRoute] is provided which
+ * contains the relevant data for the route.
  * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
@@ -206,9 +346,10 @@ public fun FeatureForm(
     isNavigationEnabled : Boolean = true,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)? = null,
-    onShowOnMapRequest : ((ArcGISFeature) -> Unit)? = null,
+    onShowOnMapRequest : (ArcGISFeature) -> Unit = {},
     onDismiss: () -> Unit = {},
     onEditingEvent: (FeatureFormEditingEvent) -> Unit = {},
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit = {},
     colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
     typography: FeatureFormTypography = FeatureFormDefaults.typography(),
 ) {
@@ -303,9 +444,8 @@ public fun FeatureForm(
                 onSaveForm = ::saveForm,
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
-                onShowOnMapRequest = { feature ->
-                    onShowOnMapRequest?.invoke(feature)
-                },
+                onShowOnMapRequest = onShowOnMapRequest,
+                onNavigationEvent = onNavigationEvent,
                 modifier = Modifier.fillMaxSize()
             )
         },

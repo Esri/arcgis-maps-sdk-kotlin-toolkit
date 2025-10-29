@@ -409,6 +409,7 @@ private fun InitializingExpressions(
 private fun NavBackStackEntry.shouldEnableTopBar(): Boolean {
     return when {
         this.destination.parent?.hasRoute<NavigationRoute.AddUNAssociationFromSource>() == true -> false
+        this.destination.hasRoute<NavigationRoute.UNAssociationDetails>() -> false
         else -> true
     }
 }
