@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 public fun LocalSceneView(
     scene: ArcGISScene,
     modifier: Modifier = Modifier,
+    localSceneViewProxy: LocalSceneViewProxy? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
@@ -126,6 +127,13 @@ public fun LocalSceneView(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(localSceneView)
             localSceneView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    DisposableEffect(localSceneViewProxy) {
+        localSceneViewProxy?.setLocalSceneView(localSceneView)
+        onDispose {
+            localSceneViewProxy?.setLocalSceneView(null)
         }
     }
 
