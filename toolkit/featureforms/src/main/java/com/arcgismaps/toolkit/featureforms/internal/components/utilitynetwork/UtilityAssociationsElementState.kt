@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
+    val featureForm : FeatureForm,
     val element: UtilityAssociationsFormElement,
     scope: CoroutineScope
 ) : FormElementState(
