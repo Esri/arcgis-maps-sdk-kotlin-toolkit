@@ -19,7 +19,9 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Stable
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.LocalSceneView
+import com.arcgismaps.mapping.view.ScreenCoordinate
 
 /**
  * Used to perform operations on a composable [LocalSceneView].
@@ -27,7 +29,7 @@ import com.arcgismaps.mapping.view.LocalSceneView
  * There should be a one-to-one relationship between a LocalSceneViewProxy and a composable
  * [LocalSceneView]. This relationship is established by passing an instance of LocalSceneViewProxy
  * to the composable [LocalSceneView] function. Operations can only be performed once the associated
- * composable LcoalSceneView has entered the composition. Operations performed when the associated
+ * composable LocalSceneView has entered the composition. Operations performed when the associated
  * composable LocalSceneView is not in the composition will fail gracefully, i.e. won't throw
  * exceptions but won't return a successful result.
  *
@@ -57,4 +59,33 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
     internal fun setLocalSceneView(localSceneView: LocalSceneView?) {
         this.localSceneView = localSceneView
     }
+
+    private val nullSceneViewErrorMessage: String =
+        "LocalSceneView must be part of the composition when this member is called."
+
+    /**
+     * Asynchronously converts a screen coordinate, relative to the upper-left corner of the
+     * LocalSceneView, to a location in scene coordinates.
+     *
+     * This calculation is executed on the GPU using a triangular mesh. Note that elevation values
+     * are approximated, and as the distance between the camera and the surface increases, the
+     * precision of the elevation value decreases.
+     *
+     * If the provided screen coordinates are outside of the bounds of the current screen, this
+     * method will immediately fail with an error.
+     *
+     * If the provided screen coordinates do not intersect with the surface of the local scene, the
+     * returned point will be empty.
+     *
+     * @param screenCoordinate The screen coordinate. The coordinate of the top left corner of the
+     * screen is 0,0.
+     *
+     * @since 300.0.0
+     */
+    public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
+        localSceneView?.screenToLocation(screenCoordinate) ?: Result.failure(
+            IllegalStateException(
+                nullSceneViewErrorMessage
+            )
+        )
 }
