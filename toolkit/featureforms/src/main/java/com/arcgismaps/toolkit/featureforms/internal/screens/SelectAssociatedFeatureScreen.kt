@@ -95,7 +95,7 @@ internal fun SelectAssociatedFeatureScreen(
     val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
     val candidates = state.candidates
     val count = candidates.count()
-    val title = if (state.isLoading) {
+    val title = if (state.isLoading || viewModel.isSearchingForCandidates) {
         stringResource(R.string.loading2)
     } else {
         stringResource(R.string.available_features, count)
@@ -135,7 +135,7 @@ internal fun SelectAssociatedFeatureScreen(
             targetState = state
         ) { state ->
             when {
-                state.isLoading -> {
+                state.isLoading || viewModel.isSearchingForCandidates -> {
                     LoadingRow(modifier = Modifier.fillMaxWidth())
                 }
 
