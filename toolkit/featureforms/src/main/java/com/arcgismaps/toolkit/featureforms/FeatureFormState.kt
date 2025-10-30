@@ -427,6 +427,7 @@ internal fun createStates(
 
             is UtilityAssociationsFormElement -> {
                 val state = UtilityAssociationsElementState(
+                    featureForm = form,
                     element = element,
                     scope = scope
                 )

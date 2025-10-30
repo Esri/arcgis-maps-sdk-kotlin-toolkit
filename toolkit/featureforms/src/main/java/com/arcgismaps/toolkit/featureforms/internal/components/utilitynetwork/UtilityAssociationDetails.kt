@@ -46,9 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationType
+import com.arcgismaps.utilitynetworks.UtilityTerminal
 import kotlinx.coroutines.launch
 
 /**
@@ -68,6 +71,8 @@ internal fun UtilityAssociationDetails(
     val associationResult = state.selectedAssociationResult ?: return
     val filter = state.selectedFilterResult?.filter ?: return
     val association = associationResult.association
+    val (fromElement, fromTerminal) = associationResult.getFromElement(state.featureForm)
+    val (toElement, toTerminal) = associationResult.getToElement(state.featureForm)
     val isEditable by state.isEditable.collectAsState()
     val scrollState = rememberScrollState()
     var showConfirmationDialog by remember {
@@ -116,12 +121,12 @@ internal fun UtilityAssociationDetails(
             Column {
                 PropertyRow(
                     title = stringResource(R.string.from_element),
-                    value = "${association.fromElement.objectId}",
+                    value = fromElement,
                     modifier = Modifier
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
-                association.fromElement.terminal?.let { terminal ->
+                fromTerminal?.let { terminal ->
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -144,12 +149,12 @@ internal fun UtilityAssociationDetails(
             Column {
                 PropertyRow(
                     title = stringResource(R.string.to_element),
-                    value = "${association.toElement.objectId}",
+                    value = toElement,
                     modifier = Modifier
                         .padding(20.dp)
                         .fillMaxWidth()
                 )
-                association.toElement.terminal?.let { terminal ->
+                toTerminal?.let { terminal ->
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -269,5 +274,37 @@ internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
         }
 
         else -> null
+    }
+}
+
+/**
+ * Extension function that returns the from element and terminal of the association result based on
+ * the provided feature form.
+ *
+ * @param featureForm The feature form to compare against.
+ * @return A pair containing the element name and terminal.
+ */
+internal fun UtilityAssociationResult.getFromElement(featureForm: FeatureForm): Pair<String, UtilityTerminal?> {
+    val feature = featureForm.feature
+    return if (feature.globalId == association.fromElement.globalId) {
+        Pair(featureForm.title.value, association.fromElement.terminal)
+    } else {
+        Pair(this.title, association.toElement.terminal)
+    }
+}
+
+/**
+ * Extension function that returns the to element and terminal of the association result based on
+ * the provided feature form.
+ *
+ * @param featureForm The feature form to compare against.
+ * @return A pair containing the element name and terminal.
+ */
+internal fun UtilityAssociationResult.getToElement(featureForm: FeatureForm): Pair<String, UtilityTerminal?> {
+    val feature = featureForm.feature
+    return if (feature.globalId == association.toElement.globalId) {
+        Pair(featureForm.title.value, association.toElement.terminal)
+    } else {
+        Pair(this.title, association.fromElement.terminal)
     }
 }

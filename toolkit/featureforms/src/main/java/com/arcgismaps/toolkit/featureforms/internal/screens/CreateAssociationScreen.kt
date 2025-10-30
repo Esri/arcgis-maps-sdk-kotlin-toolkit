@@ -187,6 +187,10 @@ internal fun CreateAssociationScreen(
                         )
                         // if terminal config is available show terminal selection
                         options.fromTerminalConfiguration?.let { terminalConfig ->
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                             UtilityTerminalControl(
                                 selected = selectedFromTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
@@ -219,6 +223,10 @@ internal fun CreateAssociationScreen(
                         )
                         // if terminal config is available show terminal selection
                         options.toTerminalConfiguration?.let { terminalConfig ->
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                             UtilityTerminalControl(
                                 selected = selectedToTerminalId?.let { id ->
                                     terminalConfig.getTerminalById(id)
