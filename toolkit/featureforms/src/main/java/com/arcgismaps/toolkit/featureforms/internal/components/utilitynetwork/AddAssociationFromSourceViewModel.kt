@@ -231,6 +231,12 @@ internal class AddAssociationFromSourceViewModel(
     val isSearchingForCandidates: Boolean
         get() = _isSearchingForCandidates.value
 
+    /**
+     * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
+     * This is used to prevent multiple simultaneous fetches.
+     */
+    private var _isFetchingNextPage = false
+
     init {
         viewModelScope.launch {
             // Whenever the selected source or asset type changes, reload the feature candidates
@@ -536,6 +542,38 @@ internal class AddAssociationFromSourceViewModel(
         setAssociatedFeaturesFilterText("")
     }
 
+    /**
+     * Loads more feature candidates from the selected source and asset type if there are more
+     * candidates to fetch. This method will not fetch more candidates if a fetch is already in
+     * progress or if there is an active search filter.
+     *
+     * This is not thread-safe as it is intended to be called from the ui thread only.
+     */
+    suspend fun loadMoreFeatureCandidates() {
+        // Only fetch the next page if not already fetching and there's no active search filter
+        if (_isFetchingNextPage.not() && featureSourcesFilterText.isEmpty()) {
+            val source = _selectedSource.value ?: return
+            val assetType = _selectedAssetType.value ?: return
+            val nextQueryParams = _featureCandidatesUiState.value.nextQueryParams ?: return
+            _isFetchingNextPage = true
+            source.queryFeatures(
+                assetType = assetType,
+                parameters = nextQueryParams
+            ).onSuccess { result ->
+                // Append the newly fetched candidates to the existing list
+                val updatedCandidates =
+                    _featureCandidatesUiState.value.candidates + result.candidates
+                // Update the candidates list with the updated list
+                _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                    isLoading = false,
+                    candidates = updatedCandidates,
+                    nextQueryParams = result.nextQueryParams
+                )
+            }
+            _isFetchingNextPage = false
+        }
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -586,8 +624,7 @@ internal data class NewAssociationOptions(
  * @param isLoading Indicates whether the feature candidates are currently being loaded.
  * @param error An optional [Throwable] representing any error that occurred during loading.
  * @param candidates A list of loaded [UtilityAssociationFeatureCandidate] objects.
- * @param nextQueryParams Optional [QueryParameters] for fetching the next set of candidates,
- * if any.
+ * @param nextQueryParams Optional [QueryParameters] for fetching the next set of candidates, if any.
  */
 internal data class FeatureCandidatesUiState(
     val isLoading: Boolean = false,
