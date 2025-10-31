@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
@@ -56,7 +57,7 @@ import kotlinx.coroutines.launch
  * added. This can be used to refresh the UI or perform other actions in response to the addition.
  */
 internal class AddAssociationFromSourceViewModel(
-    val featureForm : FeatureForm,
+    val featureForm: FeatureForm,
     val element: UtilityAssociationsFormElement,
     val filter: UtilityAssociationsFilter,
     private val onAssociationAdded: suspend () -> Unit
@@ -174,12 +175,43 @@ internal class AddAssociationFromSourceViewModel(
      */
     val filteredFeatureCandidatesUiState: StateFlow<FeatureCandidatesUiState> = snapshotFlow {
         associatedFeaturesFilterText to _featureCandidatesUiState.value
-    }.map { (text, _) ->
+    }.map { (text, candidatesUiState) ->
         return@map if (text.isNotEmpty()) {
-            val filteredList = filterFeatureCandidates(text)
+            val candidateList = candidatesUiState.candidates.toMutableList()
+            var nextQueryParams = candidatesUiState.nextQueryParams
+            var filteredList = filterFeatureCandidates(text)
+            // Keep fetching additional pages while no candidates match the filter and a next page
+            // (nextQueryParams) is available. Stop when matches appear or there are no more pages.
+            while (filteredList.isEmpty() && nextQueryParams != null) {
+                val source = _selectedSource.value ?: break
+                _isSearchingForCandidates.value = true
+                source.queryFeatures(nextQueryParams).onSuccess { result ->
+                    // Append the newly fetched candidates to the existing list
+                    candidateList += result.candidates
+                    // Update the candidates list with the updated list
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                        isLoading = false,
+                        candidates = candidateList,
+                        nextQueryParams = result.nextQueryParams
+                    )
+                    // Update for the next iteration, if needed
+                    nextQueryParams = result.nextQueryParams
+                    // Filter the updated list
+                    filteredList = filterFeatureCandidates(text)
+                }.onFailure {
+                    // If there's an error, set the error state and break the loop
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                        isLoading = false,
+                        error = it
+                    )
+                    break
+                }
+            }
+            _isSearchingForCandidates.value = false
             FeatureCandidatesUiState(
                 isLoading = false,
-                candidates = filteredList
+                candidates = filteredList,
+                nextQueryParams = nextQueryParams
             )
         } else {
             _featureCandidatesUiState.value
@@ -189,6 +221,21 @@ internal class AddAssociationFromSourceViewModel(
         started = SharingStarted.WhileSubscribed(1000),
         initialValue = FeatureCandidatesUiState(isLoading = true)
     )
+
+    private val _isSearchingForCandidates = mutableStateOf(false)
+
+    /**
+     * Indicates whether the ViewModel is currently searching for more feature candidates when there
+     * are more pages of results to fetch.
+     */
+    val isSearchingForCandidates: Boolean
+        get() = _isSearchingForCandidates.value
+
+    /**
+     * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
+     * This is used to prevent multiple simultaneous fetches.
+     */
+    private var _isFetchingNextPage = false
 
     init {
         viewModelScope.launch {
@@ -214,7 +261,8 @@ internal class AddAssociationFromSourceViewModel(
                     ).onSuccess { result ->
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
-                            candidates = result.candidates
+                            candidates = result.candidates,
+                            nextQueryParams = result.nextQueryParams
                         )
                     }.onFailure { error ->
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
@@ -494,6 +542,38 @@ internal class AddAssociationFromSourceViewModel(
         setAssociatedFeaturesFilterText("")
     }
 
+    /**
+     * Loads more feature candidates from the selected source and asset type if there are more
+     * candidates to fetch. This method will not fetch more candidates if a fetch is already in
+     * progress or if there is an active search filter.
+     *
+     * This is not thread-safe as it is intended to be called from the ui thread only.
+     */
+    suspend fun loadMoreFeatureCandidates() {
+        // Only fetch the next page if not already fetching and there's no active search filter
+        if (_isFetchingNextPage.not() && featureSourcesFilterText.isEmpty()) {
+            val source = _selectedSource.value ?: return
+            val assetType = _selectedAssetType.value ?: return
+            val nextQueryParams = _featureCandidatesUiState.value.nextQueryParams ?: return
+            _isFetchingNextPage = true
+            source.queryFeatures(
+                assetType = assetType,
+                parameters = nextQueryParams
+            ).onSuccess { result ->
+                // Append the newly fetched candidates to the existing list
+                val updatedCandidates =
+                    _featureCandidatesUiState.value.candidates + result.candidates
+                // Update the candidates list with the updated list
+                _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                    isLoading = false,
+                    candidates = updatedCandidates,
+                    nextQueryParams = result.nextQueryParams
+                )
+            }
+            _isFetchingNextPage = false
+        }
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -540,11 +620,17 @@ internal data class NewAssociationOptions(
 /**
  * Represents the UI state for loading feature candidates, including loading status,
  * any errors encountered, and the list of loaded candidates.
+ *
+ * @param isLoading Indicates whether the feature candidates are currently being loaded.
+ * @param error An optional [Throwable] representing any error that occurred during loading.
+ * @param candidates A list of loaded [UtilityAssociationFeatureCandidate] objects.
+ * @param nextQueryParams Optional [QueryParameters] for fetching the next set of candidates, if any.
  */
 internal data class FeatureCandidatesUiState(
     val isLoading: Boolean = false,
     val error: Throwable? = null,
-    val candidates: List<UtilityAssociationFeatureCandidate> = emptyList()
+    val candidates: List<UtilityAssociationFeatureCandidate> = emptyList(),
+    val nextQueryParams: QueryParameters? = null
 )
 
 /**

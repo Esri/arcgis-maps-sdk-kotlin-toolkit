@@ -48,6 +48,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -95,7 +96,7 @@ internal fun SelectAssociatedFeatureScreen(
     val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
     val candidates = state.candidates
     val count = candidates.count()
-    val title = if (state.isLoading) {
+    val title = if (state.isLoading || viewModel.isSearchingForCandidates) {
         stringResource(R.string.loading2)
     } else {
         stringResource(R.string.available_features, count)
@@ -135,7 +136,7 @@ internal fun SelectAssociatedFeatureScreen(
             targetState = state
         ) { state ->
             when {
-                state.isLoading -> {
+                state.isLoading || viewModel.isSearchingForCandidates -> {
                     LoadingRow(modifier = Modifier.fillMaxWidth())
                 }
 
@@ -225,6 +226,12 @@ internal fun SelectAssociatedFeatureScreen(
                     }
                 }
             }
+        }
+    }
+    LaunchedEffect(lazyListState.canScrollForward) {
+        if (lazyListState.canScrollForward.not() && candidates.isNotEmpty()) {
+            // Load more feature candidates when the user scrolls to the end of the list
+            viewModel.loadMoreFeatureCandidates()
         }
     }
 }
