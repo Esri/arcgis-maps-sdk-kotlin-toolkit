@@ -180,8 +180,8 @@ internal class AddAssociationFromSourceViewModel(
             val candidateList = candidatesUiState.candidates.toMutableList()
             var nextQueryParams = candidatesUiState.nextQueryParams
             var filteredList = filterFeatureCandidates(text)
-            // If the filtered list is empty and there are more candidates to fetch, keep fetching
-            // until we either get results or run out of candidates
+            // Keep fetching additional pages while no candidates match the filter and a next page
+            // (nextQueryParams) is available. Stop when matches appear or there are no more pages.
             while (filteredList.isEmpty() && nextQueryParams != null) {
                 val source = _selectedSource.value ?: break
                 _isSearchingForCandidates.value = true
