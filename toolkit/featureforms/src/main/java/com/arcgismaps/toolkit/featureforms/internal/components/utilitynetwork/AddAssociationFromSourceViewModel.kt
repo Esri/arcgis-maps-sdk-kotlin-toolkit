@@ -347,7 +347,8 @@ internal class AddAssociationFromSourceViewModel(
      *
      * @param isContainmentVisible Whether the containment is visible. This is only applicable for
      * [UtilityAssociationsFilterType.Container] and [UtilityAssociationsFilterType.Content] types.
-     * @param percentAlong The percent along for connectivity associations.
+     * @param percentAlong the value expected is a fraction between 0 and 1 rather than a percentage
+     *                      for connectivity associations.
      * @param fromTerminalId The terminal ID on the feature being edited.
      * @param toTerminalId The terminal ID on the candidate feature.
      * @return A [Result] containing the [UtilityAssociationResult] if the association was
