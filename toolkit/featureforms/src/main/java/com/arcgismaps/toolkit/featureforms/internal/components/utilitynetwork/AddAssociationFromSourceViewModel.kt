@@ -334,7 +334,7 @@ internal class AddAssociationFromSourceViewModel(
                     fromTerminalConfiguration = fromEndPoint.terminalConfiguration,
                     toElement = toEndPoint.name,
                     toTerminalConfiguration = toEndPoint.terminalConfiguration,
-                    isFractionAlongEdgeValid = options.isFractionAlongEdgeValid,
+                    isPercentAlongValid = options.isFractionAlongEdgeValid,
                     type = filter.filterType
                 )
             }
@@ -347,7 +347,7 @@ internal class AddAssociationFromSourceViewModel(
      *
      * @param isContainmentVisible Whether the containment is visible. This is only applicable for
      * [UtilityAssociationsFilterType.Container] and [UtilityAssociationsFilterType.Content] types.
-     * @param fractionAlongEdge The fraction along the edge for connectivity associations.
+     * @param percentAlong The percent along for connectivity associations.
      * @param fromTerminalId The terminal ID on the feature being edited.
      * @param toTerminalId The terminal ID on the candidate feature.
      * @return A [Result] containing the [UtilityAssociationResult] if the association was
@@ -355,7 +355,7 @@ internal class AddAssociationFromSourceViewModel(
      */
     suspend fun addAssociation(
         isContainmentVisible: Boolean,
-        fractionAlongEdge: Float? = null,
+        percentAlong: Float? = null,
         fromTerminalId: Int? = null,
         toTerminalId: Int? = null,
     ): Result<UtilityAssociationResult> = runCatching {
@@ -408,11 +408,11 @@ internal class AddAssociationFromSourceViewModel(
                     // junction (with the terminal) to edge
                     fromTerminal != null -> {
                         // these two methods can be defaulted at the sdk level
-                        if (fractionAlongEdge != null) {
+                        if (percentAlong != null) {
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                fractionAlongEdge = percentAlong.toDouble(),
                                 terminal = fromTerminal
                             )
                         } else {
@@ -428,11 +428,11 @@ internal class AddAssociationFromSourceViewModel(
                     // edge to junction (with the terminal)
                     toTerminal != null -> {
                         // these two methods can be defaulted at the sdk level
-                        if (fractionAlongEdge != null) {
+                        if (percentAlong != null) {
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                fractionAlongEdge = percentAlong.toDouble(),
                                 terminal = toTerminal
                             )
                         } else {
@@ -445,13 +445,13 @@ internal class AddAssociationFromSourceViewModel(
                         }
                     }
 
-                    // no terminals, but fraction along edge provided
-                    fractionAlongEdge != null -> {
+                    // no terminals, but percent along provided
+                    percentAlong != null -> {
                         // edge to edge
                         element.addAssociation(
                             feature = feature,
                             filter = filter,
-                            fractionAlongEdge = fractionAlongEdge.toDouble()
+                            fractionAlongEdge = percentAlong.toDouble()
                         )
                     }
 
@@ -523,7 +523,7 @@ internal class AddAssociationFromSourceViewModel(
  * @param toElement The name of the "to" element in the association.
  * @param toTerminalConfiguration The [UtilityTerminalConfiguration] for the "to" element,
  * if applicable.
- * @param isFractionAlongEdgeValid Whether the fraction along edge is valid for connectivity
+ * @param isPercentAlongValid Whether the percent along is valid for connectivity
  * associations.
  * @param type The [UtilityAssociationsFilterType] defining the type of association to create
  */
@@ -533,7 +533,7 @@ internal data class NewAssociationOptions(
     val fromTerminalConfiguration: UtilityTerminalConfiguration?,
     val toElement: String,
     val toTerminalConfiguration: UtilityTerminalConfiguration?,
-    val isFractionAlongEdgeValid: Boolean,
+    val isPercentAlongValid: Boolean,
     val type: UtilityAssociationsFilterType
 )
 

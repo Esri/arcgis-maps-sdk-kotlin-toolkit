@@ -337,10 +337,10 @@ class UtilityAssociationsFormElementAddTests {
         val terminalControl = composeTestRule.onNode(hasTextExactly("Terminal", "High"))
         terminalControl.assertIsDisplayed()
         // Verify the fraction control is displayed
-        composeTestRule.onNodeWithText("Fraction Along Edge").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Percent Along").assertIsDisplayed()
         composeTestRule.onNodeWithText("0 %").assertIsDisplayed()
         val fractionControl =
-            composeTestRule.onNodeWithContentDescription("fraction along edge slider")
+            composeTestRule.onNodeWithContentDescription("percent along slider")
         fractionControl.assertIsDisplayed()
         // Verify the slider has the correct initial state
         fractionControl.assertRangeInfoEquals(ProgressBarRangeInfo(0.0f, 0.0f..1.0f, 0))
