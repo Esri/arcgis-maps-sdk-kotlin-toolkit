@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Kaartgebieden</string>
+    <string name="add_map_area">Kaartgebied toevoegen</string>
+    <string name="thumbnail_description">Thumbnail portaalitem</string>
+    <string name="download">Downloaden</string>
+    <string name="open">Openen</string>
+    <string name="error">Fout</string>
+    <string name="loading">Bezig met laden</string>
+    <string name="loading_failed">Kan niet laden</string>
+    <string name="ready_to_download">Klaar om te downloaden</string>
+    <string name="packaging">Bezig met inpakken</string>
+    <string name="packaging_failed">Kan niet inpakken</string>
+    <string name="downloaded">Gedownload</string>
+    <string name="downloading">Bezig met downloaden</string>
+    <string name="download_failed">Het downloaden is mislukt</string>
+    <string name="currently_open">Momenteel geopend</string>
+    <string name="description">Beschrijving</string>
+    <string name="download_map_area">Kaartgebied downloaden</string>
+    <string name="remove_download">Download verwijderen</string>
+    <string name="delete_download">Download verwijderen</string>
+    <string name="no_image_available">Geen beeld beschikbaar</string>
+    <string name="refresh">Vernieuwen</string>
+    <string name="cancelled">Geannuleerd</string>
+    <string name="cancel">Annuleren</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Naam wijzigen</string>
+    <string name="enter_a_name">Voer een naam in</string>
+    <string name="select_area">Gebied selecteren</string>
+    <string name="pan_and_zoom_text">Gebruik pannen en zoomen om het gebied te definiëren</string>
+    <string name="unique_name_text">De naam van het kaartgebied moet uniek zijn</string>
+    <string name="next_on_demand_area_title">Gebied %1$s</string>
+    <string name="directory_size">Grootte: %1$s</string>
+    <string name="no_internet_connection_error_message">Er is geen internetverbinding</string>
+    <string name="no_internet_error_message">Er is geen internetverbinding. Er worden alleen gedownloade gebieden weergegeven.</string>
+    <string name="no_map_areas_error_message">Kan geen kaartgebieden ophalen voor deze kaart.</string>
+    <string name="no_offline_map_areas_error_message">Er zijn geen kaartgebieden voor deze kaart.</string>
+    <string name="error_fetching_areas">Fout bij ophalen kaaartgebieden</string>
+    <string name="error_fetching_areas_message">Er is een fout opgetreden bij het ophalen van kaartgebieden.</string>
+    <string name="no_map_areas">Geen kaartgebieden</string>
+    <string name="empty_on_demand_message">Er zijn geen kaartgebieden voor deze kaart. Tik op de onderstaande knop om aan de slag te gaan.</string>
+    <string name="offline_disabled">Offline uitgeschakeld</string>
+    <string name="offline_disabled_message">Offline gebruik is niet ingeschakeld voor deze kaart.</string>
+    <string name="level_of_detail">Detailniveau</string>
+    <string name="room">Ruimte</string>
+    <string name="rooms">Ruimtes</string>
+    <string name="house_property">Eigenschap huis</string>
+    <string name="houses">Huizen</string>
+    <string name="small_building">Klein gebouw</string>
+    <string name="building">Gebouw</string>
+    <string name="buildings">Gebouwen</string>
+    <string name="street">Straat</string>
+    <string name="streets">Straten</string>
+    <string name="neighborhood">Wijk</string>
+    <string name="town">Kleine stad</string>
+    <string name="city">Plaats</string>
+    <string name="cities">Steden</string>
+    <string name="metropolitan_area">Grootstedelijk gebied</string>
+    <string name="county">Regio</string>
+    <string name="counties">Regio\'s</string>
+    <string name="state_province">Staat/provincie</string>
+    <string name="states_provinces">Staten/provincies</string>
+    <string name="countries_small">Landen (klein)</string>
+    <string name="countries_big">Landen (groot)</string>
+    <string name="continent">Continent</string>
+    <string name="world_small">Wereld (klein)</string>
+    <string name="world_big">Wereld (groot)</string>
+    <string name="world">Wereld</string>
+</resources>

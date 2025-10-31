@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Area Peta</string>
+    <string name="add_map_area">Tambahkan Area Peta</string>
+    <string name="thumbnail_description">Thumbnail PortalItem</string>
+    <string name="download">Unduh</string>
+    <string name="open">Buka</string>
+    <string name="error">Kesalahan</string>
+    <string name="loading">Memuat</string>
+    <string name="loading_failed">Gagal memuat</string>
+    <string name="ready_to_download">Siap diunduh</string>
+    <string name="packaging">Pengemasan</string>
+    <string name="packaging_failed">Pengemasan gagal</string>
+    <string name="downloaded">Telah diunduh</string>
+    <string name="downloading">Mengunduh</string>
+    <string name="download_failed">Unduhan Gagal</string>
+    <string name="currently_open">Saat Ini Terbuka</string>
+    <string name="description">Keterangan</string>
+    <string name="download_map_area">Unduh Area Peta</string>
+    <string name="remove_download">Hapus Unduhan</string>
+    <string name="delete_download">Hapus Unduhan</string>
+    <string name="no_image_available">Tidak Ada Gambar Tersedia</string>
+    <string name="refresh">Muat Ulang</string>
+    <string name="cancelled">Dibatalkan</string>
+    <string name="cancel">Batalkan</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Ubah Nama</string>
+    <string name="enter_a_name">Masukkan nama</string>
+    <string name="select_area">Pilih area</string>
+    <string name="pan_and_zoom_text">Geser dan perbesar untuk menentukan area</string>
+    <string name="unique_name_text">Nama area peta harus unik</string>
+    <string name="next_on_demand_area_title">Area %1$s</string>
+    <string name="directory_size">Ukuran: %1$s</string>
+    <string name="no_internet_connection_error_message">Tidak Ada Koneksi Internet</string>
+    <string name="no_internet_error_message">Tidak ada koneksi internet. Menampilkan area yang diunduh saja.</string>
+    <string name="no_map_areas_error_message">Tidak dapat mengambil area peta untuk peta ini.</string>
+    <string name="no_offline_map_areas_error_message">Tidak ada area peta untuk peta ini.</string>
+    <string name="error_fetching_areas">Terjadi Kesalahan Saat Mengambil Area Peta</string>
+    <string name="error_fetching_areas_message">Terjadi kesalahan saat mengambil area peta.</string>
+    <string name="no_map_areas">Tidak Ada Area Peta</string>
+    <string name="empty_on_demand_message">Tidak ada area peta untuk peta ini. Ketuk tombol di bawah ini untuk memulai.</string>
+    <string name="offline_disabled">Offline Dinonaktifkan</string>
+    <string name="offline_disabled_message">Peta tidak diaktifkan untuk penggunaan offline.</string>
+    <string name="level_of_detail">Tingkat rincian</string>
+    <string name="room">Kamar</string>
+    <string name="rooms">Kamar</string>
+    <string name="house_property">Properti Rumah</string>
+    <string name="houses">Rumah</string>
+    <string name="small_building">Bangunan Kecil</string>
+    <string name="building">Gedung</string>
+    <string name="buildings">Bangunan</string>
+    <string name="street">Jalan</string>
+    <string name="streets">Jalan</string>
+    <string name="neighborhood">Lingkungan</string>
+    <string name="town">Kota</string>
+    <string name="city">Kota</string>
+    <string name="cities">Kota</string>
+    <string name="metropolitan_area">Area Metropolitan</string>
+    <string name="county">Daerah</string>
+    <string name="counties">Daerah</string>
+    <string name="state_province">Negara Bagian/Provinsi</string>
+    <string name="states_provinces">Negara Bagian/Provinsi</string>
+    <string name="countries_small">Negara (Kecil)</string>
+    <string name="countries_big">Negara (Besar)</string>
+    <string name="continent">Benua</string>
+    <string name="world_small">Dunia (Kecil)</string>
+    <string name="world_big">Dunia (Besar)</string>
+    <string name="world">Dunia</string>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Oblasti mape</string>
+    <string name="add_map_area">Dodaj oblast mape</string>
+    <string name="thumbnail_description">Sličica stavke portala</string>
+    <string name="download">Preuzmi</string>
+    <string name="open">Otvori</string>
+    <string name="error">Greška</string>
+    <string name="loading">Učitavanje</string>
+    <string name="loading_failed">Učitavanje nije uspelo</string>
+    <string name="ready_to_download">Spremno za preuzimanje</string>
+    <string name="packaging">Pakovanje</string>
+    <string name="packaging_failed">Pakovanje nije uspelo</string>
+    <string name="downloaded">Preuzeto</string>
+    <string name="downloading">Preuzimanje</string>
+    <string name="download_failed">Preuzimanje nije uspelo</string>
+    <string name="currently_open">Trenutno otvoreno</string>
+    <string name="description">Opis</string>
+    <string name="download_map_area">Preuzmite oblast mape</string>
+    <string name="remove_download">Ukloni preuzeto</string>
+    <string name="delete_download">Izbriši preuzeto</string>
+    <string name="no_image_available">Nema dostupnih snimaka</string>
+    <string name="refresh">Osveži</string>
+    <string name="cancelled">Otkazano</string>
+    <string name="cancel">Otkaži</string>
+    <string name="confirm">U REDU</string>
+    <string name="rename">Preimenuj</string>
+    <string name="enter_a_name">Unesite naziv</string>
+    <string name="select_area">Izaberite oblast</string>
+    <string name="pan_and_zoom_text">Pomerajte i zumirajte da biste definisali oblast</string>
+    <string name="unique_name_text">Naziv oblasti mape mora da bude jedinstven.</string>
+    <string name="next_on_demand_area_title">Oblast %1$s</string>
+    <string name="directory_size">Veličina: %1$s</string>
+    <string name="no_internet_connection_error_message">Nema internet veze</string>
+    <string name="no_internet_error_message">Nema internet veze. Prikazuju se samo preuzete oblasti.</string>
+    <string name="no_map_areas_error_message">Nije moguće povratiti oblasti mape za ovu mapu.</string>
+    <string name="no_offline_map_areas_error_message">Nema oblasti mape za ovu mapu.</string>
+    <string name="error_fetching_areas">Greška prilikom pribavljanja oblasti mape</string>
+    <string name="error_fetching_areas_message">Došlo je do greške prilikom pribavljanja oblasti mape.</string>
+    <string name="no_map_areas">Nema oblasti mape</string>
+    <string name="empty_on_demand_message">Nema oblasti mape za ovu mapu. Dodirnite dugme ispod da biste započeli.</string>
+    <string name="offline_disabled">Onemogućeno van mreže</string>
+    <string name="offline_disabled_message">Mapa nije omogućena za korišćenje van mreže.</string>
+    <string name="level_of_detail">Nivo detalja</string>
+    <string name="room">Soba</string>
+    <string name="rooms">Sobe</string>
+    <string name="house_property">Svojstvo kuće</string>
+    <string name="houses">Kuće</string>
+    <string name="small_building">Mala zgrada</string>
+    <string name="building">Zgrada</string>
+    <string name="buildings">Zgrade</string>
+    <string name="street">Ulica</string>
+    <string name="streets">Streets</string>
+    <string name="neighborhood">Naselje</string>
+    <string name="town">Varoš</string>
+    <string name="city">Grad</string>
+    <string name="cities">Gradovi</string>
+    <string name="metropolitan_area">Gradska oblast</string>
+    <string name="county">Oblast</string>
+    <string name="counties">Okruzi</string>
+    <string name="state_province">Država / Provincija</string>
+    <string name="states_provinces">Države/Provincije</string>
+    <string name="countries_small">Države (male)</string>
+    <string name="countries_big">Države (velike)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Svet (mali)</string>
+    <string name="world_big">Svet (veliki)</string>
+    <string name="world">Svet</string>
+</resources>

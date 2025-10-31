@@ -24,4 +24,24 @@
     <string name="other">其他</string>
     <string name="close">返回</string>
     <string name="attachment_thumbnail">附件缩略图</string>
+    <string name="terminal">终端</string>
+    <string name="no_associations_found">未找到任何关联</string>
+    <string name="visible_content">可见内容</string>
+    <string name="content">内容</string>
+    <string name="containment_visible">可见包含</string>
+    <string name="fraction_along_edge">沿边缘的分数</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">自元素</string>
+    <string name="to_element">至元素</string>
+    <string name="association_type">关联类型</string>
+    <string name="remove_association">移除关联</string>
+    <string name="remove_association_tooltip">仅移除关联。 保留要素。</string>
+    <string name="remove">移除</string>
+    <string name="cancel">取消</string>
+    <string name="none_selected">未选择</string>
+    <string name="association_settings">关联设置</string>
+    <string name="show_all">显示全部</string>
+    <string name="filter_by_feature_title">按要素标题过滤</string>
+    <string name="containment_visible_value">可见：%1$s</string>
+    <string name="associations">关联</string>
 </resources>

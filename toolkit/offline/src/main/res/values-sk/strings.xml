@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Mapové oblasti</string>
+    <string name="add_map_area">Pridať mapovú oblasť</string>
+    <string name="thumbnail_description">Miniatúra položky portálu</string>
+    <string name="download">Stiahnuť</string>
+    <string name="open">Otvoriť</string>
+    <string name="error">Chyba</string>
+    <string name="loading">Načítava sa</string>
+    <string name="loading_failed">Načítanie zlyhalo</string>
+    <string name="ready_to_download">Pripravené na stiahnutie</string>
+    <string name="packaging">Vytvára sa balík</string>
+    <string name="packaging_failed">Vytváranie balíka zlyhalo</string>
+    <string name="downloaded">Stiahnuté</string>
+    <string name="downloading">Prebieha sťahovanie</string>
+    <string name="download_failed">Sťahovanie zlyhalo</string>
+    <string name="currently_open">Aktuálne otvorené</string>
+    <string name="description">Popis</string>
+    <string name="download_map_area">Stiahnuť mapovú oblasť</string>
+    <string name="remove_download">Odstrániť stiahnuté súbory</string>
+    <string name="delete_download">Vymazať stiahnuté súbory</string>
+    <string name="no_image_available">Nie je k dispozícii žiadny obrázok</string>
+    <string name="refresh">Obnoviť</string>
+    <string name="cancelled">Zrušené</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Premenovať</string>
+    <string name="enter_a_name">Zadajte názov</string>
+    <string name="select_area">Vyberte oblasť</string>
+    <string name="pan_and_zoom_text">Posúvaním a priblížením definujte oblasť</string>
+    <string name="unique_name_text">Názov mapovej oblasti musí byť jedinečný</string>
+    <string name="next_on_demand_area_title">Plocha %1$s</string>
+    <string name="directory_size">Veľkosť: %1$s</string>
+    <string name="no_internet_connection_error_message">Žiadne pripojenie k internetu</string>
+    <string name="no_internet_error_message">Žiadne internetové pripojenie. Zobraziť len stiahnuté oblasti.</string>
+    <string name="no_map_areas_error_message">Nepodarilo sa načítať mapové oblasti pre túto mapu.</string>
+    <string name="no_offline_map_areas_error_message">Pre túto mapu neexistujú žiadne mapové oblasti.</string>
+    <string name="error_fetching_areas">Pri načítavaní mapových oblastí sa vyskytla chyba</string>
+    <string name="error_fetching_areas_message">Pri načítavaní mapových oblastí sa vyskytla chyba.</string>
+    <string name="no_map_areas">Žiadne mapové oblasti</string>
+    <string name="empty_on_demand_message">Pre túto mapu neexistujú žiadne mapové oblasti. Začnite ťuknutím na tlačidlo nižšie.</string>
+    <string name="offline_disabled">Režim offline je zakázaný</string>
+    <string name="offline_disabled_message">Túto mapu nie je možné používať offline.</string>
+    <string name="level_of_detail">Úroveň detailov</string>
+    <string name="room">Miestnosť</string>
+    <string name="rooms">Miestnosti</string>
+    <string name="house_property">Nehnuteľnosť domu</string>
+    <string name="houses">Domy</string>
+    <string name="small_building">Malá budova</string>
+    <string name="building">Budova</string>
+    <string name="buildings">Budovy</string>
+    <string name="street">Ulica</string>
+    <string name="streets">Ulice</string>
+    <string name="neighborhood">Susedstvo</string>
+    <string name="town">Mestečko</string>
+    <string name="city">Mesto</string>
+    <string name="cities">Mestá</string>
+    <string name="metropolitan_area">Metropolitná oblasť</string>
+    <string name="county">Okres</string>
+    <string name="counties">Okresy</string>
+    <string name="state_province">Štát/Provincia</string>
+    <string name="states_provinces">Štáty/Provincie</string>
+    <string name="countries_small">Krajiny (malé)</string>
+    <string name="countries_big">Krajiny (veľké)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Svet (malý)</string>
+    <string name="world_big">Svet (veľký)</string>
+    <string name="world">Svet</string>
+</resources>

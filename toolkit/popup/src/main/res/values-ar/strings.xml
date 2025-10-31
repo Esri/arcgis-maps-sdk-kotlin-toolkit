@@ -24,4 +24,24 @@
     <string name="other">أخرى</string>
     <string name="close">السابق</string>
     <string name="attachment_thumbnail">صورة مصغرة للمرفق</string>
+    <string name="terminal">محطة طرفية</string>
+    <string name="no_associations_found">لم يتم العثور على أي اقترانات</string>
+    <string name="visible_content">المحتوى المرئي</string>
+    <string name="content">المحتوى</string>
+    <string name="containment_visible">الاحتواء المرئي</string>
+    <string name="fraction_along_edge">كسر بامتداد Edge</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">من العنصر</string>
+    <string name="to_element">إلى العنصر</string>
+    <string name="association_type">نوع الاقتران</string>
+    <string name="remove_association">إزالة الاقتران</string>
+    <string name="remove_association_tooltip">يزيل الاقتران فقط. يبقى المعلم.</string>
+    <string name="remove">إزالة</string>
+    <string name="cancel">إلغاء الأمر</string>
+    <string name="none_selected">لم يتم تحديد أي شيء</string>
+    <string name="association_settings">إعدادات الاقتران</string>
+    <string name="show_all">إظهار الكل</string>
+    <string name="filter_by_feature_title">تصفية حسب عنوان المعلم</string>
+    <string name="containment_visible_value">المرئي: %1$s</string>
+    <string name="associations">اقترانات</string>
 </resources>

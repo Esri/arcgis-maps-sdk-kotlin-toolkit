@@ -60,9 +60,6 @@ android {
             }
         }
     }
-    lint {
-        disable += "MissingTranslation"
-    }
 
     /**
      * Configures the test report for connected (instrumented) tests to be copied to a central
