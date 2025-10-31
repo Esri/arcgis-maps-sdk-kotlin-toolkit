@@ -162,7 +162,7 @@
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
     <string name="content_visible">Content Visible</string>
-    <string name="fraction_along_edge">Fraction Along Edge</string>
+    <string name="percent_along">Percent Along</string>
     <string name="from_element">From Element</string>
     <string name="to_element">To Element</string>
     <string name="association_type">Association Type</string>

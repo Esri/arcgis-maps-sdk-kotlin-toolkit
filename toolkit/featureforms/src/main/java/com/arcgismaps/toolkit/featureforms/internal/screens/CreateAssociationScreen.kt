@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.ContentVisibleControl
-import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FractionAlongEdgeControl
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.PercentAlongControl
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.PropertyRow
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityTerminalControl
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getTerminalById
@@ -80,8 +80,8 @@ internal fun CreateAssociationScreen(
     var isContainmentVisible by rememberSaveable(associationOptions) {
         mutableStateOf(false)
     }
-    var fractionAlongEdge by rememberSaveable(associationOptions) {
-        val initialValue = if (associationOptions?.isFractionAlongEdgeValid == true) {
+    var percentAlong by rememberSaveable(associationOptions) {
+        val initialValue = if (associationOptions?.isPercentAlongValid == true) {
             0f
         } else {
             null
@@ -110,7 +110,7 @@ internal fun CreateAssociationScreen(
                             isContainmentVisible = isContainmentVisible,
                             fromTerminalId = selectedFromTerminalId,
                             toTerminalId = selectedToTerminalId,
-                            fractionAlongEdge = fractionAlongEdge
+                            percentAlong = percentAlong
                         ).onSuccess {
                             // switch to the main thread to invoke the navigation callback
                             withContext(Dispatchers.Main) {
@@ -244,15 +244,15 @@ internal fun CreateAssociationScreen(
                     }
                 }
 
-                // If isFractionAlongEdgeValid show fraction along edge control
-                if (options.isFractionAlongEdgeValid) {
+                // If isPercentAlongValid show percent along control
+                if (options.isPercentAlongValid) {
                     item {
                         Card(modifier = Modifier.padding(24.dp)) {
-                            FractionAlongEdgeControl(
-                                fraction = fractionAlongEdge ?: 0f,
+                            PercentAlongControl(
+                                fraction = percentAlong ?: 0f,
                                 enabled = true,
                                 onValueChanged = { fraction ->
-                                    fractionAlongEdge = fraction
+                                    percentAlong = fraction
                                 }
                             )
                         }

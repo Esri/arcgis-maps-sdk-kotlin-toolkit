@@ -46,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
@@ -170,7 +169,7 @@ internal fun UtilityAssociationDetails(
             }
         }
         associationResult.getFractionAlongEdge()?.let { fraction ->
-            FractionAlongEdgeControl(
+            PercentAlongControl(
                 fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
                 enabled = false,
                 onValueChanged = {},
@@ -261,9 +260,9 @@ internal fun RemoveAssociationConfirmationDialog(
 }
 
 /**
- * Extension function that returns the fraction along edge of the association result, if applicable.
+ * Extension function that returns the percent along of the association result, if applicable.
  *
- * @return The fraction along edge of the association result, or null if not applicable.
+ * @return The percent along of the association result, or null if not applicable.
  */
 internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
     return when (association.associationType) {

@@ -41,20 +41,20 @@ import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityElement
 
 /**
- * A composable that represents a fraction along edge control of a [UtilityAssociation]. This can
+ * A composable that represents a percent along control of a [UtilityAssociation]. This can
  * represent the [UtilityAssociation.fractionAlongEdge] property if one of the element is a non-spatial
  * edge or the [UtilityElement.fractionAlongEdge] when the element represents a spatial edge.
  *
  * This control displays a slider that allows the user to select a value between 0 and 1, which is then
  * multiplied by 100 to display the percentage value.
  *
- * @param fraction The current value of the fraction along edge control.
+ * @param fraction The current value of the percent along control.
  * @param enabled A boolean indicating whether the control is enabled or not.
  * @param onValueChanged A callback that is called when the value of the control changes.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
-internal fun FractionAlongEdgeControl(
+internal fun PercentAlongControl(
     fraction: Float,
     enabled: Boolean,
     onValueChanged: (Float) -> Unit,
@@ -75,7 +75,7 @@ internal fun FractionAlongEdgeControl(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PropertyRow(
-                title = stringResource(R.string.fraction_along_edge),
+                title = stringResource(R.string.percent_along),
                 value = stringResource(R.string.percent_along_edge, percent),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -88,7 +88,7 @@ internal fun FractionAlongEdgeControl(
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics {
-                        this.contentDescription = "fraction along edge slider"
+                        this.contentDescription = "percent along slider"
                     },
                 onValueChangeFinished = {
                     onValueChanged(value)
@@ -100,8 +100,8 @@ internal fun FractionAlongEdgeControl(
 
 @Preview
 @Composable
-private fun FractionAlongEdgeControlPreview() {
-    FractionAlongEdgeControl(
+private fun PercentAlongControlPreview() {
+    PercentAlongControl(
         fraction = 0.5f,
         onValueChanged = {},
         enabled = true,
