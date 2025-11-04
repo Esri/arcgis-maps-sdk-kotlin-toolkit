@@ -49,16 +49,19 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.LocalSceneViewInteractionOptions
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -75,8 +78,13 @@ public fun LocalSceneView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     interactionOptions: LocalSceneViewInteractionOptions = remember { LocalSceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() }, // not supported GeoView functionality
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    grid: Grid? = null, // not supported GeoView functionality
     onAttributionTextChanged: ((String) -> Unit)? = null,
+    isAttributionBarVisible: Boolean = true,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    timeExtent: TimeExtent? = null, // not supported GeoView functionality
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
@@ -108,6 +116,11 @@ public fun LocalSceneView(
             update = {
                 it.scene = scene
                 it.interactionOptions = interactionOptions
+                it.isAttributionBarVisible = isAttributionBarVisible
+                it.labeling = viewLabelProperties
+                it.selectionProperties = selectionProperties
+                it.grid = grid
+                it.setTimeExtent(timeExtent)
             }
         )
 
