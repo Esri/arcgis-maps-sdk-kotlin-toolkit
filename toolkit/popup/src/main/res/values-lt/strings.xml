@@ -24,4 +24,24 @@
     <string name="other">Kita</string>
     <string name="close">Atgal</string>
     <string name="attachment_thumbnail">priedo miniatiūra</string>
+    <string name="terminal">Terminalas</string>
+    <string name="no_associations_found">Susiejimų nerasta</string>
+    <string name="visible_content">Matomas turinys</string>
+    <string name="content">Turinys</string>
+    <string name="containment_visible">Apribojimas matomas</string>
+    <string name="fraction_along_edge">Trumpena išilgai krašto</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Iš elemento</string>
+    <string name="to_element">Į elementą</string>
+    <string name="association_type">Susiejimo tipas</string>
+    <string name="remove_association">Pašalinti susiejimą</string>
+    <string name="remove_association_tooltip">Pašalina tik susiejimą. Elementas išlieka.</string>
+    <string name="remove">Pašalinti</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="none_selected">Nieko nepasirinkta</string>
+    <string name="association_settings">Susiejimo nustatymai</string>
+    <string name="show_all">Rodyti visus</string>
+    <string name="filter_by_feature_title">Filtruoti pagal elemento pavadinimą</string>
+    <string name="containment_visible_value">Matoma: %1$s</string>
+    <string name="associations">Susiejimai</string>
 </resources>

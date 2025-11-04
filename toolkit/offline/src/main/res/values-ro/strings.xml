@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Zone hartă</string>
+    <string name="add_map_area">Adăugați zona de hartă</string>
+    <string name="thumbnail_description">Miniatură PortalItem</string>
+    <string name="download">Descărcare</string>
+    <string name="open">Deschidere</string>
+    <string name="error">Eroare</string>
+    <string name="loading">Se încarcă</string>
+    <string name="loading_failed">Încărcare eșuată</string>
+    <string name="ready_to_download">Gata de descărcare</string>
+    <string name="packaging">Ambalare</string>
+    <string name="packaging_failed">Ambalare eșuată</string>
+    <string name="downloaded">Descărcate</string>
+    <string name="downloading">Se descarcă</string>
+    <string name="download_failed">Descărcare eşuată</string>
+    <string name="currently_open">Deschis momentan</string>
+    <string name="description">Descriere</string>
+    <string name="download_map_area">Descărcați zona de hartă</string>
+    <string name="remove_download">Eliminare descărcare</string>
+    <string name="delete_download">Ștergeți descărcarea</string>
+    <string name="no_image_available">Nu există imagini disponibile</string>
+    <string name="refresh">Reîmprospătare</string>
+    <string name="cancelled">Anulat</string>
+    <string name="cancel">Anulare</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Redenumire</string>
+    <string name="enter_a_name">Introduceți un nume</string>
+    <string name="select_area">Selectați zona</string>
+    <string name="pan_and_zoom_text">Panoramați și măriți pentru a defini zona</string>
+    <string name="unique_name_text">Numele zonei de hartă trebuie să fie unic</string>
+    <string name="next_on_demand_area_title">Zonă %1$s</string>
+    <string name="directory_size">Dimensiune: %1$s</string>
+    <string name="no_internet_connection_error_message">Nu există conexiune la internet</string>
+    <string name="no_internet_error_message">Nu există conexiune la internet. Se afișează doar zonele descărcate.</string>
+    <string name="no_map_areas_error_message">Nu s-au putut recupera zonele de hartă pentru această hartă.</string>
+    <string name="no_offline_map_areas_error_message">Nu există zone de hartă pentru această hartă.</string>
+    <string name="error_fetching_areas">Eroare la preluarea zonelor de hartă</string>
+    <string name="error_fetching_areas_message">A apărut o eroare la preluarea zonelor de hartă.</string>
+    <string name="no_map_areas">Nu există zone de hartă</string>
+    <string name="empty_on_demand_message">Nu există zone de hartă pentru această hartă. Atingeți butonul de mai jos pentru a începe.</string>
+    <string name="offline_disabled">Dezactivat offline</string>
+    <string name="offline_disabled_message">Harta nu este activată pentru utilizare offline.</string>
+    <string name="level_of_detail">Nivel de detaliu</string>
+    <string name="room">Cameră</string>
+    <string name="rooms">Camere</string>
+    <string name="house_property">Proprietate casă</string>
+    <string name="houses">Case</string>
+    <string name="small_building">Clădire mică</string>
+    <string name="building">Clădire</string>
+    <string name="buildings">Clădiri</string>
+    <string name="street">Stradă</string>
+    <string name="streets">Străzi</string>
+    <string name="neighborhood">Cartier</string>
+    <string name="town">Localitate</string>
+    <string name="city">Oraş</string>
+    <string name="cities">Orașe</string>
+    <string name="metropolitan_area">Zonă metropolitană</string>
+    <string name="county">Ținut</string>
+    <string name="counties">Ținuturi</string>
+    <string name="state_province">Stat/Provincie</string>
+    <string name="states_provinces">State/provincii</string>
+    <string name="countries_small">Țări (mici)</string>
+    <string name="countries_big">Țări (mari)</string>
+    <string name="continent">Continent</string>
+    <string name="world_small">Mondială (mică)</string>
+    <string name="world_big">Mondială (mare)</string>
+    <string name="world">Glob</string>
+</resources>

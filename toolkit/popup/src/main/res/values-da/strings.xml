@@ -24,4 +24,24 @@
     <string name="other">Andet</string>
     <string name="close">Tilbage</string>
     <string name="attachment_thumbnail">vedhæftet miniature</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Der blev ikke fundet nogen associeringer</string>
+    <string name="visible_content">Synligt indhold</string>
+    <string name="content">Indhold</string>
+    <string name="containment_visible">Indeholdt synligt</string>
+    <string name="fraction_along_edge">Fraktion langs kanten</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Fra element</string>
+    <string name="to_element">Til element</string>
+    <string name="association_type">Associeringstype</string>
+    <string name="remove_association">Fjern associering</string>
+    <string name="remove_association_tooltip">Fjerner kun tilknytningen. Objektet forbliver.</string>
+    <string name="remove">Fjern</string>
+    <string name="cancel">Annuller</string>
+    <string name="none_selected">Ingen er valgt</string>
+    <string name="association_settings">Associeringsindstillinger</string>
+    <string name="show_all">Vis alle</string>
+    <string name="filter_by_feature_title">Filtrér efter objekttitel</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="associations">Tilknytninger</string>
 </resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Kartta-alueet</string>
+    <string name="add_map_area">Lisää kartta-alue</string>
+    <string name="thumbnail_description">Portaalikohteen pikkukuva</string>
+    <string name="download">Lataa</string>
+    <string name="open">Avaa</string>
+    <string name="error">Virhe</string>
+    <string name="loading">Ladataan</string>
+    <string name="loading_failed">Lataaminen epäonnistui</string>
+    <string name="ready_to_download">Valmis ladattavaksi</string>
+    <string name="packaging">Pakataan</string>
+    <string name="packaging_failed">Pakkaus epäonnistui</string>
+    <string name="downloaded">Ladattu</string>
+    <string name="downloading">Ladataan</string>
+    <string name="download_failed">Lataus epäonnistui</string>
+    <string name="currently_open">Parhaillaan avoinna</string>
+    <string name="description">Kuvaus</string>
+    <string name="download_map_area">Lataa kartta-alue</string>
+    <string name="remove_download">Poista lataus</string>
+    <string name="delete_download">Poista lataus</string>
+    <string name="no_image_available">Ei kuvaa saatavana</string>
+    <string name="refresh">Päivitä</string>
+    <string name="cancelled">Peruutettu</string>
+    <string name="cancel">Peruuta</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Nimeä uudelleen</string>
+    <string name="enter_a_name">Kirjoita nimi</string>
+    <string name="select_area">Valitse alue</string>
+    <string name="pan_and_zoom_text">Määritä alue vierittämällä ja zoomaamalla</string>
+    <string name="unique_name_text">Kartta-alueen nimen on oltava yksilöllinen</string>
+    <string name="next_on_demand_area_title">Alue %1$s</string>
+    <string name="directory_size">Koko: %1$s</string>
+    <string name="no_internet_connection_error_message">Ei Internet-yhteyttä</string>
+    <string name="no_internet_error_message">Ei Internet-yhteyttä. Näytetään vain ladatut alueet.</string>
+    <string name="no_map_areas_error_message">Kartta-alueita ei voi noutaa tälle kartalle.</string>
+    <string name="no_offline_map_areas_error_message">Tälle kartalle ei ole kartta-alueita.</string>
+    <string name="error_fetching_areas">Kartta-alueiden haussa tapahtui virhe</string>
+    <string name="error_fetching_areas_message">Kartta-alueiden haussa tapahtui virhe.</string>
+    <string name="no_map_areas">Ei kartta-alueita</string>
+    <string name="empty_on_demand_message">Tälle kartalle ei ole kartta-alueita. Aloita napauttamalla alla olevaa painiketta.</string>
+    <string name="offline_disabled">Offline-tila poistettu käytöstä</string>
+    <string name="offline_disabled_message">Karttaa ei voi käyttää offline-tilassa.</string>
+    <string name="level_of_detail">Yksityiskohtaisuuden taso</string>
+    <string name="room">Huone</string>
+    <string name="rooms">Huoneet</string>
+    <string name="house_property">Talo-omaisuus</string>
+    <string name="houses">Talot</string>
+    <string name="small_building">Pieni rakennus</string>
+    <string name="building">Rakennus</string>
+    <string name="buildings">Rakennukset</string>
+    <string name="street">Katu</string>
+    <string name="streets">Kadut</string>
+    <string name="neighborhood">Naapurusto</string>
+    <string name="town">Pieni kaupunki</string>
+    <string name="city">Kaupunki</string>
+    <string name="cities">Kaupungit</string>
+    <string name="metropolitan_area">Suurkaupunkialue</string>
+    <string name="county">Maakunta</string>
+    <string name="counties">Maakunnat</string>
+    <string name="state_province">Osavaltio/Provinssi</string>
+    <string name="states_provinces">Osavaltiot/Provinssit</string>
+    <string name="countries_small">Maat (pienet)</string>
+    <string name="countries_big">Maat (suuret)</string>
+    <string name="continent">Maanosa</string>
+    <string name="world_small">Maailma (pieni)</string>
+    <string name="world_big">Maailma (suuri)</string>
+    <string name="world">Maailma</string>
+</resources>

@@ -24,4 +24,24 @@
     <string name="other">Прочее</string>
     <string name="close">Назад</string>
     <string name="attachment_thumbnail">образец вложения</string>
+    <string name="terminal">Терминал</string>
+    <string name="no_associations_found">Связи не найдены</string>
+    <string name="visible_content">Видимое содержание</string>
+    <string name="content">Ресурсы</string>
+    <string name="containment_visible">Видимое содержание</string>
+    <string name="fraction_along_edge">Дробление вдоль ребра</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Элемент От</string>
+    <string name="to_element">Элемент До</string>
+    <string name="association_type">Тип связи</string>
+    <string name="remove_association">Удалить связь</string>
+    <string name="remove_association_tooltip">Удаляет только связь. Объект остается.</string>
+    <string name="remove">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="none_selected">Ничего не выбрано</string>
+    <string name="association_settings">Настройки связи</string>
+    <string name="show_all">Показать все</string>
+    <string name="filter_by_feature_title">Фильтр по заголовку объекта</string>
+    <string name="containment_visible_value">Видимый: %1$s</string>
+    <string name="associations">Связи</string>
 </resources>

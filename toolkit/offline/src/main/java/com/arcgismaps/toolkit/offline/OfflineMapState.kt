@@ -216,9 +216,9 @@ public class OfflineMapState {
             if (_mode == OfflineMapMode.Unknown)
                 _mode = OfflineMapMode.OnDemand
         }
+        _initializationStatus.value = InitializationStatus.Initialized
         // reset the selected map on initialize
         onSelectionChanged(null)
-        _initializationStatus.value = InitializationStatus.Initialized
     }
 
     /**

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Áreas de mapa</string>
+    <string name="add_map_area">Agregar área de mapa</string>
+    <string name="thumbnail_description">Vista en miniatura de PortalItem</string>
+    <string name="download">Descargar</string>
+    <string name="open">Abrir</string>
+    <string name="error">Error</string>
+    <string name="loading">Cargando</string>
+    <string name="loading_failed">Error de carga</string>
+    <string name="ready_to_download">Listo para descargar</string>
+    <string name="packaging">Empaquetado</string>
+    <string name="packaging_failed">Error de empaquetado</string>
+    <string name="downloaded">Descargado</string>
+    <string name="downloading">Descargando</string>
+    <string name="download_failed">Error al descargar</string>
+    <string name="currently_open">Actualmente abierto</string>
+    <string name="description">Descripción</string>
+    <string name="download_map_area">Descargar área de mapa</string>
+    <string name="remove_download">Eliminar descarga</string>
+    <string name="delete_download">Eliminar descargar</string>
+    <string name="no_image_available">No hay ninguna imagen disponible</string>
+    <string name="refresh">Actualizar</string>
+    <string name="cancelled">Cancelado</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Aceptar</string>
+    <string name="rename">Cambiar el nombre</string>
+    <string name="enter_a_name">Introducir un nombre</string>
+    <string name="select_area">Seleccionar área</string>
+    <string name="pan_and_zoom_text">Desplazamiento panorámico y zoom para definir el área</string>
+    <string name="unique_name_text">El nombre del área del mapa debe ser único</string>
+    <string name="next_on_demand_area_title">Área %1$s</string>
+    <string name="directory_size">Tamaño: %1$s</string>
+    <string name="no_internet_connection_error_message">Sin conexión a internet</string>
+    <string name="no_internet_error_message">No hay conexión a internet. Solo se muestran las áreas descargadas.</string>
+    <string name="no_map_areas_error_message">No se ha podido recuperar áreas de este mapa.</string>
+    <string name="no_offline_map_areas_error_message">No hay áreas de mapa correspondientes a este mapa.</string>
+    <string name="error_fetching_areas">Error al obtener áreas de mapa</string>
+    <string name="error_fetching_areas_message">Ha ocurrido un error al obtener áreas del mapa.</string>
+    <string name="no_map_areas">Ningún área de mapa</string>
+    <string name="empty_on_demand_message">No hay áreas de mapa correspondientes a este mapa. Toque el botón siguiente para empezar.</string>
+    <string name="offline_disabled">Sin conexión deshabilitado</string>
+    <string name="offline_disabled_message">El mapa no está habilitado para el uso sin conexión.</string>
+    <string name="level_of_detail">Nivel de detalle</string>
+    <string name="room">Habitación</string>
+    <string name="rooms">Habitaciones</string>
+    <string name="house_property">Propiedad horizontal</string>
+    <string name="houses">Casas</string>
+    <string name="small_building">Edificio pequeño</string>
+    <string name="building">Edificio</string>
+    <string name="buildings">Edificios</string>
+    <string name="street">Calle</string>
+    <string name="streets">Calles</string>
+    <string name="neighborhood">Vecindad</string>
+    <string name="town">Población</string>
+    <string name="city">Ciudad</string>
+    <string name="cities">Ciudades</string>
+    <string name="metropolitan_area">Área metropolitana</string>
+    <string name="county">Condado</string>
+    <string name="counties">Condados</string>
+    <string name="state_province">Estado/provincia</string>
+    <string name="states_provinces">Estados/provincias</string>
+    <string name="countries_small">Países (pequeño)</string>
+    <string name="countries_big">Países (grande)</string>
+    <string name="continent">Continente</string>
+    <string name="world_small">Mundo (pequeño)</string>
+    <string name="world_big">Mundo (grande)</string>
+    <string name="world">Mundo</string>
+</resources>

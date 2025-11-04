@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Kaardialad</string>
+    <string name="add_map_area">Lisa kaardiala</string>
+    <string name="thumbnail_description">PortalItemi pisipilt</string>
+    <string name="download">Allalaadimine</string>
+    <string name="open">Ava</string>
+    <string name="error">Tõrge</string>
+    <string name="loading">Laadimine</string>
+    <string name="loading_failed">Laadimine ebaõnnestus</string>
+    <string name="ready_to_download">Allalaadimiseks valmis</string>
+    <string name="packaging">Paketi loomine</string>
+    <string name="packaging_failed">Paketi loomine ebaõnnestus</string>
+    <string name="downloaded">Allalaaditud</string>
+    <string name="downloading">Allalaadimine</string>
+    <string name="download_failed">Allalaadimine nurjus</string>
+    <string name="currently_open">Praegu avatud</string>
+    <string name="description">Kirjeldus</string>
+    <string name="download_map_area">Laadi kaardiala alla</string>
+    <string name="remove_download">Eemalda allalaadimine</string>
+    <string name="delete_download">Kustuta allalaadimine</string>
+    <string name="no_image_available">Ühtegi pilti pole saadaval</string>
+    <string name="refresh">Värskenda</string>
+    <string name="cancelled">Tühistatud</string>
+    <string name="cancel">Tühista</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Nimeta ümber</string>
+    <string name="enter_a_name">Sisestage nimi</string>
+    <string name="select_area">Vali ala</string>
+    <string name="pan_and_zoom_text">Ala määratlemiseks panoraami ja suurenda</string>
+    <string name="unique_name_text">Kaardiala nimi peab olema kordumatu</string>
+    <string name="next_on_demand_area_title">Ala %1$s</string>
+    <string name="directory_size">Suurus: %1$s</string>
+    <string name="no_internet_connection_error_message">Internetiühendus puudub</string>
+    <string name="no_internet_error_message">Internetiühendus puudub. Kuvatakse ainult allalaaditud alad.</string>
+    <string name="no_map_areas_error_message">Selle kaardi kaardialasid ei saanud välja võtta.</string>
+    <string name="no_offline_map_areas_error_message">Sellel kaardil ei ole kaardialasid.</string>
+    <string name="error_fetching_areas">Tõrge kaardialade toomisel</string>
+    <string name="error_fetching_areas_message">Kaardialade toomisel tekkis tõrge.</string>
+    <string name="no_map_areas">Kaardialad puuduvad</string>
+    <string name="empty_on_demand_message">Sellel kaardil ei ole kaardialasid. Alustamiseks puudutage allolevat nuppu.</string>
+    <string name="offline_disabled">Võrguühenduseta olek keelatud</string>
+    <string name="offline_disabled_message">Kaart ei ole ilma võrguühenduseta kasutamiseks aktiveeritud.</string>
+    <string name="level_of_detail">Detailsuse tase</string>
+    <string name="room">Tuba</string>
+    <string name="rooms">Toad</string>
+    <string name="house_property">Maja atribuut</string>
+    <string name="houses">Majad</string>
+    <string name="small_building">Väike ehitis</string>
+    <string name="building">Hoone</string>
+    <string name="buildings">Hooned</string>
+    <string name="street">Tänav</string>
+    <string name="streets">Tänavad</string>
+    <string name="neighborhood">Naabruskond</string>
+    <string name="town">Asula</string>
+    <string name="city">Linn</string>
+    <string name="cities">Linnad</string>
+    <string name="metropolitan_area">Suurlinna piirkond</string>
+    <string name="county">Maakond</string>
+    <string name="counties">Maakonnad</string>
+    <string name="state_province">Osariik/provints</string>
+    <string name="states_provinces">Osariigid/provintsid</string>
+    <string name="countries_small">Riigid (väike)</string>
+    <string name="countries_big">Riigid (suur)</string>
+    <string name="continent">Maailmajagu</string>
+    <string name="world_small">Maailm (väike)</string>
+    <string name="world_big">Maailm (suur)</string>
+    <string name="world">Maailm</string>
+</resources>

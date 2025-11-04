@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Області карти</string>
+    <string name="add_map_area">Додати область карти</string>
+    <string name="thumbnail_description">Ескіз PortalItem</string>
+    <string name="download">Завантажити</string>
+    <string name="open">Відкрити</string>
+    <string name="error">Помилка</string>
+    <string name="loading">Завантаження</string>
+    <string name="loading_failed">Завантаження не вдалося</string>
+    <string name="ready_to_download">Готово до завантаження</string>
+    <string name="packaging">Виконується пакування</string>
+    <string name="packaging_failed">Пакування не вдалося</string>
+    <string name="downloaded">Завантажено</string>
+    <string name="downloading">Завантаження</string>
+    <string name="download_failed">Не вдалося виконати завантаження</string>
+    <string name="currently_open">Наразі відкрито</string>
+    <string name="description">Опис</string>
+    <string name="download_map_area">Завантажити область карти</string>
+    <string name="remove_download">Видалити завантаження</string>
+    <string name="delete_download">Видалити завантаження</string>
+    <string name="no_image_available">Немає доступних зображень</string>
+    <string name="refresh">Оновити</string>
+    <string name="cancelled">Скасовано</string>
+    <string name="cancel">Скасувати</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Змінити назву</string>
+    <string name="enter_a_name">Введіть назву</string>
+    <string name="select_area">Вибрати область</string>
+    <string name="pan_and_zoom_text">Переміщення та масштабування для визначення області</string>
+    <string name="unique_name_text">Назва області карти має бути унікальною</string>
+    <string name="next_on_demand_area_title">Площа %1$s</string>
+    <string name="directory_size">Розмір: %1$s</string>
+    <string name="no_internet_connection_error_message">Немає підключення до мережі Інтернет</string>
+    <string name="no_internet_error_message">Відсутнє підключення до Інтернету. Показує тільки завантажені області.</string>
+    <string name="no_map_areas_error_message">Не вдалося отримати області карти з цієї карти.</string>
+    <string name="no_offline_map_areas_error_message">Для цієї карти немає областей карти.</string>
+    <string name="error_fetching_areas">Помилка при отриманні областей карти</string>
+    <string name="error_fetching_areas_message">Під час вибірки області карти сталася помилка.</string>
+    <string name="no_map_areas">Немає областей карти</string>
+    <string name="empty_on_demand_message">Для цієї карти немає областей карти. Натисніть кнопку нижче, щоб розпочати.</string>
+    <string name="offline_disabled">Автономний режим деактивовано</string>
+    <string name="offline_disabled_message">Карту не активовано для використання в автономному режимі.</string>
+    <string name="level_of_detail">Рівень детальності</string>
+    <string name="room">Кімната</string>
+    <string name="rooms">Кімнати</string>
+    <string name="house_property">Властивість будинку</string>
+    <string name="houses">Будинки</string>
+    <string name="small_building">Невелика будівля</string>
+    <string name="building">Будівля</string>
+    <string name="buildings">Будівлі</string>
+    <string name="street">Вулиця</string>
+    <string name="streets">Вулиці</string>
+    <string name="neighborhood">Околиця</string>
+    <string name="town">Містечко</string>
+    <string name="city">Місто</string>
+    <string name="cities">Міста</string>
+    <string name="metropolitan_area">Місто з передмістями</string>
+    <string name="county">Округ</string>
+    <string name="counties">Округи</string>
+    <string name="state_province">Штат/провінція</string>
+    <string name="states_provinces">Штати/провінції</string>
+    <string name="countries_small">Країни (малі)</string>
+    <string name="countries_big">Країни (великі)</string>
+    <string name="continent">Континент</string>
+    <string name="world_small">Світ (малий)</string>
+    <string name="world_big">Світ (великий)</string>
+    <string name="world">Світ</string>
+</resources>

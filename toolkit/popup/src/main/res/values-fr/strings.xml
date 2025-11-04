@@ -24,4 +24,24 @@
     <string name="other">Autre</string>
     <string name="close">Retour</string>
     <string name="attachment_thumbnail">miniature de la pièce jointe</string>
+    <string name="terminal">Borne</string>
+    <string name="no_associations_found">Aucune association trouvée</string>
+    <string name="visible_content">Contenu visible</string>
+    <string name="content">Contenu</string>
+    <string name="containment_visible">Inclusion visible</string>
+    <string name="fraction_along_edge">Fraction sur un tronçon</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Élément d’origine</string>
+    <string name="to_element">Élément de destination</string>
+    <string name="association_type">Type d’association</string>
+    <string name="remove_association">Supprimer l’association</string>
+    <string name="remove_association_tooltip">Seule l’association est supprimée. L’entité est conservée.</string>
+    <string name="remove">Supprimer</string>
+    <string name="cancel">Annuler</string>
+    <string name="none_selected">Aucune sélection</string>
+    <string name="association_settings">Paramètres d’association</string>
+    <string name="show_all">Afficher tout</string>
+    <string name="filter_by_feature_title">Filtrer par titre d’entité</string>
+    <string name="containment_visible_value">Visible : %1$s</string>
+    <string name="associations">Associations</string>
 </resources>

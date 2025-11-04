@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Àrees del mapa</string>
+    <string name="add_map_area">Afegeix una àrea del mapa</string>
+    <string name="thumbnail_description">Miniatura de PortalItem</string>
+    <string name="download">Baixa</string>
+    <string name="open">Obert</string>
+    <string name="error">Error</string>
+    <string name="loading">S\'està carregant</string>
+    <string name="loading_failed">No s\'ha pogut carregar</string>
+    <string name="ready_to_download">Ja es pot baixar</string>
+    <string name="packaging">S\'està empaquetant</string>
+    <string name="packaging_failed">No s\'ha pogut empaquetar</string>
+    <string name="downloaded">Baixat</string>
+    <string name="downloading">S\'està baixant</string>
+    <string name="download_failed">Error de baixada</string>
+    <string name="currently_open">Obert actualment</string>
+    <string name="description">Descripció</string>
+    <string name="download_map_area">Baixa l\'àrea del mapa</string>
+    <string name="remove_download">Elimina la baixada</string>
+    <string name="delete_download">Suprimeix la baixada</string>
+    <string name="no_image_available">No hi ha cap imatge disponible</string>
+    <string name="refresh">Actualitza</string>
+    <string name="cancelled">Cancel·lat</string>
+    <string name="cancel">Cancel·la</string>
+    <string name="confirm">D\'acord</string>
+    <string name="rename">Canvia el nom</string>
+    <string name="enter_a_name">Introduïu un nom</string>
+    <string name="select_area">Seleccioneu l\'àrea</string>
+    <string name="pan_and_zoom_text">Desplaceu el mapa i apliqueu-hi el zoom per definir l\'àrea</string>
+    <string name="unique_name_text">El nom de l\'àrea del mapa ha de ser únic</string>
+    <string name="next_on_demand_area_title">Àrea %1$s</string>
+    <string name="directory_size">Mida: %1$s</string>
+    <string name="no_internet_connection_error_message">No hi ha connexió a internet</string>
+    <string name="no_internet_error_message">No hi ha connexió a Internet. Només es mostren les àrees baixades.</string>
+    <string name="no_map_areas_error_message">No s\'han pogut recuperar les àrees d\'aquest mapa.</string>
+    <string name="no_offline_map_areas_error_message">No hi ha àrees per a aquest mapa.</string>
+    <string name="error_fetching_areas">Error en recollir les àrees del mapa</string>
+    <string name="error_fetching_areas_message">Hi ha hagut un error en recollir les àrees del mapa.</string>
+    <string name="no_map_areas">No hi ha cap àrea del mapa</string>
+    <string name="empty_on_demand_message">No hi ha àrees per a aquest mapa. Toqueu el botó següent per començar.</string>
+    <string name="offline_disabled">S\'ha inhabilitat el mode sense connexió</string>
+    <string name="offline_disabled_message">El mapa de la missió no està habilitat per a l\'ús sense connexió.</string>
+    <string name="level_of_detail">Nivell de detall</string>
+    <string name="room">Habitació</string>
+    <string name="rooms">Habitacions</string>
+    <string name="house_property">Propietat de la casa</string>
+    <string name="houses">Cases</string>
+    <string name="small_building">Edifici petit</string>
+    <string name="building">Edifici</string>
+    <string name="buildings">Edificis</string>
+    <string name="street">Carrer</string>
+    <string name="streets">Carrers</string>
+    <string name="neighborhood">Barri</string>
+    <string name="town">Població</string>
+    <string name="city">Ciutat</string>
+    <string name="cities">Ciutats</string>
+    <string name="metropolitan_area">Àrea metropolitana</string>
+    <string name="county">Comtat</string>
+    <string name="counties">Comtats</string>
+    <string name="state_province">Estat o província</string>
+    <string name="states_provinces">Estats o províncies</string>
+    <string name="countries_small">Països (petit)</string>
+    <string name="countries_big">Països (gran)</string>
+    <string name="continent">Continent</string>
+    <string name="world_small">Món (petit)</string>
+    <string name="world_big">Món (gran)</string>
+    <string name="world">Món</string>
+</resources>

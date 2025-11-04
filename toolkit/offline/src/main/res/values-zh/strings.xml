@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">地图区域</string>
+    <string name="add_map_area">添加地图区域</string>
+    <string name="thumbnail_description">门户项目缩略图</string>
+    <string name="download">下载</string>
+    <string name="open">打开</string>
+    <string name="error">错误</string>
+    <string name="loading">正在加载</string>
+    <string name="loading_failed">加载失败</string>
+    <string name="ready_to_download">准备下载</string>
+    <string name="packaging">正在打包</string>
+    <string name="packaging_failed">打包失败</string>
+    <string name="downloaded">已下载</string>
+    <string name="downloading">正在下载</string>
+    <string name="download_failed">下载失败</string>
+    <string name="currently_open">当前已打开</string>
+    <string name="description">描述</string>
+    <string name="download_map_area">下载地图区域</string>
+    <string name="remove_download">移除下载</string>
+    <string name="delete_download">删除下载</string>
+    <string name="no_image_available">无可用图像</string>
+    <string name="refresh">刷新</string>
+    <string name="cancelled">已取消</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="rename">重命名</string>
+    <string name="enter_a_name">输入名称</string>
+    <string name="select_area">选择区域</string>
+    <string name="pan_and_zoom_text">平移并缩放以定义区域</string>
+    <string name="unique_name_text">地图区域的名称必须唯一</string>
+    <string name="next_on_demand_area_title">区域 %1$s</string>
+    <string name="directory_size">大小：%1$s</string>
+    <string name="no_internet_connection_error_message">无 Internet 连接</string>
+    <string name="no_internet_error_message">无 Internet 连接。 仅显示已下载的区域。</string>
+    <string name="no_map_areas_error_message">无法检索此地图的地图区域。</string>
+    <string name="no_offline_map_areas_error_message">此地图没有任何地图区域。</string>
+    <string name="error_fetching_areas">获取地图区域时出错</string>
+    <string name="error_fetching_areas_message">获取地图区域时出错。</string>
+    <string name="no_map_areas">无地图区域</string>
+    <string name="empty_on_demand_message">此地图没有任何地图区域。 点击下方按钮以开始使用。</string>
+    <string name="offline_disabled">禁用离线</string>
+    <string name="offline_disabled_message">该地图不支持离线使用。</string>
+    <string name="level_of_detail">细节层次</string>
+    <string name="room">房间</string>
+    <string name="rooms">多个房间</string>
+    <string name="house_property">房产</string>
+    <string name="houses">房屋</string>
+    <string name="small_building">小型建筑物</string>
+    <string name="building">建筑物</string>
+    <string name="buildings">建筑群</string>
+    <string name="street">街区</string>
+    <string name="streets">街区群</string>
+    <string name="neighborhood">社区</string>
+    <string name="town">乡镇</string>
+    <string name="city">城市</string>
+    <string name="cities">城市群</string>
+    <string name="metropolitan_area">大都市区</string>
+    <string name="county">县</string>
+    <string name="counties">多个区县</string>
+    <string name="state_province">州/省</string>
+    <string name="states_provinces">多个州/省</string>
+    <string name="countries_small">国家/地区(小)</string>
+    <string name="countries_big">国家/地区(大)</string>
+    <string name="continent">大洲</string>
+    <string name="world_small">世界(小)</string>
+    <string name="world_big">世界(大)</string>
+    <string name="world">世界</string>
+</resources>

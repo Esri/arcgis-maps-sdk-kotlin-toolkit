@@ -24,4 +24,24 @@
     <string name="other">Inne</string>
     <string name="close">Powrót</string>
     <string name="attachment_thumbnail">miniatura załącznika</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Nie znaleziono powiązań</string>
+    <string name="visible_content">Widoczne zasoby</string>
+    <string name="content">Zasoby</string>
+    <string name="containment_visible">Widoczne zawieranie</string>
+    <string name="fraction_along_edge">Ułamek wzdłuż krawędzi</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Z elementu</string>
+    <string name="to_element">Do elementu</string>
+    <string name="association_type">Typ powiązania</string>
+    <string name="remove_association">Usuń powiązanie</string>
+    <string name="remove_association_tooltip">Usuwa tylko powiązanie. Obiekt pozostaje.</string>
+    <string name="remove">Usuń</string>
+    <string name="cancel">Anuluj</string>
+    <string name="none_selected">Brak wyboru</string>
+    <string name="association_settings">Ustawienia powiązania</string>
+    <string name="show_all">Pokaż wszystko</string>
+    <string name="filter_by_feature_title">Filtruj według tytułu obiektu</string>
+    <string name="containment_visible_value">Widoczne: %1$s</string>
+    <string name="associations">Powiązania</string>
 </resources>

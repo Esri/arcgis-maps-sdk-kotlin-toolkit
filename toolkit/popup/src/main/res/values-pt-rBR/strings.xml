@@ -24,4 +24,24 @@
     <string name="other">Outro</string>
     <string name="close">Voltar</string>
     <string name="attachment_thumbnail">miniatura do anexo</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Nenhuma associação encontrada</string>
+    <string name="visible_content">Conteúdo visível</string>
+    <string name="content">Conteúdo</string>
+    <string name="containment_visible">Refreamento Visível</string>
+    <string name="fraction_along_edge">Fração ao Longo da Borda</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Do Elemento</string>
+    <string name="to_element">Para Elemento</string>
+    <string name="association_type">Tipo de Associação</string>
+    <string name="remove_association">Remover Associação</string>
+    <string name="remove_association_tooltip">Remove somente a associação. A feição permanece.</string>
+    <string name="remove">Remover</string>
+    <string name="cancel">Cancelar</string>
+    <string name="none_selected">Nenhum Selecionado</string>
+    <string name="association_settings">Configurações de Associação</string>
+    <string name="show_all">Mostrar todos</string>
+    <string name="filter_by_feature_title">Filtrar por título da feição</string>
+    <string name="containment_visible_value">Visível: %1$s</string>
+    <string name="associations">Associações</string>
 </resources>
