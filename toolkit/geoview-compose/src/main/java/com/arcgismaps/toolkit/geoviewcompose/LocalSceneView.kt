@@ -119,7 +119,7 @@ public fun LocalSceneView(
         val localSceneViewScope = remember { LocalSceneViewScope(localSceneView) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
-        // Invoke the content lambda only when the SceneView is ready
+        // Invoke the content lambda only when the LocalSceneView is ready
         if (isLocalSceneViewReady.value) {
             content?.let {
                 localSceneViewScope.it()
@@ -164,10 +164,10 @@ public fun LocalSceneView(
     )
 
     ViewpointHandler(
-        localSceneView = localSceneView,
-        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
+        localSceneView,
+        onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged
     )
 }
 
@@ -361,7 +361,7 @@ private fun ViewpointHandler(
     }
 
     LaunchedEffect(Unit) {
-        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
+        // if there is a persisted viewpoint, restore it when the LocalSceneView enters the composition
         persistedCamera?.let { localSceneView.setViewpointCamera(it) }
         launch {
             localSceneView.viewpointChanged.collect {
