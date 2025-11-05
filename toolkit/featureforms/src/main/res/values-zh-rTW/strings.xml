@@ -159,8 +159,6 @@
     <string name="no_associations_found">找不到關聯</string>
     <string name="terminal">終端機</string>
     <string name="terminal_with_value">終端機 : %1$s</string>
-    <string name="containment_visible">可見的遏制</string>
-    <string name="fraction_along_edge">沿邊緣分數</string>
     <string name="from_element">從元素</string>
     <string name="to_element">至元素</string>
     <string name="association_type">關聯類型</string>

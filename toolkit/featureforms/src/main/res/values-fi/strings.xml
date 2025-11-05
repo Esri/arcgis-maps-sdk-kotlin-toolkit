@@ -159,8 +159,6 @@
     <string name="no_associations_found">Liitoksia ei löytynyt</string>
     <string name="terminal">Pääte</string>
     <string name="terminal_with_value">Pääte: %1$s</string>
-    <string name="containment_visible">Sisältyvyys näkyvillä</string>
-    <string name="fraction_along_edge">Osuus reunaa pitkin</string>
     <string name="from_element">Elementistä</string>
     <string name="to_element">Elementtiin</string>
     <string name="association_type">Liitoksen tyyppi</string>

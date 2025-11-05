@@ -159,8 +159,6 @@
     <string name="no_associations_found">Der blev ikke fundet nogen associeringer</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Indeholdt synligt</string>
-    <string name="fraction_along_edge">Fraktion langs kanten</string>
     <string name="from_element">Fra element</string>
     <string name="to_element">Til element</string>
     <string name="association_type">Associeringstype</string>
