@@ -159,8 +159,6 @@
     <string name="no_associations_found">Nije pronađeno nijedno povezivanje</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Zatvaranje je vidljivo</string>
-    <string name="fraction_along_edge">Razlomak duž ivice</string>
     <string name="from_element">Iz elementa</string>
     <string name="to_element">U element</string>
     <string name="association_type">Tip povezivanja</string>

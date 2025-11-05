@@ -159,8 +159,6 @@
     <string name="no_associations_found">Няма намерени асоциации</string>
     <string name="terminal">Терминал</string>
     <string name="terminal_with_value">Терминал: %1$s</string>
-    <string name="containment_visible">Ограничение видимо</string>
-    <string name="fraction_along_edge">Фракция на ръба</string>
     <string name="from_element">От елемент</string>
     <string name="to_element">Към елемент</string>
     <string name="association_type">Тип свързване</string>

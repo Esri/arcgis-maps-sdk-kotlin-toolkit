@@ -159,8 +159,6 @@
     <string name="no_associations_found">ไม่พบความสัมพันธ์</string>
     <string name="terminal">เทอร์มินัล</string>
     <string name="terminal_with_value">เทอร์มินัล : %1$s</string>
-    <string name="containment_visible">การแสดงผลการกักกัน</string>
-    <string name="fraction_along_edge">เศษส่วนตามแนวขอบ</string>
     <string name="from_element">องค์ประกอบจาก</string>
     <string name="to_element">องค์ประกอบถึง</string>
     <string name="association_type">ประเภทความสัมพันธ์</string>

@@ -159,8 +159,6 @@
     <string name="no_associations_found">Không tìm thấy liên kết nào</string>
     <string name="terminal">Thiết bị đầu cuối</string>
     <string name="terminal_with_value">Thiết bị đầu cuối: %1$s</string>
-    <string name="containment_visible">Hiển thị Đối tượng trong bộ chứa</string>
-    <string name="fraction_along_edge">Phân số Dọc theo Cạnh</string>
     <string name="from_element">Từ Phần tử</string>
     <string name="to_element">Đến Phần tử</string>
     <string name="association_type">Loại Liên kết</string>
