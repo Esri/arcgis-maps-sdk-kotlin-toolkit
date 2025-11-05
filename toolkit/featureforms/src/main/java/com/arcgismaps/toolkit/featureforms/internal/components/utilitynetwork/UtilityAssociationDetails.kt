@@ -170,7 +170,7 @@ internal fun UtilityAssociationDetails(
         }
         associationResult.getFractionAlongEdge()?.let { fraction ->
             PercentAlongControl(
-                fraction = associationResult.getFractionAlongEdge()!!.toFloat(),
+                initialFraction = associationResult.getFractionAlongEdge()!!,
                 enabled = false,
                 onValueChanged = {},
                 modifier = Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)
@@ -266,9 +266,7 @@ internal fun RemoveAssociationConfirmationDialog(
  */
 internal fun UtilityAssociationResult.getFractionAlongEdge(): Double? {
     return when (association.associationType) {
-        UtilityAssociationType.JunctionEdgeObjectConnectivityFromSide,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan,
-        UtilityAssociationType.JunctionEdgeObjectConnectivityToSide -> {
+        UtilityAssociationType.JunctionEdgeObjectConnectivityMidspan -> {
             association.fractionAlongEdge
         }
 
