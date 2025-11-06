@@ -65,14 +65,46 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
         "LocalSceneView must be part of the composition when this member is called."
 
     /**
-     * Change the local scene view to the viewpoint specified by the given camera.
-     * The viewpoint is updated instantaneously.
+     * Changes the display to the viewpoint specified by the given camera.
      *
-     * @param camera the new camera
+     * @param camera The camera that should be set on the view.
      * @since 300.0.0
      */
     public fun setViewpointCamera(camera: Camera) {
         localSceneView?.setViewpointCamera(camera)
+    }
+
+    /**
+     * Pans or zooms the local scene view using animation to the specified camera location.
+     *
+     * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
+     * @since 300.0.0
+     */
+    public suspend fun setViewpointCameraAnimated(
+        camera: Camera
+    ): Result<Boolean> {
+        return localSceneView?.setViewpointCameraAnimated(
+            camera
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    /**
+     * Pans or zooms the local scene view using animation to the specified camera location
+     * asynchronously. Animation takes place over the specified duration.
+     *
+     * @param camera The camera that should be set on the view.
+     * @param duration The amount of time in seconds to move to the new viewpoint.
+     * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
+     * @since 300.0.0
+     */
+    public suspend fun setViewpointCameraAnimated(
+        camera: Camera,
+        duration: Float
+    ): Result<Boolean> {
+        return localSceneView?.setViewpointCameraAnimated(
+            camera,
+            duration
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
     /**
