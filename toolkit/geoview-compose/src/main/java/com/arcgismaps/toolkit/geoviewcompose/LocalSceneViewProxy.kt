@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -63,6 +65,29 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
 
     private val nullSceneViewErrorMessage: String =
         "LocalSceneView must be part of the composition when this member is called."
+
+    /**
+     * Pans or zooms the local scene view using animation to the specified viewpoint location. The
+     * animation takes place over the specified duration. The animation curve defines the animation
+     * easing function.
+     *
+     * @param viewpoint The viewpoint that should be set on the view.
+     * @param durationSeconds The amount of time in seconds to move to the new viewpoint.
+     * @param animationCurve The type of animation curve.
+     * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
+     * @since 300.0.0
+     */
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint,
+        durationSeconds: Float,
+        animationCurve: AnimationCurve
+    ): Result<Boolean> {
+        return localSceneView?.setViewpointAnimated(
+            viewpoint,
+            durationSeconds,
+            animationCurve
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
 
     /**
      * Changes the display to the viewpoint specified by the given camera.
