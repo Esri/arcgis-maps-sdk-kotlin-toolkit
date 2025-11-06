@@ -159,8 +159,6 @@
     <string name="no_associations_found">Tidak ditemukan asosiasi</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Penahanan Terlihat</string>
-    <string name="fraction_along_edge">Fraksi Sepanjang Tepi</string>
     <string name="from_element">Dari Elemen</string>
     <string name="to_element">Ke Elemen</string>
     <string name="association_type">Jenis Asosiasi</string>

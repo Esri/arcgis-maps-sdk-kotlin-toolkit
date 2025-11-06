@@ -159,8 +159,6 @@
     <string name="no_associations_found">Keine Zuordnungen gefunden</string>
     <string name="terminal">Anschlusspunkt</string>
     <string name="terminal_with_value">Anschlusspunkt: %1$s</string>
-    <string name="containment_visible">Containment sichtbar</string>
-    <string name="fraction_along_edge">Bruch entlang der Kante</string>
     <string name="from_element">Von Element</string>
     <string name="to_element">Bis Element</string>
     <string name="association_type">Zuordnungstyp</string>

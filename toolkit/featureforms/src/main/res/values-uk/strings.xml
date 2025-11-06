@@ -159,8 +159,6 @@
     <string name="no_associations_found">Зʼєднань не знайдено</string>
     <string name="terminal">Термінал</string>
     <string name="terminal_with_value">Термінал: %1$s</string>
-    <string name="containment_visible">Видиме включення</string>
-    <string name="fraction_along_edge">Частка уздовж ребра</string>
     <string name="from_element">Від елементу</string>
     <string name="to_element">До елементу</string>
     <string name="association_type">Тип з՚єднання</string>

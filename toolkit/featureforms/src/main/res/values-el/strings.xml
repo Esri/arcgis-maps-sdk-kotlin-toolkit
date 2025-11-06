@@ -159,8 +159,6 @@
     <string name="no_associations_found">Δεν βρέθηκαν συσχετίσεις</string>
     <string name="terminal">Τερματικό</string>
     <string name="terminal_with_value">Τερματικό : %1$s</string>
-    <string name="containment_visible">Ορατή περίεξη</string>
-    <string name="fraction_along_edge">Κλάσμα κατά μήκος της ακμής</string>
     <string name="from_element">Από στοιχείο</string>
     <string name="to_element">Προς στοιχείο</string>
     <string name="association_type">Τύπος συσχέτισης</string>

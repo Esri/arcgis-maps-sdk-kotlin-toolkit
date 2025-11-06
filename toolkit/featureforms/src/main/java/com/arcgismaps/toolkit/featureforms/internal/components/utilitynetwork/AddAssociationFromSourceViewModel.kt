@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
@@ -56,13 +57,14 @@ import kotlinx.coroutines.launch
  * added. This can be used to refresh the UI or perform other actions in response to the addition.
  */
 internal class AddAssociationFromSourceViewModel(
-    val featureForm : FeatureForm,
-    private val element: UtilityAssociationsFormElement,
-    private val filter: UtilityAssociationsFilter,
+    val featureForm: FeatureForm,
+    val element: UtilityAssociationsFormElement,
+    val filter: UtilityAssociationsFilter,
     private val onAssociationAdded: suspend () -> Unit
 ) : ViewModel() {
 
     private val _featureSourcesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of feature sources. This can be set via
      * [setFeatureSourcesFilterText].
@@ -70,6 +72,7 @@ internal class AddAssociationFromSourceViewModel(
     val featureSourcesFilterText by _featureSourcesFilterText
 
     private val _assetTypesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of asset types. This can be set via
      * [setAssetTypesFilterText].
@@ -77,6 +80,7 @@ internal class AddAssociationFromSourceViewModel(
     val assetTypesFilterText by _assetTypesFilterText
 
     private val _associatedFeaturesFilterText: MutableState<String> = mutableStateOf("")
+
     /**
      * The current text used to filter the list of associated feature candidates. This can be set
      * via [setAssociatedFeaturesFilterText].
@@ -171,12 +175,43 @@ internal class AddAssociationFromSourceViewModel(
      */
     val filteredFeatureCandidatesUiState: StateFlow<FeatureCandidatesUiState> = snapshotFlow {
         associatedFeaturesFilterText to _featureCandidatesUiState.value
-    }.map { (text, _) ->
+    }.map { (text, candidatesUiState) ->
         return@map if (text.isNotEmpty()) {
-            val filteredList = filterFeatureCandidates(text)
+            val candidateList = candidatesUiState.candidates.toMutableList()
+            var nextQueryParams = candidatesUiState.nextQueryParams
+            var filteredList = filterFeatureCandidates(text)
+            // Keep fetching additional pages while no candidates match the filter and a next page
+            // (nextQueryParams) is available. Stop when matches appear or there are no more pages.
+            while (filteredList.isEmpty() && nextQueryParams != null) {
+                val source = _selectedSource.value ?: break
+                _isSearchingForCandidates.value = true
+                source.queryFeatures(nextQueryParams).onSuccess { result ->
+                    // Append the newly fetched candidates to the existing list
+                    candidateList += result.candidates
+                    // Update the candidates list with the updated list
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                        isLoading = false,
+                        candidates = candidateList,
+                        nextQueryParams = result.nextQueryParams
+                    )
+                    // Update for the next iteration, if needed
+                    nextQueryParams = result.nextQueryParams
+                    // Filter the updated list
+                    filteredList = filterFeatureCandidates(text)
+                }.onFailure {
+                    // If there's an error, set the error state and break the loop
+                    _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                        isLoading = false,
+                        error = it
+                    )
+                    break
+                }
+            }
+            _isSearchingForCandidates.value = false
             FeatureCandidatesUiState(
                 isLoading = false,
-                candidates = filteredList
+                candidates = filteredList,
+                nextQueryParams = nextQueryParams
             )
         } else {
             _featureCandidatesUiState.value
@@ -186,6 +221,21 @@ internal class AddAssociationFromSourceViewModel(
         started = SharingStarted.WhileSubscribed(1000),
         initialValue = FeatureCandidatesUiState(isLoading = true)
     )
+
+    private val _isSearchingForCandidates = mutableStateOf(false)
+
+    /**
+     * Indicates whether the ViewModel is currently searching for more feature candidates when there
+     * are more pages of results to fetch.
+     */
+    val isSearchingForCandidates: Boolean
+        get() = _isSearchingForCandidates.value
+
+    /**
+     * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
+     * This is used to prevent multiple simultaneous fetches.
+     */
+    private var _isFetchingNextPage = false
 
     init {
         viewModelScope.launch {
@@ -211,7 +261,8 @@ internal class AddAssociationFromSourceViewModel(
                     ).onSuccess { result ->
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
-                            candidates = result.candidates
+                            candidates = result.candidates,
+                            nextQueryParams = result.nextQueryParams
                         )
                     }.onFailure { error ->
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
@@ -292,18 +343,49 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     /**
-     * Sets the currently selected [UtilityAssociationFeatureCandidate].
+     * Sets the currently selected [UtilityAssociationFeatureCandidate] and fetches the
+     * [UtilityAssociationFeatureOptions] for the candidate feature. [newAssociationOptions] will
+     * be updated once the options are fetched. This is an asynchronous operation.
      *
-     * @param candidate The [UtilityAssociationFeatureCandidate] to select, or `null` to clear the
-     * selection.
+     * @param candidate The [UtilityAssociationFeatureCandidate] to select.
      */
-    suspend fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
-        element.getOptionsForAssociationCandidate(candidate.feature).onSuccess {
-            _newAssociationOptions.value = NewAssociationOptions(
-                candidate = candidate,
-                options = it,
-                type = filter.filterType
-            )
+    fun selectFeatureCandidate(candidate: UtilityAssociationFeatureCandidate) {
+        viewModelScope.launch {
+            element.getOptionsForAssociationCandidate(candidate.feature).onSuccess { options ->
+                val (fromEndPoint, toEndPoint) = when (filter.filterType) {
+                    is UtilityAssociationsFilterType.Connectivity -> {
+                        AssociationEndpoint(
+                            featureForm.title.value,
+                            options.formFeatureTerminalConfiguration
+                        ) to
+                            AssociationEndpoint(
+                                candidate.title,
+                                options.candidateFeatureTerminalConfiguration
+                            )
+                    }
+
+                    is UtilityAssociationsFilterType.Container,
+                    is UtilityAssociationsFilterType.Structure -> {
+                        AssociationEndpoint(name = candidate.title) to
+                            AssociationEndpoint(featureForm.title.value)
+                    }
+
+                    else -> {
+                        AssociationEndpoint(featureForm.title.value) to
+                            AssociationEndpoint(candidate.title)
+                    }
+                }
+
+                _newAssociationOptions.value = NewAssociationOptions(
+                    candidate = candidate,
+                    fromElement = fromEndPoint.name,
+                    fromTerminalConfiguration = fromEndPoint.terminalConfiguration,
+                    toElement = toEndPoint.name,
+                    toTerminalConfiguration = toEndPoint.terminalConfiguration,
+                    isPercentAlongValid = options.isFractionAlongEdgeValid,
+                    type = filter.filterType
+                )
+            }
         }
     }
 
@@ -313,7 +395,8 @@ internal class AddAssociationFromSourceViewModel(
      *
      * @param isContainmentVisible Whether the containment is visible. This is only applicable for
      * [UtilityAssociationsFilterType.Container] and [UtilityAssociationsFilterType.Content] types.
-     * @param fractionAlongEdge The fraction along the edge for connectivity associations.
+     * @param percentAlong the value expected is a fraction between 0 and 1 rather than a percentage
+     *                      for connectivity associations.
      * @param fromTerminalId The terminal ID on the feature being edited.
      * @param toTerminalId The terminal ID on the candidate feature.
      * @return A [Result] containing the [UtilityAssociationResult] if the association was
@@ -321,26 +404,26 @@ internal class AddAssociationFromSourceViewModel(
      */
     suspend fun addAssociation(
         isContainmentVisible: Boolean,
-        fractionAlongEdge: Float? = null,
-        fromTerminalId : Int? = null,
-        toTerminalId : Int? = null,
-    ) : Result<UtilityAssociationResult> = runCatching {
+        percentAlong: Float? = null,
+        fromTerminalId: Int? = null,
+        toTerminalId: Int? = null,
+    ): Result<UtilityAssociationResult> = runCatching {
         val feature = newAssociationOptions?.candidate?.feature
         require(feature != null) {
             "No feature candidate selected"
         }
         val fromTerminal = fromTerminalId?.let { id ->
-            newAssociationOptions?.options?.formFeatureTerminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.fromTerminalConfiguration.getTerminalById(id)
         }
         val toTerminal = toTerminalId?.let { id ->
-            newAssociationOptions?.options?.candidateFeatureTerminalConfiguration.getTerminalById(id)
+            newAssociationOptions?.toTerminalConfiguration.getTerminalById(id)
         }
         // First check if we can add an association to the feature with the provided filter
         val canAddAssociation = element.canAddAssociation(
             feature,
             filter
         ).getOrThrow()
-        if (canAddAssociation.not())  {
+        if (canAddAssociation.not()) {
             throw IllegalStateException("Cannot add an association to the provided feature")
         }
         // Capture the result of adding the association based on the filter type
@@ -374,11 +457,11 @@ internal class AddAssociationFromSourceViewModel(
                     // junction (with the terminal) to edge
                     fromTerminal != null -> {
                         // these two methods can be defaulted at the sdk level
-                        if (fractionAlongEdge != null) {
+                        if (percentAlong != null) {
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                fractionAlongEdge = percentAlong.toDouble(),
                                 terminal = fromTerminal
                             )
                         } else {
@@ -394,11 +477,11 @@ internal class AddAssociationFromSourceViewModel(
                     // edge to junction (with the terminal)
                     toTerminal != null -> {
                         // these two methods can be defaulted at the sdk level
-                        if (fractionAlongEdge != null) {
+                        if (percentAlong != null) {
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = fractionAlongEdge.toDouble(),
+                                fractionAlongEdge = percentAlong.toDouble(),
                                 terminal = toTerminal
                             )
                         } else {
@@ -409,6 +492,16 @@ internal class AddAssociationFromSourceViewModel(
                                 currentFeatureTerminal = null
                             )
                         }
+                    }
+
+                    // no terminals, but percent along provided
+                    percentAlong != null -> {
+                        // edge to edge
+                        element.addAssociation(
+                            feature = feature,
+                            filter = filter,
+                            fractionAlongEdge = percentAlong.toDouble()
+                        )
                     }
 
                     // edge to edge or junction to junction without terminals
@@ -450,6 +543,38 @@ internal class AddAssociationFromSourceViewModel(
         setAssociatedFeaturesFilterText("")
     }
 
+    /**
+     * Loads more feature candidates from the selected source and asset type if there are more
+     * candidates to fetch. This method will not fetch more candidates if a fetch is already in
+     * progress or if there is an active search filter.
+     *
+     * This is not thread-safe as it is intended to be called from the ui thread only.
+     */
+    suspend fun loadMoreFeatureCandidates() {
+        // Only fetch the next page if not already fetching and there's no active search filter
+        if (_isFetchingNextPage.not() && featureSourcesFilterText.isEmpty()) {
+            val source = _selectedSource.value ?: return
+            val assetType = _selectedAssetType.value ?: return
+            val nextQueryParams = _featureCandidatesUiState.value.nextQueryParams ?: return
+            _isFetchingNextPage = true
+            source.queryFeatures(
+                assetType = assetType,
+                parameters = nextQueryParams
+            ).onSuccess { result ->
+                // Append the newly fetched candidates to the existing list
+                val updatedCandidates =
+                    _featureCandidatesUiState.value.candidates + result.candidates
+                // Update the candidates list with the updated list
+                _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                    isLoading = false,
+                    candidates = updatedCandidates,
+                    nextQueryParams = result.nextQueryParams
+                )
+            }
+            _isFetchingNextPage = false
+        }
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -473,21 +598,54 @@ internal class AddAssociationFromSourceViewModel(
  * Holds the options for creating a new association based on a selected candidate feature.
  *
  * @param candidate The selected [UtilityAssociationFeatureCandidate].
- * @param options The [UtilityAssociationFeatureOptions] for the candidate feature.
+ * @param fromElement The name of the "from" element in the association.
+ * @param fromTerminalConfiguration The [UtilityTerminalConfiguration] for the "from" element,
+ * if applicable.
+ * @param toElement The name of the "to" element in the association.
+ * @param toTerminalConfiguration The [UtilityTerminalConfiguration] for the "to" element,
+ * if applicable.
+ * @param isPercentAlongValid Whether the percent along is valid for connectivity
+ * associations.
  * @param type The [UtilityAssociationsFilterType] defining the type of association to create
  */
 internal data class NewAssociationOptions(
     val candidate: UtilityAssociationFeatureCandidate,
-    val options: UtilityAssociationFeatureOptions,
+    val fromElement: String,
+    val fromTerminalConfiguration: UtilityTerminalConfiguration?,
+    val toElement: String,
+    val toTerminalConfiguration: UtilityTerminalConfiguration?,
+    val isPercentAlongValid: Boolean,
     val type: UtilityAssociationsFilterType
 )
 
+/**
+ * Represents the UI state for loading feature candidates, including loading status,
+ * any errors encountered, and the list of loaded candidates.
+ *
+ * @param isLoading Indicates whether the feature candidates are currently being loaded.
+ * @param error An optional [Throwable] representing any error that occurred during loading.
+ * @param candidates A list of loaded [UtilityAssociationFeatureCandidate] objects.
+ * @param nextQueryParams Optional [QueryParameters] for fetching the next set of candidates, if any.
+ */
 internal data class FeatureCandidatesUiState(
     val isLoading: Boolean = false,
     val error: Throwable? = null,
-    val candidates: List<UtilityAssociationFeatureCandidate> = emptyList()
+    val candidates: List<UtilityAssociationFeatureCandidate> = emptyList(),
+    val nextQueryParams: QueryParameters? = null
 )
 
+/**
+ * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
+ */
 internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
     return this?.terminals?.find { it.terminalId == id }
 }
+
+/**
+ * Holds information about an association endpoint, including its name and optional terminal
+ * configuration.
+ */
+private data class AssociationEndpoint(
+    val name: String,
+    val terminalConfiguration: UtilityTerminalConfiguration? = null
+)

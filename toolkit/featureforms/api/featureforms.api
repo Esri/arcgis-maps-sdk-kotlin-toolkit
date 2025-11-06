@@ -31,7 +31,129 @@ public final class com/arcgismaps/toolkit/featureforms/FeatureFormEditingEvent$S
 }
 
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormKt {
-	public static final fun FeatureForm (Lcom/arcgismaps/toolkit/featureforms/FeatureFormState;Landroidx/compose/ui/Modifier;ZZZLcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;III)V
+	public static final fun FeatureForm (Lcom/arcgismaps/toolkit/featureforms/FeatureFormState;Landroidx/compose/ui/Modifier;ZZZLcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;III)V
+}
+
+public abstract class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationGroupResult : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/utilitynetworks/UtilityAssociationGroupResult;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun component3 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationGroupResult;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/utilitynetworks/UtilityAssociationGroupResult;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationGroupResult;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationGroupResult;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/utilitynetworks/UtilityAssociationGroupResult;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationGroupResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFilter ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun getGroupResult ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationGroupResult;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationResult : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationResult;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationResult;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationResult;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationResult;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationResult;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationResult;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getResult ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationResult;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationsFilterResult : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilterResult;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilterResult;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilterResult;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationsFilterResult;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationsFilterResult;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilterResult;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$AssociationsFilterResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFilterResult ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilterResult;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$CreateAssociation : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureCandidate;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun component3 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun component4 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureCandidate;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureCandidate;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$CreateAssociation;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$CreateAssociation;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureCandidate;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$CreateAssociation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCandidate ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureCandidate;
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFeatureSource ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun getFilter ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$Form : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$Form;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureCandidate : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/utilitynetworks/UtilityAssetType;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun component3 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun component4 ()Lcom/arcgismaps/utilitynetworks/UtilityAssetType;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/utilitynetworks/UtilityAssetType;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureCandidate;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureCandidate;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;Lcom/arcgismaps/utilitynetworks/UtilityAssetType;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureCandidate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAssetType ()Lcom/arcgismaps/utilitynetworks/UtilityAssetType;
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFeatureSource ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun getFilter ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureSource : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureSource;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureSource;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectAssociationFeatureSource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFilter ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectUtilityAssetType : com/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;)V
+	public final fun component1 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun component2 ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public final fun component3 ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun copy (Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectUtilityAssetType;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectUtilityAssetType;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/FeatureFormNavigationRoute$SelectUtilityAssetType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationsFormElement;
+	public final fun getFeatureSource ()Lcom/arcgismaps/mapping/featureforms/UtilityAssociationFeatureSource;
+	public final fun getFilter ()Lcom/arcgismaps/utilitynetworks/UtilityAssociationsFilter;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormState {

@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupResultScreen
@@ -35,8 +36,10 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     state: FeatureFormState,
     onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
+    onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
-    onBack: () -> Unit,
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
+    onBack: (NavBackStackEntry) -> Unit,
     isNavigationEnabled: Boolean,
 ) {
     composable<NavigationRoute.UNAssociationGroupResult> { backStackEntry ->
@@ -55,16 +58,29 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 isNavigationEnabled = isNavigationEnabled,
                 onSave = onSave,
                 onDiscard = onDiscard,
+                onNavigateToAssociation = {
+                    onNavigateToAssociation(backStackEntry, utilityAssociationsElementState.id)
+                },
                 onNavigateToFeature = { feature ->
                     onNavigateToFeature(backStackEntry, feature)
                 },
-                onBack = onBack,
+                onBack = {
+                    onBack(backStackEntry)
+                },
                 modifier = Modifier.fillMaxSize()
             )
             LaunchedEffect(formData) {
                 // Update the active feature form when we navigate back to this screen from another
                 // form.
                 state.updateActiveFeatureForm()
+            }
+            LaunchedEffect(groupResult) {
+                val eventData = FeatureFormNavigationRoute.AssociationGroupResult(
+                    element = utilityAssociationsElementState.element,
+                    filter = utilityAssociationsElementState.selectedFilterResult!!.filter,
+                    groupResult = groupResult.groupResult
+                )
+                onNavigationEvent(eventData)
             }
         } else {
             // If we don't have a valid state or group, navigate back to the previous screen.

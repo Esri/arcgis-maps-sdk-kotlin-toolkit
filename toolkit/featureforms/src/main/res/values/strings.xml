@@ -161,8 +161,8 @@
     <string name="no_associations_found">No associations to show</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Containment Visible</string>
-    <string name="fraction_along_edge">Fraction Along Edge</string>
+    <string name="content_visible">Content Visible</string>
+    <string name="percent_along">Percent Along</string>
     <string name="from_element">From Element</string>
     <string name="to_element">To Element</string>
     <string name="association_type">Association Type</string>
@@ -196,4 +196,5 @@
     <string name="choose_to_add">Choose to add</string>
     <string name="no_features_found">No features found</string>
     <string name="refine_your_search_tip">Refine your search or choose a different Network Source.</string>
+    <string name="select_terminal">Select Terminal</string>
 </resources>

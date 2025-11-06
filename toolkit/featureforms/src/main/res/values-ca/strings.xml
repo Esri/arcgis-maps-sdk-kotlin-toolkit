@@ -159,8 +159,6 @@
     <string name="no_associations_found">No s\'ha trobat cap associació</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Contenció visible</string>
-    <string name="fraction_along_edge">Fracció al llarg de la vora</string>
     <string name="from_element">Element d\'origen</string>
     <string name="to_element">Element de destinació</string>
     <string name="association_type">Tipus d\'associació</string>

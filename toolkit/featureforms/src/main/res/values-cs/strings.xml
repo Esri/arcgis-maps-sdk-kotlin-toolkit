@@ -159,8 +159,6 @@
     <string name="no_associations_found">Nebyly nalezeny žádné vazby</string>
     <string name="terminal">Vývod</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
-    <string name="containment_visible">Viditelný obsah</string>
-    <string name="fraction_along_edge">Zlomek podél hrany</string>
     <string name="from_element">Od prvku</string>
     <string name="to_element">K prvku</string>
     <string name="association_type">Typ vazby</string>

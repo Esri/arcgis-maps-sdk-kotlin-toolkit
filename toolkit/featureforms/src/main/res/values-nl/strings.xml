@@ -159,8 +159,6 @@
     <string name="no_associations_found">Kan geen associaties vinden</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Inperking zichtbaar</string>
-    <string name="fraction_along_edge">Fractie langs rand</string>
     <string name="from_element">Van element</string>
     <string name="to_element">Naar element</string>
     <string name="association_type">Type associatie</string>
