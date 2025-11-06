@@ -24,4 +24,24 @@
     <string name="other">Ostalo</string>
     <string name="close">Nazad</string>
     <string name="attachment_thumbnail">sličica priloga</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Nije pronađeno nijedno povezivanje</string>
+    <string name="visible_content">Vidljivi sadržaj</string>
+    <string name="content">Sadržaj</string>
+    <string name="containment_visible">Zatvaranje je vidljivo</string>
+    <string name="fraction_along_edge">Razlomak duž ivice</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Iz elementa</string>
+    <string name="to_element">U element</string>
+    <string name="association_type">Tip povezivanja</string>
+    <string name="remove_association">Ukloni povezivanje</string>
+    <string name="remove_association_tooltip">Samo uklanja povezivanje. Geoobjekat preostaje.</string>
+    <string name="remove">Ukloni</string>
+    <string name="cancel">Otkaži</string>
+    <string name="none_selected">Ništa nije izabrano</string>
+    <string name="association_settings">Postavke povezivanja</string>
+    <string name="show_all">Prikaži sve</string>
+    <string name="filter_by_feature_title">Filtriraj po naslovu geoobjekta</string>
+    <string name="containment_visible_value">Vidljivo: %1$s</string>
+    <string name="associations">Povezivanja</string>
 </resources>

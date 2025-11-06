@@ -51,9 +51,13 @@ class DateTimeFieldTests : FeatureFormTestRunner(
 
     @Before
     fun setContent() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm
+                featureFormState = featureFormState
             )
         }
     }

@@ -24,4 +24,24 @@
     <string name="other">Άλλο</string>
     <string name="close">Πίσω</string>
     <string name="attachment_thumbnail">μικρογραφία συνημμένου</string>
+    <string name="terminal">Τερματικό</string>
+    <string name="no_associations_found">Δεν βρέθηκαν συσχετίσεις</string>
+    <string name="visible_content">Ορατό περιεχόμενο</string>
+    <string name="content">Περιεχόμενο</string>
+    <string name="containment_visible">Ορατή περίεξη</string>
+    <string name="fraction_along_edge">Κλάσμα κατά μήκος της ακμής</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Από στοιχείο</string>
+    <string name="to_element">Προς στοιχείο</string>
+    <string name="association_type">Τύπος συσχέτισης</string>
+    <string name="remove_association">Κατάργηση συσχέτισης</string>
+    <string name="remove_association_tooltip">Καταργεί μόνο τη συσχέτιση. Το στοιχείο παραμένει.</string>
+    <string name="remove">Κατάργηση</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="none_selected">Καμία επιλογή</string>
+    <string name="association_settings">Ρυθμίσεις συσχέτισης</string>
+    <string name="show_all">Εμφάνιση όλων</string>
+    <string name="filter_by_feature_title">Φιλτράρισμα κατά τίτλο στοιχείου</string>
+    <string name="containment_visible_value">Ορατό: %1$s</string>
+    <string name="associations">Συσχετίσεις</string>
 </resources>

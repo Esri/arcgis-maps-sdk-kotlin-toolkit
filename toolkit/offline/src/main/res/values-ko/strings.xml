@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">맵 영역</string>
+    <string name="add_map_area">맵 영역 추가</string>
+    <string name="thumbnail_description">PortalItem 썸네일</string>
+    <string name="download">다운로드</string>
+    <string name="open">열기</string>
+    <string name="error">오류</string>
+    <string name="loading">불러오는 중</string>
+    <string name="loading_failed">불러오기 실패</string>
+    <string name="ready_to_download">다운로드 준비 완료</string>
+    <string name="packaging">패키징</string>
+    <string name="packaging_failed">패키징 실패</string>
+    <string name="downloaded">다운로드됨</string>
+    <string name="downloading">다운로드 중</string>
+    <string name="download_failed">다운로드 실패</string>
+    <string name="currently_open">현재 열림</string>
+    <string name="description">설명</string>
+    <string name="download_map_area">맵 영역 다운로드</string>
+    <string name="remove_download">다운로드 제거</string>
+    <string name="delete_download">다운로드 삭제</string>
+    <string name="no_image_available">사용 가능한 이미지 없음</string>
+    <string name="refresh">새로 고침</string>
+    <string name="cancelled">취소됨</string>
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
+    <string name="rename">이름 바꾸기</string>
+    <string name="enter_a_name">이름 입력</string>
+    <string name="select_area">영역 선택</string>
+    <string name="pan_and_zoom_text">이동 및 확대/축소하여 영역 정의</string>
+    <string name="unique_name_text">맵 영역의 이름은 고유해야 함</string>
+    <string name="next_on_demand_area_title">영역 %1$s</string>
+    <string name="directory_size">크기: %1$s</string>
+    <string name="no_internet_connection_error_message">인터넷 연결 없음</string>
+    <string name="no_internet_error_message">인터넷에 연결되어 있지 않습니다. 다운로드한 영역만 표시합니다.</string>
+    <string name="no_map_areas_error_message">이 맵에 대한 맵 영역을 검색할 수 없습니다.</string>
+    <string name="no_offline_map_areas_error_message">이 맵에 대한 맵 영역이 없습니다.</string>
+    <string name="error_fetching_areas">맵 영역을 가져오는 동안 오류 발생</string>
+    <string name="error_fetching_areas_message">맵 영역을 가져오는 동안 오류가 발생했습니다.</string>
+    <string name="no_map_areas">맵 영역 없음</string>
+    <string name="empty_on_demand_message">이 맵에 대한 맵 영역이 없습니다. 시작하려면 아래 버튼을 누르세요.</string>
+    <string name="offline_disabled">오프라인이 비활성화됨</string>
+    <string name="offline_disabled_message">이 맵은 오프라인용으로 활성화되지 않았습니다.</string>
+    <string name="level_of_detail">세밀도</string>
+    <string name="room">방</string>
+    <string name="rooms">방</string>
+    <string name="house_property">주택 자산</string>
+    <string name="houses">주택</string>
+    <string name="small_building">소형 건물</string>
+    <string name="building">건물</string>
+    <string name="buildings">건물</string>
+    <string name="street">도로</string>
+    <string name="streets">도로</string>
+    <string name="neighborhood">인접 영역</string>
+    <string name="town">동</string>
+    <string name="city">도시</string>
+    <string name="cities">도시</string>
+    <string name="metropolitan_area">대도시권</string>
+    <string name="county">구/군</string>
+    <string name="counties">구/군</string>
+    <string name="state_province">시/도</string>
+    <string name="states_provinces">시/도</string>
+    <string name="countries_small">국가(소)</string>
+    <string name="countries_big">국가(대)</string>
+    <string name="continent">대륙</string>
+    <string name="world_small">전 세계(소)</string>
+    <string name="world_big">전 세계(대)</string>
+    <string name="world">전 세계</string>
+</resources>

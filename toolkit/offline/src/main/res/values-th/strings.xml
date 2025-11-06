@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">พื้นที่แผนที่</string>
+    <string name="add_map_area">เพิ่มพื้นที่แผนที่</string>
+    <string name="thumbnail_description">ภาพตัวอย่าง PortalItem</string>
+    <string name="download">ดาวน์โหลด</string>
+    <string name="open">เปิด</string>
+    <string name="error">ข้อผิดพลาด</string>
+    <string name="loading">กำลังโหลด</string>
+    <string name="loading_failed">โหลดไม่สำเร็จ</string>
+    <string name="ready_to_download">พร้อมสำหรับการดาวน์โหลด</string>
+    <string name="packaging">กำลังสร้างแพ็คเกจ</string>
+    <string name="packaging_failed">สร้างแพ็คเกจไม่สำเร็จ</string>
+    <string name="downloaded">ดาวน์โหลดแล้ว</string>
+    <string name="downloading">กำลังดาวน์โหลด</string>
+    <string name="download_failed">การดาวน์โหลดล้มเหลว</string>
+    <string name="currently_open">เปิดอยู่ในปัจจุบัน</string>
+    <string name="description">รายละเอียด</string>
+    <string name="download_map_area">ดาวน์โหลดพื้นที่แผนที่</string>
+    <string name="remove_download">ลบที่ดาวน์โหลดไว้</string>
+    <string name="delete_download">ลบการดาวน์โหลด</string>
+    <string name="no_image_available">ไม่มีภาพที่พร้อมใช้งาน</string>
+    <string name="refresh">รีเฟรช</string>
+    <string name="cancelled">ยกเลิกแล้ว</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="confirm">ตกลง</string>
+    <string name="rename">เปลี่ยนชื่อ</string>
+    <string name="enter_a_name">ป้อนชื่อ</string>
+    <string name="select_area">เลือกพื้นที่</string>
+    <string name="pan_and_zoom_text">เลื่อนและซูมเพื่อกำหนดพื้นที่</string>
+    <string name="unique_name_text">ชื่อพื้นที่แผนที่ต้องไม่ซ้ำกัน</string>
+    <string name="next_on_demand_area_title">พื้นที่ %1$s</string>
+    <string name="directory_size">ขนาด: %1$s</string>
+    <string name="no_internet_connection_error_message">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</string>
+    <string name="no_internet_error_message">ไม่มีการเชื่อมต่ออินเทอร์เน็ต กำลังแสดงเฉพาะพื้นที่ที่ดาวน์โหลด</string>
+    <string name="no_map_areas_error_message">ไม่สามารถดึงข้อมูลพื้นที่แผนที่สำหรับแผนที่นี้ได้</string>
+    <string name="no_offline_map_areas_error_message">ไม่มีพื้นที่แผนที่สำหรับแผนที่นี้</string>
+    <string name="error_fetching_areas">เกิดข้อผิดพลาดขณะดึงข้อมูลพื้นที่แผนที่</string>
+    <string name="error_fetching_areas_message">เกิดข้อผิดพลาดขึ้นขณะดึงข้อมูลพื้นที่แผนที่</string>
+    <string name="no_map_areas">ไม่มีพื้นที่แผนที่</string>
+    <string name="empty_on_demand_message">ไม่มีพื้นที่แผนที่สำหรับแผนที่นี้ แตะปุ่มด้านล่างเพื่อเริ่มใช้งาน</string>
+    <string name="offline_disabled">ปิดใช้งานไว้ขณะออฟไลน์</string>
+    <string name="offline_disabled_message">ไม่ได้เปิดใช้งานแผนที่ไว้สำหรับการใช้ขณะออฟไลน์</string>
+    <string name="level_of_detail">ระดับรายละเอียด</string>
+    <string name="room">ห้อง</string>
+    <string name="rooms">ห้อง</string>
+    <string name="house_property">ทรัพย์สินบ้าน</string>
+    <string name="houses">บ้าน</string>
+    <string name="small_building">อาคารขนาดเล็ก</string>
+    <string name="building">ขอบเขตอาคาร</string>
+    <string name="buildings">ขอบเขตอาคารต่างๆ</string>
+    <string name="street">ถนน</string>
+    <string name="streets">ถนนต่างๆ</string>
+    <string name="neighborhood">ย่าน</string>
+    <string name="town">ชุมชน</string>
+    <string name="city">เมือง</string>
+    <string name="cities">เมือง</string>
+    <string name="metropolitan_area">เขตมหานคร</string>
+    <string name="county">เขต</string>
+    <string name="counties">เขต</string>
+    <string name="state_province">รัฐ/จังหวัด</string>
+    <string name="states_provinces">รัฐ/จังหวัด</string>
+    <string name="countries_small">ประเทศ (เล็ก)</string>
+    <string name="countries_big">ประเทศ (ใหญ่)</string>
+    <string name="continent">ทวีป</string>
+    <string name="world_small">โลก (เล็ก)</string>
+    <string name="world_big">โลก (ใหญ่)</string>
+    <string name="world">โลก</string>
+</resources>

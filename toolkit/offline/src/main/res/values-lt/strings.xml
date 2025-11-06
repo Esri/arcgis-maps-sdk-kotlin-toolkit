@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Žemėlapio teritorijos</string>
+    <string name="add_map_area">Pridėti žemėlapio teritoriją</string>
+    <string name="thumbnail_description">Portalo elemento miniatiūra</string>
+    <string name="download">Atsisiųsti</string>
+    <string name="open">Atverti</string>
+    <string name="error">Klaida</string>
+    <string name="loading">Kraunama</string>
+    <string name="loading_failed">Įkelti nepavyko</string>
+    <string name="ready_to_download">Parengta atsisiųsti</string>
+    <string name="packaging">Kuriamas paketas</string>
+    <string name="packaging_failed">Paketo sukurti nepavyko</string>
+    <string name="downloaded">Atsisiųsta</string>
+    <string name="downloading">Atsisiunčiama</string>
+    <string name="download_failed">Atsisiųsti nepavyko</string>
+    <string name="currently_open">Šiuo metu atidaryta</string>
+    <string name="description">Aprašas</string>
+    <string name="download_map_area">Atsisiųsti žemėlapio teritoriją</string>
+    <string name="remove_download">Šalinti atsisiuntimą</string>
+    <string name="delete_download">Ištrinti atsisiuntimą</string>
+    <string name="no_image_available">Vaizdų nėra</string>
+    <string name="refresh">Atnaujinti</string>
+    <string name="cancelled">Atšaukta</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="confirm">Gerai</string>
+    <string name="rename">Pervardinti</string>
+    <string name="enter_a_name">Įveskite pavadinimą</string>
+    <string name="select_area">Pasirinkite teritoriją</string>
+    <string name="pan_and_zoom_text">Pastumkite arba pakeiskite mastelį, kad apibrėžtumėte teritoriją</string>
+    <string name="unique_name_text">Žemėlapio teritorijos pavadinimas turi būti unikalus</string>
+    <string name="next_on_demand_area_title">Plotas %1$s</string>
+    <string name="directory_size">Dydis: %1$s</string>
+    <string name="no_internet_connection_error_message">Nėra interneto ryšio</string>
+    <string name="no_internet_error_message">Nėra interneto ryšio. Rodomos tik atsisiųstos sritys.</string>
+    <string name="no_map_areas_error_message">Nepavyko gauti šio žemėalapio teritorijų.</string>
+    <string name="no_offline_map_areas_error_message">Nėra šio žemėlapio teritorijų.</string>
+    <string name="error_fetching_areas">Gaunanat žemėlapio teritorijas įvyko klaida</string>
+    <string name="error_fetching_areas_message">Gaunant žemėlapio teritorijas įvyko klaida.</string>
+    <string name="no_map_areas">Nėra žemėlapio teritorijų</string>
+    <string name="empty_on_demand_message">Nėra šio žemėlapio teritorijų. Norėdami pradėti, bakstelėkite toliau esantį mygtuką.</string>
+    <string name="offline_disabled">Darbo neprisijungus prie interneto režimas išjungtas</string>
+    <string name="offline_disabled_message">Žemėlapio negalima naudoti neprisijungus.</string>
+    <string name="level_of_detail">Detalumo lygis</string>
+    <string name="room">Kambarys</string>
+    <string name="rooms">Kambariai</string>
+    <string name="house_property">Namų nuosavybė</string>
+    <string name="houses">Namai</string>
+    <string name="small_building">Mažas pastatas</string>
+    <string name="building">Pastatas</string>
+    <string name="buildings">Pastatai</string>
+    <string name="street">Gatvė</string>
+    <string name="streets">Gatvės</string>
+    <string name="neighborhood">Apylinkė</string>
+    <string name="town">Miestelis</string>
+    <string name="city">Miestas</string>
+    <string name="cities">Miestai</string>
+    <string name="metropolitan_area">Didmiesčio sritis</string>
+    <string name="county">Apygarda</string>
+    <string name="counties">Apygardos</string>
+    <string name="state_province">Valstija / provincija</string>
+    <string name="states_provinces">Valstijos / provincijos</string>
+    <string name="countries_small">Šalys (mažos)</string>
+    <string name="countries_big">Šalys (didelės)</string>
+    <string name="continent">Žemynas</string>
+    <string name="world_small">Pasaulis (mažas)</string>
+    <string name="world_big">Pasaulis (didelis)</string>
+    <string name="world">Pasaulis</string>
+</resources>

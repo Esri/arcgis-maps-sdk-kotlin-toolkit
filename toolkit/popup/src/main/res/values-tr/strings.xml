@@ -24,4 +24,24 @@
     <string name="other">Diğer</string>
     <string name="close">Geri</string>
     <string name="attachment_thumbnail">ek küçük resim</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">İlişkilendirme bulunamadı</string>
+    <string name="visible_content">Görünür İçerik</string>
+    <string name="content">İçerik</string>
+    <string name="containment_visible">Kapsama Görünür</string>
+    <string name="fraction_along_edge">Kenar Boyunca Kesir</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Kaynak Öge</string>
+    <string name="to_element">Hedef Öge</string>
+    <string name="association_type">İlişkilendirme Türü</string>
+    <string name="remove_association">İlişkilendirmeyi Kaldır</string>
+    <string name="remove_association_tooltip">Yalnızca ilişkilendirmeyi kaldırır. Detay kalır.</string>
+    <string name="remove">Kaldır</string>
+    <string name="cancel">İptal</string>
+    <string name="none_selected">Hiçbiri Seçilmedi</string>
+    <string name="association_settings">İlişkilendirme Ayarları</string>
+    <string name="show_all">Tümünü göster</string>
+    <string name="filter_by_feature_title">Detay başlığı ile filtrele</string>
+    <string name="containment_visible_value">Görünür: %1$s</string>
+    <string name="associations">İlişkilendirmeler</string>
 </resources>

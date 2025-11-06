@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Područja karte</string>
+    <string name="add_map_area">Dodaj područje karte</string>
+    <string name="thumbnail_description">PortalItem sličica</string>
+    <string name="download">Preuzmi</string>
+    <string name="open">Otvori</string>
+    <string name="error">Pogreška</string>
+    <string name="loading">Učitavanje u tijeku</string>
+    <string name="loading_failed">Učitavanje nije uspjelo</string>
+    <string name="ready_to_download">Spremno za preuzimanje</string>
+    <string name="packaging">Pakiranje</string>
+    <string name="packaging_failed">Pakiranje nije uspjelo</string>
+    <string name="downloaded">Preuzeto</string>
+    <string name="downloading">Preuzimanje</string>
+    <string name="download_failed">Neuspješno preuzimanje</string>
+    <string name="currently_open">Trenutačno otvoreno</string>
+    <string name="description">Opis</string>
+    <string name="download_map_area">Preuzmi područje karte</string>
+    <string name="remove_download">Ukloni preuzimanje</string>
+    <string name="delete_download">Izbriši preuzimanje</string>
+    <string name="no_image_available">Nema dostupne slike</string>
+    <string name="refresh">Osvježi</string>
+    <string name="cancelled">Poništeno</string>
+    <string name="cancel">Odustani</string>
+    <string name="confirm">U redu</string>
+    <string name="rename">Preimenuj</string>
+    <string name="enter_a_name">Unesi naziv</string>
+    <string name="select_area">Odaberi područje</string>
+    <string name="pan_and_zoom_text">Krećite se po karti i prilagodite veličinu prikaza da biste odredili područje</string>
+    <string name="unique_name_text">Naziv područja karte mora biti jedinstven.</string>
+    <string name="next_on_demand_area_title">Područje %1$s</string>
+    <string name="directory_size">Veličina: %1$s</string>
+    <string name="no_internet_connection_error_message">Nema internetske veze</string>
+    <string name="no_internet_error_message">Nema internetske veze. Prikazuju se samo preuzeta područja.</string>
+    <string name="no_map_areas_error_message">Nije moguće dohvatiti područja karte za ovu kartu.</string>
+    <string name="no_offline_map_areas_error_message">Za ovu kartu nema područja karte.</string>
+    <string name="error_fetching_areas">Pogreška pri dohvaćanju područja karte</string>
+    <string name="error_fetching_areas_message">Došlo je do pogreške prilikom dohvaćanja područja karte.</string>
+    <string name="no_map_areas">Nema područja karte</string>
+    <string name="empty_on_demand_message">Za ovu kartu nema područja karte. Dodirnite gumb u nastavku za početak.</string>
+    <string name="offline_disabled">Izvanmrežno onemogućeno</string>
+    <string name="offline_disabled_message">Karta nije omogućena za upotrebu izvan mreže.</string>
+    <string name="level_of_detail">Razina pojedinosti</string>
+    <string name="room">Soba</string>
+    <string name="rooms">Sobe</string>
+    <string name="house_property">Kućno vlasništvo</string>
+    <string name="houses">Kuće</string>
+    <string name="small_building">Mala zgrada</string>
+    <string name="building">Zgrada</string>
+    <string name="buildings">Zgrade</string>
+    <string name="street">Ulica</string>
+    <string name="streets">Ulice</string>
+    <string name="neighborhood">Susjedstvo</string>
+    <string name="town">Grad</string>
+    <string name="city">Grad</string>
+    <string name="cities">Gradovi</string>
+    <string name="metropolitan_area">Metropolitansko područje</string>
+    <string name="county">Županija</string>
+    <string name="counties">Županije</string>
+    <string name="state_province">Pokrajina/županija</string>
+    <string name="states_provinces">Pokrajine/Županije</string>
+    <string name="countries_small">Županije (male)</string>
+    <string name="countries_big">Županije (velike)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Svijet (mali)</string>
+    <string name="world_big">Svijet (veliki)</string>
+    <string name="world">Svijet</string>
+</resources>

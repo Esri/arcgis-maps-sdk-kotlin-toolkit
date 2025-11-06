@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Kartområden</string>
+    <string name="add_map_area">Lägg till kartområde</string>
+    <string name="thumbnail_description">Miniatyrbild av portalobjekt</string>
+    <string name="download">Hämta</string>
+    <string name="open">Öppna</string>
+    <string name="error">Fel</string>
+    <string name="loading">Läser in</string>
+    <string name="loading_failed">Inläsning misslyckades</string>
+    <string name="ready_to_download">Redo för hämtning</string>
+    <string name="packaging">Paketering</string>
+    <string name="packaging_failed">Paketeringen misslyckades</string>
+    <string name="downloaded">Hämtade</string>
+    <string name="downloading">Hämtar</string>
+    <string name="download_failed">Det gick inte att hämta</string>
+    <string name="currently_open">Öppen för närvarande</string>
+    <string name="description">Beskrivning</string>
+    <string name="download_map_area">Hämta kartområde</string>
+    <string name="remove_download">Ta bort hämtning</string>
+    <string name="delete_download">Ta bort hämtning</string>
+    <string name="no_image_available">Ingen bild tillgänglig</string>
+    <string name="refresh">Uppdatera</string>
+    <string name="cancelled">Avbruten</string>
+    <string name="cancel">Avbryt</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Byt namn</string>
+    <string name="enter_a_name">Ange ett namn</string>
+    <string name="select_area">Välj område</string>
+    <string name="pan_and_zoom_text">Panorera och zooma kartan för att definiera området</string>
+    <string name="unique_name_text">Namnet på kartområdet måste vara unikt</string>
+    <string name="next_on_demand_area_title">Yta %1$s</string>
+    <string name="directory_size">Storlek: %1$s</string>
+    <string name="no_internet_connection_error_message">Ingen internetanslutning</string>
+    <string name="no_internet_error_message">Ingen internetanslutning. Visar endast hämtade områden.</string>
+    <string name="no_map_areas_error_message">Det gick inte att hämta kartområden för den här kartan.</string>
+    <string name="no_offline_map_areas_error_message">Det finns inga kartområden för den här kartan.</string>
+    <string name="error_fetching_areas">Det uppstod ett fel vid hämtning av kartområden</string>
+    <string name="error_fetching_areas_message">Ett fel uppstod när kartområden hämtades.</string>
+    <string name="no_map_areas">Inga kartområden</string>
+    <string name="empty_on_demand_message">Det finns inga kartområden för den här kartan. Klicka på knappen nedan för att komma igång.</string>
+    <string name="offline_disabled">Offline inaktiverat</string>
+    <string name="offline_disabled_message">Kartan är inte aktiverad för användning offline.</string>
+    <string name="level_of_detail">Detaljnivå</string>
+    <string name="room">Rum</string>
+    <string name="rooms">Rum</string>
+    <string name="house_property">Hustomt</string>
+    <string name="houses">Hus</string>
+    <string name="small_building">Liten byggnad</string>
+    <string name="building">Byggnad</string>
+    <string name="buildings">Byggnader</string>
+    <string name="street">Gata</string>
+    <string name="streets">Gator</string>
+    <string name="neighborhood">Grannskap</string>
+    <string name="town">Stad</string>
+    <string name="city">Ort</string>
+    <string name="cities">Orter</string>
+    <string name="metropolitan_area">Storstadsområde</string>
+    <string name="county">Län</string>
+    <string name="counties">Län</string>
+    <string name="state_province">Delstat/provins</string>
+    <string name="states_provinces">Delstater/provinser</string>
+    <string name="countries_small">Länder (små)</string>
+    <string name="countries_big">Länder (stora)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Världen (liten)</string>
+    <string name="world_big">Värden (stor)</string>
+    <string name="world">Världen</string>
+</resources>

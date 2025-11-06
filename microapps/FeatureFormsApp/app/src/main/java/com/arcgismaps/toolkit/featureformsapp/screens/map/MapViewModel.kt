@@ -28,7 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
@@ -130,17 +129,14 @@ open class BaseMapViewModel(application: Application) : AndroidViewModel(applica
  */
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     portalItemRepository: PortalItemRepository,
     application: Application,
     @ApplicationScope private val scope: CoroutineScope
 ) : BaseMapViewModel(application) {
-    private val itemId: String = savedStateHandle["uri"]!!
-
     val proxy: MapViewProxy = MapViewProxy()
 
-    var portalItem: PortalItem = portalItemRepository(itemId)
-        ?: throw IllegalStateException("portal item not found with id $itemId")
+    var portalItem: PortalItem = portalItemRepository.activePortalItem
+        ?: throw IllegalStateException("No portal item selected")
 
     val map: ArcGISMap = ArcGISMap(portalItem)
 
