@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
@@ -62,6 +63,17 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
 
     private val nullSceneViewErrorMessage: String =
         "LocalSceneView must be part of the composition when this member is called."
+
+    /**
+     * Change the local scene view to the viewpoint specified by the given camera.
+     * The viewpoint is updated instantaneously.
+     *
+     * @param camera the new camera
+     * @since 300.0.0
+     */
+    public fun setViewpointCamera(camera: Camera) {
+        localSceneView?.setViewpointCamera(camera)
+    }
 
     /**
      * Asynchronously converts a screen coordinate, relative to the upper-left corner of the
