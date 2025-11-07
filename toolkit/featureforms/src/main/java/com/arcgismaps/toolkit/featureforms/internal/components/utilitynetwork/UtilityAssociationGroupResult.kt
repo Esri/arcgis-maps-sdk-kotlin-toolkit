@@ -20,6 +20,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationSearching
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,8 +90,9 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 @Composable
 internal fun UtilityAssociationGroupResult(
     groupResult: MutableGroupResult,
-    isEditable : Boolean,
+    isEditable: Boolean,
     isNavigationEnabled: Boolean,
+    onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
     onDelete: (Boolean) -> Unit,
@@ -119,6 +127,9 @@ internal fun UtilityAssociationGroupResult(
                         onDelete = {
                             groupResult.delete(info.association)
                             onDelete(groupResult.associationResults.isEmpty())
+                        },
+                        onLocateRequest = {
+                            onAssociatedFeatureLocateRequest(info.associatedFeature)
                         },
                         modifier = Modifier.animateItem()
                     )
@@ -159,9 +170,13 @@ private fun AssociationItem(
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
     onDelete: () -> Unit,
+    onLocateRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+    var showMenu by rememberSaveable {
         mutableStateOf(false)
     }
     val density = LocalDensity.current
@@ -322,9 +337,29 @@ private fun AssociationItem(
                     )
                 }
             }
-            // Details button
-            IconButton(onClick = onDetailsClick) {
-                Icon(Icons.Default.MoreHoriz, contentDescription = "details")
+            Box {
+                // Details button
+                IconButton(onClick = {
+                    showMenu = true
+                }) {
+                    Icon(Icons.Default.MoreHoriz, contentDescription = "more information")
+                }
+                OptionsMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    onLocate = {
+                        showMenu = false
+                        onLocateRequest()
+                    },
+                    onMoreInfo = {
+                        showMenu = false
+                        onDetailsClick()
+                    },
+                    onRemove = {
+                        showMenu = false
+                        showDeleteDialog = true
+                    }
+                )
             }
         }
     }
@@ -391,5 +426,58 @@ internal fun UtilityAssociation.getIcon(): Painter? {
         }
 
         else -> null
+    }
+}
+
+@Composable
+private fun OptionsMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onLocate: () -> Unit,
+    onMoreInfo: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        shape = RoundedCornerShape(15.dp)
+    ) {
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(R.string.show_on_map))
+            },
+            onClick = onLocate,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.LocationSearching,
+                    contentDescription = "locate feature"
+                )
+            }
+        )
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(R.string.more_information))
+            },
+            onClick = onMoreInfo,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "association details"
+                )
+            }
+        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(R.string.remove))
+            },
+            onClick = onRemove,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "delete association"
+                )
+            }
+        )
     }
 }

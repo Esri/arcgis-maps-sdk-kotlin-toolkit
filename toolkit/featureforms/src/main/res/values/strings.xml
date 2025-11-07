@@ -197,4 +197,6 @@
     <string name="no_features_found">No features found</string>
     <string name="refine_your_search_tip">Refine your search or choose a different Network Source.</string>
     <string name="select_terminal">Select Terminal</string>
+    <string name="show_on_map">Show on Map</string>
+    <string name="more_information">More Information</string>
 </resources>

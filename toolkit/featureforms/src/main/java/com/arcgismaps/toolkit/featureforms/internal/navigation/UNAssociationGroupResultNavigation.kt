@@ -39,6 +39,7 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
     onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
+    onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: (NavBackStackEntry) -> Unit,
     isNavigationEnabled: Boolean,
 ) {
@@ -64,6 +65,7 @@ internal fun NavGraphBuilder.associationGroupResultDestination(
                 onNavigateToFeature = { feature ->
                     onNavigateToFeature(backStackEntry, feature)
                 },
+                onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
                 onBack = {
                     onBack(backStackEntry)
                 },
