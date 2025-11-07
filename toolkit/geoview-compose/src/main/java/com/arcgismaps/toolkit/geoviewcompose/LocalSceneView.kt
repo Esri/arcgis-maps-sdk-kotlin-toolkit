@@ -57,7 +57,6 @@ import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.Dispatchers
@@ -326,52 +325,30 @@ private fun ViewpointHandler(
         onCurrentViewpointCameraChanged
     )
 
-    var persistedCamera by rememberSaveable(
+    var persistedViewpoint by rememberSaveable(
         saver = Saver(
             save = {
-                val camera = it.value ?: return@Saver null
-                listOf(
-                    camera.transformationMatrix.quaternionX,
-                    camera.transformationMatrix.quaternionY,
-                    camera.transformationMatrix.quaternionZ,
-                    camera.transformationMatrix.quaternionW,
-                    camera.transformationMatrix.translationX,
-                    camera.transformationMatrix.translationY,
-                    camera.transformationMatrix.translationZ
-                )
+                it.value?.toJson()
             },
-            restore = { matrixValues ->
-                if (matrixValues.isEmpty()) return@Saver mutableStateOf(null)
-                val camera = Camera(
-                    TransformationMatrix.createWithQuaternionAndTranslation(
-                        quaternionX = matrixValues[0],
-                        quaternionY = matrixValues[1],
-                        quaternionZ = matrixValues[2],
-                        quaternionW = matrixValues[3],
-                        translationX = matrixValues[4],
-                        translationY = matrixValues[5],
-                        translationZ = matrixValues[6]
-                    )
-                )
-                mutableStateOf(camera)
+            restore = {
+                mutableStateOf(Viewpoint.fromJsonOrNull(it))
             }
         )
     ) {
-        mutableStateOf<Camera?>(null)
+        mutableStateOf<Viewpoint?>(null)
     }
 
     LaunchedEffect(Unit) {
         // if there is a persisted viewpoint, restore it when the LocalSceneView enters the composition
-        persistedCamera?.let { localSceneView.setViewpointCamera(it) }
+        persistedViewpoint?.let { localSceneView.setViewpoint(it) }
         launch {
             localSceneView.viewpointChanged.collect {
-                val currentViewpointCamera = localSceneView.getCurrentViewpointCamera()
-                persistedCamera = currentViewpointCamera
-                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                val currentViewpointCenterAndScale =
+                    localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                persistedViewpoint = currentViewpointCenterAndScale
+                currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    val currentViewpoint =
-                        localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    currentViewpoint?.let(callback)
+                    currentViewpointCenterAndScale?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
                     val currentViewpoint =
