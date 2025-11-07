@@ -80,6 +80,7 @@ internal fun FeatureFormNavHost(
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature =  state::navigateTo,
             onNavigationEvent = onNavigationEvent,
+            onAssociatedFeatureLocateRequest = onShowOnMapRequest,
             onBack =  state::popBackStack,
         )
 
