@@ -39,8 +39,6 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.utilitynetworks.UtilityAssociation
 import com.arcgismaps.utilitynetworks.UtilityElement
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 /**
  * A composable that represents a percent along control of a [UtilityAssociation]. This can
@@ -84,8 +82,7 @@ internal fun PercentAlongControl(
             Slider(
                 value = value.toFloat(),
                 onValueChange = {
-                    val decimal = BigDecimal(it.toString()).setScale(2, RoundingMode.DOWN)
-                    value = decimal.toDouble()
+                    value = (it * 100).toInt() / 100.0
                 },
                 enabled = enabled,
                 modifier = Modifier
