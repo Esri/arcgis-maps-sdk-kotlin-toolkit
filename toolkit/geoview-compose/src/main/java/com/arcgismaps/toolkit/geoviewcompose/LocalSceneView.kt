@@ -40,7 +40,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -79,7 +78,6 @@ public fun LocalSceneView(
     onAttributionTextChanged: ((String) -> Unit)? = null,
     isAttributionBarVisible: Boolean = true,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
-    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -143,7 +141,6 @@ public fun LocalSceneView(
 
     LocalSceneViewEventHandler(
         localSceneView,
-        onTimeExtentChanged,
         onNavigationChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
@@ -178,7 +175,6 @@ public fun LocalSceneView(
 @Composable
 private fun LocalSceneViewEventHandler(
     localSceneView: LocalSceneView,
-    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
@@ -196,7 +192,6 @@ private fun LocalSceneViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
-    val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
@@ -215,11 +210,6 @@ private fun LocalSceneViewEventHandler(
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
-        launch {
-            localSceneView.timeExtent.collect { currentTimeExtent ->
-                currentOnTimeExtentChanged?.invoke(currentTimeExtent)
-            }
-        }
         launch {
             localSceneView.navigationChanged.collect {
                 currentOnNavigationChanged?.invoke(it)
