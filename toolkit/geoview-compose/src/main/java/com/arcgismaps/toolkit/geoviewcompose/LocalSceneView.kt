@@ -64,32 +64,43 @@ import kotlinx.coroutines.launch
 /**
  * A compose equivalent of the view-based [LocalSceneView].
  *
- * @param scene
- * @param modifier
- * @param localSceneViewProxy
- * @param onViewpointChangedForCenterAndScale
- * @param onViewpointChangedForBoundingGeometry
- * @param interactionOptions
- * @param selectionProperties
- * @param isAttributionBarVisible
- * @param onAttributionTextChanged
- * @param onAttributionBarLayoutChanged
- * @param onNavigationChanged
- * @param onSpatialReferenceChanged
- * @param onLayerViewStateChanged
- * @param onInteractingChanged
- * @param onCurrentViewpointCameraChanged
- * @param onRotate
- * @param onScale
- * @param onUp
- * @param onDown
- * @param onSingleTapConfirmed
- * @param onDoubleTap
- * @param onLongPress
- * @param onTwoPointerTap
- * @param onPan
- * @param onDrawStatusChanged
- * @param content
+ * @param scene the [ArcGISScene] to be rendered by this composable LocalSceneView
+ * @param modifier modifier to be applied to the composable LocalSceneView
+ * @param localSceneViewProxy the [LocalSceneViewProxy] to associate with the composable LocalSceneView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a
+ * viewpoint type of [ViewpointType.BoundingGeometry]
+ * @param interactionOptions the [LocalSceneViewInteractionOptions] used by this composable LocalSceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable LocalSceneView
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable LocalSceneView,
+ * false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable
+ * LocalSceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size
+ * changes
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable LocalSceneView
+ * has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable
+ * LocalSceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable LocalSceneView's layer view state
+ * is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the
+ * composable LocalSceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable
+ * LocalSceneView has changed
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable LocalSceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable LocalSceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable LocalSceneView
+ * @param onDown lambda invoked when the user first presses on the composable LocalSceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable LocalSceneView
+ * @param onDoubleTap lambda invoked the user double taps on the composable LocalSceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable LocalSceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
+ * is changed
+ * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
  */
