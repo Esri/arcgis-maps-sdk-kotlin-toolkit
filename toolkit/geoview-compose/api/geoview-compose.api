@@ -107,12 +107,13 @@ public final class com/arcgismaps/toolkit/geoviewcompose/LeaderPosition$UpperRig
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewKt {
-	public static final fun LocalSceneView (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/LocalSceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/SelectionProperties;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIII)V
+	public static final fun LocalSceneView (Lcom/arcgismaps/mapping/ArcGISScene;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/arcgismaps/mapping/view/LocalSceneViewInteractionOptions;Lcom/arcgismaps/mapping/view/SelectionProperties;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;IIII)V
 }
 
 public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy : com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setViewpointAnimated-BWLJW6A (Lcom/arcgismaps/mapping/Viewpoint;FLcom/arcgismaps/mapping/view/AnimationCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setViewpointCamera (Lcom/arcgismaps/mapping/view/Camera;)V
