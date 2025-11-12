@@ -347,6 +347,7 @@ private fun AssociationItem(
                 OptionsMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false },
+                    isOnLocateEnabled = associatedFeature.geometry != null,
                     onLocate = {
                         showMenu = false
                         onLocateRequest()
@@ -433,6 +434,7 @@ internal fun UtilityAssociation.getIcon(): Painter? {
 private fun OptionsMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    isOnLocateEnabled: Boolean,
     onLocate: () -> Unit,
     onMoreInfo: () -> Unit,
     onRemove: () -> Unit,
@@ -442,18 +444,20 @@ private fun OptionsMenu(
         onDismissRequest = onDismissRequest,
         shape = RoundedCornerShape(15.dp)
     ) {
-        DropdownMenuItem(
-            text = {
-                Text(text = stringResource(R.string.show_on_map))
-            },
-            onClick = onLocate,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.LocationSearching,
-                    contentDescription = "locate feature"
-                )
-            }
-        )
+        if (isOnLocateEnabled) {
+            DropdownMenuItem(
+                text = {
+                    Text(text = stringResource(R.string.show_on_map))
+                },
+                onClick = onLocate,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.LocationSearching,
+                        contentDescription = "locate feature"
+                    )
+                }
+            )
+        }
         DropdownMenuItem(
             text = {
                 Text(text = stringResource(R.string.more_information))
