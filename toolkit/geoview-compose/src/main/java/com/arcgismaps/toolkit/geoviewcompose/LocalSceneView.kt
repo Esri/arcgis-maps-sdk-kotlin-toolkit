@@ -64,6 +64,33 @@ import kotlinx.coroutines.launch
 /**
  * A compose equivalent of the view-based [LocalSceneView].
  *
+ * @param scene
+ * @param modifier
+ * @param localSceneViewProxy
+ * @param onViewpointChangedForCenterAndScale
+ * @param onViewpointChangedForBoundingGeometry
+ * @param interactionOptions
+ * @param selectionProperties
+ * @param isAttributionBarVisible
+ * @param onAttributionTextChanged
+ * @param onAttributionBarLayoutChanged
+ * @param onNavigationChanged
+ * @param onSpatialReferenceChanged
+ * @param onLayerViewStateChanged
+ * @param onInteractingChanged
+ * @param onCurrentViewpointCameraChanged
+ * @param onRotate
+ * @param onScale
+ * @param onUp
+ * @param onDown
+ * @param onSingleTapConfirmed
+ * @param onDoubleTap
+ * @param onLongPress
+ * @param onTwoPointerTap
+ * @param onPan
+ * @param onDrawStatusChanged
+ * @param content
+ *
  * @since 300.0.0
  */
 @Composable
