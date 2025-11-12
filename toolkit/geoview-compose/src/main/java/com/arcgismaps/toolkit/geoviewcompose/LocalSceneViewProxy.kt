@@ -25,6 +25,9 @@ import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  * Used to perform operations on a composable [LocalSceneView].
@@ -72,19 +75,19 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
      * easing function.
      *
      * @param viewpoint The viewpoint that should be set on the view.
-     * @param durationSeconds The amount of time in seconds to move to the new viewpoint.
+     * @param duration The amount of time to move to the new viewpoint.
      * @param animationCurve The type of animation curve.
      * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
      * @since 300.0.0
      */
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
-        durationSeconds: Float,
+        duration: Duration = 3.seconds,
         animationCurve: AnimationCurve
     ): Result<Boolean> {
         return localSceneView?.setViewpointAnimated(
             viewpoint,
-            durationSeconds,
+            duration.toDouble(DurationUnit.SECONDS).toFloat(),
             animationCurve
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
@@ -100,37 +103,43 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
     }
 
     /**
-     * Pans or zooms the local scene view using animation to the specified camera location.
-     *
-     * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
-     * @since 300.0.0
-     */
-    public suspend fun setViewpointCameraAnimated(
-        camera: Camera
-    ): Result<Boolean> {
-        return localSceneView?.setViewpointCameraAnimated(
-            camera
-        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
-    }
-
-    /**
      * Pans or zooms the local scene view using animation to the specified camera location
      * asynchronously. Animation takes place over the specified duration.
      *
      * @param camera The camera that should be set on the view.
-     * @param duration The amount of time in seconds to move to the new viewpoint.
+     * @param duration The amount of time to move to the new viewpoint.
      * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
      * @since 300.0.0
      */
     public suspend fun setViewpointCameraAnimated(
         camera: Camera,
-        duration: Float
+        duration: Duration = 3.seconds
     ): Result<Boolean> {
         return localSceneView?.setViewpointCameraAnimated(
             camera,
-            duration
+            duration.toDouble(DurationUnit.SECONDS).toFloat()
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
+
+    /**
+     * Converts the specified screen coordinate, relative to the upper-left corner of the local scene
+     * view, to a location on the base surface in geographic coordinates.
+     * Note that the elevation value for the converted location is approximated, as the precision
+     * of the elevation value decreases with increasing distance between the camera and the surface.
+     *
+     * This method returns null if the provided screen coordinate is outside the bounds of the current
+     * screen or if its location does not intersect with the surface of the local scene.
+     *
+     * To call this method, assign a local scene to the local scene view and ensure that it is loaded.
+     *
+     * @param screen The screen coordinate to convert to a location on the base surface. The coordinate
+     * of the top left corner of the screen is 0,0.
+     *
+     * @return A point on the base surface.
+     * @since 300.0.0
+     */
+    public fun screenToBaseSurface(screen: ScreenCoordinate): Point? =
+        localSceneView?.screenToBaseSurface(screen)
 
     /**
      * Asynchronously converts a screen coordinate, relative to the upper-left corner of the
