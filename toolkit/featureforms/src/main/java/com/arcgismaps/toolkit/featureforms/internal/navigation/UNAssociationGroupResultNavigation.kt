@@ -34,7 +34,7 @@ import com.arcgismaps.toolkit.featureforms.internal.screens.UNAssociationGroupRe
 
 internal fun NavGraphBuilder.associationGroupResultDestination(
     state: FeatureFormState,
-    onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSave: suspend (Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : (NavBackStackEntry, Int) -> Unit,
     onNavigateToFeature: (NavBackStackEntry, ArcGISFeature) -> Unit,
