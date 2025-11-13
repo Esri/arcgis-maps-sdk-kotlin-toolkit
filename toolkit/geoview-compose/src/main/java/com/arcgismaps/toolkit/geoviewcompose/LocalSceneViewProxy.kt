@@ -75,15 +75,15 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
      * easing function.
      *
      * @param viewpoint The viewpoint that should be set on the view.
-     * @param duration The amount of time to move to the new viewpoint.
      * @param animationCurve The type of animation curve.
+     * @param duration The amount of time to move to the new viewpoint.
      * @return a [Result] of true if the viewpoint was successfully set, false otherwise.
      * @since 300.0.0
      */
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
-        duration: Duration = 3.seconds,
-        animationCurve: AnimationCurve
+        animationCurve: AnimationCurve,
+        duration: Duration = 3.seconds
     ): Result<Boolean> {
         return localSceneView?.setViewpointAnimated(
             viewpoint,
