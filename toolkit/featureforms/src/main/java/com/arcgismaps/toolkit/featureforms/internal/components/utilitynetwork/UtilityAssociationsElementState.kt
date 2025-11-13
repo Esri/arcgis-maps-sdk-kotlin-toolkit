@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -122,6 +123,7 @@ internal class UtilityAssociationsElementState(
         element.fetchAssociationsFilterResults()
         _filters.clear()
         element.associationsFilterResults.forEach {
+            Log.e("TAG", "refresh result filter: $it -> ${it.groupResults.count()}", )
             _filters += MutableFilterResult.create(it, element)
         }
         // update the selections as the filter results may have changed
@@ -131,11 +133,19 @@ internal class UtilityAssociationsElementState(
         }
         // if the filter was found, update the selected filter result
         if (updatedFilter != null) {
+            Log.e("TAG", "refreshResults: found filter", )
             _selectedFilterResult.value = updatedFilter
             // update the selected group result if it exists in the new filter results
             val updatedGroup = updatedFilter.groupResults.find {
                 it.source == selectedGroupResult?.source
             }
+            updatedFilter.groupResults.forEach {
+                Log.e("TAG", "refreshResults: groupResult: ${it.name}", )
+                Log.e("TAG", "refreshResults: source ${it.source}", )
+            }
+            Log.e("TAG", "selected: ${selectedGroupResult?.name}", )
+            Log.e("TAG", "selected: ${selectedGroupResult?.source}", )
+            Log.e("TAG", "refreshResults: $updatedGroup", )
             // update the selected group result to trigger recomposition
             // this may be null if the group no longer exists (e.g. all associations deleted)
             _selectedGroupResult.value = updatedGroup
@@ -306,6 +316,8 @@ internal class MutableFilterResult private constructor(
             element: UtilityAssociationsFormElement
         ): MutableFilterResult {
             val groupResults = filterResult.groupResults.map { groupResult ->
+                Log.e("TAG", "create: ${groupResult.name}", )
+                Log.e("TAG", "create: ${groupResult.featureFormSource}", )
                 MutableGroupResult.create(groupResult = groupResult)
             }
             return MutableFilterResult(

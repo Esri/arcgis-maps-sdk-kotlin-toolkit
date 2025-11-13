@@ -57,7 +57,7 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
-    onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSave: suspend (Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
@@ -121,7 +121,7 @@ internal fun UNAssociationGroupResultScreen(
             },
             onSave = {
                 scope.launch {
-                    onSave(featureForm, true).onSuccess {
+                    onSave(true).onSuccess {
                         // If the save is successful, navigate to the association
                         navigateToFeature(pendingNavigationAction)
                     }

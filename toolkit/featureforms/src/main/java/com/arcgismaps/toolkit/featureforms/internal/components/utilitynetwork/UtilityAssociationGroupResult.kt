@@ -346,6 +346,7 @@ private fun AssociationItem(
                 }
                 OptionsMenu(
                     expanded = showMenu,
+                    showLocateOption = associatedFeature.geometry != null,
                     onDismissRequest = { showMenu = false },
                     onLocate = {
                         showMenu = false
@@ -432,6 +433,7 @@ internal fun UtilityAssociation.getIcon(): Painter? {
 @Composable
 private fun OptionsMenu(
     expanded: Boolean,
+    showLocateOption : Boolean,
     onDismissRequest: () -> Unit,
     onLocate: () -> Unit,
     onMoreInfo: () -> Unit,
