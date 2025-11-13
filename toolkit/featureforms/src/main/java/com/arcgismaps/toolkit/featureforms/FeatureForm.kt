@@ -293,7 +293,9 @@ public sealed class FeatureFormNavigationRoute {
  * system's back action can be used to navigate back to the previous [FeatureForm] screen. The
  * [FeatureFormState.activeFeatureForm] will be updated when the user navigates forward or back
  * through the associations. If there are any edits on the current [FeatureForm], the user will be
- * prompted to save or discard the edits before navigating to the next [FeatureForm].
+ * prompted to save or discard the edits before navigating to the next [FeatureForm]. [UtilityAssociation]s
+ * can also be created or deleted when the [UtilityAssociationsFormElement.isEditable] property is
+ * true.
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
