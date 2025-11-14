@@ -40,7 +40,7 @@ internal fun FeatureFormNavHost(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
     validationErrorVisibility: ValidationErrorVisibility,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
@@ -80,6 +80,7 @@ internal fun FeatureFormNavHost(
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature =  state::navigateTo,
             onNavigationEvent = onNavigationEvent,
+            onAssociatedFeatureLocateRequest = onShowOnMapRequest,
             onBack =  state::popBackStack,
         )
 

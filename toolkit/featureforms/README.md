@@ -17,7 +17,7 @@ The `FeatureForm` is a composable that can render a `FeatureForm` object with a 
 - Provides a DateTime picker and a picker for coded-value field types.
 - Shows Validation errors for any fields with errors.
 - Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
-- Supports viewing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
+- Supports viewing and editing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
 - Follows material 3 design system.
 
 ## Usage
@@ -113,7 +113,7 @@ Beginning with version 200.8.0, when edits are present in the `FeatureForm`, an 
 
 A new `onEditingEvent` callback of type `FeatureFormEditingEvent` is introduced which is invoked when the user performs the "Save" or "Discard" action. This event can be used to perform any additional tasks such as rolling back changes on "Discard" or applying edits to the service on "Save". The [microapp](../../microapps/FeatureFormsApp) uses this mechanism.
 
-### Utility Associations and Navigation
+### Utility Associations
 
 The `FeatureForm` composable, introduced in version 200.8.0, leverages the `FeatureFormState` class to support the `UtilityAssociationsFormElement`. This enhancement enables more advanced workflows such as viewing utility network associations for the feature being edited and navigating to and editing associated features.
 
@@ -124,6 +124,12 @@ If the user taps on an association and there are no edits in the current `Featur
 During navigation, the `FeatureFormState.activeFeatureForm` observable property is updated with the new `FeatureForm` instance as the user moves forward or backward through associations.
 
 If edits exist in the current `FeatureForm`, a dialog prompts the user to save or discard changes before proceeding to the next or previous `FeatureForm`. Navigation can be disabled using the `isNavigationEnabled: Boolean` parameter.
+
+When viewing or adding utility associations, the `onShowOnMapRequest` event can be used to highlight the feature on the map. The callback fires on the user’s action and passes the spatial `ArcGISFeature` for the selected association or the candidate feature in the add-association workflow.
+
+### Navigation Events
+
+To monitor navigation events when users interact with utility associations, the `onNavigationEvent` event can be utilized. This callback provides insights into navigation actions along with associated metadata, allowing developers to implement custom behavior. 
 
 ### Permissions
 

@@ -187,6 +187,24 @@ public class FeatureFormState private constructor(
     }
 
     /**
+     * Saves all the edits made to the [activeFeatureForm] and refreshes the associations.
+     *
+     * @return the result of the save operation.
+     */
+    internal suspend fun saveEdits(): Result<Unit> {
+        val formData = getActiveFormStateData()
+        val result = formData.featureForm.finishEditing().onSuccess {
+            // After a successful save, refresh the associations
+            formData.stateCollection.forEach { entry ->
+                if (entry.state is UtilityAssociationsElementState) {
+                    (entry.state as UtilityAssociationsElementState).refreshResults()
+                }
+            }
+        }
+        return result
+    }
+
+    /**
      * Sets the navigation callback to the provided [navigateToRoute] function. This function is
      * called when navigating to a new [FeatureForm]. Set this to null when the composition is
      * disposed.

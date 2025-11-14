@@ -46,7 +46,9 @@ import kotlinx.coroutines.launch
  * return a [Result] that indicates the success or failure of the save operation.
  * @param onDiscard The callback to be invoked when the discard button is clicked. The boolean parameter
  * indicates whether this action should be followed by a forward navigation.
+ * @param onNavigateToAssociation The callback to be invoked when the user selects to view association details.
  * @param onNavigateToFeature The callback to be invoked when the user selects a feature to navigate to.
+ * @param onAssociatedFeatureLocateRequest The callback to be invoked when a locate request is made for an associated feature.
  * @param onBack The callback to invoke when the back action is triggered.
  * @param modifier The modifier to be applied to the layout.
  */
@@ -55,10 +57,11 @@ internal fun UNAssociationGroupResultScreen(
     state: UtilityAssociationsElementState,
     featureForm: FeatureForm,
     isNavigationEnabled: Boolean,
-    onSave: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSave: suspend (Boolean) -> Result<Unit>,
     onDiscard: suspend (Boolean) -> Unit,
     onNavigateToAssociation : () -> Unit,
     onNavigateToFeature: (ArcGISFeature) -> Unit,
+    onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -83,6 +86,7 @@ internal fun UNAssociationGroupResultScreen(
         groupResult = groupResult,
         isEditable = isEditable,
         isNavigationEnabled = isNavigationEnabled,
+        onAssociatedFeatureLocateRequest = onAssociatedFeatureLocateRequest,
         onItemClick = { index ->
             if (hasEdits) {
                 pendingNavigationAction = NavigationAction.NavigateToFeature(index)
@@ -117,7 +121,7 @@ internal fun UNAssociationGroupResultScreen(
             },
             onSave = {
                 scope.launch {
-                    onSave(featureForm, true).onSuccess {
+                    onSave(true).onSuccess {
                         // If the save is successful, navigate to the association
                         navigateToFeature(pendingNavigationAction)
                     }

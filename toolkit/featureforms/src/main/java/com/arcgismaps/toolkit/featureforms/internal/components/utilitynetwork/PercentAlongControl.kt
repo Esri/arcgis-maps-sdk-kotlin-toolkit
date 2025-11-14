@@ -26,7 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,20 +48,20 @@ import com.arcgismaps.utilitynetworks.UtilityElement
  * This control displays a slider that allows the user to select a value between 0 and 1, which is then
  * multiplied by 100 to display the percentage value.
  *
- * @param fraction The current value of the percent along control.
+ * @param initialFraction The initial value of the percent along control.
  * @param enabled A boolean indicating whether the control is enabled or not.
  * @param onValueChanged A callback that is called when the value of the control changes.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
 internal fun PercentAlongControl(
-    fraction: Float,
+    initialFraction: Double,
     enabled: Boolean,
-    onValueChanged: (Float) -> Unit,
+    onValueChanged: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var value by remember {
-        mutableFloatStateOf(fraction)
+        mutableDoubleStateOf(initialFraction)
     }
     val percent = (value * 100).toInt()
     Card(
@@ -80,9 +80,9 @@ internal fun PercentAlongControl(
                 modifier = Modifier.fillMaxWidth()
             )
             Slider(
-                value = value,
+                value = value.toFloat(),
                 onValueChange = {
-                    value = it
+                    value = (it * 100).toInt() / 100.0
                 },
                 enabled = enabled,
                 modifier = Modifier
@@ -102,7 +102,7 @@ internal fun PercentAlongControl(
 @Composable
 private fun PercentAlongControlPreview() {
     PercentAlongControl(
-        fraction = 0.5f,
+        initialFraction = 0.5,
         onValueChanged = {},
         enabled = true,
         modifier = Modifier.fillMaxWidth()
