@@ -113,10 +113,11 @@ public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewKt {
 public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy : com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun locationToScreen (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/LocationToScreenResult;
 	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setViewpointAnimated-JXpvp54 (Lcom/arcgismaps/mapping/Viewpoint;JLcom/arcgismaps/mapping/view/AnimationCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun setViewpointAnimated-JXpvp54$default (Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;Lcom/arcgismaps/mapping/Viewpoint;JLcom/arcgismaps/mapping/view/AnimationCurve;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun setViewpointAnimated-E0qYoyE (Lcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/mapping/view/AnimationCurve;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun setViewpointAnimated-E0qYoyE$default (Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;Lcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/mapping/view/AnimationCurve;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setViewpointCamera (Lcom/arcgismaps/mapping/view/Camera;)V
 	public final fun setViewpointCameraAnimated-BlKvXls (Lcom/arcgismaps/mapping/view/Camera;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun setViewpointCameraAnimated-BlKvXls$default (Lcom/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy;Lcom/arcgismaps/mapping/view/Camera;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;

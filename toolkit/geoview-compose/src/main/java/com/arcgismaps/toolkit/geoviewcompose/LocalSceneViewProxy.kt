@@ -24,6 +24,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LocalSceneView
+import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -132,14 +133,14 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
      *
      * To call this method, assign a local scene to the local scene view and ensure that it is loaded.
      *
-     * @param screen The screen coordinate to convert to a location on the base surface. The coordinate
+     * @param screenCoordinate The screen coordinate to convert to a location on the base surface. The coordinate
      * of the top left corner of the screen is 0,0.
      *
      * @return A point on the base surface.
      * @since 300.0.0
      */
-    public fun screenToBaseSurface(screen: ScreenCoordinate): Point? =
-        localSceneView?.screenToBaseSurface(screen)
+    public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
+        localSceneView?.screenToBaseSurface(screenCoordinate)
 
     /**
      * Asynchronously converts a screen coordinate, relative to the upper-left corner of the
@@ -166,4 +167,31 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
                 nullSceneViewErrorMessage
             )
         )
+
+    /**
+     * Converts a location in map coordinates to a point in screen coordinates relative to the
+     * upper-left corner of the local scene view.
+     *
+     * The screen coordinates are in device-independent pixels (DIP) relative to the upper-left corner
+     * of the scene view at position 0,0. The [LocationToScreenResult] indicates whether the result
+     * screen point is visible in the local scene view. It will not be visible if it is outside the
+     * applied clipping area, is not within the current [Viewpoint], or is blocked by the base
+     * surface or elevation layer.
+     *
+     * If the input point does not have a spatial reference, it is assumed to be in the view's spatial
+     * reference.
+     *
+     * If the input point's spatial reference is not the same as the view's, it is projected to the
+     * view's spatial reference. If the projection fails, then null is returned.
+     *
+     * To call this method, assign a local scene to the local scene view and ensure that it is loaded.
+     *
+     * @param point A location defined within the spatial reference of the local scene view.
+     *
+     * @return A location to screen result object. If an error occurs, null is returned.
+     *
+     * @since 300.0.0
+     */
+    public fun locationToScreen(point: Point): LocationToScreenResult? =
+        localSceneView?.locationToScreen(point)
 }
