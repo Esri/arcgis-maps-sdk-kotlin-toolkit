@@ -27,8 +27,10 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 
@@ -41,6 +43,8 @@ internal fun FeatureFormNavHost(
     onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
+    onShowOnMapRequest: (ArcGISFeature) -> Unit,
+    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -57,12 +61,14 @@ internal fun FeatureFormNavHost(
             state = state,
             onBarcodeButtonClick = onBarcodeButtonClick,
             onUtilityFilterSelected = navController::navigateToUNAssociationsFilterResult,
+            onNavigationEvent = onNavigationEvent,
             validationErrorVisibility = validationErrorVisibility
         )
 
         associationsFilterResultDestination(
             onGroupSelected =  navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
+            onNavigationEvent = onNavigationEvent,
             state = state
         )
 
@@ -71,8 +77,24 @@ internal fun FeatureFormNavHost(
             onSave = onSaveForm,
             onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
+            onNavigateToAssociation = navController::navigateToUNAssociationDetails,
             onNavigateToFeature =  state::navigateTo,
-            onBack =  navController::popBackStack,
+            onNavigationEvent = onNavigationEvent,
+            onBack =  state::popBackStack,
+        )
+
+        associationDetailsDestination(
+            onDeleteAssociation = { isGroupEmpty ->
+                // If the group is empty after deletion, navigate back to the filter view
+                if (isGroupEmpty) {
+                    navController.popBackStack<NavigationRoute.UNAssociationsFilterResult>(inclusive = false)
+                }
+            },
+            onClose = { entry ->
+                state.popBackStack(entry)
+            },
+            onNavigationEvent = onNavigationEvent,
+            state = state,
         )
 
         navigation<NavigationRoute.AddUNAssociationFromSource>(
@@ -84,6 +106,7 @@ internal fun FeatureFormNavHost(
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 },
                 onSourceSelected = navController::navigateToSelectAssetType,
+                onNavigationEvent = onNavigationEvent,
                 state = state
             )
 
@@ -92,7 +115,8 @@ internal fun FeatureFormNavHost(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
 
             selectFeatureDestination(
@@ -100,9 +124,11 @@ internal fun FeatureFormNavHost(
                 onFeatureCandidateSelected = { backStackEntry ->
                   navController.navigateToCreateAssociation(backStackEntry)
                 },
+                onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
 
             createAssociationDestination(
@@ -112,7 +138,8 @@ internal fun FeatureFormNavHost(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                }
+                },
+                onNavigationEvent = onNavigationEvent
             )
         }
     }

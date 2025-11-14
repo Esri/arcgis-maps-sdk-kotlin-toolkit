@@ -159,8 +159,6 @@
     <string name="no_associations_found">Finner ingen tilknytninger</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Beholder som er synlig</string>
-    <string name="fraction_along_edge">Fraksjon langs kant</string>
     <string name="from_element">Fra element</string>
     <string name="to_element">Til element</string>
     <string name="association_type">Tilknytningstype</string>

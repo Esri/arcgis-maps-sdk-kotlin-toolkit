@@ -159,8 +159,6 @@
     <string name="no_associations_found">İlişkilendirme bulunamadı</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Kapsama Görünür</string>
-    <string name="fraction_along_edge">Kenar Boyunca Kesir</string>
     <string name="from_element">Kaynak Öge</string>
     <string name="to_element">Hedef Öge</string>
     <string name="association_type">İlişkilendirme Türü</string>

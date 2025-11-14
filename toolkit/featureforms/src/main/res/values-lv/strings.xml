@@ -159,8 +159,6 @@
     <string name="no_associations_found">Netika atrasta neviena asociācija</string>
     <string name="terminal">Terminālis</string>
     <string name="terminal_with_value">Terminālis: %1$s</string>
-    <string name="containment_visible">Ietvērums redzams</string>
-    <string name="fraction_along_edge">Frakcija gar malu</string>
     <string name="from_element">No elementa</string>
     <string name="to_element">Uz elementu</string>
     <string name="association_type">Saistības veids</string>

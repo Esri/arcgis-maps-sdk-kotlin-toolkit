@@ -159,8 +159,6 @@
     <string name="no_associations_found">Susiejimų nerasta</string>
     <string name="terminal">Terminalas</string>
     <string name="terminal_with_value">Terminalas: %1$s</string>
-    <string name="containment_visible">Apribojimas matomas</string>
-    <string name="fraction_along_edge">Trumpena išilgai krašto</string>
     <string name="from_element">Iš elemento</string>
     <string name="to_element">Į elementą</string>
     <string name="association_type">Susiejimo tipas</string>

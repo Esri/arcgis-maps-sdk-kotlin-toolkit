@@ -50,7 +50,7 @@ internal fun ContentVisibleControl(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = stringResource(R.string.containment_visible))
+        Text(text = stringResource(R.string.content_visible))
         Switch(
             checked = value,
             onCheckedChange = onValueChange,

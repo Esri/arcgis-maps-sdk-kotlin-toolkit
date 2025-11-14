@@ -69,7 +69,7 @@ internal fun UtilityTerminalControl(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = selected?.name ?: "Select Terminal",
+                text = selected?.name ?: stringResource(R.string.select_terminal),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (selected != null)
                     MaterialTheme.colorScheme.outline

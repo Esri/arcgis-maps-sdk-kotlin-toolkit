@@ -48,10 +48,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -76,7 +76,6 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
-import kotlinx.coroutines.launch
 
 /**
  * A screen that displays a list of features that can be associated with a utility network feature.
@@ -90,14 +89,14 @@ internal fun SelectAssociatedFeatureScreen(
     viewModel: AddAssociationFromSourceViewModel,
     onBackPressed: () -> Unit,
     onFeatureCandidateSelected: () -> Unit,
+    onFeatureCandidateLocateRequest : (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
     val candidates = state.candidates
     val count = candidates.count()
-    val title = if (state.isLoading){
+    val title = if (state.isLoading || viewModel.isSearchingForCandidates) {
         stringResource(R.string.loading2)
     } else {
         stringResource(R.string.available_features, count)
@@ -137,7 +136,7 @@ internal fun SelectAssociatedFeatureScreen(
             targetState = state
         ) { state ->
             when {
-                state.isLoading -> {
+                state.isLoading || viewModel.isSearchingForCandidates -> {
                     LoadingRow(modifier = Modifier.fillMaxWidth())
                 }
 
@@ -176,10 +175,8 @@ internal fun SelectAssociatedFeatureScreen(
                             itemsIndexed(candidates) { index, item ->
                                 ListItem(
                                     modifier = Modifier.clickable {
-                                        scope.launch {
-                                            viewModel.selectFeatureCandidate(item)
-                                            onFeatureCandidateSelected()
-                                        }
+                                        viewModel.selectFeatureCandidate(item)
+                                        onFeatureCandidateSelected()
                                     },
                                     headlineContent = {
                                         Text(
@@ -199,19 +196,21 @@ internal fun SelectAssociatedFeatureScreen(
                                             modifier = Modifier.padding(start = 12.dp)
                                         )
                                     },
-                                    trailingContent = {
-                                        IconButton(
-                                            onClick = {
-                                                // TODO: Handle locate feature on map
+                                    trailingContent = if (item.feature.geometry != null) {
+                                        {
+                                            IconButton(
+                                                onClick = {
+                                                    onFeatureCandidateLocateRequest(item.feature)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.LocationSearching,
+                                                    contentDescription = "Locate Feature",
+                                                    modifier = Modifier.size(24.dp)
+                                                )
                                             }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.LocationSearching,
-                                                contentDescription = "Locate Feature",
-                                                modifier = Modifier.size(24.dp)
-                                            )
                                         }
-                                    },
+                                    } else null,
                                     colors = ListItemDefaults.colors(
                                         containerColor = MaterialTheme.colorScheme.surfaceBright,
                                     )
@@ -229,12 +228,18 @@ internal fun SelectAssociatedFeatureScreen(
             }
         }
     }
+    LaunchedEffect(lazyListState.canScrollForward) {
+        if (lazyListState.canScrollForward.not() && candidates.isNotEmpty()) {
+            // Load more feature candidates when the user scrolls to the end of the list
+            viewModel.loadMoreFeatureCandidates()
+        }
+    }
 }
 
 @Composable
 private fun EmptyResultsRow(modifier: Modifier = Modifier) {
     val color = LocalContentColor.current
-    Column (
+    Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

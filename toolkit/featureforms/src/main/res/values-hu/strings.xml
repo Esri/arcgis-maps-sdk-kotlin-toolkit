@@ -159,8 +159,6 @@
     <string name="no_associations_found">Nem találhatók társítások</string>
     <string name="terminal">Terminál</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
-    <string name="containment_visible">Látható befoglalás</string>
-    <string name="fraction_along_edge">Részarány az él mentén</string>
     <string name="from_element">Az elemtől</string>
     <string name="to_element">Az elemhez</string>
     <string name="association_type">Társítás típusa</string>

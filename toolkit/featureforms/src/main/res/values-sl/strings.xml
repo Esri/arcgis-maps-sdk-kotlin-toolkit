@@ -159,8 +159,6 @@
     <string name="no_associations_found">Ni najdenih asociacij</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Zadrževanje vidno</string>
-    <string name="fraction_along_edge">Delež ob robu</string>
     <string name="from_element">Od elementa</string>
     <string name="to_element">Do elementa</string>
     <string name="association_type">Tip asociacije</string>

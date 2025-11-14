@@ -159,8 +159,6 @@
     <string name="no_associations_found">Não foram encontradas associações</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
-    <string name="containment_visible">Contenção visível</string>
-    <string name="fraction_along_edge">Fração ao longo da aresta</string>
     <string name="from_element">Elemento de</string>
     <string name="to_element">Elemento para</string>
     <string name="association_type">Tipo de associação</string>

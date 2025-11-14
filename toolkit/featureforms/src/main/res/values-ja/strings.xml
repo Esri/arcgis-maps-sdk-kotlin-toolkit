@@ -159,8 +159,6 @@
     <string name="no_associations_found">関連付けが見つかりません</string>
     <string name="terminal">ターミナル</string>
     <string name="terminal_with_value">ターミナル: %1$s</string>
-    <string name="containment_visible">格納の表示</string>
-    <string name="fraction_along_edge">エッジに沿った部分</string>
     <string name="from_element">始点エレメント</string>
     <string name="to_element">終点エレメント</string>
     <string name="association_type">関連付けタイプ</string>

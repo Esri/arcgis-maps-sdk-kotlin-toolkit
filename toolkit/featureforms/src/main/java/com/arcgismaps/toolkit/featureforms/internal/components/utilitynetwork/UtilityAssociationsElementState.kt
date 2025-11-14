@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
  * @param scope The [CoroutineScope] to launch coroutines from.
  */
 internal class UtilityAssociationsElementState(
+    val featureForm : FeatureForm,
     val element: UtilityAssociationsFormElement,
     scope: CoroutineScope
 ) : FormElementState(
@@ -120,25 +122,13 @@ internal class UtilityAssociationsElementState(
         element.fetchAssociationsFilterResults()
         _filters.clear()
         element.associationsFilterResults.forEach {
-            val groupResults = it.groupResults.map { groupResult ->
-                MutableGroupResult(
-                    results = groupResult.associationResults,
-                    name = groupResult.name,
-                    source = groupResult.featureFormSource
-                )
-            }
-            _filters += MutableFilterResult(
-                filter = it.filter,
-                groupResults = groupResults,
-                resultCount = it.resultCount,
-                onDelete = { association ->
-                    // delete the association from the element when it is deleted from the state
-                    element.deleteAssociation(association)
-                }
-            )
+            _filters += MutableFilterResult.create(it, element)
         }
         // update the selections as the filter results may have changed
-        val updatedFilter = _filters.find { it == selectedFilterResult }
+        val updatedFilter = _filters.find {
+            // find the filter that matches the previously selected filter
+            it.filter == selectedFilterResult?.filter
+        }
         // if the filter was found, update the selected filter result
         if (updatedFilter != null) {
             _selectedFilterResult.value = updatedFilter
@@ -180,11 +170,14 @@ internal class UtilityAssociationsElementState(
  *
  * @param results The initial list of [UtilityAssociationResult] in this group.
  * @param name The name of the group.
+ * @param source The [FeatureFormSource] of the group.
+ * @param groupResult The [UtilityAssociationGroupResult] represented by this result.
  */
-internal class MutableGroupResult(
+internal class MutableGroupResult private constructor(
     results: List<UtilityAssociationResult>,
     val name: String,
-    val source : FeatureFormSource
+    val source: FeatureFormSource,
+    val groupResult: UtilityAssociationGroupResult
 ) {
     private val _associationResults: SnapshotStateList<UtilityAssociationResult> =
         mutableStateListOf<UtilityAssociationResult>().apply { addAll(results) }
@@ -219,22 +212,45 @@ internal class MutableGroupResult(
     fun setOnAssociationDeletedListener(listener: (UtilityAssociation) -> Unit) {
         onAssociationDeleted = listener
     }
+
+    companion object {
+
+        /**
+         * Creates a new [MutableGroupResult] from the given parameters.
+         *
+         * @param groupResult The [UtilityAssociationGroupResult] to wrap.
+         * @return A new [MutableGroupResult].
+         */
+        fun create(groupResult: UtilityAssociationGroupResult): MutableGroupResult {
+            return MutableGroupResult(
+                results = groupResult.associationResults,
+                name = groupResult.name,
+                source = groupResult.featureFormSource,
+                groupResult = groupResult
+            )
+        }
+    }
 }
 
 /**
  * A mutable version of [UtilityAssociationsFilterResult] that allows deleting associations.
  *
- * @param filter The [UtilityAssociationsFilter] represented by this result.
+ * @param filterResult The [UtilityAssociationsFilterResult] represented by this result.
  * @param groupResults The initial list of [MutableGroupResult] in this filter result.
  * @param resultCount The initial count of results in this filter result.
  * @param onDelete A callback that is called after an association is deleted.
  */
-internal class MutableFilterResult(
-    val filter: UtilityAssociationsFilter,
+internal class MutableFilterResult private constructor(
+    val filterResult: UtilityAssociationsFilterResult,
     groupResults: List<MutableGroupResult>,
     resultCount: Int,
     onDelete: (UtilityAssociation) -> Unit
 ) {
+
+    /**
+     * The [UtilityAssociationsFilter] represented by this filter result.
+     */
+    val filter = filterResult.filter
 
     /**
      * Backing list for the [groupResults] property.
@@ -274,23 +290,33 @@ internal class MutableFilterResult(
     val resultCount: Int
         get() = _resultCount.value
 
-    override fun hashCode(): Int {
-        return 31 * filter.title.hashCode() +
-            filter.description.hashCode() +
-            filter.filterType.hashCode() +
-            filter.assetGroup.hashCode()
-    }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is MutableFilterResult) return false
+    companion object {
 
-        // Deep comparison of the `filter` property
-        if (filter.title != other.filter.title) return false
-        if (filter.description != other.filter.description) return false
-        if (filter.filterType != other.filter.filterType) return false
-        if (filter.assetGroup != other.filter.assetGroup) return false
-        if (filter.assetType != other.filter.assetType) return false
-        return true
+        /**
+         * Creates a new [MutableFilterResult] from the given [UtilityAssociationsFilterResult]
+         * and [UtilityAssociationsFormElement].
+         *
+         * @param filterResult The [UtilityAssociationsFilterResult] to wrap.
+         * @param element The [UtilityAssociationsFormElement] to delete associations from.
+         * @return A new [MutableFilterResult].
+         */
+        fun create(
+            filterResult: UtilityAssociationsFilterResult,
+            element: UtilityAssociationsFormElement
+        ): MutableFilterResult {
+            val groupResults = filterResult.groupResults.map { groupResult ->
+                MutableGroupResult.create(groupResult = groupResult)
+            }
+            return MutableFilterResult(
+                filterResult = filterResult,
+                groupResults = groupResults,
+                resultCount = filterResult.resultCount,
+                onDelete = { association ->
+                    // delete the association from the element when it is deleted from the state
+                    element.deleteAssociation(association)
+                }
+            )
+        }
     }
 }

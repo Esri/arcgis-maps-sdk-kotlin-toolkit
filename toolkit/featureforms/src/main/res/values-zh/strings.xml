@@ -159,8 +159,6 @@
     <string name="no_associations_found">未找到任何关联</string>
     <string name="terminal">终端</string>
     <string name="terminal_with_value">终端：%1$s</string>
-    <string name="containment_visible">可见包含</string>
-    <string name="fraction_along_edge">沿边缘的分数</string>
     <string name="from_element">自元素</string>
     <string name="to_element">至元素</string>
     <string name="association_type">关联类型</string>
