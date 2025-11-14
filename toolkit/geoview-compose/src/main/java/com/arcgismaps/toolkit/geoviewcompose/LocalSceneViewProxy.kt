@@ -87,8 +87,8 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
     ): Result<Boolean> {
         return localSceneView?.setViewpointAnimated(
             viewpoint,
-            duration.toDouble(DurationUnit.SECONDS).toFloat(),
-            animationCurve
+            animationCurve,
+            duration.toDouble(DurationUnit.SECONDS).toFloat()
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
