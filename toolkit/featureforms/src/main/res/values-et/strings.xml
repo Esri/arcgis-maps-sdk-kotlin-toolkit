@@ -159,8 +159,6 @@
     <string name="no_associations_found">Seoseid ei leitud</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
-    <string name="containment_visible">Sisaldavus nähtav</string>
-    <string name="fraction_along_edge">Murdosa mööda serva</string>
     <string name="from_element">Elemendist</string>
     <string name="to_element">Elemendini</string>
     <string name="association_type">Seose tüüp</string>

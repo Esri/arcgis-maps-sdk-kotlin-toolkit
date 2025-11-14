@@ -159,8 +159,6 @@
     <string name="no_associations_found">לא נמצאו אסוסיאציות</string>
     <string name="terminal">מסוף</string>
     <string name="terminal_with_value">מסוף: %1$s</string>
-    <string name="containment_visible">פוליגון מכיל גלוי</string>
-    <string name="fraction_along_edge">חתוך לאורך הקצה</string>
     <string name="from_element">אלמנט מ-</string>
     <string name="to_element">אלמנט ל-</string>
     <string name="association_type">סוג אסוציאציה</string>

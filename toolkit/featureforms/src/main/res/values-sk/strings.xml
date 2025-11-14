@@ -159,8 +159,6 @@
     <string name="no_associations_found">Neboli nájdené žiadne asociácie</string>
     <string name="terminal">Terminál</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
-    <string name="containment_visible">Viditeľné ohraničenie</string>
-    <string name="fraction_along_edge">Frakcia pozdĺž hrany</string>
     <string name="from_element">Z element</string>
     <string name="to_element">Do element</string>
     <string name="association_type">Typ asociácie</string>

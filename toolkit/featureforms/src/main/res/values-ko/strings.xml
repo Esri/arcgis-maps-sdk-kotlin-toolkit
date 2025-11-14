@@ -159,8 +159,6 @@
     <string name="no_associations_found">연관을 찾을 수 없음</string>
     <string name="terminal">터미널</string>
     <string name="terminal_with_value">터미널: %1$s</string>
-    <string name="containment_visible">포함성 표시</string>
-    <string name="fraction_along_edge">Fraction Along Edge</string>
     <string name="from_element">출발 요소</string>
     <string name="to_element">도착 요소</string>
     <string name="association_type">연관 유형</string>

@@ -159,8 +159,6 @@
     <string name="no_associations_found">لم يتم العثور على أي اقترانات</string>
     <string name="terminal">محطة طرفية</string>
     <string name="terminal_with_value">النقطة الطرفية: %1$s</string>
-    <string name="containment_visible">الاحتواء المرئي</string>
-    <string name="fraction_along_edge">كسر بامتداد Edge</string>
     <string name="from_element">من العنصر</string>
     <string name="to_element">إلى العنصر</string>
     <string name="association_type">نوع الاقتران</string>

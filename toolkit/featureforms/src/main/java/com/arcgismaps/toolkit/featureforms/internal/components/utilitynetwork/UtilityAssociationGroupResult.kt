@@ -141,7 +141,7 @@ internal fun UtilityAssociationGroupResult(
  *
  * - If the association is of type JunctionEdgeObjectConnectivityMidspan,
  * JunctionEdgeObjectConnectivityFromSide, JunctionEdgeObjectConnectivityToSide
- * then fractionAlongEdge and the terminal (if present) is displayed.
+ * then percentAlong and the terminal (if present) is displayed.
  *
  * - For a Connectivity association, the terminal (if present) is displayed.
  *
