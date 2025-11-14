@@ -46,7 +46,7 @@ import java.io.File
 import java.util.UUID
 
 internal object PopupConstants {
-    const val USER_AGENT = "ArcGIS Maps SDK for Kotlin Toolkit"
+    const val USER_AGENT = "ArcGISMaps-Kotlin"
 }
 
 /**
@@ -207,8 +207,7 @@ internal class PopupMediaState(
             imageFolder: String,
             context: Context
         ): PopupMediaState {
-            val srcUrl = media.value?.sourceUrl
-                ?: ""
+            val srcUrl: String? = media.value?.sourceUrl ?: ""
             return PopupMediaState(
                 media,
                 scope,
