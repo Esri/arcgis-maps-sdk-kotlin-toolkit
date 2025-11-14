@@ -24,6 +24,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.arcgismaps.mapping.ChartImageParameters
@@ -32,6 +34,7 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +44,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
+
+internal object PopupConstants {
+    const val USER_AGENT = "ArcGISMaps-Kotlin"
+}
 
 /**
  * Represents the state of an [MediaPopupElement]
@@ -120,9 +127,9 @@ internal class MediaElementState(
 internal class PopupMediaState(
     val title: String,
     val caption: String,
-    @Suppress("unused") private val refreshInterval: Long,
+    private val refreshInterval: Long,
     @Suppress("unused") private val linkUrl: String,
-    private val sourceUrl: String,
+    @Suppress("unused") private val sourceUrl: String,
     val type: PopupMediaType,
     uri: String,
     scope: CoroutineScope,
@@ -200,8 +207,7 @@ internal class PopupMediaState(
             imageFolder: String,
             context: Context
         ): PopupMediaState {
-            val srcUrl = media.value?.sourceUrl
-                ?: throw IllegalArgumentException("null sourceUrl for popup media")
+            val srcUrl: String? = media.value?.sourceUrl ?: ""
             return PopupMediaState(
                 media,
                 scope,
@@ -212,10 +218,18 @@ internal class PopupMediaState(
                 ) {
                     val request = ImageRequest.Builder(context)
                         .data(srcUrl)
+                        .addHeader("User-Agent", PopupConstants.USER_AGENT)
                         .crossfade(true)
                         .build()
                     (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
-                        ?: throw IllegalStateException("couldn't load image at $srcUrl")
+                        ?: ContextCompat.getDrawable(context, R.drawable.no_image_32)?.toBitmap()
+                        ?: throw IllegalStateException(
+                            if (srcUrl.isNullOrEmpty()) {
+                                "couldn't load image: sourceUrl is missing or empty, and placeholder drawable could not be loaded"
+                            } else {
+                                "couldn't load image at $srcUrl, and placeholder drawable could not be loaded"
+                            }
+                        )
                 }
             ).apply {
                 if (refreshInterval > 0) {
