@@ -44,9 +44,9 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
@@ -101,7 +101,9 @@ private fun GroupElement(
 ) {
     val colors = LocalColorScheme.current.groupElementColors
     Card(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {
+            toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
+        },
         shape = GroupElementDefaults.containerShape,
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
@@ -109,11 +111,7 @@ private fun GroupElement(
         border = BorderStroke(GroupElementDefaults.borderThickness, colors.outlineColor)
     ) {
         GroupElementHeader(
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
-                },
+            modifier = Modifier.fillMaxWidth(),
             title = label,
             description = description,
             isExpanded = expanded,

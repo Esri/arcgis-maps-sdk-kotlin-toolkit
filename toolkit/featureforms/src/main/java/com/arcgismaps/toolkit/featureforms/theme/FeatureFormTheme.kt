@@ -294,20 +294,18 @@ public data class RadioButtonFieldColors(
  *
  * @property labelColor the color used for the label of this field.
  * @property supportingTextColor the color used for the supporting text of this field.
- * @property outlineColor the color used for the outline of this field.
  * @property containerColor the color used for the container of this field.
  * @property tileTextColor the color used for the text of an individual attachment tile.
- * @property tileBorderColor the color used for the border of an individual attachment tile.
+ * @property tileContainerColor the color used for the container of an individual attachment tile.
  * @property scrollBarColor the color used for the scroll bar of the attachment list.
  * @since 200.5.0
  */
 public data class AttachmentsElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
-    public val outlineColor: Color,
     public val containerColor: Color,
     public val tileTextColor: Color,
-    public val tileBorderColor: Color,
+    public val tileContainerColor: Color,
     public val scrollBarColor: Color,
 )
 
@@ -413,10 +411,13 @@ public data class RadioButtonFieldTypography(
  * @property labelStyle The style for the label of this field.
  * @property supportingTextStyle The style for the supporting text of this field.
  * @property tileTextStyle The style for the text of an individual attachment tile.
+ * @property tileSupportingTextStyle The style for the supporting text of an individual attachment tile.
+ * This is used to display the size of the attachment.
  * @since 200.5.0
  */
 public data class AttachmentsElementTypography(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle,
     public val tileTextStyle: TextStyle,
+    public val tileSupportingTextStyle: TextStyle,
 )

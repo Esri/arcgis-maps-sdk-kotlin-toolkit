@@ -24,4 +24,24 @@
     <string name="other">อื่น ๆ</string>
     <string name="close">กลับ</string>
     <string name="attachment_thumbnail">ภาพตัวอย่างไฟล์แนบ</string>
+    <string name="terminal">เทอร์มินัล</string>
+    <string name="no_associations_found">ไม่พบความสัมพันธ์</string>
+    <string name="visible_content">เนื้อหาที่มองเห็น</string>
+    <string name="content">เนื้อหา</string>
+    <string name="containment_visible">การแสดงผลการกักกัน</string>
+    <string name="fraction_along_edge">เศษส่วนตามแนวขอบ</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">องค์ประกอบจาก</string>
+    <string name="to_element">องค์ประกอบถึง</string>
+    <string name="association_type">ประเภทความสัมพันธ์</string>
+    <string name="remove_association">ลบความสัมพันธ์</string>
+    <string name="remove_association_tooltip">ลบเฉพาะความสัมพันธ์เท่านั้น เหลือฟีเจอร์ไว้</string>
+    <string name="remove">ลบทิ้ง</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="none_selected">ไม่มีการเลือก</string>
+    <string name="association_settings">การตั้งค่าความสัมพันธ์</string>
+    <string name="show_all">แสดงทั้งหมด</string>
+    <string name="filter_by_feature_title">กรองตามชื่อฟีเจอร์</string>
+    <string name="containment_visible_value">การแสดงผล: %1$s</string>
+    <string name="associations">ความสัมพันธ์</string>
 </resources>

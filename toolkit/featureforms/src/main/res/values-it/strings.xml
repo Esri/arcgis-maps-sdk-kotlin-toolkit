@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Tocca per scansionare</string>
     <string name="unable_to_open_the_camera">Impossibile aprire la fotocamera</string>
     <string name="value_must_be_a_guid">Il valore deve essere un GUID valido</string>
+    <string name="delete_attachment_title">Eliminare l\'allegato?</string>
+    <string name="delete_attachment_confirmation">Eliminare questo allegato?</string>
+    <string name="download_failed">Impossibile scaricare questo file.</string>
+    <string name="file_size_exceeds_limit">Le dimensioni del file superano il limite</string>
+    <string name="unsupported_file_type">Tipo di file non supportato</string>
+    <string name="save">Salva</string>
+    <string name="discard">Conferma</string>
+    <string name="none_selected">Nessuno selezionato</string>
+    <string name="the_form_has_validation_errors">Il modulo ha errori di validazione</string>
+    <string name="the_form_has_edits">Il modulo ha modifiche</string>
+    <string name="do_you_want_to_save_your_changes">Salvare le modifiche?</string>
+    <string name="no_associations_found">Associazioni non trovate</string>
+    <string name="terminal">Terminale</string>
+    <string name="terminal_with_value">Terminale: %1$s</string>
+    <string name="from_element">Da elemento</string>
+    <string name="to_element">A elemento</string>
+    <string name="association_type">Tipo di associazione</string>
+    <string name="remove_association">Rimuovi associazione</string>
+    <string name="remove_association_tooltip">Rimuove solo l\'associazione. La feature rimane.</string>
+    <string name="remove">Rimuovi</string>
+    <string name="association_settings">Impostazioni associazione</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contenuto visibile</string>
+    <string name="content">Contenuto</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Si sono verificati %1$d errori che devono essere risolti prima di salvare.</item>
+        <item quantity="one">Si è verificato %1$d errore che deve essere risolto prima di salvare.</item>
+        <item quantity="two">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="few">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="many">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+        <item quantity="other">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
+    </plurals>
 </resources>

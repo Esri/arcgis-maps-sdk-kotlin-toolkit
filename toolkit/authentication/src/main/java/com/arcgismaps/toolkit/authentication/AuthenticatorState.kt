@@ -40,6 +40,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import com.arcgismaps.toolkit.authentication.utils.suspendWithSafeContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -50,7 +51,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -59,19 +59,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  */
 public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
-
-    /**
-     * The [OAuthUserConfiguration] to use for any sign ins. If null, OAuth will not be used for any
-     * [ArcGISAuthenticationChallenge]. If the OAuth configuration is invalid, the Authenticator will not launch an OAuth
-     * browser page and will prompt for a username and password instead.
-     *
-     * @since 200.2.0
-     */
-    @Deprecated(
-        message = "since 200.8.0. Use AuthenticatorState.oAuthUserConfigurations list instead.",
-        replaceWith = ReplaceWith("AuthenticatorState.oAuthUserConfigurations")
-    )
-    public var oAuthUserConfiguration: OAuthUserConfiguration?
 
     /**
      * A list of [OAuthUserConfiguration]s that can be used for OAuth-based sign ins.
@@ -173,25 +160,7 @@ private class AuthenticatorStateImpl(
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorState {
 
-    @Deprecated(
-        "since 200.8.0 and will be removed in a feature release. " +
-                "Use AuthenticatorState.oAuthUserConfigurations list instead.",
-        replaceWith = ReplaceWith("AuthenticatorState.oAuthUserConfigurations")
-    )
-    override var oAuthUserConfiguration: OAuthUserConfiguration? = null
-
-    override var oAuthUserConfigurations: List<OAuthUserConfiguration>
-        get() = oAuthUserConfiguration?.let {
-            if (it in _oAuthUserConfigurations) {
-                _oAuthUserConfigurations
-            } else {
-                _oAuthUserConfigurations + it
-            }
-        } ?: _oAuthUserConfigurations
-        set(value) {
-            _oAuthUserConfigurations = value
-        }
-    private var _oAuthUserConfigurations: List<OAuthUserConfiguration> = emptyList()
+    override var oAuthUserConfigurations: List<OAuthUserConfiguration> = emptyList()
 
     private val _pendingIapSignIn = MutableStateFlow<IapSignIn?>(null)
     override val pendingIapSignIn = _pendingIapSignIn.asStateFlow()
@@ -416,20 +385,20 @@ private class AuthenticatorStateImpl(
      * @since 200.2.0
      */
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
-        val selectedAlias = suspendCancellableCoroutine<String?> { continuation ->
+        val selectedAlias = suspendWithSafeContinuation<String?> { safeContinuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(alias) { _, _, _ -> }
+                safeContinuation.resumeSafely(alias)
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback) {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
+                safeContinuation.resumeSafely(null)
             }
-            continuation.invokeOnCancellation {
+            safeContinuation.invokeOnCancellation {
                 _pendingClientCertificateChallenge.value = null
-                continuation.resume(null) { _, _, _ -> }
             }
         }
+
         return if (selectedAlias != null) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
                 CertificateCredential(
@@ -449,29 +418,31 @@ private class AuthenticatorStateImpl(
      * @return [NetworkAuthenticationChallengeResponse] based on user response.
      * @since 200.2.0
      */
-    private suspend fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse =
-        suspendCancellableCoroutine { continuation ->
-            _pendingServerTrustChallenge.value =
-                ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
+    private suspend fun awaitServerTrustChallengeResponse(
+        networkAuthenticationChallenge: NetworkAuthenticationChallenge
+    ): NetworkAuthenticationChallengeResponse {
+        val shouldTrustServer = suspendWithSafeContinuation<Boolean?> { safeContinuation ->
+            val serverTrustChallenge = ServerTrustChallenge(
+                challenge = networkAuthenticationChallenge,
+                onUserResponseReceived = { response ->
                     _pendingServerTrustChallenge.value = null
-                    if (shouldTrustServer) continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                                ServerTrust
-                            )
-                        )
-                    )
-                    else continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.Cancel
-                        )
-                    )
+                    safeContinuation.resumeSafely(response)
                 }
-            continuation.invokeOnCancellation {
+            )
+
+            _pendingServerTrustChallenge.value = serverTrustChallenge
+
+            safeContinuation.invokeOnCancellation {
                 _pendingServerTrustChallenge.value = null
-                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }
         }
+
+        return if (shouldTrustServer == true) {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+        } else {
+            NetworkAuthenticationChallengeResponse.Cancel
+        }
+    }
 
     /**
      * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and returns any responses
@@ -545,26 +516,6 @@ private suspend fun IapConfiguration.handleIapChallenge(
     IapCredential.create(this) { iapSignIn ->
         onPendingSignIn(iapSignIn)
     }
-
-/**
- * Completes the current [AuthenticatorState.pendingOAuthUserSignIn] with data from the provided [intent].
- *
- * The [Intent] data should contain a string representing the redirect URI that came from a browser
- * where the OAuth sign-in was performed. If the data is null, the sign-in will be cancelled.
- *
- * @since 200.3.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use AuthenticatorState.completeBrowserAuthenticationChallenge(Intent?) instead as it also " +
-            "supports IAP sign-in/sign-out.",
-    replaceWith = ReplaceWith("AuthenticatorState.completeBrowserAuthenticationChallenge(intent)")
-)
-public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
-    intent?.data?.let {
-        val uriString = it.toString()
-        pendingOAuthUserSignIn.value?.complete(uriString)
-    } ?: pendingOAuthUserSignIn.value?.cancel()
-}
 
 /**
  * Completes the current browser-based authentication challenge for the [AuthenticatorState].

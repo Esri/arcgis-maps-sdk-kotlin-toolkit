@@ -45,6 +45,7 @@ import com.google.ar.core.Session
  * @param onFrame a callback that is invoked every frame.
  * @param onTapWithHitResult a callback that is invoked when the user taps the screen and a hit is detected.
  * @param visualizePlanes whether to visualize detected planes.
+ * @param visualizeCamera whether to visualize the camera feed.
  * @since 200.6.0
  */
 @Composable
@@ -53,7 +54,8 @@ internal fun ArCameraFeed(
     onFrame: (Frame, Int, Session) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit,
-    visualizePlanes: Boolean = true
+    visualizePlanes: Boolean = true,
+    visualizeCamera: Boolean = true
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -71,7 +73,10 @@ internal fun ArCameraFeed(
             this.surfaceDrawHandler = SurfaceDrawHandler(surfaceViewWrapper.glSurfaceView, this)
         }
     }.apply {
+        // These properties must be applied outside of the remember block, as they are expected to
+        // change after the CameraFeedRenderer is created
         this.visualizePlanes = visualizePlanes
+        this.visualizeCamera = visualizeCamera
     }
 
     DisposableEffect(Unit) {

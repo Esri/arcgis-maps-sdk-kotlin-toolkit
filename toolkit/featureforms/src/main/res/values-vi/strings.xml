@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Nhấn để quét</string>
     <string name="unable_to_open_the_camera">Không thể mở máy ảnh</string>
     <string name="value_must_be_a_guid">Giá trị phải là GUID hợp lệ</string>
+    <string name="delete_attachment_title">Xóa Tệp đính kèm?</string>
+    <string name="delete_attachment_confirmation">Bạn có chắc chắn muốn xóa tệp đính kèm này không?</string>
+    <string name="download_failed">Không thể tải xuống tệp này.</string>
+    <string name="file_size_exceeds_limit">Kích thước Tệp Vượt quá Giới hạn</string>
+    <string name="unsupported_file_type">Loại Tệp không được Hỗ trợ</string>
+    <string name="save">Lưu</string>
+    <string name="discard">Hủy</string>
+    <string name="none_selected">Chưa Chọn</string>
+    <string name="the_form_has_validation_errors">Mẫu form có lỗi xác minh</string>
+    <string name="the_form_has_edits">Mẫu form có phần chỉnh sửa</string>
+    <string name="do_you_want_to_save_your_changes">Bạn có muốn lưu thay đổi không?</string>
+    <string name="no_associations_found">Không tìm thấy liên kết nào</string>
+    <string name="terminal">Thiết bị đầu cuối</string>
+    <string name="terminal_with_value">Thiết bị đầu cuối: %1$s</string>
+    <string name="from_element">Từ Phần tử</string>
+    <string name="to_element">Đến Phần tử</string>
+    <string name="association_type">Loại Liên kết</string>
+    <string name="remove_association">Gỡ bỏ Liên kết</string>
+    <string name="remove_association_tooltip">Chỉ gỡ bỏ liên kết. Vẫn giữ lại đối tượng.</string>
+    <string name="remove">Gỡ bỏ</string>
+    <string name="association_settings">Thiết lập Liên kết</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Nội dung Hiển thị</string>
+    <string name="content">Nội dung</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Bạn có %1$d lỗi cần sửa trước khi lưu.</item>
+        <item quantity="one">Bạn có %1$d lỗi cần sửa trước khi lưu.</item>
+        <item quantity="two">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
+        <item quantity="few">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
+        <item quantity="many">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
+        <item quantity="other">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
+    </plurals>
 </resources>

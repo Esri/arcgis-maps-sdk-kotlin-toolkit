@@ -48,7 +48,8 @@ internal class CameraFeedRenderer(
     private val onFrame: (Frame, Int, Session) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
     private val onFirstPlaneDetected: () -> Unit,
-    var visualizePlanes: Boolean = true
+    var visualizePlanes: Boolean = true,
+    var visualizeCamera: Boolean = true
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
 
@@ -197,7 +198,7 @@ internal class CameraFeedRenderer(
             updateDisplayGeometry(frame)
 
             // -- Draw background
-            if (frame.timestamp != 0L) {
+            if (frame.timestamp != 0L && visualizeCamera) {
                 // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
                 // drawing possible leftover data from previous sessions if the texture is reused.
                 drawBackground(surfaceDrawHandler)

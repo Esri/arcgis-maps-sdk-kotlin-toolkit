@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Naciśnij, aby zeskanować</string>
     <string name="unable_to_open_the_camera">Nie można otworzyć kamery</string>
     <string name="value_must_be_a_guid">Wartość musi być prawidłowym identyfikatorem GUID</string>
+    <string name="delete_attachment_title">Usunąć załącznik?</string>
+    <string name="delete_attachment_confirmation">Czy na pewno chcesz usunąć ten załącznik?</string>
+    <string name="download_failed">Nie można pobrać tego pliku.</string>
+    <string name="file_size_exceeds_limit">Rozmiar pliku przekracza limit</string>
+    <string name="unsupported_file_type">Nieobsługiwany typ pliku</string>
+    <string name="save">Zapisz</string>
+    <string name="discard">Odrzuć</string>
+    <string name="none_selected">Brak wyboru</string>
+    <string name="the_form_has_validation_errors">Formularz zawiera błędy weryfikacji</string>
+    <string name="the_form_has_edits">Formularz zawiera zmiany</string>
+    <string name="do_you_want_to_save_your_changes">Czy chcesz zapisać zmiany?</string>
+    <string name="no_associations_found">Nie znaleziono powiązań</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="from_element">Z elementu</string>
+    <string name="to_element">Do elementu</string>
+    <string name="association_type">Typ powiązania</string>
+    <string name="remove_association">Usuń powiązanie</string>
+    <string name="remove_association_tooltip">Usuwa tylko powiązanie. Obiekt pozostaje.</string>
+    <string name="remove">Usuń</string>
+    <string name="association_settings">Ustawienia powiązania</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Widoczne zasoby</string>
+    <string name="content">Zasoby</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="one">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="two">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="few">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="many">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+        <item quantity="other">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
+    </plurals>
 </resources>

@@ -145,4 +145,36 @@
     <string name="tap_to_scan">點選以掃描</string>
     <string name="unable_to_open_the_camera">無法開啟相機</string>
     <string name="value_must_be_a_guid">值必須是有效的 GUID</string>
+    <string name="delete_attachment_title">刪除附件?</string>
+    <string name="delete_attachment_confirmation">確定要刪除此附件?</string>
+    <string name="download_failed">無法下載此檔案。</string>
+    <string name="file_size_exceeds_limit">檔案大小超過限制</string>
+    <string name="unsupported_file_type">不支援的檔案類型</string>
+    <string name="save">儲存</string>
+    <string name="discard">放棄</string>
+    <string name="none_selected">未選擇任何內容</string>
+    <string name="the_form_has_validation_errors">表格發生驗證錯誤</string>
+    <string name="the_form_has_edits">表格具有編輯內容</string>
+    <string name="do_you_want_to_save_your_changes">是否要儲存變更?</string>
+    <string name="no_associations_found">找不到關聯</string>
+    <string name="terminal">終端機</string>
+    <string name="terminal_with_value">終端機 : %1$s</string>
+    <string name="from_element">從元素</string>
+    <string name="to_element">至元素</string>
+    <string name="association_type">關聯類型</string>
+    <string name="remove_association">移除關聯</string>
+    <string name="remove_association_tooltip">僅移除關聯。 功能仍然存在。</string>
+    <string name="remove">移除</string>
+    <string name="association_settings">關聯設定</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">可見內容</string>
+    <string name="content">內容</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">您有 %1$d 個錯誤必須在儲存前修正。</item>
+        <item quantity="one">您有 %1$d 個錯誤必須在儲存前修正。</item>
+        <item quantity="two">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="few">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="many">您有 %1$d 個錯誤必須在儲存前修正</item>
+        <item quantity="other">您有 %1$d 個錯誤必須在儲存前修正</item>
+    </plurals>
 </resources>

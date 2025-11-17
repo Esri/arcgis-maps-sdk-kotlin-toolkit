@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">マップ エリア</string>
+    <string name="add_map_area">マップ エリアの追加</string>
+    <string name="thumbnail_description">PortalItem のサムネイル</string>
+    <string name="download">ダウンロード</string>
+    <string name="open">開く</string>
+    <string name="error">エラー</string>
+    <string name="loading">読み込んでいます</string>
+    <string name="loading_failed">読み込めませんでした</string>
+    <string name="ready_to_download">ダウンロードの準備ができました</string>
+    <string name="packaging">パッケージ化</string>
+    <string name="packaging_failed">パッケージ化に失敗しました</string>
+    <string name="downloaded">ダウンロード済み</string>
+    <string name="downloading">ダウンロードしています</string>
+    <string name="download_failed">ダウンロードに失敗しました</string>
+    <string name="currently_open">現在開いています</string>
+    <string name="description">説明</string>
+    <string name="download_map_area">マップ エリアのダウンロード</string>
+    <string name="remove_download">ダウンロードの削除</string>
+    <string name="delete_download">ダウンロードの削除</string>
+    <string name="no_image_available">使用できる画像がありません</string>
+    <string name="refresh">更新</string>
+    <string name="cancelled">キャンセル済</string>
+    <string name="cancel">キャンセル</string>
+    <string name="confirm">OK</string>
+    <string name="rename">名前の変更</string>
+    <string name="enter_a_name">名前を入力</string>
+    <string name="select_area">エリアの選択</string>
+    <string name="pan_and_zoom_text">画面移動およびズームでエリアを定義する</string>
+    <string name="unique_name_text">マップ エリアの名前は一意である必要があります</string>
+    <string name="next_on_demand_area_title">エリア %1$s</string>
+    <string name="directory_size">サイズ: %1$s</string>
+    <string name="no_internet_connection_error_message">インターネット接続なし</string>
+    <string name="no_internet_error_message">インターネットに接続されていません。 ダウンロードしたエリアのみを表示します。</string>
+    <string name="no_map_areas_error_message">このマップのマップ エリアを取得できませんでした。</string>
+    <string name="no_offline_map_areas_error_message">このマップにはマップ エリアはありません。</string>
+    <string name="error_fetching_areas">マップ エリア取得エラー</string>
+    <string name="error_fetching_areas_message">マップ エリアの取得中にエラーが発生しました。</string>
+    <string name="no_map_areas">マップ エリアなし</string>
+    <string name="empty_on_demand_message">このマップにはマップ エリアはありません。 以下のボタンをタップして開始します。</string>
+    <string name="offline_disabled">オフラインが無効</string>
+    <string name="offline_disabled_message">マップはオフラインでは使用できません。</string>
+    <string name="level_of_detail">詳細レベル</string>
+    <string name="room">部屋</string>
+    <string name="rooms">部屋 (複数)</string>
+    <string name="house_property">住宅物件</string>
+    <string name="houses">家屋</string>
+    <string name="small_building">建物 (小)</string>
+    <string name="building">建物</string>
+    <string name="buildings">建物 (複数)</string>
+    <string name="street">道路</string>
+    <string name="streets">道路 (複数)</string>
+    <string name="neighborhood">近郊</string>
+    <string name="town">町</string>
+    <string name="city">市区町村</string>
+    <string name="cities">都市 (複数)</string>
+    <string name="metropolitan_area">都市圏</string>
+    <string name="county">郡</string>
+    <string name="counties">郡 (複数)</string>
+    <string name="state_province">都道府県</string>
+    <string name="states_provinces">都道府県 (複数)</string>
+    <string name="countries_small">国 (小)</string>
+    <string name="countries_big">国 (大)</string>
+    <string name="continent">大陸</string>
+    <string name="world_small">世界 (小)</string>
+    <string name="world_big">世界 (大)</string>
+    <string name="world">世界</string>
+</resources>

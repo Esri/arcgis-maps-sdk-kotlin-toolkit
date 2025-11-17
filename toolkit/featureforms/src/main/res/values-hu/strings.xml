@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Koppintson a beolvasáshoz</string>
     <string name="unable_to_open_the_camera">Nem sikerült megnyitni a kamerát</string>
     <string name="value_must_be_a_guid">Az értéknek érvényes GUID-nak kell lennie</string>
+    <string name="delete_attachment_title">Törli a csatolmányt?</string>
+    <string name="delete_attachment_confirmation">Biztosan törli a csatolmányt?</string>
+    <string name="download_failed">A fájl letöltése nem sikerült.</string>
+    <string name="file_size_exceeds_limit">A fájl mérete meghaladja a határértéket</string>
+    <string name="unsupported_file_type">Nem támogatott fájltípus</string>
+    <string name="save">Mentés</string>
+    <string name="discard">Elvetés</string>
+    <string name="none_selected">Egy sincs kijelölve</string>
+    <string name="the_form_has_validation_errors">Az űrlapon érvényesítési hibák találhatók</string>
+    <string name="the_form_has_edits">Az űrlap módosításokat tartalmaz</string>
+    <string name="do_you_want_to_save_your_changes">Menti a módosításait?</string>
+    <string name="no_associations_found">Nem találhatók társítások</string>
+    <string name="terminal">Terminál</string>
+    <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="from_element">Az elemtől</string>
+    <string name="to_element">Az elemhez</string>
+    <string name="association_type">Társítás típusa</string>
+    <string name="remove_association">Társítás eltávolítása</string>
+    <string name="remove_association_tooltip">Csak a társítást távolítja el. A vektoros elem megmarad.</string>
+    <string name="remove">Eltávolítás</string>
+    <string name="association_settings">Társítási beállítások</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Látható tartalom</string>
+    <string name="content">Tartalom</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="one">%1$d hiba áll fenn, amelyet mentés előtt ki kell javítani.</item>
+        <item quantity="two">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="few">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="many">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+        <item quantity="other">%1$d hiba áll fenn, amelyeket mentés előtt ki kell javítani.</item>
+    </plurals>
 </resources>

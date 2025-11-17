@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.indoors"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -21,13 +25,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -79,12 +76,11 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
-    androidTestImplementation(project(mapOf("path" to ":composable-map")))
+    androidTestImplementation(project(":geoview-compose"))
     debugImplementation(libs.bundles.debug)
 }

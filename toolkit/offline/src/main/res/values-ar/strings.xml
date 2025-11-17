@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">مناطق الخريطة</string>
+    <string name="add_map_area">إضافة منطقة خريطة</string>
+    <string name="thumbnail_description">الصورة المصغّرة لعنصر البوابة الإلكترونية</string>
+    <string name="download">تنزيل</string>
+    <string name="open">فتح</string>
+    <string name="error">خطأ</string>
+    <string name="loading">تحميل</string>
+    <string name="loading_failed">فشل التحميل</string>
+    <string name="ready_to_download">جاهز للتنزيل</string>
+    <string name="packaging">جارٍ التعبئة</string>
+    <string name="packaging_failed">فشلت التعبئة</string>
+    <string name="downloaded">تم التنزيل</string>
+    <string name="downloading">جارٍ التنزيل</string>
+    <string name="download_failed">فشل التنزيل</string>
+    <string name="currently_open">مفتوح حاليًا</string>
+    <string name="description">الوصف</string>
+    <string name="download_map_area">تنزيل منطقة الخريطة</string>
+    <string name="remove_download">إزالة التنزيل</string>
+    <string name="delete_download">حذف التنزيل</string>
+    <string name="no_image_available">لا توجد صورة متاحة</string>
+    <string name="refresh">تحديث</string>
+    <string name="cancelled">تم الإلغاء</string>
+    <string name="cancel">إلغاء الأمر</string>
+    <string name="confirm">موافق</string>
+    <string name="rename">إعادة تسمية</string>
+    <string name="enter_a_name">أدخل اسمًا</string>
+    <string name="select_area">تحديد منطقة</string>
+    <string name="pan_and_zoom_text">إزاحة وتكبير/تصغير لتعريف المنطقة</string>
+    <string name="unique_name_text">يجب أن يكون اسم منطقة الخريطة فريدًا</string>
+    <string name="next_on_demand_area_title">المنطقة %1$s</string>
+    <string name="directory_size">الحجم: %1$s</string>
+    <string name="no_internet_connection_error_message">لا يوجد اتصال بالإنترنت</string>
+    <string name="no_internet_error_message">لا يوجد اتصال بالإنترنت. إظهار المناطق التي تم تنزيلها فقط.</string>
+    <string name="no_map_areas_error_message">يتعذر استرداد مناطق الخريطة لهذه الخريطة.</string>
+    <string name="no_offline_map_areas_error_message">لا توجد مناطق خريطة لهذه الخريطة.</string>
+    <string name="error_fetching_areas">حدث خطأ في أثناء جلب مناطق الخريطة</string>
+    <string name="error_fetching_areas_message">حدث خطأ في أثناء جلب مناطق الخريطة.</string>
+    <string name="no_map_areas">لا توجد مناطق خريطة</string>
+    <string name="empty_on_demand_message">لا توجد مناطق خريطة لهذه الخريطة. اضغط على الزر أدناه للبدء.</string>
+    <string name="offline_disabled">تم تعطيل عدم الاتصال</string>
+    <string name="offline_disabled_message">لم يتم تمكين الخريطة للاستخدام دون اتصال.</string>
+    <string name="level_of_detail">مستوى التفاصيل</string>
+    <string name="room">غرفة</string>
+    <string name="rooms">غرف</string>
+    <string name="house_property">ملكية المنزل</string>
+    <string name="houses">المنازل</string>
+    <string name="small_building">مبنى صغير</string>
+    <string name="building">بناء</string>
+    <string name="buildings">مباني</string>
+    <string name="street">شارع</string>
+    <string name="streets">شوارع</string>
+    <string name="neighborhood">المجاورة</string>
+    <string name="town">بلدة</string>
+    <string name="city">المدينة</string>
+    <string name="cities">مدن</string>
+    <string name="metropolitan_area">المنطقة الحضرية</string>
+    <string name="county">مقاطعة</string>
+    <string name="counties">مقاطعات</string>
+    <string name="state_province">الولاية/المقاطعة:</string>
+    <string name="states_provinces">الولايات/المقاطعات</string>
+    <string name="countries_small">الدول (الصغيرة)</string>
+    <string name="countries_big">الدول (الكبيرة)</string>
+    <string name="continent">قارة</string>
+    <string name="world_small">العالم (صغير)</string>
+    <string name="world_big">العالم (كبير)</string>
+    <string name="world">العالم</string>
+</resources>

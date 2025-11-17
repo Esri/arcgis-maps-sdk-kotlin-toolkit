@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Tryck för att skanna</string>
     <string name="unable_to_open_the_camera">Det gick inte att öppna kameran</string>
     <string name="value_must_be_a_guid">Värdet måste vara ett giltigt GUID</string>
+    <string name="delete_attachment_title">Ta bort bilaga?</string>
+    <string name="delete_attachment_confirmation">Är du säker på att du vill ta bort den här bilagan?</string>
+    <string name="download_failed">Det gick inte att hämta den här filen.</string>
+    <string name="file_size_exceeds_limit">Filstorleken överskrider gränsen</string>
+    <string name="unsupported_file_type">Filtypen stöds inte</string>
+    <string name="save">Spara</string>
+    <string name="discard">Ta bort</string>
+    <string name="none_selected">Inget har valts</string>
+    <string name="the_form_has_validation_errors">Formuläret har valideringsfel</string>
+    <string name="the_form_has_edits">Formuläret har redigeringar</string>
+    <string name="do_you_want_to_save_your_changes">Vill du spara ändringarna?</string>
+    <string name="no_associations_found">Inga associationer hittades</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="from_element">Från element</string>
+    <string name="to_element">Till element</string>
+    <string name="association_type">Associationstyp</string>
+    <string name="remove_association">Ta bort association</string>
+    <string name="remove_association_tooltip">Tar endast bort association. Geoobjektet återstår.</string>
+    <string name="remove">Ta bort</string>
+    <string name="association_settings">Associationsinställningar</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Synligt innehåll</string>
+    <string name="content">Innehåll</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+        <item quantity="one">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+        <item quantity="two">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+        <item quantity="few">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+        <item quantity="many">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+        <item quantity="other">Du har %1$d fel som måste korrigeras innan du sparar.</item>
+    </plurals>
 </resources>

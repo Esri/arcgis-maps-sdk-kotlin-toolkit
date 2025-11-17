@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Toqueu per escanejar</string>
     <string name="unable_to_open_the_camera">No es pot obrir la càmera</string>
     <string name="value_must_be_a_guid">El valor ha de ser un GUID vàlid</string>
+    <string name="delete_attachment_title">Voleu suprimir el fitxer adjunt?</string>
+    <string name="delete_attachment_confirmation">Segur que voleu suprimir aquest fitxer adjunt?</string>
+    <string name="download_failed">No es pot baixar aquest fitxer.</string>
+    <string name="file_size_exceeds_limit">La mida del fitxer supera el límit</string>
+    <string name="unsupported_file_type">Tipus de fitxer no compatible</string>
+    <string name="save">Desa</string>
+    <string name="discard">Descarta</string>
+    <string name="none_selected">Cap opció seleccionada</string>
+    <string name="the_form_has_validation_errors">El formulari té errors de validació</string>
+    <string name="the_form_has_edits">El formulari té edicions</string>
+    <string name="do_you_want_to_save_your_changes">Voleu desar els canvis?</string>
+    <string name="no_associations_found">No s\'ha trobat cap associació</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="from_element">Element d\'origen</string>
+    <string name="to_element">Element de destinació</string>
+    <string name="association_type">Tipus d\'associació</string>
+    <string name="remove_association">Elimina l\'associació</string>
+    <string name="remove_association_tooltip">Només s\'elimina l\'associació. L\'entitat es conserva.</string>
+    <string name="remove">Elimina</string>
+    <string name="association_settings">Configuració de l\'associació</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Contingut visible</string>
+    <string name="content">Contingut</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Teniu %1$d errors que cal corregir abans de desar.</item>
+        <item quantity="one">Teniu %1$d error que cal corregir abans de desar.</item>
+        <item quantity="two">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="few">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="many">Teniu %1$d errors que cal corregir abans de desar</item>
+        <item quantity="other">Teniu %1$d errors que cal corregir abans de desar</item>
+    </plurals>
 </resources>

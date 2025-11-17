@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Докоснете, за да сканирате</string>
     <string name="unable_to_open_the_camera">Не може да отвори камерата</string>
     <string name="value_must_be_a_guid">Стойността трябва да бъде валиден GUID</string>
+    <string name="delete_attachment_title">Изтриване на прикачен файл?</string>
+    <string name="delete_attachment_confirmation">Сигурни ли сте, че искате да изтриете този прикачен файл?</string>
+    <string name="download_failed">Този файл не може да се изтегли.</string>
+    <string name="file_size_exceeds_limit">Размерът на файла надвишава лимита</string>
+    <string name="unsupported_file_type">Неподдържан тип файл</string>
+    <string name="save">Запазване</string>
+    <string name="discard">Отхвърляне</string>
+    <string name="none_selected">Няма селектирани</string>
+    <string name="the_form_has_validation_errors">Формулярът съдържа грешки при валидиране</string>
+    <string name="the_form_has_edits">Формулярът съдържа редакции</string>
+    <string name="do_you_want_to_save_your_changes">Искате ли да запишете промените си?</string>
+    <string name="no_associations_found">Няма намерени асоциации</string>
+    <string name="terminal">Терминал</string>
+    <string name="terminal_with_value">Терминал: %1$s</string>
+    <string name="from_element">От елемент</string>
+    <string name="to_element">Към елемент</string>
+    <string name="association_type">Тип свързване</string>
+    <string name="remove_association">Премахване на свързване</string>
+    <string name="remove_association_tooltip">Премахва само свързването. Характеристиката остава.</string>
+    <string name="remove">Премахване</string>
+    <string name="association_settings">Настройки на свързване</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Видимо съдържание</string>
+    <string name="content">Съдържание</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Имате грешки %1$d, които трябва да бъдат поправени преди запазване.</item>
+        <item quantity="one">Имате грешка %1$d, която трябва да бъде поправена преди запазване.</item>
+        <item quantity="two">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
+        <item quantity="few">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
+        <item quantity="many">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
+        <item quantity="other">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
+    </plurals>
 </resources>

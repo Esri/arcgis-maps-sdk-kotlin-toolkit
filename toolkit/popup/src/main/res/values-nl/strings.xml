@@ -24,4 +24,24 @@
     <string name="other">Overige</string>
     <string name="close">Terug</string>
     <string name="attachment_thumbnail">thumbnail bijlage</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Kan geen associaties vinden</string>
+    <string name="visible_content">Zichtbare content</string>
+    <string name="content">Content</string>
+    <string name="containment_visible">Inperking zichtbaar</string>
+    <string name="fraction_along_edge">Fractie langs rand</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Van element</string>
+    <string name="to_element">Naar element</string>
+    <string name="association_type">Type associatie</string>
+    <string name="remove_association">Associatie verwijderen</string>
+    <string name="remove_association_tooltip">Alleen de associatie verwijderen. Het object blijft.</string>
+    <string name="remove">Verwijderen</string>
+    <string name="cancel">Annuleren</string>
+    <string name="none_selected">Geen geselecteerd</string>
+    <string name="association_settings">Associatie-instellingen</string>
+    <string name="show_all">Alles weergeven</string>
+    <string name="filter_by_feature_title">Filteren op objectnaam</string>
+    <string name="containment_visible_value">Zichtbaar: %1$s</string>
+    <string name="associations">Associaties</string>
 </resources>

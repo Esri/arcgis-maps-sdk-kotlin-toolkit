@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Taramak için dokun</string>
     <string name="unable_to_open_the_camera">Kamera açılamıyor</string>
     <string name="value_must_be_a_guid">Değer geçerli bir GUID olmalıdır</string>
+    <string name="delete_attachment_title">Ek Silinsin mi?</string>
+    <string name="delete_attachment_confirmation">Bu eki silmek istediğinizden emin misiniz?</string>
+    <string name="download_failed">Bu dosya indirilemiyor.</string>
+    <string name="file_size_exceeds_limit">Dosya Boyutu Sınırı Aşıyor</string>
+    <string name="unsupported_file_type">Desteklenmeyen Dosya Türü</string>
+    <string name="save">Kaydet</string>
+    <string name="discard">Çıkar</string>
+    <string name="none_selected">Hiçbiri Seçilmedi</string>
+    <string name="the_form_has_validation_errors">Formda doğrulama hataları var.</string>
+    <string name="the_form_has_edits">Formda düzenlemeler var.</string>
+    <string name="do_you_want_to_save_your_changes">Değişikliklerinizi kaydetmek istiyor musunuz?</string>
+    <string name="no_associations_found">İlişkilendirme bulunamadı</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="from_element">Kaynak Öge</string>
+    <string name="to_element">Hedef Öge</string>
+    <string name="association_type">İlişkilendirme Türü</string>
+    <string name="remove_association">İlişkilendirmeyi Kaldır</string>
+    <string name="remove_association_tooltip">Yalnızca ilişkilendirmeyi kaldırır. Detay kalır.</string>
+    <string name="remove">Kaldır</string>
+    <string name="association_settings">İlişkilendirme Ayarları</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Görünür İçerik</string>
+    <string name="content">İçerik</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var.</item>
+        <item quantity="one">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var.</item>
+        <item quantity="two">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
+        <item quantity="few">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
+        <item quantity="many">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
+        <item quantity="other">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
+    </plurals>
 </resources>

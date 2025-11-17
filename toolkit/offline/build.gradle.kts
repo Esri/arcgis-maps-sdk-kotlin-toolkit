@@ -26,6 +26,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply true
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.offline"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -42,13 +47,6 @@ android {
             isMinifyEnabled = false
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
@@ -62,9 +60,6 @@ android {
             }
         }
     }
-    lint {
-        disable += "MissingTranslation"
-    }
 
     /**
      * Configures the test report for connected (instrumented) tests to be copied to a central
@@ -75,6 +70,12 @@ android {
         targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+
+    publishing {
+        singleVariant("release") {
+            // This is the default variant.
+        }
     }
 }
 
@@ -100,7 +101,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.material.icons)

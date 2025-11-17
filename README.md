@@ -4,6 +4,10 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 
 ## Toolkit Components
 
+* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
+  * **[FlyoverSceneView](toolkit/ar#flyoversceneview)** - Allows you to explore a scene using your device as a window into the virtual world.
+  * **[TableTopSceneView](toolkit/ar#tabletopsceneview)** - Allows you to anchor scene content to a physical surface, as if it were a 3D-printed model.
+  * **[WorldScaleSceneView](toolkit/ar#worldscalesceneview)** - Allows you to integrate scene content with the real world features like streets and buildings.
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
@@ -11,13 +15,12 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
-  * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - a small, secondary Map View which shows a representation of the main view's current viewpoint.
+  * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - Displays the visible extent of a GeoView in a small "inset" map.
 * **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
 * **[OfflineMapAreas](toolkit/offline)** - Allows you to take a web map offline by downloading map areas ahead-of-time or on-demand.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 * **[Scalebar](toolkit/scalebar)** - Displays current scale reference.
 * **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
-* **[Augmented Reality](toolkit/ar)** - Provides components to "augment" the physical world with virtual content.
 
 ## API Reference
 
@@ -167,7 +170,7 @@ The test reports for connected tests can be located under `arcgis-maps-sdk-kotli
 
 ## Licensing
 
-Copyright 2019-2022 Esri
+Copyright 2019-2025 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

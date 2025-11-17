@@ -20,9 +20,7 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
@@ -141,11 +139,6 @@ internal abstract class BaseFieldState<T>(
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     /**
-     * A flag to indicate if the field ever gained focus.
-     */
-    protected var wasFocused = false
-
-    /**
      * The [FieldType] of the field.
      */
     val fieldType = properties.fieldType
@@ -165,6 +158,11 @@ internal abstract class BaseFieldState<T>(
     val helperText: ValidationErrorState by lazy {
         calculateHelperText()
     }
+
+    /**
+     * A flag to indicate if the field ever gained focus.
+     */
+    protected var wasFocused = false
 
     init {
         scope.launch {

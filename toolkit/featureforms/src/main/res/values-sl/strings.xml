@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Tapnite za skeniranje</string>
     <string name="unable_to_open_the_camera">Kamere ni mogoče odpreti</string>
     <string name="value_must_be_a_guid">Vrednost mora biti veljaven GUID</string>
+    <string name="delete_attachment_title">Želite izbrisati prilogo?</string>
+    <string name="delete_attachment_confirmation">Ste prepričani, da želite izbrisati to prilogo?</string>
+    <string name="download_failed">Te datoteke ni mogoče prenesti.</string>
+    <string name="file_size_exceeds_limit">Velikost datoteke presega omejitev</string>
+    <string name="unsupported_file_type">Nepodprta vrsta datoteke</string>
+    <string name="save">Shrani</string>
+    <string name="discard">Zavrzi</string>
+    <string name="none_selected">Nič ni izbrano</string>
+    <string name="the_form_has_validation_errors">Obrazec vsebuje napake pri preverjanju</string>
+    <string name="the_form_has_edits">Obrazec je bil urejen</string>
+    <string name="do_you_want_to_save_your_changes">Ali želite shraniti vaše spremembe?</string>
+    <string name="no_associations_found">Ni najdenih asociacij</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="from_element">Od elementa</string>
+    <string name="to_element">Do elementa</string>
+    <string name="association_type">Tip asociacije</string>
+    <string name="remove_association">Odstrani asociacijo</string>
+    <string name="remove_association_tooltip">Samo odstrani asociacijo. Geoobjekt ostane.</string>
+    <string name="remove">Odstrani</string>
+    <string name="association_settings">Nastavitve asociacije</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Vidna vsebina</string>
+    <string name="content">Vsebina</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Imate %1$d napak, ki jih je treba popraviti pred shranjevanjem.</item>
+        <item quantity="one">Imate %1$d napako, ki jo je treba popraviti pred shranjevanjem.</item>
+        <item quantity="two">Imate %1$d napak, ki jih je treba popraviti pred shranjevanjem</item>
+        <item quantity="few">Imate %1$d napak, ki jih je treba popraviti pred shranjevanjem</item>
+        <item quantity="many">Imate %1$d napak, ki jih je treba popraviti pred shranjevanjem</item>
+        <item quantity="other">Imate %1$d napak, ki jih je treba popraviti pred shranjevanjem</item>
+    </plurals>
 </resources>

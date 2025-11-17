@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Натисніть, щоб відсканувати</string>
     <string name="unable_to_open_the_camera">Неможливо відкрити камеру</string>
     <string name="value_must_be_a_guid">Значення має бути дійсним GUID</string>
+    <string name="delete_attachment_title">Видалити прикріплення?</string>
+    <string name="delete_attachment_confirmation">Бажаєте видалити це прикріплення?</string>
+    <string name="download_failed">Не вдалося виконати завантаження цього файлу.</string>
+    <string name="file_size_exceeds_limit">Розмір файлу перевищує обмеження</string>
+    <string name="unsupported_file_type">Непідтримуваний тип файлу</string>
+    <string name="save">Зберегти</string>
+    <string name="discard">Вилучити</string>
+    <string name="none_selected">Нічого не вибрано</string>
+    <string name="the_form_has_validation_errors">У формі містяться помилки перевірки</string>
+    <string name="the_form_has_edits">Форма містить зміни</string>
+    <string name="do_you_want_to_save_your_changes">Бажаєте зберегти ваші зміни?</string>
+    <string name="no_associations_found">Зʼєднань не знайдено</string>
+    <string name="terminal">Термінал</string>
+    <string name="terminal_with_value">Термінал: %1$s</string>
+    <string name="from_element">Від елементу</string>
+    <string name="to_element">До елементу</string>
+    <string name="association_type">Тип з՚єднання</string>
+    <string name="remove_association">Видалити зʼєднання</string>
+    <string name="remove_association_tooltip">Тільки видаляє зʼєднання Обʼєкт залишається.</string>
+    <string name="remove">Вилучити</string>
+    <string name="association_settings">Параметри зʼєднання</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Видимий вміст</string>
+    <string name="content">Зміст</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">У вас є помилки (%1$d), які потрібно виправити перед збереженням.</item>
+        <item quantity="one">У вас є помилка (%1$d), яку потрібно виправити перед збереженням.</item>
+        <item quantity="two">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
+        <item quantity="few">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
+        <item quantity="many">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
+        <item quantity="other">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
+    </plurals>
 </resources>

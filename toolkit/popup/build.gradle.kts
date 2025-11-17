@@ -23,7 +23,16 @@ plugins {
     id("artifact-deploy")
     id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
+    alias(libs.plugins.kotlin.serialization) apply true
 }
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.popup"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -39,15 +48,6 @@ android {
         release {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // This flag is the same as applying '@ConsistentCopyVisibility' annotation to all data classes in the module.
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xconsistent-data-class-copy-visibility")
     }
 
     buildFeatures {
@@ -75,7 +75,6 @@ android {
             // This is the default variant.
         }
     }
-
 }
 
 apiValidation {
@@ -85,7 +84,11 @@ apiValidation {
     val composableSingletons = listOf(
         "com.arcgismaps.toolkit.popup.internal.ui.ComposableSingletons\$ExpandableCardKt",
         "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt",
-        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt"
+        "com.arcgismaps.toolkit.popup.internal.ui.expandablecard.ComposableSingletons\$ExpandableCardKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationDetailsKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationsFilterResultKt",
+        "com.arcgismaps.toolkit.popup.internal.element.utilityassociationselement.ComposableSingletons\$UtilityAssociationGroupResultKt",
+        "com.arcgismaps.toolkit.popup.internal.screens.ComposableSingletons\$ContentAwareTopBarKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
@@ -98,8 +101,9 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)

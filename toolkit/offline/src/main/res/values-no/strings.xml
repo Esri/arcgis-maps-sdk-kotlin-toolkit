@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Kartområder</string>
+    <string name="add_map_area">Legg til kartområde</string>
+    <string name="thumbnail_description">Miniatyrbilde for portalelement</string>
+    <string name="download">Last ned</string>
+    <string name="open">Åpne</string>
+    <string name="error">Feil</string>
+    <string name="loading">Laster inn</string>
+    <string name="loading_failed">Lasting mislyktes</string>
+    <string name="ready_to_download">Klar til å laste ned</string>
+    <string name="packaging">Pakker</string>
+    <string name="packaging_failed">Pakking mislyktes</string>
+    <string name="downloaded">Lastet ned</string>
+    <string name="downloading">Laster ned</string>
+    <string name="download_failed">Nedlastingen mislyktes</string>
+    <string name="currently_open">Åpne nå</string>
+    <string name="description">Beskrivelse</string>
+    <string name="download_map_area">Last ned kartområde</string>
+    <string name="remove_download">Fjern nedlasting</string>
+    <string name="delete_download">Slett nedlasting</string>
+    <string name="no_image_available">Ingen bilder tilgjengelig</string>
+    <string name="refresh">Oppdater</string>
+    <string name="cancelled">Avbrutt</string>
+    <string name="cancel">Avbryt</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Gi nytt navn</string>
+    <string name="enter_a_name">Angi et navn</string>
+    <string name="select_area">Velg område</string>
+    <string name="pan_and_zoom_text">Panorer og zoom for å definere området</string>
+    <string name="unique_name_text">Navnet på kartområdet må være unikt</string>
+    <string name="next_on_demand_area_title">Område %1$s</string>
+    <string name="directory_size">Størrelse: %1$s</string>
+    <string name="no_internet_connection_error_message">Ingen internettilkobling</string>
+    <string name="no_internet_error_message">Ingen Internettilkobling. Viser bare nedlastede områder.</string>
+    <string name="no_map_areas_error_message">Kan ikke hente kartområder for dette kartet.</string>
+    <string name="no_offline_map_areas_error_message">Det er ingen kartområder for dette kartet.</string>
+    <string name="error_fetching_areas">Feil ved henting av kartområder</string>
+    <string name="error_fetching_areas_message">Det oppstod en feil ved henting av kartområder.</string>
+    <string name="no_map_areas">Ingen kartområder</string>
+    <string name="empty_on_demand_message">Det er ingen kartområder for dette kartet. Trykk på knappen nedenfor for å komme i gang.</string>
+    <string name="offline_disabled">Frakoblet modus deaktivert</string>
+    <string name="offline_disabled_message">Kartet er ikke aktivert for bruk i frakoblet modus.</string>
+    <string name="level_of_detail">Detaljnivå</string>
+    <string name="room">Rom</string>
+    <string name="rooms">Rom</string>
+    <string name="house_property">Huseiendom</string>
+    <string name="houses">Hus</string>
+    <string name="small_building">Liten bygning</string>
+    <string name="building">Bygning</string>
+    <string name="buildings">Bygninger</string>
+    <string name="street">Gate</string>
+    <string name="streets">Gater</string>
+    <string name="neighborhood">Nabolag</string>
+    <string name="town">By</string>
+    <string name="city">Sted</string>
+    <string name="cities">Steder</string>
+    <string name="metropolitan_area">Storbyområde</string>
+    <string name="county">Fylke</string>
+    <string name="counties">Fylker</string>
+    <string name="state_province">Delstat/provins</string>
+    <string name="states_provinces">Delstater/provinser</string>
+    <string name="countries_small">Land (små)</string>
+    <string name="countries_big">Land (store)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Verden (små)</string>
+    <string name="world_big">Verden (store)</string>
+    <string name="world">Verden</string>
+</resources>

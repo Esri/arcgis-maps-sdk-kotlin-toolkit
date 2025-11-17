@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Ketuk untuk memindai</string>
     <string name="unable_to_open_the_camera">Tidak dapat membuka kamera</string>
     <string name="value_must_be_a_guid">Nilai harus berupa GUID yang valid</string>
+    <string name="delete_attachment_title">Hapus Lampiran?</string>
+    <string name="delete_attachment_confirmation">Anda yakin ingin menghapus lampiran ini?</string>
+    <string name="download_failed">Tidak dapat mengunduh file ini.</string>
+    <string name="file_size_exceeds_limit">Ukuran File Melebihi Batas</string>
+    <string name="unsupported_file_type">Jenis File Tidak Didukung</string>
+    <string name="save">Simpan</string>
+    <string name="discard">Buang</string>
+    <string name="none_selected">Tidak Ada yang Dipilih</string>
+    <string name="the_form_has_validation_errors">Formulir memiliki kesalahan validasi</string>
+    <string name="the_form_has_edits">Formulir memiliki editan</string>
+    <string name="do_you_want_to_save_your_changes">Apakah Anda ingin menyimpan perubahan Anda?</string>
+    <string name="no_associations_found">Tidak ditemukan asosiasi</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="from_element">Dari Elemen</string>
+    <string name="to_element">Ke Elemen</string>
+    <string name="association_type">Jenis Asosiasi</string>
+    <string name="remove_association">Hapus Asosiasi</string>
+    <string name="remove_association_tooltip">Hanya hapus asosiasi. Fitur tersisa</string>
+    <string name="remove">Hapus</string>
+    <string name="association_settings">Pengaturan Asosiasi</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Konten yang Terlihat</string>
+    <string name="content">Konten</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
+        <item quantity="one">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
+        <item quantity="two">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
+        <item quantity="few">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
+        <item quantity="many">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
+        <item quantity="other">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
+    </plurals>
 </resources>

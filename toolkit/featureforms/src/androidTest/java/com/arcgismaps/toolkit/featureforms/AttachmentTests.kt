@@ -46,11 +46,21 @@ class AttachmentTests : FeatureFormTestRunner(
      */
     @Test
     fun testImageAttachments() = runTest {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(featureFormState = featureFormState)
         }
         val attachmentsFormElement = featureForm.defaultAttachmentsElement
         assertThat(attachmentsFormElement).isNotNull()
+        composeTestRule.waitUntil(
+            timeoutMillis = 2_000,
+        ) {
+            // wait for the attachments to be loaded
+            attachmentsFormElement!!.attachments.isNotEmpty()
+        }
         val formAttachment = attachmentsFormElement!!.attachments.first()
         // get the attachments form element node
         val attachmentsField = composeTestRule.onNodeWithText(attachmentsFormElement.label)

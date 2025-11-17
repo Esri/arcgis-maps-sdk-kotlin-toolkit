@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Tocar para ler</string>
     <string name="unable_to_open_the_camera">Não é possível abrir a câmara</string>
     <string name="value_must_be_a_guid">O valor tem de ser um GUID válido</string>
+    <string name="delete_attachment_title">Eliminar anexo?</string>
+    <string name="delete_attachment_confirmation">Tem a certeza de que pretende eliminar este anexo?</string>
+    <string name="download_failed">Não foi possível transferir este ficheiro.</string>
+    <string name="file_size_exceeds_limit">O tamanho do ficheiro excede o limite</string>
+    <string name="unsupported_file_type">Tipo de ficheiro não suportado</string>
+    <string name="save">Guardar</string>
+    <string name="discard">Rejeitar</string>
+    <string name="none_selected">Nenhum selecionado</string>
+    <string name="the_form_has_validation_errors">O formulário contém erros de validação</string>
+    <string name="the_form_has_edits">O formulário contém edições</string>
+    <string name="do_you_want_to_save_your_changes">Pretende guardar as suas alterações?</string>
+    <string name="no_associations_found">Não foram encontradas associações</string>
+    <string name="terminal">Terminal</string>
+    <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="from_element">Elemento de</string>
+    <string name="to_element">Elemento para</string>
+    <string name="association_type">Tipo de associação</string>
+    <string name="remove_association">Remover associação</string>
+    <string name="remove_association_tooltip">Apenas remove a associação. O elemento permanece.</string>
+    <string name="remove">Remover</string>
+    <string name="association_settings">Definições de associação</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Conteúdo visível</string>
+    <string name="content">Conteúdo</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Tem %1$d erros que têm de ser corrigidos antes de guardar.</item>
+        <item quantity="one">Tem %1$d erro que tem de ser corrigido antes de guardar.</item>
+        <item quantity="two">Tem %1$d erros que têm de ser corrigidos antes de guardar</item>
+        <item quantity="few">Tem %1$d erros que têm de ser corrigidos antes de guardar</item>
+        <item quantity="many">Tem %1$d erros que têm de ser corrigidos antes de guardar</item>
+        <item quantity="other">Tem %1$d erros que têm de ser corrigidos antes de guardar</item>
+    </plurals>
 </resources>

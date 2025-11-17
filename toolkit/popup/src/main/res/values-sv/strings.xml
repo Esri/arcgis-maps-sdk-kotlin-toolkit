@@ -24,4 +24,24 @@
     <string name="other">Övrigt</string>
     <string name="close">Tillbaka</string>
     <string name="attachment_thumbnail">bilagans miniatyrbild</string>
+    <string name="terminal">Terminal</string>
+    <string name="no_associations_found">Inga associationer hittades</string>
+    <string name="visible_content">Synligt innehåll</string>
+    <string name="content">Innehåll</string>
+    <string name="containment_visible">Inneslutning synlig</string>
+    <string name="fraction_along_edge">Bråkdel längs kant</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Från element</string>
+    <string name="to_element">Till element</string>
+    <string name="association_type">Associationstyp</string>
+    <string name="remove_association">Ta bort association</string>
+    <string name="remove_association_tooltip">Tar endast bort association. Geoobjektet återstår.</string>
+    <string name="remove">Ta bort</string>
+    <string name="cancel">Avbryt</string>
+    <string name="none_selected">Inget har valts</string>
+    <string name="association_settings">Associationsinställningar</string>
+    <string name="show_all">Visa alla</string>
+    <string name="filter_by_feature_title">Filtrera efter titel på geoobjekt</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="associations">Associationer</string>
 </resources>

@@ -145,4 +145,36 @@
     <string name="tap_to_scan">Bakstelėkite, kad nuskaitytumėte</string>
     <string name="unable_to_open_the_camera">Nepavyksta atidaryti kameros</string>
     <string name="value_must_be_a_guid">Reikšmė turi būti tinkama GUID</string>
+    <string name="delete_attachment_title">Ištrinti priedą?</string>
+    <string name="delete_attachment_confirmation">Ar tikrai norite ištrinti šį priedą?</string>
+    <string name="download_failed">Nepavyko atsisiųsti šio failo.</string>
+    <string name="file_size_exceeds_limit">Failo dydis viršija limitą</string>
+    <string name="unsupported_file_type">Nepalaikomas failo tipas</string>
+    <string name="save">Įrašyti</string>
+    <string name="discard">Atmesti</string>
+    <string name="none_selected">Nieko nepasirinkta</string>
+    <string name="the_form_has_validation_errors">Formoje yra tikrinimo klaidų</string>
+    <string name="the_form_has_edits">Formoje yra pakeitimų</string>
+    <string name="do_you_want_to_save_your_changes">Ar norite išsaugoti pakeitimus?</string>
+    <string name="no_associations_found">Susiejimų nerasta</string>
+    <string name="terminal">Terminalas</string>
+    <string name="terminal_with_value">Terminalas: %1$s</string>
+    <string name="from_element">Iš elemento</string>
+    <string name="to_element">Į elementą</string>
+    <string name="association_type">Susiejimo tipas</string>
+    <string name="remove_association">Pašalinti susiejimą</string>
+    <string name="remove_association_tooltip">Pašalina tik susiejimą. Elementas išlieka.</string>
+    <string name="remove">Pašalinti</string>
+    <string name="association_settings">Susiejimo nustatymai</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">Matomas turinys</string>
+    <string name="content">Turinys</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant.</item>
+        <item quantity="one">Turite %1$d klaidą, kurią būtina ištaisyti prieš išsaugant.</item>
+        <item quantity="two">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
+        <item quantity="few">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
+        <item quantity="many">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
+        <item quantity="other">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
+    </plurals>
 </resources>

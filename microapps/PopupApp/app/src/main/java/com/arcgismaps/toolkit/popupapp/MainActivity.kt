@@ -23,7 +23,7 @@ package com.arcgismaps.toolkit.popupapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -31,13 +31,12 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandl
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MainScreen
-import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MapViewModel
 import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val viewModel: MapViewModel by viewModels { MapViewModel.Factory }
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             TestArcGISAuthenticationChallengeHandler(
                 BuildConfig.webMapUser,
@@ -45,15 +44,15 @@ class MainActivity : ComponentActivity() {
             )
         setContent {
             PopupAppTheme {
-                PopupApp(viewModel)
+                PopupApp()
             }
         }
     }
 }
 
 @Composable
-fun PopupApp(viewModel: MapViewModel) {
-    MainScreen(viewModel)
+fun PopupApp() {
+    MainScreen()
 }
 
 class TestArcGISAuthenticationChallengeHandler(

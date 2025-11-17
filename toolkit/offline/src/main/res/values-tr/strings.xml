@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Harita Alanları</string>
+    <string name="add_map_area">Harita Alanı Ekle</string>
+    <string name="thumbnail_description">PortalItem Küçük Resmi</string>
+    <string name="download">İndir</string>
+    <string name="open">Açık</string>
+    <string name="error">Hata</string>
+    <string name="loading">Yükleniyor</string>
+    <string name="loading_failed">Yükleme başarısız oldu</string>
+    <string name="ready_to_download">İndirilmeye hazır</string>
+    <string name="packaging">Paketleme</string>
+    <string name="packaging_failed">Paketleme başarısız oldu</string>
+    <string name="downloaded">İndirildi</string>
+    <string name="downloading">İndiriliyor</string>
+    <string name="download_failed">İndirme Başarısız</string>
+    <string name="currently_open">Şu Anda Açık</string>
+    <string name="description">Açıklama</string>
+    <string name="download_map_area">Harita Alanını İndir</string>
+    <string name="remove_download">İndirmeyi Kaldır</string>
+    <string name="delete_download">İndirmeyi Sil</string>
+    <string name="no_image_available">Kullanılabilir Görüntü Yok</string>
+    <string name="refresh">Yenile</string>
+    <string name="cancelled">İptal Edildi</string>
+    <string name="cancel">İptal</string>
+    <string name="confirm">Tamam</string>
+    <string name="rename">Yeniden Adlandır</string>
+    <string name="enter_a_name">Bir ad girin</string>
+    <string name="select_area">Alan seç</string>
+    <string name="pan_and_zoom_text">Alanı tanımlamak için kaydırın ve yakınlaştırın</string>
+    <string name="unique_name_text">Harita alanının adı benzersiz olmalıdır</string>
+    <string name="next_on_demand_area_title">Alan %1$s</string>
+    <string name="directory_size">Boyut: %1$s</string>
+    <string name="no_internet_connection_error_message">İnternet Bağlantısı Yok</string>
+    <string name="no_internet_error_message">İnternet bağlantısı yok. Yalnızca indirilen alanlar gösteriliyor.</string>
+    <string name="no_map_areas_error_message">Bu harita için harita alanları alınamadı.</string>
+    <string name="no_offline_map_areas_error_message">Bu harita için herhangi bir harita alanı bulunmamaktadır.</string>
+    <string name="error_fetching_areas">Harita Alanları Getirilirken Hata Oluştu</string>
+    <string name="error_fetching_areas_message">Harita alanları getirilirken bir hata oluştu.</string>
+    <string name="no_map_areas">Harita Alanı Yok</string>
+    <string name="empty_on_demand_message">Bu harita için herhangi bir harita alanı bulunmamaktadır. Başlamak için aşağıdaki butona dokunun.</string>
+    <string name="offline_disabled">Çevrim Dışı Devre Dışı</string>
+    <string name="offline_disabled_message">Harita çevrim dışı kullanım için etkinleştirilmemiştir.</string>
+    <string name="level_of_detail">Ayrıntı seviyesi</string>
+    <string name="room">Oda</string>
+    <string name="rooms">Odalar</string>
+    <string name="house_property">Ev Mülkiyeti</string>
+    <string name="houses">Evler</string>
+    <string name="small_building">Küçük Bina</string>
+    <string name="building">Bina</string>
+    <string name="buildings">Binalar</string>
+    <string name="street">Sokak</string>
+    <string name="streets">Sokaklar</string>
+    <string name="neighborhood">Komşuluk</string>
+    <string name="town">Kasaba</string>
+    <string name="city">Şehir</string>
+    <string name="cities">Şehirler</string>
+    <string name="metropolitan_area">Metropol Alan</string>
+    <string name="county">İdari Bölge</string>
+    <string name="counties">İdari Bölgeler</string>
+    <string name="state_province">Eyalet/İl</string>
+    <string name="states_provinces">Eyaletler/İller</string>
+    <string name="countries_small">Ülkeler (Küçük)</string>
+    <string name="countries_big">Ülkeler (Büyük)</string>
+    <string name="continent">Kıta</string>
+    <string name="world_small">Dünya (Küçük)</string>
+    <string name="world_big">Dünya (Büyük)</string>
+    <string name="world">Dünya</string>
+</resources>

@@ -22,6 +22,10 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 android {
     namespace = "com.esri.microappslib"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -42,13 +46,6 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
@@ -62,7 +59,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     debugImplementation(libs.bundles.debug)

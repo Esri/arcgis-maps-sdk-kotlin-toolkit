@@ -1,0 +1,400 @@
+/*
+ * Copyright 2025 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.arcgismaps.toolkit.featureforms.internal.screens
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.outlined.LocationSearching
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.layers.ArcGISSublayer
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
+import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
+import com.arcgismaps.toolkit.featureforms.internal.utils.SearchBar
+import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
+
+/**
+ * A screen that displays a list of features that can be associated with a utility network feature.
+ *
+ * @param viewModel The [AddAssociationFromSourceViewModel] that provides the data for the screen.
+ * @param onBackPressed A callback that is called when the back button is pressed.
+ * @param modifier The [Modifier] to apply to this layout.
+ */
+@Composable
+internal fun SelectAssociatedFeatureScreen(
+    viewModel: AddAssociationFromSourceViewModel,
+    onBackPressed: () -> Unit,
+    onFeatureCandidateSelected: () -> Unit,
+    onFeatureCandidateLocateRequest : (ArcGISFeature) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val lazyListState = rememberLazyListState()
+    val state by viewModel.filteredFeatureCandidatesUiState.collectAsState()
+    val candidates = state.candidates
+    val count = candidates.count()
+    val title = if (state.isLoading || viewModel.isSearchingForCandidates) {
+        stringResource(R.string.loading2)
+    } else {
+        stringResource(R.string.available_features, count)
+    }
+    val subTitle = viewModel.selectedAssetType?.name ?: ""
+    val context = LocalContext.current
+    val imageLoader = remember {
+        SharedImageLoader.get(context)
+    }
+    Column(modifier = modifier) {
+        AddWorkflowTopBar(
+            title = title,
+            subTitle = subTitle,
+            onBackPressed = onBackPressed,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SearchBar(
+            value = viewModel.associatedFeaturesFilterText,
+            onValueChange = { viewModel.setAssociatedFeaturesFilterText(it) },
+            placeholder = stringResource(R.string.search_features)
+        )
+        if (candidates.count() > 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.choose_to_add),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+        AnimatedContent(
+            targetState = state
+        ) { state ->
+            when {
+                state.isLoading || viewModel.isSearchingForCandidates -> {
+                    LoadingRow(modifier = Modifier.fillMaxWidth())
+                }
+
+                state.error != null -> {
+                    ErrorRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        message = "${state.error.localizedMessage}"
+                    )
+                }
+
+                state.candidates.count() == 0 -> {
+                    EmptyResultsRow(modifier = Modifier.fillMaxSize())
+                }
+
+                else -> {
+                    Surface(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(15.dp),
+                        color = MaterialTheme.colorScheme.surfaceBright
+                    ) {
+                        LazyColumn(
+                            state = lazyListState,
+                            modifier = Modifier.verticalScrollbar(
+                                state = lazyListState,
+                                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                width = 4.dp,
+                                offsetX = 4.dp,
+                                autoHide = true
+                            )
+                        ) {
+                            itemsIndexed(candidates) { index, item ->
+                                ListItem(
+                                    modifier = Modifier.clickable {
+                                        viewModel.selectFeatureCandidate(item)
+                                        onFeatureCandidateSelected()
+                                    },
+                                    headlineContent = {
+                                        Text(
+                                            text = item.title,
+                                            modifier = Modifier.padding(
+                                                start = 4.dp,
+                                                top = 4.dp,
+                                                bottom = 4.dp
+                                            )
+                                        )
+                                    },
+                                    leadingContent = {
+                                        AsyncImage(
+                                            model = item.feature.getSymbol(),
+                                            contentDescription = "Feature Symbol",
+                                            imageLoader = imageLoader,
+                                            modifier = Modifier.padding(start = 12.dp)
+                                        )
+                                    },
+                                    trailingContent = if (item.feature.geometry != null) {
+                                        {
+                                            IconButton(
+                                                onClick = {
+                                                    onFeatureCandidateLocateRequest(item.feature)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.LocationSearching,
+                                                    contentDescription = "Locate Feature",
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        }
+                                    } else null,
+                                    colors = ListItemDefaults.colors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceBright,
+                                    )
+                                )
+                                if (index < candidates.count() - 1) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    LaunchedEffect(lazyListState.canScrollForward) {
+        if (lazyListState.canScrollForward.not() && candidates.isNotEmpty()) {
+            // Load more feature candidates when the user scrolls to the end of the list
+            viewModel.loadMoreFeatureCandidates()
+        }
+    }
+}
+
+@Composable
+private fun EmptyResultsRow(modifier: Modifier = Modifier) {
+    val color = LocalContentColor.current
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.no_features_found),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(8.dp),
+            color = color
+        )
+        Text(
+            text = stringResource(R.string.refine_your_search_tip),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(8.dp)
+                .width(280.dp),
+            color = color.copy(alpha = 0.6f)
+        )
+    }
+}
+
+@Composable
+private fun LoadingRow(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(56.dp)
+                .padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun ErrorRow(modifier: Modifier = Modifier, message: String) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.Error,
+                contentDescription = "Error",
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Text(
+                text = "Error loading features.",
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = message,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+/**
+ * Returns the symbol of the feature. If the feature's layer is a subtype feature layer,
+ * it will return the symbol of the sublayer that the feature belongs to. If the feature's layer is
+ * a feature layer, it will return the symbol of the feature layer.
+ *
+ * If the symbol is not available, it will return null.
+ */
+internal fun ArcGISFeature.getSymbol(): Symbol? {
+    val renderer = when (featureTable?.layer) {
+        is SubtypeFeatureLayer -> sublayer?.renderer
+        is FeatureLayer -> (featureTable?.layer as? FeatureLayer)?.renderer
+        else -> null
+    }
+    return renderer?.getSymbol(this)
+}
+
+/**
+ * Returns the sublayer that the feature belongs to. If the feature's layer is not a subtype feature
+ * layer, it will return null.
+ */
+internal val ArcGISFeature.sublayer: ArcGISSublayer?
+    get() {
+        val subtypeFeatureLayer = featureTable?.layer as? SubtypeFeatureLayer ?: return null
+        val code = getFeatureSubtype()?.code ?: return null
+        return subtypeFeatureLayer.getSublayerWithSubtypeCode(code)
+    }
+
+/**
+ * A modifier that adds a vertical scrollbar to a scrollable content.
+ */
+internal fun Modifier.verticalScrollbar(
+    state: LazyListState,
+    trackColor: Color,
+    color: Color,
+    width: Dp,
+    offsetX: Dp,
+    autoHide: Boolean = true
+): Modifier = this
+    .padding(end = offsetX)
+    .then(
+        this.composed {
+            // fade in fast when scrolling, fade out slow when not scrolling
+            val duration = if (state.isScrollInProgress) 50 else 500
+            // animate the scrollbar alpha based on the scroll state
+            val alpha by animateFloatAsState(
+                targetValue = if (!autoHide || state.isScrollInProgress) 1f else 0f,
+                animationSpec = tween(durationMillis = duration),
+                label = ""
+            )
+
+            drawWithContent {
+                drawContent()
+
+                val firstVisibleElement =
+                    state.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@drawWithContent
+                val itemHeight = firstVisibleElement.size.toFloat()
+                val totalHeight = itemHeight * state.layoutInfo.totalItemsCount
+                val scrollbarHeight = minOf(size.height / totalHeight, 1f) * size.height
+                // Do not draw scrollbar if it is not needed
+                if (scrollbarHeight >= size.height) return@drawWithContent
+                // Calculate the Y offset of the scrollbar
+                val scrollBarOffsetY = (size.height / totalHeight) *
+                    (state.firstVisibleItemIndex * itemHeight + state.firstVisibleItemScrollOffset)
+                // Calculate the X offset of the scrollbar
+                val scrollBarOffsetX = size.width + width.toPx() - offsetX.toPx()
+
+                // draw the scroll bar track
+                drawRoundRect(
+                    color = trackColor,
+                    topLeft = Offset(scrollBarOffsetX, 0f),
+                    size = Size(width.toPx(), size.height),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+                // draw the scroll bar
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
+                    size = Size(width.toPx(), scrollbarHeight),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+            }
+        }
+    )

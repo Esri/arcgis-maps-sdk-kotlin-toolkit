@@ -145,4 +145,36 @@
     <string name="tap_to_scan">แตะเพื่อสแกน</string>
     <string name="unable_to_open_the_camera">ไม่สามารถเปิดกล้องได้</string>
     <string name="value_must_be_a_guid">ค่าต้องเป็น GUID ที่ใช้งานได้</string>
+    <string name="delete_attachment_title">ลบไฟล์แนบหรือไม่</string>
+    <string name="delete_attachment_confirmation">แน่ใจหรือว่าคุณต้องการลบไฟล์แนบนี้</string>
+    <string name="download_failed">ไม่สามารถดาวน์โหลดไฟล์นี้ได้</string>
+    <string name="file_size_exceeds_limit">ขนาดไฟล์เกินขีดจำกัด</string>
+    <string name="unsupported_file_type">ประเภทไฟล์ที่ไม่รองรับ</string>
+    <string name="save">จัดเก็บ</string>
+    <string name="discard">ละทิ้ง</string>
+    <string name="none_selected">ไม่มีการเลือก</string>
+    <string name="the_form_has_validation_errors">ฟอร์มมีข้อผิดพลาดการตรวจสอบ</string>
+    <string name="the_form_has_edits">ฟอร์มมีการแก้ไข</string>
+    <string name="do_you_want_to_save_your_changes">คุณต้องการบันทึกการเปลี่ยนแปลงของคุณหรือไม่</string>
+    <string name="no_associations_found">ไม่พบความสัมพันธ์</string>
+    <string name="terminal">เทอร์มินัล</string>
+    <string name="terminal_with_value">เทอร์มินัล : %1$s</string>
+    <string name="from_element">องค์ประกอบจาก</string>
+    <string name="to_element">องค์ประกอบถึง</string>
+    <string name="association_type">ประเภทความสัมพันธ์</string>
+    <string name="remove_association">ลบความสัมพันธ์</string>
+    <string name="remove_association_tooltip">ลบเฉพาะความสัมพันธ์เท่านั้น เหลือฟีเจอร์ไว้</string>
+    <string name="remove">ลบทิ้ง</string>
+    <string name="association_settings">การตั้งค่าความสัมพันธ์</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">เนื้อหาที่มองเห็น</string>
+    <string name="content">เนื้อหา</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+        <item quantity="one">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+        <item quantity="two">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+        <item quantity="few">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+        <item quantity="many">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+        <item quantity="other">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
+    </plurals>
 </resources>

@@ -23,10 +23,15 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization) apply true
 }
 
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 android {
@@ -50,13 +55,6 @@ android {
             isMinifyEnabled = false
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -94,11 +92,16 @@ dependencies {
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
+    // kotlinx serialization
+    implementation(libs.kotlinx.serialization.json)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+    // coil
+    implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

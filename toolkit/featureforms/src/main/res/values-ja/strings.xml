@@ -145,4 +145,36 @@
     <string name="tap_to_scan">タップしてスキャン</string>
     <string name="unable_to_open_the_camera">カメラを開けません</string>
     <string name="value_must_be_a_guid">値は有効な GUID である必要があります</string>
+    <string name="delete_attachment_title">添付ファイルを削除しますか？</string>
+    <string name="delete_attachment_confirmation">この添付ファイルを削除しますか？</string>
+    <string name="download_failed">このファイルをダウンロードできません。</string>
+    <string name="file_size_exceeds_limit">ファイル サイズが制限を超えています</string>
+    <string name="unsupported_file_type">サポートされていないファイル タイプ</string>
+    <string name="save">保存</string>
+    <string name="discard">破棄</string>
+    <string name="none_selected">選択されていません</string>
+    <string name="the_form_has_validation_errors">フォームには検証エラーがあります</string>
+    <string name="the_form_has_edits">フォームは編集されています</string>
+    <string name="do_you_want_to_save_your_changes">変更を保存しますか？</string>
+    <string name="no_associations_found">関連付けが見つかりません</string>
+    <string name="terminal">ターミナル</string>
+    <string name="terminal_with_value">ターミナル: %1$s</string>
+    <string name="from_element">始点エレメント</string>
+    <string name="to_element">終点エレメント</string>
+    <string name="association_type">関連付けタイプ</string>
+    <string name="remove_association">関連付けの削除</string>
+    <string name="remove_association_tooltip">関連付けのみを削除します。 フィーチャは維持されます。</string>
+    <string name="remove">削除</string>
+    <string name="association_settings">関連付け設定</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="visible_content">表示コンテンツ</string>
+    <string name="content">コンテンツ</string>
+    <plurals name="you_have_errors_that_must_be_fixed_before_saving">
+        <item quantity="zero">保存する前に修正が必要な %1$d エラーがあります。</item>
+        <item quantity="one">保存する前に修正が必要な %1$d エラーがあります。</item>
+        <item quantity="two">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="few">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="many">保存する前に修正が必要な %1$d エラーがあります</item>
+        <item quantity="other">保存する前に修正が必要な %1$d エラーがあります</item>
+    </plurals>
 </resources>

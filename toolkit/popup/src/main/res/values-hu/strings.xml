@@ -24,4 +24,24 @@
     <string name="other">Egyéb</string>
     <string name="close">Vissza</string>
     <string name="attachment_thumbnail">csatolmány bélyegkép</string>
+    <string name="terminal">Terminál</string>
+    <string name="no_associations_found">Nem találhatók társítások</string>
+    <string name="visible_content">Látható tartalom</string>
+    <string name="content">Tartalom</string>
+    <string name="containment_visible">Látható befoglalás</string>
+    <string name="fraction_along_edge">Részarány az él mentén</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Az elemtől</string>
+    <string name="to_element">Az elemhez</string>
+    <string name="association_type">Társítás típusa</string>
+    <string name="remove_association">Társítás eltávolítása</string>
+    <string name="remove_association_tooltip">Csak a társítást távolítja el. A vektoros elem megmarad.</string>
+    <string name="remove">Eltávolítás</string>
+    <string name="cancel">Mégse</string>
+    <string name="none_selected">Egy sincs kijelölve</string>
+    <string name="association_settings">Társítási beállítások</string>
+    <string name="show_all">Összes megjelenítése</string>
+    <string name="filter_by_feature_title">Szűrés vektoroselem-cím szerint</string>
+    <string name="containment_visible_value">Látható: %1$s</string>
+    <string name="associations">Társítások</string>
 </resources>

@@ -16,16 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
-import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
-import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 
 internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
@@ -57,80 +48,4 @@ internal class RadioButtonFieldState(
     } else {
         !codedValues.contains(initialValue)
     }
-
-    companion object {
-
-        /**
-         * Default saver for the [RadioButtonFieldState].
-         */
-        fun Saver(
-            formElement: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope
-        ): Saver<RadioButtonFieldState, Any> = listSaver(
-            save = {
-                listOf(
-                    it.value.value.data
-                )
-            },
-            restore = { list ->
-                val input = formElement.input as RadioButtonsFormInput
-                RadioButtonFieldState(
-                    id = formElement.hashCode(),
-                    properties = RadioButtonFieldProperties(
-                        label = formElement.label,
-                        placeholder = formElement.hint,
-                        description = formElement.description,
-                        value = formElement.value,
-                        validationErrors = formElement.mapValidationErrors(scope),
-                        editable = formElement.isEditable,
-                        required = formElement.isRequired,
-                        visible = formElement.isVisible,
-                        fieldType = formElement.fieldType,
-                        codedValues = input.codedValues.toMap(),
-                        showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
-                    ),
-                    initialValue = list[0],
-                    hasValueExpression = formElement.hasValueExpression,
-                    scope = scope,
-                    updateValue = formElement::updateValue,
-                    evaluateExpressions = form::evaluateExpressions
-                )
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberRadioButtonFieldState(
-    field: FieldFormElement,
-    form: FeatureForm,
-    scope: CoroutineScope
-): RadioButtonFieldState = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = RadioButtonFieldState.Saver(field, form, scope)
-) {
-    val input = field.input as RadioButtonsFormInput
-    RadioButtonFieldState(
-        id = field.hashCode(),
-        properties = RadioButtonFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.value,
-            validationErrors = field.mapValidationErrors(scope),
-            editable = field.isEditable,
-            required = field.isRequired,
-            visible = field.isVisible,
-            fieldType = field.fieldType,
-            codedValues = input.codedValues.toMap(),
-            showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel
-        ),
-        hasValueExpression = field.hasValueExpression,
-        scope = scope,
-        updateValue = field::updateValue,
-        evaluateExpressions = form::evaluateExpressions
-    )
 }

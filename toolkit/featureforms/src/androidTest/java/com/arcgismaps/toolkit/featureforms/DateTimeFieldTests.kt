@@ -26,7 +26,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.performTextClearance
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -52,9 +51,13 @@ class DateTimeFieldTests : FeatureFormTestRunner(
 
     @Before
     fun setContent() {
+        val featureFormState = FeatureFormState(
+            featureForm = featureForm,
+            coroutineScope = scope
+        )
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm
+                featureFormState = featureFormState
             )
         }
     }

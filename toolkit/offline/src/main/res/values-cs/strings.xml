@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2025 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="map_areas">Oblasti mapy</string>
+    <string name="add_map_area">Přidat oblast mapy</string>
+    <string name="thumbnail_description">Miniatura položky portálu</string>
+    <string name="download">Stahování</string>
+    <string name="open">Otevřít</string>
+    <string name="error">Chyba</string>
+    <string name="loading">Načítání</string>
+    <string name="loading_failed">Načítání se nezdařilo</string>
+    <string name="ready_to_download">Připraveno ke stažení</string>
+    <string name="packaging">Vytváření balíčku</string>
+    <string name="packaging_failed">Vytvoření balíčku se nezdařilo</string>
+    <string name="downloaded">Staženo</string>
+    <string name="downloading">Stahování</string>
+    <string name="download_failed">Stahování se nezdařilo.</string>
+    <string name="currently_open">Aktuálně otevřené</string>
+    <string name="description">Popis</string>
+    <string name="download_map_area">Stáhnout oblast mapy</string>
+    <string name="remove_download">Odstranit stahování</string>
+    <string name="delete_download">Odstranit stahování</string>
+    <string name="no_image_available">Žádný snímek k dispozici</string>
+    <string name="refresh">Obnovit</string>
+    <string name="cancelled">Zrušeno</string>
+    <string name="cancel">Storno</string>
+    <string name="confirm">OK</string>
+    <string name="rename">Přejmenovat</string>
+    <string name="enter_a_name">Zadejte název</string>
+    <string name="select_area">Vybrat oblast</string>
+    <string name="pan_and_zoom_text">Posouváním a přibližováním definujte oblast</string>
+    <string name="unique_name_text">Název oblasti mapy musí být jedinečný</string>
+    <string name="next_on_demand_area_title">Plocha %1$s</string>
+    <string name="directory_size">Velikost: %1$s</string>
+    <string name="no_internet_connection_error_message">Žádné připojení k internetu</string>
+    <string name="no_internet_error_message">Žádné připojení k internetu. Zobrazují se pouze stažené oblasti.</string>
+    <string name="no_map_areas_error_message">Načtení oblastí mapy pro tuto mapu se nezdařilo.</string>
+    <string name="no_offline_map_areas_error_message">Neexistují žádné oblasti mapy pro tuto mapu.</string>
+    <string name="error_fetching_areas">Při načítání oblastí mapy došlo k chybě</string>
+    <string name="error_fetching_areas_message">Při načítání oblastí mapy došlo k chybě.</string>
+    <string name="no_map_areas">Žádné oblasti mapy</string>
+    <string name="empty_on_demand_message">Neexistují žádné oblasti mapy pro tuto mapu. Začněte klepnutím na tlačítko níže.</string>
+    <string name="offline_disabled">Offline stav deaktivován</string>
+    <string name="offline_disabled_message">Mapa není připravena k práci offline.</string>
+    <string name="level_of_detail">Úroveň podrobností</string>
+    <string name="room">Místnost</string>
+    <string name="rooms">Místnosti</string>
+    <string name="house_property">Nemovitost – dům</string>
+    <string name="houses">Domy</string>
+    <string name="small_building">Malá budova</string>
+    <string name="building">Zástavba</string>
+    <string name="buildings">Budovy</string>
+    <string name="street">Ulice</string>
+    <string name="streets">Více ulic</string>
+    <string name="neighborhood">Čtvrť</string>
+    <string name="town">Obec</string>
+    <string name="city">Město</string>
+    <string name="cities">Města</string>
+    <string name="metropolitan_area">Metropolitní oblast</string>
+    <string name="county">Kraj</string>
+    <string name="counties">Kraje</string>
+    <string name="state_province">Stát/provincie</string>
+    <string name="states_provinces">Státy/provincie</string>
+    <string name="countries_small">Země (malé)</string>
+    <string name="countries_big">Země (velké)</string>
+    <string name="continent">Kontinent</string>
+    <string name="world_small">Svět (malé)</string>
+    <string name="world_big">Svět (velké)</string>
+    <string name="world">Svět</string>
+</resources>

@@ -24,4 +24,24 @@
     <string name="other">Інше</string>
     <string name="close">Назад</string>
     <string name="attachment_thumbnail">зразок прикріплення</string>
+    <string name="terminal">Термінал</string>
+    <string name="no_associations_found">Зʼєднань не знайдено</string>
+    <string name="visible_content">Видимий вміст</string>
+    <string name="content">Зміст</string>
+    <string name="containment_visible">Видиме включення</string>
+    <string name="fraction_along_edge">Частка уздовж ребра</string>
+    <string name="percent_along_edge">%1$d %%</string>
+    <string name="from_element">Від елементу</string>
+    <string name="to_element">До елементу</string>
+    <string name="association_type">Тип з՚єднання</string>
+    <string name="remove_association">Видалити зʼєднання</string>
+    <string name="remove_association_tooltip">Тільки видаляє зʼєднання Обʼєкт залишається.</string>
+    <string name="remove">Вилучити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="none_selected">Нічого не вибрано</string>
+    <string name="association_settings">Параметри зʼєднання</string>
+    <string name="show_all">Показати всі</string>
+    <string name="filter_by_feature_title">Фільтрувати за назвою обʼєкту</string>
+    <string name="containment_visible_value">Видимий: %1$s</string>
+    <string name="associations">З’єднання</string>
 </resources>

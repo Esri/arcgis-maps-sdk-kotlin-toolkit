@@ -75,8 +75,8 @@ To configure the auto-hide behavior, pass in the `autoHide` parameter.
 ```kotlin
 // show the compass and pass the current mapRotation
 Compass(rotation = mapRotation, autoHide = false) {
-    // reset the ComposableMap viewpoint rotation to point north using the MapInterface
-    mapInterface.setViewpointRotation(0.0)
+    // reset the Map viewpoint rotation to point north using the MapViewProxy
+    mapViewProxy.setViewpointRotation(0.0)
 }
 ```
 
