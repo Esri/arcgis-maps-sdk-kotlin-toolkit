@@ -136,7 +136,7 @@ class TC3ViewModel : ViewModel() {
                 ), 170000.0
             )
         },
-        ArcGISMap(BasemapStyle.OsmBlueprint).apply {
+        ArcGISMap(BasemapStyle.OpenStreets).apply {
             initialViewpoint = Viewpoint(
                 53.321736,
                 22.697703,
