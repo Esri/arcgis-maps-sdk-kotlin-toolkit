@@ -198,5 +198,6 @@ dependencies {
     // Include only if internal tests are required
     if (file(project.findProperty("toolkitTestDir") as String).exists()) {
         androidTestImplementation(libs.mockingjay)
+        androidTestImplementation(testFixtures(arcgis.mapsSdk))
     }
 }

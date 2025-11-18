@@ -404,7 +404,7 @@ internal class AddAssociationFromSourceViewModel(
      */
     suspend fun addAssociation(
         isContainmentVisible: Boolean,
-        percentAlong: Float? = null,
+        percentAlong: Double? = null,
         fromTerminalId: Int? = null,
         toTerminalId: Int? = null,
     ): Result<UtilityAssociationResult> = runCatching {
@@ -461,7 +461,7 @@ internal class AddAssociationFromSourceViewModel(
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = percentAlong.toDouble(),
+                                fractionAlongEdge = percentAlong,
                                 terminal = fromTerminal
                             )
                         } else {
@@ -481,7 +481,7 @@ internal class AddAssociationFromSourceViewModel(
                             element.addAssociation(
                                 feature = feature,
                                 filter = filter,
-                                fractionAlongEdge = percentAlong.toDouble(),
+                                fractionAlongEdge = percentAlong,
                                 terminal = toTerminal
                             )
                         } else {
@@ -500,7 +500,7 @@ internal class AddAssociationFromSourceViewModel(
                         element.addAssociation(
                             feature = feature,
                             filter = filter,
-                            fractionAlongEdge = percentAlong.toDouble()
+                            fractionAlongEdge = percentAlong
                         )
                     }
 
