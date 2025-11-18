@@ -113,6 +113,7 @@ public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewKt {
 public final class com/arcgismaps/toolkit/geoviewcompose/LocalSceneViewProxy : com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun locationToScreen (Lcom/arcgismaps/geometry/Point;)Lcom/arcgismaps/mapping/view/LocationToScreenResult;
 	public final fun screenToBaseSurface (Lcom/arcgismaps/mapping/view/DoubleXY;)Lcom/arcgismaps/geometry/Point;
 	public final fun screenToLocation-gIAlu-s (Lcom/arcgismaps/mapping/view/DoubleXY;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setViewpointAnimated-E0qYoyE (Lcom/arcgismaps/mapping/Viewpoint;Lcom/arcgismaps/mapping/view/AnimationCurve;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
