@@ -40,6 +40,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.Basemap
+import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
@@ -62,7 +64,36 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the view-based [LocalSceneView].
+ * A user interface control that displays geographic content defined by a local [ArcGISScene].
+ * A local scene view is a user interface that displays layers and graphics. It controls the area of
+ * the local scene that is visible and supports user interactions such as pan and zoom. The local
+ * scene view also provides access to the underlying layer data in a local scene.
+ *
+ * To display a local scene, add this view to the composition and pass a local `ArcGISScene` to it
+ * via the [scene] parameter. This loads the scene and its content, such as a [Basemap] and a
+ * collection of operational layers, and displays this content on screen.
+ *
+ * User interactions such as pan, zoom, rotate, and identify or selection are supported in the
+ * [LocalSceneView] using touch interaction.
+ *
+ * The visible area ([Viewpoint]) of the local scene view is defined by the visible extent of the
+ * scene. To determine the current visible area or the center point and scale of the view, make sure
+ * that any user-initiated or programmatic navigation is complete before getting the current
+ * [Viewpoint] by listening to the [onNavigationChanged] callback.
+ *
+ * You can programmatically set the visible area by specifying a viewpoint. For example,
+ * [GeoViewProxy.setViewpoint] sets the visible area to the extent of a provided geometry, and
+ * [LocalSceneViewProxy.setViewpointCamera] centers the local scene view at a given point. Any
+ * geometries passed to these methods are automatically projected to match the [SpatialReference] of
+ * the [scene], if required.
+ *
+ * [FloorAware] is not yet supported in the local scene view, and any layer [FloorAware] configurations
+ * will not be honored.
+ *
+ * In an MVC architecture, the local scene view represents the View tier. The Model tier is
+ * represented by the [ArcGISScene] object which can provide a collection of operational layers and
+ * a [Basemap]. You can only set one local scene per local scene view, but you can replace the
+ * [scene] with another when the application is running.
  *
  * @param scene the [ArcGISScene] to be rendered by this composable LocalSceneView
  * @param modifier modifier to be applied to the composable LocalSceneView
