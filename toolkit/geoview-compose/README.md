@@ -1,7 +1,6 @@
 # GeoView-Compose
 
-The GeoView-Compose module provides `@Composable` implementations of the `MapView`, `SceneView`
-and `LocalSceneView` with a Compose-idiomatic API.
+The GeoView-Compose module provides `@Composable` implementations of the `MapView`, `SceneView` and `LocalSceneView` with a Compose-idiomatic API.
 
 ![image](screenshot.png)
 
@@ -237,8 +236,7 @@ in the project.
 
 ### Other Examples:
 
-Other microapps that demonstrate various workflows with the composable `MapView`,`SceneView` and
-`LocalSceneView` are available:
+Other microapps that demonstrate various workflows with the composable `MapView`,`SceneView` and `LocalSceneView` are available:
 
 - [MapView Geometry Editor App](../../microapps/MapViewGeometryEditorApp/README.md) demonstrates the use of `GeometryEditor` and `GraphicsOverlay`
 - [MapView Insets App](../../microapps/MapViewInsetsApp/README.md) demonstrates the use of `Insets`
