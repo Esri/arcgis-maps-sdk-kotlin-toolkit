@@ -64,9 +64,21 @@ public sealed class GeoViewProxy(className: String) {
         "$className must be part of the composition when this member is called."
 
     /**
-     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
-     * A null value represents that it is currently undetermined.
+     * True if continuous panning across the international date line is enabled, false otherwise.
+     * By default, a [GeoView] attempts to wrap the [com.arcgismaps.mapping.ArcGISMap] or [com.arcgismaps.mapping.ArcGISScene]
+     * across the international date line for a continuous panning user experience.
+     * The eastern and western hemispheres wrap to form a continuous map, giving the impression that the map is endless.
      *
+     * Wraparound display is always enabled for a [SceneView]. It is always disabled for a [LocalSceneView].
+     *
+     * To disable wraparound behavior for a composable [MapView] (or to re-enable it), you can set the composable MapView's parameter
+     * `wrapAroundMode` to the appropriate value. Wraparound can only be applied to a [MapView] if certain conditions are met, as
+     * described in [com.arcgismaps.mapping.view.WrapAroundMode.EnabledWhenSupported].
+     *
+     * If wraparound is enabled, geometries returned from the callback `MapView.onVisibleAreaChanged` may have coordinates outside
+     * the domain of the spatial reference of the map. Before using such geometries to perform spatial queries,
+     * address finding, or as feature geometries in a geodatabase, you must normalize them to lie within the
+     * spatial reference domain using [com.arcgismaps.geometry.GeometryEngine.normalizeCentralMeridian].
      * @since 200.4.0
      */
     public val isWrapAroundEnabled: Boolean?
