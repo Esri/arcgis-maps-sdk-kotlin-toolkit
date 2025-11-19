@@ -13,7 +13,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
-* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
+* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView, SceneView and LocalSceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
   * **[OverviewMap](toolkit/geoview-compose#display-an-overviewmap)** - Displays the visible extent of a GeoView in a small "inset" map.
 * **[Legend](toolkit/legend)** - Displays a legend for a map or a scene.  
