@@ -1,6 +1,6 @@
 # ArcGIS Maps SDK for Kotlin Toolkit
 
-The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the new ArcGIS Maps SDK for Kotlin.
+The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the ArcGIS Maps SDK for Kotlin.
 
 ## Toolkit Components
 
@@ -53,7 +53,7 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.8.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:300.0.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-basemapgallery")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
