@@ -1,6 +1,6 @@
 # GeoView-Compose
 
-The GeoView-Compose module provides `@Composable` implementations of the `MapView`, `SceneView` 
+The GeoView-Compose module provides `@Composable` implementations of the `MapView`, `SceneView`
 and `LocalSceneView` with a Compose-idiomatic API.
 
 ![image](screenshot.png)
