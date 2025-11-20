@@ -220,13 +220,12 @@ public fun SceneView(
  * zoom, tilt, and rotate.
  * It also provides access to the underlying layer data in the scene.
  *
- * User interactions (pan, zoom, tilt, rotate, identify, selection) are supported using touch, mouse, keyboard,
- * or pen/pencil input on the composable. If required, you can override keys, clicks, and gestures to provide
- * a specific user experience by using callbacks such as:
+ * User interactions (pan, zoom, tilt, rotate, identify, selection) are supported using touch interaction on the
+ * composable. If required, you can respond to certain gesture events to provide
+ * a specific user experience by collecting gesture flows such as:
  * - [onPan]
  * - [onSingleTapConfirmed]
  * - [onDoubleTap]
- * - etc.
  *
  * The visible area (`Viewpoint`) of the composable scene view is defined by the position and orientation of a `Camera`.
  * The current visible area can be accessed through the lambda callbacks:
@@ -242,7 +241,7 @@ public fun SceneView(
  * In an MVVM architecture, this composable represents the View tier. The Model tier is the [ArcGISScene], which can
  * provide operational layers, base map, and a base surface.
  *
- * Only one [arcGISScene] can be set at a time, but you may replace `SceneView.scene`
+ * Only one [arcGISScene] can be set at a time, but you may replace it
  * while the application is running.
  *
  * See [Scene view documentation](https://developers.arcgis.com/documentation/mapping-apis-and-services/maps/scenes-3d/#scene-view)

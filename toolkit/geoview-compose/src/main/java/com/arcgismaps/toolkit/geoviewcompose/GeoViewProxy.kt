@@ -65,11 +65,11 @@ public sealed class GeoViewProxy(className: String) {
 
     /**
      * True if continuous panning across the international date line is enabled, false otherwise.
-     * By default, a `GeoView` attempts to wrap the `ArcGISMap` or `ArcGISScene across the international date line for
+     * By default, a `GeoView` attempts to wrap the `ArcGISMap` or `ArcGISScene` across the international date line for
      * a continuous panning user experience.
      * The eastern and western hemispheres wrap to form a continuous map, giving the impression that the map is endless.
      *
-     * Wraparound display is always enabled for a `SceneView`. It is always disabled for a `LocalSceneView.
+     * Wraparound display is always enabled for a `SceneView`. It is always disabled for a `LocalSceneView`.
      *
      * To disable wraparound behavior for a composable `MapView` (or to re-enable it), you can set the composable `MapView`'s parameter
      * `wrapAroundMode` to the appropriate value. Wraparound can only be applied to a `MapView` if certain conditions are met, as
