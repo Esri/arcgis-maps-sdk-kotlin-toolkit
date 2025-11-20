@@ -65,20 +65,20 @@ public sealed class GeoViewProxy(className: String) {
 
     /**
      * True if continuous panning across the international date line is enabled, false otherwise.
-     * By default, a [GeoView] attempts to wrap the [com.arcgismaps.mapping.ArcGISMap] or [com.arcgismaps.mapping.ArcGISScene]
-     * across the international date line for a continuous panning user experience.
+     * By default, a `GeoView` attempts to wrap the `ArcGISMap` or `ArcGISScene across the international date line for
+     * a continuous panning user experience.
      * The eastern and western hemispheres wrap to form a continuous map, giving the impression that the map is endless.
      *
-     * Wraparound display is always enabled for a [SceneView]. It is always disabled for a [LocalSceneView].
+     * Wraparound display is always enabled for a `SceneView`. It is always disabled for a `LocalSceneView.
      *
-     * To disable wraparound behavior for a composable [MapView] (or to re-enable it), you can set the composable MapView's parameter
-     * `wrapAroundMode` to the appropriate value. Wraparound can only be applied to a [MapView] if certain conditions are met, as
-     * described in [com.arcgismaps.mapping.view.WrapAroundMode.EnabledWhenSupported].
+     * To disable wraparound behavior for a composable `MapView` (or to re-enable it), you can set the composable `MapView`'s parameter
+     * `wrapAroundMode` to the appropriate value. Wraparound can only be applied to a `MapView` if certain conditions are met, as
+     * described in [WrapAroundMode.EnabledWhenSupported](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.view/-wrap-around-mode/-enabled-when-supported/index.html).
      *
      * If wraparound is enabled, geometries returned from the callback `MapView.onVisibleAreaChanged` may have coordinates outside
      * the domain of the spatial reference of the map. Before using such geometries to perform spatial queries,
      * address finding, or as feature geometries in a geodatabase, you must normalize them to lie within the
-     * spatial reference domain using [com.arcgismaps.geometry.GeometryEngine.normalizeCentralMeridian].
+     * spatial reference domain using [GeometryEngine.normalizeCentralMeridian](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.geometry/-geometry-engine/normalize-central-meridian.html).
      * @since 200.4.0
      */
     public val isWrapAroundEnabled: Boolean?
@@ -158,7 +158,7 @@ public sealed class GeoViewProxy(className: String) {
      * @param returnPopupsOnly whether the graphics property of the results are populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
-     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
+     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [Graphics](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.view/-graphic/index.html)
      * @since 200.4.0
      */
     public suspend fun identifyGraphicsOverlays(
