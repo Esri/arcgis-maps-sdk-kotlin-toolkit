@@ -344,9 +344,7 @@ public fun SceneView(
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics { contentDescription = "SceneView" },
+            modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
