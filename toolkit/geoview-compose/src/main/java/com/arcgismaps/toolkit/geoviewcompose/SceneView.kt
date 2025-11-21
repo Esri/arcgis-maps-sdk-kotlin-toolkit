@@ -211,8 +211,40 @@ public fun SceneView(
         content = content
     )
 }
+
 /**
- * A compose equivalent of the view-based [SceneView].
+ * A composable UI element that displays three-dimensional (3D) geographic content defined by an `ArcGISScene`.
+ *
+ * A composable scene view displays `ArcGISScene` layers and graphics in 3D. It uses a `Camera` to control
+ * the visible area (extent) of the `ArcGISScene` (see [cameraController]) and supports user interactions such as pan,
+ * zoom, tilt, and rotate.
+ * It also provides access to the underlying layer data in the scene.
+ *
+ * User interactions (pan, zoom, tilt, rotate, identify, selection) are supported using touch interaction on the
+ * composable. If required, you can respond to certain gesture events to provide
+ * a specific user experience by collecting gesture flows such as:
+ * - [onPan]
+ * - [onSingleTapConfirmed]
+ * - [onDoubleTap]
+ *
+ * The visible area (`Viewpoint`) of the composable scene view is defined by the position and orientation of a `Camera`.
+ * The current visible area can be accessed through the lambda callbacks:
+ * - [onViewpointChangedForCenterAndScale]
+ * - [onViewpointChangedForBoundingGeometry]
+ * - [onCurrentViewpointCameraChanged]
+ *
+ * These callbacks are triggered when navigation completes or the viewpoint changes.
+ *
+ * To programmatically set the viewpoint, use a [SceneViewProxy] passed to the composable and call methods such as
+ * [SceneViewProxy.setViewpointAnimated] or [SceneViewProxy.setViewpointCamera].
+ *
+ * In an MVVM architecture, this composable represents the View tier. The Model tier is the [ArcGISScene], which can
+ * provide operational layers, base map, and a base surface.
+ *
+ * Only one [arcGISScene] can be set at a time, but you may replace it
+ * while the application is running.
+ *
+ * See [Scene view documentation](https://developers.arcgis.com/documentation/mapping-apis-and-services/maps/scenes-3d/#scene-view)
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
  * @param modifier Modifier to be applied to the composable SceneView
@@ -344,7 +376,7 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-                // Set the camera controller last, to ensure other dependend SceneView properties are already set.
+                // Set the camera controller last, to ensure other dependent SceneView properties are already set.
                 // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
                 // set on the SceneView at this point.
                 // https://devtopia.esri.com/runtime/kotlin/issues/6623
