@@ -123,14 +123,11 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
+    private val redirectUri = intent.getStringExtra("REDIRECT_URI") ?: ""
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
-        url?.let {
-            val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            launchCustomTabs(it, preferPrivateWebBrowserSession)
-        }
+        initiateAuthenticationFlow()
     }
 
     // This override gets called first when the CustomTabs close button or the back button is pressed.
@@ -138,9 +135,8 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onWindowFocusChanged(hasFocus)
 
         // We only want to respond to focus changed events when this activity is in "resumed" state.
-        // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
+        // On some devices we get unexpected focus changed events with hasFocus true which cause this Activity
         // to be finished (destroyed) prematurely, for example:
-        // - On Oreo log in to portal with OAuth
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
@@ -175,17 +171,42 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      * @since 200.8.0
      */
     private fun handleRedirectIntent(intent: Intent?) {
-        val uri = intent?.data
-        if (uri != null) {
-            val uriString = uri.toString()
+        val uri = intent?.data?.toString()
+        if (uri != null && isValidRedirectUri(uri)) {
             val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri)
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
             setResult(RESULT_CODE_CANCELED)
         }
         finish()
+    }
+
+    /**
+     * Handles the authentication challenge by launching either an external browser or a Custom Tab
+     * based on the intent extras and provided URL.
+     * If no URL is provided, it attempts to handle the redirect intent.
+     * @since 300.0.0
+     */
+    private fun initiateAuthenticationFlow() = with(intent) {
+        val shouldLaunchInExternalBrowser = getBooleanExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
+        val url = getStringExtra(KEY_INTENT_EXTRA_URL) ?: return handleRedirectIntent(this)
+        if (shouldLaunchInExternalBrowser) {
+            launchInExternalBrowser(url)
+        } else {
+            launchCustomTabs(url, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+        }
+    }
+
+    /**
+     * Validates if the provided URI starts with the expected redirect URI.
+     * @param uri the URI to validate.
+     * @return true if the URI is valid, false otherwise.
+     * @since 300.0.0
+     */
+    private fun isValidRedirectUri(uri: String): Boolean {
+        return uri.startsWith(redirectUri)
     }
 
     /**
@@ -202,7 +223,13 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
+                putExtra("REDIRECT_URI", input.oAuthUserConfiguration.redirectUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
+                if (context.isCustomTabsSupported()) {
+                    putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
+                } else {
+                    putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, true)
+                }
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
