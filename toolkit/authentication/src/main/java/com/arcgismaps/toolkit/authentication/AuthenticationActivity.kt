@@ -124,7 +124,7 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
-    private val redirectUri = intent.getStringExtra("REDIRECT_URI") ?: ""
+    private val redirectUri = intent?.getStringExtra("REDIRECT_URI") ?: ""
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
