@@ -24,12 +24,12 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
-private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
+internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
-private const val KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER"
+internal const val KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -151,7 +151,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
                 setResult(RESULT_CODE_SUCCESS, newIntent)
             } else {
                 // if we got here the user must have pressed the back button or the x button while the
-                // custom tab was visible
+                // browser was visible
                 setResult(RESULT_CODE_CANCELED, Intent())
             }
             finish()
@@ -192,6 +192,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      */
     private fun initiateAuthenticationFlow() = with(intent) {
         val shouldLaunchInExternalBrowser = getBooleanExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
+        // get the URL to launch or we assume we are redirecting back to the app
         val url = getStringExtra(KEY_INTENT_EXTRA_URL) ?: return handleRedirectIntent(this)
         if (shouldLaunchInExternalBrowser) {
             launchInExternalBrowser(url)
@@ -226,9 +227,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
                 putExtra("REDIRECT_URI", input.oAuthUserConfiguration.redirectUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
-                if (context.isCustomTabsSupported()) {
+                if (context.isCustomTabsSupportedByDefaultBrowser()) {
                     putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
                 } else {
+                    // TODO: Pass the package name to launch Custom Tabs with
                     putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, true)
                 }
             }

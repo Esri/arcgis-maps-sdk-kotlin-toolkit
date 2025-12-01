@@ -17,20 +17,17 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.content.Intent
+import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasCategories
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtraWithKey
-//import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
-//import androidx.test.espresso.intent.matcher.UriMatchers.withScheme
-//import androidx.test.espresso.intent.matcher.UriMatchers.withHost
-//import androidx.test.espresso.intent.matcher.UriMatchers.withPath
 import androidx.test.core.app.ActivityScenario
+import com.google.common.truth.Truth.assertThat
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.not
 import org.junit.After
@@ -39,10 +36,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Instrumentation test verifying that when Custom Tabs are not supported we fall back to launching
- * an external browser (plain ACTION_VIEW intent with CATEGORY_BROWSABLE) instead of a Custom Tab.
- * We force this path by explicitly setting the private extra KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER
- * to true (using the literal string name as the constant is private to [AuthenticationActivity]).
+ * Instrumentation test to verify [AuthenticationActivity]'s behavior.
+ *
+ * @since 300.0.0
  */
 @RunWith(AndroidJUnit4::class)
 class AuthenticationActivityExternalBrowserTest {
@@ -57,28 +53,86 @@ class AuthenticationActivityExternalBrowserTest {
         Intents.release()
     }
 
+    /**
+     * Given [AuthenticationActivity] is launched with an intent containing the flag KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER
+     * set to false
+     * When [AuthenticationActivity] starts
+     * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
+     * And the intent contains the Custom Tabs session extra key
+     * @since 300.0.0
+     */
     @Test
-    fun launchesExternalBrowserWhenCustomTabsNotSupported() {
-        // Arrange
+    fun launchesCustomTabsWhenExternalBrowserFlagIsFalse() {
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
-            // Force external browser path; KEY_INTENT_EXTRA_URL and KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER are private constants.
-            putExtra("KEY_INTENT_EXTRA_URL", authorizeUrl)
-            putExtra("KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER", true)
+            putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
+            putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
         }
 
-        // Act: launch the AuthenticationActivity which should immediately start the external browser intent.
         ActivityScenario.launch<AuthenticationActivity>(intent).use {
-            // Assert: An ACTION_VIEW intent for the authorize URL was fired with CATEGORY_BROWSABLE
-            // and WITHOUT the Custom Tabs session extra key (which would be present for a CustomTabsIntent).
-            intended(allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData(authorizeUrl),
-                hasCategories(setOf(Intent.CATEGORY_BROWSABLE)),
-                // Custom Tabs adds android.support.customtabs.extra.SESSION; ensure absent.
-                not(hasExtraWithKey("android.support.customtabs.extra.SESSION"))
-            ))
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(authorizeUrl),
+                    // Custom Tabs adds android.support.customtabs.extra.SESSION
+                    hasExtraWithKey("android.support.customtabs.extra.SESSION")
+
+                )
+            )
         }
+    }
+
+    /**
+     * Given [AuthenticationActivity] is launched with an intent containing the flag KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER
+     * set to true
+     * When [AuthenticationActivity] starts
+     * Then an intent should be fired with ACTION_VIEW, simulating an external browser launch
+     * And the intent does not contain the Custom Tabs session extra key
+     * @since 300.0.0
+     */
+    @Test
+    fun launchesExternalBrowserWhenCustomTabsNotSupported() {
+        val authorizeUrl = "https://example.com/auth"
+        val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
+            putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
+            putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, true) // Force external browser launch
+        }
+
+        // AuthenticationActivity will start the external browser intent
+        ActivityScenario.launch<AuthenticationActivity>(intent).use {
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(authorizeUrl),
+                    hasCategories(setOf(Intent.CATEGORY_BROWSABLE)),
+                    // Custom Tabs adds android.support.customtabs.extra.SESSION extra
+                    not(hasExtraWithKey("android.support.customtabs.extra.SESSION"))
+                )
+            )
+        }
+    }
+
+    /**
+     * Given [AuthenticationActivity] is launched with an intent containing a valid redirect URI
+     * When the activity starts
+     * Then the activity finishes with RESULT_CODE_SUCCESS and includes the the redirect URI in the result data
+     * @since 300.0.0
+     */
+    @Test
+    fun returnsSuccessWhenValidRedirectUriProvided() {
+        val redirectUri = "kotlin-iap-test-1://auth/callback?code=123"
+        // simulates the redirect from the external browser
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(redirectUri)
+        )
+
+        // invoke the activity with the redirect URI
+        val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
+        scenario.close()
+        val result = scenario.result
+        assertThat(result.resultCode).isEqualTo(1)
+        assertThat(result.resultData?.getStringExtra("KEY_INTENT_EXTRA_RESPONSE_URI")).isEqualTo(redirectUri)
     }
 }
 
