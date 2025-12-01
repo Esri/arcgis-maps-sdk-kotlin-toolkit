@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.authentication
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
@@ -25,6 +26,7 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
+private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
@@ -124,7 +126,6 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
-    private val redirectUri = intent?.getStringExtra("REDIRECT_URI") ?: ""
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,10 +173,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      * @since 200.8.0
      */
     private fun handleRedirectIntent(intent: Intent?) {
-        val uri = intent?.data?.toString()
-        if (uri != null && isValidRedirectUri(uri)) {
+        val uri = intent?.data
+        if (isValidRedirectUri(uri)) {
             val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri)
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
@@ -207,8 +208,11 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      * @return true if the URI is valid, false otherwise.
      * @since 300.0.0
      */
-    private fun isValidRedirectUri(uri: String): Boolean {
-        return uri.startsWith(redirectUri)
+    private fun isValidRedirectUri(uri: Uri?): Boolean {
+        if (uri == null) return false
+        val expectedRedirectUri = intent.getStringExtra(KEY_INTENT_EXTRA_REDIRECT_URL) ?: ""
+        val incomingRedirectUri = "${uri.scheme}://${uri.host}"
+        return incomingRedirectUri == expectedRedirectUri
     }
 
     /**
@@ -225,7 +229,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
-                putExtra("REDIRECT_URI", input.oAuthUserConfiguration.redirectUrl)
+                putExtra(KEY_INTENT_EXTRA_REDIRECT_URL, input.oAuthUserConfiguration.redirectUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
                 if (context.isCustomTabsSupportedByDefaultBrowser()) {
                     putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
