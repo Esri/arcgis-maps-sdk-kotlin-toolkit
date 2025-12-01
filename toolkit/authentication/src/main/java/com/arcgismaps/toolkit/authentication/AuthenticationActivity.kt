@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.authentication
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
@@ -174,9 +173,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      */
     private fun handleRedirectIntent(intent: Intent?) {
         val uri = intent?.data
-        if (isValidRedirectUri(uri)) {
+        if (uri != null) {
+            val uriString = uri.toString()
             val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
             }
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
@@ -200,19 +200,6 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         } else {
             launchCustomTabs(url, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
         }
-    }
-
-    /**
-     * Validates if the provided URI starts with the expected redirect URI.
-     * @param uri the URI to validate.
-     * @return true if the URI is valid, false otherwise.
-     * @since 300.0.0
-     */
-    private fun isValidRedirectUri(uri: Uri?): Boolean {
-        if (uri == null) return false
-        val expectedRedirectUri = intent.getStringExtra(KEY_INTENT_EXTRA_REDIRECT_URL) ?: ""
-        val incomingRedirectUri = "${uri.scheme}://${uri.host}"
-        return incomingRedirectUri == expectedRedirectUri
     }
 
     /**
