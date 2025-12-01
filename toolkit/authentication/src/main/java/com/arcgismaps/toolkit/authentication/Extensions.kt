@@ -22,8 +22,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.util.Log
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
@@ -127,7 +125,6 @@ internal fun Context.getPackageThatSupportsCustomTabs(): String? {
     val packageNames = resolvedActivityList.map {
         it.activityInfo.packageName
     }
-    Log.d("ArcGIS-Main", ".getPackageThatSupportsCustomTabs: $packageNames")
 
     return CustomTabsClient.getPackageName(this, packageNames, true) ?: null
 }
