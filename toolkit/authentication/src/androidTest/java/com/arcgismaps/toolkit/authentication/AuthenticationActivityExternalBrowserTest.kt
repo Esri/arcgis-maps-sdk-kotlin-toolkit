@@ -66,7 +66,6 @@ class AuthenticationActivityExternalBrowserTest {
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
-            putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
         }
 
         ActivityScenario.launch<AuthenticationActivity>(intent).use {
@@ -95,7 +94,6 @@ class AuthenticationActivityExternalBrowserTest {
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
-            putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, true) // Force external browser launch
         }
 
         // AuthenticationActivity will start the external browser intent

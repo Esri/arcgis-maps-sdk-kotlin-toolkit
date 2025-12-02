@@ -25,12 +25,10 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
-private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
-internal const val KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -192,13 +190,17 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      * @since 300.0.0
      */
     private fun initiateAuthenticationFlow() = with(intent) {
-        val shouldLaunchInExternalBrowser = getBooleanExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
         // get the URL to launch or we assume we are redirecting back to the app
         val url = getStringExtra(KEY_INTENT_EXTRA_URL) ?: return handleRedirectIntent(this)
-        if (shouldLaunchInExternalBrowser) {
+        val browserPackageName = getPackageThatSupportsCustomTabs()
+        if (browserPackageName.isNullOrEmpty()) {
             launchInExternalBrowser(url)
         } else {
-            launchCustomTabs(url, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+            launchCustomTabs(
+                url,
+                getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false),
+                browserPackageName
+            )
         }
     }
 
@@ -216,14 +218,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
-                putExtra(KEY_INTENT_EXTRA_REDIRECT_URL, input.oAuthUserConfiguration.redirectUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
-                if (context.isCustomTabsSupportedByDefaultBrowser()) {
-                    putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, false)
-                } else {
-                    // TODO: Pass the package name to launch Custom Tabs with
-                    putExtra(KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER, true)
-                }
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
