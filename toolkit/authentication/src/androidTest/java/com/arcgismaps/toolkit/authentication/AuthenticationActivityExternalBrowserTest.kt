@@ -28,6 +28,9 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasCategories
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtraWithKey
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.not
 import org.junit.After
@@ -50,19 +53,23 @@ class AuthenticationActivityExternalBrowserTest {
 
     @After
     fun tearDown() {
+        unmockkAll()
         Intents.release()
     }
 
     /**
-     * Given [AuthenticationActivity] is launched with an intent containing the flag KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER
-     * set to false
+     * Given [AuthenticationActivity] with a the browser "com.android.chrome" that supports Custom Tabs
      * When [AuthenticationActivity] starts
      * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
      * And the intent contains the Custom Tabs session extra key
      * @since 300.0.0
      */
     @Test
-    fun launchesCustomTabsWhenExternalBrowserFlagIsFalse() {
+    fun launchesCustomTabsWhenSupported() {
+        // Mock the top-level extension so it returns "com.android.chrome" (supports Custom Tabs)
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns "com.android.chrome"
+
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
@@ -82,8 +89,7 @@ class AuthenticationActivityExternalBrowserTest {
     }
 
     /**
-     * Given [AuthenticationActivity] is launched with an intent containing the flag KEY_INTENT_EXTRA_LAUNCH_IN_EXTERNAL_BROWSER
-     * set to true
+     * Given [AuthenticationActivity] is launched with no browser that support Custom Tabs
      * When [AuthenticationActivity] starts
      * Then an intent should be fired with ACTION_VIEW, simulating an external browser launch
      * And the intent does not contain the Custom Tabs session extra key
@@ -91,6 +97,10 @@ class AuthenticationActivityExternalBrowserTest {
      */
     @Test
     fun launchesExternalBrowserWhenCustomTabsNotSupported() {
+        // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns null
+
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
@@ -108,6 +118,34 @@ class AuthenticationActivityExternalBrowserTest {
                 )
             )
         }
+    }
+
+    /**
+     * Given [AuthenticationActivity] is launched with no browser that support Custom Tabs
+     * And launching external browsers is disallowed
+     * When [AuthenticationActivity] starts
+     * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
+     * @since 300.0.0
+     */
+    @Test
+    fun returnsExceptionWhenNoBrowserAvailable() {
+        // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns null
+
+        val authorizeUrl = "https://example.com/auth"
+        val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
+            putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
+            putExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, false)
+        }
+
+        // invoke the activity
+        val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
+        scenario.close()
+        val result = scenario.result
+        assertThat(result.resultCode).isEqualTo(2)
+        val exceptionMessage = result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+        assertThat(exceptionMessage).isEqualTo(NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE)
     }
 
     /**
@@ -133,4 +171,3 @@ class AuthenticationActivityExternalBrowserTest {
         assertThat(result.resultData?.getStringExtra("KEY_INTENT_EXTRA_RESPONSE_URI")).isEqualTo(redirectUri)
     }
 }
-

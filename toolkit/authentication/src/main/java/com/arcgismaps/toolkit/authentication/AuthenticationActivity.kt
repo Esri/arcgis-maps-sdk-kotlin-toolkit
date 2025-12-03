@@ -30,13 +30,13 @@ private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
 internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
-private const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
+internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
-private const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser that supports Custom Tabs is available on this device."
+internal const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser that supports Custom Tabs is available on this device."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
