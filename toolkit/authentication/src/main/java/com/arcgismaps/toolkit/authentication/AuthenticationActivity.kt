@@ -29,11 +29,14 @@ private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
+internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
+private const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
+private const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser that supports Custom Tabs is available on this device."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -164,26 +167,6 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     }
 
     /**
-     * Finishes this activity with a response containing a success code and the redirect intent's uri
-     * or a canceled code if no uri can be found.
-     *
-     * @since 200.8.0
-     */
-    private fun handleRedirectIntent(intent: Intent?) {
-        val uri = intent?.data
-        if (uri != null) {
-            val uriString = uri.toString()
-            val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
-            }
-            setResult(RESULT_CODE_SUCCESS, newIntent)
-        } else {
-            setResult(RESULT_CODE_CANCELED)
-        }
-        finish()
-    }
-
-    /**
      * Handles the authentication challenge by launching either an external browser or a Custom Tab
      * based on the intent extras and provided URL.
      * If no URL is provided, it attempts to handle the redirect intent.
@@ -192,16 +175,39 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     private fun initiateAuthenticationFlow() = with(intent) {
         // get the URL to launch or we assume we are redirecting back to the app
         val url = getStringExtra(KEY_INTENT_EXTRA_URL) ?: return handleRedirectIntent(this)
+        val allowExternalBrowser = getBooleanExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, true)
         val browserPackageName = getPackageThatSupportsCustomTabs()
-        if (browserPackageName.isNullOrEmpty()) {
-            launchInExternalBrowser(url)
-        } else {
-            launchCustomTabs(
+        when {
+            browserPackageName != null -> launchCustomTabs(
                 url,
                 getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false),
                 browserPackageName
             )
+
+            allowExternalBrowser -> launchInExternalBrowser(url)
+            else -> handleRedirectIntent(intent = null, errorMessage = NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE)
         }
+    }
+
+    /**
+     * Finishes this activity with a response containing a success code and the redirect intent's uri
+     * or a canceled code if no uri can be found.
+     *
+     * @since 200.8.0
+     */
+    private fun handleRedirectIntent(intent: Intent?, errorMessage: String? = null) {
+        val uri = intent?.data
+        val newIntent = Intent()
+        if (uri != null) {
+            newIntent.putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
+            setResult(RESULT_CODE_SUCCESS, newIntent)
+        } else {
+            errorMessage?.let {
+                newIntent.putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, it)
+            }
+            setResult(RESULT_CODE_CANCELED, newIntent)
+        }
+        finish()
     }
 
     /**
@@ -214,18 +220,21 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, OAuthUserSignInResult>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
+                putExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, input.allowExternalBrowserLaunch)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            } else {
-                null
+        override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
+            val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            val errorMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
+                errorMessage != null -> OAuthUserSignInResult.Failure(IllegalStateException(errorMessage))
+                else -> OAuthUserSignInResult.Canceled
             }
         }
     }
@@ -276,5 +285,15 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             else
                 false
         }
+    }
+
+    /**
+     * Represents the result of an OAuth sign-in operation.
+     * @since 300.0.0
+     */
+    internal sealed class OAuthUserSignInResult {
+        data class Success(val redirectUri: String) : OAuthUserSignInResult()
+        data class Failure(val exception: Exception) : OAuthUserSignInResult()
+        data object Canceled : OAuthUserSignInResult()
     }
 }
