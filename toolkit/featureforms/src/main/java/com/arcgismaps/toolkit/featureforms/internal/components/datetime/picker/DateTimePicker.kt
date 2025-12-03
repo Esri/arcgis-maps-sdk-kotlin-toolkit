@@ -35,12 +35,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -62,10 +64,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePicker
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerDefaults
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerState
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DisplayMode
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.TimePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.TimePickerState
 import java.time.Instant
@@ -165,15 +163,23 @@ internal fun DateTimePicker(
     val dateTime by state.dateTime
     // create and remember a DatePickerState
 
-    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
-        DatePickerState(
-            initialSelectedDateMillis = dateTime.dateForPicker,
-            initialDisplayedMonthMillis = dateTime.dateForPicker
-                ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
-            datePickerRange,
-            DisplayMode.Picker
-        )
-    }
+//    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
+//        DatePickerState(
+//            initialSelectedDateMillis = dateTime.dateForPicker,
+//            initialDisplayedMonthMillis = dateTime.dateForPicker
+//                ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
+//            datePickerRange,
+//            DisplayMode.Picker
+//        )
+//    }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = dateTime.dateForPicker,
+        initialDisplayedMonthMillis = dateTime.dateForPicker
+            ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
+        yearRange = datePickerRange,
+        initialDisplayMode = androidx.compose.material3.DisplayMode.Picker,
+        selectableDates = state
+    )
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -229,7 +235,7 @@ private fun (ColumnScope).PickerContent(
     label: String,
     description: String,
     state: DateTimePickerState,
-    datePickerState: DatePickerState,
+    datePickerState: androidx.compose.material3.DatePickerState,
     timePickerState: TimePickerState,
     style: DateTimePickerStyle,
     picker: DateTimePickerInput,
@@ -258,12 +264,13 @@ private fun (ColumnScope).PickerContent(
                 TimePicker(state = timePickerState, modifier = Modifier.padding(10.dp))
             } else {
                 key(state.dateTime.value) {
-                    DatePicker(
+                    androidx.compose.material3.DatePicker(
                         state = datePickerState,
-                        dateValidator = { timeStamp ->
-                            state.dateValidator(timeStamp)
-                        },
-                        title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
+//                        dateValidator = { timeStamp ->
+//                            state.dateValidator(timeStamp)
+//                        },
+                        title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) },
+
                     )
                 }
             }
@@ -434,4 +441,12 @@ private fun DateTimePickerPreview() {
         initialError = ValidationErrorState.MinDatetimeConstraint("1/1/2000 01:00 AM")
     )
     DateTimePicker(state = state, {}, {}, {})
+}
+
+
+@Composable
+@Preview
+private fun DatePr() {
+    val state = rememberDatePickerState()
+    androidx.compose.material3.DatePicker(state)
 }

@@ -183,7 +183,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.util)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.material.icons)
+    implementation(libs.bundles.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.compose.navigation)

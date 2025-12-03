@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker
 
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -119,7 +120,7 @@ internal class UtcDateTime private constructor(
 /**
  * State for [DateTimePicker]. Use factory [DateTimePicker()] to create an instance.
  */
-internal interface DateTimePickerState {
+internal interface DateTimePickerState : SelectableDates {
     
     /**
      * Minimum date time allowed. This should be null if no range restriction is needed.
@@ -308,6 +309,14 @@ private class DateTimePickerStateImpl(
             hour,
             minute
         )
+    }
+
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        return dateValidator(utcTimeMillis)
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return true
     }
 }
 
