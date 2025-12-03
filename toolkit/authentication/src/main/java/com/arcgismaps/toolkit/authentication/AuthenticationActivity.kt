@@ -32,8 +32,8 @@ private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP
 internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
 internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
-private const val RESULT_CODE_SUCCESS = 1
-private const val RESULT_CODE_CANCELED = 2
+internal const val RESULT_CODE_SUCCESS = 1
+internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
 internal const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser that supports Custom Tabs is available on this device."
@@ -123,6 +123,7 @@ internal const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser 
  *    }
  *    ```
  *    See [README.md](../README.md) for more details.
+ *    //TODO: Update doc to mention external browser launch.
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
@@ -253,6 +254,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
+                // TODO: Allow external browser launch configuration for IAP sign-in.
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {

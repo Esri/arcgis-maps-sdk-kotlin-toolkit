@@ -143,7 +143,7 @@ class AuthenticationActivityExternalBrowserTest {
         val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
         scenario.close()
         val result = scenario.result
-        assertThat(result.resultCode).isEqualTo(2)
+        assertThat(result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
         val exceptionMessage = result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
         assertThat(exceptionMessage).isEqualTo(NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE)
     }
@@ -151,7 +151,7 @@ class AuthenticationActivityExternalBrowserTest {
     /**
      * Given [AuthenticationActivity] is launched with an intent containing a valid redirect URI
      * When the activity starts
-     * Then the activity finishes with RESULT_CODE_SUCCESS and includes the the redirect URI in the result data
+     * Then the activity finishes with RESULT_CODE_SUCCESS and includes the redirect URI in the result data
      * @since 300.0.0
      */
     @Test
@@ -167,7 +167,7 @@ class AuthenticationActivityExternalBrowserTest {
         val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
         scenario.close()
         val result = scenario.result
-        assertThat(result.resultCode).isEqualTo(1)
+        assertThat(result.resultCode).isEqualTo(RESULT_CODE_SUCCESS)
         assertThat(result.resultData?.getStringExtra("KEY_INTENT_EXTRA_RESPONSE_URI")).isEqualTo(redirectUri)
     }
 }
