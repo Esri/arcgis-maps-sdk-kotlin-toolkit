@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
@@ -29,14 +30,15 @@ private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
-internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER = "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
+internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER =
+    "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
 internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
 internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
-internal const val NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE = "No browser that supports Custom Tabs is available on this device."
+internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -130,7 +132,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initiateAuthenticationFlow()
+        processAuthenticationFlow()
     }
 
     // This override gets called first when the CustomTabs close button or the back button is pressed.
@@ -168,25 +170,38 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     }
 
     /**
-     * Handles the authentication challenge by launching either an external browser or a Custom Tab
-     * based on the intent extras and provided URL.
-     * If no URL is provided, it attempts to handle the redirect intent.
+     * Processes the authentication flow based on the intent action and data.
+     * - If the action is [Intent.ACTION_VIEW] and data is present, it handles the redirect intent.
+     * - If the URL extra is missing, it handles the redirect intent with an error message
+     * indicating the failure to start authentication.
+     *   If the default browser cannot launch Custom Tabs, it handles the redirect intent with
+     *   an appropriate error message.
      * @since 300.0.0
      */
-    private fun initiateAuthenticationFlow() = with(intent) {
-        // get the URL to launch or we assume we are redirecting back to the app
-        val url = getStringExtra(KEY_INTENT_EXTRA_URL) ?: return handleRedirectIntent(this)
-        val allowExternalBrowser = getBooleanExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, true)
-        val browserPackageName = getPackageThatSupportsCustomTabs()
-        when {
-            browserPackageName != null -> launchCustomTabs(
-                url,
-                getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false),
-                browserPackageName
-            )
-
-            allowExternalBrowser -> launchInExternalBrowser(url)
-            else -> handleRedirectIntent(intent = null, errorMessage = NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE)
+    private fun processAuthenticationFlow() {
+        val localIntent = intent
+        with(localIntent) {
+            val url = getStringExtra(KEY_INTENT_EXTRA_URL)
+            when {
+                // This signals that we have been redirected back to the app from the browser
+                action == Intent.ACTION_VIEW && data != null -> {
+                    //TODO : Validate redirect URI
+                    handleRedirectIntent(localIntent)
+                }
+                url.isNullOrEmpty() -> {
+                    handleRedirectIntent(
+                        null,
+                        errorMessage = "Failed to start authentication: Authorize URL is missing."
+                    )
+                }
+                else -> {
+                    if (canDefaultBrowserLaunchCustomTabs()) {
+                        launchCustomTabs(url, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+                    } else {
+                        handleRedirectIntent(null, errorMessage = DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+                    }
+                }
+            }
         }
     }
 
@@ -212,6 +227,17 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     }
 
     /**
+     * Replace the implementation with validation that matches your redirect URI(s).
+     * Example: check scheme + host or a configured redirect prefix.
+     */
+    private fun isExpectedRedirectUri(uri: android.net.Uri): Boolean {
+        // TODO: validate against your configured redirect uri(s)
+        // Example:
+        // return uri.toString().startsWith(expectedRedirectPrefix)
+        return true
+    }
+
+    /**
      * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
      * string as output. The output string represents a redirect URI as the result of an OAuth user
      * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
@@ -226,7 +252,6 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
-                putExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, input.allowExternalBrowserLaunch)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {

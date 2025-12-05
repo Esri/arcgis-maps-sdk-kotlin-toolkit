@@ -91,11 +91,3 @@ internal fun OAuthAuthenticator(
         }
     }
 }
-
-//TODO: This is a temporary backing property until we have a better way to configure this behavior.
-internal var _allowExternalBrowserLaunch: Boolean = true
-public var OAuthUserSignIn.allowExternalBrowserLaunch: Boolean
-    get() = _allowExternalBrowserLaunch
-    set(value) {
-        _allowExternalBrowserLaunch = value
-    }

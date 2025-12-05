@@ -24,9 +24,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
-import androidx.core.net.toUri
 
 /**
  * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
@@ -70,7 +70,7 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
     }
     val preferredBrowserPackageName = this.getPackageThatSupportsCustomTabs()
     if (!preferredBrowserPackageName.isNullOrEmpty()) {
-        launchCustomTabs(url, preferPrivateWebBrowserSession, preferredBrowserPackageName)
+        launchCustomTabs(url, preferPrivateWebBrowserSession)
     } else {
         launchInExternalBrowser(url)
     }
@@ -88,15 +88,13 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
  */
 internal fun Activity.launchCustomTabs(
     authorizeUrl: String,
-    preferPrivateWebBrowserSession: Boolean?,
-    preferredBrowserPackageName: String
+    preferPrivateWebBrowserSession: Boolean?
 ) {
     val builder = CustomTabsIntent.Builder()
     if (preferPrivateWebBrowserSession == true) {
         builder.setEphemeralBrowsingEnabled(true)
     }
     val customTabsIntent = builder.build()
-    customTabsIntent.intent.setPackage(preferredBrowserPackageName)
     customTabsIntent.launchUrl(this, authorizeUrl.toUri())
 }
 
@@ -136,4 +134,18 @@ internal fun Context.getPackageThatSupportsCustomTabs(): String? {
 
         CustomTabsClient.getPackageName(this, packageNames, true)
     }
+}
+
+/**
+ * Checks if the device has a default browser that supports Custom Tabs.
+ *
+ * @return true if a default browser that supports Custom Tabs is found, false otherwise.
+ * @since 300.0.0
+ */
+internal fun Context.canDefaultBrowserLaunchCustomTabs(): Boolean {
+    val packageName = CustomTabsClient.getPackageName(
+        this,
+        emptyList()
+    )
+    return !packageName.isNullOrEmpty()
 }
