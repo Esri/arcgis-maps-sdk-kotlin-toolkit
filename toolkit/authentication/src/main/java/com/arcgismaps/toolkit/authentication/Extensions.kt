@@ -61,19 +61,25 @@ public suspend fun AuthenticationManager.signOut() {
  * @since 200.8.0
  */
 public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
+    if (!canDefaultBrowserLaunchCustomTabs()) {
+        val exception = IllegalStateException(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+        when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignIn ->
+                pendingBrowserAuthenticationChallenge.iapSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignOut ->
+                pendingBrowserAuthenticationChallenge.iapSignOut.cancel(exception)
+        }
+    }
+
     val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
         is BrowserAuthenticationChallenge.OAuthUserSignIn ->
             pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-
         is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
         is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
     }
-    val preferredBrowserPackageName = this.getPackageThatSupportsCustomTabs()
-    if (!preferredBrowserPackageName.isNullOrEmpty()) {
-        launchCustomTabs(url, preferPrivateWebBrowserSession)
-    } else {
-        launchInExternalBrowser(url)
-    }
+    launchCustomTabs(url, preferPrivateWebBrowserSession)
 }
 
 
@@ -96,44 +102,6 @@ internal fun Activity.launchCustomTabs(
     }
     val customTabsIntent = builder.build()
     customTabsIntent.launchUrl(this, authorizeUrl.toUri())
-}
-
-/**
- * Launches an external browser with the provided authorize URL.
- *
- * @param authorizeUrl the authorize URL used by the external browser to prompt for OAuth
- * user credentials.
- *
- * @since 300.0.0
- */
-internal fun Activity.launchInExternalBrowser(authorizeUrl: String) {
-    val intent = Intent(Intent.ACTION_VIEW, authorizeUrl.toUri()).apply {
-        addCategory(Intent.CATEGORY_BROWSABLE)
-    }
-    startActivity(intent)
-}
-
-/**
- * Returns the package name of a browser that supports Custom Tabs, or null if none is found.
- * @since 300.0.0
- */
-internal fun Context.getPackageThatSupportsCustomTabs(): String? {
-    // Check if the default browser supports Custom Tabs
-    val defaultBrowser = CustomTabsClient.getPackageName(this, emptyList())
-    return if (!defaultBrowser.isNullOrEmpty()) {
-        defaultBrowser
-    } else {
-        // If not, check all browsers that can handle http intents
-        val packageManager = packageManager
-        val activityIntent = Intent(Intent.ACTION_VIEW, "http://www.example.com".toUri())
-        val resolvedActivityList = packageManager.queryIntentActivities(activityIntent, PackageManager.MATCH_ALL)
-
-        val packageNames = resolvedActivityList.map {
-            it.activityInfo.packageName
-        }
-
-        CustomTabsClient.getPackageName(this, packageNames, true)
-    }
 }
 
 /**

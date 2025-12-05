@@ -537,20 +537,17 @@ private suspend fun IapConfiguration.handleIapChallenge(
  * @since 200.8.0
  */
 public fun AuthenticatorState.completeBrowserAuthenticationChallenge(intent: Intent?) {
-    val intentData = intent?.data
-    val errorException = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)?.let { IllegalStateException(it) }
-
     when {
         pendingOAuthUserSignIn.value != null -> {
-            intentData?.let { uri ->
+            intent?.data?.let { uri ->
                 pendingOAuthUserSignIn.value?.complete(uri.toString())
-            } ?: pendingOAuthUserSignIn.value?.cancel(errorException)
+            } ?: pendingOAuthUserSignIn.value?.cancel()
         }
 
         pendingIapSignIn.value != null -> {
-            intentData?.let { uri ->
+            intent?.data?.let { uri ->
                 pendingIapSignIn.value?.complete(uri.toString())
-            } ?: pendingIapSignIn.value?.cancel(errorException)
+            } ?: pendingIapSignIn.value?.cancel()
         }
 
         pendingIapSignOut.value != null -> {

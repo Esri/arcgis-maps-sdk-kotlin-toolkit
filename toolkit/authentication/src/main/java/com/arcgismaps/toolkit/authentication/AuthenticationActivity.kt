@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
@@ -30,8 +29,6 @@ private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
-internal const val KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER =
-    "KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER"
 internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
 internal const val RESULT_CODE_SUCCESS = 1
@@ -125,7 +122,7 @@ internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default brows
  *    }
  *    ```
  *    See [README.md](../README.md) for more details.
- *    //TODO: Update doc to mention external browser launch.
+ *    //TODO: Update doc to mention failure if custom tabs isn't supported
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
@@ -155,7 +152,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
                 setResult(RESULT_CODE_SUCCESS, newIntent)
             } else {
                 // if we got here the user must have pressed the back button or the x button while the
-                // browser was visible
+                // custom tab was visible
                 setResult(RESULT_CODE_CANCELED, Intent())
             }
             finish()
@@ -185,7 +182,6 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             when {
                 // This signals that we have been redirected back to the app from the browser
                 action == Intent.ACTION_VIEW && data != null -> {
-                    //TODO : Validate redirect URI
                     handleRedirectIntent(localIntent)
                 }
                 url.isNullOrEmpty() -> {

@@ -24,7 +24,6 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasCategories
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtraWithKey
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
@@ -68,7 +67,7 @@ class AuthenticationActivityExternalBrowserTest {
     fun launchesCustomTabsWhenSupported() {
         // Mock the top-level extension so it returns "com.android.chrome" (supports Custom Tabs)
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
-        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns "com.android.chrome"
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns true
 
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
@@ -90,38 +89,6 @@ class AuthenticationActivityExternalBrowserTest {
 
     /**
      * Given [AuthenticationActivity] is launched with no browser that support Custom Tabs
-     * When [AuthenticationActivity] starts
-     * Then an intent should be fired with ACTION_VIEW, simulating an external browser launch
-     * And the intent does not contain the Custom Tabs session extra key
-     * @since 300.0.0
-     */
-    @Test
-    fun launchesExternalBrowserWhenCustomTabsNotSupported() {
-        // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
-        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
-        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns null
-
-        val authorizeUrl = "https://example.com/auth"
-        val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
-            putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
-        }
-
-        // AuthenticationActivity will start the external browser intent
-        ActivityScenario.launch<AuthenticationActivity>(intent).use {
-            intended(
-                allOf(
-                    hasAction(Intent.ACTION_VIEW),
-                    hasData(authorizeUrl),
-                    hasCategories(setOf(Intent.CATEGORY_BROWSABLE)),
-                    // Custom Tabs adds android.support.customtabs.extra.SESSION extra
-                    not(hasExtraWithKey("android.support.customtabs.extra.SESSION"))
-                )
-            )
-        }
-    }
-
-    /**
-     * Given [AuthenticationActivity] is launched with no browser that support Custom Tabs
      * And launching external browsers is disallowed
      * When [AuthenticationActivity] starts
      * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
@@ -131,12 +98,11 @@ class AuthenticationActivityExternalBrowserTest {
     fun returnsExceptionWhenNoBrowserAvailable() {
         // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
-        every { any<android.content.Context>().getPackageThatSupportsCustomTabs() } returns null
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
 
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
-            putExtra(KEY_INTENT_EXTRA_ALLOW_LAUNCH_ON_EXTERNAL_BROWSER, false)
         }
 
         // invoke the activity
@@ -145,7 +111,7 @@ class AuthenticationActivityExternalBrowserTest {
         val result = scenario.result
         assertThat(result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
         val exceptionMessage = result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
-        assertThat(exceptionMessage).isEqualTo(NO_CUSTOM_TABS_BROWSER_AVAILABLE_ERROR_MESSAGE)
+        assertThat(exceptionMessage).isEqualTo(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
     }
 
     /**
