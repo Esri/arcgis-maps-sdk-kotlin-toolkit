@@ -57,7 +57,7 @@ class AuthenticationActivityExternalBrowserTest {
     }
 
     /**
-     * Given [AuthenticationActivity] with a the browser "com.android.chrome" that supports Custom Tabs
+     * Given [AuthenticationActivity] with a browser that supports Custom Tabs
      * When [AuthenticationActivity] starts
      * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
      * And the intent contains the Custom Tabs session extra key
@@ -88,8 +88,7 @@ class AuthenticationActivityExternalBrowserTest {
     }
 
     /**
-     * Given [AuthenticationActivity] is launched with no browser that support Custom Tabs
-     * And launching external browsers is disallowed
+     * Given [AuthenticationActivity] is launched with a default browser that does not support Custom Tabs
      * When [AuthenticationActivity] starts
      * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
      * @since 300.0.0
