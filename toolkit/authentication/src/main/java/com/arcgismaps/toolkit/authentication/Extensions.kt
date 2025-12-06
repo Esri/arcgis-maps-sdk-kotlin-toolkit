@@ -69,15 +69,15 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
             is BrowserAuthenticationChallenge.IapSignOut ->
                 pendingBrowserAuthenticationChallenge.iapSignOut.cancel(exception)
         }
+    } else {
+        val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+            is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
+            is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+        }
+        launchCustomTabs(url, preferPrivateWebBrowserSession)
     }
-
-    val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
-        is BrowserAuthenticationChallenge.OAuthUserSignIn ->
-            pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-        is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
-        is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
-    }
-    launchCustomTabs(url, preferPrivateWebBrowserSession)
 }
 
 
