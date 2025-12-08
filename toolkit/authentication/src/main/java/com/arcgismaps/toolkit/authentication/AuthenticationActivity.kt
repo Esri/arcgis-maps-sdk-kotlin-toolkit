@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import CustomTabsNotFoundException
+import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -35,7 +37,6 @@ internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
-internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -223,23 +224,9 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     }
 
     /**
-     * Replace the implementation with validation that matches your redirect URI(s).
-     * Example: check scheme + host or a configured redirect prefix.
-     */
-    private fun isExpectedRedirectUri(uri: android.net.Uri): Boolean {
-        // TODO: validate against your configured redirect uri(s)
-        // Example:
-        // return uri.toString().startsWith(expectedRedirectPrefix)
-        return true
-    }
-
-    /**
-     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
-     * string as output. The output string represents a redirect URI as the result of an OAuth user
-     * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [AuthenticationActivity] for a result.
-     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
-     * for more details.
+     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns an [OAuthUserSignInResult] as output.
+     * The output encapsulates the result of an OAuth sign in prompt, which can be a success with a redirect URI,
+     * a failure with an exception, or a cancellation.
      *
      * @since 200.8.0
      */
@@ -256,6 +243,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
                 errorMessage != null -> OAuthUserSignInResult.Failure(IllegalStateException(errorMessage))
+                    -> OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
                 else -> OAuthUserSignInResult.Canceled
             }
         }

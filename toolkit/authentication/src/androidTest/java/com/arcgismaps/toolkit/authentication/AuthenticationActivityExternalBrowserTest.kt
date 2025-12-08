@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Intent
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
