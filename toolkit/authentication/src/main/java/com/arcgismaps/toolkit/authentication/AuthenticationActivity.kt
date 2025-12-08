@@ -239,11 +239,12 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
         override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
             val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            val errorMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            val exception = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)?.let {
+                createExceptionFromMessage(it)
+            }
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
-                errorMessage != null -> OAuthUserSignInResult.Failure(IllegalStateException(errorMessage))
-                    -> OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
+                resultCode == RESULT_CODE_CANCELED &&  exception != null -> OAuthUserSignInResult.Failure(exception)
                 else -> OAuthUserSignInResult.Canceled
             }
         }
@@ -306,5 +307,19 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         data class Success(val redirectUri: String) : OAuthUserSignInResult()
         data class Failure(val exception: Exception) : OAuthUserSignInResult()
         data object Canceled : OAuthUserSignInResult()
+    }
+}
+
+/**
+ * Creates an [Exception] based on the provided error message.
+ *
+ * @param message the error message used to determine the type of exception to create.
+ * @return an [Exception] corresponding to the provided error message.
+ * @since 300.0.0
+ */
+internal fun createExceptionFromMessage(message: String): Exception {
+    return when (message) {
+        DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE -> CustomTabsNotFoundException()
+        else -> IllegalStateException(message)
     }
 }
