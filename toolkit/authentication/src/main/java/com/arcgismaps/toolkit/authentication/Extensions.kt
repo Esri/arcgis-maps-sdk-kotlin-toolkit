@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import CustomTabsNotFoundException
 import android.app.Activity
 import android.content.Context
 import androidx.browser.customtabs.CustomTabsClient
@@ -60,7 +61,7 @@ public suspend fun AuthenticationManager.signOut() {
  */
 public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
     if (!canDefaultBrowserLaunchCustomTabs()) {
-        val exception = IllegalStateException(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+        val exception = CustomTabsNotFoundException()
         when (pendingBrowserAuthenticationChallenge) {
             is BrowserAuthenticationChallenge.OAuthUserSignIn ->
                 pendingBrowserAuthenticationChallenge.oAuthUserSignIn.cancel(exception)
