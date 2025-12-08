@@ -16,7 +16,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import CustomTabsNotFoundException
+import AUTH_ENDPOINT_MISSING_ERROR
 import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Context
 import android.content.Intent
@@ -25,6 +25,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import createExceptionFromMessage
 
 internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
@@ -123,7 +124,6 @@ private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
  *    }
  *    ```
  *    See [README.md](../README.md) for more details.
- *    //TODO: Update doc to mention failure if custom tabs isn't supported
  * @since 200.8.0
  */
 public class AuthenticationActivity internal constructor() : ComponentActivity() {
@@ -170,30 +170,27 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     /**
      * Processes the authentication flow based on the intent action and data.
      * - If the action is [Intent.ACTION_VIEW] and data is present, it handles the redirect intent.
-     * - If the URL extra is missing, it handles the redirect intent with an error message
+     * - If the Auth endpoint is missing, it handles the redirect intent with an error message
      * indicating the failure to start authentication.
-     *   If the default browser cannot launch Custom Tabs, it handles the redirect intent with
+     * - If the default browser cannot launch Custom Tabs, it handles the redirect intent with
      *   an appropriate error message.
      * @since 300.0.0
      */
     private fun processAuthenticationFlow() {
         val localIntent = intent
         with(localIntent) {
-            val url = getStringExtra(KEY_INTENT_EXTRA_URL)
+            val authEndpoint = getStringExtra(KEY_INTENT_EXTRA_URL)
             when {
                 // This signals that we have been redirected back to the app from the browser
                 action == Intent.ACTION_VIEW && data != null -> {
                     handleRedirectIntent(localIntent)
                 }
-                url.isNullOrEmpty() -> {
-                    handleRedirectIntent(
-                        null,
-                        errorMessage = "Failed to start authentication: Authorize URL is missing."
-                    )
+                authEndpoint.isNullOrEmpty() -> {
+                    handleRedirectIntent(intent = null, errorMessage = AUTH_ENDPOINT_MISSING_ERROR)
                 }
                 else -> {
                     if (canDefaultBrowserLaunchCustomTabs()) {
-                        launchCustomTabs(url, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+                        launchCustomTabs(authEndpoint, getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
                     } else {
                         handleRedirectIntent(null, errorMessage = DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
                     }
@@ -204,7 +201,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
     /**
      * Finishes this activity with a response containing a success code and the redirect intent's uri
-     * or a canceled code if no uri can be found.
+     * or a canceled code with an optional error message, depending on the provided intent.
      *
      * @since 200.8.0
      */
@@ -244,7 +241,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             }
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
-                resultCode == RESULT_CODE_CANCELED &&  exception != null -> OAuthUserSignInResult.Failure(exception)
+                resultCode == RESULT_CODE_CANCELED && exception != null -> OAuthUserSignInResult.Failure(exception)
                 else -> OAuthUserSignInResult.Canceled
             }
         }
@@ -264,10 +261,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
-                // TODO: Allow external browser launch configuration for IAP sign-in.
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
+            // TODO handle error message from intent extras
             return if (resultCode == RESULT_CODE_SUCCESS) {
                 intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
             } else {
@@ -307,19 +304,5 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         data class Success(val redirectUri: String) : OAuthUserSignInResult()
         data class Failure(val exception: Exception) : OAuthUserSignInResult()
         data object Canceled : OAuthUserSignInResult()
-    }
-}
-
-/**
- * Creates an [Exception] based on the provided error message.
- *
- * @param message the error message used to determine the type of exception to create.
- * @return an [Exception] corresponding to the provided error message.
- * @since 300.0.0
- */
-internal fun createExceptionFromMessage(message: String): Exception {
-    return when (message) {
-        DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE -> CustomTabsNotFoundException()
-        else -> IllegalStateException(message)
     }
 }

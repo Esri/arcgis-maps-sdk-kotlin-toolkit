@@ -32,7 +32,6 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

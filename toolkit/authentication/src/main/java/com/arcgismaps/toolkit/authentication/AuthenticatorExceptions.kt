@@ -17,6 +17,7 @@
  */
 
 internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
+internal const val AUTH_ENDPOINT_MISSING_ERROR = "Failed to start authentication: Auth endpoint is missing."
 
 /**
  * Exception thrown when the default browser does not support Custom Tabs.
@@ -24,3 +25,17 @@ internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default brows
  * @since 200.8.0
  */
 public class CustomTabsNotFoundException : Exception(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+en
+/**
+ * Creates an [Exception] based on the provided error message.
+ *
+ * @param message the error message used to determine the type of exception to create.
+ * @return an [Exception] corresponding to the provided error message.
+ * @since 300.0.0
+ */
+internal fun createExceptionFromMessage(message: String): Exception {
+    return when (message) {
+        DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE -> CustomTabsNotFoundException()
+        else -> IllegalStateException(message)
+    }
+}
