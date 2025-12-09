@@ -79,6 +79,7 @@ dependencies {
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
+    implementation(libs.bundles.icons)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
