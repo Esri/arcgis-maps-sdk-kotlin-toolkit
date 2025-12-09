@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Tarih %1$s veya daha önce olmalıdır</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Girilen tarih</string>
-    <string name="ff_date_input_headline_description">Girilen tarih: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Tarih beklenen kalıpla eşleşmiyor: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">İzin verilmeyen tarih: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Beklenen yıl aralığı %1$s - %2$s dışındaki tarih
-    </string>
-    <string name="ff_date_input_label">Tarih</string>
-    <string name="ff_date_input_no_input_description">Hiçbiri</string>
-    <string name="ff_date_input_title">Tarih seç</string>
-    <string name="ff_date_picker_headline">"Seçilen tarih"</string>
-    <string name="ff_date_picker_headline_description">Mevcut seçim: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">%1$s yılına git</string>
-    <string name="ff_date_picker_no_selection_description">Hiçbiri</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Önceki yılları göstermek için kaydır</string>
-    <string name="ff_date_picker_scroll_to_later_years">Sonraki yılları göstermek için kaydır</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Takvim giriş moduna geçin</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Yıl seçmek için kaydırın veya gün seçmeye geri dönmek için dokunun"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Metin giriş moduna geçin</string>
-    <string name="ff_date_picker_switch_to_next_month">"Sonraki aya değiştir"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Önceki aya değiştir"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Yıl seçimine değiştir"</string>
-    <string name="ff_date_picker_title">"Tarih seç"</string>
-    <string name="ff_date_picker_today_description">Bugün</string>
-    <string name="ff_date_picker_year_picker_pane_title">Yıl seçici görünür</string>
-    <string name="ff_date_range_input_invalid_range_input">Geçersiz tarih aralığı girdisi</string>
-    <string name="ff_date_range_input_title">Tarihleri gir</string>
-    <string name="ff_date_range_picker_day_in_range">Aralık içinde</string>
-    <string name="ff_date_range_picker_end_headline">Bitiş tarihi</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Sonraki ayı göstermek için kaydır</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Önceki ayı göstermek için kaydır</string>
-    <string name="ff_date_range_picker_start_headline">Başlangıç tarihi</string>
-    <string name="ff_date_range_picker_title">Tarihleri seç</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

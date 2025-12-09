@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Data trebuie să fie la sau înainte de %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Data intrării</string>
-    <string name="ff_date_input_headline_description">Data intrării: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Data nu corespunde cu modelul preconizat: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data nu este permisă: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data este în afara intervalului anual preconizat %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Dată</string>
-    <string name="ff_date_input_no_input_description">Niciunul</string>
-    <string name="ff_date_input_title">Selectare dată</string>
-    <string name="ff_date_picker_headline">„Data selectată”</string>
-    <string name="ff_date_picker_headline_description">Selecția curentă: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigați la anul %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Niciunul</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Derulați pentru afișarea anilor anteriori</string>
-    <string name="ff_date_picker_scroll_to_later_years">Derulați pentru afișarea anilor ulteriori</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Comutați la modul de introducere în calendar</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        „Glisați pentru a selecta un an sau atingeți pentru a comuta înapoi la selectarea unei zile”
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Comutați la modul de introducere text</string>
-    <string name="ff_date_picker_switch_to_next_month">„Schimbați la luna următoare”</string>
-    <string name="ff_date_picker_switch_to_previous_month">„Schimbați la luna anterioară”</string>
-    <string name="ff_date_picker_switch_to_year_selection">„Comutați la selectarea unui an”</string>
-    <string name="ff_date_picker_title">„Selectare dată”</string>
-    <string name="ff_date_picker_today_description">Astăzi</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selector an vizibil</string>
-    <string name="ff_date_range_input_invalid_range_input">Introducere interval dată nevalid</string>
-    <string name="ff_date_range_input_title">Intrare date</string>
-    <string name="ff_date_range_picker_day_in_range">În interval</string>
-    <string name="ff_date_range_picker_end_headline">Data terminării</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Derulați pentru a afișa luna următoare</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Derulați pentru a afișa luna anterioară</string>
-    <string name="ff_date_range_picker_start_headline">Data începerii</string>
-    <string name="ff_date_range_picker_title">Selectare date</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

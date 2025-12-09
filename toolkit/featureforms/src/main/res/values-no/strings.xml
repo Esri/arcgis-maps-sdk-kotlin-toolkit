@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datoen må være den eller før %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Angitt dato</string>
-    <string name="ff_date_input_headline_description">Angitt dato: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datoen matcher ikke det forventede mønsteret: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Dato ikke tillatt: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datoen er utenfor det forventede årsområdet %1$s – %2$s
-    </string>
-    <string name="ff_date_input_label">Dato</string>
-    <string name="ff_date_input_no_input_description">Ingen</string>
-    <string name="ff_date_input_title">Velg dato</string>
-    <string name="ff_date_picker_headline">"Valgt dato"</string>
-    <string name="ff_date_picker_headline_description">Gjeldende utvalg: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Naviger til år %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ingen</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Rull for å vise tidligere år</string>
-    <string name="ff_date_picker_scroll_to_later_years">Rull for å vise senere år</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Bytt til kalenderinnsettingsmodus</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Sveip for å velge et år eller trykk for å gå tilbake til å velge en dag"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Bytt til tekstinnsettingsmodus</string>
-    <string name="ff_date_picker_switch_to_next_month">"Endre til neste måned"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Endre til tidligere måned"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Bytt til å velge et år"</string>
-    <string name="ff_date_picker_title">"Velg dato"</string>
-    <string name="ff_date_picker_today_description">I dag</string>
-    <string name="ff_date_picker_year_picker_pane_title">Årsvelgeren er synlig</string>
-    <string name="ff_date_range_input_invalid_range_input">Ugyldige inndata for datoområde</string>
-    <string name="ff_date_range_input_title">Angi datoer</string>
-    <string name="ff_date_range_picker_day_in_range">Innenfor området</string>
-    <string name="ff_date_range_picker_end_headline">Sluttdato</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Rull ned for å vise neste måned</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Bla ned for å vise forrige måned</string>
-    <string name="ff_date_range_picker_start_headline">Startdato</string>
-    <string name="ff_date_range_picker_title">Velg datoer</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

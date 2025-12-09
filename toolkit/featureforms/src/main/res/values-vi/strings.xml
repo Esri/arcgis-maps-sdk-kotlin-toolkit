@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Ngày phải vào hoặc trước %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ngày đã nhập</string>
-    <string name="ff_date_input_headline_description">Ngày đã nhập: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Ngày không khớp với kiểu mẫu dự kiến: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Ngày không được cho phép: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Ngày nằm ngoài khoảng năm dự kiến %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Ngày</string>
-    <string name="ff_date_input_no_input_description">Không có</string>
-    <string name="ff_date_input_title">Chọn ngày</string>
-    <string name="ff_date_picker_headline">"Ngày đã chọn"</string>
-    <string name="ff_date_picker_headline_description">Lựa chọn hiện tại: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Điều hướng đến năm %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Không có</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Cuộn để hiển thị các năm trước</string>
-    <string name="ff_date_picker_scroll_to_later_years">Cuộn để hiển thị các năm sau</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Chuyển sang chế độ đầu vào lịch</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Vuốt để chọn năm hoặc chạm để chuyển về chọn ngày"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Chuyển sang chế độ đầu vào văn bản</string>
-    <string name="ff_date_picker_switch_to_next_month">"Thay đổi sang tháng sau"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Thay đổi về tháng trước"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Chuyển sang chọn năm"</string>
-    <string name="ff_date_picker_title">"Chọn ngày"</string>
-    <string name="ff_date_picker_today_description">Hôm nay</string>
-    <string name="ff_date_picker_year_picker_pane_title">Trình chọn năm hiển thị</string>
-    <string name="ff_date_range_input_invalid_range_input">Đầu vào khoảng ngày tháng không hợp lệ</string>
-    <string name="ff_date_range_input_title">Nhập ngày</string>
-    <string name="ff_date_range_picker_day_in_range">Trong khoảng</string>
-    <string name="ff_date_range_picker_end_headline">Ngày kết thúc</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Cuộn để hiển thị tháng sau</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Cuộn để hiển thị tháng trước</string>
-    <string name="ff_date_range_picker_start_headline">Ngày bắt đầu</string>
-    <string name="ff_date_range_picker_title">Chọn ngày</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">SA</string>

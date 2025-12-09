@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Η ημερομηνία πρέπει να είναι στις ή πριν από τις %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Καταχωρημένη ημερομηνία</string>
-    <string name="ff_date_input_headline_description">Καταχωρημένη ημερομηνία: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Η ημερομηνία δεν συμφωνεί με το αναμενόμενο πρότυπο: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Η ημερομηνία δεν επιτρέπεται: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Η ημερομηνία δεν εμπίπτει στο αναμενόμενο εύρος τιμών για το έτος %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Ημερομηνία</string>
-    <string name="ff_date_input_no_input_description">Καθόλου</string>
-    <string name="ff_date_input_title">Επιλογή ημερομηνίας</string>
-    <string name="ff_date_picker_headline">"Επιλεγμένη ημερομηνία"</string>
-    <string name="ff_date_picker_headline_description">Τρέχουσα επιλογή: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Πλοήγηση στο έτος %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Καθόλου</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Κυλήστε για να εμφανιστούν τα προηγούμενα έτη</string>
-    <string name="ff_date_picker_scroll_to_later_years">Κυλήστε για να εμφανιστούν τα μεταγενέστερα έτη</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Αλλαγή σε λειτουργία εισαγωγής ημερολογίου</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Αλλαγή για επιλογή ενός έτους ή πάτημα για επιστροφή για επιλογή μίας ημέρας"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Αλλαγή σε λειτουργία εισαγωγής κειμένου</string>
-    <string name="ff_date_picker_switch_to_next_month">"Αλλαγή στον επόμενο μήνα"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Αλλαγή στον προηγούμενο μήνα"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Αλλαγή στην επιλογή ενός έτους"</string>
-    <string name="ff_date_picker_title">"Επιλογή ημερομηνίας"</string>
-    <string name="ff_date_picker_today_description">Σήμερα</string>
-    <string name="ff_date_picker_year_picker_pane_title">Ορατός επιλογέας έτους</string>
-    <string name="ff_date_range_input_invalid_range_input">Μη έγκυρη εισαγωγή εύρους τιμών ημερομηνίας</string>
-    <string name="ff_date_range_input_title">Καταχώριση ημερομηνιών</string>
-    <string name="ff_date_range_picker_day_in_range">Εντός του εύρους τιμών</string>
-    <string name="ff_date_range_picker_end_headline">Ημ/νία λήξης</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Κυλήστε για να εμφανιστεί ο επόμενος μήνας</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Κυλήστε για να εμφανιστεί ο προηγούμενος μήνας</string>
-    <string name="ff_date_range_picker_start_headline">Ημ/νία έναρξης</string>
-    <string name="ff_date_range_picker_title">Επιλογή ημερομηνιών</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">π.μ.</string>

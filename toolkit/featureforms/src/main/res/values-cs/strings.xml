@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum musí být %1$s nebo dřívější</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Zadané datum</string>
-    <string name="ff_date_input_headline_description">Zadané datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum neodpovídá očekávanému vzorci: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nepovoleno: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum mimo očekávaný rozsah let %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Žádný</string>
-    <string name="ff_date_input_title">Vyberte datum</string>
-    <string name="ff_date_picker_headline">"Vybrané datum"</string>
-    <string name="ff_date_picker_headline_description">Aktuální výběr: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Přejít na rok %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Žádný</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Posunout a zobrazit předešlé roky</string>
-    <string name="ff_date_picker_scroll_to_later_years">Posunout a zobrazit následující roky</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Přepnout do režimu zadávání kalendáře</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Posunutím vyberte rok nebo klepnutím přepněte zpět na výběr dne"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Přepnout do režimu zadávání textu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Změnit na další měsíc"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Změnit na předchozí měsíc"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Přepnout na výběr roku"</string>
-    <string name="ff_date_picker_title">"Vybrat datum"</string>
-    <string name="ff_date_picker_today_description">Dnes</string>
-    <string name="ff_date_picker_year_picker_pane_title">Výběr roku viditelný</string>
-    <string name="ff_date_range_input_invalid_range_input">Neplatné zadání rozsahu dat</string>
-    <string name="ff_date_range_input_title">Zadejte data</string>
-    <string name="ff_date_range_picker_day_in_range">V rozsahu</string>
-    <string name="ff_date_range_picker_end_headline">Koncové datum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Posunout a zobrazit další měsíc</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Posunout a zobrazit předchozí měsíc</string>
-    <string name="ff_date_range_picker_start_headline">Počáteční datum</string>
-    <string name="ff_date_range_picker_title">Vyberte data</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">dopoledne</string>

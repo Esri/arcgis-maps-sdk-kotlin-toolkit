@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">วันที่ต้องเท่ากับหรืออยู่ก่อนหน้า %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">วันที่ที่ป้อน</string>
-    <string name="ff_date_input_headline_description">วันที่ที่ป้อน: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">วันที่ไม่ตรงกับรูปแบบที่คาดไว้: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">วันที่ที่ไม่ได้รับอนุญาต: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        วันที่อยู่นอกช่วงปีที่คาดไว้ %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">วันที่</string>
-    <string name="ff_date_input_no_input_description">ไม่มีเลย</string>
-    <string name="ff_date_input_title">เลือกวันที่</string>
-    <string name="ff_date_picker_headline">"วันที่ที่เลือก"</string>
-    <string name="ff_date_picker_headline_description">การเลือกปัจจุบัน: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">นำทางไปยังปี %1$s</string>
-    <string name="ff_date_picker_no_selection_description">ไม่มีเลย</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">เลื่อนเพื่อแสดงปีช่วงก่อนหน้า</string>
-    <string name="ff_date_picker_scroll_to_later_years">เลื่อนเพื่อแสดงปีช่วงหลัง</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">สลับเป็นโหมดอินพุทปฏิทิน</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "ปัดเพื่อเลือกปี หรือแตะเพื่อสลับกลับไปเลือกวัน"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">สลับเป็นโหมดอินพุทข้อความ</string>
-    <string name="ff_date_picker_switch_to_next_month">"เปลี่ยนเป็นเดือนถัดไป"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"เปลี่ยนเป็นเดือนก่อนหน้า"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"สลับเป็นการเลือกปี"</string>
-    <string name="ff_date_picker_title">"เลือกวันที่"</string>
-    <string name="ff_date_picker_today_description">วันนี้</string>
-    <string name="ff_date_picker_year_picker_pane_title">แสดงตัวเลือกปี</string>
-    <string name="ff_date_range_input_invalid_range_input">อินพุทช่วงวันที่ไม่ถูกต้อง</string>
-    <string name="ff_date_range_input_title">ป้อนวันที่</string>
-    <string name="ff_date_range_picker_day_in_range">อยู่ในช่วง</string>
-    <string name="ff_date_range_picker_end_headline">วันที่สิ้นสุด</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">เลื่อนเพื่อแสดงเดือนถัดไป</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">เลื่อนเพื่อแสดงเดือนก่อนหน้า</string>
-    <string name="ff_date_range_picker_start_headline">วันที่เริ่มต้น</string>
-    <string name="ff_date_range_picker_title">เลือกวันที่</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
