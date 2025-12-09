@@ -116,7 +116,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.navigation)
-    implementation(libs.bundles.icons)
+    implementation(libs.androidx.material.icons.core)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

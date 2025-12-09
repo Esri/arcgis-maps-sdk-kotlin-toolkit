@@ -78,7 +78,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.bundles.icons)
+    implementation(libs.androidx.material.icons.core)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(project(":geoview-compose"))

@@ -103,7 +103,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.bundles.icons)
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
