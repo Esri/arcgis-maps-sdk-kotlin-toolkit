@@ -25,7 +25,7 @@ internal const val AUTH_ENDPOINT_MISSING_ERROR = "Failed to start authentication
  * @since 200.8.0
  */
 public class CustomTabsNotFoundException : Exception(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
-en
+
 /**
  * Creates an [Exception] based on the provided error message.
  *
