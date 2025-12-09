@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -232,7 +233,7 @@ private fun (ColumnScope).PickerContent(
     label: String,
     description: String,
     state: DateTimePickerState,
-    datePickerState: androidx.compose.material3.DatePickerState,
+    datePickerState: DatePickerState,
     timePickerState: TimePickerState,
     style: DateTimePickerStyle,
     picker: DateTimePickerInput,
