@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">日期必須等於或早於 %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">輸入日期</string>
-    <string name="ff_date_input_headline_description">輸入日期: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">日期與預期模式不符: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">不允許: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        日期超出預期年份範圍 %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">日期</string>
-    <string name="ff_date_input_no_input_description">無</string>
-    <string name="ff_date_input_title">選擇日期</string>
-    <string name="ff_date_picker_headline">"選擇的日期"</string>
-    <string name="ff_date_picker_headline_description">目前選擇: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">導覽至 %1$s 年</string>
-    <string name="ff_date_picker_no_selection_description">無</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">捲動以顯示較早年份</string>
-    <string name="ff_date_picker_scroll_to_later_years">捲動以顯示較晚年份</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">切換到行事曆輸入模式</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "切換以選擇年份，或點選以切換回選擇日期"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">切換到文字輸入模式</string>
-    <string name="ff_date_picker_switch_to_next_month">"變改為下個月"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"變改為上個月"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"切換以選擇某年"</string>
-    <string name="ff_date_picker_title">"選擇日期"</string>
-    <string name="ff_date_picker_today_description">今天</string>
-    <string name="ff_date_picker_year_picker_pane_title">年份選取器可見</string>
-    <string name="ff_date_range_input_invalid_range_input">日期範圍輸入無效</string>
-    <string name="ff_date_range_input_title">輸入日期</string>
-    <string name="ff_date_range_picker_day_in_range">範圍中</string>
-    <string name="ff_date_range_picker_end_headline">結束日期</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">捲動以顯示下個月</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">捲動以顯示上個月</string>
-    <string name="ff_date_range_picker_start_headline">開始日期</string>
-    <string name="ff_date_range_picker_title">選擇日期</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">上午</string>

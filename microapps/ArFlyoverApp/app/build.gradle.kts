@@ -80,6 +80,7 @@ dependencies {
     implementation(project(":ar"))
     implementation(libs.arcore)
     implementation(arcgis.mapsSdk)
+    implementation(libs.androidx.material.icons.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

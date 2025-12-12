@@ -103,6 +103,7 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(libs.arcore)
     api(arcgis.mapsSdk)
+    implementation(libs.androidx.material.icons.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

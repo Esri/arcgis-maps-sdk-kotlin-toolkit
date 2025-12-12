@@ -35,12 +35,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -62,10 +67,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePicker
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerDefaults
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerState
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DisplayMode
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.TimePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.TimePickerState
 import java.time.Instant
@@ -114,6 +115,7 @@ private fun calcYearRangeStart(min: Long?, selectedDateTime: Long?): Int {
 
     return year ?: DatePickerDefaults.YearRange.first
 }
+
 private fun calcYearRangeEnd(max: Long?, selectedDateTime: Long?): Int {
     val year = if (max != null && selectedDateTime != null) {
         if (max > selectedDateTime) {
@@ -129,6 +131,7 @@ private fun calcYearRangeEnd(max: Long?, selectedDateTime: Long?): Int {
 
     return year ?: DatePickerDefaults.YearRange.last
 }
+
 /**
  * A material3 date and time picker presented as an [AlertDialog].
  *
@@ -157,23 +160,24 @@ internal fun DateTimePicker(
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
         start = calcYearRangeStart(state.minDateTime?.toEpochMilli(), state.selectedDateTimeMillis),
-        endInclusive = calcYearRangeEnd(state.maxDateTime?.toEpochMilli(), state.selectedDateTimeMillis)
+        endInclusive = calcYearRangeEnd(
+            state.maxDateTime?.toEpochMilli(),
+            state.selectedDateTimeMillis
+        )
     )
     // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState
-
-    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
-        DatePickerState(
-            initialSelectedDateMillis = dateTime.dateForPicker,
-            initialDisplayedMonthMillis = dateTime.dateForPicker
-                ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
-            datePickerRange,
-            DisplayMode.Picker
-        )
-    }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = dateTime.dateForPicker,
+        initialDisplayedMonthMillis = dateTime.dateForPicker
+            ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
+        yearRange = datePickerRange,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = state
+    )
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -260,10 +264,18 @@ private fun (ColumnScope).PickerContent(
                 key(state.dateTime.value) {
                     DatePicker(
                         state = datePickerState,
-                        dateValidator = { timeStamp ->
-                            state.dateValidator(timeStamp)
+                        title = {
+                            title(
+                                if (style == DateTimePickerStyle.Date) {
+                                    null
+                                } else {
+                                    Icons.Rounded.AccessTime
+                                }
+                            )
                         },
-                        title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
+                        colors = DatePickerDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
                     )
                 }
             }
@@ -331,7 +343,7 @@ private fun PickerFooter(
                 // only enable Today button if today is within the range if provided
                 // the date validator assumes the Long is from the picker,
                 // i.e. offset from UTC.
-                enabled = state.dateValidator(
+                enabled = state.isSelectableDate(
                     UtcDateTime.create(Instant.now().toEpochMilli()).dateForPicker!!
                 ),
                 modifier = Modifier.semantics { contentDescription = "current date or time button" }
@@ -344,7 +356,9 @@ private fun PickerFooter(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        TextButton(onClick = onCancelled, modifier = Modifier.semantics { contentDescription = "cancel" }) {
+        TextButton(
+            onClick = onCancelled,
+            modifier = Modifier.semantics { contentDescription = "cancel" }) {
             Text(stringResource(R.string.cancel))
         }
         TextButton(onClick = onConfirmed, enabled = confirmEnabled) {
@@ -403,7 +417,7 @@ private object DateTimePickerDialogTokens {
  * [Modifier.widthIn] is used. This is useful when different layouts are needed in portrait
  * and landscape orientations.
  */
-internal fun Modifier.widthWithOrientation(width: Dp) : Modifier = composed {
+internal fun Modifier.widthWithOrientation(width: Dp): Modifier = composed {
     val configuration = LocalConfiguration.current
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         this.widthIn(width)

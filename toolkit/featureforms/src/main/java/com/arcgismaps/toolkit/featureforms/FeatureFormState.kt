@@ -546,7 +546,7 @@ internal fun createFieldState(
                     required = element.isRequired,
                     visible = element.isVisible,
                     minEpochMillis = input.min,
-                    maxEpochMillis = input.min,
+                    maxEpochMillis = input.max,
                     shouldShowTime = input.includeTime,
                     fieldType = element.fieldType
                 ),

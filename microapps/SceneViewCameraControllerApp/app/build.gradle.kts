@@ -79,6 +79,7 @@ dependencies {
     implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)

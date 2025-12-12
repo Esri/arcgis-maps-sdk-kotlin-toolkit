@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">La data ha de ser el dia %1$s o anterior</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Data introduïda</string>
-    <string name="ff_date_input_headline_description">Data introduïda: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">La data no coincideix amb el patró esperat: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data no permesa: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        La data està fora de l\'interval d\'anys esperat %1$s-%2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Cap</string>
-    <string name="ff_date_input_title">Seleccioneu la data</string>
-    <string name="ff_date_picker_headline">"Data seleccionada"</string>
-    <string name="ff_date_picker_headline_description">Selecció actual: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ves a l\'any %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Cap</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Desplaceu-vos per veure els anys anteriors</string>
-    <string name="ff_date_picker_scroll_to_later_years">Desplaceu-vos per veure els anys posteriors</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Canvia al mode d\'entrada de calendari</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Feu lliscar el dit per seleccionar un any o toqueu per canviar a la selecció d\'un dia"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Canvia al mode d\'entrada de text</string>
-    <string name="ff_date_picker_switch_to_next_month">"Canvia al mes següent"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Canvia al mes anterior"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Canvia a la selecció d\'un any"</string>
-    <string name="ff_date_picker_title">"Seleccioneu una data"</string>
-    <string name="ff_date_picker_today_description">Avui</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selector d\'any visible</string>
-    <string name="ff_date_range_input_invalid_range_input">Entrada d\'interval de dates no vàlida</string>
-    <string name="ff_date_range_input_title">Introduïu les dates</string>
-    <string name="ff_date_range_picker_day_in_range">A l\'interval</string>
-    <string name="ff_date_range_picker_end_headline">Data de finalització</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Desplaceu-vos per mostrar el mes següent</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Desplaceu-vos per mostrar el mes anterior</string>
-    <string name="ff_date_range_picker_start_headline">Data d\'inici</string>
-    <string name="ff_date_range_picker_title">Seleccioneu les dates</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

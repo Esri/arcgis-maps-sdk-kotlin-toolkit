@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datumam jāsakrīt vai jābūt pirms %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ievadīšanas datums</string>
-    <string name="ff_date_input_headline_description">Ievadīšanas datums: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datums neatbilst paredzētajam modelim: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datums nav atļauts: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datums ārpus paredzētā gadu diapazona: %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Datums</string>
-    <string name="ff_date_input_no_input_description">Nav</string>
-    <string name="ff_date_input_title">Atlasīt datumu</string>
-    <string name="ff_date_picker_headline">"Atlasītais datums"</string>
-    <string name="ff_date_picker_headline_description">Pašreizējā atlase: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Pāriet uz gadu %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Nav</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Ritiniet, lai parādītu iepriekšējos gadus</string>
-    <string name="ff_date_picker_scroll_to_later_years">Ritiniet, lai parādītu vēlākos gadus</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Pārslēgt uz kalendāra ievades režīmu</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Pavelciet, lai izvēlētos gadu, vai pieskarieties, lai pārslēgtu atpakaļ uz dienas atlasi"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Pārslēgt uz teksta ievades režīmu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Mainīt uz nākamo mēnesi"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Mainīt uz iepriekšējo mēnesi"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Pārslēgt uz gada atlasi"</string>
-    <string name="ff_date_picker_title">"Atlasīt datumu"</string>
-    <string name="ff_date_picker_today_description">Šodien</string>
-    <string name="ff_date_picker_year_picker_pane_title">Redzams gada atlasītājs</string>
-    <string name="ff_date_range_input_invalid_range_input">Nederīga datumu diapazona ievade</string>
-    <string name="ff_date_range_input_title">Ievadiet datumus</string>
-    <string name="ff_date_range_picker_day_in_range">Diapazonā</string>
-    <string name="ff_date_range_picker_end_headline">Beigu datums</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Ritiniet, lai parādītu nākamo mēnesi</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Ritiniet, lai parādītu iepriekšējo mēnesi</string>
-    <string name="ff_date_range_picker_start_headline">Sākuma datums</string>
-    <string name="ff_date_range_picker_title">Atlasīt datumus</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

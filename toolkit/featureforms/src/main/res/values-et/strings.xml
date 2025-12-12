@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Kuupäev peab olema %1$s või varasem</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Sisestatud kuupäev</string>
-    <string name="ff_date_input_headline_description">Sisestatud kuupäev: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Kuupäev ei vasta eeldatud mustrile: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Kuupäev pole lubatud: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Kuupäev on väljaspool eeldatud aastavahemikku: %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Kuupäev</string>
-    <string name="ff_date_input_no_input_description">Puudub</string>
-    <string name="ff_date_input_title">Valige kuupäev</string>
-    <string name="ff_date_picker_headline">"Valitud kuupäev"</string>
-    <string name="ff_date_picker_headline_description">Praegune valik: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Liikuge aastasse %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Puudub</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Kerige varasemate aastate kuvamiseks</string>
-    <string name="ff_date_picker_scroll_to_later_years">Kerige hilisemate aastate kuvamiseks</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Aktiveerige kalendrisisestusrežiim</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Nipsake aasta valimiseks või puudutage, et aktiveerida uuesti päeva valimine"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Aktiveerige tekstisisestusrežiim</string>
-    <string name="ff_date_picker_switch_to_next_month">"Vali järgmine kuu"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Vali eelmine kuu"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Aktiveeri aasta valimine"</string>
-    <string name="ff_date_picker_title">"Vali kuupäev"</string>
-    <string name="ff_date_picker_today_description">Täna</string>
-    <string name="ff_date_picker_year_picker_pane_title">Aastavalija on nähtav</string>
-    <string name="ff_date_range_input_invalid_range_input">Sobimatu kuupäevavahemiku sisend</string>
-    <string name="ff_date_range_input_title">Sisestage kuupäevad</string>
-    <string name="ff_date_range_picker_day_in_range">Vahemikus</string>
-    <string name="ff_date_range_picker_end_headline">Lõppkuupäev</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Kerige järgmise kuu kuvamiseks</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Kerige eelmise kuu kuvamiseks</string>
-    <string name="ff_date_range_picker_start_headline">Alguskuupäev</string>
-    <string name="ff_date_range_picker_title">Valige kuupäevad</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">e.l.</string>
