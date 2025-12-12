@@ -177,13 +177,12 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      * @since 300.0.0
      */
     private fun processAuthenticationFlow() {
-        val localIntent = intent
-        with(localIntent) {
+        with(intent) {
             val authEndpoint = getStringExtra(KEY_INTENT_EXTRA_URL)
             when {
                 // This signals that we have been redirected back to the app from the browser
                 action == Intent.ACTION_VIEW && data != null -> {
-                    handleRedirectIntent(localIntent)
+                    handleRedirectIntent(this)
                 }
                 authEndpoint.isNullOrEmpty() -> {
                     handleRedirectIntent(intent = null, errorMessage = AUTH_ENDPOINT_MISSING_ERROR)

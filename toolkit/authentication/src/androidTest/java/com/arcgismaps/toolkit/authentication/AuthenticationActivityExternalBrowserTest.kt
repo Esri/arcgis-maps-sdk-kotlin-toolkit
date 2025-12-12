@@ -69,14 +69,16 @@ class AuthenticationActivityExternalBrowserTest {
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
         every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns true
 
+        // Define the authorize URL to be used in the intent
         val authorizeUrl = "https://example.com/auth"
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
         }
-
+        // Launch the AuthenticationActivity with the intent
         ActivityScenario.launch<AuthenticationActivity>(intent).use {
             intended(
                 allOf(
+                    // Verify that the launched intent is a Custom Tabs intent with the expected properties
                     hasAction(Intent.ACTION_VIEW),
                     hasData(authorizeUrl),
                     // Custom Tabs adds android.support.customtabs.extra.SESSION
@@ -115,23 +117,27 @@ class AuthenticationActivityExternalBrowserTest {
 
     /**
      * Given [AuthenticationActivity] is launched with an intent containing a valid redirect URI
-     * When the activity starts
+     * simulating a browser redirect back to the app after successful authentication
+     * When the activity processes the redirect intent
      * Then the activity finishes with RESULT_CODE_SUCCESS and includes the redirect URI in the result data
      * @since 300.0.0
      */
     @Test
     fun returnsSuccessWhenValidRedirectUriProvided() {
+        // Define a valid redirect URI to simulate a successful OAuth/IAP redirect
         val redirectUri = "kotlin-iap-test-1://auth/callback?code=123"
-        // simulates the redirect from the external browser
+        // Create an intent with ACTION_VIEW and the redirect URI, simulating the browser redirecting back to the app
         val intent = Intent(
             Intent.ACTION_VIEW,
             Uri.parse(redirectUri)
         )
 
-        // invoke the activity with the redirect URI
+        // Launch the AuthenticationActivity with the redirect intent
         val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
         scenario.close()
         val result = scenario.result
+
+        // The activity should finish with RESULT_CODE_SUCCESS and include the redirect URI in the result data
         assertThat(result.resultCode).isEqualTo(RESULT_CODE_SUCCESS)
         assertThat(result.resultData?.getStringExtra("KEY_INTENT_EXTRA_RESPONSE_URI")).isEqualTo(redirectUri)
     }
