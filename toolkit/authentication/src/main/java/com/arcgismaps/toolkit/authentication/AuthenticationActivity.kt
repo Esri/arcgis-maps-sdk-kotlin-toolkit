@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,15 +24,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import createExceptionFromMessage
 
 private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
+internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
-private const val RESULT_CODE_SUCCESS = 1
-private const val RESULT_CODE_CANCELED = 2
+
+internal const val RESULT_CODE_SUCCESS = 1
+internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
 
@@ -128,8 +132,11 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         url?.let {
-            val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            launchCustomTabs(it, preferPrivateWebBrowserSession)
+            if (canDefaultBrowserLaunchCustomTabs()) {
+                launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+            } else {
+                handleRedirectIntent(null, errorMessage = DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+            }
         }
     }
 
@@ -138,7 +145,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onWindowFocusChanged(hasFocus)
 
         // We only want to respond to focus changed events when this activity is in "resumed" state.
-        // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
+        // On some devices we get unexpected focus changed events with hasFocus true which cause this Activity
         // to be finished (destroyed) prematurely, for example:
         // - On Oreo log in to portal with OAuth
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
@@ -174,42 +181,44 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    private fun handleRedirectIntent(intent: Intent?) {
+    private fun handleRedirectIntent(intent: Intent?, errorMessage: String? = null) {
         val uri = intent?.data
+        val newIntent = Intent()
         if (uri != null) {
-            val uriString = uri.toString()
-            val newIntent = Intent().apply {
-                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
-            }
+            newIntent.putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
-            setResult(RESULT_CODE_CANCELED)
+            errorMessage?.let {
+                newIntent.putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, it)
+            }
+            setResult(RESULT_CODE_CANCELED, newIntent)
         }
         finish()
     }
 
     /**
-     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
-     * string as output. The output string represents a redirect URI as the result of an OAuth user
-     * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [AuthenticationActivity] for a result.
-     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
-     * for more details.
+     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns an [OAuthUserSignInResult] as output.
+     * The output encapsulates the result of an OAuth sign in prompt, which can be a success with a redirect URI,
+     * a failure with an exception, or a cancellation.
      *
      * @since 200.8.0
      */
-    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, OAuthUserSignInResult>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            } else {
-                null
+        override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
+            val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            val exception = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)?.let {
+                createExceptionFromMessage(it)
+            }
+            return when {
+                resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
+                resultCode == RESULT_CODE_CANCELED && exception != null -> OAuthUserSignInResult.Failure(exception)
+                else -> OAuthUserSignInResult.Canceled
             }
         }
     }
@@ -260,5 +269,15 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             else
                 false
         }
+    }
+
+    /**
+     * Represents the result of an OAuth sign-in operation.
+     * @since 300.0.0
+     */
+    internal sealed class OAuthUserSignInResult {
+        data class Success(val redirectUri: String) : OAuthUserSignInResult()
+        data class Failure(val exception: Exception) : OAuthUserSignInResult()
+        data object Canceled : OAuthUserSignInResult()
     }
 }
