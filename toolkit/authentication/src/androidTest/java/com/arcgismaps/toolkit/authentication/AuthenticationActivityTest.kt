@@ -39,7 +39,7 @@ import org.junit.Test
  *
  * @since 300.0.0
  */
-class AuthenticationActivityExternalBrowserTest {
+class AuthenticationActivityTest {
 
     @Before
     fun setUp() {
@@ -53,7 +53,7 @@ class AuthenticationActivityExternalBrowserTest {
     }
 
     /**
-     * Given [AuthenticationActivity] with a browser that supports Custom Tabs
+     * Given a device with default browser that does not support Custom Tabs
      * When [AuthenticationActivity] starts
      * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
      * And the intent contains the Custom Tabs session extra key
@@ -86,13 +86,14 @@ class AuthenticationActivityExternalBrowserTest {
     }
 
     /**
-     * Given [AuthenticationActivity] is launched with a default browser that does not support Custom Tabs
-     * When [AuthenticationActivity] starts
+     * Given a device with default browser that does not support Custom Tabs
+     * When [AuthenticationActivity] receives an intent for OAuth sign-in
      * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
      * @since 300.0.0
      */
+     */
     @Test
-    fun returnsExceptionWhenNoBrowserAvailable() {
+    fun returnsExceptionWhenNoCustomTabsAvailable() {
         // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
         every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
@@ -104,7 +105,7 @@ class AuthenticationActivityExternalBrowserTest {
 
         // invoke the activity
         val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
-        scenario.close()
+        scenario.use {  }
         val result = scenario.result
         assertThat(result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
         val exceptionMessage = result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
