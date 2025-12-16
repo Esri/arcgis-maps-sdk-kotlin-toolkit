@@ -193,7 +193,7 @@ private fun GroupElementHeader(
 
 internal object GroupElementDefaults {
     val borderThickness = 1.dp
-    val containerShape = RoundedCornerShape(5.dp)
+    val containerShape = RoundedCornerShape(15.dp)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)

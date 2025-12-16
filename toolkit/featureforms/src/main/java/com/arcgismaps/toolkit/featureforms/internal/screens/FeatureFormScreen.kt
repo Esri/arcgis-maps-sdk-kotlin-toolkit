@@ -99,7 +99,7 @@ internal fun FeatureFormScreen(
                             state = entry.getState(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp),
+                                .padding(15.dp),
                             // set the onClick callback for the group element only if provided
                             onFormElementClick = handleFormElementTapAction(
                                 barcodeTapAction = onBarcodeButtonClick
@@ -112,7 +112,7 @@ internal fun FeatureFormScreen(
                             state = entry.getState(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                                .padding(15.dp)
                         )
                     }
 
