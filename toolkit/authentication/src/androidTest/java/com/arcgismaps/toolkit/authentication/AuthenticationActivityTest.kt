@@ -53,7 +53,7 @@ class AuthenticationActivityTest {
     }
 
     /**
-     * Given a device with default browser that does not support Custom Tabs
+     * Given a device with default browser that supports Custom Tabs
      * When [AuthenticationActivity] starts
      * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
      * And the intent contains the Custom Tabs session extra key
