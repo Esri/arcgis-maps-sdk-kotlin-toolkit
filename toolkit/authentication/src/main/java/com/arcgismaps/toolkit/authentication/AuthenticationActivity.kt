@@ -26,7 +26,7 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import createExceptionFromMessage
 
-private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
+internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
