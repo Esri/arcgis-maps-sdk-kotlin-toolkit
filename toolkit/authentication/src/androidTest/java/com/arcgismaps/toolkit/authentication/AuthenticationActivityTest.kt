@@ -91,7 +91,6 @@ class AuthenticationActivityTest {
      * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
      * @since 300.0.0
      */
-     */
     @Test
     fun returnsExceptionWhenNoCustomTabsAvailable() {
         // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
