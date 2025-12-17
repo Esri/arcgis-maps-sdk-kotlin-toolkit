@@ -16,7 +16,7 @@
  *
  */
 
-internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
+import com.arcgismaps.toolkit.authentication.DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 
 /**
  * Exception thrown when the default browser does not support Custom Tabs.

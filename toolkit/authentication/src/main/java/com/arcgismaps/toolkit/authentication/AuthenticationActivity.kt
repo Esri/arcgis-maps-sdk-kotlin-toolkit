@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -38,6 +37,7 @@ internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
+internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
