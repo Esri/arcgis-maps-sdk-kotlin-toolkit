@@ -104,12 +104,11 @@ class AuthenticationActivityTest {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
         }
 
-        // invoke the activity
-        val scenario = ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent)
-        scenario.use {  }
-        val result = scenario.result
-        assertThat(result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
-        val exceptionMessage = result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
-        assertThat(exceptionMessage).isEqualTo(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+        // Launch the AuthenticationActivity with the intent for OAuth sign in
+        ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent).use { activityScenario ->
+            assertThat(activityScenario.result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
+            val exceptionMessage = activityScenario.result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            assertThat(exceptionMessage).isEqualTo(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+        }
     }
 }
