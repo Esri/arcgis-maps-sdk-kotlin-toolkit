@@ -37,7 +37,7 @@ internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
-internal const val VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE = "Default browser does not support Custom Tabs."
+internal const val VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -140,7 +140,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
                     preferPrivateWebBrowserSession = preferPrivateWebBrowserSession
                 )
             } else {
-                handleRedirectIntent(null, errorMessage = VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE)
+                finishWithError(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
             }
         }
     }
@@ -186,18 +186,30 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    private fun handleRedirectIntent(intent: Intent?, errorMessage: String? = null) {
+    private fun handleRedirectIntent(intent: Intent?) {
         val uri = intent?.data
-        val newIntent = Intent()
         if (uri != null) {
-            newIntent.putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
+            val uriString = uri.toString()
+            val newIntent = Intent().apply {
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
+            }
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
-            errorMessage?.let {
-                newIntent.putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, it)
-            }
-            setResult(RESULT_CODE_CANCELED, newIntent)
+            setResult(RESULT_CODE_CANCELED)
         }
+        finish()
+    }
+
+    /**
+     * Finishes this activity with a canceled result code and an error message.
+     *
+     * @since 300.0.0
+     */
+    private fun finishWithError(errorMessage: String) {
+        val newIntent = Intent().apply {
+            putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, errorMessage)
+        }
+        setResult(RESULT_CODE_CANCELED, newIntent)
         finish()
     }
 

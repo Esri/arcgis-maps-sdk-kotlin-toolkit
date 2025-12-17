@@ -107,7 +107,7 @@ class AuthenticationActivityTest {
         ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent).use { activityScenario ->
             assertThat(activityScenario.result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
             val exceptionMessage = activityScenario.result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
-            assertThat(exceptionMessage).isEqualTo(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            assertThat(exceptionMessage).isEqualTo(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
         }
     }
 }

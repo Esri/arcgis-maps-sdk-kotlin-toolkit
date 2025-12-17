@@ -16,14 +16,14 @@
  *
  */
 
-import com.arcgismaps.toolkit.authentication.VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE
+import com.arcgismaps.toolkit.authentication.VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB
 
 /**
  * Exception thrown when the default browser does not support Custom Tabs.
  *
  * @since 200.8.0
  */
-public class CustomTabsNotFoundException : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE)
+public class CustomTabsNotFoundException : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
 
 /**
  * Creates an [Exception] based on the provided error message.
@@ -34,7 +34,7 @@ public class CustomTabsNotFoundException : Exception(VALUE_INTENT_EXTRA_EXCEPTIO
  */
 internal fun createExceptionFromMessage(message: String): Exception {
     return when (message) {
-        VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE -> CustomTabsNotFoundException()
+        VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB -> CustomTabsNotFoundException()
         else -> IllegalStateException(message)
     }
 }
