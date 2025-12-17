@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum moet op of voor %1$s liggen</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ingevoerde datum</string>
-    <string name="ff_date_input_headline_description">Ingevoerde datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum komt niet overeen met verwacht patroon: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum niet toegestaan: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum ligt buiten verwacht jarenbereik %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Geen</string>
-    <string name="ff_date_input_title">Datum selecteren</string>
-    <string name="ff_date_picker_headline">"Geselecteerd date"</string>
-    <string name="ff_date_picker_headline_description">Huidige selectie: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ga naar jaar %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Geen</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Scrollen om eerdere jaren weer te geven</string>
-    <string name="ff_date_picker_scroll_to_later_years">Scrollen om latere jaren weer te geven</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Overschakelen naar kalenderinvoermodus</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Veeg om een jaar te selecteren of tik om terug te gaan om een dag te selecteren"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Overschakelen op tekstinvoermodus</string>
-    <string name="ff_date_picker_switch_to_next_month">"Veranderen in volgende maand"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Veranderen in vorige maand"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Overschakelen op selecteren van een jaar"</string>
-    <string name="ff_date_picker_title">"Datum selecteren"</string>
-    <string name="ff_date_picker_today_description">Vandaag</string>
-    <string name="ff_date_picker_year_picker_pane_title">Jaarkiezer zichtbaar</string>
-    <string name="ff_date_range_input_invalid_range_input">Invoer heeft ongeldig datumbereik</string>
-    <string name="ff_date_range_input_title">Datums invoeren</string>
-    <string name="ff_date_range_picker_day_in_range">Binnen bereik</string>
-    <string name="ff_date_range_picker_end_headline">Einddatum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Scrollen om de volgende maand weer te geven</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Scrollen om de vorige maand weer te geven</string>
-    <string name="ff_date_range_picker_start_headline">Begindatum</string>
-    <string name="ff_date_range_picker_title">Datums selecteren</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

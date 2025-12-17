@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Дата должна быть %1$s или ранее</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Введенная дата</string>
-    <string name="ff_date_input_headline_description">Введенная дата: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Дата не соответствует ожидаемому шаблону: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Недопустимая дата: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Дата не попадает в ожидаемый диапазон лет %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Дата</string>
-    <string name="ff_date_input_no_input_description">Нет</string>
-    <string name="ff_date_input_title">Выбрать дату</string>
-    <string name="ff_date_picker_headline">"Выбранная дата"</string>
-    <string name="ff_date_picker_headline_description">Текущая выборка: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Перейти к году %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Нет</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Прокрутите, чтобы просмотреть предыдущие годы</string>
-    <string name="ff_date_picker_scroll_to_later_years">Прокрутите, чтобы просмотреть следующие годы</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Переключиться в режим ввода календаря</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Проведите пальцем, чтобы выбрать год, или коснитесь, чтобы вернуться к выбору дня"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Переключиться в режим ввода текста</string>
-    <string name="ff_date_picker_switch_to_next_month">"Перейти к следующему месяцу"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Перейти к предыдущему месяцу"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Переключиться на выбор года"</string>
-    <string name="ff_date_picker_title">"Выбрать дату"</string>
-    <string name="ff_date_picker_today_description">Сегодня</string>
-    <string name="ff_date_picker_year_picker_pane_title">Видимый выбор года</string>
-    <string name="ff_date_range_input_invalid_range_input">Введен некорректный диапазон дат</string>
-    <string name="ff_date_range_input_title">Ввести даты</string>
-    <string name="ff_date_range_picker_day_in_range">В диапазоне</string>
-    <string name="ff_date_range_picker_end_headline">Дата окончания</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Прокрутить, чтобы отобразился следующий месяц</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Прокрутить, чтобы отобразился предыдущий месяц</string>
-    <string name="ff_date_range_picker_start_headline">Дата начала</string>
-    <string name="ff_date_range_picker_title">Выбрать даты</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>

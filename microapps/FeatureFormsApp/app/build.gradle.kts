@@ -100,6 +100,7 @@ dependencies {
     implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)

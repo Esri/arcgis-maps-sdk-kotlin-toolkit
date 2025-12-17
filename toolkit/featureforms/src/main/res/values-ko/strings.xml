@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">날짜는 %1$s 또는 그 이전이어야 함</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">입력한 날짜</string>
-    <string name="ff_date_input_headline_description">입력한 날짜: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">날짜가 예상 패턴과 일치하지 않음: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">날짜가 허용되지 않음: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        날짜가 예상 연도 범위(%1$s - %2$s)를 벗어남
-    </string>
-    <string name="ff_date_input_label">날짜</string>
-    <string name="ff_date_input_no_input_description">없음</string>
-    <string name="ff_date_input_title">날짜 선택</string>
-    <string name="ff_date_picker_headline">"선택한 날짜"</string>
-    <string name="ff_date_picker_headline_description">현재 선택 항목: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">연도(%1$s)로 이동</string>
-    <string name="ff_date_picker_no_selection_description">없음</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">스크롤하여 이전 연도 표시</string>
-    <string name="ff_date_picker_scroll_to_later_years">스크롤하여 이후 연도 표시</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">캘린더 입력 모드로 전환</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "스와이프하여 연도를 선택하거나 눌러서 다시 날짜 선택으로 전환"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">텍스트 입력 모드로 전환</string>
-    <string name="ff_date_picker_switch_to_next_month">"다음 달로 변경"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"이전 달로 변경"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"연도 선택으로 전환"</string>
-    <string name="ff_date_picker_title">"날짜 선택"</string>
-    <string name="ff_date_picker_today_description">오늘</string>
-    <string name="ff_date_picker_year_picker_pane_title">연도 선택기 표시</string>
-    <string name="ff_date_range_input_invalid_range_input">잘못된 날짜 범위 입력</string>
-    <string name="ff_date_range_input_title">날짜 입력</string>
-    <string name="ff_date_range_picker_day_in_range">범위 내</string>
-    <string name="ff_date_range_picker_end_headline">종료일</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">스크롤하여 다음 달 표시</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">스크롤하여 이전 달 표시</string>
-    <string name="ff_date_range_picker_start_headline">시작일</string>
-    <string name="ff_date_range_picker_title">날짜 선택</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">오전</string>

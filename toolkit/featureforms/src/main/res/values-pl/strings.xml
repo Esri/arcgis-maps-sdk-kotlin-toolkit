@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Data musi równa %1$s lub wcześniejsza</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Wprowadzona data</string>
-    <string name="ff_date_input_headline_description">Wprowadzona data: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Data nie pasuje do oczekiwanego wzorca: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Niedozwolona data: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data poza oczekiwanym zakresem lat %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Brak</string>
-    <string name="ff_date_input_title">Wybierz datę</string>
-    <string name="ff_date_picker_headline">"Wybrana data"</string>
-    <string name="ff_date_picker_headline_description">Bieżący wybór: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Przejdź do roku %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Brak</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Przewiń, aby wyświetlić wcześniejsze lata</string>
-    <string name="ff_date_picker_scroll_to_later_years">Przewiń, aby wyświetlić późniejsze lata</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Przełącz do trybu wprowadzania w kalendarzu</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Przesuń palcem, aby wybrać rok, lub dotknij, aby powrócić do wyboru dnia"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Przełącz do trybu wprowadzania tekstu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Zmień na następny miesiąc"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Zmień na poprzedni miesiąc"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Przełącz na wybór roku"</string>
-    <string name="ff_date_picker_title">"Wybierz datę"</string>
-    <string name="ff_date_picker_today_description">Dzisiaj</string>
-    <string name="ff_date_picker_year_picker_pane_title">Okno wyboru roku jest widoczne</string>
-    <string name="ff_date_range_input_invalid_range_input">Wprowadzono nieprawidłowy zakres dat</string>
-    <string name="ff_date_range_input_title">Wprowadź daty</string>
-    <string name="ff_date_range_picker_day_in_range">W zakresie</string>
-    <string name="ff_date_range_picker_end_headline">Data końcowa</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Przewiń, aby wyświetlić następny miesiąc</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Przewiń, aby wyświetlić poprzedni miesiąc</string>
-    <string name="ff_date_range_picker_start_headline">Data początkowa</string>
-    <string name="ff_date_range_picker_title">Wybierz daty</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">przed południem</string>

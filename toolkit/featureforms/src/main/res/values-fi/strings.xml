@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Päivämäärän on oltava %1$s tai sitä ennen</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Annettu päivämäärä</string>
-    <string name="ff_date_input_headline_description">Annettu päivämäärä: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Päivämäärä ei vastaa odotettua muotoa: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Päivämäärä ei sallittu: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Päivämäärä odotetun vuosialueen ulkopuolella: %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Päivämäärä</string>
-    <string name="ff_date_input_no_input_description">Ei mitään</string>
-    <string name="ff_date_input_title">Valitse päivämäärä</string>
-    <string name="ff_date_picker_headline">"Valittu päivämäärä"</string>
-    <string name="ff_date_picker_headline_description">Nykyinen valinta: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Siirry vuoteen %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ei mitään</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Vieritä, jos haluat nähdä aiemmat vuodet</string>
-    <string name="ff_date_picker_scroll_to_later_years">Vieritä, jos haluat nähdä myöhemmät vuodet</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Vaihda kalenterin syöttötilaan</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Valitse vuosi pyyhkäisemällä tai siirry takaisin päivän valintaan napauttamalla"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Vaihda tekstinsyöttötilaan</string>
-    <string name="ff_date_picker_switch_to_next_month">"Muuta seuraavaksi kuukaudeksi"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Muuta edelliseksi kuukaudeksi"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Siirry vuoden valintaan"</string>
-    <string name="ff_date_picker_title">"Valitse päivämäärä"</string>
-    <string name="ff_date_picker_today_description">Tänään</string>
-    <string name="ff_date_picker_year_picker_pane_title">Vuosivalitsin näkyvissä</string>
-    <string name="ff_date_range_input_invalid_range_input">Virheellinen päivämääräalueen syöttö</string>
-    <string name="ff_date_range_input_title">Anna päivämäärät</string>
-    <string name="ff_date_range_picker_day_in_range">Alueella</string>
-    <string name="ff_date_range_picker_end_headline">Lopetuspäivämäärä</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Vieritä, jos haluat nähdä seuraavan kuukauden</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Vieritä, jos haluat nähdä edellisen kuukauden</string>
-    <string name="ff_date_range_picker_start_headline">Aloituspäivämäärä</string>
-    <string name="ff_date_range_picker_title">Valitse päivämäärät</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AP</string>

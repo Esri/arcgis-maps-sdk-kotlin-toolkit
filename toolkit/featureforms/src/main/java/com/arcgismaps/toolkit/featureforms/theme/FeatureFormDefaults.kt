@@ -205,8 +205,8 @@ public object FeatureFormDefaults {
     public fun groupElementColors(
         labelColor: Color = Color.Unspecified,
         supportingTextColor: Color = Color.Unspecified,
-        outlineColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-        containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+        outlineColor: Color = Color.Transparent,
+        containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
         bodyColor: Color = MaterialTheme.colorScheme.background
     ): GroupElementColors {
         return GroupElementColors(

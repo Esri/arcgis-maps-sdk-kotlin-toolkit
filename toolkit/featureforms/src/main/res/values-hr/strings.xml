@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum početka mora biti na ili prije datuma %1$s.</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Uneseni datum</string>
-    <string name="ff_date_input_headline_description">Uneseni datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum ne odgovara očekivanom uzorku:: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nije dopušten: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum izvan očekivanog raspona godina %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Nema</string>
-    <string name="ff_date_input_title">Odaberi datum</string>
-    <string name="ff_date_picker_headline">"Odabran datum"</string>
-    <string name="ff_date_picker_headline_description">Trenutačni odabir: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigiraj na godinu %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Nema</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Pomakni radi prikaza ranijih godina</string>
-    <string name="ff_date_picker_scroll_to_later_years">Pomakni radi prikaza kasnijih godina</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Prebaci na način unosa u kalendar</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Prevucite prstom za odabir godine ili dodirnite za povratak na odabir dana"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Prebaci na način unosa teksta</string>
-    <string name="ff_date_picker_switch_to_next_month">"Promijeni na sljedeći mjesec"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Promijeni na prethodni mjesec"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Prebaci na odabir godine"</string>
-    <string name="ff_date_picker_title">"Odaberi datum"</string>
-    <string name="ff_date_picker_today_description">Danas</string>
-    <string name="ff_date_picker_year_picker_pane_title">Odabirač godine vidljiv</string>
-    <string name="ff_date_range_input_invalid_range_input">Neispravni unos raspona datuma</string>
-    <string name="ff_date_range_input_title">Unesite datume</string>
-    <string name="ff_date_range_picker_day_in_range">U rasponu</string>
-    <string name="ff_date_range_picker_end_headline">Datum kraja</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Pomaknite se za prikaz sljedećeg mjeseca</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Pomaknite se za prikaz prethodnog mjeseca</string>
-    <string name="ff_date_range_picker_start_headline">Datum početka</string>
-    <string name="ff_date_range_picker_title">Odaberi datume</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Ujutro</string>

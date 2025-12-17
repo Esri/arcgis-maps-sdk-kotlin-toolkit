@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Tanggal harus pada atau sebelum %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Tanggal yang dimasukkan</string>
-    <string name="ff_date_input_headline_description">Tanggal yang dimasukkan: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Tanggal tidak sesuai dengan pola yang diharapkan: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Tanggal tidak diizinkan: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Tanggal di luar rentang tahun yang diharapkan %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Tanggal</string>
-    <string name="ff_date_input_no_input_description">Tidak Ada</string>
-    <string name="ff_date_input_title">Pilih tanggal</string>
-    <string name="ff_date_picker_headline">"Tanggal yang dipillih"</string>
-    <string name="ff_date_picker_headline_description">Pilihan saat ini: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigasikan ke tahun %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Tidak Ada</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Gulir untuk menampilkan tahun-tahun sebelumnya</string>
-    <string name="ff_date_picker_scroll_to_later_years">Gulir untuk menampilkan tahun-tahun berikutnya</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Beralih ke mode input kalender</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Geser untuk memilih tahun, atau ketuk untuk kembali memilih hari"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Beralih ke mode input teks</string>
-    <string name="ff_date_picker_switch_to_next_month">"Ubah ke bulan berikutnya"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Ubah ke bulan sebelumnya"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Beralih ke memilih tahun"</string>
-    <string name="ff_date_picker_title">"Pilih tanggal"</string>
-    <string name="ff_date_picker_today_description">Hari ini</string>
-    <string name="ff_date_picker_year_picker_pane_title">Pemilih tahun terlihat</string>
-    <string name="ff_date_range_input_invalid_range_input">Input rentang tanggal tidak valid</string>
-    <string name="ff_date_range_input_title">Masukkan tanggal</string>
-    <string name="ff_date_range_picker_day_in_range">Dalam rentang</string>
-    <string name="ff_date_range_picker_end_headline">Tanggal akhir</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Gulir untuk menampilkan bulan berikutnya</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Gulir untuk menampilkan bulan sebelumnya</string>
-    <string name="ff_date_range_picker_start_headline">Tanggal mulai</string>
-    <string name="ff_date_range_picker_title">Pilih tanggal</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
