@@ -53,10 +53,11 @@ class AuthenticationActivityTest {
     }
 
     /**
-     * Given a device with default browser that does not support Custom Tabs
-     * When [AuthenticationActivity] starts
-     * Then an intent should be fired with ACTION_VIEW, simulating a Custom Tabs launch
-     * And the intent contains the Custom Tabs session extra key
+     * Given a device with default browser that does support Custom Tabs,
+     * When [AuthenticationActivity] starts due to receiving an intent for OAuth sign-in,
+     * Then the activity launches an outgoing intent to launch Custom Tabs. The outgoing
+     * intent's action should be `ACTION_VIEW`, contain data with authorize URL as well as extra data
+     * with Custom Tabs session package.
      * @since 300.0.0
      */
     @Test
@@ -70,8 +71,9 @@ class AuthenticationActivityTest {
         val intent = Intent(ApplicationProvider.getApplicationContext(), AuthenticationActivity::class.java).apply {
             putExtra(KEY_INTENT_EXTRA_URL, authorizeUrl)
         }
-        // Launch the AuthenticationActivity with the intent
+        // Launch the AuthenticationActivity with the intent for OAuth sign in
         ActivityScenario.launch<AuthenticationActivity>(intent).use {
+            // Verify that an intent to launch Custom Tabs was sent by AuthenticationActivity
             intended(
                 allOf(
                     // Verify that the launched intent is a Custom Tabs intent with the expected properties
@@ -87,7 +89,7 @@ class AuthenticationActivityTest {
 
     /**
      * Given a device with default browser that does not support Custom Tabs
-     * When [AuthenticationActivity] receives an intent for OAuth sign-in
+     * When [AuthenticationActivity] starts due to receiving an intent for OAuth sign-in,
      * Then the activity finishes with RESULT_CODE_CANCELED and includes an exception message in the result data
      * @since 300.0.0
      */
