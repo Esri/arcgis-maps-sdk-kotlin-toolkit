@@ -16,14 +16,14 @@
  *
  */
 
-import com.arcgismaps.toolkit.authentication.DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
+import com.arcgismaps.toolkit.authentication.ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS
 
 /**
  * Exception thrown when the default browser does not support Custom Tabs.
  *
  * @since 200.8.0
  */
-public class CustomTabsNotFoundException : Exception(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+public class CustomTabsNotFoundException : Exception(ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS)
 
 /**
  * Creates an [Exception] based on the provided error message.
@@ -34,7 +34,7 @@ public class CustomTabsNotFoundException : Exception(DEFAULT_BROWSER_NO_CUSTOM_T
  */
 internal fun createExceptionFromMessage(message: String): Exception {
     return when (message) {
-        DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE -> CustomTabsNotFoundException()
+        ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS -> CustomTabsNotFoundException()
         else -> IllegalStateException(message)
     }
 }

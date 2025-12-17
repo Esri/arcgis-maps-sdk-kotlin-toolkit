@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -108,7 +107,7 @@ class AuthenticationActivityTest {
         ActivityScenario.launchActivityForResult<AuthenticationActivity>(intent).use { activityScenario ->
             assertThat(activityScenario.result.resultCode).isEqualTo(RESULT_CODE_CANCELED)
             val exceptionMessage = activityScenario.result.resultData?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
-            assertThat(exceptionMessage).isEqualTo(DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+            assertThat(exceptionMessage).isEqualTo(ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS)
         }
     }
 }

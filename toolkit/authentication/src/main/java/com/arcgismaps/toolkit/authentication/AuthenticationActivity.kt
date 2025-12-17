@@ -37,7 +37,7 @@ internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
-internal const val DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE = "Default browser does not support Custom Tabs."
+internal const val ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
@@ -135,7 +135,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             if (canDefaultBrowserLaunchCustomTabs()) {
                 launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
             } else {
-                handleRedirectIntent(null, errorMessage = DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+                handleRedirectIntent(null, errorMessage = ERROR_MESSAGE_DEFAULT_BROWSER_NO_CUSTOM_TABS)
             }
         }
     }
