@@ -41,7 +41,8 @@ internal const val VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE = "Default browser does 
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
- * a Custom Tab for user interaction.
+ * a Custom Tab for user interaction. If Custom Tabs are not supported by the default browser,
+ * sign-in will fail with an error of type [CustomTabsNotFoundException].
  *
  * This activity must be registered in the application's manifest.
  * Configuration depends on the app's requirements:
