@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import CustomTabsNotFoundException
 import android.app.Activity
 import android.content.Context
 import androidx.browser.customtabs.CustomTabsClient

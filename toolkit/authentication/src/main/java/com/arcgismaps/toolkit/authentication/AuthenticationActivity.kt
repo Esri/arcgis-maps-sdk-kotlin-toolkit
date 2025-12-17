@@ -23,7 +23,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import createExceptionFromMessage
 
 internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
@@ -229,12 +228,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
         override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
             val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            val exception = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)?.let {
-                createExceptionFromMessage(it)
-            }
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
-                resultCode == RESULT_CODE_CANCELED && exception != null -> OAuthUserSignInResult.Failure(exception)
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB -> OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
                 else -> OAuthUserSignInResult.Canceled
             }
         }
@@ -298,3 +295,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         data object Canceled : OAuthUserSignInResult()
     }
 }
+
+/**
+ * Exception thrown when the default browser does not support Custom Tabs.
+ *
+ * @since 300.0.0
+ */
+public class CustomTabsNotFoundException : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
