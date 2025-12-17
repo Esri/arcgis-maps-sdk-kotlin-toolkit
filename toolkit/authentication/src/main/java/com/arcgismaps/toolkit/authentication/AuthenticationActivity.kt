@@ -301,4 +301,4 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
  *
  * @since 300.0.0
  */
-public class CustomTabsNotFoundException : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
+public class CustomTabsNotFoundException internal constructor() : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
