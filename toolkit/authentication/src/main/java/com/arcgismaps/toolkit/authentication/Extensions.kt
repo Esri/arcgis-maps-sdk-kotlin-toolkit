@@ -108,10 +108,5 @@ internal fun Activity.launchCustomTabs(authorizeUrl: String, preferPrivateWebBro
  * @return true if a default browser that supports Custom Tabs is found, false otherwise.
  * @since 300.0.0
  */
-internal fun Context.canDefaultBrowserLaunchCustomTabs(): Boolean {
-    val packageName = CustomTabsClient.getPackageName(
-        this,
-        emptyList()
-    )
-    return !packageName.isNullOrEmpty()
-}
+internal fun Context.canDefaultBrowserLaunchCustomTabs(): Boolean =
+    CustomTabsClient.getPackageName(this, emptyList())?.isNotEmpty() ?: false
