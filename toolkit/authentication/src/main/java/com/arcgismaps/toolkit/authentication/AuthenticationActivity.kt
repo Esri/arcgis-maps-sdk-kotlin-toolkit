@@ -134,7 +134,11 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         url?.let {
             if (canDefaultBrowserLaunchCustomTabs()) {
-                launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+                val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+                launchCustomTabs(
+                    authorizeUrl = it,
+                    preferPrivateWebBrowserSession = preferPrivateWebBrowserSession
+                )
             } else {
                 handleRedirectIntent(null, errorMessage = VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE)
             }
