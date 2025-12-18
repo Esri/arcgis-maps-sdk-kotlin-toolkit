@@ -239,19 +239,21 @@ private class AuthenticatorStateImpl(
     private suspend fun handleOAuthOrTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
-            val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
-                .also {
-                    // At this point we have suspended until the OAuth workflow is complete, so
-                    // we can get rid of the pending OAuth sign in. Composables observing this can know
-                    // to remove the OAuth prompt when this value changes.
-                    _pendingOAuthUserSignIn.value = null
-                }
-                .getOrThrow()
-            return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
-        }
+        return oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
+            val challengeResult = config.handleOAuthChallenge {
+                _pendingOAuthUserSignIn.value = it
+            }
 
-        return handleArcGISTokenChallenge(challenge)
+            // At this point we have suspended until the OAuth workflow is complete, so
+            // we can get rid of the pending OAuth sign in. Composables observing this can know
+            // to remove the OAuth prompt when this value changes.
+            _pendingOAuthUserSignIn.value = null
+
+            challengeResult.fold(
+                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                onFailure = { ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it) }
+            )
+        } ?: handleArcGISTokenChallenge(challenge)
     }
 
     override suspend fun signOut(): Result<Unit> = runCatchingCancellable {

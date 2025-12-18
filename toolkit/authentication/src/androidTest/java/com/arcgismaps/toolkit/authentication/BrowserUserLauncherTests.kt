@@ -33,6 +33,10 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
+import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -62,7 +66,10 @@ class BrowserUserLauncherTests {
     fun signOutBefore() = signOut()
 
     @After
-    fun signOutAfter() = signOut()
+    fun tearDown() {
+        signOut()
+        unmockkAll()
+    }
 
     private fun signOut() {
         runBlocking {
@@ -108,6 +115,44 @@ class BrowserUserLauncherTests {
     }
 
     /**
+     * Given a device with a default browser that does not support Custom Tabs,
+     * When the Authenticator receives an [ArcGISAuthenticationChallenge] for OAuth sign in,
+     * Then the challenge will fail with a [CustomTabsNotFoundException].
+     *
+     * @since 200.8.0
+     */
+    @Test
+    fun oAuthSignInNoCustomTabs() = runTest {
+        // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
+
+        // configure the ArcGISHttpClient to intercept token requests and return a fake token response
+        // this is necessary when we are faking a successful sign-in without entering credentials,
+        // as we are not given a valid token from the OAuth server and RTC won't be able to verify it.
+        ArcGISEnvironment.configureArcGISHttpClient {
+            setupOAuthTokenRequestInterceptor()
+        }
+        val response = testOAuthChallengeWithStateRestoration(
+            waitForBrowser = false
+        ) {
+            // When the OAuth sign in screen displays, we simulate successful sign in by launching an
+            // intent with the expected redirect URL, which otherwise would be sent from the Portal
+            // server, but would require valid credentials
+            InstrumentationRegistry.getInstrumentation().context.startActivity(
+                createSuccessfulRedirectIntent("kotlin-authentication-test-browser://auth")
+            )
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(
+            ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java
+        )
+        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(
+            CustomTabsNotFoundException::class.java
+        )
+    }
+
+    /**
      * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
      * When an [ArcGISAuthenticationChallenge] is received and the user cancels the sign in process,
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
@@ -118,8 +163,10 @@ class BrowserUserLauncherTests {
     fun cancelSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             clickByText("Cancel")
-        }.await().exceptionOrNull()
-        assert(response is OperationCancelledException)
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
+        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(OperationCancelledException::class.java)
     }
 
     /**
@@ -133,8 +180,10 @@ class BrowserUserLauncherTests {
     fun pressBack() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             pressBack()
-        }.await().exceptionOrNull()
-        assert(response is OperationCancelledException)
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
+        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(OperationCancelledException::class.java)
     }
 
     /**
@@ -142,11 +191,14 @@ class BrowserUserLauncherTests {
      * Once the browser is launched, [userInputOnDialog] will be called to simulate user input.
      * Also, the device will be rotated to ensure that the Authenticator can handle configuration
      * changes before calling [userInputOnDialog].
+     * [waitForBrowser] can be set to false to skip waiting for the browser to launch. This is useful
+     * for tests that end up never launching the browser, such as when no Custom Tabs scenario is simulated.
      *
      * @since 200.8.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun TestScope.testOAuthChallengeWithStateRestoration(
+        waitForBrowser: Boolean = true,
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
         // start the activity (which contains the Authenticator)
@@ -173,7 +225,9 @@ class BrowserUserLauncherTests {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
         // wait for the browser to be launched
-        uiDevice.awaitViewVisible("com.android.chrome")
+        if (waitForBrowser) {
+            uiDevice.awaitViewVisible("com.android.chrome")
+        }
 
         // rotate the device to ensure the Authenticator can handle configuration changes
         uiDevice.setOrientationLandscape()
