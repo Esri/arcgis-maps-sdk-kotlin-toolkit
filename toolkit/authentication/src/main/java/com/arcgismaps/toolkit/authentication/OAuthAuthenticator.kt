@@ -30,7 +30,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 
 /**
- * Launches a Custom Tab using the url in [oAuthPendingSignIn] and calls processes the result on completion.
+ * Launches a Custom Tab using the url in [oAuthPendingSignIn] and processes the result on completion.
  *
  * @see AuthenticationActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
