@@ -165,8 +165,7 @@ class BrowserUserLauncherTests {
             clickByText("Cancel")
         }.await().getOrThrow()
 
-        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
-        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(OperationCancelledException::class.java)
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.Cancel::class.java)
     }
 
     /**
@@ -182,8 +181,7 @@ class BrowserUserLauncherTests {
             pressBack()
         }.await().getOrThrow()
 
-        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
-        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(OperationCancelledException::class.java)
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.Cancel::class.java)
     }
 
     /**

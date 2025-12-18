@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Intent
 import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -251,7 +252,10 @@ private class AuthenticatorStateImpl(
 
             challengeResult.fold(
                 onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
-                onFailure = { ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it) }
+                onFailure = {
+                    if (it is OperationCancelledException) ArcGISAuthenticationChallengeResponse.Cancel
+                    else ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
+                }
             )
         } ?: handleArcGISTokenChallenge(challenge)
     }
