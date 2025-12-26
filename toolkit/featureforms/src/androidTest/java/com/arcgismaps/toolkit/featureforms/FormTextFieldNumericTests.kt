@@ -16,16 +16,18 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
@@ -33,7 +35,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFiel
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import junit.framework.TestCase
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -103,7 +104,7 @@ class FormTextFieldNumericTests : FeatureFormTestRunner(
                     },
                 )
             }
-            FormTextField(state = state)
+            FormTextField(state = state, modifier = Modifier.padding(top = 25.dp))
         }
         val outlinedTextField =
             composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -153,7 +154,7 @@ class FormTextFieldNumericTests : FeatureFormTestRunner(
                     },
                 )
             }
-            FormTextField(state = state)
+            FormTextField(state = state, modifier = Modifier.padding(top = 25.dp))
         }
         val outlinedTextField =
             composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
