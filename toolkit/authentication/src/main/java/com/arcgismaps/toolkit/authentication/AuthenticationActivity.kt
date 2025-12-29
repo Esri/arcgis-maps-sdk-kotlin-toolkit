@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -24,7 +23,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import createExceptionFromMessage
 
 internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
@@ -38,10 +36,12 @@ internal const val RESULT_CODE_SUCCESS = 1
 internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
+internal const val VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
- * a Custom Tab for user interaction.
+ * a Custom Tab for user interaction. If Custom Tabs are not supported by the default browser,
+ * sign-in will fail with an error of type [CustomTabsNotFoundException].
  *
  * This activity must be registered in the application's manifest.
  * Configuration depends on the app's requirements:
@@ -133,9 +133,13 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         url?.let {
             if (canDefaultBrowserLaunchCustomTabs()) {
-                launchCustomTabs(it, intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false))
+                val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+                launchCustomTabs(
+                    authorizeUrl = it,
+                    preferPrivateWebBrowserSession = preferPrivateWebBrowserSession
+                )
             } else {
-                handleRedirectIntent(null, errorMessage = DEFAULT_BROWSER_NO_CUSTOM_TABS_ERROR_MESSAGE)
+                finishWithError(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
             }
         }
     }
@@ -181,18 +185,30 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    private fun handleRedirectIntent(intent: Intent?, errorMessage: String? = null) {
+    private fun handleRedirectIntent(intent: Intent?) {
         val uri = intent?.data
-        val newIntent = Intent()
         if (uri != null) {
-            newIntent.putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uri.toString())
+            val uriString = uri.toString()
+            val newIntent = Intent().apply {
+                putExtra(KEY_INTENT_EXTRA_RESPONSE_URI, uriString)
+            }
             setResult(RESULT_CODE_SUCCESS, newIntent)
         } else {
-            errorMessage?.let {
-                newIntent.putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, it)
-            }
-            setResult(RESULT_CODE_CANCELED, newIntent)
+            setResult(RESULT_CODE_CANCELED)
         }
+        finish()
+    }
+
+    /**
+     * Finishes this activity with a canceled result code and an error message.
+     *
+     * @since 300.0.0
+     */
+    private fun finishWithError(errorMessage: String) {
+        val newIntent = Intent().apply {
+            putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, errorMessage)
+        }
+        setResult(RESULT_CODE_CANCELED, newIntent)
         finish()
     }
 
@@ -212,12 +228,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
 
         override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
             val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            val exception = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)?.let {
-                createExceptionFromMessage(it)
-            }
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
-                resultCode == RESULT_CODE_CANCELED && exception != null -> OAuthUserSignInResult.Failure(exception)
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB -> OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
                 else -> OAuthUserSignInResult.Canceled
             }
         }
@@ -281,3 +295,10 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         data object Canceled : OAuthUserSignInResult()
     }
 }
+
+/**
+ * Exception thrown when the default browser does not support Custom Tabs.
+ *
+ * @since 300.0.0
+ */
+public class CustomTabsNotFoundException internal constructor() : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
