@@ -28,7 +28,6 @@ import androidx.lifecycle.ViewModel
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
@@ -136,12 +135,7 @@ class BrowserUserLauncherTests {
         val response = testOAuthChallengeWithStateRestoration(
             waitForBrowser = false
         ) {
-            // When the OAuth sign in screen displays, we simulate successful sign in by launching an
-            // intent with the expected redirect URL, which otherwise would be sent from the Portal
-            // server, but would require valid credentials
-            InstrumentationRegistry.getInstrumentation().context.startActivity(
-                createSuccessfulRedirectIntent("kotlin-authentication-test-browser://auth")
-            )
+            // No user interaction, as the Custom Tabs cannot be launched
         }.await().getOrThrow()
 
         assertThat(response).isInstanceOf(
