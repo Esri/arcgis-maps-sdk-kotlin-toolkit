@@ -19,11 +19,13 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
-import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import androidx.core.net.toUri
 
 /**
@@ -62,10 +64,16 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
     val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
         is BrowserAuthenticationChallenge.OAuthUserSignIn ->
             pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+
         is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
         is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
     }
-    launchCustomTabs(url, preferPrivateWebBrowserSession)
+    val preferredBrowserPackageName = this.getPackageThatSupportsCustomTabs()
+    if (!preferredBrowserPackageName.isNullOrEmpty()) {
+        launchCustomTabs(url, preferPrivateWebBrowserSession, preferredBrowserPackageName)
+    } else {
+        launchInExternalBrowser(url)
+    }
 }
 
 
@@ -78,10 +86,54 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
  *
  * @since 200.8.1
  */
-internal fun Activity.launchCustomTabs(authorizeUrl: String, preferPrivateWebBrowserSession: Boolean?) {
-    CustomTabsIntent.Builder().apply {
-        if (preferPrivateWebBrowserSession == true) {
-            setEphemeralBrowsingEnabled(true)
+internal fun Activity.launchCustomTabs(
+    authorizeUrl: String,
+    preferPrivateWebBrowserSession: Boolean?,
+    preferredBrowserPackageName: String
+) {
+    val builder = CustomTabsIntent.Builder()
+    if (preferPrivateWebBrowserSession == true) {
+        builder.setEphemeralBrowsingEnabled(true)
+    }
+    val customTabsIntent = builder.build()
+    customTabsIntent.intent.setPackage(preferredBrowserPackageName)
+    customTabsIntent.launchUrl(this, authorizeUrl.toUri())
+}
+
+/**
+ * Launches an external browser with the provided authorize URL.
+ *
+ * @param authorizeUrl the authorize URL used by the external browser to prompt for OAuth
+ * user credentials.
+ *
+ * @since 300.0.0
+ */
+internal fun Activity.launchInExternalBrowser(authorizeUrl: String) {
+    val intent = Intent(Intent.ACTION_VIEW, authorizeUrl.toUri()).apply {
+        addCategory(Intent.CATEGORY_BROWSABLE)
+    }
+    startActivity(intent)
+}
+
+/**
+ * Returns the package name of a browser that supports Custom Tabs, or null if none is found.
+ * @since 300.0.0
+ */
+internal fun Context.getPackageThatSupportsCustomTabs(): String? {
+    // Check if the default browser supports Custom Tabs
+    val defaultBrowser = CustomTabsClient.getPackageName(this, emptyList())
+    return if (!defaultBrowser.isNullOrEmpty()) {
+        defaultBrowser
+    } else {
+        // If not, check all browsers that can handle http intents
+        val packageManager = packageManager
+        val activityIntent = Intent(Intent.ACTION_VIEW, "http://www.example.com".toUri())
+        val resolvedActivityList = packageManager.queryIntentActivities(activityIntent, PackageManager.MATCH_ALL)
+
+        val packageNames = resolvedActivityList.map {
+            it.activityInfo.packageName
         }
-    }.build().launchUrl(this, authorizeUrl.toUri())
+
+        CustomTabsClient.getPackageName(this, packageNames, true)
+    }
 }

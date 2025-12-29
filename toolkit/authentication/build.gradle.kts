@@ -116,4 +116,5 @@ dependencies {
     // uiautomator
     androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.androidx.test.espresso.intents)
 }

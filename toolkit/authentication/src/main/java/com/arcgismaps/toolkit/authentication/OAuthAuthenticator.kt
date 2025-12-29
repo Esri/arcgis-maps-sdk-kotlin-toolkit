@@ -61,11 +61,17 @@ internal fun OAuthAuthenticator(
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
         var didLaunch by rememberSaveable(oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
-            rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { redirectUrl ->
-                redirectUrl?.let {
-                    oAuthPendingSignIn.complete(redirectUrl)
-                } ?: run {
-                    oAuthPendingSignIn.cancel()
+            rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { signInResult ->
+                when (signInResult) {
+                    is AuthenticationActivity.OAuthUserSignInResult.Success -> {
+                        oAuthPendingSignIn.complete(signInResult.redirectUri)
+                    }
+                    is AuthenticationActivity.OAuthUserSignInResult.Failure -> {
+                        oAuthPendingSignIn.cancel(signInResult.exception)
+                    }
+                    is AuthenticationActivity.OAuthUserSignInResult.Canceled -> {
+                        oAuthPendingSignIn.cancel()
+                    }
                 }
             }
         // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
@@ -85,3 +91,11 @@ internal fun OAuthAuthenticator(
         }
     }
 }
+
+//TODO: This is a temporary backing property until we have a better way to configure this behavior.
+internal var _allowExternalBrowserLaunch: Boolean = true
+public var OAuthUserSignIn.allowExternalBrowserLaunch: Boolean
+    get() = _allowExternalBrowserLaunch
+    set(value) {
+        _allowExternalBrowserLaunch = value
+    }
