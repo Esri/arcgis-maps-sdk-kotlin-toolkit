@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Intent
 import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -270,19 +271,24 @@ private class AuthenticatorStateImpl(
     private suspend fun handleOAuthOrTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
-            val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
-                .also {
-                    // At this point we have suspended until the OAuth workflow is complete, so
-                    // we can get rid of the pending OAuth sign in. Composables observing this can know
-                    // to remove the OAuth prompt when this value changes.
-                    _pendingOAuthUserSignIn.value = null
-                }
-                .getOrThrow()
-            return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
-        }
+        return oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
+            val challengeResult = config.handleOAuthChallenge {
+                _pendingOAuthUserSignIn.value = it
+            }
 
-        return handleArcGISTokenChallenge(challenge)
+            // At this point we have suspended until the OAuth workflow is complete, so
+            // we can get rid of the pending OAuth sign in. Composables observing this can know
+            // to remove the OAuth prompt when this value changes.
+            _pendingOAuthUserSignIn.value = null
+
+            challengeResult.fold(
+                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                onFailure = {
+                    if (it is OperationCancelledException) ArcGISAuthenticationChallengeResponse.Cancel
+                    else ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
+                }
+            )
+        } ?: handleArcGISTokenChallenge(challenge)
     }
 
     override suspend fun signOut(): Result<Unit> = runCatchingCancellable {

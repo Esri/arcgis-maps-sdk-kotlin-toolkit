@@ -23,11 +23,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -103,8 +103,9 @@ class OAuthDefaultConfigurationTests {
     fun cancelSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             clickByText("Cancel")
-        }.await().exceptionOrNull()
-        assert(response is OperationCancelledException)
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.Cancel::class.java)
     }
 
     /**
@@ -118,8 +119,9 @@ class OAuthDefaultConfigurationTests {
     fun pressBack() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             pressBack()
-        }.await().exceptionOrNull()
-        assert(response is OperationCancelledException)
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.Cancel::class.java)
     }
 
     /**
