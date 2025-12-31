@@ -95,6 +95,7 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
