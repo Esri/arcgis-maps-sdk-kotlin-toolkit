@@ -293,8 +293,7 @@ private class AuthenticatorStateImpl(
      * @since 200.8.0
      */
     private suspend fun handleIapChallenge(requestUrl: String): ArcGISAuthenticationChallengeResponse {
-        val matchingIapConfiguration = iapConfigurations.firstOrNull { it.canBeUsedForUrl(requestUrl) }
-        return matchingIapConfiguration?.let { config ->
+        return iapConfigurations.firstOrNull { it.canBeUsedForUrl(requestUrl) }?.let { config ->
             val iapCredentialResult = config.handleIapChallenge { onPendingSignIn ->
                 _pendingIapSignIn.value = onPendingSignIn
             }
