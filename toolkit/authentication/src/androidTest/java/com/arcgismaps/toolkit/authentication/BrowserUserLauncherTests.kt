@@ -155,7 +155,7 @@ class BrowserUserLauncherTests {
      * @since 300.0.0
      */
     @Test
-    fun iapSIgnInNoCustomTabs() = runTest {
+    fun iapSignInNoCustomTabs() = runTest {
         // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
         every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false

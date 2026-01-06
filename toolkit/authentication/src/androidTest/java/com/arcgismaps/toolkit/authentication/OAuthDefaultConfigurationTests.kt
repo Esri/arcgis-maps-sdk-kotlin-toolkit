@@ -107,14 +107,14 @@ class OAuthDefaultConfigurationTests {
      * @since 300.0.0
      */
     @Test
-    fun testFailedWhenNoCustomTabsSupport() = runTest {
+    fun authenticationFailsWhenNoCustomTabsSupport() = runTest {
         // Mock the top-level extension so it returns false for Custom Tabs support
         mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
         every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
 
         val response = testOAuthChallengeWithStateRestoration(waitForBrowser = false) {
             // No user action needed, as the lack of Custom Tabs support should cause immediate cancellation
-        }.await().getOrThrow()
+        }.await().getOrNull()
 
         assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
         assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error)
