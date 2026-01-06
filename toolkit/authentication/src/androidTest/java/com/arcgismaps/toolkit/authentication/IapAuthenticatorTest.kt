@@ -85,7 +85,7 @@ class IapAuthenticatorTest {
      * Then it should not launch a Custom Tab
      * And it should handle the absence of Custom Tabs by invoking the cancellation callback with an exception.
      *
-     * @since 200.8.0
+     * @since 300.0.0
      */
     @Test
     fun verifyIapAuthenticatorCallsOnCancelWhenNoCustomTabIsAvailable() {

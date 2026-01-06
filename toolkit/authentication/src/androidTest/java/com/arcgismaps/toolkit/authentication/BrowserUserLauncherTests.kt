@@ -152,7 +152,7 @@ class BrowserUserLauncherTests {
      * When the Authenticator receives an [ArcGISAuthenticationChallenge] for IAP sign in,
      * Then the challenge will fail with a [CustomTabsNotFoundException].
      *
-     * @since 200.8.0
+     * @since 300.0.0
      */
     @Test
     fun iapSIgnInNoCustomTabs() = runTest {

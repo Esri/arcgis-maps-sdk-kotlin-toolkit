@@ -104,7 +104,7 @@ class OAuthDefaultConfigurationTests {
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
      * with a [CustomTabsNotFoundException].
      *
-     * @since 200.5.0
+     * @since 300.0.0
      */
     @Test
     fun testFailedWhenNoCustomTabsSupport() = runTest {
