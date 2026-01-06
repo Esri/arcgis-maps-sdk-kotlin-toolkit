@@ -30,6 +30,7 @@ import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeType
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.google.common.truth.Truth.assertThat
@@ -92,7 +93,7 @@ class BrowserUserLauncherTests {
      * @since 200.8.0
      */
     @Test
-    fun successfulSignIn() = runTest {
+    fun successfulOAuthSignIn() = runTest {
         // configure the ArcGISHttpClient to intercept token requests and return a fake token response
         // this is necessary when we are faking a successful sign-in without entering credentials,
         // as we are not given a valid token from the OAuth server and RTC won't be able to verify it.
@@ -133,6 +134,36 @@ class BrowserUserLauncherTests {
             setupOAuthTokenRequestInterceptor()
         }
         val response = testOAuthChallengeWithStateRestoration(
+            waitForBrowser = false
+        ) {
+            // No user interaction, as the Custom Tabs cannot be launched
+        }.await().getOrThrow()
+
+        assertThat(response).isInstanceOf(
+            ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java
+        )
+        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error).isInstanceOf(
+            CustomTabsNotFoundException::class.java
+        )
+    }
+
+    /**
+     * Given a device with a default browser that does not support Custom Tabs,
+     * When the Authenticator receives an [ArcGISAuthenticationChallenge] for IAP sign in,
+     * Then the challenge will fail with a [CustomTabsNotFoundException].
+     *
+     * @since 300.0.0
+     */
+    @Test
+    fun iapSignInNoCustomTabs() = runTest {
+        // Mock the top-level extension so it returns null and simulates no browsers that support Custom Tabs
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
+
+        val response = testOAuthChallengeWithStateRestoration(
+            arcGISAuthenticationChallenge = makeMockArcGISAuthenticationChallenge(
+                challengeType = ArcGISAuthenticationChallengeType.Iap
+            ),
             waitForBrowser = false
         ) {
             // No user interaction, as the Custom Tabs cannot be launched
@@ -191,6 +222,7 @@ class BrowserUserLauncherTests {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun TestScope.testOAuthChallengeWithStateRestoration(
         waitForBrowser: Boolean = true,
+        arcGISAuthenticationChallenge: ArcGISAuthenticationChallenge = makeMockArcGISAuthenticationChallenge(),
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
         // start the activity (which contains the Authenticator)
