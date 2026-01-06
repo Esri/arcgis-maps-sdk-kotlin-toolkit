@@ -324,20 +324,23 @@ private class AuthenticatorStateImpl(
      * @since 200.8.0
      */
     private suspend fun handleIapChallenge(requestUrl: String): ArcGISAuthenticationChallengeResponse {
-        val matchingIapConfiguration = iapConfigurations.firstOrNull {
-            it.canBeUsedForUrl(requestUrl)
-        }
-        return matchingIapConfiguration?.let {
-            val iapCredential = it.handleIapChallenge { onPendingSignIn -> _pendingIapSignIn.value = onPendingSignIn }
-                .also {
-                    // At this point we have suspended until the IAP workflow is complete, so
-                    // we can get rid of the pending IAP sign in. Composables observing this can know
-                    // to remove the IAP prompt when this value changes.
-                    _pendingIapSignIn.value = null
-                }
-                .getOrThrow()
+        return iapConfigurations.firstOrNull { it.canBeUsedForUrl(requestUrl) }?.let { config ->
+            val iapCredentialResult = config.handleIapChallenge { onPendingSignIn ->
+                _pendingIapSignIn.value = onPendingSignIn
+            }
 
-            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(iapCredential)
+            // At this point we have suspended until the IAP workflow is complete, so
+            // we can get rid of the pending IAP sign in. Composables observing this can know
+            // to remove the IAP prompt when this value changes.
+            _pendingIapSignIn.value = null
+
+            iapCredentialResult.fold(
+                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                onFailure = {
+                    if (it is OperationCancelledException) ArcGISAuthenticationChallengeResponse.Cancel
+                    else ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
+                }
+            )
         } ?: ArcGISAuthenticationChallengeResponse.ContinueAndFail
     }
 

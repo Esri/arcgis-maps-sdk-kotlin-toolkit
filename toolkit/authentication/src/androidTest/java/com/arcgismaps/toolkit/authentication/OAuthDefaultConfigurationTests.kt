@@ -28,6 +28,9 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeRespo
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -54,7 +57,10 @@ class OAuthDefaultConfigurationTests {
     fun signOutBefore() = signOut()
 
     @After
-    fun signOutAfter() = signOut()
+    fun signOutAfter() {
+        signOut()
+        unmockkAll()
+    }
 
     private fun signOut() {
         runBlocking {
@@ -90,6 +96,29 @@ class OAuthDefaultConfigurationTests {
         }.await().getOrNull()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
         assert((response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential is OAuthUserCredential)
+    }
+
+    /**
+     * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
+     * When an [ArcGISAuthenticationChallenge] is received on a device with no Custom Tabs support,
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
+     * with a [CustomTabsNotFoundException].
+     *
+     * @since 300.0.0
+     */
+    @Test
+    fun authenticationFailsWhenNoCustomTabsSupport() = runTest {
+        // Mock the top-level extension so it returns false for Custom Tabs support
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
+
+        val response = testOAuthChallengeWithStateRestoration(waitForBrowser = false) {
+            // No user action needed, as the lack of Custom Tabs support should cause immediate cancellation
+        }.await().getOrNull()
+
+        assertThat(response).isInstanceOf(ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError::class.java)
+        assertThat((response as ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError).error)
+            .isInstanceOf(CustomTabsNotFoundException::class.java)
     }
 
     /**
@@ -215,6 +244,7 @@ class OAuthDefaultConfigurationTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun TestScope.testOAuthChallengeWithStateRestoration(
+        waitForBrowser: Boolean = true,
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
         val authenticatorState = AuthenticatorState().apply {
@@ -252,7 +282,9 @@ class OAuthDefaultConfigurationTests {
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
         // wait for the browser to be launched
-        uiDevice.awaitViewVisible("com.android.chrome")
+        if (waitForBrowser) {
+            uiDevice.awaitViewVisible("com.android.chrome")
+        }
 
         // rotate the device to ensure the Authenticator can handle configuration changes
         uiDevice.setOrientationLandscape()
