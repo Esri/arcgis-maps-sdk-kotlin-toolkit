@@ -89,7 +89,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     // room
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     ksp(libs.room.compiler)
     // jetpack window manager

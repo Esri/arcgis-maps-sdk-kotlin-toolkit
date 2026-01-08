@@ -79,6 +79,7 @@ sealed class NavigationRoute {
 }
 
 @Composable
+@Suppress("DEPRECATION")
 fun AppNavigation(
     navController: NavHostController,
     navigator: Navigator,
