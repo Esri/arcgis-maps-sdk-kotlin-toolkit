@@ -126,7 +126,9 @@ testAggregation {
 fun getModulesExcept(vararg modulesToExclude: String): List<String> =
     with(File("$rootDir/settings.gradle.kts")) {
         readLines()
-            .filter { it.startsWith("include") }
+            // Ignore composite build declarations
+            .map { it.trim() }
+            .filter { it.startsWith("include(\":") }
             .map {
                 it.removePrefix("include(\":").removeSuffix("\")")
             }
