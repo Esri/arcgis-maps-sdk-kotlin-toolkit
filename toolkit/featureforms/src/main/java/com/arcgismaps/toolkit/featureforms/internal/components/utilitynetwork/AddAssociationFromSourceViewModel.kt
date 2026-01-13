@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
@@ -763,8 +764,11 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
  */
 private fun List<Field>.getSupportedFields(): List<Field> {
     return filter { field ->
-        field.fieldType.isNumeric ||
-            field.fieldType == FieldType.Text ||
-            field.fieldType == FieldType.Oid
+        field.fieldType == FieldType.Text ||
+            field.fieldType == FieldType.Oid ||
+            field.fieldType.isNumeric &&
+            // Exclude fields with coded value domains until we support selection from coded values
+            field.domain !is CodedValueDomain
+
     }
 }
