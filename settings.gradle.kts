@@ -114,6 +114,8 @@ dependencyResolutionManagement {
 
             version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
+            library("mapsSdkTestFixtures", "com.esri", "arcgis-maps-kotlin-test-fixtures")
+                .versionRef("mapsSdk")
         }
     }
 }

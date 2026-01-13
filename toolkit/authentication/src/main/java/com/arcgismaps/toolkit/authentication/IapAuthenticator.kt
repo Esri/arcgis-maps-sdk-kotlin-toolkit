@@ -39,17 +39,17 @@ import androidx.compose.runtime.setValue
 @Composable
 internal fun IapSignInAuthenticator(
     authorizeUrl: String,
-    onComplete : (String) -> Unit,
-    onCancel: () -> Unit,
+    onComplete: (String) -> Unit,
+    onCancel: (Exception?) -> Unit,
 ) {
     var hasLaunched by rememberSaveable(authorizeUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignInContract()
-    ) { redirectUrl ->
-        if (!redirectUrl.isNullOrEmpty()) {
-            onComplete(redirectUrl)
-        } else {
-            onCancel()
+    ) { signInResult ->
+        when (signInResult) {
+            is AuthenticationActivity.IapSignInResult.Success -> onComplete(signInResult.redirectUri)
+            is AuthenticationActivity.IapSignInResult.Failure -> onCancel(signInResult.exception)
+            is AuthenticationActivity.IapSignInResult.Canceled -> onCancel(null)
         }
     }
 
@@ -70,7 +70,7 @@ internal fun IapSignInAuthenticator(
  */
 @Composable
 internal fun IapSignInAuthenticator(
-    browserChallengeHandler : () -> Unit
+    browserChallengeHandler: () -> Unit
 ) {
     var hasLaunched by rememberSaveable(browserChallengeHandler) { mutableStateOf(false) }
     LaunchedEffect(browserChallengeHandler) {
@@ -94,16 +94,16 @@ internal fun IapSignInAuthenticator(
 internal fun IapSignOutAuthenticator(
     iapSignOutUrl: String,
     onCompleteSignOut: (Boolean) -> Unit,
-    onCancelSignOut: () -> Unit
+    onCancelSignOut: (Exception?) -> Unit
 ) {
     var hasLaunched by rememberSaveable(iapSignOutUrl) { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
         contract = AuthenticationActivity.IapSignOutContract()
-    ) { res ->
-        if (res) {
-            onCompleteSignOut(true)
-        } else {
-            onCancelSignOut()
+    ) { signOutResult ->
+        when (signOutResult) {
+            is AuthenticationActivity.IapSignOutResult.Success -> onCompleteSignOut(signOutResult.result)
+            is AuthenticationActivity.IapSignOutResult.Failure -> onCancelSignOut(signOutResult.exception)
+            is AuthenticationActivity.IapSignOutResult.Canceled -> onCancelSignOut(null)
         }
     }
 
@@ -123,7 +123,7 @@ internal fun IapSignOutAuthenticator(
  */
 @Composable
 internal fun IapSignOutAuthenticator(
-    browserChallengeHandler : () -> Unit
+    browserChallengeHandler: () -> Unit
 ) {
     var hasLaunched by rememberSaveable(browserChallengeHandler) { mutableStateOf(false) }
     LaunchedEffect(browserChallengeHandler) {

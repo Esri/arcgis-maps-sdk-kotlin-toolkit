@@ -20,6 +20,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
@@ -32,6 +36,12 @@ class IapAuthenticatorTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @After
+    fun tearDown() {
+        // Unmock all mocked static methods after each test
+        unmockkAll()
+    }
 
     /**
      * Given an [IapSignInAuthenticator] composable,
@@ -54,7 +64,7 @@ class IapAuthenticatorTest {
             IapSignInAuthenticator(
                 authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { receivedRedirectUri = it },
-                onCancel = { cancellationHandled= true }
+                onCancel = { cancellationHandled = true }
             )
         }
 
@@ -67,6 +77,41 @@ class IapAuthenticatorTest {
         // Verify that the redirect URI was received
         assertThat(cancellationHandled).isFalse()
         assertThat(receivedRedirectUri).contains(expectedRedirectUri)
+    }
+
+    /**
+     * Given an [IapSignInAuthenticator] composable,
+     * When it is launched on a device with no Custom Tab support,
+     * Then it should not launch a Custom Tab
+     * And it should handle the absence of Custom Tabs by invoking the cancellation callback with an exception.
+     *
+     * @since 300.0.0
+     */
+    @Test
+    fun verifyIapAuthenticatorCallsOnCancelWhenNoCustomTabIsAvailable() {
+        // Mock the top-level extension so it returns null (no Custom Tab available)
+        mockkStatic("com.arcgismaps.toolkit.authentication.ExtensionsKt")
+        every { any<android.content.Context>().canDefaultBrowserLaunchCustomTabs() } returns false
+
+        var receivedRedirectUri: String? = null
+        var cancellationException: Exception? = null
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        composeTestRule.setContent {
+            IapSignInAuthenticator(
+                authorizeUrl = "https://www.arcgis.com/index.html",
+                onComplete = { receivedRedirectUri = it },
+                onCancel = { cancellationException = it }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        // Verify that the Custom Tab is not launched
+        val isCustomTabLaunched = uiDevice.waitForWindowUpdate("com.android.chrome", 2000)
+        // Since no Custom Tab is available, it should not be launched
+        assertThat(isCustomTabLaunched).isFalse()
+        // Verify that cancellation was handled with an exception
+        assertThat(cancellationException).isInstanceOf(CustomTabsNotFoundException::class.java)
+        assertThat(receivedRedirectUri).isNull()
     }
 
 
@@ -82,12 +127,16 @@ class IapAuthenticatorTest {
     fun verifyIapAuthenticatorHandlesCancellation() {
         var onCompleteCalled = false
         var cancellationHandled = false
+        var signOutException: Exception? = null
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignInAuthenticator(
                 authorizeUrl = "https://www.arcgis.com/index.html",
                 onComplete = { onCompleteCalled = true },
-                onCancel = { cancellationHandled = true }
+                onCancel = {
+                    cancellationHandled = true
+                    signOutException = it
+                }
             )
         }
 
@@ -97,6 +146,7 @@ class IapAuthenticatorTest {
         composeTestRule.waitForIdle()
         // Verify that the cancellation was handled
         assertThat(cancellationHandled).isTrue()
+        assertThat(signOutException).isNull()
         assertThat(onCompleteCalled).isFalse()
     }
 
@@ -114,13 +164,17 @@ class IapAuthenticatorTest {
     fun verifyIapSignOutAuthenticatorCompletesOnBackPress() {
         var signOutCompleted = false
         var signOutCancelled = false
+        var signOutException: Exception? = null
         val expectedSignOutUrl = "https://www.arcgis.com/index.html"
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         composeTestRule.setContent {
             IapSignOutAuthenticator(
                 iapSignOutUrl = expectedSignOutUrl,
                 onCompleteSignOut = { signOutCompleted = it },
-                onCancelSignOut = { signOutCancelled = true }
+                onCancelSignOut = {
+                    signOutCancelled = true
+                    signOutException = it
+                }
             )
         }
 
@@ -132,5 +186,6 @@ class IapAuthenticatorTest {
         // Verify that the sign out was completed
         assertThat(signOutCompleted).isTrue()
         assertThat(signOutCancelled).isFalse()
+        assertThat(signOutException).isNull()
     }
 }

@@ -231,7 +231,8 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
             val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
             return when {
                 resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
-                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB -> OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
                 else -> OAuthUserSignInResult.Canceled
             }
         }
@@ -247,17 +248,20 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    internal class IapSignInContract : ActivityResultContract<String, String?>() {
+    internal class IapSignInContract : ActivityResultContract<String, IapSignInResult>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            } else {
-                null
+        override fun parseResult(resultCode: Int, intent: Intent?): IapSignInResult {
+            val redirectUri = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS && !redirectUri.isNullOrEmpty() -> IapSignInResult.Success(redirectUri)
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    IapSignInResult.Failure(CustomTabsNotFoundException())
+                else -> IapSignInResult.Canceled
             }
         }
     }
@@ -270,18 +274,25 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    internal class IapSignOutContract : ActivityResultContract<String, Boolean>() {
+    internal class IapSignOutContract : ActivityResultContract<String, IapSignOutResult>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): Boolean {
-            return if (resultCode == RESULT_CODE_SUCCESS)
-                intent?.getBooleanExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, false) ?: false
-            else
-                false
+        override fun parseResult(resultCode: Int, intent: Intent?): IapSignOutResult {
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS -> {
+                    val signOutResponse =
+                        intent?.getBooleanExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, false) ?: false
+                    IapSignOutResult.Success(signOutResponse)
+                }
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    IapSignOutResult.Failure(CustomTabsNotFoundException())
+                else -> IapSignOutResult.Canceled
+            }
         }
     }
 
@@ -294,6 +305,26 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         data class Failure(val exception: Exception) : OAuthUserSignInResult()
         data object Canceled : OAuthUserSignInResult()
     }
+
+    /**
+     * Represents the result of an IAP sign-in operation.
+     * @since 300.0.0
+     */
+    internal sealed class IapSignInResult {
+        data class Success(val redirectUri: String) : IapSignInResult()
+        data class Failure(val exception: Exception) : IapSignInResult()
+        data object Canceled : IapSignInResult()
+    }
+
+    /**
+     * Represents the result of an IAP sign-out operation.
+     * @since 300.0.0
+     */
+    internal sealed class IapSignOutResult {
+        data class Success(val result: Boolean) : IapSignOutResult()
+        data class Failure(val exception: Exception) : IapSignOutResult()
+        data object Canceled : IapSignOutResult()
+    }
 }
 
 /**
@@ -301,4 +332,5 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
  *
  * @since 300.0.0
  */
-public class CustomTabsNotFoundException internal constructor() : Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
+public class CustomTabsNotFoundException internal constructor() :
+    Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
