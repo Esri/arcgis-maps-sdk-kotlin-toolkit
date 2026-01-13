@@ -170,7 +170,8 @@
     <string name="add_condition">Add Condition</string>
     <string name="no_conditions_added">No conditions added.</string>
     <string name="show_features_that_meet_all_the_conditions">Show features that meet all the conditions.</string>
-    <string name="condition">Condition %1$d</string>
+    <string name="condition">Condition</string>
+    <string name="condition_numbered">Condition %1$d</string>
     <string name="duplicate">Duplicate</string>
     <string name="field">Field</string>
     <string name="not_set">Not Set</string>

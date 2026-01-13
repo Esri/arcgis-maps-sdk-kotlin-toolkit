@@ -639,14 +639,10 @@ internal class AddAssociationFromSourceViewModel(
      */
     suspend fun applyAttributeFilters(): Result<Unit> {
         val source = _selectedSource.value ?: return Result.failure(
-            IllegalStateException(
-                "No source selected"
-            )
+            IllegalStateException("No source selected")
         )
         val assetType = _selectedAssetType.value ?: return Result.failure(
-            IllegalStateException(
-                "No asset type selected"
-            )
+            IllegalStateException("No asset type selected")
         )
         val whereClause = buildString {
             // Count of valid filters applied

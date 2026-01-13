@@ -183,7 +183,10 @@ internal fun FeaturesFilterScreen(
                     key = { _, filter -> filter.hashCode() }
                 ) { idx, filter ->
                     FilterItem(
-                        name = context.getString(R.string.condition, filters.count() - idx),
+                        name = context.getString(
+                            R.string.condition_numbered,
+                            filters.count() - idx
+                        ),
                         filter = filter,
                         fields = fields,
                         onDelete = {
