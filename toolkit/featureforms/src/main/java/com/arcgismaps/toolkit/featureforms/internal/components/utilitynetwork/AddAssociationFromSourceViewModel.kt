@@ -298,11 +298,15 @@ internal class AddAssociationFromSourceViewModel(
                             nextQueryParams = result.nextQueryParams
                         )
                     }.onFailure { error ->
+                        // Clear fields on error
+                        _fields.value = emptyList()
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             error = error
                         )
                     }
+                    // Clear any previously set attribute filters
+                    _attributeFieldFilters.clear()
                 }
             }
         }
