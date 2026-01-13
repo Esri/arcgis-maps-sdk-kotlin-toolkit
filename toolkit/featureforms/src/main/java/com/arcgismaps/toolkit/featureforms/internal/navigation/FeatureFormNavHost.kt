@@ -66,7 +66,7 @@ internal fun FeatureFormNavHost(
         )
 
         associationsFilterResultDestination(
-            onGroupSelected =  navController::navigateToUNAssociationGroupResult,
+            onGroupSelected = navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             onNavigationEvent = onNavigationEvent,
             state = state
@@ -78,10 +78,10 @@ internal fun FeatureFormNavHost(
             onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
-            onNavigateToFeature =  state::navigateTo,
+            onNavigateToFeature = state::navigateTo,
             onNavigationEvent = onNavigationEvent,
             onAssociatedFeatureLocateRequest = onShowOnMapRequest,
-            onBack =  state::popBackStack,
+            onBack = state::popBackStack,
         )
 
         associationDetailsDestination(
@@ -123,7 +123,10 @@ internal fun FeatureFormNavHost(
             selectFeatureDestination(
                 onBackPressed = state::popBackStack,
                 onFeatureCandidateSelected = { backStackEntry ->
-                  navController.navigateToCreateAssociation(backStackEntry)
+                    navController.navigateToCreateAssociation(backStackEntry)
+                },
+                onFilter = { backStackEntry ->
+                    navController.navigateToFeaturesFilter(backStackEntry)
                 },
                 onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
@@ -136,6 +139,14 @@ internal fun FeatureFormNavHost(
                 onAssociationCreated = {
                     navController.popBackStack<NavigationRoute.UNAssociationsFilterResult>(inclusive = false)
                 },
+                onBackPressed = state::popBackStack,
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                },
+                onNavigationEvent = onNavigationEvent
+            )
+
+            featuresFilterDestination(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)

@@ -16,9 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
@@ -26,12 +28,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.Field
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.toolkit.featureforms.internal.screens.FieldFilter
+import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
@@ -176,6 +182,7 @@ internal class AddAssociationFromSourceViewModel(
     val filteredFeatureCandidatesUiState: StateFlow<FeatureCandidatesUiState> = snapshotFlow {
         associatedFeaturesFilterText to _featureCandidatesUiState.value
     }.map { (text, candidatesUiState) ->
+        Log.e("TAG", "state refreshed: ", )
         return@map if (text.isNotEmpty()) {
             val candidateList = candidatesUiState.candidates.toMutableList()
             var nextQueryParams = candidatesUiState.nextQueryParams
@@ -232,6 +239,28 @@ internal class AddAssociationFromSourceViewModel(
         get() = _isSearchingForCandidates.value
 
     /**
+     * Backing list for [fields].
+     */
+    private val _fields = mutableStateOf<List<Field>>(emptyList())
+
+    /**
+     * A list of fields for the current source that can be used for attribute filtering.
+     */
+    val fields: List<Field>
+        get() = _fields.value
+
+    /**
+     * Backing list of attribute [FieldFilter] objects applied to the feature candidates query.
+     */
+    private val _attributeFieldFilters = mutableStateListOf<FieldFilter>()
+
+    /**
+     * A list of attribute [FieldFilter] objects applied to the feature candidates query.
+     */
+    val attributeFieldFilters: List<FieldFilter>
+        get() = _attributeFieldFilters
+
+    /**
      * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
      * This is used to prevent multiple simultaneous fetches.
      */
@@ -259,6 +288,10 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
+                        // Get the available fields from the table
+                        result.candidates.firstOrNull()?.feature?.featureTable?.fields?.let { fields ->
+                            _fields.value = fields.getSupportedFields()
+                        }
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
@@ -304,6 +337,18 @@ internal class AddAssociationFromSourceViewModel(
         return _featureCandidatesUiState.value.candidates.filter { candidate ->
             candidate.title.contains(filterString, ignoreCase = true)
         }
+    }
+
+    /**
+     * Adds a new attribute [FieldFilter] to the list of [attributeFieldFilters] at the
+     * beginning of the list.
+     */
+    fun addAttributeFieldFilter(fieldFilter: FieldFilter) {
+        _attributeFieldFilters.add(0, fieldFilter)
+    }
+
+    fun deleteAttributeFieldFilter(fieldFilter: FieldFilter) {
+        _attributeFieldFilters.remove(fieldFilter)
     }
 
     /**
@@ -575,6 +620,58 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 
+    /**
+     * Applies the current [attributeFieldFilters] to the feature candidates query, updating the
+     * [featureCandidatesUiState] with the filtered results.
+     */
+    suspend fun applyAttributeFilters(): Result<Unit> {
+        val source = _selectedSource.value ?: return Result.failure(
+            IllegalStateException(
+                "No source selected"
+            )
+        )
+        val assetType = _selectedAssetType.value ?: return Result.failure(
+            IllegalStateException(
+                "No asset type selected"
+            )
+        )
+        val whereClause = buildString {
+            // Count of valid filters applied
+            var i = 0
+            attributeFieldFilters.forEach { filter ->
+                if (filter.isValid()) {
+                    // Append AND for multiple filters
+                    if (i > 0) {
+                        append(" AND ")
+                    }
+                    append("${filter.field!!.name} ${filter.condition!!.sign} ${filter.value}")
+                    i++
+                }
+            }
+        }
+        Log.e("TAG", "applyAttributeFilters: $whereClause", )
+        val queryParams = QueryParameters().apply {
+            this.whereClause = whereClause
+        }
+        val result = source.queryFeatures(
+            assetType = assetType,
+            parameters = queryParams
+        ).onSuccess { result ->
+            _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                isLoading = false,
+                candidates = result.candidates,
+                nextQueryParams = result.nextQueryParams
+            )
+        }
+        return if (result.isSuccess) {
+            Result.success(Unit)
+        } else {
+            Result.failure(
+                result.exceptionOrNull() ?: Exception("Unknown error")
+            )
+        }
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -635,13 +732,6 @@ internal data class FeatureCandidatesUiState(
 )
 
 /**
- * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
- */
-internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
-    return this?.terminals?.find { it.terminalId == id }
-}
-
-/**
  * Holds information about an association endpoint, including its name and optional terminal
  * configuration.
  */
@@ -649,3 +739,18 @@ private data class AssociationEndpoint(
     val name: String,
     val terminalConfiguration: UtilityTerminalConfiguration? = null
 )
+
+/**
+ * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
+ */
+internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
+    return this?.terminals?.find { it.terminalId == id }
+}
+
+private fun List<Field>.getSupportedFields(): List<Field> {
+    return filter { field ->
+        field.fieldType.isNumeric ||
+            field.fieldType == FieldType.Text ||
+            field.fieldType == FieldType.Oid
+    }
+}

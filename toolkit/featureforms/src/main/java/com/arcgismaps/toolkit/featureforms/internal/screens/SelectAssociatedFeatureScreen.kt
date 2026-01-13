@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.LocationSearching
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -89,7 +90,8 @@ internal fun SelectAssociatedFeatureScreen(
     viewModel: AddAssociationFromSourceViewModel,
     onBackPressed: () -> Unit,
     onFeatureCandidateSelected: () -> Unit,
-    onFeatureCandidateLocateRequest : (ArcGISFeature) -> Unit,
+    onFilter: () -> Unit,
+    onFeatureCandidateLocateRequest: (ArcGISFeature) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -113,11 +115,23 @@ internal fun SelectAssociatedFeatureScreen(
             onBackPressed = onBackPressed,
             modifier = Modifier.fillMaxWidth(),
         )
-        SearchBar(
-            value = viewModel.associatedFeaturesFilterText,
-            onValueChange = { viewModel.setAssociatedFeaturesFilterText(it) },
-            placeholder = stringResource(R.string.search_features)
-        )
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = CenterVertically
+        ) {
+            SearchBar(
+                value = viewModel.associatedFeaturesFilterText,
+                onValueChange = { viewModel.setAssociatedFeaturesFilterText(it) },
+                placeholder = stringResource(R.string.search_features),
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(
+                onClick = onFilter,
+                modifier = Modifier.padding(end = 16.dp)
+            ) {
+                Icon(imageVector = Icons.Default.FilterList, contentDescription = "Filter")
+            }
+        }
         if (candidates.count() > 0) {
             Row(
                 modifier = Modifier
