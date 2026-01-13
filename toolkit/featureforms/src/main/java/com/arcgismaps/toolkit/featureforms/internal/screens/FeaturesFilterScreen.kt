@@ -64,13 +64,16 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import kotlinx.coroutines.launch
@@ -88,6 +91,7 @@ internal fun FeaturesFilterScreen(
     val filters = viewModel.attributeFieldFilters
     val fields = viewModel.fields
     val lazyListState = rememberLazyListState()
+    val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = modifier,
@@ -96,7 +100,7 @@ internal fun FeaturesFilterScreen(
         ) {
             Row {
                 AddWorkflowTopBar(
-                    title = "Filter Features",
+                    title = stringResource(R.string.filter_features),
                     subTitle = "",
                     onBackPressed = onBackPressed,
                     modifier = Modifier
@@ -118,7 +122,7 @@ internal fun FeaturesFilterScreen(
                     },
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Text(text = "Apply")
+                    Text(text = stringResource(R.string.apply))
                 }
             }
             // button to add a new filter
@@ -139,14 +143,16 @@ internal fun FeaturesFilterScreen(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "add condition")
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Add Condition")
+                    Text(text = stringResource(R.string.add_condition))
                 }
             }
             AnimatedVisibility(filters.isEmpty()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = 64.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 64.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
@@ -156,13 +162,13 @@ internal fun FeaturesFilterScreen(
                             .align(Alignment.CenterHorizontally)
                     )
                     Text(
-                        text = "No conditions added.",
+                        text = stringResource(R.string.no_conditions_added),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(top = 16.dp),
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Show features that meet all the conditions.",
+                        text = stringResource(R.string.show_features_that_meet_all_the_conditions),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                         modifier = Modifier.padding(16.dp),
@@ -177,7 +183,7 @@ internal fun FeaturesFilterScreen(
                     key = { _, filter -> filter.hashCode() }
                 ) { idx, filter ->
                     FilterItem(
-                        name = "Condition ${filters.count() - idx}",
+                        name = context.getString(R.string.condition, filters.count() - idx),
                         filter = filter,
                         fields = fields,
                         onDelete = {
@@ -251,7 +257,7 @@ private fun FilterItem(
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     DropdownMenuItem(
-                        text = { Text(text = "Duplicate") },
+                        text = { Text(text = stringResource(R.string.duplicate)) },
                         onClick = {
                             onDuplicate()
                             showMenu = false
@@ -260,7 +266,7 @@ private fun FilterItem(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Delete",
+                                text = stringResource(R.string.delete),
                                 color = MaterialTheme.colorScheme.error
                             )
                         },
@@ -278,8 +284,6 @@ private fun FilterItem(
             color = MaterialTheme.colorScheme.surfaceBright
         ) {
             Column {
-                // show the field name
-                // field name should be selectable from a dropdown
                 Column(
                     modifier = Modifier
                         .padding(
@@ -291,12 +295,12 @@ private fun FilterItem(
                         }
                 ) {
                     Text(
-                        text = "Field",
+                        text = stringResource(R.string.field),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = filter.field?.name ?: "Not Set",
+                        text = filter.field?.name ?: stringResource(R.string.not_set),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (filter.field == null) {
                             Color.Unspecified
@@ -346,12 +350,12 @@ private fun FilterItem(
                         }
                 ) {
                     Text(
-                        text = "Condition",
+                        text = stringResource(R.string.condition),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = filter.condition?.sign ?: "Not Set",
+                        text = filter.condition?.sign ?: stringResource(R.string.not_set),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (filter.condition == null) {
                             Color.Unspecified
@@ -389,7 +393,7 @@ private fun FilterItem(
                     )
                 ) {
                     Text(
-                        text = "Value",
+                        text = stringResource(R.string.value),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     TextField(

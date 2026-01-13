@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -182,7 +181,6 @@ internal class AddAssociationFromSourceViewModel(
     val filteredFeatureCandidatesUiState: StateFlow<FeatureCandidatesUiState> = snapshotFlow {
         associatedFeaturesFilterText to _featureCandidatesUiState.value
     }.map { (text, candidatesUiState) ->
-        Log.e("TAG", "state refreshed: ", )
         return@map if (text.isNotEmpty()) {
             val candidateList = candidatesUiState.candidates.toMutableList()
             var nextQueryParams = candidatesUiState.nextQueryParams
@@ -259,6 +257,14 @@ internal class AddAssociationFromSourceViewModel(
      */
     val attributeFieldFilters: List<FieldFilter>
         get() = _attributeFieldFilters
+
+    private var _areAttributeFiltersApplied: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     * Indicates whether any attribute filters are currently applied to the feature candidates.
+     */
+    val areAttributeFiltersApplied: Boolean
+        get() = _areAttributeFiltersApplied.value
 
     /**
      * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
@@ -351,6 +357,9 @@ internal class AddAssociationFromSourceViewModel(
         _attributeFieldFilters.add(0, fieldFilter)
     }
 
+    /**
+     * Removes the specified attribute [FieldFilter] from the list of [attributeFieldFilters].
+     */
     fun deleteAttributeFieldFilter(fieldFilter: FieldFilter) {
         _attributeFieldFilters.remove(fieldFilter)
     }
@@ -653,7 +662,6 @@ internal class AddAssociationFromSourceViewModel(
                 }
             }
         }
-        Log.e("TAG", "applyAttributeFilters: $whereClause", )
         val queryParams = QueryParameters().apply {
             this.whereClause = whereClause
         }
@@ -666,6 +674,8 @@ internal class AddAssociationFromSourceViewModel(
                 candidates = result.candidates,
                 nextQueryParams = result.nextQueryParams
             )
+            // Update whether filters are applied based on where clause being non-empty
+            _areAttributeFiltersApplied.value = whereClause.isNotEmpty()
         }
         return if (result.isSuccess) {
             Result.success(Unit)
@@ -751,6 +761,10 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
     return this?.terminals?.find { it.terminalId == id }
 }
 
+/**
+ * Filters the list of [Field] objects to include only those that are supported for attribute
+ * filtering.
+ */
 private fun List<Field>.getSupportedFields(): List<Field> {
     return filter { field ->
         field.fieldType.isNumeric ||

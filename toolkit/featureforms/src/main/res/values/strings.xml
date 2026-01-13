@@ -164,4 +164,15 @@
     <string name="select_terminal">Select Terminal</string>
     <string name="show_on_map">Show on Map</string>
     <string name="more_information">More Information</string>
+    <string name="add_associations">Add Associations</string>
+    <string name="filter_features">Filter Features</string>
+    <string name="apply">Apply</string>
+    <string name="add_condition">Add Condition</string>
+    <string name="no_conditions_added">No conditions added.</string>
+    <string name="show_features_that_meet_all_the_conditions">Show features that meet all the conditions.</string>
+    <string name="condition">Condition %1$d</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="field">Field</string>
+    <string name="not_set">Not Set</string>
+    <string name="value">Value</string>
 </resources>

@@ -28,7 +28,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
@@ -126,7 +125,7 @@ internal fun FeatureFormNavHost(
                     navController.navigateToCreateAssociation(backStackEntry)
                 },
                 onFilter = { backStackEntry ->
-                    navController.navigateToFeaturesFilter(backStackEntry)
+                    navController.navigateToFeatureAttributesFilter(backStackEntry)
                 },
                 onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
@@ -146,12 +145,11 @@ internal fun FeatureFormNavHost(
                 onNavigationEvent = onNavigationEvent
             )
 
-            featuresFilterDestination(
+            featureAttributesFilterDestination(
                 onBackPressed = state::popBackStack,
                 onGetParentEntry = {
                     navController.getBackStackEntry(it.destination.parent!!.id)
-                },
-                onNavigationEvent = onNavigationEvent
+                }
             )
         }
     }

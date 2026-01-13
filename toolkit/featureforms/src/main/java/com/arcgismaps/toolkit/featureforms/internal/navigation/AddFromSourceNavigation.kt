@@ -213,12 +213,11 @@ internal fun NavGraphBuilder.createAssociationDestination(
     }
 }
 
-internal fun NavGraphBuilder.featuresFilterDestination(
+internal fun NavGraphBuilder.featureAttributesFilterDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
-    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
-    onNavigationEvent: (FeatureFormNavigationRoute) -> Unit
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
 ) {
-    composable<AddFromSourceNavRoute.FeaturesFilter>(
+    composable<AddFromSourceNavRoute.FeatureAttributesFilter>(
         enterTransition = { slideInVertically { h -> h } },
         exitTransition = { fadeOut() },
         popEnterTransition = { fadeIn() },
@@ -267,9 +266,9 @@ internal fun NavHostController.navigateToCreateAssociation(
     navigateSafely(backStackEntry, newRoute)
 }
 
-internal fun NavHostController.navigateToFeaturesFilter(
+internal fun NavHostController.navigateToFeatureAttributesFilter(
     backStackEntry: NavBackStackEntry
 ) {
-    val newRoute = AddFromSourceNavRoute.FeaturesFilter
+    val newRoute = AddFromSourceNavRoute.FeatureAttributesFilter
     navigateSafely(backStackEntry, newRoute)
 }

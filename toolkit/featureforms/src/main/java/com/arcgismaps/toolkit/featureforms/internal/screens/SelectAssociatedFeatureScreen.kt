@@ -42,6 +42,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
@@ -83,6 +84,10 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.SharedImageLoader
  *
  * @param viewModel The [AddAssociationFromSourceViewModel] that provides the data for the screen.
  * @param onBackPressed A callback that is called when the back button is pressed.
+ * @param onFeatureCandidateSelected A callback that is called when a feature candidate is selected.
+ * @param onFilter A callback that is called when the filter button is pressed.
+ * @param onFeatureCandidateLocateRequest A callback that is called when a locate request is made
+ * for a feature candidate.
  * @param modifier The [Modifier] to apply to this layout.
  */
 @Composable
@@ -127,7 +132,19 @@ internal fun SelectAssociatedFeatureScreen(
             )
             IconButton(
                 onClick = onFilter,
-                modifier = Modifier.padding(end = 16.dp)
+                modifier = Modifier.padding(end = 16.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = if (viewModel.areAttributeFiltersApplied) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        Color.Unspecified
+                    },
+                    contentColor = if (viewModel.areAttributeFiltersApplied) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        LocalContentColor.current
+                    }
+                )
             ) {
                 Icon(imageVector = Icons.Default.FilterList, contentDescription = "Filter")
             }

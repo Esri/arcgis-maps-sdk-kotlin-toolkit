@@ -104,8 +104,11 @@ internal sealed class AddFromSourceNavRoute {
     @Serializable
     data object SelectAssociatedFeature : AddFromSourceNavRoute()
 
+    /**
+     * Represents the attribute filter screen for features.
+     */
     @Serializable
-    data object FeaturesFilter : AddFromSourceNavRoute()
+    data object FeatureAttributesFilter : AddFromSourceNavRoute()
 
     /**
      * Represents the review screen before adding the association.
