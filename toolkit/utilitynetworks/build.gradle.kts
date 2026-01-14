@@ -33,6 +33,7 @@ kotlin {
     jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 

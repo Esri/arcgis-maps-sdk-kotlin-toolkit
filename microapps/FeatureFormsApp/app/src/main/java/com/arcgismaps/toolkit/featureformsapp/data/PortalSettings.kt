@@ -136,6 +136,7 @@ class PortalSettings(
     /**
      * Signs out the current user and clears the stored portal settings.
      */
+    @Suppress("DEPRECATION")
     suspend fun signOut() = withContext(Dispatchers.IO) {
         preferences.edit { settings ->
             settings.remove(URL_KEY)
