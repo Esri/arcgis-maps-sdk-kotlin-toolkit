@@ -314,6 +314,8 @@ internal class AddAssociationFromSourceViewModel(
                     }
                     // Clear any previously set attribute filters
                     _attributeFieldFilters.clear()
+                    // Reset whether filters are applied
+                    _areAttributeFiltersApplied.value = false
                 }
             }
         }
@@ -645,20 +647,11 @@ internal class AddAssociationFromSourceViewModel(
         val assetType = _selectedAssetType.value ?: return Result.failure(
             IllegalStateException("No asset type selected")
         )
-        val whereClause = buildString {
-            // Count of valid filters applied
-            var i = 0
-            attributeFieldFilters.forEach { filter ->
-                if (filter.isValid()) {
-                    // Append AND for multiple filters
-                    if (i > 0) {
-                        append(" AND ")
-                    }
-                    append("${filter.field!!.name} ${filter.condition!!.sign} ${filter.value}")
-                    i++
-                }
-            }
+        // Build the where clause from only valid attribute filters
+        val queries = attributeFieldFilters.mapNotNull { filter ->
+            filter.getQuery()
         }
+        val whereClause = queries.joinToString(" AND ")
         val queryParams = QueryParameters().apply {
             this.whereClause = whereClause
         }

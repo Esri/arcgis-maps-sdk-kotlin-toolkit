@@ -223,15 +223,17 @@ private fun FilterItem(
     modifier: Modifier = Modifier,
 ) {
     var fieldOptionsExpanded by remember { mutableStateOf(false) }
-    var conditionsExpanded by remember { mutableStateOf(false) }
+    var operatorsExpanded by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
-    var conditions by remember(filter.field) {
-        mutableStateOf(filter.getConditions())
+    var operators by remember(filter.field) {
+        mutableStateOf(filter.getOperators())
     }
     val keyboardType by remember(filter.field) {
         mutableStateOf(filter.getKeyboardType())
     }
     val focusManager = LocalFocusManager.current
+    // The value field is only visible if the operator is not unary or if no operator is selected yet
+    val isFieldVisible = filter.operator?.isUnary()?.not() ?: true
 
     Column(modifier = modifier) {
         Row(
@@ -349,7 +351,7 @@ private fun FilterItem(
                             vertical = 14.dp
                         )
                         .clickable {
-                            conditionsExpanded = true
+                            operatorsExpanded = true
                         }
                 ) {
                     Text(
@@ -358,9 +360,9 @@ private fun FilterItem(
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = filter.condition?.sign ?: stringResource(R.string.not_set),
+                        text = filter.operator?.name ?: stringResource(R.string.not_set),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (filter.condition == null) {
+                        color = if (filter.operator == null) {
                             Color.Unspecified
                         } else {
                             Color(0xFF376FDC)
@@ -369,17 +371,17 @@ private fun FilterItem(
 
                     Box {
                         DropdownMenu(
-                            expanded = conditionsExpanded,
+                            expanded = operatorsExpanded,
                             onDismissRequest = {
-                                conditionsExpanded = false
+                                operatorsExpanded = false
                             }
                         ) {
-                            conditions.forEach { condition ->
+                            operators.forEach { operator ->
                                 DropdownMenuItem(
-                                    text = { Text(condition.sign) },
+                                    text = { Text(operator.name) },
                                     onClick = {
-                                        filter.setCondition(condition)
-                                        conditionsExpanded = false
+                                        filter.setOperator(operator)
+                                        operatorsExpanded = false
                                     }
                                 )
                             }
@@ -387,40 +389,44 @@ private fun FilterItem(
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                Column(
-                    modifier = Modifier.padding(
-                        horizontal = 24.dp,
-                        vertical = 14.dp
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.value),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    TextField(
-                        value = filter.value,
-                        onValueChange = {
-                            filter.setValue(it)
-                        },
-                        enabled = filter.field != null,
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = keyboardType,
-                            imeAction = ImeAction.Done,
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                focusManager.clearFocus()
-                            }
+                AnimatedVisibility(isFieldVisible) {
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    Column(
+                        modifier = Modifier.padding(
+                            horizontal = 24.dp,
+                            vertical = 14.dp
                         )
-                    )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.value),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        TextField(
+                            value = filter.value,
+                            onValueChange = {
+                                filter.setValue(it)
+                            },
+                            enabled = filter.field != null,
+                            placeholder = {
+                                Text(text = stringResource(R.string.enter_a_value))
+                            },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = keyboardType,
+                                imeAction = ImeAction.Done,
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                }
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -428,54 +434,89 @@ private fun FilterItem(
 }
 
 /**
- * Class representing a filter on a field with a condition and value.
+ * Class representing a filter on a [Field] with a [Operator] and value.
  */
 internal class FieldFilter() {
 
     private var _field = mutableStateOf<Field?>(null)
+
+    /**
+     * The field to filter on.
+     */
     val field: Field?
         get() = _field.value
 
-    private var _condition = mutableStateOf<Condition?>(null)
-    val condition: Condition?
-        get() = _condition.value
+    private var _operator = mutableStateOf<Operator?>(null)
+
+    /**
+     * The operator to use for filtering.
+     */
+    val operator: Operator?
+        get() = _operator.value
 
     private var _value = mutableStateOf("")
+
+    /**
+     * The value to filter on.
+     */
     val value: String
         get() = _value.value
 
+    /**
+     * Sets the field for this filter. Resets the operator and value.
+     *
+     * @param value the field to set
+     */
     fun setField(value: Field) {
         _field.value = value
-        _condition.value = null // reset condition when field changes
+        _operator.value = null // reset operator when field changes
         _value.value = "" // reset value when field changes
     }
 
-    fun setCondition(value: Condition) {
-        _condition.value = value
+    /**
+     * Sets the operator for this filter.
+     *
+     * @param value the operator to set
+     */
+    fun setOperator(value: Operator) {
+        _operator.value = value
     }
 
+    /**
+     * Sets the value for this filter.
+     *
+     * @param value the value to set
+     */
     fun setValue(value: String) {
         _value.value = value
     }
 
-    fun getConditions(): List<Condition> {
+    /**
+     * Gets the list of valid operators for the current field type.
+     *
+     * @return the list of valid operators
+     */
+    fun getOperators(): List<Operator> {
         val fieldType = field?.fieldType ?: return emptyList()
-
         return when {
-            fieldType.isNumeric -> listOf(
-                Condition.Equal,
-                Condition.NotEqual,
-                Condition.GreaterThan,
-                Condition.GreaterThanOrEqual,
-                Condition.LessThan,
-                Condition.LessThanOrEqual
-            )
+            fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
+            fieldType == FieldType.Text -> {
+                if (field!!.nullable) {
+                    FilterOperators.TEXT_OPERATORS
+                } else {
+                    FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
+                }
+            }
 
-            fieldType == FieldType.Text || fieldType == FieldType.Oid -> listOf(Condition.Equal)
             else -> emptyList()
         }
     }
 
+    /**
+     * Gets the appropriate keyboard type for the current field type.
+     *
+     * @return the keyboard type
+     */
     fun getKeyboardType(): KeyboardType {
         val fieldType = field?.fieldType ?: return KeyboardType.Text
 
@@ -486,28 +527,138 @@ internal class FieldFilter() {
         }
     }
 
-    fun isValid(): Boolean {
-        return field != null && condition != null && value.isNotEmpty()
+    /**
+     * Generates the query string for this filter.
+     *
+     * @return the query string or null if the filter is not valid
+     */
+    fun getQuery(): String? {
+        if (isValid().not()) return null
+        val formattedValue = when (field!!.fieldType) {
+            is FieldType.Text -> "'${this.value}'"
+            else -> this.value
+        }
+        val field = this.field!!
+        return when (val operator = this.operator!!) {
+            is Operator.StartsWith -> {
+                "${field.name} ${operator.sign} '${value}%'"
+            }
+
+            is Operator.EndsWith -> {
+                "${field.name} ${operator.sign} '%${value}'"
+            }
+
+            Operator.Contains, Operator.DoesNotContain -> {
+                "${field.name} ${operator.sign} '%${value}%'"
+            }
+
+            is Operator.IsBlank, Operator.IsNotBlank, Operator.IsEmpty, Operator.IsNotEmpty -> {
+                "${field.name} ${operator.sign}"
+            }
+
+            else -> {
+                "${field.name} ${operator.sign} $formattedValue"
+            }
+        }
     }
 
+    /**
+     * Checks if the filter is valid and can be used to generate a query.
+     *
+     * @return true if the filter is valid, false otherwise
+     */
+    fun isValid(): Boolean {
+        return field != null && operator != null && value.isNotEmpty()
+    }
+
+    /**
+     * Creates a copy of this filter.
+     *
+     * @return the copied filter
+     */
     fun copy(): FieldFilter {
         val newFilter = FieldFilter()
         field?.let { newFilter.setField(it) }
-        condition?.let { newFilter.setCondition(it) }
+        operator?.let { newFilter.setOperator(it) }
         newFilter.setValue(value)
         return newFilter
     }
 }
 
-internal sealed class Condition(val sign: String) {
-    object Equal : Condition("=")
-    object NotEqual : Condition("!=")
-    object GreaterThan : Condition(">")
-    object GreaterThanOrEqual : Condition(">=")
-    object LessThan : Condition("<")
-    object LessThanOrEqual : Condition("<=")
+/**
+ * Represents an operator that can be used in a [FieldFilter].
+ *
+ * @param name the display name of the operator.
+ * @param sign the sign of the operator used in queries.
+ */
+internal sealed class Operator(
+    val name: String,
+    val sign: String
+) {
+    object Equal : Operator("=", "=")
+    object NotEqual : Operator("!=", "<>")
+    object Is : Operator("is", "=")
+    object IsNot : Operator("is not", "<>")
+    object GreaterThan : Operator(">", ">")
+    object GreaterThanOrEqual : Operator(">=", ">=")
+    object LessThan : Operator("<", "<")
+    object LessThanOrEqual : Operator("<=", "<=")
+    object StartsWith : Operator("starts with", "LIKE")
+    object EndsWith : Operator("ends with", "LIKE")
+    object Contains : Operator("contains the text", "LIKE")
+    object DoesNotContain : Operator("does not contain the text", "not LIKE")
+    object IsBlank : Operator("is blank", "IS NULL")
+    object IsNotBlank : Operator("is not blank", "IS NOT NULL")
+    object IsEmpty : Operator("is empty", "= ''")
+    object IsNotEmpty : Operator("is not empty", "<> ''")
 
     override fun toString(): String {
         return sign
     }
+
+    /**
+     * Checks if the operator is unary (does not require a value).
+     *
+     * @return true if the operator is unary, false otherwise
+     */
+    fun isUnary(): Boolean {
+        return this is IsBlank || this is IsNotBlank || this is IsEmpty || this is IsNotEmpty
+    }
+}
+
+private object FilterOperators {
+
+    /**
+     * The list of operators applicable to numeric fields.
+     */
+    val NUMERIC_OPERATORS = listOf(
+        Operator.Equal,
+        Operator.NotEqual,
+        Operator.GreaterThan,
+        Operator.GreaterThanOrEqual,
+        Operator.LessThan,
+        Operator.LessThanOrEqual
+    )
+
+    /**
+     * The list of operators applicable to text fields.
+     */
+    val TEXT_OPERATORS = listOf(
+        Operator.Is,
+        Operator.IsNot,
+        Operator.StartsWith,
+        Operator.EndsWith,
+        Operator.Contains,
+        Operator.DoesNotContain,
+        Operator.IsEmpty,
+        Operator.IsNotEmpty
+    )
+
+    /**
+     * The list of operators applicable to nullable fields.
+     */
+    val NULLABLE_OPERATORS = listOf(
+        Operator.IsBlank,
+        Operator.IsNotBlank
+    )
 }
