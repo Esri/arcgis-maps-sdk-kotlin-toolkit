@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
 package com.arcgismaps.toolkit.ar.internal.render
 
@@ -21,10 +21,13 @@ import android.opengl.GLES30
 import java.io.Closeable
 
 /**
- * A collection of vertices, faces, and other attributes that define how to render a 3D object.
- * Based on Google's Hello AR sample app.
+ * A collection of vertices, faces, and other attributes that define how to render a 3D object. This
+ * class is based on the [Mesh](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Mesh.java)
+ * from Google's Hello AR sample app.
  *
- * @since 200.6.0
+ * <p>To render the mesh, use {@link SurfaceDrawHandler#draw()}.
+ *
+ * @since 300.0.0
  */
 internal class Mesh(
     private val primitiveMode: PrimitiveMode,
@@ -42,7 +45,7 @@ internal class Mesh(
         TRIANGLES(GLES30.GL_TRIANGLES)
     }
 
-    private val vertexArrayId = IntArray(1)
+    private val vertexArrayId = intArrayOf(0)
 
     init {
         require(vertexBuffers.isNotEmpty()) { "Must pass at least one vertex buffer" }
@@ -88,7 +91,8 @@ internal class Mesh(
     }
 
     /**
-     * Draws the mesh. Don't call this directly unless you are doing low level OpenGL code.
+     * Draws the mesh. Don't call this directly unless you are doing low level OpenGL code; instead,
+     * prefer {@link SurfaceDrawHandler#draw}.
      */
     fun lowLevelDraw() {
         if (vertexArrayId[0] == 0) {

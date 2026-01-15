@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
 package com.arcgismaps.toolkit.ar.internal.render
 
@@ -25,7 +25,7 @@ import java.io.Closeable
  * https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Framebuffer.java
  * from Google's Hello AR sample app.
  *
- * @since 200.6.0
+ * @since 300.0.0
  */
 internal class Framebuffer(width: Int, height: Int) : Closeable {
 

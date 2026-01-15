@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
 package com.arcgismaps.toolkit.ar.internal.render
 
@@ -27,9 +27,10 @@ import java.io.IOException
 import java.nio.ByteBuffer
 
 /**
- * A GPU-side texture.
+ * A GPU-side texture. This class is based on the [Texture](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Texture.java)
+ * from Google's Hello AR sample app.
  *
- * @since 200.6.0
+ * @since 300.0.0
  */
 internal class Texture(
     val target: Target,
@@ -37,7 +38,7 @@ internal class Texture(
     useMipmaps: Boolean = true
 ) : Closeable {
 
-    private val textureId = IntArray(1) { 0 }
+    private val textureId = intArrayOf(0)
 
     init {
         GLES30.glGenTextures(1, textureId, 0)
@@ -77,6 +78,11 @@ internal class Texture(
             val texture = Texture(Target.TEXTURE_2D, wrapMode)
             var bitmap: Bitmap? = null
             try {
+                // The following lines up to glTexImage2D could technically be replaced with
+                // GLUtils.texImage2d, but this method does not allow for loading sRGB images.
+
+                // Load and convert the bitmap and copy its contents to a direct ByteBuffer. Despite its name,
+                // the ARGB_8888 config is actually stored in RGBA order.
                 bitmap = convertBitmapToConfig(
                     BitmapFactory.decodeStream(assets.open(assetFileName)),
                     Bitmap.Config.ARGB_8888
@@ -111,6 +117,8 @@ internal class Texture(
         }
 
         private fun convertBitmapToConfig(bitmap: Bitmap, config: Bitmap.Config): Bitmap {
+            // We use this method instead of BitmapFactory.Options.outConfig to support a minimum of Android
+            // API level 24.
             if (bitmap.config == config) return bitmap
             val result = bitmap.copy(config, false)
             bitmap.recycle()

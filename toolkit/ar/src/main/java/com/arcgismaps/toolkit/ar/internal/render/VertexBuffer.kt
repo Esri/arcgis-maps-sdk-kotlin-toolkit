@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
 package com.arcgismaps.toolkit.ar.internal.render
 
@@ -22,10 +22,29 @@ import java.io.Closeable
 import java.nio.FloatBuffer
 
 /**
- * A list of vertex attribute data stored GPU-side.
- * Based on Google's Hello AR sample app.
+ * A list of vertex attribute data stored GPU-side. This class is based on the [VertexBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/VertexBuffer.java)
+ * from Google's Hello AR sample app.
  *
- * @since 200.6.0
+ * <p>One or more {@link VertexBuffer}s are used when constructing a {@link Mesh} to describe vertex
+ * attribute data; for example, local coordinates, texture coordinates, vertex normals, etc.
+ *
+ * @see <a
+ * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glVertexAttribPointer.xhtml">glVertexAttribPointer</a>
+ *
+ * Construct a {@link VertexBuffer} populated with initial data.
+ *
+ * <p>The GPU buffer will be filled with the data in the <i>direct</i> buffer {@code entries},
+ * starting from the beginning of the buffer (not the current cursor position). The cursor will be
+ * left in an undefined position after this function returns.
+ *
+ * <p>The number of vertices in the buffer can be expressed as {@code entries.limit() /
+ * numberOfEntriesPerVertex}. Thus, The size of the buffer must be divisible by {@code
+ * numberOfEntriesPerVertex}.
+ *
+ * <p>The {@code entries} buffer may be null, in which case an empty buffer is constructed
+ * instead.
+ *
+ * @since 300.0.0
  */
 internal class VertexBuffer(
     internal val numberOfEntriesPerVertex: Int,
@@ -63,5 +82,4 @@ internal class VertexBuffer(
     override fun close() {
         buffer.free()
     }
-
 }

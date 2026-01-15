@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (C) 2024 Esri Inc
+ * Modifications copyright (C) 2026 Esri Inc
  */
 package com.arcgismaps.toolkit.ar.internal.render
 
@@ -22,9 +22,25 @@ import java.io.Closeable
 import java.nio.IntBuffer
 
 /**
- * A list of vertex indices stored GPU-side.
+ * A list of vertex indices stored GPU-side. This class is based on the [IndexBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/IndexBuffer.java)
+ * from Google's Hello AR sample app.
  *
- * @since 200.6.0
+ * <p>When constructing a {@link Mesh}, an {@link IndexBuffer} may be passed to describe the
+ * ordering of vertices when drawing each primitive.
+ *
+ * @see <a
+ * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
+ *
+ * Construct an {@link IndexBuffer} populated with initial data.
+ *
+ * <p>The GPU buffer will be filled with the data in the <i>direct</i> buffer {@code entries},
+ * starting from the beginning of the buffer (not the current cursor position). The cursor will be
+ * left in an undefined position after this function returns.
+ *
+ * <p>The {@code entries} buffer may be null, in which case an empty buffer is constructed
+ * instead.
+ *
+ * @since 300.0.0
  */
 internal class IndexBuffer(
     entries: IntBuffer?
@@ -35,8 +51,13 @@ internal class IndexBuffer(
     /**
      * Populate with new data.
      *
-     * The entire buffer is replaced by the contents of the direct buffer [entries].
-     * The GPU buffer is reallocated automatically if necessary.
+     * <p>The entire buffer is replaced by the contents of the <i>direct</i> buffer {@code entries}
+     * starting from the beginning of the buffer, not the current cursor position. The cursor will be
+     * left in an undefined position after this function returns.
+     *
+     * <p>The GPU buffer is reallocated automatically if necessary.
+     *
+     * <p>The {@code entries} buffer may be null, in which case the buffer will become empty.
      */
     fun set(entries: IntBuffer?) {
         buffer.set(entries)
