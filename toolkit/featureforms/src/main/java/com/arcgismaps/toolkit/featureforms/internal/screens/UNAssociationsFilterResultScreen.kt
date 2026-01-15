@@ -123,7 +123,7 @@ internal fun UNAssociationsFilterResultScreen(
                 enabled = isEditable
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Associations")
-                Text(text = "Add Associations", modifier = Modifier.padding(horizontal = 12.dp))
+                Text(text = stringResource(R.string.add_associations), modifier = Modifier.padding(horizontal = 12.dp))
             }
             if (showAddAssociationAction && !showAsSheet) {
                 // Show the dropdown menu below the button
