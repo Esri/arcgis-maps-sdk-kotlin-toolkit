@@ -144,9 +144,6 @@ internal fun UNAssociationsFilterResultScreen(
         AddActionSheet(
             onDismissRequest = { showAddAssociationAction = false },
             sheetState = sheetState,
-            onSelectFromMap = {
-                // Currently not supported
-            },
             onSelectFromNetworkDataSource = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) {
@@ -162,7 +159,6 @@ internal fun UNAssociationsFilterResultScreen(
 @Composable
 private fun AddActionSheet(
     onDismissRequest: () -> Unit,
-    onSelectFromMap: () -> Unit,
     onSelectFromNetworkDataSource: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState()
 ) {
@@ -171,29 +167,6 @@ private fun AddActionSheet(
         onDismissRequest = onDismissRequest
     ) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(enabled = false) {
-                        onSelectFromMap()
-                    }
-                    .padding(horizontal = 32.dp)
-                    .height(52.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.38f
-                    )
-                ) {
-                    Icon(Icons.Outlined.Map, contentDescription = "On Map")
-                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                    Text(
-                        text = stringResource(R.string.on_map),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,5 +257,5 @@ private fun PreviewAddActionSheet() {
         confirmValueChange = { true },
         initialValue = SheetValue.Expanded,
     )
-    AddActionSheet({}, {}, {}, sheetState = sheetState)
+    AddActionSheet({}, {}, sheetState = sheetState)
 }

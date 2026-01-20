@@ -131,7 +131,10 @@ internal fun SelectAssociatedFeatureScreen(
                 modifier = Modifier.weight(1f)
             )
             IconButton(
-                onClick = onFilter,
+                onClick = {
+                    viewModel.attributeFilterStateManager.saveSnapshot()
+                    onFilter()
+                },
                 modifier = Modifier.padding(end = 16.dp),
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = if (viewModel.areAttributeFiltersApplied) {
