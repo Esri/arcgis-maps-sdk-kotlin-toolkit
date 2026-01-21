@@ -372,7 +372,11 @@ private object FilterOperators {
 internal val Field.fieldName: String
     get() = this.alias.ifEmpty { this.name }
 
-
+/**
+ * Builds a where clause string from the list of [FieldFilter]s.
+ *
+ * @return the where clause string
+ */
 internal fun List<FieldFilter>.buildWhereClause(): String {
     val queries = this.mapNotNull { it.getQuery() }
     return queries.joinToString(separator = " AND ")
