@@ -25,11 +25,20 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 
 /**
+ * Snapshot of the filters to allow restoring later.
+ */
+private data class FilterSnapshot(
+    val filters: List<FieldFilter>
+) {
+    val whereClause: String = filters.buildWhereClause()
+}
+
+/**
  * Manages the state of [FieldFilter]s applied to filter candidate features. This supports adding,
  * removing, duplicating, and applying filters, as well as building the corresponding where clause.
- * Tracking edits to the filters is also supported to know when changes have been made. [hasEdits]
- * will be true if there are unsaved changes to the filters. To ensure that the state is consistent,
- * use [saveSnapshot] before making changes and [restoreSnapshot] to revert to the last saved state.
+ * Tracking edits to the filters is also supported via the [hasEdits] method. To ensure that the
+ * state is consistent, use [saveSnapshot] before making changes and [restoreSnapshot] to revert to
+ * the last saved state.
  *
  * When filters are applied via [applyFilters], the [onApplyFilter] callback is invoked with the
  * current where clause. The callback should handle the application of the where clause and return
@@ -41,8 +50,15 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 internal class FilterStateManager(
     private val onApplyFilter: suspend (String) -> Result<Unit>
 ) {
-    private var whereClause : String = ""
 
+    /**
+     * Snapshot of the filters to allow restoring later. [saveSnapshot] populates this value.
+     */
+    private var snapshot: FilterSnapshot = FilterSnapshot(emptyList())
+
+    /**
+     * The mutable list of current [FieldFilter]s. Backs the public [filters] property.
+     */
     private val _filters = mutableStateListOf<FieldFilter>()
 
     /**
@@ -51,36 +67,19 @@ internal class FilterStateManager(
     val filters: List<FieldFilter>
         get() = _filters
 
-    private val _hasEdits = mutableStateOf(false)
-
-    /**
-     * Indicates whether there are unsaved edits to the filters.
-     */
-    val hasEdits: Boolean
-        get() = _hasEdits.value
-
     /**
      * Adds the [FieldFilter] to the start of the list and rebuilds the where clause.
      */
     private fun addFilter(filter: FieldFilter) {
         _filters.add(0, filter)
-        buildWhereClause()
     }
 
     /**
-     * Builds the SQL where clause from the current filters. If [notifyEdits] is true, it updates
-     * the [hasEdits] state based on whether the where clause has changed.
+     * Removes invalid filters from the list.
      */
-    private fun buildWhereClause(notifyEdits: Boolean = true) {
-        val queries = _filters.mapNotNull { it.getQuery() }
-        val fullQuery = queries.joinToString(separator = " AND ")
-        Log.e("TAG", "buildWhereClause: $fullQuery", )
-        if (fullQuery != whereClause && notifyEdits) {
-            whereClause = fullQuery
-            _hasEdits.value = true
-            whereClause
-        } else {
-            _hasEdits.value = false
+    private fun purgeInvalidFilters() {
+        _filters.removeIf {
+            it.isValid().not()
         }
     }
 
@@ -88,37 +87,40 @@ internal class FilterStateManager(
      * Applies the current filters.
      */
     suspend fun applyFilters() : Result<Unit> {
+        val whereClause = _filters.buildWhereClause()
+
+        Log.e("TAG", "applyFilters: $whereClause", )
+
         return onApplyFilter(whereClause).onSuccess {
-            _hasEdits.value = false
+            // Purge invalid filters after successful application
+            purgeInvalidFilters()
+            // Save snapshot of applied filters
+            saveSnapshot()
+        }.onFailure {
+            Log.e("TAG", "failed applyFilters: $it", )
         }
     }
 
     /**
-     * Clears all filters and resets the where clause.
+     * Creates a new [FieldFilter], adds it to the start of the list.
      */
-    fun clearFilters() {
-        _filters.clear()
-        whereClause = ""
-    }
-
-    /**
-     * Creates a new [FieldFilter], adds it to the list.
-     */
-    fun createNewFilter() {
-        val newFilter = FieldFilter(
-            onFilterChanged = ::buildWhereClause
-        )
-        addFilter(newFilter)
-    }
+    fun createNewFilter() = addFilter(FieldFilter())
 
     /**
      * Duplicates the given [FieldFilter] and adds it to the start of the list.
      */
-    fun duplicateFilter(filter: FieldFilter) {
-        val newFilter = filter.copy(
-            onFilterChanged = ::buildWhereClause
-        )
-        addFilter(newFilter)
+    fun duplicateFilter(filter: FieldFilter) = addFilter(filter.copy())
+
+    /**
+     * Checks if there are unsaved edits to the filters compared to the last saved snapshot. If
+     * no snapshot exists, this returns false.
+     *
+     * @return true if there are unsaved edits, false otherwise
+     */
+    fun hasEdits(): Boolean {
+        val currentWhereClause = _filters.buildWhereClause()
+        val snapshotWhereClause = snapshot.whereClause
+        return currentWhereClause != snapshotWhereClause
     }
 
     /**
@@ -126,46 +128,39 @@ internal class FilterStateManager(
      */
     fun removeFilter(filter: FieldFilter) {
         _filters.remove(filter)
-        buildWhereClause()
     }
 
     /**
      * Saves a snapshot of the current filters to allow restoring later. Use [restoreSnapshot] to revert
-     * to this state.
+     * to this state. This method must be called before making changes to the filters to track edits.
      */
     fun saveSnapshot() {
-        _filters.forEach {
-            it.saveSnapshot()
+        val filtersToSnapshot = _filters.mapNotNull {
+            if (it.isValid()) it.copy() else null
         }
+        filtersToSnapshot.forEach {
+            Log.e("TAG", "saveSnapshot filter: ${it.getQuery()}", )
+        }
+        snapshot = FilterSnapshot(
+            filters = filtersToSnapshot
+        )
+        Log.e("TAG", "saveSnapshot: ${snapshot?.whereClause}", )
     }
 
     /**
-     * Restores the filters to the last saved snapshot state. Use after [saveSnapshot] to revert changes.
+     * Restores the filters to the last saved snapshot state. Use after [saveSnapshot] to revert
+     * changes. If no snapshot exists, this does nothing.
      */
     fun restoreSnapshot() {
-        _filters.forEach {
-            it.restoreSnapshot()
-        }
-        // Restore where clause without notifying edits.
-        buildWhereClause(notifyEdits = false)
+        _filters.clear()
+        _filters.addAll(snapshot.filters)
     }
 }
 
 /**
- * A snapshot of a [FieldFilter]'s state for saving and restoring.
- */
-private data class FieldFilterSnapshot(
-    val field : Field?,
-    val operator : Operator?,
-    val value : String
-)
-
-/**
  * Class representing a filter on a [Field] with a [Operator] and value.
  */
-internal class FieldFilter(
-    private val onFilterChanged : () -> Unit
-) {
+internal class FieldFilter() {
 
     private var _field = mutableStateOf<Field?>(null)
 
@@ -191,15 +186,12 @@ internal class FieldFilter(
     val value: String
         get() = _value.value
 
-
-    private var snapshot : FieldFilterSnapshot? = null
-
     /**
      * Checks if the filter is valid and can be used to generate a query.
      *
      * @return true if the filter is valid, false otherwise
      */
-    private fun isValid(): Boolean {
+    fun isValid(): Boolean {
         val hasField = field != null
         val operator = operator ?: return false
         // For unary operators, value is not required
@@ -215,8 +207,6 @@ internal class FieldFilter(
         _field.value = value
         _operator.value = null // reset operator when field changes
         _value.value = "" // reset value when field changes
-        // Notify that the filter has changed
-        onFilterChanged()
     }
 
     /**
@@ -226,8 +216,6 @@ internal class FieldFilter(
      */
     fun setOperator(value: Operator) {
         _operator.value = value
-        // Notify that the filter has changed
-        onFilterChanged()
     }
 
     /**
@@ -237,8 +225,6 @@ internal class FieldFilter(
      */
     fun setValue(value: String) {
         _value.value = value
-        // Notify that the filter has changed
-        onFilterChanged()
     }
 
     /**
@@ -317,36 +303,15 @@ internal class FieldFilter(
      *
      * @return the copied filter
      */
-    fun copy(
-        onFilterChanged: () -> Unit
-    ): FieldFilter {
-        val newFilter = FieldFilter(onFilterChanged)
-        field?.let { newFilter.setField(it) }
-        operator?.let { newFilter.setOperator(it) }
+    fun copy(): FieldFilter {
+        val newFilter = FieldFilter()
+        _field.value?.let { newFilter.setField(it) }
+        _operator.value?.let { newFilter.setOperator(it) }
         newFilter.setValue(value)
+
+        Log.e("TAG", "copy: ${newFilter._value} - $_value", )
+
         return newFilter
-    }
-
-    /**
-     * Saves a snapshot of the current filter state.
-     */
-    fun saveSnapshot() {
-        snapshot = FieldFilterSnapshot(
-            field = field,
-            operator = operator,
-            value = value
-        )
-    }
-
-    /**
-     * Restores the filter state from the last saved snapshot, if available.
-     */
-    fun restoreSnapshot() {
-        snapshot?.let { snap ->
-            snap.field?.let { setField(it) }
-            snap.operator?.let { setOperator(it) }
-            setValue(snap.value)
-        }
     }
 }
 
@@ -433,3 +398,9 @@ private object FilterOperators {
  */
 internal val Field.fieldName: String
     get() = this.alias.ifEmpty { this.name }
+
+
+internal fun List<FieldFilter>.buildWhereClause(): String {
+    val queries = this.mapNotNull { it.getQuery() }
+    return queries.joinToString(separator = " AND ")
+}

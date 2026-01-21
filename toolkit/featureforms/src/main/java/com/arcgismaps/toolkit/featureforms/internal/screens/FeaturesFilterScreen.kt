@@ -41,8 +41,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -58,11 +58,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
@@ -80,7 +80,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ad
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FieldFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fieldName
 import kotlinx.coroutines.launch
-import java.util.Locale.getDefault
 
 @Composable
 internal fun FeaturesFilterScreen(
@@ -96,7 +95,7 @@ internal fun FeaturesFilterScreen(
     val fields = viewModel.fields
     val lazyListState = rememberLazyListState()
     val context = LocalContext.current
-    var showDiscardDialog by remember {
+    var showDiscardDialog by rememberSaveable {
         mutableStateOf(false)
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -110,9 +109,10 @@ internal fun FeaturesFilterScreen(
                     title = stringResource(R.string.filter_features),
                     subTitle = "",
                     onBackPressed = {
-                        if (filterStateManager.hasEdits) {
+                        if (filterStateManager.hasEdits()) {
                             showDiscardDialog = true
                         } else {
+                            filterStateManager.restoreSnapshot()
                             onBackPressed()
                         }
                     },
@@ -134,7 +134,6 @@ internal fun FeaturesFilterScreen(
                         }
                     },
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    enabled = filterStateManager.hasEdits
                 ) {
                     Text(text = stringResource(R.string.apply))
                 }
@@ -196,6 +195,7 @@ internal fun FeaturesFilterScreen(
                     items = filters,
                     key = { _, filter -> filter.hashCode() }
                 ) { idx, filter ->
+                    Log.e("TAG", "FeaturesFilterScreen: $filter, ${filter._value}", )
                     FilterItem(
                         name = context.getString(
                             R.string.condition_numbered,
@@ -346,7 +346,7 @@ private fun FilterItem(
                         ) {
                             fields.forEach { field ->
                                 DropdownMenuItem(
-                                    text = { Text(field.fieldName.uppercase(getDefault())) },
+                                    text = { Text(field.fieldName) },
                                     onClick = {
                                         filter.setField(field)
                                         fieldOptionsExpanded = false
@@ -473,11 +473,17 @@ private fun ConfirmationDialog(
                 Text(text = stringResource(R.string.cancel))
             }
         },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = "filter icon",
+            )
+        },
         title = {
-            Text(text = "Filters have not been applied")
+            Text(text = stringResource(R.string.filters_not_applied))
         },
         text = {
-            Text(text = "Are you sure you want to discard the changes?")
+            Text(text = stringResource(R.string.discard_changes_confirmation))
         }
     )
 }

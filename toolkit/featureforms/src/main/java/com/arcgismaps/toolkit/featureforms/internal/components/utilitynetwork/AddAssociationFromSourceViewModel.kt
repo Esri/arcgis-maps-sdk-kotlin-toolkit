@@ -249,10 +249,8 @@ internal class AddAssociationFromSourceViewModel(
     /**
      * Manages the state of attribute filters applied to the feature candidates.
      */
-    val attributeFilterStateManager = FilterStateManager(
-        onApplyFilter = ::applyAttributeFilters,
-        scope = viewModelScope
-    )
+    var attributeFilterStateManager = FilterStateManager(onApplyFilter = ::applyAttributeFilters)
+        private set
 
     private var _areAttributeFiltersApplied: MutableState<Boolean> = mutableStateOf(false)
 
@@ -307,8 +305,10 @@ internal class AddAssociationFromSourceViewModel(
                             error = error
                         )
                     }
-                    // Clear any previously set attribute filters
-                    attributeFilterStateManager.clearFilters()
+                    // Create a new filter state manager for the new source/asset type
+                    attributeFilterStateManager = FilterStateManager(
+                        onApplyFilter = ::applyAttributeFilters
+                    )
                     // Reset whether filters are applied
                     _areAttributeFiltersApplied.value = false
                 }
@@ -616,7 +616,7 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 
-    private suspend fun applyAttributeFilters(whereClause : String): Result<Unit> {
+    private suspend fun applyAttributeFilters(whereClause: String): Result<Unit> {
         val source = _selectedSource.value ?: return Result.failure(
             IllegalStateException("No source selected")
         )
