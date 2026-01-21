@@ -79,6 +79,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Ad
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FieldFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Operator
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fieldName
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getKeyboardType
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getOperators
 import kotlinx.coroutines.launch
 
 @Composable
@@ -203,7 +205,7 @@ internal fun FeaturesFilterScreen(
                         filter = filter,
                         fields = fields,
                         onDelete = {
-                            filterStateManager.removeFilter(filter)
+                            filterStateManager.removeFilter(idx)
                         },
                         onDuplicate = {
                             Snapshot.withMutableSnapshot {

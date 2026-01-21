@@ -120,10 +120,12 @@ internal class FilterStateManager(
     }
 
     /**
-     * Removes the given [FieldFilter] from the list and rebuilds the where clause.
+     * Removes the given [FieldFilter] from the list.
      */
-    fun removeFilter(filter: FieldFilter) {
-        _filters.remove(filter)
+    fun removeFilter(index: Int) {
+        if (index in _filters.indices) {
+            _filters.removeAt(index)
+        }
     }
 
     /**
@@ -189,76 +191,6 @@ internal data class FieldFilter(
     }
 
     /**
-     * Gets the list of valid operators for the current field type.
-     *
-     * @return the list of valid operators
-     */
-    fun getOperators(): List<Operator> {
-        val fieldType = field?.fieldType ?: return emptyList()
-        return when {
-            fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
-            fieldType == FieldType.Text -> {
-                if (field.nullable) {
-                    FilterOperators.TEXT_OPERATORS
-                } else {
-                    FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
-                }
-            }
-
-            else -> emptyList()
-        }
-    }
-
-    /**
-     * Gets the appropriate keyboard type for the current field type.
-     *
-     * @return the keyboard type
-     */
-    fun getKeyboardType(): KeyboardType {
-        val fieldType = field?.fieldType ?: return KeyboardType.Text
-
-        return when {
-            fieldType.isNumeric -> KeyboardType.Number
-            fieldType == FieldType.Oid -> KeyboardType.Number
-            else -> KeyboardType.Text
-        }
-    }
-
-    /**
-     * Generates the query string for this filter.
-     *
-     * @return the query string or null if the filter is not valid
-     */
-    fun getQuery(): String? {
-        if (isValid().not()) return null
-        val formattedValue = when (field!!.fieldType) {
-            is FieldType.Text -> "'${this.value}'"
-            else -> this.value
-        }
-        return when (val operator = this.operator!!) {
-            is Operator.StartsWith -> {
-                "${field.name} ${operator.sign} '${value}%'"
-            }
-
-            is Operator.EndsWith -> {
-                "${field.name} ${operator.sign} '%${value}'"
-            }
-
-            Operator.Contains, Operator.DoesNotContain -> {
-                "${field.name} ${operator.sign} '%${value}%'"
-            }
-
-            is Operator.IsBlank, Operator.IsNotBlank, Operator.IsEmpty, Operator.IsNotEmpty -> {
-                "${field.name} ${operator.sign}"
-            }
-
-            else -> {
-                "${field.name} ${operator.sign} $formattedValue"
-            }
-        }
-    }
-
-    /**
      * Creates a copy of this [FieldFilter] with the given new field.
      */
     fun withField(newField: Field): FieldFilter = copy(
@@ -284,6 +216,76 @@ internal data class FieldFilter(
         operator = operator,
         value = newValue
     )
+}
+
+/**
+ * Gets the list of valid operators for the current field type.
+ *
+ * @return the list of valid operators
+ */
+internal fun FieldFilter.getOperators(): List<Operator> {
+    val fieldType = field?.fieldType ?: return emptyList()
+    return when {
+        fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
+        fieldType == FieldType.Text -> {
+            if (field.nullable) {
+                FilterOperators.TEXT_OPERATORS
+            } else {
+                FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
+            }
+        }
+
+        else -> emptyList()
+    }
+}
+
+/**
+ * Gets the appropriate keyboard type for the current field type.
+ *
+ * @return the keyboard type
+ */
+internal fun FieldFilter.getKeyboardType(): KeyboardType {
+    val fieldType = field?.fieldType ?: return KeyboardType.Text
+
+    return when {
+        fieldType.isNumeric -> KeyboardType.Number
+        fieldType == FieldType.Oid -> KeyboardType.Number
+        else -> KeyboardType.Text
+    }
+}
+
+/**
+ * Generates the query string for this filter.
+ *
+ * @return the query string or null if the filter is not valid
+ */
+internal fun FieldFilter.getQuery(): String? {
+    if (isValid().not()) return null
+    val formattedValue = when (field!!.fieldType) {
+        is FieldType.Text -> "'${this.value}'"
+        else -> this.value
+    }
+    return when (val operator = this.operator!!) {
+        is Operator.StartsWith -> {
+            "${field.name} ${operator.sign} '${value}%'"
+        }
+
+        is Operator.EndsWith -> {
+            "${field.name} ${operator.sign} '%${value}'"
+        }
+
+        Operator.Contains, Operator.DoesNotContain -> {
+            "${field.name} ${operator.sign} '%${value}%'"
+        }
+
+        is Operator.IsBlank, Operator.IsNotBlank, Operator.IsEmpty, Operator.IsNotEmpty -> {
+            "${field.name} ${operator.sign}"
+        }
+
+        else -> {
+            "${field.name} ${operator.sign} $formattedValue"
+        }
+    }
 }
 
 /**
