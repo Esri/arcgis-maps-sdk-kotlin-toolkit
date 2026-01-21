@@ -16,13 +16,12 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
+import java.util.UUID
 
 /**
  * Snapshot of the filters to allow restoring later.
@@ -62,17 +61,13 @@ internal class FilterStateManager(
     private val _filters = mutableStateListOf<FieldFilter>()
 
     /**
-     * The list of current [FieldFilter]s.
+     * The list of current [FieldFilter]s. To modify the list or update any filters, use the
+     * provided methods on this class such as [createNewFilter], [removeFilter], and [updateFilter].
+     *
+     * This property is observable and will trigger recompositions when modified.
      */
     val filters: List<FieldFilter>
         get() = _filters
-
-    /**
-     * Adds the [FieldFilter] to the start of the list and rebuilds the where clause.
-     */
-    private fun addFilter(filter: FieldFilter) {
-        _filters.add(0, filter)
-    }
 
     /**
      * Removes invalid filters from the list.
@@ -86,30 +81,30 @@ internal class FilterStateManager(
     /**
      * Applies the current filters.
      */
-    suspend fun applyFilters() : Result<Unit> {
+    suspend fun applyFilters(): Result<Unit> {
         val whereClause = _filters.buildWhereClause()
-
-        Log.e("TAG", "applyFilters: $whereClause", )
-
         return onApplyFilter(whereClause).onSuccess {
             // Purge invalid filters after successful application
             purgeInvalidFilters()
             // Save snapshot of applied filters
             saveSnapshot()
-        }.onFailure {
-            Log.e("TAG", "failed applyFilters: $it", )
         }
     }
 
     /**
      * Creates a new [FieldFilter], adds it to the start of the list.
      */
-    fun createNewFilter() = addFilter(FieldFilter())
+    fun createNewFilter() = _filters.add(0, FieldFilter())
 
     /**
      * Duplicates the given [FieldFilter] and adds it to the start of the list.
      */
-    fun duplicateFilter(filter: FieldFilter) = addFilter(filter.copy())
+    fun duplicateFilter(filter: FieldFilter) = _filters.add(
+        index = 0,
+        element = filter.copy(
+            id = UUID.randomUUID().toString()
+        )
+    )
 
     /**
      * Checks if there are unsaved edits to the filters compared to the last saved snapshot. If
@@ -131,20 +126,25 @@ internal class FilterStateManager(
     }
 
     /**
+     * Updates the [FieldFilter] at the given index with the new filter values.
+     */
+    fun updateFilter(index: Int, newFilter: FieldFilter) {
+        _filters[index] = newFilter
+    }
+
+    /**
      * Saves a snapshot of the current filters to allow restoring later. Use [restoreSnapshot] to revert
      * to this state. This method must be called before making changes to the filters to track edits.
+     *
+     * Only valid filters are saved in the snapshot.
      */
     fun saveSnapshot() {
         val filtersToSnapshot = _filters.mapNotNull {
             if (it.isValid()) it.copy() else null
         }
-        filtersToSnapshot.forEach {
-            Log.e("TAG", "saveSnapshot filter: ${it.getQuery()}", )
-        }
         snapshot = FilterSnapshot(
             filters = filtersToSnapshot
         )
-        Log.e("TAG", "saveSnapshot: ${snapshot?.whereClause}", )
     }
 
     /**
@@ -158,34 +158,22 @@ internal class FilterStateManager(
 }
 
 /**
- * Class representing a filter on a [Field] with a [Operator] and value.
+ * Class representing a filter on a [Field] with a [Operator] and value. This class is immutable;
+ * to modify a filter, create a new instance using the provided copy methods ([withField],
+ * [withOperator], [withValue]). The copy methods return a new [FieldFilter] instance with the
+ * same [id] but updated properties.
+ *
+ * @param id Unique identifier for the filter. Defaults to a random UUID.
+ * @param field The [Field] to filter on. Defaults to null.
+ * @param operator The [Operator] to use for filtering. Defaults to null.
+ * @param value The value to filter against as a [String]. Defaults to an empty string
  */
-internal class FieldFilter() {
-
-    private var _field = mutableStateOf<Field?>(null)
-
-    /**
-     * The field to filter on.
-     */
-    val field: Field?
-        get() = _field.value
-
-    private var _operator = mutableStateOf<Operator?>(null)
-
-    /**
-     * The operator to use for filtering.
-     */
-    val operator: Operator?
-        get() = _operator.value
-
-    private var _value = mutableStateOf("")
-
-    /**
-     * The value to filter on.
-     */
-    val value: String
-        get() = _value.value
-
+internal data class FieldFilter(
+    val id: String = UUID.randomUUID().toString(),
+    val field: Field? = null,
+    val operator: Operator? = null,
+    val value: String = ""
+) {
     /**
      * Checks if the filter is valid and can be used to generate a query.
      *
@@ -199,35 +187,6 @@ internal class FieldFilter() {
     }
 
     /**
-     * Sets the field for this filter. Resets the operator and value.
-     *
-     * @param value the field to set
-     */
-    fun setField(value: Field) {
-        _field.value = value
-        _operator.value = null // reset operator when field changes
-        _value.value = "" // reset value when field changes
-    }
-
-    /**
-     * Sets the operator for this filter.
-     *
-     * @param value the operator to set
-     */
-    fun setOperator(value: Operator) {
-        _operator.value = value
-    }
-
-    /**
-     * Sets the value for this filter.
-     *
-     * @param value the value to set
-     */
-    fun setValue(value: String) {
-        _value.value = value
-    }
-
-    /**
      * Gets the list of valid operators for the current field type.
      *
      * @return the list of valid operators
@@ -237,7 +196,7 @@ internal class FieldFilter() {
         return when {
             fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
             fieldType == FieldType.Text -> {
-                if (field!!.nullable) {
+                if (field.nullable) {
                     FilterOperators.TEXT_OPERATORS
                 } else {
                     FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
@@ -274,7 +233,6 @@ internal class FieldFilter() {
             is FieldType.Text -> "'${this.value}'"
             else -> this.value
         }
-        val field = this.field!!
         return when (val operator = this.operator!!) {
             is Operator.StartsWith -> {
                 "${field.name} ${operator.sign} '${value}%'"
@@ -299,20 +257,31 @@ internal class FieldFilter() {
     }
 
     /**
-     * Creates a copy of this filter.
-     *
-     * @return the copied filter
+     * Creates a copy of this [FieldFilter] with the given new field.
      */
-    fun copy(): FieldFilter {
-        val newFilter = FieldFilter()
-        _field.value?.let { newFilter.setField(it) }
-        _operator.value?.let { newFilter.setOperator(it) }
-        newFilter.setValue(value)
+    fun withField(newField: Field): FieldFilter = copy(
+        field = newField,
+        operator = operator,
+        value = value
+    )
 
-        Log.e("TAG", "copy: ${newFilter._value} - $_value", )
+    /**
+     * Creates a copy of this [FieldFilter] with the given new operator.
+     */
+    fun withOperator(newOperator: Operator): FieldFilter = copy(
+        field = field,
+        operator = newOperator,
+        value = value
+    )
 
-        return newFilter
-    }
+    /**
+     * Creates a copy of this [FieldFilter] with the given new value.
+     */
+    fun withValue(newValue: String): FieldFilter = copy(
+        field = field,
+        operator = operator,
+        value = newValue
+    )
 }
 
 /**

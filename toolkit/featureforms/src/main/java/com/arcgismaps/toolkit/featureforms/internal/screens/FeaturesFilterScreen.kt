@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +77,7 @@ import com.arcgismaps.data.Field
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FieldFilter
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Operator
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fieldName
 import kotlinx.coroutines.launch
 
@@ -193,9 +193,8 @@ internal fun FeaturesFilterScreen(
             LazyColumn(state = lazyListState) {
                 itemsIndexed(
                     items = filters,
-                    key = { _, filter -> filter.hashCode() }
+                    key = { _, filter -> filter.id }
                 ) { idx, filter ->
-                    Log.e("TAG", "FeaturesFilterScreen: $filter, ${filter._value}", )
                     FilterItem(
                         name = context.getString(
                             R.string.condition_numbered,
@@ -211,6 +210,24 @@ internal fun FeaturesFilterScreen(
                                 filterStateManager.duplicateFilter(filter)
                                 lazyListState.requestScrollToItem(0)
                             }
+                        },
+                        onFieldChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withField(it)
+                            )
+                        },
+                        onOperatorChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withOperator(it)
+                            )
+                        },
+                        onValueChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withValue(it)
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -243,6 +260,9 @@ private fun FilterItem(
     fields: List<Field>,
     onDelete: () -> Unit,
     onDuplicate: () -> Unit,
+    onFieldChange: (Field) -> Unit,
+    onOperatorChange: (Operator) -> Unit,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var fieldOptionsExpanded by remember { mutableStateOf(false) }
@@ -348,7 +368,7 @@ private fun FilterItem(
                                 DropdownMenuItem(
                                     text = { Text(field.fieldName) },
                                     onClick = {
-                                        filter.setField(field)
+                                        onFieldChange(field)
                                         fieldOptionsExpanded = false
                                     },
                                     leadingIcon = {
@@ -403,7 +423,7 @@ private fun FilterItem(
                                 DropdownMenuItem(
                                     text = { Text(operator.name) },
                                     onClick = {
-                                        filter.setOperator(operator)
+                                        onOperatorChange(operator)
                                         operatorsExpanded = false
                                     }
                                 )
@@ -426,9 +446,7 @@ private fun FilterItem(
                         )
                         TextField(
                             value = filter.value,
-                            onValueChange = {
-                                filter.setValue(it)
-                            },
+                            onValueChange = onValueChange,
                             enabled = filter.field != null,
                             placeholder = {
                                 Text(text = stringResource(R.string.enter_a_value))
