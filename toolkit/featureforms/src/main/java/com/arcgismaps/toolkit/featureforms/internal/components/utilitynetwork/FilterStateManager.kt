@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.data.Field
@@ -168,6 +169,7 @@ internal class FilterStateManager(
  * @param operator The [Operator] to use for filtering. Defaults to null.
  * @param value The value to filter against as a [String]. Defaults to an empty string
  */
+@Immutable
 internal data class FieldFilter(
     val id: String = UUID.randomUUID().toString(),
     val field: Field? = null,
