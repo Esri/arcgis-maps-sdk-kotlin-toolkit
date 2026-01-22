@@ -759,9 +759,6 @@ private fun List<Field>.getSupportedFields(): List<Field> {
     return filter { field ->
         field.fieldType == FieldType.Text ||
             field.fieldType == FieldType.Oid ||
-            field.fieldType.isNumeric &&
-            // Exclude fields with coded value domains until we support selection from coded values
-            field.domain !is CodedValueDomain
-
+            field.fieldType.isNumeric
     }
 }

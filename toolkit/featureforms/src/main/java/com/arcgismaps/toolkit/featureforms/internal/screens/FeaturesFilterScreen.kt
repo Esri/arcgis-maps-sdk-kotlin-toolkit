@@ -71,6 +71,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.R
@@ -401,31 +402,54 @@ private fun FilterItem(
                             text = stringResource(R.string.value),
                             style = MaterialTheme.typography.bodyLarge
                         )
-                        TextField(
-                            value = filter.value,
-                            onValueChange = {
-                                filter.setValue(it)
-                            },
-                            enabled = filter.field != null,
-                            placeholder = {
-                                Text(text = stringResource(R.string.enter_a_value))
-                            },
-                            colors = TextFieldDefaults.colors(
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = keyboardType,
-                                imeAction = ImeAction.Done,
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
+                        if (filter.field?.domain is CodedValueDomain) {
+                            val domain = filter.field?.domain as CodedValueDomain
+                            var expanded by remember { mutableStateOf(false) }
+                            Box {
+                                Text(
+                                    text = domain.codedValues.find { it.code.toString() == filter.value }?.name
+                                        ?: stringResource(R.string.enter_a_value),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { expanded = true }
+                                        .padding(16.dp)
+                                )
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    domain.codedValues.forEach { codedValue ->
+                                        DropdownMenuItem(
+                                            text = { Text(codedValue.name) },
+                                            onClick = {
+                                                filter.setValue(codedValue.code.toString())
+                                                expanded = false
+                                            }
+                                        )
+                                    }
                                 }
+                            }
+                        } else {
+                            TextField(
+                                value = filter.value,
+                                onValueChange = { filter.setValue(it) },
+                                enabled = filter.field != null,
+                                placeholder = { Text(text = stringResource(R.string.enter_a_value)) },
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = keyboardType,
+                                    imeAction = ImeAction.Done,
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = { focusManager.clearFocus() }
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -499,6 +523,7 @@ internal class FieldFilter() {
     fun getOperators(): List<Operator> {
         val fieldType = field?.fieldType ?: return emptyList()
         return when {
+            fieldType.isNumeric && field!!.domain is CodedValueDomain -> FilterOperators.EQUALITY_OPERATORS
             fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
             fieldType == FieldType.Text -> {
                 if (field!!.nullable) {
@@ -627,6 +652,15 @@ internal sealed class Operator(
 }
 
 private object FilterOperators {
+
+    /**
+     * The list of operators applicable to fields where we just need to check for equality.
+     * Ex. coded value domain fields.
+     */
+    val EQUALITY_OPERATORS = listOf(
+        Operator.Equal,
+        Operator.NotEqual,
+    )
 
     /**
      * The list of operators applicable to numeric fields.
