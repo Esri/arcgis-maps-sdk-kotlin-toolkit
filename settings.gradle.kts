@@ -53,7 +53,7 @@ includeBuild("../kotlin/android-api") {
         substitute(module("com.esri:arcgis-maps-kotlin")).using(project(":arcgis-maps-kotlin"))
     }
 }
-includeBuild("../MockingJay") {
+includeBuild("../mockingjay") {
     dependencySubstitution {
         substitute(module("com.esri:mockingjay")).using(project(":MockingJay-lib"))
     }
