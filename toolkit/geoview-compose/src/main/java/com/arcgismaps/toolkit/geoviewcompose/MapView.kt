@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -175,20 +175,32 @@ public fun MapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember {
-        MapView(context).apply {
-            isFocusable = true
-            isFocusedByDefault = true
-            isFocusableInTouchMode = true
-        }
+        MapView(context)
     }
     val layoutDirection = LocalLayoutDirection.current
 
+    if (mapViewInteractionOptions.isFocusable) {
+        // these must be set here rather than relying on setting them view the interaction options
+        // in the
+        // so the AndroidView focus interop's properties are set up to respect the desired focusability.
+        // see https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/src/androidMain/kotlin/androidx/compose/ui/viewinterop/FocusGroupNode.android.kt;l=89;bpv=0;bpt=0
+        mapView.isFocusable = true
+        mapView.isFocusableInTouchMode = true
+        mapView.isFocusedByDefault = true // for testing only
+    } else {
+        mapView.isFocusable = false
+        mapView.isFocusableInTouchMode = false
+    }
+
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
-    Box(modifier = modifier.clipToBounds()) {
+    Box(modifier = modifier
+        .clipToBounds()
+        .focusable(mapView.isFocusable)) {
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(mapView.isFocusable)
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
@@ -214,6 +226,10 @@ public fun MapView(
                         clear()
                         addAll(imageOverlays)
                     }
+                }
+                if (mapViewInteractionOptions.isFocusable) {
+                    it.isFocusable = true
+                    it.isFocusableInTouchMode = true
                 }
             })
 
@@ -475,6 +491,7 @@ private fun ViewpointHandler(
             mapView.viewpointChanged.collect {
                 val newViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
                 newViewpoint?.let {
+                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = it
                 }
 
@@ -505,6 +522,7 @@ private fun ViewpointHandler(
             // here in order to keep track of changes to currentViewpointPersistence at recomposition
             snapshotFlow { currentViewpointPersistence }
                 .collect {
+                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = mapView.getViewpointByPersistence(it)
                 }
         }
