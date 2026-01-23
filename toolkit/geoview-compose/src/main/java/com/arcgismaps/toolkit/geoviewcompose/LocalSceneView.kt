@@ -166,7 +166,13 @@ public fun LocalSceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val localSceneView = remember { LocalSceneView(context) }
+    val localSceneView = remember {
+        LocalSceneView(context).apply {
+            // set this right away so the compose AndroidView "focus interop" is set up correctly
+            isFocusable = localSceneViewProxy?.isFocusable ?: false
+            isFocusedByDefault = true // for testing. remove.
+        }
+    }
 
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
@@ -179,6 +185,8 @@ public fun LocalSceneView(
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
+                it.isFocusable = localSceneViewProxy?.isFocusable ?: false
+                it.isFocusedByDefault = true // for testing. remove.
             }
         )
 
@@ -404,6 +412,7 @@ private fun ViewpointHandler(
             localSceneView.viewpointChanged.collect {
                 val currentViewpointCenterAndScale =
                     localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                @Suppress("AssignedValueIsNeverRead")
                 persistedViewpoint = currentViewpointCenterAndScale
                 currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->

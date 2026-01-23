@@ -173,7 +173,13 @@ public fun MapView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    val mapView = remember {
+        MapView(context).apply {
+            // set this right away so the compose AndroidView "focus interop" is set up correctly.
+            isFocusable = mapViewProxy?.isFocusable ?: false
+            isFocusedByDefault = true // for testing. remove
+        }
+    }
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -196,6 +202,8 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
+                it.isFocusable = mapViewProxy?.isFocusable ?: false
+                it.isFocusedByDefault = true // for testing. remove.
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -468,6 +476,7 @@ private fun ViewpointHandler(
             mapView.viewpointChanged.collect {
                 val newViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
                 newViewpoint?.let {
+                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = it
                 }
 
@@ -498,6 +507,7 @@ private fun ViewpointHandler(
             // here in order to keep track of changes to currentViewpointPersistence at recomposition
             snapshotFlow { currentViewpointPersistence }
                 .collect {
+                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = mapView.getViewpointByPersistence(it)
                 }
         }

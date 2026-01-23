@@ -337,7 +337,13 @@ public fun SceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember { SceneView(context) }
+    val sceneView = remember {
+        SceneView(context).apply {
+            // set this right away so the compose AndroidView "focus interop" is set up correctly.
+            isFocusable = sceneViewProxy?.isFocusable ?: false
+            isFocusedByDefault = true // for testing. remove
+        }
+    }
 
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
@@ -358,6 +364,8 @@ public fun SceneView(
                 it.sunLighting = sunLighting
                 it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
                 it.isAttributionBarVisible = isAttributionBarVisible
+                it.isFocusable = sceneViewProxy?.isFocusable ?: false
+                it.isFocusedByDefault = true // for testing. remove.
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -637,6 +645,7 @@ private fun ViewpointHandler(
         launch {
             sceneView.viewpointChanged.collect {
                 val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
+                @Suppress("AssignedValueIsNeverRead")
                 persistedCamera = currentViewpointCamera
                 currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->

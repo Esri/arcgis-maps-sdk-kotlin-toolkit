@@ -50,18 +50,19 @@ public sealed class GeoViewProxy(className: String) {
      */
     private var geoView: GeoView? = null
 
-    /**
-     * Sets the [geoView] parameter on this operator. This should be called by the composable component
-     * when it enters the composition and set to null when it is disposed.
-     *
-     * @since 200.4.0
-     */
-    protected fun setGeoView(geoView: GeoView?) {
-        this.geoView = geoView
-    }
-
     protected val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
+
+    /**
+     * Represents the view-based [GeoView]'s isFocusable property
+     *
+     * @since 300.0.0
+     */
+    public var isFocusable: Boolean = false
+        set(value) {
+            geoView?.isFocusable = value
+            field = value
+        }
 
     /**
      * True if continuous panning across the international date line is enabled, false otherwise.
@@ -83,6 +84,20 @@ public sealed class GeoViewProxy(className: String) {
      */
     public val isWrapAroundEnabled: Boolean?
         get() = geoView?.isWrapAroundEnabled
+
+    /**
+     * Sets the [geoView] parameter on this operator. This should be called by the composable component
+     * when it enters the composition and set to null when it is disposed.
+     *
+     * @since 200.4.0
+     */
+    protected fun setGeoView(geoView: GeoView?) {
+        this.geoView = geoView.also {
+            geoView?.let {
+                it.isFocusable = isFocusable
+            }
+        }
+    }
 
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.
