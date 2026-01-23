@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
@@ -36,7 +35,6 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
-import com.arcgismaps.toolkit.featureforms.internal.screens.FieldFilter
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
 import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
@@ -249,15 +247,10 @@ internal class AddAssociationFromSourceViewModel(
         get() = _fields.value
 
     /**
-     * Backing list of attribute [FieldFilter] objects applied to the feature candidates query.
+     * Manages the state of attribute filters applied to the feature candidates.
      */
-    private val _attributeFieldFilters = mutableStateListOf<FieldFilter>()
-
-    /**
-     * A list of attribute [FieldFilter] objects applied to the feature candidates query.
-     */
-    val attributeFieldFilters: List<FieldFilter>
-        get() = _attributeFieldFilters
+    var attributeFilterStateManager = FilterStateManager(onApplyFilter = ::applyAttributeFilters)
+        private set
 
     private var _areAttributeFiltersApplied: MutableState<Boolean> = mutableStateOf(false)
 
@@ -312,8 +305,10 @@ internal class AddAssociationFromSourceViewModel(
                             error = error
                         )
                     }
-                    // Clear any previously set attribute filters
-                    _attributeFieldFilters.clear()
+                    // Create a new filter state manager for the new source/asset type
+                    attributeFilterStateManager = FilterStateManager(
+                        onApplyFilter = ::applyAttributeFilters
+                    )
                     // Reset whether filters are applied
                     _areAttributeFiltersApplied.value = false
                 }
@@ -350,21 +345,6 @@ internal class AddAssociationFromSourceViewModel(
         return _featureCandidatesUiState.value.candidates.filter { candidate ->
             candidate.title.contains(filterString, ignoreCase = true)
         }
-    }
-
-    /**
-     * Adds a new attribute [FieldFilter] to the list of [attributeFieldFilters] at the
-     * beginning of the list.
-     */
-    fun addAttributeFieldFilter(fieldFilter: FieldFilter) {
-        _attributeFieldFilters.add(0, fieldFilter)
-    }
-
-    /**
-     * Removes the specified attribute [FieldFilter] from the list of [attributeFieldFilters].
-     */
-    fun deleteAttributeFieldFilter(fieldFilter: FieldFilter) {
-        _attributeFieldFilters.remove(fieldFilter)
     }
 
     /**
@@ -636,22 +616,13 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 
-    /**
-     * Applies the current [attributeFieldFilters] to the feature candidates query, updating the
-     * [featureCandidatesUiState] with the filtered results.
-     */
-    suspend fun applyAttributeFilters(): Result<Unit> {
+    private suspend fun applyAttributeFilters(whereClause: String): Result<Unit> {
         val source = _selectedSource.value ?: return Result.failure(
             IllegalStateException("No source selected")
         )
         val assetType = _selectedAssetType.value ?: return Result.failure(
             IllegalStateException("No asset type selected")
         )
-        // Build the where clause from only valid attribute filters
-        val queries = attributeFieldFilters.mapNotNull { filter ->
-            filter.getQuery()
-        }
-        val whereClause = queries.joinToString(" AND ")
         val queryParams = QueryParameters().apply {
             this.whereClause = whereClause
         }

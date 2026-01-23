@@ -177,4 +177,6 @@
     <string name="field">Field</string>
     <string name="not_set">Not Set</string>
     <string name="value">Value</string>
+    <string name="filters_not_applied">Filters have not been applied</string>
+    <string name="discard_changes_confirmation">Are you sure you want to discard the changes?</string>
 </resources>

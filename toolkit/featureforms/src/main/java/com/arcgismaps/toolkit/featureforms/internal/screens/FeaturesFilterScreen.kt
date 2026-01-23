@@ -40,6 +40,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -59,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
@@ -68,16 +71,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Field
-import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
-import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FieldFilter
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Operator
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fieldName
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getKeyboardType
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getOperators
 import kotlinx.coroutines.launch
-import java.util.Locale.getDefault
 
 @Composable
 internal fun FeaturesFilterScreen(
@@ -88,10 +92,14 @@ internal fun FeaturesFilterScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     // get filters from the view model
-    val filters = viewModel.attributeFieldFilters
+    val filterStateManager = viewModel.attributeFilterStateManager
+    val filters = filterStateManager.filters
     val fields = viewModel.fields
     val lazyListState = rememberLazyListState()
     val context = LocalContext.current
+    var showDiscardDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = modifier,
@@ -102,7 +110,14 @@ internal fun FeaturesFilterScreen(
                 AddWorkflowTopBar(
                     title = stringResource(R.string.filter_features),
                     subTitle = "",
-                    onBackPressed = onBackPressed,
+                    onBackPressed = {
+                        if (filterStateManager.hasEdits()) {
+                            showDiscardDialog = true
+                        } else {
+                            filterStateManager.restoreSnapshot()
+                            onBackPressed()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -110,7 +125,7 @@ internal fun FeaturesFilterScreen(
                 TextButton(
                     onClick = {
                         scope.launch {
-                            viewModel.applyAttributeFilters()
+                            filterStateManager.applyFilters()
                                 .onSuccess {
                                     onBackPressed()
                                 }.onFailure {
@@ -120,7 +135,7 @@ internal fun FeaturesFilterScreen(
                                 }
                         }
                     },
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 ) {
                     Text(text = stringResource(R.string.apply))
                 }
@@ -129,7 +144,7 @@ internal fun FeaturesFilterScreen(
             FilledTonalButton(
                 onClick = {
                     Snapshot.withMutableSnapshot {
-                        viewModel.addAttributeFieldFilter(FieldFilter())
+                        filterStateManager.createNewFilter()
                         lazyListState.requestScrollToItem(0)
                     }
                 },
@@ -180,7 +195,7 @@ internal fun FeaturesFilterScreen(
             LazyColumn(state = lazyListState) {
                 itemsIndexed(
                     items = filters,
-                    key = { _, filter -> filter.hashCode() }
+                    key = { _, filter -> filter.id }
                 ) { idx, filter ->
                     FilterItem(
                         name = context.getString(
@@ -190,13 +205,31 @@ internal fun FeaturesFilterScreen(
                         filter = filter,
                         fields = fields,
                         onDelete = {
-                            viewModel.deleteAttributeFieldFilter(filter)
+                            filterStateManager.removeFilter(idx)
                         },
                         onDuplicate = {
                             Snapshot.withMutableSnapshot {
-                                viewModel.addAttributeFieldFilter(filter.copy())
+                                filterStateManager.duplicateFilter(filter)
                                 lazyListState.requestScrollToItem(0)
                             }
+                        },
+                        onFieldChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withField(it)
+                            )
+                        },
+                        onOperatorChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withOperator(it)
+                            )
+                        },
+                        onValueChange = {
+                            filterStateManager.updateFilter(
+                                index = idx,
+                                newFilter = filter.withValue(it)
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -211,6 +244,15 @@ internal fun FeaturesFilterScreen(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
+    if (showDiscardDialog) {
+        ConfirmationDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            onConfirmRequest = {
+                filterStateManager.restoreSnapshot()
+                onBackPressed()
+            }
+        )
+    }
 }
 
 @Composable
@@ -220,6 +262,9 @@ private fun FilterItem(
     fields: List<Field>,
     onDelete: () -> Unit,
     onDuplicate: () -> Unit,
+    onFieldChange: (Field) -> Unit,
+    onOperatorChange: (Operator) -> Unit,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var fieldOptionsExpanded by remember { mutableStateOf(false) }
@@ -305,7 +350,7 @@ private fun FilterItem(
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = filter.field?.name ?: stringResource(R.string.not_set),
+                        text = filter.field?.fieldName ?: stringResource(R.string.not_set),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (filter.field == null) {
                             Color.Unspecified
@@ -323,9 +368,9 @@ private fun FilterItem(
                         ) {
                             fields.forEach { field ->
                                 DropdownMenuItem(
-                                    text = { Text(field.name.uppercase(getDefault())) },
+                                    text = { Text(field.fieldName) },
                                     onClick = {
-                                        filter.setField(field)
+                                        onFieldChange(field)
                                         fieldOptionsExpanded = false
                                     },
                                     leadingIcon = {
@@ -380,7 +425,7 @@ private fun FilterItem(
                                 DropdownMenuItem(
                                     text = { Text(operator.name) },
                                     onClick = {
-                                        filter.setOperator(operator)
+                                        onOperatorChange(operator)
                                         operatorsExpanded = false
                                     }
                                 )
@@ -403,9 +448,7 @@ private fun FilterItem(
                         )
                         TextField(
                             value = filter.value,
-                            onValueChange = {
-                                filter.setValue(it)
-                            },
+                            onValueChange = onValueChange,
                             enabled = filter.field != null,
                             placeholder = {
                                 Text(text = stringResource(R.string.enter_a_value))
@@ -433,232 +476,34 @@ private fun FilterItem(
     }
 }
 
-/**
- * Class representing a filter on a [Field] with a [Operator] and value.
- */
-internal class FieldFilter() {
-
-    private var _field = mutableStateOf<Field?>(null)
-
-    /**
-     * The field to filter on.
-     */
-    val field: Field?
-        get() = _field.value
-
-    private var _operator = mutableStateOf<Operator?>(null)
-
-    /**
-     * The operator to use for filtering.
-     */
-    val operator: Operator?
-        get() = _operator.value
-
-    private var _value = mutableStateOf("")
-
-    /**
-     * The value to filter on.
-     */
-    val value: String
-        get() = _value.value
-
-    /**
-     * Sets the field for this filter. Resets the operator and value.
-     *
-     * @param value the field to set
-     */
-    fun setField(value: Field) {
-        _field.value = value
-        _operator.value = null // reset operator when field changes
-        _value.value = "" // reset value when field changes
-    }
-
-    /**
-     * Sets the operator for this filter.
-     *
-     * @param value the operator to set
-     */
-    fun setOperator(value: Operator) {
-        _operator.value = value
-    }
-
-    /**
-     * Sets the value for this filter.
-     *
-     * @param value the value to set
-     */
-    fun setValue(value: String) {
-        _value.value = value
-    }
-
-    /**
-     * Gets the list of valid operators for the current field type.
-     *
-     * @return the list of valid operators
-     */
-    fun getOperators(): List<Operator> {
-        val fieldType = field?.fieldType ?: return emptyList()
-        return when {
-            fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
-            fieldType == FieldType.Text -> {
-                if (field!!.nullable) {
-                    FilterOperators.TEXT_OPERATORS
-                } else {
-                    FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
-                }
-            }
-
-            else -> emptyList()
-        }
-    }
-
-    /**
-     * Gets the appropriate keyboard type for the current field type.
-     *
-     * @return the keyboard type
-     */
-    fun getKeyboardType(): KeyboardType {
-        val fieldType = field?.fieldType ?: return KeyboardType.Text
-
-        return when {
-            fieldType.isNumeric -> KeyboardType.Number
-            fieldType == FieldType.Oid -> KeyboardType.Number
-            else -> KeyboardType.Text
-        }
-    }
-
-    /**
-     * Generates the query string for this filter.
-     *
-     * @return the query string or null if the filter is not valid
-     */
-    fun getQuery(): String? {
-        if (isValid().not()) return null
-        val formattedValue = when (field!!.fieldType) {
-            is FieldType.Text -> "'${this.value}'"
-            else -> this.value
-        }
-        val field = this.field!!
-        return when (val operator = this.operator!!) {
-            is Operator.StartsWith -> {
-                "${field.name} ${operator.sign} '${value}%'"
-            }
-
-            is Operator.EndsWith -> {
-                "${field.name} ${operator.sign} '%${value}'"
-            }
-
-            Operator.Contains, Operator.DoesNotContain -> {
-                "${field.name} ${operator.sign} '%${value}%'"
-            }
-
-            is Operator.IsBlank, Operator.IsNotBlank, Operator.IsEmpty, Operator.IsNotEmpty -> {
-                "${field.name} ${operator.sign}"
-            }
-
-            else -> {
-                "${field.name} ${operator.sign} $formattedValue"
-            }
-        }
-    }
-
-    /**
-     * Checks if the filter is valid and can be used to generate a query.
-     *
-     * @return true if the filter is valid, false otherwise
-     */
-    fun isValid(): Boolean {
-        return field != null && operator != null && value.isNotEmpty()
-    }
-
-    /**
-     * Creates a copy of this filter.
-     *
-     * @return the copied filter
-     */
-    fun copy(): FieldFilter {
-        val newFilter = FieldFilter()
-        field?.let { newFilter.setField(it) }
-        operator?.let { newFilter.setOperator(it) }
-        newFilter.setValue(value)
-        return newFilter
-    }
-}
-
-/**
- * Represents an operator that can be used in a [FieldFilter].
- *
- * @param name the display name of the operator.
- * @param sign the sign of the operator used in queries.
- */
-internal sealed class Operator(
-    val name: String,
-    val sign: String
+@Composable
+private fun ConfirmationDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmRequest: () -> Unit
 ) {
-    object Equal : Operator("=", "=")
-    object NotEqual : Operator("!=", "<>")
-    object Is : Operator("is", "=")
-    object IsNot : Operator("is not", "<>")
-    object GreaterThan : Operator(">", ">")
-    object GreaterThanOrEqual : Operator(">=", ">=")
-    object LessThan : Operator("<", "<")
-    object LessThanOrEqual : Operator("<=", "<=")
-    object StartsWith : Operator("starts with", "LIKE")
-    object EndsWith : Operator("ends with", "LIKE")
-    object Contains : Operator("contains the text", "LIKE")
-    object DoesNotContain : Operator("does not contain the text", "not LIKE")
-    object IsBlank : Operator("is blank", "IS NULL")
-    object IsNotBlank : Operator("is not blank", "IS NOT NULL")
-    object IsEmpty : Operator("is empty", "= ''")
-    object IsNotEmpty : Operator("is not empty", "<> ''")
-
-    override fun toString(): String {
-        return sign
-    }
-
-    /**
-     * Checks if the operator is unary (does not require a value).
-     *
-     * @return true if the operator is unary, false otherwise
-     */
-    fun isUnary(): Boolean {
-        return this is IsBlank || this is IsNotBlank || this is IsEmpty || this is IsNotEmpty
-    }
-}
-
-private object FilterOperators {
-
-    /**
-     * The list of operators applicable to numeric fields.
-     */
-    val NUMERIC_OPERATORS = listOf(
-        Operator.Equal,
-        Operator.NotEqual,
-        Operator.GreaterThan,
-        Operator.GreaterThanOrEqual,
-        Operator.LessThan,
-        Operator.LessThanOrEqual
-    )
-
-    /**
-     * The list of operators applicable to text fields.
-     */
-    val TEXT_OPERATORS = listOf(
-        Operator.Is,
-        Operator.IsNot,
-        Operator.StartsWith,
-        Operator.EndsWith,
-        Operator.Contains,
-        Operator.DoesNotContain,
-        Operator.IsEmpty,
-        Operator.IsNotEmpty
-    )
-
-    /**
-     * The list of operators applicable to nullable fields.
-     */
-    val NULLABLE_OPERATORS = listOf(
-        Operator.IsBlank,
-        Operator.IsNotBlank
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onConfirmRequest) {
+                Text(text = stringResource(R.string.discard))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = "filter icon",
+            )
+        },
+        title = {
+            Text(text = stringResource(R.string.filters_not_applied))
+        },
+        text = {
+            Text(text = stringResource(R.string.discard_changes_confirmation))
+        }
     )
 }
