@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.KeyboardType
+import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
@@ -226,6 +227,7 @@ internal data class FieldFilter(
 internal fun FieldFilter.getOperators(): List<Operator> {
     val fieldType = field?.fieldType ?: return emptyList()
     return when {
+        fieldType.isNumeric && field.domain is CodedValueDomain -> FilterOperators.EQUALITY_OPERATORS
         fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
         fieldType == FieldType.Text -> {
             if (field.nullable) {
@@ -330,6 +332,15 @@ internal sealed class Operator(
 }
 
 private object FilterOperators {
+
+    /**
+     * The list of operators applicable to fields where we just need to check for equality.
+     * Ex. coded value domain fields.
+     */
+    val EQUALITY_OPERATORS = listOf(
+        Operator.Equal,
+        Operator.NotEqual,
+    )
 
     /**
      * The list of operators applicable to numeric fields.

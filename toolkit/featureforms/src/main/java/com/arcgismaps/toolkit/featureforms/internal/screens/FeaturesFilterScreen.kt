@@ -73,6 +73,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.CodedValue
+import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
@@ -446,29 +448,39 @@ private fun FilterItem(
                             text = stringResource(R.string.value),
                             style = MaterialTheme.typography.bodyLarge
                         )
-                        TextField(
-                            value = filter.value,
-                            onValueChange = onValueChange,
-                            enabled = filter.field != null,
-                            placeholder = {
-                                Text(text = stringResource(R.string.enter_a_value))
-                            },
-                            colors = TextFieldDefaults.colors(
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = keyboardType,
-                                imeAction = ImeAction.Done,
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
-                                }
+                        if (filter.field?.domain is CodedValueDomain) {
+                            val domain = filter.field.domain as CodedValueDomain
+                            CodedValueDropdownMenu(
+                                selectedValue = filter.value,
+                                onValueChange = onValueChange,
+                                defaultLabel = stringResource(R.string.enter_a_value),
+                                items = domain.codedValues
                             )
-                        )
+                        } else {
+                            TextField(
+                                value = filter.value,
+                                onValueChange = onValueChange,
+                                enabled = filter.field != null,
+                                placeholder = {
+                                    Text(text = stringResource(R.string.enter_a_value))
+                                },
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = keyboardType,
+                                    imeAction = ImeAction.Done,
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        focusManager.clearFocus()
+                                    }
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -476,6 +488,48 @@ private fun FilterItem(
     }
 }
 
+@Composable
+private fun CodedValueDropdownMenu(
+    selectedValue: String,
+    onValueChange: (String) -> Unit,
+    defaultLabel: String,
+    items: List<CodedValue>,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Text(
+            text = items.find { it.code.toString() == selectedValue }?.name
+                ?: defaultLabel,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(vertical = 14.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { codedValue ->
+                DropdownMenuItem(
+                    text = { Text(codedValue.name) },
+                    onClick = {
+                        onValueChange(codedValue.code.toString())
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        if (selectedValue == codedValue.code.toString()) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "selected"
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
 @Composable
 private fun ConfirmationDialog(
     onDismissRequest: () -> Unit,
