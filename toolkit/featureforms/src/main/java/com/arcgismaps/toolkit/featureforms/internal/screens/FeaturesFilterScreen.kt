@@ -281,7 +281,6 @@ private fun FilterItem(
     val focusManager = LocalFocusManager.current
     // The value field is only visible if the operator is not unary or if no operator is selected yet
     val isFieldVisible = filter.operator?.isUnary()?.not() ?: true
-    var selectedName by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(modifier = modifier) {
         Row(
@@ -452,14 +451,11 @@ private fun FilterItem(
                         if (filter.field?.domain is CodedValueDomain) {
                             val domain = filter.field.domain as CodedValueDomain
                             CodedValueDropdownMenu(
-                                selectedName = selectedName,
-                                onSelectedNameChange = { selectedName = it },
                                 selectedValue = filter.value,
                                 onValueChange = onValueChange,
                                 defaultLabel = stringResource(R.string.enter_a_value),
                                 items = domain.codedValues
                             )
-
                         } else {
                             TextField(
                                 value = filter.value,
@@ -494,8 +490,6 @@ private fun FilterItem(
 
 @Composable
 private fun CodedValueDropdownMenu(
-    selectedName: String?,
-    onSelectedNameChange: (String) -> Unit,
     selectedValue: String,
     onValueChange: (String) -> Unit,
     defaultLabel: String,
@@ -504,7 +498,8 @@ private fun CodedValueDropdownMenu(
     var expanded by remember { mutableStateOf(false) }
     Box {
         Text(
-            text = selectedName ?: defaultLabel,
+            text = items.find { it.code.toString() == selectedValue }?.name
+                ?: defaultLabel,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = true }
@@ -520,7 +515,6 @@ private fun CodedValueDropdownMenu(
                     text = { Text(codedValue.name) },
                     onClick = {
                         onValueChange(codedValue.code.toString())
-                        onSelectedNameChange(codedValue.name)
                         expanded = false
                     },
                     leadingIcon = {
