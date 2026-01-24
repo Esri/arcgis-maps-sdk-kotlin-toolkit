@@ -26,6 +26,7 @@ ksp = "2.3.4"
 media3Exoplayer = "1.9.0"
 minSdk = "28"
 mlkitBarcodeScanning = "17.3.0"
+mockingjay = "2.0.0"
 kotlinxCoroutinesTest = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
 mockkAndroid = "1.14.7"
@@ -85,7 +86,7 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-mockingjay = { module = "com.esri:mockingjay" }
+mockingjay = { module = "com.esri:mockingjay", version.ref = "mockingjay" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }

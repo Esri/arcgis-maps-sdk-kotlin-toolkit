@@ -31,6 +31,43 @@ val localProperties = java.util.Properties().apply {
     }
 }
 
+// The version of the ArcGIS Maps SDK for Kotlin dependency.
+// First look for the version number provided via command line (for CI builds), if not found,
+// take the one defined in gradle.properties.
+// CI builds pass -PversionNumber=${BUILDVER}
+val sdkVersionNumber: String =
+    providers.gradleProperty("versionNumber").orNull
+        ?: providers.gradleProperty("sdkVersionNumber").orNull
+        ?: throw IllegalStateException("sdkVersionNumber must be set either via command line or in gradle.properties")
+
+// The build number of the ArcGIS Maps SDK for Kotlin dependency.
+// First look for the version number provided via command line (for CI builds), if not found,
+// take the one defined in local.properties.
+// CI builds pass -PbuildNumber=${BUILDNUM}
+val sdkBuildNumber: String =
+    providers.gradleProperty("buildNumber").orNull
+        ?: localProperties.getProperty("sdkBuildNumber")
+        ?: ""
+
+// The Artifactory credentials for the ArcGIS Maps SDK for Kotlin repository.
+// First look for the credentials provided via command line (for CI builds), if not found,
+// take the one defined in local.properties.
+// CI builds pass -PartifactoryURL=${ARTIFACTORY_URL} -PartifactoryUsername=${ARTIFACTORY_USER} -PartifactoryPassword=${ARTIFACTORY_PASSWORD}
+val artifactoryUrl: String =
+    providers.gradleProperty("artifactoryUrl").orNull
+        ?: localProperties.getProperty("artifactoryUrl")
+        ?: ""
+
+val artifactoryUsername: String =
+    providers.gradleProperty("artifactoryUsername").orNull
+        ?: localProperties.getProperty("artifactoryUsername")
+        ?: ""
+
+val artifactoryPassword: String =
+    providers.gradleProperty("artifactoryPassword").orNull
+        ?: localProperties.getProperty("artifactoryPassword")
+        ?: ""
+
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -38,6 +75,20 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = java.net.URI(
+                "https://esri.jfrog.io/artifactory/arcgis"
+            )
+        }
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
+            }
+        }
     }
 
     versionCatalogs {
@@ -47,7 +98,7 @@ dependencyResolutionManagement {
     }
 }
 
-// Use local ArcGIS Maps SDK & MockingJay sources via a composite build.
+// Use local ArcGIS Maps SDK via a composite build.
 includeBuild("../kotlin/android-api") {
     dependencySubstitution {
         substitute(module("com.esri:arcgis-maps-kotlin")).using(project(":arcgis-maps-kotlin"))
