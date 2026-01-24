@@ -12,8 +12,10 @@ public abstract class com/arcgismaps/toolkit/geoviewcompose/GeoViewProxy {
 	public static synthetic fun identifyGraphicsOverlays-GOOf7xI$default (Lcom/arcgismaps/toolkit/geoviewcompose/GeoViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun identifyLayers-GOOf7xI (Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun identifyLayers-GOOf7xI$default (Lcom/arcgismaps/toolkit/geoviewcompose/GeoViewProxy;Lcom/arcgismaps/mapping/view/DoubleXY;FZLjava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun isFocusable ()Z
 	public final fun isWrapAroundEnabled ()Ljava/lang/Boolean;
 	public final fun setBookmark-gIAlu-s (Lcom/arcgismaps/mapping/Bookmark;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setFocusable (Z)V
 	protected final fun setGeoView (Lcom/arcgismaps/mapping/view/GeoView;)V
 	public final fun setViewpoint (Lcom/arcgismaps/mapping/Viewpoint;)V
 	public final fun setViewpointAnimated-BlKvXls (Lcom/arcgismaps/mapping/Viewpoint;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
