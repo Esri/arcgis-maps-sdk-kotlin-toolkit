@@ -53,11 +53,6 @@ includeBuild("../kotlin/android-api") {
         substitute(module("com.esri:arcgis-maps-kotlin")).using(project(":arcgis-maps-kotlin"))
     }
 }
-includeBuild("../mockingjay") {
-    dependencySubstitution {
-        substitute(module("com.esri:mockingjay")).using(project(":MockingJay-lib"))
-    }
-}
 
 // fixes https://devtopia.esri.com/runtime/kotlin/issues/3863#issuecomment-4715101
 // fixes https://issuetracker.google.com/issues/315023802
