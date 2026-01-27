@@ -54,17 +54,6 @@ public sealed class GeoViewProxy(className: String) {
         "$className must be part of the composition when this member is called."
 
     /**
-     * Represents the view-based [GeoView]'s isFocusable property
-     *
-     * @since 300.0.0
-     */
-    public var isFocusable: Boolean = false
-        set(value) {
-            geoView?.isFocusable = value
-            field = value
-        }
-
-    /**
      * True if continuous panning across the international date line is enabled, false otherwise.
      * By default, a `GeoView` attempts to wrap the `ArcGISMap` or `ArcGISScene` across the international date line for
      * a continuous panning user experience.
@@ -92,11 +81,7 @@ public sealed class GeoViewProxy(className: String) {
      * @since 200.4.0
      */
     protected fun setGeoView(geoView: GeoView?) {
-        this.geoView = geoView.also {
-            geoView?.let {
-                it.isFocusable = isFocusable
-            }
-        }
+        this.geoView = geoView
     }
 
     /**

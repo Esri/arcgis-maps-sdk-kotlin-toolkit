@@ -131,6 +131,7 @@ import kotlinx.coroutines.launch
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
  * is changed
+ * @param canFocus pass true if the LocalSceneView should receive focus
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -162,19 +163,22 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = false,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val localSceneView = remember {
-        LocalSceneView(context).apply {
-            // set this right away so the compose AndroidView "focus interop" is set up correctly
-            isFocusable = localSceneViewProxy?.isFocusable ?: false
-            isFocusedByDefault = true // for testing. remove.
-        }
+        LocalSceneView(context)
     }
 
+    localSceneView.isFocusable = canFocus
+    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
+    localSceneView.isFocusedByDefault = canFocus
+
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
@@ -185,8 +189,8 @@ public fun LocalSceneView(
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
-                it.isFocusable = localSceneViewProxy?.isFocusable ?: false
-                it.isFocusedByDefault = true // for testing. remove.
+                it.isFocusable = canFocus
+                it.isFocusedByDefault = canFocus // TODO: remove when #7178 is complete
             }
         )
 
