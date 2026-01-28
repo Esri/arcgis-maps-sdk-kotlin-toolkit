@@ -25,6 +25,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -51,7 +54,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
@@ -390,6 +395,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
+            val focusRequester = remember { FocusRequester() }
+            LaunchedEffect(leaderScreenCoordinate) {
+                focusRequester.requestFocus()
+            }
+
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = leaderScreenCoordinate,
@@ -426,7 +436,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .semantics { contentDescription = "CalloutContainerLayout" },
+                            .focusRequester(focusRequester)
+                            .focusable()
+                            .semantics(mergeDescendants = true) {
+                                liveRegion = LiveRegionMode.Polite
+                            },
                     ) {
                         content.invoke(this)
                     }
