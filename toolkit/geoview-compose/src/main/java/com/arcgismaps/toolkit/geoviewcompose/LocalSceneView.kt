@@ -172,6 +172,7 @@ public fun LocalSceneView(
         LocalSceneView(context)
     }
 
+    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
     localSceneView.isFocusable = canFocus
     // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
     localSceneView.isFocusedByDefault = canFocus

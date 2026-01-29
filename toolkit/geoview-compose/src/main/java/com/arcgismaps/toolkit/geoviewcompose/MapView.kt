@@ -217,7 +217,7 @@ public fun MapView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus =false,
+        canFocus = false,
         content = content
     )
 }
