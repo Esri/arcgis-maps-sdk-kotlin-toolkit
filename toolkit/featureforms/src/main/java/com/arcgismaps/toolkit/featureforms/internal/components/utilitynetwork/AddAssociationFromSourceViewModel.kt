@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.text.get
 
 /**
  * A [ViewModel] that manages the state for adding utility associations from a selected feature
@@ -289,9 +292,31 @@ internal class AddAssociationFromSourceViewModel(
                         assetType = assetType
                     ).onSuccess { result ->
                         // Get the available fields from the table
-                        result.candidates.firstOrNull()?.feature?.featureTable?.fields?.let { fields ->
-                            _fields.value = fields.getSupportedFields()
+                        val featureTable = result.candidates.firstOrNull()?.feature?.featureTable
+                        val tempFields = mutableListOf<Field>()
+                        featureTable?.fields?.let { fields ->
+//                            _fields.value = fields.getSupportedFields()
+                            tempFields.addAll(fields.getSupportedFields())
                         }
+                        if (tempFields.isNotEmpty()) {
+                            var subtypes = (featureTable as ArcGISFeatureTable).featureSubtypes
+                            for (subtype in subtypes) {
+                                subtype.fieldOverrides.forEach { overrideField ->
+                                    val index = tempFields.indexOfFirst {
+                                        it.name.equals(overrideField.name, ignoreCase = true)
+                                    }
+                                    if (index != -1 && overrideField.domain != null) {
+                                        Log.d(
+                                            "AddAssocViewModel",
+                                            "Updating field: ${tempFields[index].name} with override: ${overrideField.name}"
+                                        )
+                                        tempFields[index] = overrideField
+                                    }
+                                }
+                            }
+                        }
+                        _fields.value = tempFields
+
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
