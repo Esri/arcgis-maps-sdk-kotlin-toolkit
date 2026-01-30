@@ -394,8 +394,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
-            val focusRequester = remember { FocusRequester() }
-            LaunchedEffect(leaderScreenCoordinate) {
+            val focusRequester = remember(location) { FocusRequester() }
+            LaunchedEffect(location) {
                 focusRequester.requestFocus()
             }
 
