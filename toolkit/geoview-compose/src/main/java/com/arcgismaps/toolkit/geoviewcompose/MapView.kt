@@ -269,14 +269,14 @@ public fun MapView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
- * @param canFocus pass true if the MapView should receive focus
+ * @param canFocus pass true if the MapView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the MapView composable has no effect.
  * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-web-map/">Display a web map tutorial</a>
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/add-a-point-line-and-polygon/">Add a point, line, and polygon tutorial</a>
- * @since 200.7.0
+ * @since 300.0.0
  */
 @Composable
 public fun MapView(
@@ -630,7 +630,6 @@ private fun ViewpointHandler(
             mapView.viewpointChanged.collect {
                 val newViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
                 newViewpoint?.let {
-                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = it
                 }
 
@@ -661,7 +660,6 @@ private fun ViewpointHandler(
             // here in order to keep track of changes to currentViewpointPersistence at recomposition
             snapshotFlow { currentViewpointPersistence }
                 .collect {
-                    @Suppress("AssignedValueIsNeverRead")
                     persistedViewpoint = mapView.getViewpointByPersistence(it)
                 }
         }

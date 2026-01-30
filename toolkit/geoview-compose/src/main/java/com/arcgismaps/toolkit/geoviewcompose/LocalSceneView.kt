@@ -131,7 +131,7 @@ import kotlinx.coroutines.launch
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
  * is changed
- * @param canFocus pass true if the LocalSceneView should receive focus
+ * @param canFocus pass true if the LocalSceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the LocalSceneView composable has no effect.
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -417,7 +417,6 @@ private fun ViewpointHandler(
             localSceneView.viewpointChanged.collect {
                 val currentViewpointCenterAndScale =
                     localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                @Suppress("AssignedValueIsNeverRead")
                 persistedViewpoint = currentViewpointCenterAndScale
                 currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->

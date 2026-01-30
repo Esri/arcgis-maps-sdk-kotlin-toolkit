@@ -124,7 +124,7 @@ import java.time.Instant
  * @since 200.4.0
  */
 @Deprecated(
-    message = "Use the SceneView function with `grid` instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use the SceneView function with `grid` and `canFocus` instead. This deprecated function remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -287,7 +287,7 @@ public fun SceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
- * @param canFocus pass true if the SceneView should receive focus
+ * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
  * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
@@ -355,7 +355,9 @@ public fun SceneView(
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
@@ -652,7 +654,6 @@ private fun ViewpointHandler(
         launch {
             sceneView.viewpointChanged.collect {
                 val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
-                @Suppress("AssignedValueIsNeverRead")
                 persistedCamera = currentViewpointCamera
                 currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
