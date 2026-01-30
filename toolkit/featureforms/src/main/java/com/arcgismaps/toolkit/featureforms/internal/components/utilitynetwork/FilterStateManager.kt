@@ -266,6 +266,8 @@ internal fun FieldFilter.getQuery(): String? {
     if (isValid().not()) return null
     val formattedValue = when (field!!.fieldType) {
         is FieldType.Text -> "'${this.value}'"
+        is FieldType.Date -> "TIMESTAMP '${this.value}'"
+        is FieldType.DateOnly -> "DATE '${this.value}'"
         else -> this.value
     }
     return when (val operator = this.operator!!) {

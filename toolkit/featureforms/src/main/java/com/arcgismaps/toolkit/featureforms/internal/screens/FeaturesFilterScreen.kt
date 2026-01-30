@@ -553,7 +553,8 @@ private fun FilterItem(
 //                                            val valueString = it?.let { convertMillisToDate(it) } ?: ""
 ////                                            onValueChange(valueString)
                                         val valueString = pickerState.selectedDateTimeMillis?.let {
-                                            Instant.ofEpochMilli(it)
+//                                            Instant.ofEpochMilli(it)
+                                            convertMillisToDate(it)
                                         }
                                         onValueChange(valueString?.toString() ?: "")
 
