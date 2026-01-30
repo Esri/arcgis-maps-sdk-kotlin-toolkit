@@ -127,6 +127,10 @@ import kotlinx.coroutines.launch
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/add-a-point-line-and-polygon/">Add a point, line, and polygon tutorial</a>
  * @since 200.7.0
  */
+@Deprecated(
+    message = "Use the MapView function with `canFocus` instead. This deprecated function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 public fun MapView(
     arcGISMap: ArcGISMap,
@@ -171,14 +175,170 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
+    //Just call through the version with canFocus
+    MapView(
+        arcGISMap = arcGISMap,
+        modifier = modifier,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onVisibleAreaChanged = onVisibleAreaChanged,
+        viewpointPersistence = viewpointPersistence,
+        graphicsOverlays = graphicsOverlays,
+        imageOverlays = imageOverlays,
+        locationDisplay = locationDisplay,
+        geometryEditor = geometryEditor,
+        mapViewProxy = mapViewProxy,
+        mapViewInteractionOptions = mapViewInteractionOptions,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        insets = insets,
+        grid = grid,
+        backgroundGrid = backgroundGrid,
+        wrapAroundMode = wrapAroundMode,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        onNavigationChanged = onNavigationChanged,
+        onMapRotationChanged = onMapRotationChanged,
+        onMapScaleChanged = onMapScaleChanged,
+        onUnitsPerDipChanged = onUnitsPerDipChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = false,
+        content = content
+    )
+}
+
+/**
+ * A compose equivalent of the view-based [MapView].
+ *
+ * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
+ * @param modifier Modifier to be applied to the composable MapView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
+ * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
+ * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
+ * across configuration changes.
+ * @param graphicsOverlays graphics overlays used by this composable MapView
+ * @param imageOverlays image overlays for displaying images in the composable MapView
+ * @param locationDisplay the [LocationDisplay] used by the composable MapView
+ * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
+ * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
+ * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param insets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
+ * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display
+ * @param grid represents the display of a coordinate system [Grid] on the composable MapView
+ * @param backgroundGrid the default color and context grid behind the map surface
+ * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
+ * @param timeExtent the [TimeExtent] used by the composable MapView
+ * @param onTimeExtentChanged lambda invoked when the composable MapView's [TimeExtent] is changed
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
+ * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
+ * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
+ * @param onUnitsPerDipChanged lambda invoked when the Units per DIP of this composable MapView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable MapView's layer view state is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
+ * @param onDown lambda invoked when the user first presses on the composable MapView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
+ * @param onDoubleTap lambda invoked the user double taps on the composable MapView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param canFocus pass true if the MapView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the MapView composable has no effect.
+ * @param content the content of the composable MapView
+ * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-web-map/">Display a web map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/add-a-point-line-and-polygon/">Add a point, line, and polygon tutorial</a>
+ * @since 300.0.0
+ */
+@Composable
+public fun MapView(
+    arcGISMap: ArcGISMap,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
+    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    geometryEditor: GeometryEditor? = null,
+    mapViewProxy: MapViewProxy? = null,
+    mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    insets: PaddingValues = MapViewDefaults.DefaultInsets,
+    grid: Grid? = null,
+    backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
+    onUnitsPerDipChanged: ((Double) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = false,
+    content: (@Composable MapViewScope.() -> Unit)? = null
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    val mapView = remember {
+        MapView(context)
+    }
+    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
+    mapView.isFocusable = canFocus
+    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
+    mapView.isFocusedByDefault = true
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
@@ -196,6 +356,8 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
+                it.isFocusable = canFocus
+                it.isFocusedByDefault = true // TODO: remove when #7178 is complete
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
