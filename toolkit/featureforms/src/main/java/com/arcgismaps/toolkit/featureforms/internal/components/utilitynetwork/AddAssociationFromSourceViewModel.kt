@@ -291,7 +291,7 @@ internal class AddAssociationFromSourceViewModel(
                         // Get the first feature from the results to extract the fields and the subtype
                         val firstFeature = result.candidates.firstOrNull()?.feature
                         // Get the available fields from the table
-                        _fields.value = firstFeature?.featureTable?.fields?.getSupportedFields(firstFeature) ?: emptyList()
+                        _fields.value = firstFeature?.getSupportedFields() ?: emptyList()
 
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
@@ -724,13 +724,14 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 }
 
 /**
- * Filters the list of [Field] objects to include only those that are supported for attribute
- * filtering.
+ * Gets the list of [Field] objects associated with the feature and filters it to include only those
+ * that are supported for attribute filtering.
  * Supported fields are those of type Text, Oid, or Numeric. Additionally, if the feature has a
  * feature subtype with field overrides, those overrides are applied to the corresponding fields.
  */
-private fun List<Field>.getSupportedFields(feature: ArcGISFeature): List<Field> {
-    val fieldMap = filterNot {
+private fun ArcGISFeature.getSupportedFields(): List<Field> {
+    val fields = this.featureTable?.fields ?: return emptyList()
+    val fieldMap = fields.filterNot {
         // Exclude ASSETGROUP and ASSETTYPE fields from filtering as the features are already
         // filtered by the selected asset type
         it.name.equals("ASSETGROUP", ignoreCase = true) || it.name.equals("ASSETTYPE", ignoreCase = true)
@@ -743,7 +744,7 @@ private fun List<Field>.getSupportedFields(feature: ArcGISFeature): List<Field> 
         .toMutableMap()
 
     // Apply any subtype overrides to the fields
-    feature.getFeatureSubtype()?.fieldOverrides?.forEach { overrideField ->
+    this.getFeatureSubtype()?.fieldOverrides?.forEach { overrideField ->
         val key = overrideField.name.lowercase()
         if (fieldMap.containsKey(key) && overrideField.domain != null) {
             fieldMap[key] = overrideField
