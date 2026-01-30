@@ -27,8 +27,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.CodedValueDomain
+import com.arcgismaps.data.FeatureSubtype
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
@@ -50,7 +50,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.text.get
 
 /**
  * A [ViewModel] that manages the state for adding utility associations from a selected feature
@@ -291,31 +290,16 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
+                        // Get the first feature from the results to extract the fields and the subtype
+                        val firstFeature = result.candidates.firstOrNull()?.feature
                         // Get the available fields from the table
-                        val featureTable = result.candidates.firstOrNull()?.feature?.featureTable
-                        val tempFields = mutableListOf<Field>()
-                        featureTable?.fields?.let { fields ->
-//                            _fields.value = fields.getSupportedFields()
-                            tempFields.addAll(fields.getSupportedFields())
-                        }
-                        if (tempFields.isNotEmpty()) {
-                            var subtypes = (featureTable as ArcGISFeatureTable).featureSubtypes
-                            for (subtype in subtypes) {
-                                subtype.fieldOverrides.forEach { overrideField ->
-                                    val index = tempFields.indexOfFirst {
-                                        it.name.equals(overrideField.name, ignoreCase = true)
-                                    }
-                                    if (index != -1 && overrideField.domain != null) {
-                                        Log.d(
-                                            "AddAssocViewModel",
-                                            "Updating field: ${tempFields[index].name} with override: ${overrideField.name}"
-                                        )
-                                        tempFields[index] = overrideField
-                                    }
-                                }
-                            }
-                        }
-                        _fields.value = tempFields
+                        val supportedFields = firstFeature?.featureTable?.fields?.getSupportedFields() ?: emptyList()
+                        // Apply any subtype overrides to the fields
+                        val subtype = firstFeature?.getFeatureSubtype()
+                        _fields.value = if (subtype != null)
+                            filterFieldsAndApplySubtypeOverrides(supportedFields, subtype)
+                        else
+                            supportedFields
 
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
@@ -670,6 +654,21 @@ internal class AddAssociationFromSourceViewModel(
                 result.exceptionOrNull() ?: Exception("Unknown error")
             )
         }
+    }
+
+    private fun filterFieldsAndApplySubtypeOverrides(fields: List<Field>, subtype: FeatureSubtype): List<Field> {
+        val filteredFields = fields.filterNot {
+            it.name.equals("ASSETGROUP", ignoreCase = true) ||
+                    it.name.equals("ASSETTYPE", ignoreCase = true)
+        }.toMutableList()
+
+        subtype.fieldOverrides.forEach { overrideField ->
+            val index = filteredFields.indexOfFirst { it.name.equals(overrideField.name, ignoreCase = true) }
+            if (index != -1 && overrideField.domain != null) {
+                filteredFields[index] = overrideField
+            }
+        }
+        return filteredFields
     }
 
     companion object {
