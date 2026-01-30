@@ -655,6 +655,8 @@ internal class AddAssociationFromSourceViewModel(
     }
 
     private fun filterFieldsAndApplySubtypeOverrides(fields: List<Field>, subtype: FeatureSubtype): List<Field> {
+        // Exclude ASSETGROUP and ASSETTYPE fields from filtering as the features are already
+        // filtered by the selected asset type
         val filteredFields = fields.filterNot {
             it.name.equals("ASSETGROUP", ignoreCase = true) ||
                     it.name.equals("ASSETTYPE", ignoreCase = true)
