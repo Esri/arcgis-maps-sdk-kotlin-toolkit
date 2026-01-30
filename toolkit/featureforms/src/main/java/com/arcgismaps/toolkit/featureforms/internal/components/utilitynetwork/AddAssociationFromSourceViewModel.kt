@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.data.FeatureSubtype
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
@@ -291,13 +291,7 @@ internal class AddAssociationFromSourceViewModel(
                         // Get the first feature from the results to extract the fields and the subtype
                         val firstFeature = result.candidates.firstOrNull()?.feature
                         // Get the available fields from the table
-                        val supportedFields = firstFeature?.featureTable?.fields?.getSupportedFields() ?: emptyList()
-                        // Apply any subtype overrides to the fields
-                        val subtype = firstFeature?.getFeatureSubtype()
-                        _fields.value = if (subtype != null)
-                            filterFieldsAndApplySubtypeOverrides(supportedFields, subtype)
-                        else
-                            supportedFields
+                        _fields.value = firstFeature?.featureTable?.fields?.getSupportedFields(firstFeature) ?: emptyList()
 
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
@@ -654,23 +648,6 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 
-    private fun filterFieldsAndApplySubtypeOverrides(fields: List<Field>, subtype: FeatureSubtype): List<Field> {
-        // Exclude ASSETGROUP and ASSETTYPE fields from filtering as the features are already
-        // filtered by the selected asset type
-        val filteredFields = fields.filterNot {
-            it.name.equals("ASSETGROUP", ignoreCase = true) ||
-                    it.name.equals("ASSETTYPE", ignoreCase = true)
-        }.toMutableList()
-
-        subtype.fieldOverrides.forEach { overrideField ->
-            val index = filteredFields.indexOfFirst { it.name.equals(overrideField.name, ignoreCase = true) }
-            if (index != -1 && overrideField.domain != null) {
-                filteredFields[index] = overrideField
-            }
-        }
-        return filteredFields
-    }
-
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -749,11 +726,28 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 /**
  * Filters the list of [Field] objects to include only those that are supported for attribute
  * filtering.
+ * Supported fields are those of type Text, Oid, or Numeric. Additionally, if the feature has a
+ * feature subtype with field overrides, those overrides are applied to the corresponding fields.
  */
-private fun List<Field>.getSupportedFields(): List<Field> {
-    return filter { field ->
-        field.fieldType == FieldType.Text ||
-            field.fieldType == FieldType.Oid ||
-            field.fieldType.isNumeric
+private fun List<Field>.getSupportedFields(feature: ArcGISFeature): List<Field> {
+    val fieldMap = filterNot {
+        // Exclude ASSETGROUP and ASSETTYPE fields from filtering as the features are already
+        // filtered by the selected asset type
+        it.name.equals("ASSETGROUP", ignoreCase = true) || it.name.equals("ASSETTYPE", ignoreCase = true)
+        }
+        .filter {
+            it.fieldType == FieldType.Text || it.fieldType == FieldType.Oid || it.fieldType.isNumeric
+        }
+        .associateBy { it.name.lowercase() }
+        // Convert list to map for efficient lookup and replacement
+        .toMutableMap()
+
+    // Apply any subtype overrides to the fields
+    feature.getFeatureSubtype()?.fieldOverrides?.forEach { overrideField ->
+        val key = overrideField.name.lowercase()
+        if (fieldMap.containsKey(key) && overrideField.domain != null) {
+            fieldMap[key] = overrideField
+        }
     }
+    return fieldMap.values.toList()
 }
