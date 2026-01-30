@@ -124,7 +124,7 @@ import java.time.Instant
  * @since 200.4.0
  */
 @Deprecated(
-    message = "Use the SceneView function with `grid` instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use the SceneView function with `grid` and `canFocus` instead. This deprecated function remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -208,6 +208,7 @@ public fun SceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = false,
         content = content
     )
 }
@@ -286,6 +287,7 @@ public fun SceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
  * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
@@ -333,17 +335,29 @@ public fun SceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = false,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember { SceneView(context) }
+    val sceneView = remember {
+        SceneView(context)
+    }
+
+    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
+    sceneView.isFocusable = canFocus
+    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
+    sceneView.isFocusedByDefault = canFocus
 
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
@@ -376,6 +390,8 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
+                it.isFocusable = canFocus
+                it.isFocusedByDefault = canFocus // TODO: remove when #7178 is complete
                 // Set the camera controller last, to ensure other dependent SceneView properties are already set.
                 // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
                 // set on the SceneView at this point.
@@ -443,6 +459,7 @@ public fun SceneView(
         onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
+
 
 /**
  * Sets up the callbacks for all the view-based [sceneView] events.
