@@ -731,13 +731,13 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
  */
 private fun ArcGISFeature.getSupportedFields(): List<Field> {
     val fields = this.featureTable?.fields ?: return emptyList()
-    val fieldMap = fields.filterNot {
-        // Exclude ASSETGROUP and ASSETTYPE fields from filtering as the features are already
-        // filtered by the selected asset type
-        it.name.equals("ASSETGROUP", ignoreCase = true) || it.name.equals("ASSETTYPE", ignoreCase = true)
-        }
+    val fieldMap = fields
         .filter {
-            it.fieldType == FieldType.Text || it.fieldType == FieldType.Oid || it.fieldType.isNumeric
+            (it.fieldType == FieldType.Text ||
+                    it.fieldType == FieldType.Oid ||
+                    it.fieldType.isNumeric) &&
+                    !it.name.equals("ASSETGROUP", ignoreCase = true) &&
+                    !it.name.equals("ASSETTYPE", ignoreCase = true)
         }
         .associateBy { it.name.lowercase() }
         // Convert list to map for efficient lookup and replacement
