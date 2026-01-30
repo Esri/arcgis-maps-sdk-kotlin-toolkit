@@ -729,7 +729,9 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 private fun List<Field>.getSupportedFields(): List<Field> {
     return filter { field ->
         field.fieldType == FieldType.Text ||
-            field.fieldType == FieldType.Oid ||
-            field.fieldType.isNumeric
+                field.fieldType == FieldType.Oid ||
+                field.fieldType.isNumeric ||
+            field.fieldType == FieldType.Date
+//            field.fieldType == FieldType.DateOnly
     }
 }
