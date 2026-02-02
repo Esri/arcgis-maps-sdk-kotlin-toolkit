@@ -26,7 +26,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
@@ -731,7 +730,7 @@ private fun List<Field>.getSupportedFields(): List<Field> {
         field.fieldType == FieldType.Text ||
                 field.fieldType == FieldType.Oid ||
                 field.fieldType.isNumeric ||
-            field.fieldType == FieldType.Date
-//            field.fieldType == FieldType.DateOnly
+                field.fieldType == FieldType.Date ||
+                field.fieldType == FieldType.DateOnly
     }
 }
