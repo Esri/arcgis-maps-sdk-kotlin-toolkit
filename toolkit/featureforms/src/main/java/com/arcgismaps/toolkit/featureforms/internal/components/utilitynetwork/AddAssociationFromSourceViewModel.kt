@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.data.CodedValueDomain
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
@@ -288,10 +288,11 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
+                        // Get the first feature from the results to extract the fields and the subtype
+                        val firstFeature = result.candidates.firstOrNull()?.feature
                         // Get the available fields from the table
-                        result.candidates.firstOrNull()?.feature?.featureTable?.fields?.let { fields ->
-                            _fields.value = fields.getSupportedFields()
-                        }
+                        _fields.value = firstFeature?.getSupportedFields() ?: emptyList()
+
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
@@ -723,13 +724,31 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 }
 
 /**
- * Filters the list of [Field] objects to include only those that are supported for attribute
- * filtering.
+ * Gets the list of [Field] objects associated with the feature and filters it to include only those
+ * that are supported for attribute filtering.
+ * Supported fields are those of type Text, Oid, or Numeric. Additionally, if the feature has a
+ * feature subtype with field overrides, those overrides are applied to the corresponding fields.
  */
-private fun List<Field>.getSupportedFields(): List<Field> {
-    return filter { field ->
-        field.fieldType == FieldType.Text ||
-            field.fieldType == FieldType.Oid ||
-            field.fieldType.isNumeric
+private fun ArcGISFeature.getSupportedFields(): List<Field> {
+    val fields = this.featureTable?.fields ?: return emptyList()
+    val fieldMap = fields
+        .filter {
+            (it.fieldType == FieldType.Text ||
+                    it.fieldType == FieldType.Oid ||
+                    it.fieldType.isNumeric) &&
+                    !it.name.equals("ASSETGROUP", ignoreCase = true) &&
+                    !it.name.equals("ASSETTYPE", ignoreCase = true)
+        }
+        .associateBy { it.name.lowercase() }
+        // Convert list to map for efficient lookup and replacement
+        .toMutableMap()
+
+    // Apply any subtype overrides to the fields
+    this.getFeatureSubtype()?.fieldOverrides?.forEach { overrideField ->
+        val key = overrideField.name.lowercase()
+        if (fieldMap.containsKey(key) && overrideField.domain != null) {
+            fieldMap[key] = overrideField
+        }
     }
+    return fieldMap.values.toList()
 }
