@@ -517,8 +517,13 @@ private fun DatePickerModalInput(
         return
     }
     var showDatePicker by remember { mutableStateOf(false) }
+    val pickerStyle = if (filter.field.fieldType == FieldType.Date) {
+        DateTimePickerStyle.DateTime
+    } else {
+        DateTimePickerStyle.Date
+    }
     val pickerState = rememberDateTimePickerState(
-        DateTimePickerStyle.Date,
+        pickerStyle,
         label = filter.field.alias,
         initialValue = filter.value.toInstant(filter.field.fieldType == FieldType.Date),
         pickerInput = DateTimePickerInput.Date,
