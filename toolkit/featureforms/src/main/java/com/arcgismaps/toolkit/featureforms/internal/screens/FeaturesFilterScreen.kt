@@ -473,7 +473,11 @@ private fun FilterItem(
                                 items = domain.codedValues
                             )
                         } else if (filter.field?.fieldType == FieldType.Date || filter.field?.fieldType == FieldType.DateOnly) {
-                            DatePickerModalInput(filter, focusManager, onValueChange = onValueChange)
+                            DatePickerModalInput(
+                                filter,
+                                filter.field,
+                                onValueChange = onValueChange
+                            )
                         }
                         else {
                             TextField(
@@ -510,22 +514,20 @@ private fun FilterItem(
 @Composable
 private fun DatePickerModalInput(
     filter: FieldFilter,
-    focusManager: FocusManager,
+    field: Field,
     onValueChange: (String) -> Unit,
 ) {
-    if (filter.field == null) {
-        return
-    }
+    val focusManager = LocalFocusManager.current
     var showDatePicker by remember { mutableStateOf(false) }
-    val pickerStyle = if (filter.field.fieldType == FieldType.Date) {
+    val pickerStyle = if (field.fieldType == FieldType.Date) {
         DateTimePickerStyle.DateTime
     } else {
         DateTimePickerStyle.Date
     }
     val pickerState = rememberDateTimePickerState(
         pickerStyle,
-        label = filter.field.alias,
-        initialValue = filter.value.toInstant(filter.field.fieldType == FieldType.Date),
+        label = field.alias,
+        initialValue = filter.value.toInstant(field.fieldType == FieldType.Date),
         pickerInput = DateTimePickerInput.Date,
         initialError = ValidationErrorState.NoError
     )
@@ -573,7 +575,7 @@ private fun DatePickerModalInput(
             },
             onConfirmed = {
                 val valueString = pickerState.selectedDateTimeMillis?.let {
-                    val isDateField = filter.field.fieldType == FieldType.Date
+                    val isDateField = field.fieldType == FieldType.Date
                     Instant.ofEpochMilli(it).formattedDateTime(
                         includeTime = isDateField
                     )

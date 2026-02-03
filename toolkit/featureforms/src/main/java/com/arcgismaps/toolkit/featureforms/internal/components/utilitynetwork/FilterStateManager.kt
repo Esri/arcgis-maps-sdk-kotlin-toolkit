@@ -236,7 +236,7 @@ internal fun FieldFilter.getOperators(): List<Operator> {
                 FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
             }
         }
-        fieldType == FieldType.Date -> FilterOperators.EQUALITY_OPERATORS
+        fieldType == FieldType.Date || fieldType == FieldType.DateOnly -> FilterOperators.EQUALITY_OPERATORS
 
         else -> emptyList()
     }

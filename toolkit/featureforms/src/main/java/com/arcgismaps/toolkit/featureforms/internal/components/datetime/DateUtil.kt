@@ -98,8 +98,12 @@ internal fun String.toInstant(includeTime: Boolean): Instant? {
     } else {
         DateTimeFormatter.ofPattern("MMM dd, yyyy")
     }
-    val localDate = LocalDate.parse(this, formatter)
-    return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+    return try {
+        val localDate = LocalDate.parse(this, formatter)
+        localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+    } catch (e: Exception) {
+        null
+    }
 }
 
 /**
