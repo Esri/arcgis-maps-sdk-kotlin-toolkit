@@ -131,7 +131,7 @@ import kotlinx.coroutines.launch
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
  * is changed
- * @param onCriticalErrorChanged lambda envoked when the critical error state of the composable
+ * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
  * LocalSceneView changes
  * @param content the content of the composable LocalSceneView
  *
