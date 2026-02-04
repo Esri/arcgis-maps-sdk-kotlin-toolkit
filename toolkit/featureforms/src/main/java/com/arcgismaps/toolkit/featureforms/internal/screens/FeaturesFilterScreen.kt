@@ -473,7 +473,7 @@ private fun FilterItem(
                             )
                         } else if (filter.field?.fieldType == FieldType.Date || filter.field?.fieldType == FieldType.DateOnly) {
                             DatePickerModalInput(
-                                filter,
+                                filter.value,
                                 filter.field,
                                 onValueChange = onValueChange
                             )
@@ -512,7 +512,7 @@ private fun FilterItem(
 
 @Composable
 private fun DatePickerModalInput(
-    filter: FieldFilter,
+    value: String,
     field: Field,
     onValueChange: (String) -> Unit,
 ) {
@@ -526,13 +526,13 @@ private fun DatePickerModalInput(
     val pickerState = rememberDateTimePickerState(
         pickerStyle,
         label = field.alias,
-        initialValue = filter.value.toInstant(field.fieldType == FieldType.Date),
+        initialValue = value.toInstant(field.fieldType == FieldType.Date),
         pickerInput = DateTimePickerInput.Date,
         initialError = ValidationErrorState.NoError
     )
 
     TextField(
-        value = filter.value,
+        value = value,
         onValueChange = onValueChange,
         label = { Text(stringResource(R.string.enter_a_value)) },
         placeholder = { Text(stringResource(R.string.not_set)) },
@@ -546,7 +546,7 @@ private fun DatePickerModalInput(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .pointerInput(filter.value) {
+            .pointerInput(value) {
                 awaitEachGesture {
                     // Modifier.clickable doesn't work for text fields, so we use Modifier.pointerInput
                     // in the Initial pass to observe events before the text field consumes them
@@ -558,7 +558,8 @@ private fun DatePickerModalInput(
                         showDatePicker = true
                     }
                 }
-            }
+            },
+        readOnly = true
     )
 
     if (showDatePicker) {
