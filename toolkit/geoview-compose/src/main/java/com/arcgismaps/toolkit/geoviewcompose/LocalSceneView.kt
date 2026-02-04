@@ -162,6 +162,7 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -225,7 +226,8 @@ public fun LocalSceneView(
         onPan,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        onCriticalErrorChanged
     )
 
     ViewpointHandler(
@@ -260,6 +262,7 @@ private fun LocalSceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -277,6 +280,9 @@ private fun LocalSceneViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnCriticalErrorChanged by rememberUpdatedState(
+        onCriticalErrorChanged
+    )
 
     LaunchedEffect(Unit) {
         launch {
@@ -357,6 +363,11 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            localSceneView.criticalError.collect {
+                currentOnCriticalErrorChanged?.invoke(it)
             }
         }
     }
