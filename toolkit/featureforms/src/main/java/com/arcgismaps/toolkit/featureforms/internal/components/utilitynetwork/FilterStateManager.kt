@@ -192,12 +192,13 @@ internal data class FieldFilter(
     }
 
     /**
-     * Creates a copy of this [FieldFilter] with the given new field.
+     * Creates a copy of this [FieldFilter] with the given new field. This also resets the operator
+     * and value to their default states since they may not be valid for the new field.
      */
     fun withField(newField: Field): FieldFilter = copy(
         field = newField,
-        operator = operator,
-        value = value
+        operator = null,
+        value = ""
     )
 
     /**
