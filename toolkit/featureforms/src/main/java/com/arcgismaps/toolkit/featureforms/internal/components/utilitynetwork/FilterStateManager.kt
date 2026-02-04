@@ -236,6 +236,7 @@ internal fun FieldFilter.getOperators(): List<Operator> {
                 FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
             }
         }
+        fieldType == FieldType.Date || fieldType == FieldType.DateOnly -> FilterOperators.EQUALITY_OPERATORS
 
         else -> emptyList()
     }
@@ -265,6 +266,8 @@ internal fun FieldFilter.getQuery(): String? {
     if (isValid().not()) return null
     val formattedValue = when (field!!.fieldType) {
         is FieldType.Text -> "'${this.value}'"
+        is FieldType.Date -> "timestamp '${this.value}'"
+        is FieldType.DateOnly -> "date '${this.value}'"
         else -> this.value
     }
     return when (val operator = this.operator!!) {

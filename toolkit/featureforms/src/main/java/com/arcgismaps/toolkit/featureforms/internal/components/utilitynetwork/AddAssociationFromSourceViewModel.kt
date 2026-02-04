@@ -726,7 +726,7 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 /**
  * Gets the list of [Field] objects associated with the feature and filters it to include only those
  * that are supported for attribute filtering.
- * Supported fields are those of type Text, Oid, or Numeric. Additionally, if the feature has a
+ * Supported fields are those of type Text, Oid, Numeric, Date or DateOnly. Additionally, if the feature has a
  * feature subtype with field overrides, those overrides are applied to the corresponding fields.
  */
 private fun ArcGISFeature.getSupportedFields(): List<Field> {
@@ -735,7 +735,9 @@ private fun ArcGISFeature.getSupportedFields(): List<Field> {
         .filter {
             (it.fieldType == FieldType.Text ||
                     it.fieldType == FieldType.Oid ||
-                    it.fieldType.isNumeric) &&
+                    it.fieldType.isNumeric) ||
+                    it.fieldType == FieldType.Date ||
+                    it.fieldType == FieldType.DateOnly &&
                     !it.name.equals("ASSETGROUP", ignoreCase = true) &&
                     !it.name.equals("ASSETTYPE", ignoreCase = true)
         }

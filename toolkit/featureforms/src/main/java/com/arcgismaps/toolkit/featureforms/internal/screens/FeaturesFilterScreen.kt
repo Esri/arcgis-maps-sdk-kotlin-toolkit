@@ -18,6 +18,9 @@ package com.arcgismaps.toolkit.featureforms.internal.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +41,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Warning
@@ -67,6 +71,8 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -76,7 +82,15 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.data.Field
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePicker
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toInstant
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.FieldFilter
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Operator
@@ -84,6 +98,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fi
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getKeyboardType
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getOperators
 import kotlinx.coroutines.launch
+import java.time.Instant
 
 @Composable
 internal fun FeaturesFilterScreen(
@@ -456,7 +471,14 @@ private fun FilterItem(
                                 defaultLabel = stringResource(R.string.enter_a_value),
                                 items = domain.codedValues
                             )
-                        } else {
+                        } else if (filter.field?.fieldType == FieldType.Date || filter.field?.fieldType == FieldType.DateOnly) {
+                            DatePickerModalInput(
+                                filter.value,
+                                filter.field,
+                                onValueChange = onValueChange
+                            )
+                        }
+                        else {
                             TextField(
                                 value = filter.value,
                                 onValueChange = onValueChange,
@@ -485,6 +507,84 @@ private fun FilterItem(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DatePickerModalInput(
+    value: String,
+    field: Field,
+    onValueChange: (String) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    var showDatePicker by remember { mutableStateOf(false) }
+    val pickerStyle = if (field.fieldType == FieldType.Date) {
+        DateTimePickerStyle.DateTime
+    } else {
+        DateTimePickerStyle.Date
+    }
+    val pickerState = rememberDateTimePickerState(
+        pickerStyle,
+        label = field.alias,
+        initialValue = value.toInstant(field.fieldType == FieldType.Date),
+        pickerInput = DateTimePickerInput.Date,
+        initialError = ValidationErrorState.NoError
+    )
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(R.string.enter_a_value)) },
+        placeholder = { Text(stringResource(R.string.not_set)) },
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+        ),
+        trailingIcon = {
+            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(value) {
+                awaitEachGesture {
+                    // Modifier.clickable doesn't work for text fields, so we use Modifier.pointerInput
+                    // in the Initial pass to observe events before the text field consumes them
+                    // in the Main pass.
+                    awaitFirstDown(pass = PointerEventPass.Initial)
+                    val upEvent =
+                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                    if (upEvent != null) {
+                        showDatePicker = true
+                    }
+                }
+            },
+        readOnly = true
+    )
+
+    if (showDatePicker) {
+        DateTimePicker(
+            pickerState,
+            {
+                showDatePicker = false
+                focusManager.clearFocus()
+            },
+            {
+                showDatePicker = false
+                focusManager.clearFocus()
+            },
+            onConfirmed = {
+                val valueString = pickerState.selectedDateTimeMillis?.let {
+                    val isDateField = field.fieldType == FieldType.Date
+                    Instant.ofEpochMilli(it).formattedDateTime(
+                        includeTime = isDateField
+                    )
+                }
+                onValueChange(valueString ?: "")
+                showDatePicker = false
+                focusManager.clearFocus()
+            }
+        )
     }
 }
 
