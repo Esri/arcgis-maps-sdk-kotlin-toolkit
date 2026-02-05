@@ -169,6 +169,7 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -267,7 +268,8 @@ public fun MapView(
         onPan,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged
     )
 
     ViewpointHandler(
@@ -304,7 +306,8 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
-    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?
 ) {
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -326,6 +329,7 @@ private fun MapViewEventHandler(
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanges by rememberUpdatedState(onGeoModelErrorChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -422,6 +426,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            mapView.geoModelError.collect {
+                currentOnGeoModelErrorChanges?.invoke(it)
             }
         }
     }
