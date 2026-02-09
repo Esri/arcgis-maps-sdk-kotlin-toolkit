@@ -35,20 +35,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +59,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.material3.remembe
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.rememberSheetState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsFilterResult
-import kotlinx.coroutines.launch
 
 /**
  * Screen that displays the selected filter for a [UtilityAssociationsFormElement].
@@ -86,14 +78,6 @@ internal fun UNAssociationsFilterResultScreen(
 ) {
     val filterResult = state.selectedFilterResult ?: return
     val isEditable by state.isEditable.collectAsState()
-    // Determine if we should show the add action as a sheet or a dropdown menu
-    // based on the current window size class
-    val showAsSheet = getWindowSize(LocalContext.current)
-        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-        .not()
-    var showAddAssociationAction by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -118,41 +102,15 @@ internal fun UNAssociationsFilterResultScreen(
         ) {
             Button(
                 onClick = {
-                    showAddAssociationAction = true
+                    onAddFromSourceClick(state.id)
                 },
                 enabled = isEditable
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Associations")
                 Text(text = stringResource(R.string.add_associations), modifier = Modifier.padding(horizontal = 12.dp))
             }
-            if (showAddAssociationAction && !showAsSheet) {
-                // Show the dropdown menu below the button
-                AddActionMenu(
-                    onDismissRequest = { showAddAssociationAction = false },
-                    onSelectFromMap = {
-                        // Currently not supported
-                    },
-                    onSelectFromNetworkDataSource = {
-                        onAddFromSourceClick(state.id)
-                    }
-                )
-            }
         }
         Spacer(modifier = Modifier.height(25.dp))
-    }
-    if (showAddAssociationAction && showAsSheet) {
-        AddActionSheet(
-            onDismissRequest = { showAddAssociationAction = false },
-            sheetState = sheetState,
-            onSelectFromNetworkDataSource = {
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                        showAddAssociationAction = false
-                        onAddFromSourceClick(state.id)
-                    }
-                }
-            }
-        )
     }
 }
 
