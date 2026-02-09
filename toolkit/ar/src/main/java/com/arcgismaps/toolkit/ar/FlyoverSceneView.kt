@@ -107,6 +107,8 @@ import java.time.Instant
  * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView
+ * changes
  * @param content the content of the FlyoverSceneView.
  *
  * @since 200.8.0
@@ -149,6 +151,7 @@ public fun FlyoverSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable FlyoverSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberFlyoverSceneViewStatus()
@@ -259,6 +262,7 @@ public fun FlyoverSceneView(
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
+            onGeoModelErrorChanged = onGeoModelErrorChanged,
             content = {
                 content?.let { content ->
                     val flyoverSceneViewScope = remember {

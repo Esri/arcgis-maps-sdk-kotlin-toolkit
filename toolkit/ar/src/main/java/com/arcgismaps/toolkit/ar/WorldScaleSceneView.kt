@@ -149,6 +149,8 @@ import java.time.Instant
  * @param onLongPress lambda invoked when a user holds a pointer on the WorldScaleSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across WorldScaleSceneView.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the WorldScaleSceneView
+ * changes
  * @param content the content of the WorldScaleSceneView.
  *
  * @since 200.7.0
@@ -191,6 +193,7 @@ public fun WorldScaleSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable WorldScaleSceneViewScope.() -> Unit)? = null
 ) {
     val initializationStatus = rememberWorldScaleSceneViewStatus()
@@ -374,6 +377,7 @@ public fun WorldScaleSceneView(
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
+            onGeoModelErrorChanged = onGeoModelErrorChanged,
             content = {
                 content?.let { content ->
                     val worldScaleSceneViewScope = remember {
