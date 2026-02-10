@@ -735,11 +735,11 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
  */
 private fun UtilityAssociationFeatureSource.getFields(assetGroup: UtilityAssetGroup): List<Field> {
     return when (val source = featureFormSource) {
-        is FeatureLayer -> (source.featureTable as? ArcGISFeatureTable)?.getSupportedFieldsForSubType(
+        is FeatureLayer -> (source.featureTable as? ArcGISFeatureTable)?.getSupportedFields(
             subTypeCode = assetGroup.code
         )
 
-        is FeatureTable -> (source as? ArcGISFeatureTable)?.getSupportedFieldsForSubType(
+        is FeatureTable -> (source as? ArcGISFeatureTable)?.getSupportedFields(
             subTypeCode = assetGroup.code
         )
 
@@ -752,8 +752,12 @@ private fun UtilityAssociationFeatureSource.getFields(assetGroup: UtilityAssetGr
 /**
  * Returns a list of supported [Field]s on the [ArcGISFeatureTable] for the given [subTypeCode], or
  * all supported fields if the provided [subTypeCode] does not match any subtype in the table.
+ *
+ * @param subTypeCode An optional subtype code used to determine if there are specific field
+ * overrides for that subtype.
+ * @return A list of supported [Field]s.
  */
-private fun ArcGISFeatureTable.getSupportedFieldsForSubType(subTypeCode: Any?): List<Field> {
+private fun ArcGISFeatureTable.getSupportedFields(subTypeCode: Any?): List<Field> {
     val subtype = featureSubtypes.find {
         it.code == subTypeCode
     }
