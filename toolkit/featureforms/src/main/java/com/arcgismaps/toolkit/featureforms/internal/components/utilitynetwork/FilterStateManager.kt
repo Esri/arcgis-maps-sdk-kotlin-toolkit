@@ -232,12 +232,17 @@ internal fun FieldFilter.getOperators(): List<Operator> {
         fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
         fieldType == FieldType.Text -> {
             if (field.nullable) {
-                FilterOperators.TEXT_OPERATORS
-            } else {
                 FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
+            } else {
+                FilterOperators.TEXT_OPERATORS
             }
         }
-        fieldType == FieldType.Date || fieldType == FieldType.DateOnly -> FilterOperators.EQUALITY_OPERATORS
+        fieldType == FieldType.Date || fieldType == FieldType.DateOnly ->
+            if (field.nullable) {
+                FilterOperators.NUMERIC_OPERATORS + FilterOperators.NULLABLE_OPERATORS
+            } else {
+                FilterOperators.NUMERIC_OPERATORS
+            }
 
         else -> emptyList()
     }
@@ -347,7 +352,7 @@ private object FilterOperators {
     )
 
     /**
-     * The list of operators applicable to numeric fields.
+     * The list of operators applicable to numeric, date and dateOnly fields.
      */
     val NUMERIC_OPERATORS = listOf(
         Operator.Equal,
