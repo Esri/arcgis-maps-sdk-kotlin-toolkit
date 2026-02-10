@@ -230,22 +230,10 @@ internal fun FieldFilter.getOperators(): List<Operator> {
     return when {
         fieldType.isNumeric && field.domain is CodedValueDomain -> FilterOperators.EQUALITY_OPERATORS
         fieldType.isNumeric || fieldType == FieldType.Oid -> FilterOperators.NUMERIC_OPERATORS
-        fieldType == FieldType.Text -> {
-            if (field.nullable) {
-                FilterOperators.TEXT_OPERATORS + FilterOperators.NULLABLE_OPERATORS
-            } else {
-                FilterOperators.TEXT_OPERATORS
-            }
-        }
-        fieldType == FieldType.Date || fieldType == FieldType.DateOnly ->
-            if (field.nullable) {
-                FilterOperators.NUMERIC_OPERATORS + FilterOperators.NULLABLE_OPERATORS
-            } else {
-                FilterOperators.NUMERIC_OPERATORS
-            }
-
+        fieldType == FieldType.Text -> FilterOperators.TEXT_OPERATORS
+        fieldType == FieldType.Date || fieldType == FieldType.DateOnly -> FilterOperators.NUMERIC_OPERATORS
         else -> emptyList()
-    }
+    } + if (field.nullable) FilterOperators.NULLABLE_OPERATORS else emptyList()
 }
 
 /**
