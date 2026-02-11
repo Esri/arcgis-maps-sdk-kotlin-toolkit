@@ -76,6 +76,7 @@ import java.time.format.DateTimeFormatter
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("DEPRECATION")
 fun PortalContentScreen(
     modifier: Modifier = Modifier,
     onFolderClick: (PortalFolder) -> Unit,

@@ -161,6 +161,7 @@ internal fun UtilityAssociationGroupResult(
  *
  */
 @Composable
+@Suppress("DEPRECATION")
 private fun AssociationItem(
     title: String,
     association: UtilityAssociation,

@@ -118,6 +118,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
 @Composable
+@Suppress("DEPRECATION")
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     val uiState by mapViewModel.uiState
     val scope = rememberCoroutineScope()

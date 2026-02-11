@@ -53,6 +53,7 @@ import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("DEPRECATION")
 fun FolderContentScreen(
     viewModel: FolderContentViewModel = hiltViewModel(),
     onItemSelected: () -> Unit,

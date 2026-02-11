@@ -32,6 +32,9 @@ secrets {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
 }
 
 android {
@@ -86,7 +89,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     // room
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     ksp(libs.room.compiler)
     // jetpack window manager
