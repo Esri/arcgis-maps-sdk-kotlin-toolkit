@@ -1,6 +1,6 @@
 # FloorFilterApp
 
-This micro app showcases the use of the FloorFilter toolkit component. It uses the map of a fictional corporate campus "made up" data following 
+This micro app showcases the use of the [FloorFilter toolkit component](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/toolkit/indoors). It uses the map of a fictional corporate campus "made up" data following 
 the Indoors Information Model schema and floor awareness.
 
 When the Site button is tapped, a prompt opens so the user can select a site and then a facility. After selecting a site and facility,
@@ -19,3 +19,4 @@ The list of sites and facilities can be dynamically filtered using the search ba
 |Site Filter|Facility Filter|
 |:--:|:--:|
 |![Site Filter](screenshots/sitefilter.png)|![Facility Filter](screenshots/facilityfilter.png)|
+
