@@ -5,6 +5,7 @@
 /captures
 .externalNativeBuild
 build/
+.kotlin/
 
 # test artifacts
 connectedTestReports/
@@ -36,3 +37,4 @@ gen/
 Icon?
 ehthumbs.db
 Thumbs.db
+
