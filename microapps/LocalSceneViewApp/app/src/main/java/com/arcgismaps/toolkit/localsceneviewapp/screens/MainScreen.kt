@@ -46,7 +46,12 @@ fun MainScreen() {
 
     val camera = remember {
         Camera(
-            Point(19455578.6821, -5056336.2227, 1699.3366, SpatialReference.webMercator()),
+            locationPoint = Point(
+                19455578.6821,
+                -5056336.2227,
+                1699.3366,
+                SpatialReference.webMercator()
+            ),
             heading = 338.7410,
             pitch = 40.3763,
             roll = 0.0,
@@ -63,8 +68,8 @@ fun MainScreen() {
 
     val arcGISScene = remember {
         ArcGISScene(
-            BasemapStyle.ArcGISTopographic,
-            SceneViewingMode.Local
+            viewingMode = SceneViewingMode.Local,
+            basemapStyle = BasemapStyle.ArcGISTopographic
         ).apply {
             operationalLayers.add(sceneLayer)
             baseSurface.elevationSources.add(elevationSource)
@@ -88,7 +93,7 @@ fun MainScreen() {
     var criticalError: Throwable? by remember { mutableStateOf(null) }
 
     LocalSceneView(
-        arcGISScene,
+        scene = arcGISScene,
         modifier = Modifier.fillMaxSize(),
         onCriticalErrorChanged = { throwable ->
             throwable?.let {

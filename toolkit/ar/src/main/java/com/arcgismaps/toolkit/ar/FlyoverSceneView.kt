@@ -107,11 +107,142 @@ import java.time.Instant
  * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
+ * @param content the content of the FlyoverSceneView.
+ *
+ * @since 200.8.0
+ */
+@Deprecated(
+    message = "Use the FlyoverSceneView function with `onGeoModelError` instead. This deprecated " +
+            "function remains to maintain binary compatibility",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+public fun FlyoverSceneView(
+    arcGISScene: ArcGISScene,
+    flyoverSceneViewProxy: FlyoverSceneViewProxy,
+    translationFactor: Double,
+    modifier: Modifier = Modifier,
+    onInitializationStatusChanged: ((FlyoverSceneViewStatus) -> Unit)? = null,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.Realistic,
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    spaceEffect: SpaceEffect = SpaceEffect.Stars,
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
+    sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    content: (@Composable FlyoverSceneViewScope.() -> Unit)? = null
+) {
+    FlyoverSceneView(
+        arcGISScene = arcGISScene,
+        flyoverSceneViewProxy = flyoverSceneViewProxy,
+        translationFactor = translationFactor,
+        modifier = modifier,
+        onInitializationStatusChanged = onInitializationStatusChanged,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        graphicsOverlays = graphicsOverlays,
+        viewLabelProperties = viewLabelProperties,
+        selectionProperties = selectionProperties,
+        isAttributionBarVisible = isAttributionBarVisible,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        analysisOverlays = analysisOverlays,
+        imageOverlays = imageOverlays,
+        atmosphereEffect = atmosphereEffect,
+        timeExtent = timeExtent,
+        onTimeExtentChanged = onTimeExtentChanged,
+        spaceEffect = spaceEffect,
+        sunTime = sunTime,
+        sunLighting = sunLighting,
+        ambientLightColor = ambientLightColor,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onGeoModelErrorChanged = null,
+        content = content
+    )
+}
+
+/**
+ * A scene view that provides an augmented reality fly over experience.
+ *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this FlyoverSceneView.
+ * @param flyoverSceneViewProxy the [FlyoverSceneViewProxy] to associate with the FlyoverSceneView.
+ * @param translationFactor the translation factor that defines how much the scene view translates
+ * as the device moves.
+ * @param modifier Modifier to be applied to the FlyoverSceneView.
+ * @param onInitializationStatusChanged a callback that is invoked when the initialization status of this FlyoverSceneView changes.
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale].
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry].
+ * @param graphicsOverlays graphics overlays used by this FlyoverSceneView.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the FlyoverSceneView.
+ * @param selectionProperties the [SelectionProperties] used by the FlyoverSceneView.
+ * @param isAttributionBarVisible true if attribution bar is visible in the FlyoverSceneView, false otherwise.
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the FlyoverSceneView has changed.
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes.
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the FlyoverSceneView.
+ * @param imageOverlays image overlays for displaying images in the FlyoverSceneView.
+ * @param timeExtent the [TimeExtent] used by the FlyoverSceneView.
+ * @param onTimeExtentChanged lambda invoked when the FlyoverSceneView's [TimeExtent] is changed.
+ * @param sunTime the position of the sun in the FlyoverSceneView based on a specific date and time.
+ * @param sunLighting the type of ambient sunlight and shadows in the FlyoverSceneView.
+ * @param ambientLightColor the color of the FlyoverSceneView's ambient light.
+ * @param onNavigationChanged lambda invoked when the navigation status of the FlyoverSceneView has changed.
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the FlyoverSceneView has changed.
+ * @param onLayerViewStateChanged lambda invoked when the FlyoverSceneView's layer view state is changed.
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the FlyoverSceneView.
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the FlyoverSceneView has changed.
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the FlyoverSceneView.
+ * @param onScale lambda invoked when a user performs a pinch gesture on the FlyoverSceneView.
+ * @param onUp lambda invoked when the user removes all their pointers from the FlyoverSceneView.
+ * @param onDown lambda invoked when the user first presses on the FlyoverSceneView.
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the FlyoverSceneView.
+ * @param onDoubleTap lambda invoked the user double taps on the FlyoverSceneView.
+ * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
+ * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView
  * changes
  * @param content the content of the FlyoverSceneView.
  *
- * @since 200.8.0
+ * @since 300.0.0
  */
 @Composable
 public fun FlyoverSceneView(
