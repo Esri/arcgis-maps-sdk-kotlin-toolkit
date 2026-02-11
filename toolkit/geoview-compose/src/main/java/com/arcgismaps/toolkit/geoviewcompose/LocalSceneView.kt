@@ -168,6 +168,7 @@ public fun LocalSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -232,8 +233,9 @@ public fun LocalSceneView(
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged,
         onCriticalErrorChanged,
-        onGeoModelErrorChanged
+        onWarningsChanged
     )
 
     ViewpointHandler(
@@ -269,7 +271,8 @@ private fun LocalSceneViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)?,
-    onCriticalErrorChanged: ((Throwable?) -> Unit)?
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
+    onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -287,8 +290,9 @@ private fun LocalSceneViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
-    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
     val currentOnCriticalErrorChanged by rememberUpdatedState(onCriticalErrorChanged)
+    val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -372,13 +376,18 @@ private fun LocalSceneViewEventHandler(
             }
         }
         launch {
-            localSceneView.geoModelError.collect {
-                currentOnGeoModelErrorChanged?.invoke(it)
+            localSceneView.criticalError.collect {
+                currentOnCriticalErrorChanged?.invoke(it)
             }
         }
         launch {
-            localSceneView.criticalError.collect {
-                currentOnCriticalErrorChanged?.invoke(it)
+            localSceneView.warnings.collect {
+                currentOnWarningsChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
             }
         }
     }
