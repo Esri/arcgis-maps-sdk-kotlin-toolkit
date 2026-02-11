@@ -26,16 +26,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ArcGISFeatureTable
+import com.arcgismaps.data.FeatureTable
 import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
+import com.arcgismaps.data.SubtypeSubtable
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeSublayer
 import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
+import com.arcgismaps.utilitynetworks.UtilityAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
@@ -288,11 +294,7 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
-                        // Get the first feature from the results to extract the fields and the subtype
-                        val firstFeature = result.candidates.firstOrNull()?.feature
-                        // Get the available fields from the table
-                        _fields.value = firstFeature?.getSupportedFields() ?: emptyList()
-
+                        _fields.value = source.getFields(assetType.assetGroup)
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
@@ -724,33 +726,56 @@ internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerm
 }
 
 /**
- * Gets the list of [Field] objects associated with the feature and filters it to include only those
- * that are supported for attribute filtering.
- * Supported fields are those of type Text, Oid, Numeric, Date or DateOnly. Additionally, if the feature has a
- * feature subtype with field overrides, those overrides are applied to the corresponding fields.
+ * Returns a list of supported [Field]s for the given source based on the [FeatureFormSource] it
+ * represents, taking into account any subtype field overrides if applicable.
+ *
+ * @param assetGroup The [UtilityAssetGroup] used to determine the subtype.
+ * @return A list of supported [Field]s for the source and subtype, or an empty list if the source
+ * type is not recognized or if there are no supported fields.
  */
-private fun ArcGISFeature.getSupportedFields(): List<Field> {
-    val fields = this.featureTable?.fields ?: return emptyList()
-    val fieldMap = fields
-        .filter {
-            (it.fieldType == FieldType.Text ||
-                    it.fieldType == FieldType.Oid ||
-                    it.fieldType.isNumeric) ||
-                    it.fieldType == FieldType.Date ||
-                    it.fieldType == FieldType.DateOnly &&
-                    !it.name.equals("ASSETGROUP", ignoreCase = true) &&
-                    !it.name.equals("ASSETTYPE", ignoreCase = true)
-        }
-        .associateBy { it.name.lowercase() }
-        // Convert list to map for efficient lookup and replacement
-        .toMutableMap()
+private fun UtilityAssociationFeatureSource.getFields(assetGroup: UtilityAssetGroup): List<Field> {
+    return when (val source = featureFormSource) {
+        is FeatureLayer -> (source.featureTable as? ArcGISFeatureTable)?.getSupportedFields(
+            subTypeCode = assetGroup.code
+        )
 
-    // Apply any subtype overrides to the fields
-    this.getFeatureSubtype()?.fieldOverrides?.forEach { overrideField ->
-        val key = overrideField.name.lowercase()
-        if (fieldMap.containsKey(key) && overrideField.domain != null) {
-            fieldMap[key] = overrideField
-        }
+        is FeatureTable -> (source as? ArcGISFeatureTable)?.getSupportedFields(
+            subTypeCode = assetGroup.code
+        )
+
+        is SubtypeSublayer -> source.subtype.fieldOverrides.filterSupportedFields()
+        is SubtypeSubtable -> source.subtype.fieldOverrides.filterSupportedFields()
+        else -> null
+    } ?: emptyList()
+}
+
+/**
+ * Returns a list of supported [Field]s on the [ArcGISFeatureTable] for the given [subTypeCode], or
+ * all supported fields if the provided [subTypeCode] does not match any subtype in the table.
+ *
+ * @param subTypeCode An optional subtype code used to determine if there are specific field
+ * overrides for that subtype.
+ * @return A list of supported [Field]s.
+ */
+private fun ArcGISFeatureTable.getSupportedFields(subTypeCode: Any?): List<Field> {
+    val subtype = featureSubtypes.find {
+        it.code == subTypeCode
     }
-    return fieldMap.values.toList()
+    return subtype?.fieldOverrides?.filterSupportedFields() ?: fields.filterSupportedFields()
+}
+
+/**
+ * Filters the list of [Field]s to include only those that are supported for use in attribute
+ * filtering.
+ */
+private fun List<Field>.filterSupportedFields(): List<Field> {
+    return filter { field ->
+        (field.fieldType == FieldType.Text ||
+            field.fieldType == FieldType.Oid ||
+            field.fieldType.isNumeric) ||
+            field.fieldType == FieldType.Date ||
+            field.fieldType == FieldType.DateOnly &&
+            !field.name.equals("ASSETGROUP", ignoreCase = true) &&
+            !field.name.equals("ASSETTYPE", ignoreCase = true)
+    }
 }
