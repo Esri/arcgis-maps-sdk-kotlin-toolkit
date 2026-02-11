@@ -129,7 +129,8 @@ import kotlinx.coroutines.launch
  * @since 200.7.0
  */
 @Deprecated(
-    message = "Use the MapView function with `onGeoModelError` instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use the MapView function with `onGeoModelError` instead. This deprecated function " +
+            "remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
