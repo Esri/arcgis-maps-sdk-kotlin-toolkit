@@ -772,9 +772,9 @@ private fun List<Field>.filterSupportedFields(): List<Field> {
     return filter { field ->
         (field.fieldType == FieldType.Text ||
             field.fieldType == FieldType.Oid ||
-            field.fieldType.isNumeric) ||
+            field.fieldType.isNumeric ||
             field.fieldType == FieldType.Date ||
-            field.fieldType == FieldType.DateOnly &&
+            field.fieldType == FieldType.DateOnly) &&
             !field.name.equals("ASSETGROUP", ignoreCase = true) &&
             !field.name.equals("ASSETTYPE", ignoreCase = true)
     }
