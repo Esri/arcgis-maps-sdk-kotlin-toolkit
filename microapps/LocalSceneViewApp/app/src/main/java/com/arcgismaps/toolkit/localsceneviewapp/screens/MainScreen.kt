@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.localsceneviewapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -99,7 +98,6 @@ fun MainScreen() {
             throwable?.let {
                 showErrorDialog = true
                 criticalError = throwable
-                Log.e("LSV", it.toString())
             }
         }
     )

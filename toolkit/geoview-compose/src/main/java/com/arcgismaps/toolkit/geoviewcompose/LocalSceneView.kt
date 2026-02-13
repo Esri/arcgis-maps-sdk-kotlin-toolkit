@@ -130,7 +130,7 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
- * is changed
+ * changes
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * LocalSceneView changes
  * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
@@ -215,32 +215,32 @@ public fun LocalSceneView(
     }
 
     LocalSceneViewEventHandler(
-        localSceneView,
-        onNavigationChanged,
-        onSpatialReferenceChanged,
-        onLayerViewStateChanged,
-        onInteractingChanged,
-        onRotate,
-        onScale,
-        onUp,
-        onDown,
-        onSingleTapConfirmed,
-        onDoubleTap,
-        onLongPress,
-        onTwoPointerTap,
-        onPan,
-        onDrawStatusChanged,
-        onAttributionTextChanged,
-        onAttributionBarLayoutChanged,
-        onCriticalErrorChanged,
-        onGeoModelErrorChanged
+        localSceneView = localSceneView,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onDrawStatusChanged = onDrawStatusChanged,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged
     )
 
     ViewpointHandler(
-        localSceneView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
-        onCurrentViewpointCameraChanged
+        localSceneView = localSceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
 
