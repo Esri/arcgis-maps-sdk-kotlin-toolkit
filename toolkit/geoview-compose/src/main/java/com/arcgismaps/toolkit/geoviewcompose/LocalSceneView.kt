@@ -133,6 +133,8 @@ import kotlinx.coroutines.launch
  * is changed
  * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
  * LocalSceneView changes
+ * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
+ * is changed
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -165,6 +167,7 @@ public fun LocalSceneView(
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -229,7 +232,8 @@ public fun LocalSceneView(
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
-        onCriticalErrorChanged
+        onCriticalErrorChanged,
+        onWarningsChanged
     )
 
     ViewpointHandler(
@@ -264,7 +268,8 @@ private fun LocalSceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
-    onCriticalErrorChanged: ((Throwable?) -> Unit)?
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
+    onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -285,6 +290,7 @@ private fun LocalSceneViewEventHandler(
     val currentOnCriticalErrorChanged by rememberUpdatedState(
         onCriticalErrorChanged
     )
+    val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -370,6 +376,11 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.criticalError.collect {
                 currentOnCriticalErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.warnings.collect {
+                currentOnWarningsChanged?.invoke(it)
             }
         }
     }
