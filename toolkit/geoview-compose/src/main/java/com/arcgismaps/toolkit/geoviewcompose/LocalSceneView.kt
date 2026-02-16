@@ -232,7 +232,7 @@ public fun LocalSceneView(
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
-        onCriticalErrorChanged
+        onCriticalErrorChanged,
         onWarningsChanged
     )
 
@@ -268,7 +268,7 @@ private fun LocalSceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
-    onCriticalErrorChanged: ((Throwable?) -> Unit)?
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
     onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
