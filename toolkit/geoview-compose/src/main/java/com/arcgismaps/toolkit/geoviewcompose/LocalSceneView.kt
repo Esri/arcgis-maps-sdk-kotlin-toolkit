@@ -131,6 +131,8 @@ import kotlinx.coroutines.launch
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
  * is changed
+ * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
+ * LocalSceneView changes
  * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
  * is changed
  * @param content the content of the composable LocalSceneView
@@ -164,6 +166,7 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
@@ -229,6 +232,7 @@ public fun LocalSceneView(
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
+        onCriticalErrorChanged
         onWarningsChanged
     )
 
@@ -264,6 +268,7 @@ private fun LocalSceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?
     onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -282,6 +287,9 @@ private fun LocalSceneViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnCriticalErrorChanged by rememberUpdatedState(
+        onCriticalErrorChanged
+    )
     val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
@@ -363,6 +371,11 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            localSceneView.criticalError.collect {
+                currentOnCriticalErrorChanged?.invoke(it)
             }
         }
         launch {
