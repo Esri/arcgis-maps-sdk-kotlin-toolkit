@@ -23,10 +23,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalUser
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -60,6 +59,8 @@ class PortalSettings(
     val user: StateFlow<PortalUser?> = _user.asStateFlow()
 
     val defaultPortalUrl: String = context.getString(R.string.agol_portal_url)
+
+    private val authenticatorState = AuthenticatorState()
 
     init {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -144,14 +145,6 @@ class PortalSettings(
         }
         _user.value = null
 
-        with (ArcGISEnvironment.authenticationManager) {
-            arcGISCredentialStore.getCredentials().forEach {
-                if (it is OAuthUserCredential) {
-                    it.revokeToken()
-                }
-            }
-            arcGISCredentialStore.removeAll()
-            networkCredentialStore.removeAll()
-        }
+        authenticatorState.signOut()
     }
 }
