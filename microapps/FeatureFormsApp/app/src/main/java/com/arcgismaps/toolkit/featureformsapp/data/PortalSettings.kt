@@ -24,9 +24,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalUser
-import com.arcgismaps.toolkit.authentication.signOut
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -136,7 +136,6 @@ class PortalSettings(
     /**
      * Signs out the current user and clears the stored portal settings.
      */
-    @Suppress("DEPRECATION")
     suspend fun signOut() = withContext(Dispatchers.IO) {
         preferences.edit { settings ->
             settings.remove(URL_KEY)
@@ -144,6 +143,15 @@ class PortalSettings(
             settings.remove(PORTAL_CONNECTION_KEY)
         }
         _user.value = null
-        ArcGISEnvironment.authenticationManager.signOut()
+
+        with (ArcGISEnvironment.authenticationManager) {
+            arcGISCredentialStore.getCredentials().forEach {
+                if (it is OAuthUserCredential) {
+                    it.revokeToken()
+                }
+            }
+            arcGISCredentialStore.removeAll()
+            networkCredentialStore.removeAll()
+        }
     }
 }
