@@ -498,8 +498,7 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
 }
 
 /**
- * Adds an attachment to the [AttachmentElementState] from the specified [uri]. Since the data from
- * the uri is read into memory, there is a limit of 50 MB for the size of the attachment.
+ * Adds an attachment to the [AttachmentElementState] from the specified [uri].
  *
  * @param uri The uri of the attachment.
  * @param context The context.
@@ -575,7 +574,8 @@ internal suspend fun AttachmentElementState.addAttachmentFromUri(
 
 
 /**
- * Copies the content from the specified [uri] to a file in the cache directory.
+ * Copies the content from the specified [uri] to a file in the cache directory given by
+ * [Context.getCacheDir].
  *
  * @param uri The uri of the file to copy.
  * @param fileName The name of the file to create in the cache directory.
