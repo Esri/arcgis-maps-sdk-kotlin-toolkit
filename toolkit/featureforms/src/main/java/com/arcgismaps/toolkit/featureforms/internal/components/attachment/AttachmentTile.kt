@@ -93,7 +93,7 @@ internal fun AttachmentTile(
     modifier: Modifier = Modifier
 ) {
     val loadStatus by state.loadStatus.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = remember(state) { MutableInteractionSource() }
     val thumbnail by state.thumbnail
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
@@ -178,7 +178,7 @@ internal fun AttachmentTile(
             }
         }
     }
-    LaunchedEffect(interactionSource) {
+    LaunchedEffect(interactionSource, state) {
         var wasALongPress = false
         interactionSource.interactions.collectLatest {
             when (it) {

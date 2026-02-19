@@ -58,7 +58,7 @@ import java.util.Objects
 /**
  * The maximum attachment size in bytes that can be added.
  */
-internal const val maxAttachmentUploadSize = 50_000_000L
+internal const val maxAttachmentUploadSize = 999_999_999L
 
 /**
  * The maximum attachment size in bytes that can be downloaded.
@@ -93,7 +93,7 @@ internal class AttachmentElementState(
      * The attachments associated with the form element. This list is observable and will update
      * the UI when attachments are added or removed.
      */
-    val attachments : List<FormAttachmentState>
+    val attachments: List<FormAttachmentState>
         get() = _attachments
 
     /**
@@ -148,35 +148,36 @@ internal class AttachmentElementState(
     }
 
     /**
-     * Adds an attachment with the given [name], [contentType], and [data].
+     * Adds an attachment with the given [name], [contentType], and [filePath].
      */
-    fun addAttachment(name: String, contentType: String, data: ByteArray): Result<Unit> {
-        val formAttachment = formElement.addAttachmentOrNull(name, contentType, data)
-            ?: return Result.failure(Exception("Failed to add attachment"))
-        // create a new state
-        val state = FormAttachmentState(
-            name = formAttachment.name,
-            size = formAttachment.size,
-            contentType = formAttachment.contentType,
-            type = formAttachment.type,
-            elementStateId = id,
-            deleteAttachment = { deleteAttachment(formAttachment) },
-            scope = scope,
-            formAttachment = formAttachment
-        )
-        // add the new state to the beginning of the list and scroll to the new attachment in
-        // one atomic operation
-        Snapshot.withMutableSnapshot {
-            _attachments.add(0, state)
-            lazyListState.requestScrollToItem(0)
-        }
-        // load the new attachment
-        state.loadWithParentScope()
-        // scroll to the new attachment after a delay to allow the recomposition to complete
-        scope.launch {
-            evaluateExpressions()
-        }
-        return Result.success(Unit)
+    suspend fun addAttachment(name: String, contentType: String, filePath: String): Result<Unit> {
+        return formElement.addAttachment(
+            name = name,
+            contentType = contentType,
+            filePath = filePath
+        ).onSuccess { formAttachment ->
+            // create a new state
+            val attachment = FormAttachmentState(
+                name = formAttachment.name,
+                size = formAttachment.size,
+                contentType = formAttachment.contentType,
+                type = formAttachment.type,
+                elementStateId = id,
+                deleteAttachment = { deleteAttachment(formAttachment) },
+                scope = scope,
+                formAttachment = formAttachment
+            )
+            // add the new state to the beginning of the list and scroll to the new attachment in
+            // one atomic operation
+            Snapshot.withMutableSnapshot {
+                _attachments.add(0, attachment)
+                lazyListState.requestScrollToItem(0)
+            }
+            // load the new attachment
+            attachment.loadWithParentScope()
+            // evaluate expressions after the attachment is added
+            scope.launch { evaluateExpressions() }
+        }.map {}
     }
 
     /**
@@ -283,7 +284,7 @@ internal class FormAttachmentState(
     /**
      * A callback that is invoked when the attachment fails to load.
      */
-    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
+    private var onLoadErrorCallback: ((Throwable) -> Unit)? = null
 
     /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
@@ -316,7 +317,10 @@ internal class FormAttachmentState(
             result = when {
                 formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
                 formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
-                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize))
+                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(
+                    AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize)
+                )
+
                 else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
@@ -492,7 +496,7 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
  * @param limit The attachment size limit in bytes.
  */
 internal class AttachmentSizeLimitExceededException(val limit: Long) : Exception(
-    "Attachment size exceeds the limit of ${limit/1_000_000} MB"
+    "Attachment size exceeds the limit of ${limit / 1_000_000} MB"
 )
 
 /**

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 @file:Suppress("DEPRECATION")
+
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
@@ -61,16 +62,15 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.SaveEditsDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.FileNotFoundException
 import java.time.Instant
-import kotlin.math.max
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -425,18 +425,33 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     }
 }
 
-internal suspend fun Context.readBytes(uri: Uri): Result<ByteArray> = withContext(Dispatchers.IO) {
+/**
+ * Copies the content from the specified [uri] to a file in the cache directory.
+ *
+ * @param uri The uri of the file to copy.
+ * @param fileName The name of the file to create in the cache directory.
+ * @return The file in the cache directory that contains the copied content.
+ */
+internal suspend fun Context.cacheFile(
+    uri: Uri,
+    fileName: String
+): Result<File> = withContext(Dispatchers.IO) {
     return@withContext try {
-        val bytes = contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
-        if (bytes == null) {
-            Result.failure(Exception("Failed to read data from file: $uri"))
-        } else {
-            Result.success(bytes)
+        val outFile = cacheDir.resolve(fileName)
+        // Delete the file if it already exists
+        if (outFile.exists()) {
+            outFile.delete()
         }
-    } catch (e: FileNotFoundException) {
-        Result.failure(Exception("File not found: $uri"))
-    } catch (e: OutOfMemoryError) {
-        Result.failure(Exception("File too large: $uri"))
+        // Copy the content from the uri to a file in the cache directory that the toolkit/app
+        // controls, so that it can be accessed.
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            outFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        Result.success(outFile)
+    } catch (ex : FileNotFoundException) {
+        Result.failure(ex)
     }
 }
 
@@ -506,18 +521,19 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
             size = it
         }
     }
-    // check if the size is within the limits
-    return@withContext if (size == 0L) {
-        Result.failure(EmptyAttachmentException())
-    } else if (size > maxAttachmentUploadSize) {
-        Result.failure(AttachmentSizeLimitExceededException(maxAttachmentUploadSize))
-    } else {
-        var result = Result.success(Unit)
-        context.readBytes(uri).onFailure {
-            result = Result.failure(it)
-        }.onSuccess { data ->
-            result = addAttachment(name, contentType, data)
-        }
-        result
+    // Cache the file from the URI and get the cached file reference. This is required to get a file
+    // path that can be accessed by the toolkit/app.
+    val cachedFile = context.cacheFile(uri, name).getOrNull()
+    // Add the attachment if it passes all the checks
+    return@withContext when {
+        size == 0L -> Result.failure(EmptyAttachmentException())
+        size > maxAttachmentUploadSize -> Result.failure(
+            exception = AttachmentSizeLimitExceededException(maxAttachmentUploadSize)
+        )
+        cachedFile == null -> Result.failure(
+            exception = Exception(context.getString(R.string.attachment_error))
+        )
+
+        else -> addAttachment(name, contentType, cachedFile.absolutePath)
     }
 }
