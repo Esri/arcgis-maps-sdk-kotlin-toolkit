@@ -18,9 +18,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
-import android.net.Uri
-import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -34,23 +31,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.core.database.getLongOrNull
-import androidx.core.database.getStringOrNull
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentErrorDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentSizeLimitExceededException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.DeleteAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.EmptyAttachmentException
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.maxAttachmentUploadSize
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.addAttachmentFromUri
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
 import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -62,14 +54,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.internal.components.dialogs.ErrorDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
 import java.time.Instant
 
 /**
@@ -426,36 +414,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
 }
 
 /**
- * Copies the content from the specified [uri] to a file in the cache directory.
- *
- * @param uri The uri of the file to copy.
- * @param fileName The name of the file to create in the cache directory.
- * @return The file in the cache directory that contains the copied content.
- */
-internal suspend fun Context.cacheFile(
-    uri: Uri,
-    fileName: String
-): Result<File> = withContext(Dispatchers.IO) {
-    return@withContext try {
-        val outFile = cacheDir.resolve(fileName)
-        // Delete the file if it already exists
-        if (outFile.exists()) {
-            outFile.delete()
-        }
-        // Copy the content from the uri to a file in the cache directory that the toolkit/app
-        // controls, so that it can be accessed.
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            outFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        Result.success(outFile)
-    } catch (ex : FileNotFoundException) {
-        Result.failure(ex)
-    }
-}
-
-/**
  * Computes the [WindowSizeClass] of the device.
  */
 internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
@@ -476,64 +434,4 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
 
 internal fun showError(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-}
-
-/**
- * Adds an attachment to the [AttachmentElementState] from the specified [uri]. Since the data from
- * the uri is read into memory, there is a limit of 50 MB for the size of the attachment.
- *
- * @param uri The uri of the attachment.
- * @param context The context.
- * @param useDefaultName Whether to use the default name from the uri. If false, a new name will be generated
- * based on the content type of the attachment.
- */
-private suspend fun AttachmentElementState.addAttachmentFromUri(
-    uri: Uri,
-    context: Context,
-    useDefaultName: Boolean
-): Result<Unit> = withContext(Dispatchers.IO) {
-    // get the content type of the uri
-    val contentType = context.contentResolver.getType(uri) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // get the file extension from the content type
-    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType) ?: run {
-        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-    }
-    // generate a name for the attachment
-    var name = getNewAttachmentNameForContentType(contentType, extension)
-    // size of the attachment
-    var size = 0L
-    // get the name and size of the attachment
-    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        cursor.moveToFirst()
-        val nameIndex =
-            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-        // use the default file name from the uri if available
-        if (useDefaultName) {
-            cursor.getStringOrNull(nameIndex)?.let {
-                name = it
-            }
-        }
-        // update the size
-        cursor.getLongOrNull(sizeIndex)?.let {
-            size = it
-        }
-    }
-    // Cache the file from the URI and get the cached file reference. This is required to get a file
-    // path that can be accessed by the toolkit/app.
-    val cachedFile = context.cacheFile(uri, name).getOrNull()
-    // Add the attachment if it passes all the checks
-    return@withContext when {
-        size == 0L -> Result.failure(EmptyAttachmentException())
-        size > maxAttachmentUploadSize -> Result.failure(
-            exception = AttachmentSizeLimitExceededException(maxAttachmentUploadSize)
-        )
-        cachedFile == null -> Result.failure(
-            exception = Exception(context.getString(R.string.attachment_error))
-        )
-
-        else -> addAttachment(name, contentType, cachedFile.absolutePath)
-    }
 }
