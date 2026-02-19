@@ -19,9 +19,10 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
+import android.content.Context
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import androidx.core.net.toUri
@@ -48,7 +49,7 @@ public suspend fun AuthenticationManager.signOut() {
 
 /**
  * Launches the custom tabs activity with the provided authorize URL. The resulting intent will
- * launch using an Incognito tab if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
+ * launch using a private web browser session if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
  * is true.
  *
  * @receiver an [Activity] used to launch the [CustomTabsIntent].
@@ -57,7 +58,7 @@ public suspend fun AuthenticationManager.signOut() {
  *
  * @since 200.2.0
  */
-@Deprecated (
+@Deprecated(
     message = "since 200.8.0. Use Activity.launchCustomTabs(BrowserAuthenticationChallenge) " +
             "instead as it provides support for IAP sign-in/sign-out.",
     replaceWith = ReplaceWith("Activity.launchCustomTabs(BrowserAuthenticationChallenge)")
@@ -72,8 +73,11 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
 /**
  * Launches the custom tabs activity with the provided browser authentication challenge.
  *
- * This method determines the appropriate URL and whether to use Incognito mode based on the type of
+ * This method determines the appropriate URL and whether to use a private web browser session based on the type of
  * [BrowserAuthenticationChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
+ *
+ * Additionally, if the device does not have a default browser that supports Custom Tabs, it cancels the authentication
+ * challenge with a [CustomTabsNotFoundException].
  *
  * @receiver an [Activity] used to launch the [CustomTabsIntent].
  * @param pendingBrowserAuthenticationChallenge the [BrowserAuthenticationChallenge] containing the necessary information
@@ -82,13 +86,25 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
  * @since 200.8.0
  */
 public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
-    val (url, useIncognito) = when (pendingBrowserAuthenticationChallenge) {
-        is BrowserAuthenticationChallenge.OAuthUserSignIn ->
-            pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-        is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
-        is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+    if (!canDefaultBrowserLaunchCustomTabs()) {
+        val exception = CustomTabsNotFoundException()
+        when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignIn ->
+                pendingBrowserAuthenticationChallenge.iapSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignOut ->
+                pendingBrowserAuthenticationChallenge.iapSignOut.cancel(exception)
+        }
+    } else {
+        val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+            is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
+            is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+        }
+        launchCustomTabs(url, preferPrivateWebBrowserSession)
     }
-    launchCustomTabs(url, useIncognito)
 }
 
 
@@ -97,14 +113,23 @@ public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: Brow
  *
  * @param authorizeUrl the authorize URL used by the custom tabs browser to prompt for OAuth
  * user credentials.
- * @param useIncognito whether the [CustomTabsIntent] should use Incognito mode, if available.
+ * @param preferPrivateWebBrowserSession whether the [CustomTabsIntent] should use a private web browser session, if available.
  *
- * @since 200.2.0
+ * @since 200.8.1
  */
-internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boolean?) {
-    CustomTabsIntent.Builder().build().apply {
-        if (useIncognito == true) {
-            intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
+internal fun Activity.launchCustomTabs(authorizeUrl: String, preferPrivateWebBrowserSession: Boolean?) {
+    CustomTabsIntent.Builder().apply {
+        if (preferPrivateWebBrowserSession == true) {
+            setEphemeralBrowsingEnabled(true)
         }
-    }.launchUrl(this, authorizeUrl.toUri())
+    }.build().launchUrl(this, authorizeUrl.toUri())
 }
+
+/**
+ * Checks if the device has a default browser that supports Custom Tabs.
+ *
+ * @return true if a default browser that supports Custom Tabs is found, false otherwise.
+ * @since 300.0.0
+ */
+internal fun Context.canDefaultBrowserLaunchCustomTabs(): Boolean =
+    CustomTabsClient.getPackageName(this, emptyList())?.isNotEmpty() ?: false

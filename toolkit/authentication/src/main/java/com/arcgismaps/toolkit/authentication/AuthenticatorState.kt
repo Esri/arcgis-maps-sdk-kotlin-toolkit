@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Intent
 import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -270,19 +271,24 @@ private class AuthenticatorStateImpl(
     private suspend fun handleOAuthOrTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse {
-        oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
-            val credential = config.handleOAuthChallenge { _pendingOAuthUserSignIn.value = it }
-                .also {
-                    // At this point we have suspended until the OAuth workflow is complete, so
-                    // we can get rid of the pending OAuth sign in. Composables observing this can know
-                    // to remove the OAuth prompt when this value changes.
-                    _pendingOAuthUserSignIn.value = null
-                }
-                .getOrThrow()
-            return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
-        }
+        return oAuthUserConfigurations.firstOrNull { it.canBeUsedForUrl(challenge.requestUrl) }?.let { config ->
+            val challengeResult = config.handleOAuthChallenge {
+                _pendingOAuthUserSignIn.value = it
+            }
 
-        return handleArcGISTokenChallenge(challenge)
+            // At this point we have suspended until the OAuth workflow is complete, so
+            // we can get rid of the pending OAuth sign in. Composables observing this can know
+            // to remove the OAuth prompt when this value changes.
+            _pendingOAuthUserSignIn.value = null
+
+            challengeResult.fold(
+                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                onFailure = {
+                    if (it is OperationCancelledException) ArcGISAuthenticationChallengeResponse.Cancel
+                    else ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
+                }
+            )
+        } ?: handleArcGISTokenChallenge(challenge)
     }
 
     override suspend fun signOut(): Result<Unit> = runCatchingCancellable {
@@ -318,20 +324,23 @@ private class AuthenticatorStateImpl(
      * @since 200.8.0
      */
     private suspend fun handleIapChallenge(requestUrl: String): ArcGISAuthenticationChallengeResponse {
-        val matchingIapConfiguration = iapConfigurations.firstOrNull {
-            it.canBeUsedForUrl(requestUrl)
-        }
-        return matchingIapConfiguration?.let {
-            val iapCredential = it.handleIapChallenge { onPendingSignIn -> _pendingIapSignIn.value = onPendingSignIn }
-                .also {
-                    // At this point we have suspended until the IAP workflow is complete, so
-                    // we can get rid of the pending IAP sign in. Composables observing this can know
-                    // to remove the IAP prompt when this value changes.
-                    _pendingIapSignIn.value = null
-                }
-                .getOrThrow()
+        return iapConfigurations.firstOrNull { it.canBeUsedForUrl(requestUrl) }?.let { config ->
+            val iapCredentialResult = config.handleIapChallenge { onPendingSignIn ->
+                _pendingIapSignIn.value = onPendingSignIn
+            }
 
-            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(iapCredential)
+            // At this point we have suspended until the IAP workflow is complete, so
+            // we can get rid of the pending IAP sign in. Composables observing this can know
+            // to remove the IAP prompt when this value changes.
+            _pendingIapSignIn.value = null
+
+            iapCredentialResult.fold(
+                onSuccess = { ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it) },
+                onFailure = {
+                    if (it is OperationCancelledException) ArcGISAuthenticationChallengeResponse.Cancel
+                    else ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
+                }
+            )
         } ?: ArcGISAuthenticationChallengeResponse.ContinueAndFail
     }
 

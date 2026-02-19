@@ -24,20 +24,24 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
-private const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
+internal const val KEY_INTENT_EXTRA_URL = "KEY_INTENT_EXTRA_URL"
 private const val KEY_INTENT_EXTRA_RESPONSE_URI = "KEY_INTENT_EXTRA_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_TYPE = "KEY_INTENT_EXTRA_PROMPT_TYPE"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE = "KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE"
+internal const val KEY_INTENT_EXTRA_EXCEPTION_MESSAGE = "KEY_INTENT_EXTRA_EXCEPTION_MESSAGE"
 
-private const val RESULT_CODE_SUCCESS = 1
-private const val RESULT_CODE_CANCELED = 2
+
+internal const val RESULT_CODE_SUCCESS = 1
+internal const val RESULT_CODE_CANCELED = 2
 
 private const val VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT = "SIGN_OUT"
+internal const val VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB = "Default browser does not support Custom Tabs."
 
 /**
  * Handles OAuth sign-in and Identity-Aware Proxy (IAP) sign-in/sign-out flows by launching
- * a Custom Tab for user interaction.
+ * a Custom Tab for user interaction. If Custom Tabs are not supported by the default browser,
+ * sign-in will fail with an error of type [CustomTabsNotFoundException].
  *
  * This activity must be registered in the application's manifest.
  * Configuration depends on the app's requirements:
@@ -128,8 +132,15 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(KEY_INTENT_EXTRA_URL)
         url?.let {
-            val shouldUseIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            launchCustomTabs(it, shouldUseIncognito)
+            if (canDefaultBrowserLaunchCustomTabs()) {
+                val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+                launchCustomTabs(
+                    authorizeUrl = it,
+                    preferPrivateWebBrowserSession = preferPrivateWebBrowserSession
+                )
+            } else {
+                finishWithError(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)
+            }
         }
     }
 
@@ -138,7 +149,7 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
         super.onWindowFocusChanged(hasFocus)
 
         // We only want to respond to focus changed events when this activity is in "resumed" state.
-        // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
+        // On some devices we get unexpected focus changed events with hasFocus true which cause this Activity
         // to be finished (destroyed) prematurely, for example:
         // - On Oreo log in to portal with OAuth
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
@@ -189,27 +200,40 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
     }
 
     /**
-     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
-     * string as output. The output string represents a redirect URI as the result of an OAuth user
-     * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [AuthenticationActivity] for a result.
-     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
-     * for more details.
+     * Finishes this activity with a canceled result code and an error message.
+     *
+     * @since 300.0.0
+     */
+    private fun finishWithError(errorMessage: String) {
+        val newIntent = Intent().apply {
+            putExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE, errorMessage)
+        }
+        setResult(RESULT_CODE_CANCELED, newIntent)
+        finish()
+    }
+
+    /**
+     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns an [OAuthUserSignInResult] as output.
+     * The output encapsulates the result of an OAuth sign in prompt, which can be a success with a redirect URI,
+     * a failure with an exception, or a cancellation.
      *
      * @since 200.8.0
      */
-    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    internal class OAuthUserSignInContract : ActivityResultContract<OAuthUserSignIn, OAuthUserSignInResult>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input.authorizeUrl)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            } else {
-                null
+        override fun parseResult(resultCode: Int, intent: Intent?): OAuthUserSignInResult {
+            val redirectUrl = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS && redirectUrl != null -> OAuthUserSignInResult.Success(redirectUrl)
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    OAuthUserSignInResult.Failure(CustomTabsNotFoundException())
+                else -> OAuthUserSignInResult.Canceled
             }
         }
     }
@@ -224,17 +248,20 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    internal class IapSignInContract : ActivityResultContract<String, String?>() {
+    internal class IapSignInContract : ActivityResultContract<String, IapSignInResult>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
-            } else {
-                null
+        override fun parseResult(resultCode: Int, intent: Intent?): IapSignInResult {
+            val redirectUri = intent?.getStringExtra(KEY_INTENT_EXTRA_RESPONSE_URI)
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS && !redirectUri.isNullOrEmpty() -> IapSignInResult.Success(redirectUri)
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    IapSignInResult.Failure(CustomTabsNotFoundException())
+                else -> IapSignInResult.Canceled
             }
         }
     }
@@ -247,18 +274,63 @@ public class AuthenticationActivity internal constructor() : ComponentActivity()
      *
      * @since 200.8.0
      */
-    internal class IapSignOutContract : ActivityResultContract<String, Boolean>() {
+    internal class IapSignOutContract : ActivityResultContract<String, IapSignOutResult>() {
         override fun createIntent(context: Context, input: String): Intent =
             Intent(context, AuthenticationActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_URL, input)
                 putExtra(KEY_INTENT_EXTRA_PROMPT_TYPE, VALUE_INTENT_EXTRA_PROMPT_TYPE_SIGN_OUT)
             }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): Boolean {
-            return if (resultCode == RESULT_CODE_SUCCESS)
-                intent?.getBooleanExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, false) ?: false
-            else
-                false
+        override fun parseResult(resultCode: Int, intent: Intent?): IapSignOutResult {
+            val exceptionMessage = intent?.getStringExtra(KEY_INTENT_EXTRA_EXCEPTION_MESSAGE)
+            return when {
+                resultCode == RESULT_CODE_SUCCESS -> {
+                    val signOutResponse =
+                        intent?.getBooleanExtra(KEY_INTENT_EXTRA_IAP_SIGN_OUT_RESPONSE, false) ?: false
+                    IapSignOutResult.Success(signOutResponse)
+                }
+                exceptionMessage == VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB ->
+                    IapSignOutResult.Failure(CustomTabsNotFoundException())
+                else -> IapSignOutResult.Canceled
+            }
         }
     }
+
+    /**
+     * Represents the result of an OAuth sign-in operation.
+     * @since 300.0.0
+     */
+    internal sealed class OAuthUserSignInResult {
+        data class Success(val redirectUri: String) : OAuthUserSignInResult()
+        data class Failure(val exception: Exception) : OAuthUserSignInResult()
+        data object Canceled : OAuthUserSignInResult()
+    }
+
+    /**
+     * Represents the result of an IAP sign-in operation.
+     * @since 300.0.0
+     */
+    internal sealed class IapSignInResult {
+        data class Success(val redirectUri: String) : IapSignInResult()
+        data class Failure(val exception: Exception) : IapSignInResult()
+        data object Canceled : IapSignInResult()
+    }
+
+    /**
+     * Represents the result of an IAP sign-out operation.
+     * @since 300.0.0
+     */
+    internal sealed class IapSignOutResult {
+        data class Success(val result: Boolean) : IapSignOutResult()
+        data class Failure(val exception: Exception) : IapSignOutResult()
+        data object Canceled : IapSignOutResult()
+    }
 }
+
+/**
+ * Exception thrown when the default browser does not support Custom Tabs.
+ *
+ * @since 300.0.0
+ */
+public class CustomTabsNotFoundException internal constructor() :
+    Exception(VALUE_INTENT_EXTRA_EXCEPTION_MESSAGE_NO_CUSTOM_TAB)

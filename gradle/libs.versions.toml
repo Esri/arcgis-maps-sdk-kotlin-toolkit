@@ -1,7 +1,7 @@
 [versions]
 activityCompose = "1.10.1"
 androidGradlePlugin = "8.9.2"
-androidXBrowser = "1.8.0"
+androidXBrowser = "1.9.0"
 coilBOM = "2.5.0"
 composeBOM = "2025.04.01"
 androidxCamera = "1.4.2"
@@ -97,6 +97,7 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

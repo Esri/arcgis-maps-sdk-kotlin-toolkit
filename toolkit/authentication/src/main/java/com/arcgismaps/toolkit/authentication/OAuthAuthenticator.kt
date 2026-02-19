@@ -30,7 +30,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 
 /**
- * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
+ * Launches a Custom Tab using the url in [oAuthPendingSignIn] and processes the result on completion.
  *
  * @see AuthenticationActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
@@ -61,11 +61,17 @@ internal fun OAuthAuthenticator(
         // composition and a new `didLaunch` state variable will be initialized again to `false`.
         var didLaunch by rememberSaveable(key = oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
-            rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { redirectUrl ->
-                redirectUrl?.let {
-                    oAuthPendingSignIn.complete(redirectUrl)
-                } ?: run {
-                    oAuthPendingSignIn.cancel()
+            rememberLauncherForActivityResult(contract = AuthenticationActivity.OAuthUserSignInContract()) { signInResult ->
+                when (signInResult) {
+                    is AuthenticationActivity.OAuthUserSignInResult.Success -> {
+                        oAuthPendingSignIn.complete(signInResult.redirectUri)
+                    }
+                    is AuthenticationActivity.OAuthUserSignInResult.Failure -> {
+                        oAuthPendingSignIn.cancel(signInResult.exception)
+                    }
+                    is AuthenticationActivity.OAuthUserSignInResult.Canceled -> {
+                        oAuthPendingSignIn.cancel()
+                    }
                 }
             }
         // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending

@@ -32,8 +32,8 @@ private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_
 private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 
-private const val RESULT_CODE_SUCCESS = 1
-private const val RESULT_CODE_CANCELED = 2
+private const val RESULT_CODE_SUCCESS_OAUTH = 1
+private const val RESULT_CODE_CANCELED_OAUTH = 2
 
 /**
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
@@ -106,9 +106,9 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
             // authorize URL should be a valid string since we are adding it in the ActivityResultContract
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
-            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+            val preferPrivateWebBrowserSession = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
             authorizeUrl?.let {
-                launchCustomTabs(it, useIncognito)
+                launchCustomTabs(it, preferPrivateWebBrowserSession)
             }
         }
     }
@@ -127,7 +127,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             // if we got here the user must have pressed the back button or the x button while the
             // custom tab was visible - finish by cancelling OAuth sign in
-            setResult(RESULT_CODE_CANCELED, Intent())
+            setResult(RESULT_CODE_CANCELED_OAUTH, Intent())
             finish()
         }
     }
@@ -151,10 +151,10 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             val newIntent = Intent().apply {
                 putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uriString)
             }
-            setResult(RESULT_CODE_SUCCESS, newIntent)
+            setResult(RESULT_CODE_SUCCESS_OAUTH, newIntent)
             finish()
         } ?: {
-            setResult(RESULT_CODE_CANCELED)
+            setResult(RESULT_CODE_CANCELED_OAUTH)
             finish()
         }
     }
@@ -183,7 +183,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
+            return if (resultCode == RESULT_CODE_SUCCESS_OAUTH) {
                 intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
             } else {
                 null
