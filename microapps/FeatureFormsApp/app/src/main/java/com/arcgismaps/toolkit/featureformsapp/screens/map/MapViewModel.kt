@@ -454,18 +454,18 @@ class MapViewModel @Inject constructor(
      *
      * If there are no errors, the feature is refreshed and the UI state is set to not editing.
      */
-    private suspend fun applyEditsToService(featureForm: FeatureForm) {
+    private suspend fun applyEditsToService(featureForm: FeatureForm) = withContext(Dispatchers.IO) {
         val serviceFeatureTable = featureForm.feature.featureTable as? ServiceFeatureTable ?: run {
             _error.value = Error(
                 title = "Failed to sync edits with the service",
                 details = "Cannot save edits without a ServiceFeatureTable"
             )
-            return
+            return@withContext
         }
         if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
             // if there are no local edits across all the tables in the service geodatabase
             // then return as there is nothing to sync
-            return
+            return@withContext
         }
         // check if the service supports applyEdits using the service geodatabase
         val canUseServiceGeodatabaseApplyEdits =

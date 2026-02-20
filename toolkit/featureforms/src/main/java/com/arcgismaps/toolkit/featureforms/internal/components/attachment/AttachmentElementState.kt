@@ -21,8 +21,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.ThumbnailUtils
+import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
+import android.util.Log
 import android.util.Size
+import android.webkit.MimeTypeMap
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -39,11 +43,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
+import androidx.core.database.getLongOrNull
+import androidx.core.database.getStringOrNull
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -58,12 +65,12 @@ import java.util.Objects
 /**
  * The maximum attachment size in bytes that can be added.
  */
-internal const val maxAttachmentUploadSize = 50_000_000L
+internal const val maxAttachmentUploadSize = 999_000_000L
 
 /**
  * The maximum attachment size in bytes that can be downloaded.
  */
-internal const val maxAttachmentsDownloadSize = 999_999_999L
+internal const val maxAttachmentsDownloadSize = 999_000_000L
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -93,7 +100,7 @@ internal class AttachmentElementState(
      * The attachments associated with the form element. This list is observable and will update
      * the UI when attachments are added or removed.
      */
-    val attachments : List<FormAttachmentState>
+    val attachments: List<FormAttachmentState>
         get() = _attachments
 
     /**
@@ -148,35 +155,36 @@ internal class AttachmentElementState(
     }
 
     /**
-     * Adds an attachment with the given [name], [contentType], and [data].
+     * Adds an attachment with the given [name], [contentType], and [filePath].
      */
-    fun addAttachment(name: String, contentType: String, data: ByteArray): Result<Unit> {
-        val formAttachment = formElement.addAttachmentOrNull(name, contentType, data)
-            ?: return Result.failure(Exception("Failed to add attachment"))
-        // create a new state
-        val state = FormAttachmentState(
-            name = formAttachment.name,
-            size = formAttachment.size,
-            contentType = formAttachment.contentType,
-            type = formAttachment.type,
-            elementStateId = id,
-            deleteAttachment = { deleteAttachment(formAttachment) },
-            scope = scope,
-            formAttachment = formAttachment
-        )
-        // add the new state to the beginning of the list and scroll to the new attachment in
-        // one atomic operation
-        Snapshot.withMutableSnapshot {
-            _attachments.add(0, state)
-            lazyListState.requestScrollToItem(0)
-        }
-        // load the new attachment
-        state.loadWithParentScope()
-        // scroll to the new attachment after a delay to allow the recomposition to complete
-        scope.launch {
-            evaluateExpressions()
-        }
-        return Result.success(Unit)
+    suspend fun addAttachment(name: String, contentType: String, filePath: String): Result<Unit> {
+        return formElement.addAttachment(
+            name = name,
+            contentType = contentType,
+            filePath = filePath
+        ).onSuccess { formAttachment ->
+            // create a new state
+            val attachment = FormAttachmentState(
+                name = formAttachment.name,
+                size = formAttachment.size,
+                contentType = formAttachment.contentType,
+                type = formAttachment.type,
+                elementStateId = id,
+                deleteAttachment = { deleteAttachment(formAttachment) },
+                scope = scope,
+                formAttachment = formAttachment
+            )
+            // add the new state to the beginning of the list and scroll to the new attachment in
+            // one atomic operation
+            Snapshot.withMutableSnapshot {
+                _attachments.add(0, attachment)
+                lazyListState.requestScrollToItem(0)
+            }
+            // load the new attachment
+            attachment.loadWithParentScope()
+            // evaluate expressions after the attachment is added
+            scope.launch { evaluateExpressions() }
+        }.map {}
     }
 
     /**
@@ -283,7 +291,7 @@ internal class FormAttachmentState(
     /**
      * A callback that is invoked when the attachment fails to load.
      */
-    private var onLoadErrorCallback : ((Throwable) -> Unit)? = null
+    private var onLoadErrorCallback: ((Throwable) -> Unit)? = null
 
     /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
@@ -316,7 +324,10 @@ internal class FormAttachmentState(
             result = when {
                 formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
                 formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
-                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize))
+                formAttachment.size > maxAttachmentsDownloadSize -> Result.failure(
+                    AttachmentSizeLimitExceededException(maxAttachmentsDownloadSize)
+                )
+
                 else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
@@ -487,12 +498,117 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
 }
 
 /**
+ * Adds an attachment to the [AttachmentElementState] from the specified [uri].
+ *
+ * @param uri The uri of the attachment.
+ * @param context The context.
+ * @param useDefaultName Whether to use the default name from the uri. If false, a new name will be generated
+ * based on the content type of the attachment.
+ */
+internal suspend fun AttachmentElementState.addAttachmentFromUri(
+    uri: Uri,
+    context: Context,
+    useDefaultName: Boolean
+): Result<Unit> = withContext(Dispatchers.IO) {
+    // get the content type of the uri
+    val contentType = context.contentResolver.getType(uri) ?: run {
+        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
+    }
+    // get the file extension from the content type
+    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType) ?: run {
+        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
+    }
+    // generate a name for the attachment
+    var name = getNewAttachmentNameForContentType(contentType, extension)
+    // size of the attachment
+    var size = 0L
+    // get the name and size of the attachment
+    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        cursor.moveToFirst()
+        val nameIndex =
+            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        // use the default file name from the uri if available
+        if (useDefaultName) {
+            cursor.getStringOrNull(nameIndex)?.let {
+                name = it
+            }
+        }
+        // update the size
+        cursor.getLongOrNull(sizeIndex)?.let {
+            size = it
+        }
+    }
+
+    // Add the attachment if it passes all the checks
+    return@withContext when {
+        size == 0L -> Result.failure(EmptyAttachmentException())
+        size > maxAttachmentUploadSize -> Result.failure(
+            exception = AttachmentSizeLimitExceededException(maxAttachmentUploadSize)
+        )
+
+        else -> {
+            // Cache the file from the URI and get the cached file reference. This is required to get a file
+            // path that can be accessed by the toolkit/app.
+            context.cacheFile(uri, name).fold(
+                onSuccess = { cachedFile ->
+                    addAttachment(name, contentType, cachedFile.absolutePath).also {
+                        // delete the cached file after attempting to add the attachment since it's
+                        // no longer needed
+                        try {
+                            cachedFile.delete()
+                        } catch (ex: Exception) {
+                            Log.w(
+                                "FeatureFormToolkit",
+                                "Unable to clear cached attachment data",
+                                ex
+                            )
+                        }
+                    }
+                },
+                onFailure = { ex -> Result.failure(ex) }
+            )
+        }
+    }
+}
+
+
+/**
+ * Copies the content from the specified [uri] to a file in the cache directory given by
+ * [Context.getCacheDir].
+ *
+ * @param uri The uri of the file to copy.
+ * @param fileName The name of the file to create in the cache directory.
+ * @return The file in the cache directory that contains the copied content.
+ */
+internal suspend fun Context.cacheFile(
+    uri: Uri,
+    fileName: String
+): Result<File> = runCatching {
+    withContext(Dispatchers.IO) {
+        val outFile = cacheDir.resolve(fileName)
+        // Delete the file if it already exists
+        if (outFile.exists()) {
+            outFile.delete()
+        }
+        // Copy the content from the uri to a file in the cache directory that the toolkit/app
+        // controls, so that it can be accessed.
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            outFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return@withContext outFile
+    }
+}
+
+/**
  * Exception indicating that the attachment size exceeds the limit.
  *
  * @param limit The attachment size limit in bytes.
  */
 internal class AttachmentSizeLimitExceededException(val limit: Long) : Exception(
-    "Attachment size exceeds the limit of ${limit/1_000_000} MB"
+    "Attachment size exceeds the limit of ${limit / 1_000_000} MB"
 )
 
 /**
