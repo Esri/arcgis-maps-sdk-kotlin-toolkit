@@ -65,7 +65,7 @@ import java.util.Objects
 /**
  * The maximum attachment size in bytes that can be added.
  */
-internal const val maxAttachmentUploadSize = 999_999_999L
+internal const val maxAttachmentUploadSize = 999_000_000L
 
 /**
  * The maximum attachment size in bytes that can be downloaded.
