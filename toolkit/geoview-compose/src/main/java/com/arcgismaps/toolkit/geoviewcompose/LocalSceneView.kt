@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,6 +40,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arcgismaps.exceptions.ArcGISException
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
@@ -291,6 +294,8 @@ private fun LocalSceneViewEventHandler(
         onCriticalErrorChanged
     )
     val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
+    var criticalErrorCode by rememberSaveable { mutableIntStateOf(0) }
+    var warningCodes = rememberSaveable { mutableStateListOf<Int>() }
 
     LaunchedEffect(Unit) {
         launch {
@@ -375,12 +380,23 @@ private fun LocalSceneViewEventHandler(
         }
         launch {
             localSceneView.criticalError.collect {
-                currentOnCriticalErrorChanged?.invoke(it)
+                if (it is ArcGISException && it.errorCode != criticalErrorCode) {
+                    criticalErrorCode = it.errorCode
+                    currentOnCriticalErrorChanged?.invoke(it)
+                }
             }
         }
         launch {
             localSceneView.warnings.collect {
-                currentOnWarningsChanged?.invoke(it)
+                if (it.isNotEmpty()) {
+                    val codes = it.filterIsInstance<ArcGISException>()
+                        .map { arcGISException -> arcGISException.errorCode }
+                    if (!(warningCodes.containsAll(codes) && codes.containsAll(warningCodes))) {
+                        warningCodes.clear()
+                        warningCodes.addAll(codes)
+                        currentOnWarningsChanged?.invoke(it)
+                    }
+                }
             }
         }
     }
