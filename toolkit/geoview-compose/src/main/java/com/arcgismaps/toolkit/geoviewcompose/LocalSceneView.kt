@@ -135,6 +135,8 @@ import kotlinx.coroutines.launch
  * LocalSceneView changes
  * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
  * LocalSceneView changes
+ * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
+ * is changed
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -168,6 +170,7 @@ public fun LocalSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -233,7 +236,8 @@ public fun LocalSceneView(
         onAttributionTextChanged = onAttributionTextChanged,
         onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
         onGeoModelErrorChanged = onGeoModelErrorChanged,
-        onCriticalErrorChanged = onCriticalErrorChanged
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged
     )
 
     ViewpointHandler(
@@ -269,7 +273,8 @@ private fun LocalSceneViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)?,
-    onCriticalErrorChanged: ((Throwable?) -> Unit)?
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
+    onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -289,6 +294,7 @@ private fun LocalSceneViewEventHandler(
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
     val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
     val currentOnCriticalErrorChanged by rememberUpdatedState(onCriticalErrorChanged)
+    val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -379,6 +385,11 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.criticalError.collect {
                 currentOnCriticalErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.warnings.collect {
+                currentOnWarningsChanged?.invoke(it)
             }
         }
     }
