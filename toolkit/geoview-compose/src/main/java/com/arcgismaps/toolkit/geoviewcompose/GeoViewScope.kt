@@ -394,11 +394,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
-            val focusRequester = remember(location) { FocusRequester() }
-            LaunchedEffect(location) {
-                focusRequester.requestFocus()
-            }
-
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = leaderScreenCoordinate,
@@ -435,11 +430,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .focusRequester(focusRequester)
-                            .focusable()
-                            .semantics(mergeDescendants = true) {
-                                liveRegion = LiveRegionMode.Polite
-                            },
                     ) {
                         content.invoke(this)
                     }
