@@ -133,7 +133,7 @@ open class BaseMapViewModel(application: Application) : AndroidViewModel(applica
  * @constructor to be invoked by injection
  */
 @HiltViewModel
-class MapViewModel @Inject constructor(
+open class MapViewModel @Inject constructor(
     portalItemRepository: PortalItemRepository,
     application: Application,
     @ApplicationScope private val scope: CoroutineScope
@@ -143,7 +143,7 @@ class MapViewModel @Inject constructor(
     var portalItem: PortalItem = portalItemRepository.activePortalItem
         ?: throw IllegalStateException("No portal item selected")
 
-    val map: ArcGISMap = ArcGISMap(portalItem)
+    open val map: ArcGISMap = ArcGISMap(portalItem)
 
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
 

@@ -100,6 +100,7 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
@@ -119,7 +120,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 @Suppress("DEPRECATION")
-fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
+fun MapScreen(
+    mapViewModel: MapViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit = {},
+    onViewOfflineMapAreas: (ArcGISMap) -> Unit = {}
+) {
     val uiState by mapViewModel.uiState
     val scope = rememberCoroutineScope()
     val featureFormState = remember(uiState) {
@@ -153,6 +158,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     isNavigationEnabled = mapViewModel.navigationEnabled,
                     onToggleNavigation = {
                         mapViewModel.toggleNavigationEnabled()
+                    },
+                    onViewOfflineMapAreas = {
+                        onViewOfflineMapAreas(mapViewModel.map)
                     },
                     onBackPressed = onBackPressed
                 )
@@ -267,6 +275,17 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     state = rememberedState,
                     onSelectFeature = mapViewModel::selectFeature,
                     onDismissRequest = mapViewModel::setDefaultState
+                )
+            }
+            AnimatedVisibility(
+                visible = uiState is UIState.SelectFeature,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(durationMillis = 10)),
+            ) {
+                OfflineMapAreasSheet(
+                    state = mapViewModel.offlineMapState,
+                    onDismiss = mapViewModel::setDefaultState,
+                    onOfflineMapSelected = {}
                 )
             }
         }
@@ -468,6 +487,7 @@ fun TopFormBar(
     isEditing: Boolean,
     isNavigationEnabled: Boolean,
     onToggleNavigation: () -> Unit = {},
+    onViewOfflineMapAreas: () -> Unit = {},
     onBackPressed: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -508,6 +528,12 @@ fun TopFormBar(
                         }
                     },
                     onClick = onToggleNavigation
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(text = "View Offline Map Areas")
+                    },
+                    onClick = onViewOfflineMapAreas
                 )
             }
         }

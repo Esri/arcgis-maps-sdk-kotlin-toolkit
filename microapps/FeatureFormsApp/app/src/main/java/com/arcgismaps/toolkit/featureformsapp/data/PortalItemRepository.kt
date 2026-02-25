@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.util.Log
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Item
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalFolder
@@ -57,11 +59,17 @@ class PortalItemRepository(
     var activePortalItem : PortalItem? = null
         private set
 
+    var activeOfflineMap : ArcGISMap? = null
+
     // to protect shared state of portalItems
     private val mutex = Mutex()
 
     fun setActivePortalItem(item: PortalItem?) {
         activePortalItem = item
+    }
+
+    fun setActiveOfflineMap(map: ArcGISMap?) {
+        activeOfflineMap = map
     }
 
     /**
