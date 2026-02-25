@@ -241,8 +241,8 @@ public fun FlyoverSceneView(
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
  * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
  *  on the FlyoverSceneView.
- * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView.
- * changes
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView
+ * changes.
  * @param content the content of the FlyoverSceneView.
  *
  * @since 300.0.0
