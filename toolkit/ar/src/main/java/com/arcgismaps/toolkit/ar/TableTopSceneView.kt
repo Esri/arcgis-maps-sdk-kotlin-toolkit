@@ -274,7 +274,7 @@ public fun TableTopSceneView(
  * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
  *  on the TableTopSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the TableTopSceneView
- * changes
+ * changes.
  * @param content the content of the TableTopSceneView.
  *
  * @since 300.0.0

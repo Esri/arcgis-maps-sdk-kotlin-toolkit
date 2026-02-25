@@ -310,7 +310,7 @@ public fun WorldScaleSceneView(
  * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
  *  on the WorldScaleSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the WorldScaleSceneView
- * changes
+ * changes.
  * @param content the content of the WorldScaleSceneView.
  *
  * @since 300.0.0
