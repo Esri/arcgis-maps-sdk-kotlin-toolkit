@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -270,6 +271,8 @@ public fun TableTopSceneView(
  * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView.
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the TableTopSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the TableTopSceneView
  * changes
  * @param content the content of the TableTopSceneView.
@@ -315,6 +318,7 @@ public fun TableTopSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
@@ -458,6 +462,7 @@ public fun TableTopSceneView(
                 onLongPress = onLongPress,
                 onTwoPointerTap = onTwoPointerTap,
                 onPan = onPan,
+                onInteractiveZooming = onInteractiveZooming,
                 onGeoModelErrorChanged = onGeoModelErrorChanged,
                 content = {
                     content?.let { content ->
