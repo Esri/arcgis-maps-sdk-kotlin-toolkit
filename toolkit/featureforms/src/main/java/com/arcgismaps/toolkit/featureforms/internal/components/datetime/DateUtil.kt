@@ -84,6 +84,23 @@ internal fun Instant.formattedDateTime(includeTime: Boolean): String {
 }
 
 /**
+ * Formats an Instant in SQL‑92 / RFC‑3339 format for the current timezone as required for date
+ * and date only queries.
+ *
+ * @param includeTime format the time if true
+ * @return a string formatted for the value in epoch milliseconds
+ * @since 300.0.0
+ */
+internal fun Instant.formattedDateTimeForQuery(includeTime: Boolean): String {
+    val formatter = if (includeTime) {
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    } else {
+        DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    }
+    return atZone(TimeZone.getDefault().toZoneId()).format(formatter)
+}
+
+/**
  * Parses a string to an Instant
  *
  * @param includeTime whether the time component is included in the string

@@ -85,7 +85,7 @@ import com.arcgismaps.data.Field
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTimeForQuery
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
@@ -576,7 +576,7 @@ private fun DatePickerModalInput(
             onConfirmed = {
                 val valueString = pickerState.selectedDateTimeMillis?.let {
                     val isDateField = field.fieldType == FieldType.Date
-                    Instant.ofEpochMilli(it).formattedDateTime(
+                    Instant.ofEpochMilli(it).formattedDateTimeForQuery(
                         includeTime = isDateField
                     )
                 }
