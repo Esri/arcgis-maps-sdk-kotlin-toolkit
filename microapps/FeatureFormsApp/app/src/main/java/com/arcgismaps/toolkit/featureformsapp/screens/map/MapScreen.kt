@@ -52,7 +52,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
@@ -88,6 +92,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,7 +100,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.computeWindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
@@ -105,7 +109,6 @@ import com.arcgismaps.mapping.layers.ArcGISSublayer
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.SubtypeFeatureLayer
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormEditingEvent
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
@@ -121,7 +124,7 @@ import kotlinx.coroutines.launch
 @Composable
 @Suppress("DEPRECATION")
 fun MapScreen(
-    mapViewModel: MapViewModel = hiltViewModel(),
+    mapViewModel: MapViewModel,
     onBackPressed: () -> Unit = {},
     onViewOfflineMapAreas: (ArcGISMap) -> Unit = {}
 ) {
@@ -139,7 +142,7 @@ fun MapScreen(
         }
     }
     val isBusy by mapViewModel.isBusy
-    val errors by mapViewModel.error
+    val message by mapViewModel.uiMessage
     val title = if (featureFormState != null) {
         "${stringResource(R.string.edit)} ${featureFormState.activeFeatureForm.feature.label}"
     } else {
@@ -156,11 +159,20 @@ fun MapScreen(
                     title = title,
                     isEditing = uiState is UIState.Editing,
                     isNavigationEnabled = mapViewModel.navigationEnabled,
+                    isOfflineMapAreasEnabled = uiState is UIState.NotEditing,
+                    isConnected = mapViewModel.isConnected,
+                    isSyncEnabled = uiState is UIState.NotEditing || uiState is UIState.Editing,
                     onToggleNavigation = {
                         mapViewModel.toggleNavigationEnabled()
                     },
                     onViewOfflineMapAreas = {
-                        onViewOfflineMapAreas(mapViewModel.map)
+                        mapViewModel.viewOfflineMapAreas()
+                    },
+                    onGoOnline = {
+                        mapViewModel.goOnline()
+                    },
+                    onSync = {
+                        mapViewModel.commitEdits()
                     },
                     onBackPressed = onBackPressed
                 )
@@ -178,12 +190,12 @@ fun MapScreen(
         Box {
             // show the composable map using the mapViewModel
             MapView(
-                arcGISMap = mapViewModel.map,
+                arcGISMap = mapViewModel.mapState.map,
                 mapViewProxy = mapViewModel.proxy,
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
-                onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
+                onSingleTapConfirmed = mapViewModel::onSingleTapConfirmed
             ) {
                 val identifyTaskLocation by mapViewModel.identifyTaskLocation
                 identifyTaskLocation?.let { mapPoint ->
@@ -233,13 +245,6 @@ fun MapScreen(
                     onDismiss = {
                         mapViewModel.setDefaultState()
                     },
-                    onEditingEvent = { event ->
-                        if (event is FeatureFormEditingEvent.SavedEdits) {
-                            scope.launch {
-                                mapViewModel.commitEdits(featureForm = event.featureForm)
-                            }
-                        }
-                    },
                     modifier = Modifier.padding(padding)
                 )
             }
@@ -278,14 +283,17 @@ fun MapScreen(
                 )
             }
             AnimatedVisibility(
-                visible = uiState is UIState.SelectFeature,
+                visible = uiState is UIState.OfflineMapAreas,
                 enter = fadeIn(),
                 exit = fadeOut(animationSpec = tween(durationMillis = 10)),
             ) {
+                val offlineMapState = remember(this) {
+                    (uiState as UIState.OfflineMapAreas).offlineMapState
+                }
                 OfflineMapAreasSheet(
-                    state = mapViewModel.offlineMapState,
+                    state = offlineMapState,
                     onDismiss = mapViewModel::setDefaultState,
-                    onOfflineMapSelected = {}
+                    modifier = Modifier.padding(padding)
                 )
             }
         }
@@ -293,14 +301,11 @@ fun MapScreen(
     if (isBusy) {
         ProgressDialog()
     }
-    errors?.let { nonNullErrors ->
-        ErrorDialog(
-            error = nonNullErrors,
-            onContinue = {
-                mapViewModel.clearErrors()
-            },
+    message?.let { nonNullMessage ->
+        MessageDialog(
+            message = nonNullMessage,
             onDismissRequest = {
-                mapViewModel.clearErrors()
+                mapViewModel.clearMessages()
             }
         )
     }
@@ -427,7 +432,6 @@ fun FeatureFormSheet(
     isNavigationEnabled: Boolean,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
     onDismiss: () -> Unit,
-    onEditingEvent: (FeatureFormEditingEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -473,8 +477,7 @@ fun FeatureFormSheet(
                         onShowOnMapRequest(feature)
                     }
                 },
-                onDismiss = onDismiss,
-                onEditingEvent = onEditingEvent
+                onDismiss = onDismiss
             )
         }
     }
@@ -486,8 +489,13 @@ fun TopFormBar(
     title: String,
     isEditing: Boolean,
     isNavigationEnabled: Boolean,
+    isOfflineMapAreasEnabled: Boolean,
+    isConnected: Boolean,
+    isSyncEnabled: Boolean,
     onToggleNavigation: () -> Unit = {},
     onViewOfflineMapAreas: () -> Unit = {},
+    onGoOnline: () -> Unit = {},
+    onSync: () -> Unit = {},
     onBackPressed: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -516,7 +524,8 @@ fun TopFormBar(
             }
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                shape = RoundedCornerShape(15.dp)
             ) {
                 DropdownMenuItem(
                     text = {
@@ -533,7 +542,64 @@ fun TopFormBar(
                     text = {
                         Text(text = "View Offline Map Areas")
                     },
-                    onClick = onViewOfflineMapAreas
+                    onClick = {
+                        onViewOfflineMapAreas()
+                        expanded = false
+                    },
+                    enabled = isOfflineMapAreasEnabled,
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.map_24px),
+                            contentDescription = "Offline Map Areas",
+                            tint = if (isOfflineMapAreasEnabled) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(text = "Go Online")
+                    },
+                    onClick = {
+                        onGoOnline()
+                        expanded = false
+                    },
+                    enabled = isConnected.not(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.cloud_24px),
+                            contentDescription = "Go Online"
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        val text = if (isConnected) {
+                            "Apply Changes"
+                        } else {
+                            "Sync"
+                        }
+                        Text(text = text)
+                    },
+                    onClick = {
+                        onSync()
+                        expanded = false
+                    },
+                    enabled = isSyncEnabled,
+                    leadingIcon = {
+                        val painter = if (isConnected) {
+                            painterResource(R.drawable.arrow_upload_ready_24px)
+                        } else {
+                            painterResource(R.drawable.sync_24px)
+                        }
+                        Icon(
+                            painter = painter,
+                            contentDescription = "sync"
+                        )
+                    }
                 )
             }
         }
@@ -559,40 +625,46 @@ fun ProgressDialog() {
 }
 
 @Composable
-fun ErrorDialog(
-    error: Error,
-    onContinue: () -> Unit,
+fun MessageDialog(
+    message: UIMessage,
     onDismissRequest: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            Button(onClick = onContinue) {
-                Text(text = stringResource(R.string.edit))
-            }
-        },
-        dismissButton = {
             Button(onClick = onDismissRequest) {
-                Text(text = stringResource(R.string.discard))
+                Text(text = stringResource(R.string.okay))
             }
         },
         icon = {
+            val icon = when (message.kind) {
+                UIMessage.Kind.Error -> Icons.Rounded.Warning
+                UIMessage.Kind.Info -> Icons.Rounded.Info
+                UIMessage.Kind.Success -> Icons.Rounded.CheckCircle
+                UIMessage.Kind.Warning -> Icons.Rounded.Warning
+            }
+            val tint = when (message.kind) {
+                UIMessage.Kind.Error -> MaterialTheme.colorScheme.error
+                UIMessage.Kind.Info -> MaterialTheme.colorScheme.primary
+                UIMessage.Kind.Success -> MaterialTheme.colorScheme.primary
+                UIMessage.Kind.Warning -> MaterialTheme.colorScheme.error
+            }
             Icon(
-                imageVector = Icons.Rounded.Warning,
-                contentDescription = "Warning",
-                tint = MaterialTheme.colorScheme.error
+                imageVector = icon,
+                contentDescription = "Message Icon",
+                tint = tint
             )
         },
         title = {
             Column {
-                Text(text = error.title, style = MaterialTheme.typography.headlineMedium)
-                Text(text = error.subTitle, style = MaterialTheme.typography.titleMedium)
+                Text(text = message.title, style = MaterialTheme.typography.headlineMedium)
+                Text(text = message.subTitle, style = MaterialTheme.typography.titleMedium)
             }
         },
         text = {
             // enable scrolling for the error details
             LazyColumn(modifier = Modifier.fillMaxWidth(fraction = 0.8f)) {
-                item { Text(text = error.details) }
+                item { Text(text = message.details) }
             }
         },
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
@@ -657,5 +729,5 @@ val ArcGISFeature.sublayer: ArcGISSublayer?
 @Preview
 @Composable
 private fun TopFormBarPreview() {
-    TopFormBar("Map", false, true)
+    TopFormBar("Map", false, true, true,true, true)
 }

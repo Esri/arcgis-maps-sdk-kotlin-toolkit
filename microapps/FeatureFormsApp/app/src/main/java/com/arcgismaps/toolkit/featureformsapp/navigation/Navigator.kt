@@ -191,7 +191,7 @@ fun AppNavigation(
             popExitTransition = { slideOutHorizontally { h -> h } }
         ) {
             MapScreen (
-                // navigate back on back pressed
+                mapViewModel = hiltViewModel(),
                 onBackPressed = navController::popBackStack,
                 onViewOfflineMapAreas = {
                     navController.navigate(NavigationRoute.OfflineMapAreasView)

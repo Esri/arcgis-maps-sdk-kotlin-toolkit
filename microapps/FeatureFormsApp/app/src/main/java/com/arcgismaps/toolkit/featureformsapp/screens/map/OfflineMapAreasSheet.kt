@@ -16,7 +16,9 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,13 +27,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
@@ -46,7 +47,6 @@ import com.arcgismaps.toolkit.offline.OfflineMapState
 fun OfflineMapAreasSheet(
     state: OfflineMapState,
     onDismiss: () -> Unit,
-    onOfflineMapSelected: (ArcGISMap?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val windowSize = getWindowSize(LocalContext.current)
@@ -72,18 +72,24 @@ fun OfflineMapAreasSheet(
             sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() },
             tonalElevation = (-1).dp
         ) {
-            IconButton(
-                onClick = onDismiss
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
+            Box(modifier = Modifier.fillMaxSize()) {
+                OfflineMapAreas(
+                    offlineMapState = state,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(16.dp))
                 )
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(horizontal = 16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close"
+                    )
+                }
             }
-            OfflineMapAreas(
-                offlineMapState = state,
-                modifier = Modifier.fillMaxSize()
-            )
         }
     }
 }

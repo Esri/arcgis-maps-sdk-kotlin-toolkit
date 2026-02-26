@@ -59,17 +59,11 @@ class PortalItemRepository(
     var activePortalItem : PortalItem? = null
         private set
 
-    var activeOfflineMap : ArcGISMap? = null
-
     // to protect shared state of portalItems
     private val mutex = Mutex()
 
     fun setActivePortalItem(item: PortalItem?) {
         activePortalItem = item
-    }
-
-    fun setActiveOfflineMap(map: ArcGISMap?) {
-        activeOfflineMap = map
     }
 
     /**
