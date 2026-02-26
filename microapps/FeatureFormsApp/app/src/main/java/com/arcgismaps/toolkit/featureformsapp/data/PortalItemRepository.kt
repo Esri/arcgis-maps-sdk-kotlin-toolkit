@@ -19,8 +19,6 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.util.Log
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Item
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalFolder

@@ -161,18 +161,10 @@ fun MapScreen(
                     isOfflineMapAreasEnabled = uiState is UIState.NotEditing,
                     isConnected = mapViewModel.isConnected,
                     isSyncEnabled = uiState is UIState.NotEditing || uiState is UIState.Editing,
-                    onToggleNavigation = {
-                        mapViewModel.toggleNavigationEnabled()
-                    },
-                    onViewOfflineMapAreas = {
-                        mapViewModel.viewOfflineMapAreas()
-                    },
-                    onGoOnline = {
-                        mapViewModel.goOnline()
-                    },
-                    onSync = {
-                        mapViewModel.commitEdits()
-                    },
+                    onToggleNavigation = mapViewModel::toggleNavigationEnabled,
+                    onViewOfflineMapAreas = mapViewModel::viewOfflineMapAreas,
+                    onGoOnline = mapViewModel::goOnline,
+                    onSync = mapViewModel::commitEdits,
                     onBackPressed = onBackPressed
                 )
                 if (uiState is UIState.Loading) {
@@ -189,7 +181,7 @@ fun MapScreen(
         Box {
             // show the composable map using the mapViewModel
             MapView(
-                arcGISMap = mapViewModel.mapState.map,
+                arcGISMap = mapViewModel.map,
                 mapViewProxy = mapViewModel.proxy,
                 modifier = Modifier
                     .padding(padding)
@@ -618,7 +610,7 @@ fun ProgressDialog() {
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Working..")
+                Text(text = stringResource(R.string.working))
             }
         }
     }
@@ -637,17 +629,29 @@ fun MessageDialog(
             }
         },
         icon = {
-            val icon = when (message.kind) {
-                UIMessage.Kind.Error -> Icons.Rounded.Warning
-                UIMessage.Kind.Info -> Icons.Rounded.Info
-                UIMessage.Kind.Success -> Icons.Rounded.CheckCircle
-                UIMessage.Kind.Warning -> Icons.Rounded.Warning
-            }
-            val tint = when (message.kind) {
-                UIMessage.Kind.Error -> MaterialTheme.colorScheme.error
-                UIMessage.Kind.Info -> MaterialTheme.colorScheme.primary
-                UIMessage.Kind.Success -> Color(0xFF43A047)
-                UIMessage.Kind.Warning -> MaterialTheme.colorScheme.error
+            val colorScheme = MaterialTheme.colorScheme
+            val (icon, tint) = remember(message.kind) {
+                when (message.kind) {
+                    UIMessage.Kind.Error -> Pair(
+                        Icons.Rounded.Warning,
+                        colorScheme.error
+                    )
+
+                    UIMessage.Kind.Info -> Pair(
+                        Icons.Rounded.Info,
+                        colorScheme.primary
+                    )
+
+                    UIMessage.Kind.Success -> Pair(
+                        Icons.Rounded.CheckCircle,
+                        Color(0xFF43A047)
+                    )
+
+                    UIMessage.Kind.Warning -> Pair(
+                        Icons.Rounded.Warning,
+                        colorScheme.error
+                    )
+                }
             }
             Icon(
                 imageVector = icon,
@@ -729,5 +733,5 @@ val ArcGISFeature.sublayer: ArcGISSublayer?
 @Preview
 @Composable
 private fun TopFormBarPreview() {
-    TopFormBar("Map", false, true, true,true, true)
+    TopFormBar("Map", false, true, true, true, true)
 }

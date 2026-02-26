@@ -69,4 +69,5 @@
     <string name="go_online">Go Online</string>
     <string name="apply_changes">Apply Changes</string>
     <string name="sync">Sync</string>
+    <string name="working">Working..</string>
 </resources>

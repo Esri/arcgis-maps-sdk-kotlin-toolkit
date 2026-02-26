@@ -66,6 +66,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * A class to hold an [ArcGISMap] as state and provide functions to set and restore the map.
+ */
 class MapState(
     private val initialMap: ArcGISMap
 ) {
@@ -193,9 +196,16 @@ class MapViewModel @Inject constructor(
     var portalItem: PortalItem = portalItemRepository.activePortalItem
         ?: throw IllegalStateException("No portal item selected")
 
-    val mapState = MapState(
+    private val mapState = MapState(
         ArcGISMap(portalItem)
     )
+
+    /**
+     * The current map to be displayed in the MapView. This may be the original map from the portal
+     * item or it may be a temporary offline map if the user is viewing offline map areas.
+     */
+    val map: ArcGISMap
+        get() = mapState.map
 
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
 
@@ -278,6 +288,9 @@ class MapViewModel @Inject constructor(
 
     private val _isConnected = mutableStateOf(true)
 
+    /**
+     * Indicates if the map is currently connected to the service.
+     */
     val isConnected: Boolean
         get() = _isConnected.value
 
@@ -429,6 +442,10 @@ class MapViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Sets the map back to the original online map and resets the offline map state. [isConnected]
+     * will be set to true after the map is successfully loaded.
+     */
     fun goOnline() {
         offlineMapState.resetSelectedMapArea()
     }
