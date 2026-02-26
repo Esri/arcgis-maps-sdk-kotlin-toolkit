@@ -34,7 +34,6 @@ import com.arcgismaps.toolkit.featureformsapp.screens.browse.FolderContentViewMo
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.PortalContentScreen
 import com.arcgismaps.toolkit.featureformsapp.screens.login.LoginScreen
 import com.arcgismaps.toolkit.featureformsapp.screens.map.MapScreen
-import com.arcgismaps.toolkit.featureformsapp.screens.offline.OfflineMapAreasScreen
 import com.arcgismaps.toolkit.featureformsapp.screens.search.SearchScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -67,9 +66,6 @@ sealed class NavigationRoute {
 
     @Serializable
     object MapView : NavigationRoute()
-
-    @Serializable
-    object OfflineMapAreasView : NavigationRoute()
 }
 
 @Composable
@@ -192,24 +188,7 @@ fun AppNavigation(
         ) {
             MapScreen (
                 mapViewModel = hiltViewModel(),
-                onBackPressed = navController::popBackStack,
-                onViewOfflineMapAreas = {
-                    navController.navigate(NavigationRoute.OfflineMapAreasView)
-                }
-            )
-        }
-
-        composable<NavigationRoute.OfflineMapAreasView>(
-            enterTransition = { slideInHorizontally { h -> h } },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = { slideOutHorizontally { h -> h } }
-        ) {
-            OfflineMapAreasScreen(
-                onNavigateToOfflineMapScreen = {
-
-                },
-                onBack = navController::popBackStack
+                onBackPressed = navController::popBackStack
             )
         }
     }

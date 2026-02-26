@@ -41,6 +41,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottom
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.offline.OfflineMapAreas
 import com.arcgismaps.toolkit.offline.OfflineMapState
+import com.arcgismaps.toolkit.offline.theme.OfflineMapAreasDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +79,10 @@ fun OfflineMapAreasSheet(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp)),
+                    colorScheme = OfflineMapAreasDefaults.colorScheme(
+                        offlineBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    )
                 )
                 IconButton(
                     onClick = onDismiss,

@@ -65,4 +65,8 @@
     <string name="loading">Loading..</string>
     <string name="signing_out">Signing out..</string>
     <string name="nothing_to_show">Nothing to show.</string>
+    <string name="view_offline_map_areas">View Offline Map Areas</string>
+    <string name="go_online">Go Online</string>
+    <string name="apply_changes">Apply Changes</string>
+    <string name="sync">Sync</string>
 </resources>

@@ -33,6 +33,7 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
+import com.arcgismaps.data.GeodatabaseFeatureTable
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
@@ -64,6 +65,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.log
 import kotlin.time.Duration.Companion.seconds
 
 class MapState(
@@ -261,8 +263,15 @@ class MapViewModel @Inject constructor(
             } else {
                 mapState.restoreMap()
                 viewModelScope.launch {
-                    mapState.map.load().onSuccess {
+                    mapState.map.retryLoad().onSuccess {
                         _isConnected.value = true
+                    }.onFailure {
+                        _isConnected.value = false
+                        _uiMessage.value = UIMessage(
+                            kind = UIMessage.Kind.Error,
+                            title = "Failed to load the map",
+                            details = it.message ?: "Unknown error"
+                        )
                     }
                 }
             }
@@ -623,6 +632,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sync any local edits in the current offline map with the service.
+     */
     private suspend fun syncMapWithService(map: ArcGISMap) = withContext(Dispatchers.IO) {
         val syncTask = OfflineMapSyncTask(map)
         syncTask.load()
@@ -639,15 +651,10 @@ class MapViewModel @Inject constructor(
         }
         val syncJob = syncTask.createOfflineMapSyncJob(params.apply {
             syncDirection = SyncDirection.Bidirectional
-            keepGeodatabaseDeltas = true
+            keepGeodatabaseDeltas = false
             preplannedScheduledUpdatesOption = PreplannedScheduledUpdatesOption.DownloadAllUpdates
+            reconcileBranchVersion = true
         })
-        syncTask.checkForUpdates().onSuccess {
-            Log.e(
-                "TAG",
-                "syncMapWithService: ${it.uploadAvailability}, ${it.downloadAvailability}",
-            )
-        }
         val errors = mutableListOf<Throwable>()
         syncJob.start()
         syncJob.result().onSuccess { result ->

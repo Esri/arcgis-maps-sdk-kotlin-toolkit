@@ -125,8 +125,7 @@ import kotlinx.coroutines.launch
 @Suppress("DEPRECATION")
 fun MapScreen(
     mapViewModel: MapViewModel,
-    onBackPressed: () -> Unit = {},
-    onViewOfflineMapAreas: (ArcGISMap) -> Unit = {}
+    onBackPressed: () -> Unit = {}
 ) {
     val uiState by mapViewModel.uiState
     val scope = rememberCoroutineScope()
@@ -540,7 +539,7 @@ fun TopFormBar(
                 )
                 DropdownMenuItem(
                     text = {
-                        Text(text = "View Offline Map Areas")
+                        Text(text = stringResource(R.string.view_offline_map_areas))
                     },
                     onClick = {
                         onViewOfflineMapAreas()
@@ -561,26 +560,10 @@ fun TopFormBar(
                 )
                 DropdownMenuItem(
                     text = {
-                        Text(text = "Go Online")
-                    },
-                    onClick = {
-                        onGoOnline()
-                        expanded = false
-                    },
-                    enabled = isConnected.not(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.cloud_24px),
-                            contentDescription = "Go Online"
-                        )
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
                         val text = if (isConnected) {
-                            "Apply Changes"
+                            stringResource(R.string.apply_changes)
                         } else {
-                            "Sync"
+                            stringResource(R.string.sync)
                         }
                         Text(text = text)
                     },
@@ -601,6 +584,23 @@ fun TopFormBar(
                         )
                     }
                 )
+                if (isConnected.not()) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = stringResource(R.string.go_online))
+                        },
+                        onClick = {
+                            onGoOnline()
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.cloud_24px),
+                                contentDescription = "Go Online"
+                            )
+                        }
+                    )
+                }
             }
         }
     )
@@ -618,7 +618,7 @@ fun ProgressDialog() {
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Saving..")
+                Text(text = "Working..")
             }
         }
     }
@@ -646,7 +646,7 @@ fun MessageDialog(
             val tint = when (message.kind) {
                 UIMessage.Kind.Error -> MaterialTheme.colorScheme.error
                 UIMessage.Kind.Info -> MaterialTheme.colorScheme.primary
-                UIMessage.Kind.Success -> MaterialTheme.colorScheme.primary
+                UIMessage.Kind.Success -> Color(0xFF43A047)
                 UIMessage.Kind.Warning -> MaterialTheme.colorScheme.error
             }
             Icon(
