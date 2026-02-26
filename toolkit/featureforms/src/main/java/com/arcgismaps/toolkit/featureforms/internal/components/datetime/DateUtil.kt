@@ -84,8 +84,8 @@ internal fun Instant.formattedDateTime(includeTime: Boolean): String {
 }
 
 /**
- * Formats an Instant in SQL‑92 / RFC‑3339 format for the current timezone as required for date
- * and date only queries.
+ * Formats an Instant in SQL‑92 / RFC‑3339 compliant syntax for the current timezone as required
+ * for date and date only queries.
  *
  * @param includeTime format the time if true
  * @return a string formatted for the value in epoch milliseconds
