@@ -452,6 +452,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         offset: Offset,
         rotateOffsetWithGeoView: Boolean
     ): ScreenCoordinate? {
+        if (location.isEmpty) {
+            return null
+        }
+
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
             is MapView -> geoView.locationToScreen(location).takeIf {
