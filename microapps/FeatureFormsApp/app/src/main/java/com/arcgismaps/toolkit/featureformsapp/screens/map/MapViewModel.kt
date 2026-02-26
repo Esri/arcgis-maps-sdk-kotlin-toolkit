@@ -33,7 +33,6 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.FeatureTemplate
-import com.arcgismaps.data.GeodatabaseFeatureTable
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
@@ -65,7 +64,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.log
 import kotlin.time.Duration.Companion.seconds
 
 class MapState(
@@ -659,19 +657,11 @@ class MapViewModel @Inject constructor(
         syncJob.start()
         syncJob.result().onSuccess { result ->
             result.layerResults.forEach { layerResults ->
-                layerResults.value.editErrors.forEach {
-                    Log.e("TAG", "editError: $it")
-                }
-                Log.e("TAG", "layerResults: ${layerResults.value.hasErrors}")
                 layerResults.value.error?.let {
                     errors.add(it)
                 }
             }
             result.tableResults.forEach { tableResult ->
-                tableResult.value.editErrors.forEach {
-                    Log.e("TAG", "editError: $it")
-                }
-                Log.e("TAG", "tableResult: ${tableResult.value.hasErrors}")
                 tableResult.value.error?.let {
                     errors.add(it)
                 }
