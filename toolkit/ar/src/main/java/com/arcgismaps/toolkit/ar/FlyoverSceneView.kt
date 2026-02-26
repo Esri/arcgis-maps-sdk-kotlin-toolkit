@@ -43,7 +43,6 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
-import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -239,8 +238,6 @@ public fun FlyoverSceneView(
  * @param onLongPress lambda invoked when a user holds a pointer on the FlyoverSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
- * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
- *  on the FlyoverSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView
  * changes.
  * @param content the content of the FlyoverSceneView.
@@ -285,7 +282,6 @@ public fun FlyoverSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable FlyoverSceneViewScope.() -> Unit)? = null
 ) {
@@ -397,7 +393,6 @@ public fun FlyoverSceneView(
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
-            onInteractiveZooming = onInteractiveZooming,
             onGeoModelErrorChanged = onGeoModelErrorChanged,
             content = {
                 content?.let { content ->

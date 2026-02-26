@@ -49,7 +49,6 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ImageOverlay
-import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -307,8 +306,6 @@ public fun WorldScaleSceneView(
  * @param onLongPress lambda invoked when a user holds a pointer on the WorldScaleSceneView.
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across WorldScaleSceneView.
- * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
- *  on the WorldScaleSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the WorldScaleSceneView
  * changes.
  * @param content the content of the WorldScaleSceneView.
@@ -353,7 +350,6 @@ public fun WorldScaleSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable WorldScaleSceneViewScope.() -> Unit)? = null
 ) {
@@ -538,7 +534,6 @@ public fun WorldScaleSceneView(
             onLongPress = onLongPress,
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
-            onInteractiveZooming = onInteractiveZooming,
             onGeoModelErrorChanged = onGeoModelErrorChanged,
             content = {
                 content?.let { content ->
