@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ArcGISFeatureTable
@@ -52,6 +53,7 @@ import com.arcgismaps.tasks.geodatabase.SyncDirection
 import com.arcgismaps.tasks.offlinemaptask.OfflineMapSyncTask
 import com.arcgismaps.tasks.offlinemaptask.PreplannedScheduledUpdatesOption
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
@@ -162,7 +164,7 @@ data class DefaultFeatureRow(
  */
 data class UIMessage(
     val kind: Kind,
-    val title : String,
+    val title: String,
     val details: String,
     val subTitle: String = ""
 ) {
@@ -277,8 +279,8 @@ class MapViewModel @Inject constructor(
                         _isConnected.value = false
                         _uiMessage.value = UIMessage(
                             kind = UIMessage.Kind.Error,
-                            title = "Failed to load the map",
-                            details = it.message ?: "Unknown error"
+                            title = application.getString(R.string.failed_to_load_the_map),
+                            details = it.message ?: application.getString(R.string.unknown_error)
                         )
                     }
                 }
@@ -593,16 +595,16 @@ class MapViewModel @Inject constructor(
         val serviceFeatureTable = table ?: run {
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Error,
-                title = "Failed to apply the edits to the service",
-                details = "Cannot save edits without a ServiceFeatureTable"
+                title = application.getString(R.string.failed_to_apply_edits),
+                details = application.getString(R.string.no_servicefeaturetable)
             )
             return@withContext
         }
         if (serviceFeatureTable.serviceGeodatabase?.hasLocalEdits() == false) {
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Success,
-                title = "Already up to date",
-                details = "No local edits to apply to the service"
+                title = application.getString(R.string.already_up_to_date),
+                details = application.getString(R.string.no_local_edits)
             )
             // if there are no local edits across all the tables in the service geodatabase
             // then return as there is nothing to sync
@@ -632,17 +634,19 @@ class MapViewModel @Inject constructor(
         }
         // if there are errors then set the UI state to error
         if (errors.isNotEmpty()) {
-            val errorText = errors.joinToString(separator = "\n") { it.message ?: "Unknown error" }
+            val errorText = errors.joinToString(separator = "\n") {
+                it.message ?: application.getString(R.string.unknown_error)
+            }
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Error,
-                title = "Failed to apply the edits to the service",
+                title = application.getString(R.string.failed_to_apply_edits),
                 details = errorText
             )
         } else {
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Success,
-                title = "Success",
-                details = "All edits have now been applied to the service"
+                title = application.getString(R.string.success),
+                details = application.getString(R.string.edits_applied_to_the_service)
             )
         }
     }
@@ -655,11 +659,12 @@ class MapViewModel @Inject constructor(
         syncTask.load()
         val createParametersResult = syncTask.createDefaultOfflineMapSyncParameters()
         val params = createParametersResult.getOrNull() ?: run {
-            val details = createParametersResult.exceptionOrNull()?.message ?: "Unknown error"
+            val details = createParametersResult.exceptionOrNull()?.message
+                ?: application.getString(R.string.unknown_error)
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Error,
-                title = "Failed to sync with the service",
-                details = "Failed to create default sync parameters",
+                title = application.getString(R.string.failed_to_sync_with_the_service),
+                details = application.getString(R.string.failed_to_create_sync_parameters),
                 subTitle = details
             )
             return@withContext
@@ -688,17 +693,19 @@ class MapViewModel @Inject constructor(
         }
         // if there are errors then set the UI state to error
         if (errors.isNotEmpty()) {
-            val errorText = errors.joinToString(separator = "\n") { it.message ?: "Unknown error" }
+            val errorText = errors.joinToString(separator = "\n") {
+                it.message ?: application.getString(R.string.unknown_error)
+            }
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Error,
-                title = "Failed to sync edits with the service",
+                title = application.getString(R.string.failed_to_sync_with_the_service),
                 details = errorText
             )
         } else {
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Success,
-                title = "Success",
-                details = "The Map is in sync with the service"
+                title = application.getString(R.string.success),
+                details = application.getString(R.string.map_is_in_sync_with_service)
             )
         }
     }

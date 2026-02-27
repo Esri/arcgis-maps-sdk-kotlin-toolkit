@@ -70,4 +70,14 @@
     <string name="apply_changes">Apply Changes</string>
     <string name="sync">Sync</string>
     <string name="working">Working..</string>
+    <string name="failed_to_load_the_map">Failed to load the map</string>
+    <string name="failed_to_apply_edits">Failed to apply the edits to the service</string>
+    <string name="no_servicefeaturetable">Cannot save edits without a ServiceFeatureTable</string>
+    <string name="already_up_to_date">Already up to date</string>
+    <string name="no_local_edits">No local edits to apply to the service</string>
+    <string name="success">Success</string>
+    <string name="edits_applied_to_the_service">All edits have now been applied to the service</string>
+    <string name="map_is_in_sync_with_service">The Map is in sync with the service</string>
+    <string name="failed_to_sync_with_the_service">Failed to sync with the service</string>
+    <string name="failed_to_create_sync_parameters">Failed to create sync parameters</string>
 </resources>
