@@ -346,6 +346,7 @@ private fun AssociationItem(
                     Icon(Icons.Default.MoreHoriz, contentDescription = "more information")
                 }
                 OptionsMenu(
+                    editable = isEditable,
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false },
                     isOnLocateEnabled = associatedFeature.geometry != null,
@@ -433,6 +434,7 @@ internal fun UtilityAssociation.getIcon(): Painter? {
 
 @Composable
 private fun OptionsMenu(
+    editable: Boolean,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     isOnLocateEnabled: Boolean,
@@ -482,7 +484,8 @@ private fun OptionsMenu(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "delete association"
                 )
-            }
+            },
+            enabled = editable
         )
     }
 }
