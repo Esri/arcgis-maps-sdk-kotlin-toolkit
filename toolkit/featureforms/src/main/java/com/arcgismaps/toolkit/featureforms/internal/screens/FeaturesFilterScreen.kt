@@ -97,7 +97,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.Op
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.fieldName
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getKeyboardType
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.getOperators
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 
 @Composable
@@ -144,7 +146,9 @@ internal fun FeaturesFilterScreen(
                         scope.launch {
                             filterStateManager.applyFilters()
                                 .onSuccess {
-                                    onBackPressed()
+                                    withContext(Dispatchers.Main) {
+                                        onBackPressed()
+                                    }
                                 }.onFailure {
                                     snackbarHostState.showSnackbar(
                                         message = it.message ?: "Failed to apply filters"
