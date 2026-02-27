@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formularz zawiera błędy weryfikacji</string>
     <string name="the_form_has_edits">Formularz zawiera zmiany</string>
     <string name="do_you_want_to_save_your_changes">Czy chcesz zapisać zmiany?</string>
-    <string name="no_associations_found">Nie znaleziono powiązań</string>
+    <string name="no_associations_found">ł_No associations to show________________________ą</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">ł_Content Visible________________ą</string>
+    <string name="percent_along">ł_Percent Along______________ą</string>
     <string name="from_element">Z elementu</string>
     <string name="to_element">Do elementu</string>
     <string name="association_type">Typ powiązania</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Widoczne zasoby</string>
     <string name="content">Zasoby</string>
+    <string name="containment_visible_value">ł_Visible: %1$s______________ą</string>
+    <string name="from_network_data_source">ł_From Network Data Source_________________________ą</string>
+    <string name="on_map">ł_On Map_____________ą</string>
+    <string name="network_data_source">ł_Network Data Source____________________ą</string>
+    <string name="available_asset_types">ł_Available Asset Types______________________ą</string>
+    <string name="count">ł_Count %1$d_____________________ą</string>
+    <string name="new_association">ł_New Association________________ą</string>
+    <string name="add">ł_Add_______ą</string>
+    <string name="failed_to_create_association">ł_Failed to create association. %1$s__________________ą</string>
+    <string name="available_features">ł_%1$d Available Features________________________ą</string>
+    <string name="loading2">ł_Loading___________________ą..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
         <item quantity="one">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
         <item quantity="other">Występuje następująca liczba błędów: %1$d, które trzeba poprawić przed zapisaniem.</item>
     </plurals>
+    <string name="search_features">ł_Search features________________ą</string>
+    <string name="choose_to_add">ł_Choose to add______________ą</string>
+    <string name="no_features_found">ł_No features found__________________ą</string>
+    <string name="refine_your_search_tip">ł_Refine your search or choose a different Network Source_____________________________ą.</string>
+    <string name="select_terminal">ł_Select Terminal________________ą</string>
+    <string name="show_on_map">ł_Show on Map____________ą</string>
+    <string name="more_information">ł_More Information_________________ą</string>
 </resources>

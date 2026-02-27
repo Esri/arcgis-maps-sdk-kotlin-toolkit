@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">النموذج يحتوي على أخطاء التحقق من الصحة</string>
     <string name="the_form_has_edits">النموذج يحتوي على تعديلات</string>
     <string name="do_you_want_to_save_your_changes">هل تريد حفظ التغييرات؟</string>
-    <string name="no_associations_found">لم يتم العثور على أي اقترانات</string>
+    <string name="no_associations_found">بيت_No associations to show________________________لاحقة</string>
     <string name="terminal">محطة طرفية</string>
     <string name="terminal_with_value">النقطة الطرفية: %1$s</string>
+    <string name="content_visible">بيت_Content Visible________________لاحقة</string>
+    <string name="percent_along">بيت_Percent Along______________لاحقة</string>
     <string name="from_element">من العنصر</string>
     <string name="to_element">إلى العنصر</string>
     <string name="association_type">نوع الاقتران</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">المحتوى المرئي</string>
     <string name="content">المحتوى</string>
+    <string name="containment_visible_value">بيت_Visible: %1$s______________لاحقة</string>
+    <string name="from_network_data_source">بيت_From Network Data Source_________________________لاحقة</string>
+    <string name="on_map">بيت_On Map_____________لاحقة</string>
+    <string name="network_data_source">بيت_Network Data Source____________________لاحقة</string>
+    <string name="available_asset_types">بيت_Available Asset Types______________________لاحقة</string>
+    <string name="count">بيت_Count %1$d_____________________لاحقة</string>
+    <string name="new_association">بيت_New Association________________لاحقة</string>
+    <string name="add">بيت_Add_______لاحقة</string>
+    <string name="failed_to_create_association">بيت_Failed to create association. %1$s__________________لاحقة</string>
+    <string name="available_features">بيت_%1$d Available Features________________________لاحقة</string>
+    <string name="loading2">بيت_Loading___________________لاحقة..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
         <item quantity="one">لديك خطأ %1$d يجب إصلاحه قبل الحفظ.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
         <item quantity="other">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
     </plurals>
+    <string name="search_features">بيت_Search features________________لاحقة</string>
+    <string name="choose_to_add">بيت_Choose to add______________لاحقة</string>
+    <string name="no_features_found">بيت_No features found__________________لاحقة</string>
+    <string name="refine_your_search_tip">بيت_Refine your search or choose a different Network Source_____________________________لاحقة.</string>
+    <string name="select_terminal">بيت_Select Terminal________________لاحقة</string>
+    <string name="show_on_map">بيت_Show on Map____________لاحقة</string>
+    <string name="more_information">بيت_More Information_________________لاحقة</string>
 </resources>

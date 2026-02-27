@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Mẫu form có lỗi xác minh</string>
     <string name="the_form_has_edits">Mẫu form có phần chỉnh sửa</string>
     <string name="do_you_want_to_save_your_changes">Bạn có muốn lưu thay đổi không?</string>
-    <string name="no_associations_found">Không tìm thấy liên kết nào</string>
+    <string name="no_associations_found">Đ_No associations to show________________________ớ</string>
     <string name="terminal">Thiết bị đầu cuối</string>
     <string name="terminal_with_value">Thiết bị đầu cuối: %1$s</string>
+    <string name="content_visible">Đ_Content Visible________________ớ</string>
+    <string name="percent_along">Đ_Percent Along______________ớ</string>
     <string name="from_element">Từ Phần tử</string>
     <string name="to_element">Đến Phần tử</string>
     <string name="association_type">Loại Liên kết</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Nội dung Hiển thị</string>
     <string name="content">Nội dung</string>
+    <string name="containment_visible_value">Đ_Visible: %1$s______________ớ</string>
+    <string name="from_network_data_source">Đ_From Network Data Source_________________________ớ</string>
+    <string name="on_map">Đ_On Map_____________ớ</string>
+    <string name="network_data_source">Đ_Network Data Source____________________ớ</string>
+    <string name="available_asset_types">Đ_Available Asset Types______________________ớ</string>
+    <string name="count">Đ_Count %1$d_____________________ớ</string>
+    <string name="new_association">Đ_New Association________________ớ</string>
+    <string name="add">Đ_Add_______ớ</string>
+    <string name="failed_to_create_association">Đ_Failed to create association. %1$s__________________ớ</string>
+    <string name="available_features">Đ_%1$d Available Features________________________ớ</string>
+    <string name="loading2">Đ_Loading___________________ớ..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Bạn có %1$d lỗi cần sửa trước khi lưu.</item>
         <item quantity="one">Bạn có %1$d lỗi cần sửa trước khi lưu.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
         <item quantity="other">Bạn có %1$d lỗi cần sửa trước khi lưu</item>
     </plurals>
+    <string name="search_features">Đ_Search features________________ớ</string>
+    <string name="choose_to_add">Đ_Choose to add______________ớ</string>
+    <string name="no_features_found">Đ_No features found__________________ớ</string>
+    <string name="refine_your_search_tip">Đ_Refine your search or choose a different Network Source_____________________________ớ.</string>
+    <string name="select_terminal">Đ_Select Terminal________________ớ</string>
+    <string name="show_on_map">Đ_Show on Map____________ớ</string>
+    <string name="more_information">Đ_More Information_________________ớ</string>
 </resources>
