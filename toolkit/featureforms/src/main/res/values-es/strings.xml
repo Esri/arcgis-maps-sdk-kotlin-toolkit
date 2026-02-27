@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">El formulario tiene errores de validación</string>
     <string name="the_form_has_edits">El formulario tiene ediciones</string>
     <string name="do_you_want_to_save_your_changes">¿Desea guardar los cambios?</string>
-    <string name="no_associations_found">No se han encontrado asociaciones</string>
+    <string name="no_associations_found">á_No associations to show________________________Ó</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">á_Content Visible________________Ó</string>
+    <string name="percent_along">á_Percent Along______________Ó</string>
     <string name="from_element">Elemento de origen</string>
     <string name="to_element">Elemento de destino</string>
     <string name="association_type">Tipo de asociación</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Contenido visible</string>
     <string name="content">Contenido</string>
+    <string name="containment_visible_value">á_Visible: %1$s______________Ó</string>
+    <string name="from_network_data_source">á_From Network Data Source_________________________Ó</string>
+    <string name="on_map">á_On Map_____________Ó</string>
+    <string name="network_data_source">á_Network Data Source____________________Ó</string>
+    <string name="available_asset_types">á_Available Asset Types______________________Ó</string>
+    <string name="count">á_Count %1$d_____________________Ó</string>
+    <string name="new_association">á_New Association________________Ó</string>
+    <string name="add">á_Add_______Ó</string>
+    <string name="failed_to_create_association">á_Failed to create association. %1$s__________________Ó</string>
+    <string name="available_features">á_%1$d Available Features________________________Ó</string>
+    <string name="loading2">á_Loading___________________Ó..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Tiene %1$d errores que deben corregirse antes de guardar.</item>
         <item quantity="one">Tiene %1$d error que debe corregirse antes de guardar.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Tiene %1$d errores que deben corregirse antes de guardar</item>
         <item quantity="other">Tiene %1$d errores que deben corregirse antes de guardar</item>
     </plurals>
+    <string name="search_features">á_Search features________________Ó</string>
+    <string name="choose_to_add">á_Choose to add______________Ó</string>
+    <string name="no_features_found">á_No features found__________________Ó</string>
+    <string name="refine_your_search_tip">á_Refine your search or choose a different Network Source_____________________________Ó.</string>
+    <string name="select_terminal">á_Select Terminal________________Ó</string>
+    <string name="show_on_map">á_Show on Map____________Ó</string>
+    <string name="more_information">á_More Information_________________Ó</string>
 </resources>

@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Šai veidlapai ir validācijas kļūdas</string>
     <string name="the_form_has_edits">Veidlapā ir izmaiņas</string>
     <string name="do_you_want_to_save_your_changes">Vai vēlaties saglabāt izmaiņas?</string>
-    <string name="no_associations_found">Netika atrasta neviena asociācija</string>
+    <string name="no_associations_found">ķ_No associations to show________________________ū</string>
     <string name="terminal">Terminālis</string>
     <string name="terminal_with_value">Terminālis: %1$s</string>
+    <string name="content_visible">ķ_Content Visible________________ū</string>
+    <string name="percent_along">ķ_Percent Along______________ū</string>
     <string name="from_element">No elementa</string>
     <string name="to_element">Uz elementu</string>
     <string name="association_type">Saistības veids</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Redzamais saturs</string>
     <string name="content">Saturs</string>
+    <string name="containment_visible_value">ķ_Visible: %1$s______________ū</string>
+    <string name="from_network_data_source">ķ_From Network Data Source_________________________ū</string>
+    <string name="on_map">ķ_On Map_____________ū</string>
+    <string name="network_data_source">ķ_Network Data Source____________________ū</string>
+    <string name="available_asset_types">ķ_Available Asset Types______________________ū</string>
+    <string name="count">ķ_Count %1$d_____________________ū</string>
+    <string name="new_association">ķ_New Association________________ū</string>
+    <string name="add">ķ_Add_______ū</string>
+    <string name="failed_to_create_association">ķ_Failed to create association. %1$s__________________ū</string>
+    <string name="available_features">ķ_%1$d Available Features________________________ū</string>
+    <string name="loading2">ķ_Loading___________________ū..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
         <item quantity="one">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
         <item quantity="other">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
     </plurals>
+    <string name="search_features">ķ_Search features________________ū</string>
+    <string name="choose_to_add">ķ_Choose to add______________ū</string>
+    <string name="no_features_found">ķ_No features found__________________ū</string>
+    <string name="refine_your_search_tip">ķ_Refine your search or choose a different Network Source_____________________________ū.</string>
+    <string name="select_terminal">ķ_Select Terminal________________ū</string>
+    <string name="show_on_map">ķ_Show on Map____________ū</string>
+    <string name="more_information">ķ_More Information_________________ū</string>
 </resources>

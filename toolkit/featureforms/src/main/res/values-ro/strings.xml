@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formularul are erori de validare</string>
     <string name="the_form_has_edits">Formularul conține editări</string>
     <string name="do_you_want_to_save_your_changes">Doriți să salvați modificările?</string>
-    <string name="no_associations_found">Nu s-au găsit asocieri</string>
+    <string name="no_associations_found">Ă_No associations to show________________________ș</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Ă_Content Visible________________ș</string>
+    <string name="percent_along">Ă_Percent Along______________ș</string>
     <string name="from_element">Din element</string>
     <string name="to_element">La element</string>
     <string name="association_type">Tip asociere</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Conținut vizibil</string>
     <string name="content">Conținut</string>
+    <string name="containment_visible_value">Ă_Visible: %1$s______________ș</string>
+    <string name="from_network_data_source">Ă_From Network Data Source_________________________ș</string>
+    <string name="on_map">Ă_On Map_____________ș</string>
+    <string name="network_data_source">Ă_Network Data Source____________________ș</string>
+    <string name="available_asset_types">Ă_Available Asset Types______________________ș</string>
+    <string name="count">Ă_Count %1$d_____________________ș</string>
+    <string name="new_association">Ă_New Association________________ș</string>
+    <string name="add">Ă_Add_______ș</string>
+    <string name="failed_to_create_association">Ă_Failed to create association. %1$s__________________ș</string>
+    <string name="available_features">Ă_%1$d Available Features________________________ș</string>
+    <string name="loading2">Ă_Loading___________________ș..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Aveți %1$d erori care trebuie remediate înainte de a salva.</item>
         <item quantity="one">Aveți %1$d eroare care trebuie remediată înainte de a salva.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
         <item quantity="other">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
     </plurals>
+    <string name="search_features">Ă_Search features________________ș</string>
+    <string name="choose_to_add">Ă_Choose to add______________ș</string>
+    <string name="no_features_found">Ă_No features found__________________ș</string>
+    <string name="refine_your_search_tip">Ă_Refine your search or choose a different Network Source_____________________________ș.</string>
+    <string name="select_terminal">Ă_Select Terminal________________ș</string>
+    <string name="show_on_map">Ă_Show on Map____________ș</string>
+    <string name="more_information">Ă_More Information_________________ș</string>
 </resources>

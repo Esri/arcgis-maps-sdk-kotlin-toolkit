@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Obrazac ima greške u validaciji</string>
     <string name="the_form_has_edits">Obrazac sadrži uređivanja</string>
     <string name="do_you_want_to_save_your_changes">Da li želite da sačuvate svoje promene?</string>
-    <string name="no_associations_found">Nije pronađeno nijedno povezivanje</string>
+    <string name="no_associations_found">Č_No associations to show________________________ž</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Č_Content Visible________________ž</string>
+    <string name="percent_along">Č_Percent Along______________ž</string>
     <string name="from_element">Iz elementa</string>
     <string name="to_element">U element</string>
     <string name="association_type">Tip povezivanja</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Vidljivi sadržaj</string>
     <string name="content">Sadržaj</string>
+    <string name="containment_visible_value">Č_Visible: %1$s______________ž</string>
+    <string name="from_network_data_source">Č_From Network Data Source_________________________ž</string>
+    <string name="on_map">Č_On Map_____________ž</string>
+    <string name="network_data_source">Č_Network Data Source____________________ž</string>
+    <string name="available_asset_types">Č_Available Asset Types______________________ž</string>
+    <string name="count">Č_Count %1$d_____________________ž</string>
+    <string name="new_association">Č_New Association________________ž</string>
+    <string name="add">Č_Add_______ž</string>
+    <string name="failed_to_create_association">Č_Failed to create association. %1$s__________________ž</string>
+    <string name="available_features">Č_%1$d Available Features________________________ž</string>
+    <string name="loading2">Č_Loading___________________ž..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="one">Imate %1$d grešku koja mora da bude ispravljena pre čuvanja.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="other">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
     </plurals>
+    <string name="search_features">Č_Search features________________ž</string>
+    <string name="choose_to_add">Č_Choose to add______________ž</string>
+    <string name="no_features_found">Č_No features found__________________ž</string>
+    <string name="refine_your_search_tip">Č_Refine your search or choose a different Network Source_____________________________ž.</string>
+    <string name="select_terminal">Č_Select Terminal________________ž</string>
+    <string name="show_on_map">Č_Show on Map____________ž</string>
+    <string name="more_information">Č_More Information_________________ž</string>
 </resources>

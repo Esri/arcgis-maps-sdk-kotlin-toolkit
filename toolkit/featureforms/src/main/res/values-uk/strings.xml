@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">У формі містяться помилки перевірки</string>
     <string name="the_form_has_edits">Форма містить зміни</string>
     <string name="do_you_want_to_save_your_changes">Бажаєте зберегти ваші зміни?</string>
-    <string name="no_associations_found">Зʼєднань не знайдено</string>
+    <string name="no_associations_found">ґ_No associations to show________________________Ї</string>
     <string name="terminal">Термінал</string>
     <string name="terminal_with_value">Термінал: %1$s</string>
+    <string name="content_visible">ґ_Content Visible________________Ї</string>
+    <string name="percent_along">ґ_Percent Along______________Ї</string>
     <string name="from_element">Від елементу</string>
     <string name="to_element">До елементу</string>
     <string name="association_type">Тип з՚єднання</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Видимий вміст</string>
     <string name="content">Зміст</string>
+    <string name="containment_visible_value">ґ_Visible: %1$s______________Ї</string>
+    <string name="from_network_data_source">ґ_From Network Data Source_________________________Ї</string>
+    <string name="on_map">ґ_On Map_____________Ї</string>
+    <string name="network_data_source">ґ_Network Data Source____________________Ї</string>
+    <string name="available_asset_types">ґ_Available Asset Types______________________Ї</string>
+    <string name="count">ґ_Count %1$d_____________________Ї</string>
+    <string name="new_association">ґ_New Association________________Ї</string>
+    <string name="add">ґ_Add_______Ї</string>
+    <string name="failed_to_create_association">ґ_Failed to create association. %1$s__________________Ї</string>
+    <string name="available_features">ґ_%1$d Available Features________________________Ї</string>
+    <string name="loading2">ґ_Loading___________________Ї..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">У вас є помилки (%1$d), які потрібно виправити перед збереженням.</item>
         <item quantity="one">У вас є помилка (%1$d), яку потрібно виправити перед збереженням.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
         <item quantity="other">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
     </plurals>
+    <string name="search_features">ґ_Search features________________Ї</string>
+    <string name="choose_to_add">ґ_Choose to add______________Ї</string>
+    <string name="no_features_found">ґ_No features found__________________Ї</string>
+    <string name="refine_your_search_tip">ґ_Refine your search or choose a different Network Source_____________________________Ї.</string>
+    <string name="select_terminal">ґ_Select Terminal________________Ї</string>
+    <string name="show_on_map">ґ_Show on Map____________Ї</string>
+    <string name="more_information">ґ_More Information_________________Ї</string>
 </resources>

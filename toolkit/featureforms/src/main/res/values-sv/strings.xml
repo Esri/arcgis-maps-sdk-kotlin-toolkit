@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formuläret har valideringsfel</string>
     <string name="the_form_has_edits">Formuläret har redigeringar</string>
     <string name="do_you_want_to_save_your_changes">Vill du spara ändringarna?</string>
-    <string name="no_associations_found">Inga associationer hittades</string>
+    <string name="no_associations_found">Å_No associations to show________________________ö</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Å_Content Visible________________ö</string>
+    <string name="percent_along">Å_Percent Along______________ö</string>
     <string name="from_element">Från element</string>
     <string name="to_element">Till element</string>
     <string name="association_type">Associationstyp</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Synligt innehåll</string>
     <string name="content">Innehåll</string>
+    <string name="containment_visible_value">Å_Visible: %1$s______________ö</string>
+    <string name="from_network_data_source">Å_From Network Data Source_________________________ö</string>
+    <string name="on_map">Å_On Map_____________ö</string>
+    <string name="network_data_source">Å_Network Data Source____________________ö</string>
+    <string name="available_asset_types">Å_Available Asset Types______________________ö</string>
+    <string name="count">Å_Count %1$d_____________________ö</string>
+    <string name="new_association">Å_New Association________________ö</string>
+    <string name="add">Å_Add_______ö</string>
+    <string name="failed_to_create_association">Å_Failed to create association. %1$s__________________ö</string>
+    <string name="available_features">Å_%1$d Available Features________________________ö</string>
+    <string name="loading2">Å_Loading___________________ö..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Du har %1$d fel som måste korrigeras innan du sparar.</item>
         <item quantity="one">Du har %1$d fel som måste korrigeras innan du sparar.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Du har %1$d fel som måste korrigeras innan du sparar.</item>
         <item quantity="other">Du har %1$d fel som måste korrigeras innan du sparar.</item>
     </plurals>
+    <string name="search_features">Å_Search features________________ö</string>
+    <string name="choose_to_add">Å_Choose to add______________ö</string>
+    <string name="no_features_found">Å_No features found__________________ö</string>
+    <string name="refine_your_search_tip">Å_Refine your search or choose a different Network Source_____________________________ö.</string>
+    <string name="select_terminal">Å_Select Terminal________________ö</string>
+    <string name="show_on_map">Å_Show on Map____________ö</string>
+    <string name="more_information">Å_More Information_________________ö</string>
 </resources>

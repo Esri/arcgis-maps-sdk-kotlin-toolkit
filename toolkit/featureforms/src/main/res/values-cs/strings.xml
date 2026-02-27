@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formulář má chyby ověření</string>
     <string name="the_form_has_edits">Formulář má úpravy</string>
     <string name="do_you_want_to_save_your_changes">Chcete uložit své změny?</string>
-    <string name="no_associations_found">Nebyly nalezeny žádné vazby</string>
+    <string name="no_associations_found">Ř_No associations to show________________________ů</string>
     <string name="terminal">Vývod</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="content_visible">Ř_Content Visible________________ů</string>
+    <string name="percent_along">Ř_Percent Along______________ů</string>
     <string name="from_element">Od prvku</string>
     <string name="to_element">K prvku</string>
     <string name="association_type">Typ vazby</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Viditelný obsah</string>
     <string name="content">Obsah</string>
+    <string name="containment_visible_value">Ř_Visible: %1$s______________ů</string>
+    <string name="from_network_data_source">Ř_From Network Data Source_________________________ů</string>
+    <string name="on_map">Ř_On Map_____________ů</string>
+    <string name="network_data_source">Ř_Network Data Source____________________ů</string>
+    <string name="available_asset_types">Ř_Available Asset Types______________________ů</string>
+    <string name="count">Ř_Count %1$d_____________________ů</string>
+    <string name="new_association">Ř_New Association________________ů</string>
+    <string name="add">Ř_Add_______ů</string>
+    <string name="failed_to_create_association">Ř_Failed to create association. %1$s__________________ů</string>
+    <string name="available_features">Ř_%1$d Available Features________________________ů</string>
+    <string name="loading2">Ř_Loading___________________ů..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Máte chyby (celkem %1$d), které je před uložením nutné opravit.</item>
         <item quantity="one">Máte %1$d chybu, kterou je před uložením nutné opravit.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Máte chyby (celkem %1$d), které je před uložením nutné opravit</item>
         <item quantity="other">Máte chyby (celkem %1$d), které je před uložením nutné opravit</item>
     </plurals>
+    <string name="search_features">Ř_Search features________________ů</string>
+    <string name="choose_to_add">Ř_Choose to add______________ů</string>
+    <string name="no_features_found">Ř_No features found__________________ů</string>
+    <string name="refine_your_search_tip">Ř_Refine your search or choose a different Network Source_____________________________ů.</string>
+    <string name="select_terminal">Ř_Select Terminal________________ů</string>
+    <string name="show_on_map">Ř_Show on Map____________ů</string>
+    <string name="more_information">Ř_More Information_________________ů</string>
 </resources>
