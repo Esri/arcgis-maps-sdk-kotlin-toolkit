@@ -21,7 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("grant-test-permissions")
+    id("android-integration-testing")
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 kotlin {
@@ -89,19 +89,6 @@ android {
             java.setSrcDirs(java.srcDirs.plus(file))
         }
     }
-}
-
-grantTestPermissionsConfig {
-    packageName.set(android.defaultConfig.testApplicationId)
-    adbPath.set(android.adbExecutable.absoluteFile)
-    permissions.set(
-        listOf(
-            "android.permission.CAMERA",
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.MANAGE_EXTERNAL_STORAGE"
-        )
-    )
 }
 
 dependencies {
