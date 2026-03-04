@@ -23,17 +23,24 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
+import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.SceneViewingMode
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlinx.coroutines.Job
@@ -46,6 +53,7 @@ class GeoViewModel : ViewModel() {
 
     val mapViewProxy = MapViewProxy()
     val sceneViewProxy = SceneViewProxy()
+    val localSceneViewProxy = LocalSceneViewProxy()
 
     val arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
         initialViewpoint = Viewpoint(
@@ -62,6 +70,43 @@ class GeoViewModel : ViewModel() {
             scale = 10e7
         )
     }
+
+    val localScene =
+        ArcGISScene(
+            viewingMode = SceneViewingMode.Local,
+            basemapStyle = BasemapStyle.ArcGISTopographic
+        ).apply {
+            operationalLayers.add(ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=61da8dc1a7bc4eea901c20ffb3f8b7af"))
+            baseSurface.elevationSources.add(ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"))
+
+            initialViewpoint = Viewpoint(
+                center = Point(
+                    x = 19455026.8116,
+                    y = -5054995.7415,
+                    spatialReference = SpatialReference.webMercator()
+                ),
+                scale = 8314.6991,
+                camera = Camera(
+                    locationPoint = Point(
+                        x = 19455578.6821,
+                        y = -5056336.2227,
+                        z = 1699.3366,
+                        spatialReference = SpatialReference.webMercator()
+                    ),
+                    heading = 338.7410,
+                    pitch = 40.3763,
+                    roll = 0.0,
+                )
+            )
+            clippingArea = Envelope(
+                xMin = 19454578.8235,
+                yMin = -5055381.4798,
+                xMax = 19455518.8814,
+                yMax = -5054888.4150,
+                spatialReference = SpatialReference.webMercator()
+            )
+            isClippingEnabled = true
+        }
 
     val arcGISMapWithFeatureLayer = ArcGISMap(
         uri = "https://www.arcgis.com/home/item.html?id=16f1b8ba37b44dc3884afc8d5f454dd2"
@@ -92,7 +137,8 @@ class GeoViewModel : ViewModel() {
     val offset: StateFlow<Offset> = _offset
 
     private val _tapLocationGraphicsOverlay = MutableStateFlow(GraphicsOverlay())
-    val tapLocationGraphicsOverlay: StateFlow<GraphicsOverlay> = _tapLocationGraphicsOverlay.asStateFlow()
+    val tapLocationGraphicsOverlay: StateFlow<GraphicsOverlay> =
+        _tapLocationGraphicsOverlay.asStateFlow()
 
     private var currentIdentifyJob: Job? = null
 
@@ -107,10 +153,21 @@ class GeoViewModel : ViewModel() {
     }
 
     fun setPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
-        if (_geoViewType.value == GeoViewType.MapViewType)
-            _point.value = singleTapConfirmedEvent.mapPoint
-        else
-            _point.value = sceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+        when (_geoViewType.value) {
+            GeoViewType.MapViewType -> {
+                _point.value = singleTapConfirmedEvent.mapPoint
+            }
+
+            GeoViewType.SceneViewType -> {
+                _point.value =
+                    sceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+            }
+
+            GeoViewType.LocalSceneViewType -> {
+                _point.value =
+                    localSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+            }
+        }
 
         _tapLocationGraphicsOverlay.value.graphics.clear()
         _tapLocationGraphicsOverlay.value.graphics.add(
@@ -121,12 +178,9 @@ class GeoViewModel : ViewModel() {
         )
     }
 
-    fun toggleGeoView() {
+    fun toggleGeoView(geoViewType: GeoViewType) {
         clearPoint()
-        _geoViewType.value = if (_geoViewType.value == GeoViewType.MapViewType)
-            GeoViewType.SceneViewType
-        else
-            GeoViewType.MapViewType
+        _geoViewType.value = geoViewType
     }
 
     fun clearTapLocationAndGraphic() {
@@ -174,7 +228,9 @@ class GeoViewModel : ViewModel() {
         }
     }
 }
+
 sealed class GeoViewType {
     object MapViewType : GeoViewType()
     object SceneViewType : GeoViewType()
+    object LocalSceneViewType : GeoViewType()
 }
