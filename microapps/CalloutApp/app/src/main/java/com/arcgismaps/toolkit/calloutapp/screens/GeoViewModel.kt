@@ -28,11 +28,10 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
-import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Camera
@@ -76,8 +75,7 @@ class GeoViewModel : ViewModel() {
             viewingMode = SceneViewingMode.Local,
             basemapStyle = BasemapStyle.ArcGISTopographic
         ).apply {
-            operationalLayers.add(ArcGISSceneLayer("https://www.arcgis.com/home/item.html?id=61da8dc1a7bc4eea901c20ffb3f8b7af"))
-            baseSurface.elevationSources.add(ArcGISTiledElevationSource("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"))
+            baseSurface.elevationSources.add(ElevationSource.fromTerrain3dService())
 
             initialViewpoint = Viewpoint(
                 center = Point(
@@ -164,8 +162,14 @@ class GeoViewModel : ViewModel() {
             }
 
             GeoViewType.LocalSceneViewType -> {
-                _point.value =
-                    localSceneViewProxy.screenToBaseSurface(singleTapConfirmedEvent.screenCoordinate)
+                viewModelScope.launch {
+                    _point.value =
+                        localSceneViewProxy.screenToLocation(singleTapConfirmedEvent.screenCoordinate)
+                            .getOrNull()?.let {
+                                // get the highest resolution elevation for the tapped point
+                                localScene.baseSurface.applyElevation(it).getOrNull() as Point?
+                            }
+                }
             }
         }
 
