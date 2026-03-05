@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
-import com.arcgismaps.analysis.ExploratoryLocationViewshed
+import com.arcgismaps.interactive.ExploratoryLocationViewshed
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
