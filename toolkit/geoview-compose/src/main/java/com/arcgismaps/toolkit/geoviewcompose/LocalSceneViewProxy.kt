@@ -123,18 +123,18 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
     }
 
     /**
-     * Converts the specified screen coordinate, relative to the upper-left corner of the local scene
-     * view, to a location on the base surface in geographic coordinates.
-     * Note that the elevation value for the converted location is approximated, as the precision
-     * of the elevation value decreases with increasing distance between the camera and the surface.
+     * Converts a screen coordinate to a location on the base surface in scene coordinates, considering
+     * only the scene's base surface and ignoring other scene content. Note that the elevation value
+     * for the converted location is approximated, as the precision of the elevation value decreases
+     * with increasing distance between the camera and the surface.
      *
      * This method returns null if the provided screen coordinate is outside the bounds of the current
      * screen or if its location does not intersect with the surface of the local scene.
      *
      * To call this method, assign a local scene to the local scene view and ensure that it is loaded.
      *
-     * @param screenCoordinate The screen coordinate to convert to a location on the base surface. The coordinate
-     * of the top left corner of the screen is 0,0.
+     * @param screenCoordinate The screen coordinate to convert to a location on the base surface.
+     * The coordinate of the top left corner of the screen is 0,0.
      *
      * @return A point on the base surface.
      * @since 300.0.0
@@ -143,18 +143,21 @@ public class LocalSceneViewProxy : GeoViewProxy("LocalSceneView") {
         localSceneView?.screenToBaseSurface(screenCoordinate)
 
     /**
-     * Asynchronously converts a screen coordinate, relative to the upper-left corner of the
-     * LocalSceneView, to a location in scene coordinates.
+     * Converts a screen coordinate to a location in scene coordinates, considering both the scene's
+     * base surface and other scene content.
      *
-     * This calculation is executed on the GPU using a triangular mesh. Note that elevation values
-     * are approximated, and as the distance between the camera and the surface increases, the
-     * precision of the elevation value decreases.
+     * Note that elevation values are approximated, and as the distance between the camera and the
+     * surface increases, the precision of the elevation value decreases.
      *
-     * If the provided screen coordinates are outside of the bounds of the current screen, this
-     * method will immediately fail with an error.
+     * This method will fail with an error when:
+     * - The provided screen coordinates are outside of the bounds of the current screen
+     * - The view does not have a spatial reference
+     * - The screen coordinates contain NAN values
      *
      * If the provided screen coordinates do not intersect with the surface of the local scene, the
      * returned point will be empty.
+     *
+     * To call this method, assign a local scene to the local scene view and ensure that it is loaded.
      *
      * @param screenCoordinate The screen coordinate. The coordinate of the top left corner of the
      * screen is 0,0.
