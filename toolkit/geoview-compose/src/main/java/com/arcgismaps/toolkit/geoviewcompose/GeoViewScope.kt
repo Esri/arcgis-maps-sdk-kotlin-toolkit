@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.geoviewcompose
 
 import android.graphics.RectF
 import android.util.DisplayMetrics
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -32,6 +33,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
@@ -42,8 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -54,8 +54,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
@@ -104,6 +106,24 @@ import kotlin.math.sin
  * @since 200.5.0
  */
 public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
+
+    private val _isCalloutVisible = mutableStateOf(false)
+
+    @Composable
+    internal fun Modifier.geoViewSemanticModifier(geoViewDescription: String): Modifier {
+        val isCalloutVisible by _isCalloutVisible
+        return if (isCalloutVisible){
+            Log.e("Callout", "Callout is visible")
+            focusable(false).semantics{
+                geoView.isFocusable = false
+                focused = false
+            }
+        }else {
+            Log.e("Callout", "Callout is not visible")
+            focusable(true).semantics { focused = true }
+        }
+    }
+
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -394,6 +414,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
+            DisposableEffect(Unit) {
+                _isCalloutVisible.value = true
+                onDispose { _isCalloutVisible.value = false }
+            }
+
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = leaderScreenCoordinate,
@@ -430,6 +455,12 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
+                            .focusable()
+                            .semantics {
+                                paneTitle = "Callout"
+                                isTraversalGroup = true
+                                contentDescription = "CalloutContainerLayout"
+                            }
                     ) {
                         content.invoke(this)
                     }

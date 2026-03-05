@@ -35,8 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
@@ -217,7 +215,7 @@ public fun MapView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus = false,
+        canFocus = true,
         content = content
     )
 }
@@ -235,7 +233,6 @@ public fun MapView(
  * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
  * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
- * @param imageOverlays image overlays for displaying images in the composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -320,29 +317,24 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = false,
+    canFocus: Boolean = true,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember {
-        MapView(context)
-    }
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    mapView.isFocusable = canFocus
-    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
-    mapView.isFocusedByDefault = true
+    val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-
+    val mapViewScope = remember { MapViewScope(mapView) }
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
+    with(mapViewScope) {
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = "MapView" },
+                .geoViewSemanticModifier("MapView"),
             factory = { mapView },
             update = {
                 it.map = arcGISMap
@@ -371,8 +363,7 @@ public fun MapView(
                     }
                 }
             })
-
-        val mapViewScope = remember { MapViewScope(mapView) }
+        }
         val isMapViewReady = mapView.rememberIsReady()
 
         if (isMapViewReady.value) {

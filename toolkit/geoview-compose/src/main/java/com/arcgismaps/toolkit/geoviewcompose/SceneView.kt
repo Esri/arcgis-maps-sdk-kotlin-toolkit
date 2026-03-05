@@ -34,8 +34,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
@@ -208,7 +206,7 @@ public fun SceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus = false,
+        canFocus = true,
         content = content
     )
 }
@@ -335,7 +333,7 @@ public fun SceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = false,
+    canFocus: Boolean = true,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -344,20 +342,17 @@ public fun SceneView(
         SceneView(context)
     }
 
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    sceneView.isFocusable = canFocus
-    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
-    sceneView.isFocusedByDefault = canFocus
-
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
+        val sceneViewScope = remember { SceneViewScope(sceneView) }
+        with(sceneViewScope) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = "SceneView" },
+                .geoViewSemanticModifier("SceneView"),
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
@@ -398,8 +393,7 @@ public fun SceneView(
                 // https://devtopia.esri.com/runtime/kotlin/issues/6623
                 it.cameraController = cameraController
             })
-
-        val sceneViewScope = remember { SceneViewScope(sceneView) }
+        }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
@@ -459,7 +453,6 @@ public fun SceneView(
         onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
-
 
 /**
  * Sets up the callbacks for all the view-based [sceneView] events.
