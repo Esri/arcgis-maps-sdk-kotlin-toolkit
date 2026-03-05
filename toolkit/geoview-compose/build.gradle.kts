@@ -21,9 +21,14 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("android-integration-testing")
+    id("android-integration-testing") apply false
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+if (file(project.findProperty("toolkitTestDir") as String).exists()){
+    pluginManager.apply("android-integration-testing")
+}
+
 kotlin {
     jvmToolchain(17)
 }
