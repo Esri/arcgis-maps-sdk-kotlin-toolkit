@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -322,19 +323,18 @@ public fun MapView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    val mapView = remember { MapView(context) }.apply {
+        isFocusable = true
+    }
     val layoutDirection = LocalLayoutDirection.current
-    val mapViewScope = remember { MapViewScope(mapView) }
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
-    with(mapViewScope) {
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
-                .fillMaxSize()
-                .geoViewSemanticModifier("MapView"),
+                .fillMaxSize(),
             factory = { mapView },
             update = {
                 it.map = arcGISMap
@@ -348,8 +348,6 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
-                it.isFocusable = canFocus
-                it.isFocusedByDefault = true // TODO: remove when #7178 is complete
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -364,6 +362,8 @@ public fun MapView(
                 }
             })
         }
+
+        val mapViewScope = remember { MapViewScope(mapView) }
         val isMapViewReady = mapView.rememberIsReady()
 
         if (isMapViewReady.value) {
@@ -371,7 +371,6 @@ public fun MapView(
                 mapViewScope.it()
             }
         }
-    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)

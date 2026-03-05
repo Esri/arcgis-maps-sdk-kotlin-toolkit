@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -338,21 +339,17 @@ public fun SceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember {
-        SceneView(context)
-    }
-
+    val sceneView = remember { SceneView(context) }
+    val sceneViewScope = remember { SceneViewScope(sceneView) }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
-        val sceneViewScope = remember { SceneViewScope(sceneView) }
-        with(sceneViewScope) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .geoViewSemanticModifier("SceneView"),
+                .focusable(),
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
@@ -385,8 +382,7 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-                it.isFocusable = canFocus
-                it.isFocusedByDefault = canFocus // TODO: remove when #7178 is complete
+                it.isFocusable = true
                 // Set the camera controller last, to ensure other dependent SceneView properties are already set.
                 // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
                 // set on the SceneView at this point.
@@ -408,7 +404,6 @@ public fun SceneView(
                 sceneViewScope.it()
             }
         }
-    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(sceneView)

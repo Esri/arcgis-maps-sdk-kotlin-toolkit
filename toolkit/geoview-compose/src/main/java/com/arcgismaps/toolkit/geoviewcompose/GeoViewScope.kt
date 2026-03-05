@@ -107,24 +107,6 @@ import kotlin.math.sin
  */
 public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
 
-    private val _isCalloutVisible = mutableStateOf(false)
-
-    @Composable
-    internal fun Modifier.geoViewSemanticModifier(geoViewDescription: String): Modifier {
-        val isCalloutVisible by _isCalloutVisible
-        return if (isCalloutVisible){
-            Log.e("Callout", "Callout is visible")
-            focusable(false).semantics{
-                geoView.isFocusable = false
-                focused = false
-            }
-        }else {
-            Log.e("Callout", "Callout is not visible")
-            focusable(true).semantics { focused = true }
-        }
-    }
-
-
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
      * that can be used to display additional information about a location on the map. The additional information is
@@ -414,11 +396,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
-            DisposableEffect(Unit) {
-                _isCalloutVisible.value = true
-                onDispose { _isCalloutVisible.value = false }
-            }
-
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = leaderScreenCoordinate,
@@ -455,12 +432,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .focusable()
-                            .semantics {
-                                paneTitle = "Callout"
-                                isTraversalGroup = true
-                                contentDescription = "CalloutContainerLayout"
-                            }
                     ) {
                         content.invoke(this)
                     }

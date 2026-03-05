@@ -163,7 +163,7 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = false,
+    canFocus: Boolean = true,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -173,9 +173,7 @@ public fun LocalSceneView(
     }
 
     // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    localSceneView.isFocusable = canFocus
-    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
-    localSceneView.isFocusedByDefault = canFocus
+    localSceneView.isFocusable = true
 
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
@@ -190,8 +188,7 @@ public fun LocalSceneView(
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
-                it.isFocusable = canFocus
-                it.isFocusedByDefault = canFocus // TODO: remove when #7178 is complete
+                it.isFocusable = true
             }
         )
 
