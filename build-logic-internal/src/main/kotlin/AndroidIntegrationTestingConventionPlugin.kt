@@ -41,12 +41,12 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                         tasks.named("connected$capitalizedTestVariantName") {
                             if (syncTestDataBeforeInstrumentedTests.toBoolean()) {
                                 // Uses adb to sync the test data to the test device.
-                                dependsOn(gradle.includedBuild("build-logic").task(":syncTestData"))
+                                dependsOn(gradle.includedBuild("build-logic-internal").task(":syncTestData"))
                             }
                             // Grants storage permissions requested by the test app.
                             dependsOn("grantDevicePermissions")
                             // Deletes ic-output folder before running connectedAndroidTests
-                            dependsOn(gradle.includedBuild("build-logic").task(":deleteICOutput"))
+                            dependsOn(gradle.includedBuild("build-logic-internal").task(":deleteICOutput"))
                         }
 
                         // Make sure the permissions task only runs after the install task, otherwise the app

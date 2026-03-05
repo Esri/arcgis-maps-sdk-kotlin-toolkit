@@ -17,35 +17,41 @@
  */
 
 pluginManagement {
-    includeBuild("build-logic")
+    if (file(settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests").exists()){
+        includeBuild("build-logic-internal")
+    } else {
+        includeBuild("build-logic")
+    }
     repositories {
-        maven {
-            val localProperties = java.util.Properties().apply {
-                val localPropertiesFile = file("local.properties")
-                if (localPropertiesFile.exists()) {
-                    load(localPropertiesFile.inputStream())
-                }
+        val localProperties = java.util.Properties().apply {
+            val localPropertiesFile = file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
             }
+        }
 
-            val artifactoryUrl: String =
-                providers.gradleProperty("artifactoryUrl").orNull
-                    ?: localProperties.getProperty("artifactoryUrl")
-                    ?: ""
+        val artifactoryUrl: String =
+            providers.gradleProperty("artifactoryUrl").orNull
+                ?: localProperties.getProperty("artifactoryUrl")
+                ?: ""
 
-            val artifactoryUsername: String =
-                providers.gradleProperty("artifactoryUsername").orNull
-                    ?: localProperties.getProperty("artifactoryUsername")
-                    ?: ""
+        val artifactoryUsername: String =
+            providers.gradleProperty("artifactoryUsername").orNull
+                ?: localProperties.getProperty("artifactoryUsername")
+                ?: ""
 
-            val artifactoryPassword: String =
-                providers.gradleProperty("artifactoryPassword").orNull
-                    ?: localProperties.getProperty("artifactoryPassword")
-                    ?: ""
+        val artifactoryPassword: String =
+            providers.gradleProperty("artifactoryPassword").orNull
+                ?: localProperties.getProperty("artifactoryPassword")
+                ?: ""
 
-            url = java.net.URI(artifactoryUrl)
-            credentials {
-                username = artifactoryUsername
-                password = artifactoryPassword
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
             }
         }
         gradlePluginPortal()
