@@ -3,7 +3,7 @@
 pluginManagement {
     repositories {
         val localProperties = java.util.Properties().apply {
-            val localPropertiesFile = file("local.properties")
+            val localPropertiesFile = file("../local.properties")
             if (localPropertiesFile.exists()) {
                 load(localPropertiesFile.inputStream())
             }
