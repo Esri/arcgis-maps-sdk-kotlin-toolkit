@@ -2,16 +2,72 @@
 
 pluginManagement {
     repositories {
-        mavenLocal()
+        maven {
+            val localProperties = java.util.Properties().apply {
+                val localPropertiesFile = file("../local.properties")
+                if (localPropertiesFile.exists()) {
+                    load(localPropertiesFile.inputStream())
+                }
+            }
+
+            val artifactoryUrl: String =
+                providers.gradleProperty("artifactoryUrl").orNull
+                    ?: localProperties.getProperty("artifactoryUrl")
+                    ?: ""
+
+            val artifactoryUsername: String =
+                providers.gradleProperty("artifactoryUsername").orNull
+                    ?: localProperties.getProperty("artifactoryUsername")
+                    ?: ""
+
+            val artifactoryPassword: String =
+                providers.gradleProperty("artifactoryPassword").orNull
+                    ?: localProperties.getProperty("artifactoryPassword")
+                    ?: ""
+
+            url = java.net.URI(artifactoryUrl)
+            credentials {
+                username = artifactoryUsername
+                password = artifactoryPassword
+            }
+        }
         gradlePluginPortal()
         google()
         mavenCentral()
     }
 }
 
+val localProperties = java.util.Properties().apply {
+    val localPropertiesFile = file("../local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
+val artifactoryUrl: String =
+    providers.gradleProperty("artifactoryUrl").orNull
+        ?: localProperties.getProperty("artifactoryUrl")
+        ?: ""
+
+val artifactoryUsername: String =
+    providers.gradleProperty("artifactoryUsername").orNull
+        ?: localProperties.getProperty("artifactoryUsername")
+        ?: ""
+
+val artifactoryPassword: String =
+    providers.gradleProperty("artifactoryPassword").orNull
+        ?: localProperties.getProperty("artifactoryPassword")
+        ?: ""
+
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
+        maven {
+            url = java.net.URI(artifactoryUrl)
+            credentials {
+                username = artifactoryUsername
+                password = artifactoryPassword
+            }
+        }
         google()
         mavenCentral()
         gradlePluginPortal()

@@ -98,7 +98,7 @@ arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
-arcgismaps-testdata-sync-gradle-plugin = { group = "com.esri.testdata.sync", name = "com.esri.testdata.sync.gradle.plugin", version.ref = "arcgismapsTestdataSync" }
+arcgismaps-testdata-sync-gradle-plugin = { group = "com.esri.gradle-plugins.testdata.sync", name = "com.esri.gradle-plugins.testdata.sync.gradle.plugin", version.ref = "arcgismapsTestdataSync" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -112,7 +112,7 @@ gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradl
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
-arcgismaps-testdata-sync = { id = "com.esri.testdata.sync", version.ref = "arcgismapsTestdataSync" }
+arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", version.ref = "arcgismapsTestdataSync" }
 
 [bundles]
 camerax = [
