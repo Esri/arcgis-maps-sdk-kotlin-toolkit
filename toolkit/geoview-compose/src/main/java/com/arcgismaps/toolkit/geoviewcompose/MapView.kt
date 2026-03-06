@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.Log
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.ArcGISEnvironment
@@ -234,6 +237,7 @@ public fun MapView(
  * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
  * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
+ * @param imageOverlays image overlays for displaying images in the composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -323,10 +327,14 @@ public fun MapView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }.apply {
-        isFocusable = true
+    val mapView = remember {
+        MapView(context)
     }
+    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
+    mapView.isFocusable = canFocus
+    var isMapViewFocusable by remember { mutableStateOf(canFocus) }
     val layoutDirection = LocalLayoutDirection.current
+
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -334,7 +342,9 @@ public fun MapView(
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .focusable(isMapViewFocusable)
+                .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
@@ -348,6 +358,7 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
+                it.isFocusable = isMapViewFocusable
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -361,16 +372,20 @@ public fun MapView(
                     }
                 }
             })
-        }
 
         val mapViewScope = remember { MapViewScope(mapView) }
         val isMapViewReady = mapView.rememberIsReady()
-
+        val isCalloutVisible by remember { mapViewScope.isCalloutVisible() }
+        LaunchedEffect(canFocus, isCalloutVisible) {
+            isMapViewFocusable = canFocus && !isCalloutVisible
+            Log.e("MapView","MapView focusable: $isMapViewFocusable, CanFocus: $canFocus, isCalloutVisible: $isCalloutVisible")
+        }
         if (isMapViewReady.value) {
             content?.let {
                 mapViewScope.it()
             }
         }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)

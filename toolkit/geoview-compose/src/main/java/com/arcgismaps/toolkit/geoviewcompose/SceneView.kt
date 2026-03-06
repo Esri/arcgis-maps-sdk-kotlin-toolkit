@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -35,6 +34,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
@@ -334,13 +335,18 @@ public fun SceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = true,
+    canFocus: Boolean = false,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember { SceneView(context) }
-    val sceneViewScope = remember { SceneViewScope(sceneView) }
+    val sceneView = remember {
+        SceneView(context)
+    }
+
+    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
+    sceneView.isFocusable = canFocus
+
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -349,7 +355,7 @@ public fun SceneView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(),
+                .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
@@ -382,14 +388,15 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-                it.isFocusable = true
+                it.isFocusable = canFocus
                 // Set the camera controller last, to ensure other dependent SceneView properties are already set.
                 // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
                 // set on the SceneView at this point.
                 // https://devtopia.esri.com/runtime/kotlin/issues/6623
                 it.cameraController = cameraController
             })
-        }
+
+        val sceneViewScope = remember { SceneViewScope(sceneView) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
@@ -404,6 +411,7 @@ public fun SceneView(
                 sceneViewScope.it()
             }
         }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(sceneView)

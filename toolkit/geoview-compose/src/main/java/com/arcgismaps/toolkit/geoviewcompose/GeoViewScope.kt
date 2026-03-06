@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.geoviewcompose
 
 import android.graphics.RectF
 import android.util.DisplayMetrics
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -55,7 +54,6 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.focused
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -106,6 +104,8 @@ import kotlin.math.sin
  * @since 200.5.0
  */
 public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
+    private val _isCalloutContentPlaced = mutableStateOf(false)
+    internal fun isCalloutVisible(): State<Boolean> = _isCalloutContentPlaced
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -396,11 +396,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let { leaderScreenCoordinate ->
-            val focusRequester = remember(location) { FocusRequester() }
-            LaunchedEffect(location) {
-                focusRequester.requestFocus()
-            }
-
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = leaderScreenCoordinate,
@@ -437,13 +432,18 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .focusRequester(focusRequester)
                             .focusable()
-                            .semantics(mergeDescendants = true) {
-                                liveRegion = LiveRegionMode.Polite
-                            },
+                            .semantics{
+                                paneTitle = "Callout"
+                                isTraversalGroup = true
+                                contentDescription = "CalloutContainerLayout"
+                            }
                     ) {
                         content.invoke(this)
+                        DisposableEffect(Unit) {
+                            _isCalloutContentPlaced.value = true
+                            onDispose { _isCalloutContentPlaced.value = false }
+                        }
                     }
                 }
             }
