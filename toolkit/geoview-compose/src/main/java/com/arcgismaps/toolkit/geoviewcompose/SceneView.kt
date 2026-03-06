@@ -17,6 +17,12 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -31,6 +37,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -346,15 +354,18 @@ public fun SceneView(
 
     // set focus right away so the compose AndroidView "focus interop" is set up correctly.
     sceneView.isFocusable = canFocus
-
+    var isSceneViewFocusable by remember { mutableStateOf(canFocus) }
+    val calloutFocusRequester = remember { FocusRequester() }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
-    Box(modifier = modifier.clipToBounds()) {
+    Box(modifier = modifier.clipToBounds().focusGroup()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(isSceneViewFocusable)
+                .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
@@ -388,7 +399,36 @@ public fun SceneView(
                         addAll(imageOverlays)
                     }
                 }
-                it.isFocusable = canFocus
+                it.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                    override fun onInitializeAccessibilityEvent(
+                        host: View,
+                        event: AccessibilityEvent
+                    ) {
+                        super.onInitializeAccessibilityEvent(host, event)
+                        host.isFocusable = isSceneViewFocusable
+                    }
+                    override fun dispatchPopulateAccessibilityEvent(
+                        host: View,
+                        event: AccessibilityEvent
+                    ): Boolean {
+                        return if (isSceneViewFocusable)
+                            super.dispatchPopulateAccessibilityEvent(host, event)
+                        else
+                            true
+                    }
+
+                    override fun onRequestSendAccessibilityEvent(
+                        host: ViewGroup,
+                        child: View,
+                        event: AccessibilityEvent
+                    ): Boolean {
+                        return if (isSceneViewFocusable) {
+                            Log.e("EVENT", "event: ${event.contentDescription}, ${event.text}")
+                            super.onRequestSendAccessibilityEvent(host, child, event)
+                        }
+                        else false
+                    }
+                }
                 // Set the camera controller last, to ensure other dependent SceneView properties are already set.
                 // For example, OrbitGeoElementCameraController requires its associated GeoElement to be in a graphics overlay
                 // set on the SceneView at this point.
@@ -396,7 +436,7 @@ public fun SceneView(
                 it.cameraController = cameraController
             })
 
-        val sceneViewScope = remember { SceneViewScope(sceneView) }
+        val sceneViewScope = remember { SceneViewScope(sceneView, calloutFocusRequester) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
@@ -672,7 +712,9 @@ private fun ViewpointHandler(
  *
  * @since 200.5.0
  */
-public class SceneViewScope internal constructor(sceneView: SceneView) : GeoViewScope(sceneView)
+public class SceneViewScope internal constructor(
+    sceneView: SceneView, calloutFocusRequester: FocusRequester
+) : GeoViewScope(sceneView, calloutFocusRequester)
 
 /**
  * Contains default values for the SceneView.

@@ -43,6 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -103,7 +106,7 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
+public sealed class GeoViewScope protected constructor(private val geoView: GeoView, private val calloutFocusRequester: FocusRequester) {
     private val _isCalloutContentPlaced = mutableStateOf(false)
     internal fun isCalloutVisible(): State<Boolean> = _isCalloutContentPlaced
 
@@ -432,7 +435,12 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
+                            .focusRequester(calloutFocusRequester)
                             .focusable()
+                            .focusProperties{
+                                next = calloutFocusRequester
+                                previous = calloutFocusRequester
+                            }
                             .semantics{
                                 paneTitle = "Callout"
                                 isTraversalGroup = true
