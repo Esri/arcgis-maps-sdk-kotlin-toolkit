@@ -17,7 +17,13 @@
  */
 
 pluginManagement {
-    if (file(settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests").exists()){
+    val toolkitTestDir = settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests"
+
+    gradle.beforeProject {
+        extra.set("toolkitTestDir", toolkitTestDir)
+    }
+
+    if (file(toolkitTestDir).exists()){
         includeBuild("build-logic-internal")
     }
     includeBuild("build-logic")
