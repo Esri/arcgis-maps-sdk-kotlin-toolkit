@@ -14,7 +14,10 @@ val localProperties = Properties().apply {
 }
 
 configure<SyncTestDataPluginExtension>{
-    adbExe.set(File("${ localProperties.getProperty("sdk.dir") }/platform-tools/adb"))
+    val sdkDir = localProperties.getProperty("sdk.dir")
+        ?: providers.environmentVariable("ANDROID_SDK_ROOT").orNull
+        ?: error("Android SDK not found. Set sdk.dir in local.properties or ANDROID_SDK_ROOT env var.")
+    adbExe.set(File("$sdkDir/platform-tools/adb"))
     testApplicationId.set("")
     testDataSyncPath.set(rootProject.properties["testDataSyncPath"] as String)
     val kotlinDirPath = rootProject.properties["kotlinDirPath"] as String
