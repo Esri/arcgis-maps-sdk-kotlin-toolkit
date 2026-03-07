@@ -50,6 +50,7 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTerminalConfiguration
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -164,21 +165,38 @@ internal class AddAssociationFromSourceViewModel(
     )
 
     /**
-     * A flow that emits a list of [UtilityAssetType]s based on the current search text.
+     * A flow that emits a list of [UtilityAssetType]s from the currently selected source, ordered by
+     * asset group name. This should be used as the source of truth for the list of asset types to
+     * ensure consistent ordering.
      */
-    val filteredAssetTypes: StateFlow<List<UtilityAssetType>> = snapshotFlow {
-        assetTypesFilterText to selectedSource
-    }.map { (text, _) ->
-        return@map if (text.isNotEmpty()) {
-            filterAssetTypes(text)
-        } else {
-            _selectedSource.value?.assetTypes ?: emptyList()
-        }
+    private val orderedAssetTypes: StateFlow<List<UtilityAssetType>> = snapshotFlow {
+        _selectedSource.value
+    }.map {
+        it?.assetTypes?.orderByAssetGroup() ?: emptyList()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
-        initialValue = _selectedSource.value?.assetTypes ?: emptyList()
+        initialValue = _selectedSource.value?.assetTypes?.orderByAssetGroup() ?: emptyList()
     )
+
+    /**
+     * A flow that emits a list of [UtilityAssetType]s based on the current search text.
+     */
+    val filteredAssetTypes: StateFlow<List<UtilityAssetType>> = orderedAssetTypes
+        .combine(snapshotFlow { assetTypesFilterText }) { assetTypes, text ->
+            if (text.isNotEmpty()) {
+                assetTypes.filter { assetType ->
+                    assetType.name.contains(text, ignoreCase = true)
+                }
+            } else {
+                assetTypes
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(1000),
+            initialValue = orderedAssetTypes.value
+        )
 
     /**
      * A flow that emits a [FeatureCandidatesUiState] based on the current search text.
@@ -327,17 +345,6 @@ internal class AddAssociationFromSourceViewModel(
         return _featureSources.value.filter { featureSource ->
             featureSource.name.contains(filterString, ignoreCase = true)
         }
-    }
-
-    /**
-     * Filters the list of [UtilityAssetType] objects from the currently selected source based on
-     * the provided [filterString], returning only those whose names contain the filter string
-     * (case-insensitive).
-     */
-    private fun filterAssetTypes(filterString: String): List<UtilityAssetType> {
-        return _selectedSource.value?.assetTypes?.filter { assetType ->
-            assetType.name.contains(filterString, ignoreCase = true)
-        } ?: emptyList()
     }
 
     /**
@@ -778,4 +785,52 @@ private fun List<Field>.filterSupportedFields(): List<Field> {
             !field.name.equals("ASSETGROUP", ignoreCase = true) &&
             !field.name.equals("ASSETTYPE", ignoreCase = true)
     }
+}
+
+/**
+ * Returns a new list of [UtilityAssetType] sorted by their asset group name, ignoring case, while
+ * maintaining the original order for asset types with the same name. Note that this function assumes
+ * that the input list is already ordered by asset type name.
+ *
+ * @return A list of [UtilityAssetType] sorted by asset group name within each asset type name.
+ */
+internal fun List<UtilityAssetType>.orderByAssetGroup(): List<UtilityAssetType> {
+    // Create a mutable copy of the list if it's not already mutable, so we can sort in place.
+    val reorderedList = this as? MutableList<UtilityAssetType> ?: this.toMutableList()
+
+    /**
+     * Sorts the [reorderedList] from [fromIndex] to [toIndexInclusive] (inclusive) in place by the
+     * name of the asset group, ignoring case.
+     */
+    fun sortSubList(fromIndex: Int, toIndexInclusive: Int) {
+        if (toIndexInclusive > fromIndex) {
+            reorderedList.subList(fromIndex, toIndexInclusive + 1).sortBy {
+                it.assetGroup.name.lowercase()
+            }
+        }
+    }
+
+    var l = 0
+    var r = 0
+    reorderedList.forEachIndexed { index, item ->
+        // Skip the first item since there's no "last" item to compare to.
+        if (index == 0) return@forEachIndexed
+        val last = reorderedList[index - 1]
+        // If the asset type name is the same as the last one, move r forward to continue the run
+        // of same names.
+        if (item.name.equals(last.name, ignoreCase = true)) {
+            r++
+        } else {
+            // If the name is different, we might have ended a chain of same names, so sort this
+            // sublist in place by asset group name
+            sortSubList(l, r)
+            // Move both l and r to the current index to start a new chain.
+            l = index
+            r = index
+        }
+    }
+
+    // Sort trailing run, if any.
+    sortSubList(l, r)
+    return reorderedList
 }
