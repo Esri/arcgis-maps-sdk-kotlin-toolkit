@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork
+package com.arcgismaps.toolkit.featureforms
 
+import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.orderByAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityAssetType
 import io.mockk.every
