@@ -81,6 +81,7 @@ import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewProxy
 import com.arcgismaps.toolkit.ar.rememberFlyoverSceneViewStatus
 import com.arcgismaps.toolkit.arflyoverapp.R
 import com.arcgismaps.toolkit.arflyoverapp.rememberPointsOfInterest
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -222,7 +223,10 @@ fun MainScreen() {
                         val pointOfInterest = pointsOfInterestList[currentPoiIndex]
                         pointOfInterest.calloutLocation?.let { calloutLocation ->
                             // Display a Callout containing information about the current POI
-                            Callout(calloutLocation) {
+                            Callout(
+                                location = calloutLocation,
+                                leaderPosition = LeaderPosition.Automatic
+                            ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
                                         text = pointOfInterest.name,
