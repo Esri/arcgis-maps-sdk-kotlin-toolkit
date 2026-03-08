@@ -286,6 +286,8 @@ public fun SceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
  * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
@@ -333,6 +335,7 @@ public fun SceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -433,7 +436,8 @@ public fun SceneView(
         onPan,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged
     )
 
     ViewpointHandler(
@@ -467,6 +471,7 @@ private fun SceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?
 ) {
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -485,6 +490,7 @@ private fun SceneViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -570,6 +576,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            sceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
             }
         }
     }

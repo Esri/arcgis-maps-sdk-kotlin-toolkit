@@ -130,6 +130,12 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
+ * changes
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
+ * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
+ * LocalSceneView changes
+ * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
  * is changed
  * @param content the content of the composable LocalSceneView
  *
@@ -162,6 +168,9 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -209,30 +218,33 @@ public fun LocalSceneView(
     }
 
     LocalSceneViewEventHandler(
-        localSceneView,
-        onNavigationChanged,
-        onSpatialReferenceChanged,
-        onLayerViewStateChanged,
-        onInteractingChanged,
-        onRotate,
-        onScale,
-        onUp,
-        onDown,
-        onSingleTapConfirmed,
-        onDoubleTap,
-        onLongPress,
-        onTwoPointerTap,
-        onPan,
-        onDrawStatusChanged,
-        onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        localSceneView = localSceneView,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onDrawStatusChanged = onDrawStatusChanged,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged
     )
 
     ViewpointHandler(
-        localSceneView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
-        onCurrentViewpointCameraChanged
+        localSceneView = localSceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
 
@@ -260,6 +272,9 @@ private fun LocalSceneViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
+    onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -277,6 +292,9 @@ private fun LocalSceneViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
+    val currentOnCriticalErrorChanged by rememberUpdatedState(onCriticalErrorChanged)
+    val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -357,6 +375,21 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            localSceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.criticalError.collect {
+                currentOnCriticalErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.warnings.collect {
+                currentOnWarningsChanged?.invoke(it)
             }
         }
     }

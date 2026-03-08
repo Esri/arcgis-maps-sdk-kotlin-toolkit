@@ -93,6 +93,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -118,6 +119,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
@@ -190,7 +192,7 @@ fun MapScreen(
             ) {
                 val identifyTaskLocation by mapViewModel.identifyTaskLocation
                 identifyTaskLocation?.let { mapPoint ->
-                    Callout(location = mapPoint) {
+                    Callout(location = mapPoint, leaderPosition = LeaderPosition.Automatic) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(15.dp),
                             strokeWidth = 3.dp
@@ -381,7 +383,7 @@ fun FeatureItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     ListItem(
         headlineContent = {
@@ -411,8 +413,9 @@ fun FeatureItem(
             onClick()
         }
     )
+
     LaunchedEffect(feature) {
-        bitmap = feature.getSymbol(context.resources)
+        bitmap = feature.getSymbol(resources)
     }
 }
 
@@ -680,7 +683,7 @@ fun getWindowSize(context: Context): WindowSizeClass {
     val width = metrics.bounds.width()
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
-    return WindowSizeClass.Companion.BREAKPOINTS_V1.computeWindowSizeClass(
+    return WindowSizeClass.BREAKPOINTS_V1.computeWindowSizeClass(
         widthDp = width / density,
         heightDp = height / density
     )

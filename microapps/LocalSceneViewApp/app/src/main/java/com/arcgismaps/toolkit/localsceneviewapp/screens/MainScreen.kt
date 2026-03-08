@@ -19,8 +19,14 @@
 package com.arcgismaps.toolkit.localsceneviewapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Point
@@ -82,8 +88,30 @@ fun MainScreen() {
         }
     }
 
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var criticalError: Throwable? by remember { mutableStateOf(null) }
+
     LocalSceneView(
         scene = arcGISScene,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        onCriticalErrorChanged = { throwable ->
+            throwable?.let {
+                showErrorDialog = true
+                criticalError = throwable
+            }
+        }
     )
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text(text = "Critical Error") },
+            text = { Text(text = criticalError?.message.toString()) },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
