@@ -307,7 +307,7 @@ public fun WorldScaleSceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the WorldScaleSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across WorldScaleSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the WorldScaleSceneView
- * changes
+ * changes.
  * @param content the content of the WorldScaleSceneView.
  *
  * @since 300.0.0

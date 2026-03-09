@@ -271,7 +271,7 @@ public fun TableTopSceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the TableTopSceneView
- * changes
+ * changes.
  * @param content the content of the TableTopSceneView.
  *
  * @since 300.0.0

@@ -56,6 +56,7 @@ import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.ImageOverlay
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -285,6 +286,8 @@ public fun SceneView(
  * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * LocalSceneView changes
@@ -334,6 +337,7 @@ public fun SceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable SceneViewScope.() -> Unit)? = null
@@ -434,6 +438,7 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
+        onInteractiveZooming,
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
@@ -468,6 +473,7 @@ private fun SceneViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
@@ -487,6 +493,7 @@ private fun SceneViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
@@ -561,6 +568,11 @@ private fun SceneViewEventHandler(
         launch(Dispatchers.Main.immediate) {
             sceneView.onPan.collect { panChangeEvent ->
                 currentOnPan?.invoke(panChangeEvent)
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            sceneView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
             }
         }
         launch {

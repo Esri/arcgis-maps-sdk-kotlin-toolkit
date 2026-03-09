@@ -239,7 +239,7 @@ public fun FlyoverSceneView(
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the FlyoverSceneView.
  * @param onPan lambda invoked when a user drags a pointer or pointers across FlyoverSceneView.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the FlyoverSceneView
- * changes
+ * changes.
  * @param content the content of the FlyoverSceneView.
  *
  * @since 300.0.0
