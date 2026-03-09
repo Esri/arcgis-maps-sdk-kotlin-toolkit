@@ -18,10 +18,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.accessibility.AccessibilityEvent
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -44,14 +40,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
-
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -68,6 +63,8 @@ import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
+import com.arcgismaps.toolkit.geoviewcompose.internal.geoViewA11yDelegate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -180,59 +177,34 @@ public fun LocalSceneView(
         LocalSceneView(context)
     }
 
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    localSceneView.isFocusable = true
-    var isLocalSceneViewFocusable by remember { mutableStateOf(canFocus) }
     val calloutFocusRequester = remember { FocusRequester() }
+    val a11yCoordinator = remember(calloutFocusRequester, localSceneView) {
+        GeoViewA11yCoordinator(calloutFocusRequester, localSceneView)
+    }
+    val geoViewAccessibilityDelegate = geoViewA11yDelegate(a11yCoordinator, canFocus)
     Box(modifier = modifier.clipToBounds().focusGroup()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(isLocalSceneViewFocusable)
+                .focusable(a11yCoordinator.isGeoViewFocusable)
                 .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
-                it.scene = scene
+                it.accessibilityDelegate = geoViewAccessibilityDelegate
+                it.isFocusable = a11yCoordinator.isGeoViewFocusable
+                if (it.scene !== scene) {
+                    it.scene = scene
+                }
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
-                it.accessibilityDelegate = object : View.AccessibilityDelegate() {
-                    override fun onInitializeAccessibilityEvent(
-                        host: View,
-                        event: AccessibilityEvent
-                    ) {
-                        super.onInitializeAccessibilityEvent(host, event)
-                        host.isFocusable = isLocalSceneViewFocusable
-                    }
-                    override fun dispatchPopulateAccessibilityEvent(
-                        host: View,
-                        event: AccessibilityEvent
-                    ): Boolean {
-                        return if (isLocalSceneViewFocusable)
-                            super.dispatchPopulateAccessibilityEvent(host, event)
-                        else
-                            true
-                    }
-
-                    override fun onRequestSendAccessibilityEvent(
-                        host: ViewGroup,
-                        child: View,
-                        event: AccessibilityEvent
-                    ): Boolean {
-                        return if (isLocalSceneViewFocusable) {
-                            Log.e("EVENT", "event: ${event.contentDescription}, ${event.text}")
-                            super.onRequestSendAccessibilityEvent(host, child, event)
-                        }
-                        else false
-                    }
-                }
             }
         )
 
-        val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, calloutFocusRequester) }
+        val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, a11yCoordinator) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
         // Invoke the content lambda only when the LocalSceneView is ready
@@ -475,5 +447,5 @@ private fun ViewpointHandler(
  * @since 300.0.0
  */
 public class LocalSceneViewScope internal constructor(
-    localSceneView: LocalSceneView, calloutFocusRequester: FocusRequester
-) : GeoViewScope(localSceneView, calloutFocusRequester)
+    localSceneView: LocalSceneView, allyCoordinator: GeoViewA11yCoordinator,
+) : GeoViewScope(localSceneView, allyCoordinator)

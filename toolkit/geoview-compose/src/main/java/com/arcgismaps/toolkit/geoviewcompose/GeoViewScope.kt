@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -56,9 +55,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
@@ -92,6 +91,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
@@ -106,9 +106,9 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope protected constructor(private val geoView: GeoView, private val calloutFocusRequester: FocusRequester) {
-    private val _isCalloutContentPlaced = mutableStateOf(false)
-    internal fun isCalloutVisible(): State<Boolean> = _isCalloutContentPlaced
+public sealed class GeoViewScope constructor(
+    private val geoView: GeoView, private val a11yCoordinator: GeoViewA11yCoordinator
+) {
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -384,6 +384,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             )
         }
         var animationDuration by remember { mutableIntStateOf(300) }
+        val rootView = LocalView.current
 
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
@@ -435,22 +436,23 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .focusRequester(calloutFocusRequester)
+                            .focusRequester(a11yCoordinator.calloutFocusRequester)
                             .focusable()
                             .focusProperties{
-                                next = calloutFocusRequester
-                                previous = calloutFocusRequester
+                                next = a11yCoordinator.calloutFocusRequester
+                                previous = a11yCoordinator.calloutFocusRequester
                             }
                             .semantics{
-                                paneTitle = "Callout"
                                 isTraversalGroup = true
                                 contentDescription = "CalloutContainerLayout"
                             }
                     ) {
                         content.invoke(this)
                         DisposableEffect(Unit) {
-                            _isCalloutContentPlaced.value = true
-                            onDispose { _isCalloutContentPlaced.value = false }
+                            a11yCoordinator.onCalloutPlaced(rootView)
+                            onDispose {
+                                a11yCoordinator.onCalloutDisposed()
+                            }
                         }
                     }
                 }

@@ -17,10 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.accessibility.AccessibilityEvent
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -77,6 +73,8 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
+import com.arcgismaps.toolkit.geoviewcompose.internal.geoViewA11yDelegate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -338,8 +336,11 @@ public fun MapView(
     }
     // set focus right away so the compose AndroidView "focus interop" is set up correctly.
     mapView.isFocusable = canFocus
-    var isMapViewFocusable by remember { mutableStateOf(canFocus) }
     val calloutFocusRequester = remember { FocusRequester() }
+    val a11yCoordinator = remember(calloutFocusRequester, mapView) {
+        GeoViewA11yCoordinator(calloutFocusRequester, mapView)
+    }
+    val geoViewA11yDelegate = geoViewA11yDelegate(a11yCoordinator, canFocus)
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -350,11 +351,13 @@ public fun MapView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(isMapViewFocusable)
+                .focusable(a11yCoordinator.isGeoViewFocusable)
                 .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
+                it.accessibilityDelegate = geoViewA11yDelegate
+                it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.map = arcGISMap
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
@@ -366,36 +369,6 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
-                it.accessibilityDelegate = object : View.AccessibilityDelegate() {
-                    override fun onInitializeAccessibilityEvent(
-                        host: View,
-                        event: AccessibilityEvent
-                    ) {
-                        super.onInitializeAccessibilityEvent(host, event)
-                        host.isFocusable = isMapViewFocusable
-                    }
-                    override fun dispatchPopulateAccessibilityEvent(
-                        host: View,
-                        event: AccessibilityEvent
-                    ): Boolean {
-                        return if (isMapViewFocusable)
-                            super.dispatchPopulateAccessibilityEvent(host, event)
-                        else
-                            true
-                    }
-
-                    override fun onRequestSendAccessibilityEvent(
-                        host: ViewGroup,
-                        child: View,
-                        event: AccessibilityEvent
-                    ): Boolean {
-                        return if (isMapViewFocusable) {
-                            Log.e("EVENT", "event: ${event.contentDescription}, ${event.text}")
-                            super.onRequestSendAccessibilityEvent(host, child, event)
-                        }
-                        else false
-                    }
-                }
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -410,13 +383,8 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember { MapViewScope(mapView, calloutFocusRequester) }
+        val mapViewScope = remember { MapViewScope(mapView, a11yCoordinator) }
         val isMapViewReady = mapView.rememberIsReady()
-        val isCalloutVisible by remember { mapViewScope.isCalloutVisible() }
-        LaunchedEffect(canFocus, isCalloutVisible) {
-            isMapViewFocusable = canFocus && !isCalloutVisible
-            Log.e("MapView","MapView focusable: $isMapViewFocusable, CanFocus: $canFocus, isCalloutVisible: $isCalloutVisible")
-        }
         if (isMapViewReady.value) {
             content?.let {
                 mapViewScope.it()
@@ -749,8 +717,8 @@ public inline fun rememberLocationDisplay(
  * @since 200.5.0
  */
 public class MapViewScope internal constructor(
-    mapView: MapView, calloutFocusRequester: FocusRequester
-) : GeoViewScope(mapView, calloutFocusRequester)
+    mapView: MapView, a11yCoordinator: GeoViewA11yCoordinator,
+) : GeoViewScope(mapView, a11yCoordinator)
 
 /**
  * Contains default values for the composable MapView.
