@@ -9,9 +9,19 @@ import org.gradle.kotlin.dsl.register
 import java.util.Locale
 
 /**
- * Example convention plugin:
- * - applies/coordinates tasks needed before connectedAndroidTest tasks run
- * - keep it lazy and scoped to Android app modules
+ * Convention plugin for Android library modules that wire prerequisite tasks for
+ * instrumented integration tests.
+ *
+ * This plugin:
+ * - Registers `grantDevicePermissions` to grant runtime permissions to the test app.
+ * - Wires each `connected<Variant>` task to:
+ *   - optionally sync test data from `:build-logic-internal:syncTestData`,
+ *   - grant device permissions,
+ *   - delete IC output via `:build-logic-internal:deleteICOutput`.
+ *
+ * Expected project setup:
+ * - `com.android.library` is applied on the target module.
+ * - Gradle property `syncTestDataBeforeInstrumentedTests` is defined (`true`/`false`).
  */
 class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -19,8 +29,7 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
             pluginManager.withPlugin("com.android.library") {
                 val android = extensions.getByType(LibraryExtension::class.java)
 
-                val syncTestDataBeforeInstrumentedTests: String by project
-
+                // Registers a module-specific `grantDevicePermissions` task for the test app.
                 tasks.register<GrantDevicePermissions>("grantDevicePermissions") {
                     adbExe.set(android.adbExecutable.absoluteFile)
                     testApplicationId.set(android.defaultConfig.testApplicationId)
@@ -39,6 +48,8 @@ class AndroidIntegrationTestingConventionPlugin : Plugin<Project> {
                                 }
                             }
                         tasks.named("connected$capitalizedTestVariantName") {
+                            val syncTestDataBeforeInstrumentedTests: String by project
+
                             if (syncTestDataBeforeInstrumentedTests.toBoolean()) {
                                 // Uses adb to sync the test data to the test device.
                                 dependsOn(gradle.includedBuild("build-logic-internal").task(":syncTestData"))

@@ -2,6 +2,10 @@
 
 pluginManagement {
     repositories {
+        // the variables are duplicated here because the pluginManagement block is evaluated before
+        // the rest of the settings.gradle.kts, so it can't access the variables defined in the
+        // dependencyResolutionManagement block below.
+        // This is a known limitation of Gradle's settings script evaluation order.
         val localProperties = java.util.Properties().apply {
             val localPropertiesFile = file("../local.properties")
             if (localPropertiesFile.exists()) {

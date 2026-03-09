@@ -17,6 +17,8 @@
  */
 
 pluginManagement {
+    // Set toolkitTestDir here because pluginManagement is evaluated before the rest of the
+    // settings.gradle.kts and build.gradle.kts files, so the variables defined in those files are not accessible here.
     val toolkitTestDir = settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests"
 
     gradle.beforeProject {
@@ -28,6 +30,10 @@ pluginManagement {
     }
     includeBuild("build-logic")
     repositories {
+        // the variables are duplicated here because the pluginManagement block is evaluated before
+        // the rest of the settings.gradle.kts, so it can't access the variables defined in the
+        // dependencyResolutionManagement block below.
+        // This is a known limitation of Gradle's settings script evaluation order.
         val localProperties = java.util.Properties().apply {
             val localPropertiesFile = file("local.properties")
             if (localPropertiesFile.exists()) {
