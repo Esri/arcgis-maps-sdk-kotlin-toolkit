@@ -22,29 +22,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
-import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import androidx.core.net.toUri
-
-/**
- * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
- * and [AuthenticationManager.networkCredentialStore].
- *
- * @since 200.2.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
-    replaceWith = ReplaceWith("AuthenticatorState.signOut()")
-)
-public suspend fun AuthenticationManager.signOut() {
-    arcGISCredentialStore.getCredentials().forEach {
-        if (it is OAuthUserCredential) {
-            it.revokeToken()
-        }
-    }
-    arcGISCredentialStore.removeAll()
-    networkCredentialStore.removeAll()
-}
 
 /**
  * Launches the custom tabs activity with the provided browser authentication challenge.

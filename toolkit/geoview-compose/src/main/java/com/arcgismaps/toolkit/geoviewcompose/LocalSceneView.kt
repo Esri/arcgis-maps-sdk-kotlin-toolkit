@@ -50,6 +50,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.LocalSceneViewInteractionOptions
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -129,8 +130,12 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable LocalSceneView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
- * is changed
+ * changes
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
  * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
  * LocalSceneView changes
  * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
@@ -165,7 +170,9 @@ public fun LocalSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
@@ -215,32 +222,34 @@ public fun LocalSceneView(
     }
 
     LocalSceneViewEventHandler(
-        localSceneView,
-        onNavigationChanged,
-        onSpatialReferenceChanged,
-        onLayerViewStateChanged,
-        onInteractingChanged,
-        onRotate,
-        onScale,
-        onUp,
-        onDown,
-        onSingleTapConfirmed,
-        onDoubleTap,
-        onLongPress,
-        onTwoPointerTap,
-        onPan,
-        onDrawStatusChanged,
-        onAttributionTextChanged,
-        onAttributionBarLayoutChanged,
-        onCriticalErrorChanged,
-        onWarningsChanged
+        localSceneView = localSceneView,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged
     )
 
     ViewpointHandler(
-        localSceneView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
-        onCurrentViewpointCameraChanged
+        localSceneView = localSceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
 
@@ -265,9 +274,11 @@ private fun LocalSceneViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?,
     onCriticalErrorChanged: ((Throwable?) -> Unit)?,
     onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
@@ -284,12 +295,12 @@ private fun LocalSceneViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
-    val currentOnCriticalErrorChanged by rememberUpdatedState(
-        onCriticalErrorChanged
-    )
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
+    val currentOnCriticalErrorChanged by rememberUpdatedState(onCriticalErrorChanged)
     val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
@@ -358,6 +369,11 @@ private fun LocalSceneViewEventHandler(
                 currentOnPan?.invoke(panChangeEvent)
             }
         }
+        launch(Dispatchers.Main.immediate) {
+            localSceneView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
+            }
+        }
         launch {
             localSceneView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
@@ -371,6 +387,11 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            localSceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
             }
         }
         launch {
