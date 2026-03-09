@@ -799,14 +799,16 @@ internal fun List<UtilityAssetType>.orderByAssetGroup(): List<UtilityAssetType> 
     val reorderedList = this as? MutableList<UtilityAssetType> ?: this.toMutableList()
 
     /**
-     * Sorts the [reorderedList] from [fromIndex] to [toIndexInclusive] (inclusive) in place by the
+     * Sorts the reorderedList from [fromIndex] to [toIndexInclusive] (inclusive) in place by the
      * name of the asset group, ignoring case.
      */
     fun sortSubList(fromIndex: Int, toIndexInclusive: Int) {
         if (toIndexInclusive > fromIndex) {
-            reorderedList.subList(fromIndex, toIndexInclusive + 1).sortBy {
-                it.assetGroup.name.lowercase()
-            }
+            reorderedList.subList(fromIndex, toIndexInclusive + 1).sortWith(
+                compareBy(String.CASE_INSENSITIVE_ORDER) {
+                    it.assetGroup.name
+                }
+            )
         }
     }
 
