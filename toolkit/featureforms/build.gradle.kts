@@ -190,6 +190,7 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(libs.mockk.android)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
