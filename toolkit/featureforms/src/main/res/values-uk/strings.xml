@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">У формі містяться помилки перевірки</string>
     <string name="the_form_has_edits">Форма містить зміни</string>
     <string name="do_you_want_to_save_your_changes">Бажаєте зберегти ваші зміни?</string>
-    <string name="no_associations_found">Зʼєднань не знайдено</string>
+    <string name="no_associations_found">Немає зв’язків для відображення</string>
     <string name="terminal">Термінал</string>
     <string name="terminal_with_value">Термінал: %1$s</string>
+    <string name="content_visible">Вміст видимий</string>
+    <string name="percent_along">Відсоток вздовж</string>
     <string name="from_element">Від елементу</string>
     <string name="to_element">До елементу</string>
     <string name="association_type">Тип з՚єднання</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Видимий вміст</string>
     <string name="content">Зміст</string>
+    <string name="containment_visible_value">Видимий: %1$s</string>
+    <string name="from_network_data_source">Із джерела мережевих даних</string>
+    <string name="on_map">На карті</string>
+    <string name="network_data_source">Джерело мережевих даних</string>
+    <string name="available_asset_types">Доступні типи активів</string>
+    <string name="count">Лічильник %1$d</string>
+    <string name="new_association">Новий звʼязок</string>
+    <string name="add">Додати</string>
+    <string name="failed_to_create_association">Не вдалося створити з’єднання. %1$s</string>
+    <string name="available_features">%1$d Доступні обʼєкти</string>
+    <string name="loading2">Виконується завантаження...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">У вас є помилки (%1$d), які потрібно виправити перед збереженням.</item>
         <item quantity="one">У вас є помилка (%1$d), яку потрібно виправити перед збереженням.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
         <item quantity="other">У вас є помилки (%1$d), які потрібно виправити перед збереженням</item>
     </plurals>
+    <string name="search_features">Обʼєкти пошуку</string>
+    <string name="choose_to_add">Оберіть для додавання</string>
+    <string name="no_features_found">Обʼєкти не знайдено</string>
+    <string name="refine_your_search_tip">Уточніть пошук або виберіть інше джерело мережі.</string>
+    <string name="select_terminal">Вибрати термінал</string>
+    <string name="show_on_map">Показати на карті</string>
+    <string name="more_information">Додаткова інформація</string>
 </resources>

@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Lomakkeessa on validointivirheitä</string>
     <string name="the_form_has_edits">Lomakkeessa on muokkauksia</string>
     <string name="do_you_want_to_save_your_changes">Haluatko tallentaa muutokset?</string>
-    <string name="no_associations_found">Liitoksia ei löytynyt</string>
+    <string name="no_associations_found">Ei näytettäviä liitoksia</string>
     <string name="terminal">Pääte</string>
     <string name="terminal_with_value">Pääte: %1$s</string>
+    <string name="content_visible">Sisältö näkyvissä</string>
+    <string name="percent_along">Prosenttiosuus</string>
     <string name="from_element">Elementistä</string>
     <string name="to_element">Elementtiin</string>
     <string name="association_type">Liitoksen tyyppi</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Näkyvä sisältö</string>
     <string name="content">Sisältö</string>
+    <string name="containment_visible_value">Näkyvä: %1$s</string>
+    <string name="from_network_data_source">Verkkoaineistolähteestä</string>
+    <string name="on_map">Kartassa</string>
+    <string name="network_data_source">Verkkoaineistolähde</string>
+    <string name="available_asset_types">Käytettävissä olevat omaisuustyypit</string>
+    <string name="count">Lukumäärä %1$d</string>
+    <string name="new_association">Uusi liitos</string>
+    <string name="add">Lisää</string>
+    <string name="failed_to_create_association">Liitoksen luominen epäonnistui. %1$s</string>
+    <string name="available_features">%1$d käytettävissä olevaa kohdetta</string>
+    <string name="loading2">Ladataan...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Sinulla on %1$d virhettä, jotka on korjattava ennen tallennusta.</item>
         <item quantity="one">Sinulla on %1$d virhe, joka on korjattava ennen tallennusta.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Sinulla on %1$d virhettä, jotka on korjattava ennen tallennusta</item>
         <item quantity="other">Sinulla on %1$d virhettä, jotka on korjattava ennen tallennusta</item>
     </plurals>
+    <string name="search_features">Hae kohteita</string>
+    <string name="choose_to_add">Lisää valitsemalla</string>
+    <string name="no_features_found">Kohteita ei löytynyt</string>
+    <string name="refine_your_search_tip">Tarkenna hakua tai valitse eri verkon lähtöaineisto.</string>
+    <string name="select_terminal">Valitse pääte</string>
+    <string name="show_on_map">Näytä kartassa</string>
+    <string name="more_information">Lisätietoja</string>
 </resources>

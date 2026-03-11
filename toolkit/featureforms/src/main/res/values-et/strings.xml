@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Vormil on valideerimise vigu</string>
     <string name="the_form_has_edits">Vormil on muudatusi</string>
     <string name="do_you_want_to_save_your_changes">Kas soovite oma muudatused salvestada?</string>
-    <string name="no_associations_found">Seoseid ei leitud</string>
+    <string name="no_associations_found">Kuvatavaid seoseid pole</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Sisu on nähtav</string>
+    <string name="percent_along">Protsent (joonest või marsruudist)</string>
     <string name="from_element">Elemendist</string>
     <string name="to_element">Elemendini</string>
     <string name="association_type">Seose tüüp</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Nähtav sisu</string>
     <string name="content">Sisu</string>
+    <string name="containment_visible_value">Nähtav: %1$s</string>
+    <string name="from_network_data_source">Võrgu andmeallikast</string>
+    <string name="on_map">Kaardil</string>
+    <string name="network_data_source">Võrgu andmeallikas</string>
+    <string name="available_asset_types">Saadaolevad varatüübid</string>
+    <string name="count">Arv: %1$d</string>
+    <string name="new_association">Uue seos</string>
+    <string name="add">Lisa</string>
+    <string name="failed_to_create_association">Seose loomine ebaõnnestus. %1$s</string>
+    <string name="available_features">%1$d Saadaolevad objektid</string>
+    <string name="loading2">Laadimine…</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Teil on %1$d viga, mis tuleb enne salvestamist parandada.</item>
         <item quantity="one">Teil on %1$d viga, mis tuleb enne salvestamist parandada.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
         <item quantity="other">Teil on %1$d viga, mis tuleb enne salvestamist parandada</item>
     </plurals>
+    <string name="search_features">Otsi objektidest</string>
+    <string name="choose_to_add">Vali, et lisada</string>
+    <string name="no_features_found">Objekte ei leitud</string>
+    <string name="refine_your_search_tip">Täpsustage otsingut või valige mõni muu võrguallikas.</string>
+    <string name="select_terminal">Vali terminal</string>
+    <string name="show_on_map">Kuva kaardil</string>
+    <string name="more_information">Lisateave</string>
 </resources>

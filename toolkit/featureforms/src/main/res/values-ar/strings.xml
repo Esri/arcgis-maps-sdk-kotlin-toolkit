@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">النموذج يحتوي على أخطاء التحقق من الصحة</string>
     <string name="the_form_has_edits">النموذج يحتوي على تعديلات</string>
     <string name="do_you_want_to_save_your_changes">هل تريد حفظ التغييرات؟</string>
-    <string name="no_associations_found">لم يتم العثور على أي اقترانات</string>
+    <string name="no_associations_found">لا توجد ارتباطات لعرضها</string>
     <string name="terminal">محطة طرفية</string>
     <string name="terminal_with_value">النقطة الطرفية: %1$s</string>
+    <string name="content_visible">المحتوى مرئي</string>
+    <string name="percent_along">النسبة المئوية على طول</string>
     <string name="from_element">من العنصر</string>
     <string name="to_element">إلى العنصر</string>
     <string name="association_type">نوع الاقتران</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">المحتوى المرئي</string>
     <string name="content">المحتوى</string>
+    <string name="containment_visible_value">المرئي: %1$s</string>
+    <string name="from_network_data_source">من مصدر بيانات الشبكة</string>
+    <string name="on_map">على الخريطة</string>
+    <string name="network_data_source">مصدر بيانات الشبكة</string>
+    <string name="available_asset_types">أنواع الأصول المتاحة</string>
+    <string name="count">عدد: %1$d</string>
+    <string name="new_association">اقتران جديد</string>
+    <string name="add">إضافة</string>
+    <string name="failed_to_create_association">فشل إنشاء الارتباط. %1$s</string>
+    <string name="available_features">المعالم المتاحة %1$d</string>
+    <string name="loading2">جارِ التحميل..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
         <item quantity="one">لديك خطأ %1$d يجب إصلاحه قبل الحفظ.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
         <item quantity="other">لديك أخطاء %1$d يجب تصحيحها قبل الحفظ.</item>
     </plurals>
+    <string name="search_features">البحث عن المعالم</string>
+    <string name="choose_to_add">اختر للإضافة</string>
+    <string name="no_features_found">لم يتم العثور على أي معالم</string>
+    <string name="refine_your_search_tip">قم بتحسين عملية البحث أو اختر مصدر شبكة مختلف.</string>
+    <string name="select_terminal">حدد المحطة الطرفية</string>
+    <string name="show_on_map">إظهار على الخريطة</string>
+    <string name="more_information">المزيد من المعلومات</string>
 </resources>

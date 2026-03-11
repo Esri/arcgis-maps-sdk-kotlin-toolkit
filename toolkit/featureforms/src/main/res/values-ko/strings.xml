@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">양식에 유효성 검사 오류가 있음</string>
     <string name="the_form_has_edits">양식에 편집 사항이 있음</string>
     <string name="do_you_want_to_save_your_changes">변경 사항을 저장하시겠습니까?</string>
-    <string name="no_associations_found">연관을 찾을 수 없음</string>
+    <string name="no_associations_found">표시할 연관 없음</string>
     <string name="terminal">터미널</string>
     <string name="terminal_with_value">터미널: %1$s</string>
+    <string name="content_visible">콘텐츠 표시</string>
+    <string name="percent_along">다음에 따른 퍼센트</string>
     <string name="from_element">출발 요소</string>
     <string name="to_element">도착 요소</string>
     <string name="association_type">연관 유형</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">표시 콘텐츠</string>
     <string name="content">콘텐츠</string>
+    <string name="containment_visible_value">표시: %1$s</string>
+    <string name="from_network_data_source">시작 네트워크 데이터 소스</string>
+    <string name="on_map">On Map</string>
+    <string name="network_data_source">네트워크 데이터 소스</string>
+    <string name="available_asset_types">사용할 수 있는 자산 유형</string>
+    <string name="count">개수 %1$d개</string>
+    <string name="new_association">새 연관</string>
+    <string name="add">추가</string>
+    <string name="failed_to_create_association">연관 생성에 실패했습니다. %1$s</string>
+    <string name="available_features">사용 가능한 피처 %1$d개</string>
+    <string name="loading2">불러오는 중...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">저장하기 전에 %1$d개 오류를 수정해야 합니다.</item>
         <item quantity="one">저장하기 전에 %1$d개 오류를 수정해야 합니다.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">저장하기 전에 %1$d개 오류를 수정해야 함</item>
         <item quantity="other">저장하기 전에 %1$d개 오류를 수정해야 함</item>
     </plurals>
+    <string name="search_features">피처 검색</string>
+    <string name="choose_to_add">추가하려면 선택</string>
+    <string name="no_features_found">피처를 찾을 수 없음</string>
+    <string name="refine_your_search_tip">검색을 구체화하거나 다른 네트워크 원본을 선택하세요.</string>
+    <string name="select_terminal">터미널 선택</string>
+    <string name="show_on_map">맵에 표시</string>
+    <string name="more_information">추가 정보</string>
 </resources>

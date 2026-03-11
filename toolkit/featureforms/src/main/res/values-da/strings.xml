@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formularen indeholder valideringsfejl</string>
     <string name="the_form_has_edits">Formularen indeholder redigeringer</string>
     <string name="do_you_want_to_save_your_changes">Vil du gemme ændringerne?</string>
-    <string name="no_associations_found">Der blev ikke fundet nogen associeringer</string>
+    <string name="no_associations_found">Der er ingen associeringer at vise</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Indhold synligt</string>
+    <string name="percent_along">Procent langs med</string>
     <string name="from_element">Fra element</string>
     <string name="to_element">Til element</string>
     <string name="association_type">Associeringstype</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Synligt indhold</string>
     <string name="content">Indhold</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="from_network_data_source">Fra netværksdatakilde</string>
+    <string name="on_map">På kort</string>
+    <string name="network_data_source">Netværksdatakilde</string>
+    <string name="available_asset_types">Tilgængelige aktivtyper</string>
+    <string name="count">Antal %1$d</string>
+    <string name="new_association">Ny associering</string>
+    <string name="add">Tilføj</string>
+    <string name="failed_to_create_association">Kunne ikke oprette associering. %1$s</string>
+    <string name="available_features">%1$d Tilgængelige objekter</string>
+    <string name="loading2">Indlæser..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Du har %1$d fejl, der skal rettes, før du gemmer.</item>
         <item quantity="one">Du har %1$d fejl, der skal rettes, før du gemmer.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Du har %1$d fejl, der skal rettes, før du gemmer</item>
         <item quantity="other">Du har %1$d fejl, der skal rettes, før du gemmer</item>
     </plurals>
+    <string name="search_features">Søgefunktioner</string>
+    <string name="choose_to_add">Vælg at tilføje</string>
+    <string name="no_features_found">Ingen objekter fundet</string>
+    <string name="refine_your_search_tip">Omdefiner din søgning eller vælg en anden netværkskilde.</string>
+    <string name="select_terminal">Vælg terminal</string>
+    <string name="show_on_map">Vis på kort</string>
+    <string name="more_information">Flere oplysninger</string>
 </resources>

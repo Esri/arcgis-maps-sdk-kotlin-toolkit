@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formularul are erori de validare</string>
     <string name="the_form_has_edits">Formularul conține editări</string>
     <string name="do_you_want_to_save_your_changes">Doriți să salvați modificările?</string>
-    <string name="no_associations_found">Nu s-au găsit asocieri</string>
+    <string name="no_associations_found">Nu există asocieri de afișat.</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Conținut vizibil</string>
+    <string name="percent_along">Procent de-a lungul</string>
     <string name="from_element">Din element</string>
     <string name="to_element">La element</string>
     <string name="association_type">Tip asociere</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Conținut vizibil</string>
     <string name="content">Conținut</string>
+    <string name="containment_visible_value">Vizibil: %1$s</string>
+    <string name="from_network_data_source">Din sursa de date de rețea</string>
+    <string name="on_map">Pe hartă</string>
+    <string name="network_data_source">Sursă de date de rețea</string>
+    <string name="available_asset_types">Tipuri de active disponibile</string>
+    <string name="count">Număr %1$d</string>
+    <string name="new_association">Asociere nouă</string>
+    <string name="add">Adăugare</string>
+    <string name="failed_to_create_association">Eșec creare asociere. %1$s</string>
+    <string name="available_features">%1$d Obiecte spațiale disponibile</string>
+    <string name="loading2">Se încarcă...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Aveți %1$d erori care trebuie remediate înainte de a salva.</item>
         <item quantity="one">Aveți %1$d eroare care trebuie remediată înainte de a salva.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
         <item quantity="other">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
     </plurals>
+    <string name="search_features">Căutare obiecte spațiale</string>
+    <string name="choose_to_add">Alegeți pentru a adăuga</string>
+    <string name="no_features_found">Nu au fost găsite obiecte spațiale</string>
+    <string name="refine_your_search_tip">Rafinați căutarea sau alegeți o altă sursă de rețea.</string>
+    <string name="select_terminal">Selectați terminalul</string>
+    <string name="show_on_map">Afișare pe hartă</string>
+    <string name="more_information">Informații suplimentare</string>
 </resources>

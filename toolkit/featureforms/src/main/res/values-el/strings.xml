@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Η φόρμα έχει σφάλματα επικύρωσης</string>
     <string name="the_form_has_edits">Η φόρμα περιέχει αλλαγές</string>
     <string name="do_you_want_to_save_your_changes">Θέλετε να αποθηκεύσετε τις αλλαγές σας;</string>
-    <string name="no_associations_found">Δεν βρέθηκαν συσχετίσεις</string>
+    <string name="no_associations_found">Δεν υπάρχουν συσχετίσεις προς εμφάνιση</string>
     <string name="terminal">Τερματικό</string>
     <string name="terminal_with_value">Τερματικό : %1$s</string>
+    <string name="content_visible">Ορατό περιεχόμενο</string>
+    <string name="percent_along">Ποσοστό κατά μήκος</string>
     <string name="from_element">Από στοιχείο</string>
     <string name="to_element">Προς στοιχείο</string>
     <string name="association_type">Τύπος συσχέτισης</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Ορατό περιεχόμενο</string>
     <string name="content">Περιεχόμενο</string>
+    <string name="containment_visible_value">Ορατό: %1$s</string>
+    <string name="from_network_data_source">Από πηγή δεδομένων δικτύου</string>
+    <string name="on_map">Στον χάρτη</string>
+    <string name="network_data_source">Πηγή δεδομένων δικτύου</string>
+    <string name="available_asset_types">Διαθέσιμοι τύποι περιουσιακών στοιχείων</string>
+    <string name="count">Πλήθος %1$d</string>
+    <string name="new_association">Νέα συσχέτιση</string>
+    <string name="add">Προσθήκη</string>
+    <string name="failed_to_create_association">Αποτυχία δημιουργίας συσχέτισης. %1$s</string>
+    <string name="available_features">Διαθέσιμα στοιχεία: %1$d</string>
+    <string name="loading2">Φόρτωση...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση.</item>
         <item quantity="one">Έχετε %1$d σφάλμα που πρέπει να διορθώσετε πριν από την αποθήκευση.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση</item>
         <item quantity="other">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση</item>
     </plurals>
+    <string name="search_features">Αναζήτηση στοιχείων</string>
+    <string name="choose_to_add">Επιλέξτε για προσθήκη</string>
+    <string name="no_features_found">Δεν βρέθηκαν στοιχεία</string>
+    <string name="refine_your_search_tip">Περιορίστε την αναζήτησή σας ή επιλέξτε διαφορετική πηγή δικτύου.</string>
+    <string name="select_terminal">Επιλέξτε τερματικό</string>
+    <string name="show_on_map">Εμφάνιση στον χάρτη</string>
+    <string name="more_information">Περισσότερες πληροφορίες</string>
 </resources>

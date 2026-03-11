@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Validatie van het formulier levert fouten op.</string>
     <string name="the_form_has_edits">Het formulier is bewerkt</string>
     <string name="do_you_want_to_save_your_changes">Wilt u uw wijzigingen opslaan?</string>
-    <string name="no_associations_found">Kan geen associaties vinden</string>
+    <string name="no_associations_found">Er zijn geen associaties die u kunt weergeven</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Content zichtbaar</string>
+    <string name="percent_along">Percentage langs</string>
     <string name="from_element">Van element</string>
     <string name="to_element">Naar element</string>
     <string name="association_type">Type associatie</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Zichtbare content</string>
     <string name="content">Content</string>
+    <string name="containment_visible_value">Zichtbaar: %1$s</string>
+    <string name="from_network_data_source">Van netwerk-gegevensbron</string>
+    <string name="on_map">Op kaart</string>
+    <string name="network_data_source">Netwerk-gegevensbron</string>
+    <string name="available_asset_types">Beschikbare assettypes</string>
+    <string name="count">Aantal %1$d</string>
+    <string name="new_association">Nieuwe associatie</string>
+    <string name="add">Toevoegen</string>
+    <string name="failed_to_create_association">Kan associatie niet maken. %1$s</string>
+    <string name="available_features">%1$d beschikbare objecten</string>
+    <string name="loading2">Bezig met laden...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat.</item>
         <item quantity="one">Er is %1$d fout die moet worden hersteld voordat u opslaat.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat</item>
         <item quantity="other">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat</item>
     </plurals>
+    <string name="search_features">Objecten zoeken</string>
+    <string name="choose_to_add">Kiezen om toe te voegen</string>
+    <string name="no_features_found">Kan geen objecten vinden</string>
+    <string name="refine_your_search_tip">Verfijn uw zoekactie of kies een andere netwerkbron.</string>
+    <string name="select_terminal">Terminal selecteren</string>
+    <string name="show_on_map">Weergeven op kaart</string>
+    <string name="more_information">Meer informatie</string>
 </resources>

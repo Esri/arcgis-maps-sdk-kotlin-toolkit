@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">O formulário tem erros de validação</string>
     <string name="the_form_has_edits">O formulário tem edições</string>
     <string name="do_you_want_to_save_your_changes">Você deseja salvar suas alterações?</string>
-    <string name="no_associations_found">Nenhuma associação encontrada</string>
+    <string name="no_associations_found">Nenhuma associação a ser exibida</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Conteúdo Visível</string>
+    <string name="percent_along">Percentual ao longo</string>
     <string name="from_element">Do Elemento</string>
     <string name="to_element">Para Elemento</string>
     <string name="association_type">Tipo de Associação</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Conteúdo visível</string>
     <string name="content">Conteúdo</string>
+    <string name="containment_visible_value">Visível: %1$s</string>
+    <string name="from_network_data_source">Da fonte de dados de origem</string>
+    <string name="on_map">No mapa</string>
+    <string name="network_data_source">Fonte de dados de rede</string>
+    <string name="available_asset_types">Tipos de ativos disponíveis</string>
+    <string name="count">Contagem %1$d</string>
+    <string name="new_association">Nova associação</string>
+    <string name="add">Adicionar</string>
+    <string name="failed_to_create_association">Não foi possível criar associação. %1$s</string>
+    <string name="available_features">%1$d Feições disponíveis</string>
+    <string name="loading2">Carregando...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Você tem %1$d erros que devem ser corrigidos antes de salvar.</item>
         <item quantity="one">Você tem %1$d erro que deve ser corrigido antes de salvar.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Você tem %1$d erros que devem ser corrigidos antes de salvar</item>
         <item quantity="other">Você tem %1$d erros que devem ser corrigidos antes de salvar</item>
     </plurals>
+    <string name="search_features">Pesquisar feições</string>
+    <string name="choose_to_add">Escolha para adicionar</string>
+    <string name="no_features_found">Nenhuma feição encontrada</string>
+    <string name="refine_your_search_tip">Refine sua busca ou escolha uma fonte de rede diferente.</string>
+    <string name="select_terminal">Selecionar terminal</string>
+    <string name="show_on_map">Mostrar no mapa</string>
+    <string name="more_information">Mais informações</string>
 </resources>

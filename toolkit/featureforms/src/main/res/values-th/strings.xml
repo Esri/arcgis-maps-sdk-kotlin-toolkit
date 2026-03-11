@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">ฟอร์มมีข้อผิดพลาดการตรวจสอบ</string>
     <string name="the_form_has_edits">ฟอร์มมีการแก้ไข</string>
     <string name="do_you_want_to_save_your_changes">คุณต้องการบันทึกการเปลี่ยนแปลงของคุณหรือไม่</string>
-    <string name="no_associations_found">ไม่พบความสัมพันธ์</string>
+    <string name="no_associations_found">ไม่มีความสัมพันธ์ที่จะแสดง</string>
     <string name="terminal">เทอร์มินัล</string>
     <string name="terminal_with_value">เทอร์มินัล : %1$s</string>
+    <string name="content_visible">การมองเห็นเนื้อหา</string>
+    <string name="percent_along">เปอร์เซ็นต์ตามแนว</string>
     <string name="from_element">องค์ประกอบจาก</string>
     <string name="to_element">องค์ประกอบถึง</string>
     <string name="association_type">ประเภทความสัมพันธ์</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">เนื้อหาที่มองเห็น</string>
     <string name="content">เนื้อหา</string>
+    <string name="containment_visible_value">การแสดงผล: %1$s</string>
+    <string name="from_network_data_source">จากแหล่งข้อมูลเครือข่าย</string>
+    <string name="on_map">บนแผนที่</string>
+    <string name="network_data_source">แหล่งข้อมูลเครือข่าย</string>
+    <string name="available_asset_types">ประเภทแอสเซ็ทที่พร้อมใช้งาน</string>
+    <string name="count">จำนวน %1$d</string>
+    <string name="new_association">ความสัมพันธ์ใหม่</string>
+    <string name="add">เพิ่ม</string>
+    <string name="failed_to_create_association">สร้างความสัมพันธ์ไม่สำเร็จ %1$s</string>
+    <string name="available_features">%1$d ฟีเจอร์ที่พร้อมใช้งาน</string>
+    <string name="loading2">กำลังโหลด..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
         <item quantity="one">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
@@ -142,4 +155,11 @@
         <item quantity="many">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
         <item quantity="other">คุณมีข้อผิดพลาด %1$d รายการ ที่ต้องได้รับการแก้ไขก่อนบันทึก</item>
     </plurals>
+    <string name="search_features">ค้นหาฟีเจอร์</string>
+    <string name="choose_to_add">เลือกเพื่อเพิ่ม</string>
+    <string name="no_features_found">ไม่พบฟีเจอร์</string>
+    <string name="refine_your_search_tip">ปรับแต่งการค้นหาของคุณ หรือเลือกแหล่งที่มาเครือข่าย</string>
+    <string name="select_terminal">เลือกเทอร์มินัล</string>
+    <string name="show_on_map">แสดงบนแผนที่</string>
+    <string name="more_information">ข้อมูลเพิ่มเติม</string>
 </resources>
