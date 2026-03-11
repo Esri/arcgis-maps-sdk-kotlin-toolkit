@@ -55,6 +55,7 @@ import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.ImageOverlay
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
@@ -268,6 +269,8 @@ public fun MapView(
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ * on the composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * mapView changes
@@ -320,6 +323,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
@@ -418,6 +422,7 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
+        onInteractiveZooming,
         onDrawStatusChanged,
         onAttributionTextChanged,
         onAttributionBarLayoutChanged,
@@ -456,6 +461,7 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
@@ -477,6 +483,7 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
@@ -563,6 +570,11 @@ private fun MapViewEventHandler(
         launch(Dispatchers.Main.immediate) {
             mapView.onPan.collect { panChangeEvent ->
                 currentOnPan?.invoke(panChangeEvent)
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
             }
         }
         launch {
