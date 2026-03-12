@@ -30,6 +30,8 @@ pluginManagement {
     // the real implementations in build-logic-internal. If build-logic is included first,
     // the placeholder plugins will be used and the real implementations won’t be applied.
     if (file(toolkitTestDir).exists()){
+        // This should only be included for internal developers because it depends on
+        // internally published plugins that are not accessible to external developers.
         includeBuild("build-logic-internal")
     }
     includeBuild("build-logic")
