@@ -19,6 +19,10 @@ import java.util.Locale
  *   - grant device permissions,
  *   - delete IC output via `:build-logic-internal:deleteICOutput`.
  *
+ * Note:
+ * By depending on tasks such as `syncTestData` and `deleteICOutput` from the `build-logic-internal` 
+ * module, Gradle ensures that these tasks are only executed once after project evaluation. This means 
+ * that test data sync and deleting IC output is only happening once for multiple modules. 
  * Expected project setup:
  * - `com.android.library` is applied on the target module.
  * - Gradle property `syncTestDataBeforeInstrumentedTests` is defined (`true`/`false`).
