@@ -33,6 +33,11 @@ tasks.named("grantDevicePermissions") {
     }
 }
 
+// All plugins created in this module should have a corresponding placeholder plugin
+// with the same ID in build-logic. build-logic-internal is not included for
+// non-internal developers, so they can’t access these plugins and applying a missing
+// plugin would fail their builds. The placeholder lets them compile, while internal
+// developers get the real implementation from build-logic-internal.
 gradlePlugin {
     plugins {
         create("androidIntegrationTesting") {

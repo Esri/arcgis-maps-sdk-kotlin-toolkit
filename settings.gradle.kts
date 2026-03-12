@@ -25,6 +25,10 @@ pluginManagement {
         extra.set("toolkitTestDir", toolkitTestDir)
     }
 
+    // Include build-logic-internal for internal developers. It must be included before
+    // build-logic because build-logic contains placeholder plugins that are replaced by
+    // the real implementations in build-logic-internal. If build-logic is included first,
+    // the placeholder plugins will be used and the real implementations won’t be applied.
     if (file(toolkitTestDir).exists()){
         includeBuild("build-logic-internal")
     }
