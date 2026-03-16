@@ -326,6 +326,7 @@ public fun SceneView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -428,6 +429,7 @@ public fun SceneView(
         onNavigationChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
+        onAnalysisViewStatusChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -463,6 +465,7 @@ private fun SceneViewEventHandler(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -483,6 +486,7 @@ private fun SceneViewEventHandler(
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
+    val currentOnAnalysisViewStatusChanged by rememberUpdatedState(onAnalysisViewStatusChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -518,6 +522,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
+            }
+        }
+        launch {
+            sceneView.analysisViewStatusChanged.collect { currentAnalysisViewStatus ->
+                currentOnAnalysisViewStatusChanged?.invoke(currentAnalysisViewStatus)
             }
         }
         launch(Dispatchers.Main.immediate) {

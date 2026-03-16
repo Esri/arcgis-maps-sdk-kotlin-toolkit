@@ -20,9 +20,11 @@ package com.arcgismaps.toolkit.geoviewcompose
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
+import com.arcgismaps.analysis.interactive.Analysis
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.AnalysisViewStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
@@ -316,5 +318,16 @@ public sealed class GeoViewProxy(className: String) {
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? {
         return geoView?.getLayerViewState(layer)
+    }
+
+    /**
+     * Retrieves the analysis' status in the view.
+     *
+     * @param analysis An analysis object to get the view status for.
+     * @return A valid [AnalysisViewStatus] or null if the view doesn't contain the given analysis.
+     * @since 300.0.0
+     */
+    public fun getAnalysisViewStatus(analysis: Analysis): AnalysisViewStatus? {
+        return geoView?.getAnalysisViewStatus(analysis)
     }
 }
