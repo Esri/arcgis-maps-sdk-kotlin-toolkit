@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -349,10 +348,9 @@ public fun SceneView(
     val sceneView = remember {
         SceneView(context)
     }
-
-    val (geoViewFocusRequestor, calloutFocusRequester) = remember { FocusRequester.createRefs() }
-    val a11yCoordinator = remember(geoViewFocusRequestor, calloutFocusRequester, canFocus,sceneView) {
-        GeoViewA11yCoordinator(geoViewFocusRequestor, calloutFocusRequester, canFocus, sceneView)
+    val calloutFocusRequester = remember { FocusRequester() }
+    val a11yCoordinator = remember(calloutFocusRequester, canFocus,sceneView) {
+        GeoViewA11yCoordinator(calloutFocusRequester, canFocus, sceneView)
     }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
@@ -362,14 +360,13 @@ public fun SceneView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusRequester(geoViewFocusRequestor)
                 .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties{ next = calloutFocusRequester }
+                .focusProperties { next = calloutFocusRequester }
                 .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
-                it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.scene = arcGISScene
+                it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties

@@ -44,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -439,9 +438,6 @@ public sealed class GeoViewScope constructor(
                             .focusRequester(a11yCoordinator.calloutFocusRequester)
                             .focusable()
                             .focusGroup()
-                            .focusProperties{
-                                previous = a11yCoordinator.geoViewFocusRequestor
-                            }
                             .semantics{
                                 testTag = "CalloutContainerLayout"
                             }

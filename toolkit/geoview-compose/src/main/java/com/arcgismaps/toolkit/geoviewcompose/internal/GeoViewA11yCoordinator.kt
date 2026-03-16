@@ -39,10 +39,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Stable
 internal class GeoViewA11yCoordinator(
     internal val calloutFocusRequester: FocusRequester,
-    internal val geoViewFocusRequestor: FocusRequester,
     internal val canFocus: Boolean,
     internal val geoView: View
 ) {
+
+    init {
+        // Set focus right away so initial compose AndroidView "focus interop" is set up correctly.
+        geoView.isFocusable = canFocus
+    }
 
     /**
      * The isCalloutBeingDisplayed property from the related GeoViewScope,
@@ -68,7 +72,6 @@ internal class GeoViewA11yCoordinator(
                 if (!canFocus) return@post
                 applyGeoViewA11yConfiguration()
                 calloutFocusRequester.requestFocus()
-                calloutFocusRequester.captureFocus()
             }
         }
     }
@@ -79,10 +82,10 @@ internal class GeoViewA11yCoordinator(
      * back to the GeoView and send a focused accessibility event.
      */
     internal fun onCalloutDisposed() {
-        isCalloutBeingDisplayed.set(false)
-        if (!canFocus) return
-        applyGeoViewA11yConfiguration()
         geoView.post {
+            isCalloutBeingDisplayed.set(false)
+            if (!canFocus) return@post
+            applyGeoViewA11yConfiguration()
             geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_FOCUS, null)
         }
     }
@@ -97,11 +100,6 @@ internal class GeoViewA11yCoordinator(
         geoView.isFocusable = isGeoViewFocusable
         // If GeoView should not be focusable, clear any existing focus.
         if (!isGeoViewFocusable) {
-            geoView.clearFocus()
-            geoView.performAccessibilityAction(
-                AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS,
-                null
-            )
             geoView.performAccessibilityAction(
                 AccessibilityNodeInfo.ACTION_CLEAR_FOCUS,
                 null

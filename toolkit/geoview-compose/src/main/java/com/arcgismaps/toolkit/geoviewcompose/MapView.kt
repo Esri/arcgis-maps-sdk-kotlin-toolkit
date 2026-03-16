@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.util.Log
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -38,8 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -336,9 +333,9 @@ public fun MapView(
     val mapView = remember {
         MapView(context)
     }
-    val (geoViewFocusRequestor, calloutFocusRequester) = remember { FocusRequester.createRefs() }
-    val a11yCoordinator = remember(geoViewFocusRequestor, calloutFocusRequester, canFocus, mapView) {
-        GeoViewA11yCoordinator(geoViewFocusRequestor, calloutFocusRequester, canFocus,mapView)
+    val calloutFocusRequester = remember { FocusRequester() }
+    val a11yCoordinator = remember(calloutFocusRequester, canFocus, mapView) {
+        GeoViewA11yCoordinator( calloutFocusRequester, canFocus,mapView)
     }
     val layoutDirection = LocalLayoutDirection.current
 
@@ -350,14 +347,13 @@ public fun MapView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusRequester(geoViewFocusRequestor)
                 .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties{ next = calloutFocusRequester }
+                .focusProperties { next = calloutFocusRequester }
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
-                it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.map = arcGISMap
+                it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
