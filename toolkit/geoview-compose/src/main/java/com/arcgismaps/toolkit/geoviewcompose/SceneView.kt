@@ -275,6 +275,7 @@ public fun SceneView(
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
+ * @param onAnalysisViewStatusChanged lambda invoked when the composable SceneView's analysis view status is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
