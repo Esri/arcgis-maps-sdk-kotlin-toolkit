@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -75,7 +76,6 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
-import com.arcgismaps.toolkit.geoviewcompose.internal.geoViewA11yDelegate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -350,12 +350,10 @@ public fun SceneView(
         SceneView(context)
     }
 
-    val calloutFocusRequester = remember { FocusRequester() }
-    val allyCoordinator = remember(calloutFocusRequester, sceneView) {
-        GeoViewA11yCoordinator(calloutFocusRequester, sceneView)
+    val (geoViewFocusRequestor, calloutFocusRequester) = remember { FocusRequester.createRefs() }
+    val a11yCoordinator = remember(geoViewFocusRequestor, calloutFocusRequester, canFocus,sceneView) {
+        GeoViewA11yCoordinator(geoViewFocusRequestor, calloutFocusRequester, canFocus, sceneView)
     }
-    val geoViewAllyDelegate = geoViewA11yDelegate(allyCoordinator, canFocus)
-
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds().focusGroup()) {
@@ -364,16 +362,14 @@ public fun SceneView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(allyCoordinator.isGeoViewFocusable)
+                .focusRequester(geoViewFocusRequestor)
+                .focusable(a11yCoordinator.isGeoViewFocusable)
                 .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
-                it.accessibilityDelegate = geoViewAllyDelegate
-                it.isFocusable = allyCoordinator.isGeoViewFocusable
-                if (it.scene !== arcGISScene) {
-                    it.scene = arcGISScene
-                }
+                it.isFocusable = a11yCoordinator.isGeoViewFocusable
+                it.scene = arcGISScene
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties
@@ -410,7 +406,7 @@ public fun SceneView(
                 it.cameraController = cameraController
             })
 
-        val sceneViewScope = remember { SceneViewScope(sceneView, allyCoordinator) }
+        val sceneViewScope = remember { SceneViewScope(sceneView, a11yCoordinator) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 

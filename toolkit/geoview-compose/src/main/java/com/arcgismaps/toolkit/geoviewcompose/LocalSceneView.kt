@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -64,7 +65,6 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
-import com.arcgismaps.toolkit.geoviewcompose.internal.geoViewA11yDelegate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -177,27 +177,24 @@ public fun LocalSceneView(
         LocalSceneView(context)
     }
 
-    val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester, localSceneView) {
-        GeoViewA11yCoordinator(calloutFocusRequester, localSceneView)
+    val (geoViewFocusRequestor, calloutFocusRequester) = remember { FocusRequester.createRefs() }
+    val a11yCoordinator = remember(geoViewFocusRequestor, calloutFocusRequester,canFocus, localSceneView) {
+        GeoViewA11yCoordinator(geoViewFocusRequestor, calloutFocusRequester, canFocus,localSceneView)
     }
-    val geoViewAccessibilityDelegate = geoViewA11yDelegate(a11yCoordinator, canFocus)
     Box(modifier = modifier.clipToBounds().focusGroup()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusRequester(geoViewFocusRequestor)
                 .focusable(a11yCoordinator.isGeoViewFocusable)
                 .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
-                it.accessibilityDelegate = geoViewAccessibilityDelegate
                 it.isFocusable = a11yCoordinator.isGeoViewFocusable
-                if (it.scene !== scene) {
-                    it.scene = scene
-                }
+                it.scene = scene
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties

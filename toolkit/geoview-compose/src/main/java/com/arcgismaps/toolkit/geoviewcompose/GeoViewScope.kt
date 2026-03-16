@@ -25,6 +25,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -56,9 +57,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
@@ -438,13 +438,12 @@ public sealed class GeoViewScope constructor(
                             .animateContentSize()
                             .focusRequester(a11yCoordinator.calloutFocusRequester)
                             .focusable()
+                            .focusGroup()
                             .focusProperties{
-                                next = a11yCoordinator.calloutFocusRequester
-                                previous = a11yCoordinator.calloutFocusRequester
+                                previous = a11yCoordinator.geoViewFocusRequestor
                             }
                             .semantics{
-                                isTraversalGroup = true
-                                contentDescription = "CalloutContainerLayout"
+                                testTag = "CalloutContainerLayout"
                             }
                     ) {
                         content.invoke(this)

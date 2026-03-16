@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.Log
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -74,7 +77,6 @@ import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
-import com.arcgismaps.toolkit.geoviewcompose.internal.geoViewA11yDelegate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -334,13 +336,10 @@ public fun MapView(
     val mapView = remember {
         MapView(context)
     }
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    mapView.isFocusable = canFocus
-    val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester, mapView) {
-        GeoViewA11yCoordinator(calloutFocusRequester, mapView)
+    val (geoViewFocusRequestor, calloutFocusRequester) = remember { FocusRequester.createRefs() }
+    val a11yCoordinator = remember(geoViewFocusRequestor, calloutFocusRequester, canFocus, mapView) {
+        GeoViewA11yCoordinator(geoViewFocusRequestor, calloutFocusRequester, canFocus,mapView)
     }
-    val geoViewA11yDelegate = geoViewA11yDelegate(a11yCoordinator, canFocus)
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -351,12 +350,12 @@ public fun MapView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusRequester(geoViewFocusRequestor)
                 .focusable(a11yCoordinator.isGeoViewFocusable)
                 .focusProperties{ next = calloutFocusRequester }
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
-                it.accessibilityDelegate = geoViewA11yDelegate
                 it.isFocusable = a11yCoordinator.isGeoViewFocusable
                 it.map = arcGISMap
                 it.selectionProperties = selectionProperties
