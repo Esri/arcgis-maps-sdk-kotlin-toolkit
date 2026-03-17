@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config>
+        <trust-anchors>
+<!--            Let the app trust the system and user certificates. -->
+<!--            This is required to allow the app to connect to servers with self-signed certificates, -->
+<!--            which is common in enterprise environments. The user certificates are only trusted if -->
+<!--            the user has explicitly added them to their device, which is a reasonable requirement -->
+<!--            for trusting user certificates.-->
+            <certificates src="system" />
+            <certificates src="user"
+                    tools:ignore="AcceptsUserCertificates" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
