@@ -86,7 +86,7 @@ internal class GeoViewA11yCoordinator(
             isCalloutBeingDisplayed.set(false)
             if (!canFocus) return@post
             applyGeoViewA11yConfiguration()
-            geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_FOCUS, null)
+            geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, null)
         }
     }
 
@@ -100,10 +100,7 @@ internal class GeoViewA11yCoordinator(
         geoView.isFocusable = isGeoViewFocusable
         // If GeoView should not be focusable, clear any existing focus.
         if (!isGeoViewFocusable) {
-            geoView.performAccessibilityAction(
-                AccessibilityNodeInfo.ACTION_CLEAR_FOCUS,
-                null
-            )
+            geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null)
         }
     }
 }

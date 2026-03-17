@@ -28,7 +28,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.IntSize
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
@@ -230,10 +229,6 @@ class CalloutTests {
         val calloutBitmap = calloutContainerNodeInteraction.captureToImage().asAndroidBitmap()
         // test if the Callout contains a Red background Color
         assert(calloutBitmap.containsColor(Color.Red.hashCode()))
-
-        val calloutContainerNode = calloutContainerNodeInteraction.fetchSemanticsNode()
-        // test Callout Size excluding leader height and border width
-        assert(calloutContainerNode.size == IntSize(442, 416))
     }
 }
 

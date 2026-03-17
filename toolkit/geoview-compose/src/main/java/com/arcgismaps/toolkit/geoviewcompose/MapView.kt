@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -335,13 +334,13 @@ public fun MapView(
     }
     val calloutFocusRequester = remember { FocusRequester() }
     val a11yCoordinator = remember(calloutFocusRequester, canFocus, mapView) {
-        GeoViewA11yCoordinator( calloutFocusRequester, canFocus,mapView)
+        GeoViewA11yCoordinator( calloutFocusRequester, canFocus, mapView)
     }
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
-    Box(modifier = modifier.clipToBounds().focusGroup()) {
+    Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
@@ -712,7 +711,7 @@ public inline fun rememberLocationDisplay(
  * @since 200.5.0
  */
 public class MapViewScope internal constructor(
-    mapView: MapView, a11yCoordinator: GeoViewA11yCoordinator,
+    mapView: MapView, a11yCoordinator: GeoViewA11yCoordinator
 ) : GeoViewScope(mapView, a11yCoordinator)
 
 /**

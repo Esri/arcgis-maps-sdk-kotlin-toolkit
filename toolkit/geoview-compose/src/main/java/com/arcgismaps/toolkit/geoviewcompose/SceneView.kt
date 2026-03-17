@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -349,12 +348,12 @@ public fun SceneView(
         SceneView(context)
     }
     val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester, canFocus,sceneView) {
+    val a11yCoordinator = remember(calloutFocusRequester, canFocus, sceneView) {
         GeoViewA11yCoordinator(calloutFocusRequester, canFocus, sceneView)
     }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
-    Box(modifier = modifier.clipToBounds().focusGroup()) {
+    Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
@@ -680,7 +679,7 @@ private fun ViewpointHandler(
  * @since 200.5.0
  */
 public class SceneViewScope internal constructor(
-    sceneView: SceneView, allyCoordinator: GeoViewA11yCoordinator,
+    sceneView: SceneView, allyCoordinator: GeoViewA11yCoordinator
 ) : GeoViewScope(sceneView, allyCoordinator)
 
 /**
