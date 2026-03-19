@@ -32,7 +32,7 @@ plugins {
 gradlePlugin {
     plugins {
         register("androidIntegrationTesting") {
-            id = "android-integration-testing"
+            id = libs.plugins.android.integration.testing.get().pluginId
             implementationClass = "EmptyPlugin"
         }
     }
