@@ -1,17 +1,19 @@
 /*
- * COPYRIGHT 1995-2022 ESRI
  *
- * TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
- * Unpublished material - all rights reserved under the
- * Copyright Laws of the United States.
+ *  Copyright 2026 Esri
  *
- * For additional information, contact:
- * Environmental Systems Research Institute, Inc.
- * Attn: Contracts Dept
- * 380 New York Street
- * Redlands, California, USA 92373
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * email: contracts@esri.com
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package com.arcgismaps.toolkit.geoviewcompose.testUtil
@@ -44,7 +46,7 @@ import java.io.Closeable
  * The test case on the SharedFlow is itself an [extension on SharedFlow][SharedFlow.test], which
  * takes as a parameter an extension function on this class.
  *
- * @since 200.0.0
+ * @since 300.0.0
  */
 class EventsChannel<T>(private val collectionTimeout: Long = 1000) : Closeable {
     val channel = Channel<Result<T>>(UNLIMITED)
@@ -54,7 +56,7 @@ class EventsChannel<T>(private val collectionTimeout: Long = 1000) : Closeable {
      * This property can be used in tests to assert that the channel is empty.
      * It returns true if the channel is empty, and false otherwise.
      *
-     * @since 200.8.0
+     * @since 300.0.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val hasNoValue = channel.isEmpty
@@ -65,7 +67,7 @@ class EventsChannel<T>(private val collectionTimeout: Long = 1000) : Closeable {
      * before the test completed.
      *
      * @param message the emitted value from the Event.
-     * @since 200.2.0
+     * @since 300.0.0
      */
     @OptIn(DelicateCoroutinesApi::class)
     @ExperimentalCoroutinesApi
@@ -93,7 +95,7 @@ class EventsChannel<T>(private val collectionTimeout: Long = 1000) : Closeable {
      * In case we want to use non-test coroutines at some point.
      *
      * @return the emitted value wrapped in a result, or the Throwable that was thrown, if any.
-     * @since 200.0.0
+     * @since 300.0.0
      */
     suspend fun awaitValue(): Result<T> =
         try {
@@ -120,7 +122,7 @@ class EventsChannel<T>(private val collectionTimeout: Long = 1000) : Closeable {
  * A convenience function to automatically fail a test if the [Result] containing the emitted value
  * is of type [Result.Failure].
  *
- * @since 200.0.0
+ * @since 300.0.0
  */
 suspend fun <T> EventsChannel<T>.awaitOrFail() =
     awaitValue().onFailure { fail(it.message) }
@@ -146,7 +148,7 @@ suspend fun <T> EventsChannel<T>.awaitEvent(block: (T) -> Unit): Result<T> =
  * @param collectionDispatcher the CoroutineDispatcher to use for launching a collecting coroutine that
  * collects from the [Flow] specified as the receiver of this function.
  * @param testBlock an extension function on [EventsChannel], passed as a trailing lambda.
- * @since 200.0.0
+ * @since 300.0.0
  */
 @ExperimentalCoroutinesApi
 suspend fun <T> Flow<T>.test(
@@ -193,7 +195,7 @@ suspend fun <T> Flow<T>.test(
  * @param predicate A function to determine whether the element should be collected and returned
  * @see CoroutineScope.async
  * @see Flow.first
- * @since 200.1.0
+ * @since 300.0.0
  */
 suspend fun <T> Flow<T>.firstAsync(
     coroutineScope: CoroutineScope,
