@@ -277,11 +277,11 @@ private fun AssociationItem(
             .clickable(enabled = enabled, onClick = onClick)
             .fillMaxWidth(),
         onDismiss = { value ->
+            // Show the delete confirmation dialog when a swipe to delete is performed.
             if (value == SwipeToDismissBoxValue.EndToStart) {
                 showDeleteDialog = true
-                // Set a pending value instead of confirming the value change directly. There
-                // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
-                // not work after the first swipe, if we confirm the value change directly here.
+                // The actual swipe value will be set in a LaunchedEffect when the user confirms the
+                // deletion.
                 pendingSwipeValue = value
             }
         }
