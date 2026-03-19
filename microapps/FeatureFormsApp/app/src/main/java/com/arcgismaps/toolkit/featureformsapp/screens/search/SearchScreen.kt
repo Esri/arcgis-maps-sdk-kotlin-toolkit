@@ -58,7 +58,6 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("DEPRECATION")
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onItemSelected: () -> Unit,

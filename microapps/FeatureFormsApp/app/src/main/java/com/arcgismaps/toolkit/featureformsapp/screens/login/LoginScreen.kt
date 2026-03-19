@@ -101,7 +101,6 @@ import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
 
 @Composable
-@Suppress("DEPRECATION")
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onSuccessfulLogin: () -> Unit = {}

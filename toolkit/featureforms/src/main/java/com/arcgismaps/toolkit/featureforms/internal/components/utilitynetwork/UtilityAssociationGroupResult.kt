@@ -58,6 +58,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -161,7 +162,6 @@ internal fun UtilityAssociationGroupResult(
  *
  */
 @Composable
-@Suppress("DEPRECATION")
 private fun AssociationItem(
     title: String,
     association: UtilityAssociation,
@@ -189,17 +189,6 @@ private fun AssociationItem(
     val swipeToDismissBoxState = remember(association) {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
-            density = density,
-            confirmValueChange = { value ->
-                if (value == SwipeToDismissBoxValue.EndToStart) {
-                    showDeleteDialog = true
-                    // Set a pending value instead of confirming the value change directly. There
-                    // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
-                    // not work after the first swipe, if we confirm the value change directly here.
-                    pendingSwipeValue = value
-                }
-                false
-            },
             positionalThreshold = {
                 with(density) { 56.dp.toPx() }
             }
@@ -286,7 +275,16 @@ private fun AssociationItem(
         },
         modifier = modifier
             .clickable(enabled = enabled, onClick = onClick)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        onDismiss = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                showDeleteDialog = true
+                // Set a pending value instead of confirming the value change directly. There
+                // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
+                // not work after the first swipe, if we confirm the value change directly here.
+                pendingSwipeValue = value
+            }
+        }
     ) {
         Row(
             modifier = Modifier
@@ -370,8 +368,10 @@ private fun AssociationItem(
         // Confirmation dialog to delete the association
         RemoveAssociationConfirmationDialog(
             onDismiss = {
-                showDeleteDialog = false
-                pendingSwipeValue = SwipeToDismissBoxValue.Settled
+                Snapshot.withMutableSnapshot {
+                    showDeleteDialog = false
+                    pendingSwipeValue = SwipeToDismissBoxValue.Settled
+                }
             },
             onRemove = {
                 showDeleteDialog = false
