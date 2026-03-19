@@ -104,3 +104,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "build-logic-internal"
+include(":convention")
