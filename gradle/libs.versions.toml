@@ -114,6 +114,8 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
 arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", version.ref = "arcgismapsTestdataSync" }
+# Plugins defined by the project build-logic
+android-integration-testing = { id = "android-integration-testing" }
 
 [bundles]
 camerax = [
