@@ -21,7 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
-    id("android-integration-testing")
+    alias(libs.plugins.android.integration.testing)
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
