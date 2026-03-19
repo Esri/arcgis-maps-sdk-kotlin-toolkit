@@ -58,7 +58,7 @@ tasks.named("grantDevicePermissions") {
 // developers get the real implementation from build-logic-internal.
 gradlePlugin {
     plugins {
-        create("androidIntegrationTesting") {
+        register("androidIntegrationTesting") {
             id = "android-integration-testing"
             implementationClass = "AndroidIntegrationTestingConventionPlugin"
         }
