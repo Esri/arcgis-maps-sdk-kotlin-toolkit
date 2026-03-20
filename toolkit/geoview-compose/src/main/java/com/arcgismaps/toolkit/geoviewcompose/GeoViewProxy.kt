@@ -312,8 +312,8 @@ public sealed class GeoViewProxy(className: String) {
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
-     * part of the composition
+     * @return the [LayerViewState] of the provided layer, or null if the view doesn't contain the
+     * given layer or this proxy's GeoView is not part of the composition
      * @since 200.4.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? {
@@ -324,7 +324,8 @@ public sealed class GeoViewProxy(className: String) {
      * Retrieves the analysis' status in the view.
      *
      * @param analysis An analysis object to get the view status for.
-     * @return A valid [AnalysisViewStatus] or null if the view doesn't contain the given analysis.
+     * @return a valid [AnalysisViewStatus] or null if the view doesn't contain the given analysis
+     * or this proxy's GeoView is not part of the composition
      * @since 300.0.0
      */
     public fun getAnalysisViewStatus(analysis: Analysis): AnalysisViewStatus? {
