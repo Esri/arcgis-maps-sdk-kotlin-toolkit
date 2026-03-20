@@ -58,7 +58,7 @@ internal class GeoViewA11yCoordinator(
      * The main boolean condition to determine if the GeoView (not trailing content)
      * should be focusable and interact with screen readers.
      */
-    val isGeoViewFocusable: Boolean
+    internal val isGeoViewFocusable: Boolean
         get() = canFocus && !isContentBeingDisplayed.get()
 
     /**
@@ -70,7 +70,6 @@ internal class GeoViewA11yCoordinator(
         geoView.post {
             if (isContentBeingDisplayed.compareAndSet(false, true)) {
                 if (!canFocus) return@post
-                geoView.isFocusable = false
                 geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null)
                 contentFocusRequester.requestFocus()
             }
@@ -86,7 +85,6 @@ internal class GeoViewA11yCoordinator(
         geoView.post {
             isContentBeingDisplayed.set(false)
             if (!canFocus) return@post
-            geoView.isFocusable = true
             geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, null)
         }
     }
