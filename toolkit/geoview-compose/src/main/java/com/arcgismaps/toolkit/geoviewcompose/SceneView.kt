@@ -348,7 +348,9 @@ public fun SceneView(
         SceneView(context)
     }
     val contentFocusRequester = remember(canFocus) { FocusRequester() }
-    val a11yCoordinator = remember { GeoViewA11yCoordinator(sceneView, canFocus, contentFocusRequester) }
+    val a11yCoordinator = remember(canFocus) {
+        GeoViewA11yCoordinator(sceneView, canFocus, contentFocusRequester)
+    }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -460,6 +462,7 @@ public fun SceneView(
         onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
+
 
 /**
  * Sets up the callbacks for all the view-based [sceneView] events.

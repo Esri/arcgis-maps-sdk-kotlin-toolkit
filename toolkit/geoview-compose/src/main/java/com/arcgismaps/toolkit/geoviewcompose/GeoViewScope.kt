@@ -104,7 +104,7 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope(private val geoView: GeoView) {
+public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
 
     /**
      * Coordinator for managing mutually exclusive accessibility focus from GeoView and its trailing lambda content.
