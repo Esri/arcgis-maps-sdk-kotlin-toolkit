@@ -347,10 +347,8 @@ public fun SceneView(
     val sceneView = remember {
         SceneView(context)
     }
-    val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester, canFocus, sceneView) {
-        GeoViewA11yCoordinator(calloutFocusRequester, canFocus, sceneView)
-    }
+    val contentFocusRequester = remember(canFocus) { FocusRequester() }
+    val a11yCoordinator = remember { GeoViewA11yCoordinator(sceneView, canFocus, contentFocusRequester) }
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -360,7 +358,7 @@ public fun SceneView(
             modifier = Modifier
                 .fillMaxSize()
                 .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = calloutFocusRequester }
+                .focusProperties { next = contentFocusRequester }
                 .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
@@ -679,8 +677,8 @@ private fun ViewpointHandler(
  * @since 200.5.0
  */
 public class SceneViewScope internal constructor(
-    sceneView: SceneView, allyCoordinator: GeoViewA11yCoordinator
-) : GeoViewScope(sceneView, allyCoordinator)
+    sceneView: SceneView, a11yCoordinator: GeoViewA11yCoordinator
+) : GeoViewScope(sceneView, a11yCoordinator)
 
 /**
  * Contains default values for the SceneView.

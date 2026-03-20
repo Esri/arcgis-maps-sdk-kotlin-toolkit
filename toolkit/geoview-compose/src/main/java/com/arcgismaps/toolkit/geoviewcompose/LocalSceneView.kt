@@ -174,10 +174,8 @@ public fun LocalSceneView(
     val localSceneView = remember {
         LocalSceneView(context)
     }
-    val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester,canFocus, localSceneView) {
-        GeoViewA11yCoordinator( calloutFocusRequester, canFocus, localSceneView)
-    }
+    val contentFocusRequester = remember(canFocus) { FocusRequester() }
+    val a11yCoordinator = remember { GeoViewA11yCoordinator(localSceneView, canFocus, contentFocusRequester) }
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
@@ -185,7 +183,7 @@ public fun LocalSceneView(
             modifier = Modifier
                 .fillMaxSize()
                 .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = calloutFocusRequester }
+                .focusProperties { next = contentFocusRequester }
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
@@ -440,5 +438,5 @@ private fun ViewpointHandler(
  * @since 300.0.0
  */
 public class LocalSceneViewScope internal constructor(
-    localSceneView: LocalSceneView, allyCoordinator: GeoViewA11yCoordinator
-) : GeoViewScope(localSceneView, allyCoordinator)
+    localSceneView: LocalSceneView, a11yCoordinator: GeoViewA11yCoordinator
+) : GeoViewScope(localSceneView, a11yCoordinator)

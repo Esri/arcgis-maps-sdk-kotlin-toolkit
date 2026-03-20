@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.geoviewcompose.internal
 
 import android.view.View
-import android.view.View.AccessibilityDelegate
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.focus.FocusRequester
@@ -26,21 +25,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Internal coordinator class to manage accessibility focus and configuration for a
- * MapView or SceneView or LocalSceneView and its Callout using an [AccessibilityDelegate].
+ * GeoView and mutually exclusive focus with its trailing lambda content.
  *
- * Track whether the GeoView can be focused and whether a callout is currently being displayed.
- * Either a GeoView or its Callout can be focused at a given time, but not both.
+ * Track whether the GeoView can be focused and whether content is currently being displayed.
+ * Either a GeoView or its content (like Callout) can be focused at a given time, but not both.
  *
- * @param calloutFocusRequester FocusRequester for Callout to request focus when displayed.
- * @param geoView The GeoView type whose accessibility configuration is being managed.
+ * @param geoView The GeoView whose accessibility configuration is being managed.
+ * @param canFocus User provided property to set underlying focus behavior.
+ * @param contentFocusRequester FocusRequester used by trailing lambda content to request focus.
  *
  * @since 300.0.0
  */
 @Stable
 internal class GeoViewA11yCoordinator(
-    internal val calloutFocusRequester: FocusRequester,
+    internal val geoView: View,
     internal val canFocus: Boolean,
-    internal val geoView: View
+    internal val contentFocusRequester: FocusRequester
 ) {
 
     init {
@@ -49,58 +49,45 @@ internal class GeoViewA11yCoordinator(
     }
 
     /**
-     * The isCalloutBeingDisplayed property from the related GeoViewScope,
-     * Used to drive focus away from GeoView and into Callout when displayed.
+     * Tracks whether content from the related GeoViewScope is currently being displayed.
+     * Used to drive focus away from GeoView and into content when displayed.
      */
-    private val isCalloutBeingDisplayed = AtomicBoolean(false)
+    private val isContentBeingDisplayed = AtomicBoolean(false)
 
     /**
-     * The main boolean condition to determine if GeoView (not Callout) should be focusable
-     * and interact with screen readers.
+     * The main boolean condition to determine if the GeoView (not trailing content)
+     * should be focusable and interact with screen readers.
      */
     val isGeoViewFocusable: Boolean
-        get() = canFocus && !isCalloutBeingDisplayed.get()
+        get() = canFocus && !isContentBeingDisplayed.get()
 
     /**
-     * Used by GeoViewScope to notify here that a Callout is being displayed.
-     * Update GeoView to not be focusable and, on [View.post] of the calloutView, request focus
-     * into the Callout and send a content changed accessibility event.
+     * Used by GeoViewScope to notify here that trailing content has entered the composition.
+     * Update the GeoView to not be focusable and, on [View.post] of the GeoView, request focus
+     * into the trailing content.
      */
-    internal fun onCalloutPlaced(calloutView: View) {
-        calloutView.post {
-            if (isCalloutBeingDisplayed.compareAndSet(false, true)) {
+    internal fun onContentComposed() {
+        geoView.post {
+            if (isContentBeingDisplayed.compareAndSet(false, true)) {
                 if (!canFocus) return@post
-                applyGeoViewA11yConfiguration()
-                calloutFocusRequester.requestFocus()
+                geoView.isFocusable = false
+                geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null)
+                contentFocusRequester.requestFocus()
             }
         }
     }
 
     /**
-     * Used by GeoViewScope to notify here that a Callout is being dismissed.
-     * Update GeoView to be focusable again and, on [View.post] of the geoView, request focus
-     * back to the GeoView and send a focused accessibility event.
+     * Used by GeoViewScope to notify here that trailing content has left the composition.
+     * Update the GeoView to be focusable again and, on [View.post] of the GeoView, hand focus
+     * back it.
      */
-    internal fun onCalloutDisposed() {
+    internal fun onContentDisposed() {
         geoView.post {
-            isCalloutBeingDisplayed.set(false)
+            isContentBeingDisplayed.set(false)
             if (!canFocus) return@post
-            applyGeoViewA11yConfiguration()
+            geoView.isFocusable = true
             geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, null)
-        }
-    }
-
-    /**
-     * Using the current state of this coordinator, apply accessibility configuration to the GeoView.
-     *
-     * @param geoView The GeoView to apply configuration, defaults to the constructor property.
-     */
-    internal fun applyGeoViewA11yConfiguration(geoView: View = this.geoView) {
-        // Mirror the focusable property into the GeoView
-        geoView.isFocusable = isGeoViewFocusable
-        // If GeoView should not be focusable, clear any existing focus.
-        if (!isGeoViewFocusable) {
-            geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null)
         }
     }
 }

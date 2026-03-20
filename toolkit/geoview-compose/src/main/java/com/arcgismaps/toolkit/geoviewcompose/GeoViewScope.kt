@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.Density
@@ -105,9 +104,19 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope constructor(
-    private val geoView: GeoView, private val a11yCoordinator: GeoViewA11yCoordinator
-) {
+public sealed class GeoViewScope(private val geoView: GeoView) {
+
+    /**
+     * Coordinator for managing mutually exclusive accessibility focus from GeoView and its trailing lambda content.
+     * Initialized with null for backwards compatibility with the top level constructor.
+     * @since 300.0.0
+     */
+    internal var a11yCoordinator: GeoViewA11yCoordinator? = null
+
+    protected constructor(
+        geoView: GeoView,
+        a11yCoordinator: GeoViewA11yCoordinator
+    ) : this(geoView) { this.a11yCoordinator = a11yCoordinator }
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -383,7 +392,6 @@ public sealed class GeoViewScope constructor(
             )
         }
         var animationDuration by remember { mutableIntStateOf(300) }
-        val rootView = LocalView.current
 
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
@@ -435,23 +443,40 @@ public sealed class GeoViewScope constructor(
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
-                            .focusRequester(a11yCoordinator.calloutFocusRequester)
-                            .focusable()
-                            .focusGroup()
-                            .semantics{
+                            .optionalA11yFocusable(a11yCoordinator)
+                            .semantics {
                                 testTag = "CalloutContainerLayout"
                             }
                     ) {
                         content.invoke(this)
-                        DisposableEffect(Unit) {
-                            a11yCoordinator.onCalloutPlaced(rootView)
-                            onDispose {
-                                a11yCoordinator.onCalloutDisposed()
+                        a11yCoordinator?.let { coordinator ->
+                            DisposableEffect(coordinator) {
+                                coordinator.onContentComposed()
+                                onDispose {
+                                    coordinator.onContentDisposed()
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Optional accessibility focus modifier configurations applied to the Callout container
+     * using the [a11yCoordinator].
+     *
+     * @since 300.0.0
+     */
+    private fun Modifier.optionalA11yFocusable(coordinator: GeoViewA11yCoordinator?): Modifier {
+        return if (coordinator != null) {
+            this
+                .focusRequester(coordinator.contentFocusRequester)
+                .focusable()
+                .focusGroup()
+        } else {
+            this
         }
     }
 

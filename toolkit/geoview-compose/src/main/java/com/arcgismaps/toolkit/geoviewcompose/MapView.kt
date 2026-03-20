@@ -332,10 +332,8 @@ public fun MapView(
     val mapView = remember {
         MapView(context)
     }
-    val calloutFocusRequester = remember { FocusRequester() }
-    val a11yCoordinator = remember(calloutFocusRequester, canFocus, mapView) {
-        GeoViewA11yCoordinator( calloutFocusRequester, canFocus, mapView)
-    }
+    val contentFocusRequester = remember(canFocus) { FocusRequester() }
+    val a11yCoordinator = remember { GeoViewA11yCoordinator(mapView, canFocus, contentFocusRequester) }
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -347,7 +345,7 @@ public fun MapView(
             modifier = Modifier
                 .fillMaxSize()
                 .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = calloutFocusRequester }
+                .focusProperties { next = contentFocusRequester }
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
