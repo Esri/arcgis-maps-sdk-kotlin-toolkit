@@ -46,6 +46,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -237,6 +238,7 @@ public fun MapView(
  * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param imageOverlays image overlays for displaying images in the composable MapView
+ * @param analysisOverlays analysis overlays that render the analysis results on the composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -259,6 +261,7 @@ public fun MapView(
  * @param onUnitsPerDipChanged lambda invoked when the Units per DIP of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable MapView's layer view state is changed
+ * @param onAnalysisViewStatusChanged lambda invoked when the composable MapView's analysis view status is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -292,6 +295,7 @@ public fun MapView(
     viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
@@ -313,6 +317,7 @@ public fun MapView(
     onUnitsPerDipChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -357,6 +362,12 @@ public fun MapView(
                     it.graphicsOverlays.apply {
                         clear()
                         addAll(graphicsOverlays)
+                    }
+                }
+                if (it.analysisOverlays != analysisOverlays) {
+                    it.analysisOverlays.apply {
+                        clear()
+                        addAll(analysisOverlays)
                     }
                 }
                 if (it.imageOverlays != imageOverlays) {
@@ -412,6 +423,7 @@ public fun MapView(
         onUnitsPerDipChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
+        onAnalysisViewStatusChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -451,6 +463,7 @@ private fun MapViewEventHandler(
     onUnitsPerDipChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -486,6 +499,7 @@ private fun MapViewEventHandler(
     val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
+    val currentOnAnalysisViewStatusChanged by rememberUpdatedState(onAnalysisViewStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
     val currentOnGeoModelErrorChanges by rememberUpdatedState(onGeoModelErrorChanged)
@@ -499,6 +513,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
+            }
+        }
+        launch {
+            mapView.analysisViewStatusChanged.collect { currentAnalysisViewStatus ->
+                currentOnAnalysisViewStatusChanged?.invoke(currentAnalysisViewStatus)
             }
         }
         launch {
