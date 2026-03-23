@@ -464,13 +464,32 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     }
 
     /**
-     * Optional accessibility focus modifier configurations applied to the Callout container
-     * using the [a11yCoordinator].
+     * Marks a composable inside the GeoView trailing lambda content as the preferred initial focus
+     * target when toolkit accessibility focus handoff moves focus from the GeoView into the
+     * content. This is useful for content such as a Callout where initial focus should land on the
+     * first meaningful child rather than the underlying GeoView.
+     *
+     * If no preferred content focus target is provided, focus falls back to the Callout container.
+     * This modifier only has an effect when the GeoView composable's `canFocus` parameter is true.
      *
      * @since 300.0.0
      */
+    public fun Modifier.preferredContentFocusTarget(): Modifier {
+        val coordinator = a11yCoordinator
+        return if (coordinator?.canFocus == true) {
+            this
+                .focusRequester(coordinator.preferredTargetFocusRequester)
+                .focusable()
+        } else {
+            this
+        }
+    }
+    /**
+     * Optional accessibility focus modifier configurations applied to the Callout container
+     * using the [a11yCoordinator].
+     */
     private fun Modifier.optionalA11yFocusable(coordinator: GeoViewA11yCoordinator?): Modifier {
-        return if (coordinator != null) {
+        return if (coordinator?.canFocus == true) {
             this
                 .focusRequester(coordinator.contentFocusRequester)
                 .focusable()

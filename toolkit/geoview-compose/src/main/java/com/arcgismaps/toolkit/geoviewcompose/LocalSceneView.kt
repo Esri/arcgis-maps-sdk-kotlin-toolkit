@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -178,26 +177,26 @@ public fun LocalSceneView(
     val a11yCoordinator = remember(canFocus) {
         GeoViewA11yCoordinator(localSceneView, canFocus, contentFocusRequester)
     }
+    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = contentFocusRequester }
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
                 it.scene = scene
-                it.isFocusable = a11yCoordinator.isGeoViewFocusable
+                it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
             }
         )
 
-        val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, a11yCoordinator) }
+        val localSceneViewScope = remember(canFocus) { LocalSceneViewScope(localSceneView, a11yCoordinator) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
         // Invoke the content lambda only when the LocalSceneView is ready

@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -351,6 +350,7 @@ public fun SceneView(
     val a11yCoordinator = remember(canFocus) {
         GeoViewA11yCoordinator(sceneView, canFocus, contentFocusRequester)
     }
+    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -359,13 +359,12 @@ public fun SceneView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = contentFocusRequester }
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
-                it.isFocusable = a11yCoordinator.isGeoViewFocusable
+                it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties
@@ -402,7 +401,7 @@ public fun SceneView(
                 it.cameraController = cameraController
             })
 
-        val sceneViewScope = remember { SceneViewScope(sceneView, a11yCoordinator) }
+        val sceneViewScope = remember(canFocus) { SceneViewScope(sceneView, a11yCoordinator) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 

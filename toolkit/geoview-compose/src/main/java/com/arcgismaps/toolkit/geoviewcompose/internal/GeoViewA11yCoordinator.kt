@@ -19,7 +19,9 @@ package com.arcgismaps.toolkit.geoviewcompose.internal
 
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.focus.FocusRequester
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -55,11 +57,17 @@ internal class GeoViewA11yCoordinator(
     private val isContentBeingDisplayed = AtomicBoolean(false)
 
     /**
+     * The preferred target element for accessibility focus when content is displayed.
+     */
+    internal val preferredTargetFocusRequester = FocusRequester()
+
+    /**
      * The main boolean condition to determine if the GeoView (not trailing content)
      * should be focusable and interact with screen readers.
      */
-    internal val isGeoViewFocusable: Boolean
-        get() = canFocus && !isContentBeingDisplayed.get()
+    private val _isGeoViewFocusable = mutableStateOf(canFocus && !isContentBeingDisplayed.get())
+    internal val isGeoViewFocusable: State<Boolean>
+        get() = _isGeoViewFocusable
 
     /**
      * Used by GeoViewScope to notify here that trailing content has entered the composition.
@@ -67,11 +75,23 @@ internal class GeoViewA11yCoordinator(
      * into the trailing content.
      */
     internal fun onContentComposed() {
-        geoView.post {
-            if (isContentBeingDisplayed.compareAndSet(false, true)) {
-                if (!canFocus) return@post
-                geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null)
-                contentFocusRequester.requestFocus()
+        if (isContentBeingDisplayed.compareAndSet(false, true)) {
+            // Continue if user provided property is true
+            if (!canFocus) return
+            // Set focusable state to propagate an `update` to the AndroidView.
+            _isGeoViewFocusable.value = false
+            // Clear accessibility focus from GeoView to send it to the content lambda.
+            geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null)
+            geoView.post {
+                // Attempt to focus preferred target in content lambda,
+                // if a target is provided by user then boolean should be true.
+                val isPreferredTargetFocused = runCatching {
+                    preferredTargetFocusRequester.requestFocus()
+                }.getOrDefault(false)
+                // If preferred target focus request failed, attempt to focus the content as a whole.
+                if (!isPreferredTargetFocused){
+                    contentFocusRequester.requestFocus()
+                }
             }
         }
     }
@@ -82,9 +102,15 @@ internal class GeoViewA11yCoordinator(
      * back it.
      */
     internal fun onContentDisposed() {
+        isContentBeingDisplayed.set(false)
+        // Continue if user provided property is true
+        if (!canFocus) return
+        // Set focusable state to propagate an `update` to the AndroidView.
+        _isGeoViewFocusable.value = true
+        // After AndroidView post, send accessibility focus from content lambda back to GeoView.
         geoView.post {
-            isContentBeingDisplayed.set(false)
-            if (!canFocus) return@post
+            // Update isFocusable attribute in case if post was called before mutable state triggered an `update`.
+            geoView.isFocusable = true
             geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, null)
         }
     }

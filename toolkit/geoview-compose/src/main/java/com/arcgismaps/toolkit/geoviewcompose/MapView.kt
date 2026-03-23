@@ -35,7 +35,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -336,6 +335,7 @@ public fun MapView(
     val a11yCoordinator = remember(canFocus) {
         GeoViewA11yCoordinator(mapView, canFocus, contentFocusRequester)
     }
+    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -346,13 +346,12 @@ public fun MapView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(a11yCoordinator.isGeoViewFocusable)
-                .focusProperties { next = contentFocusRequester }
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
-                it.isFocusable = a11yCoordinator.isGeoViewFocusable
+                it.isFocusable = isGeoViewFocusable
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
@@ -377,7 +376,7 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember { MapViewScope(mapView, a11yCoordinator) }
+        val mapViewScope = remember(canFocus) { MapViewScope(mapView, a11yCoordinator) }
 
         val isMapViewReady = mapView.rememberIsReady()
         if (isMapViewReady.value) {
