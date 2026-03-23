@@ -32,7 +32,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -41,10 +40,7 @@ import org.junit.Assert.fail
 import java.io.Closeable
 
 /**
- * Test cases on SharedFlows are written as extensions function of this class.
- *
- * The test case on the SharedFlow is itself an [extension on SharedFlow][SharedFlow.test], which
- * takes as a parameter an extension function on this class.
+ * Test helper for collecting [Flow] emissions in order and asserting them in tests.
  *
  * @since 300.0.0
  */
