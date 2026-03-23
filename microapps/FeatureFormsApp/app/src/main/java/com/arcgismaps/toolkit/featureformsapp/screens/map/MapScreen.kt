@@ -124,7 +124,6 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
 @Composable
-@Suppress("DEPRECATION")
 fun MapScreen(
     mapViewModel: MapViewModel,
     onBackPressed: () -> Unit = {}
