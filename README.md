@@ -9,7 +9,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
   * **[TableTopSceneView](toolkit/ar#tabletopsceneview)** - Allows you to anchor scene content to a physical surface, as if it were a 3D-printed model.
   * **[WorldScaleSceneView](toolkit/ar#worldscalesceneview)** - Allows you to integrate scene content with the real world features like streets and buildings.
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
-* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps
+* **[Basemap Gallery](toolkit/basemapgallery)** - Provides a control for selecting basemaps.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
