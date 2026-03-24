@@ -57,7 +57,8 @@ internal class GeoViewA11yCoordinator(
     private val isContentBeingDisplayed = AtomicBoolean(false)
 
     /**
-     * The preferred target element for accessibility focus when content is displayed.
+     * The preferred target element for accessibility focus when content is displayed,
+     * for example the title `Text` within a Callout.
      */
     internal val preferredTargetFocusRequester = FocusRequester()
 
@@ -66,8 +67,7 @@ internal class GeoViewA11yCoordinator(
      * should be focusable and interact with screen readers.
      */
     private val _isGeoViewFocusable = mutableStateOf(canFocus && !isContentBeingDisplayed.get())
-    internal val isGeoViewFocusable: State<Boolean>
-        get() = _isGeoViewFocusable
+    internal val isGeoViewFocusable: State<Boolean> = _isGeoViewFocusable
 
     /**
      * Used by GeoViewScope to notify here that trailing content has entered the composition.
