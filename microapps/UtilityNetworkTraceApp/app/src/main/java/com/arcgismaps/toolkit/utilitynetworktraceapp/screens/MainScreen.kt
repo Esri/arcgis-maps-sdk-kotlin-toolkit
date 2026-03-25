@@ -27,6 +27,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -47,11 +48,13 @@ fun MainScreen(viewModel: TraceViewModel) {
         )
     )
 
-    val addStartingPointMode by viewModel.traceState.addStartingPointMode
-    LaunchedEffect(key1 = addStartingPointMode) {
-        if (addStartingPointMode == AddStartingPointMode.Started) {
+    val map by viewModel.arcGISMap.collectAsState()
+    val traceState by viewModel.traceState.collectAsState()
+
+    LaunchedEffect(key1 = traceState.addStartingPointMode) {
+        if (traceState.addStartingPointMode == AddStartingPointMode.Started) {
             scaffoldState.bottomSheetState.partialExpand()
-        } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
+        } else if (traceState.addStartingPointMode == AddStartingPointMode.Stopped) {
             scaffoldState.bottomSheetState.expand()
         }
     }
@@ -60,7 +63,7 @@ fun MainScreen(viewModel: TraceViewModel) {
         sheetContent = {
             Trace(
                 modifier = Modifier.animateContentSize(),
-                traceState = viewModel.traceState
+                traceState = traceState
             )
         },
         sheetContainerColor = MaterialTheme.colorScheme.surface,
@@ -71,7 +74,7 @@ fun MainScreen(viewModel: TraceViewModel) {
         topBar = null
     ) { padding ->
         MapView(
-            arcGISMap = viewModel.arcGISMap,
+            arcGISMap = map,
             mapViewProxy = viewModel.mapViewProxy,
             graphicsOverlays = listOf(viewModel.graphicsOverlay),
             modifier = Modifier
@@ -80,7 +83,7 @@ fun MainScreen(viewModel: TraceViewModel) {
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 singleTapConfirmedEvent.mapPoint?.let {
                     coroutineScope.launch {
-                        viewModel.traceState.addStartingPoint(it)
+                        traceState.addStartingPoint(it)
                     }
                 }
             }
