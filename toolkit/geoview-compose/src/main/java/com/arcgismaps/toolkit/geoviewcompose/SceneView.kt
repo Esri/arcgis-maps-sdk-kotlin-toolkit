@@ -669,18 +669,20 @@ private fun ViewpointHandler(
         persistedCamera?.let { sceneView.setViewpointCamera(it) }
         launch {
             sceneView.viewpointChanged.collect {
-                val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
-                persistedCamera = currentViewpointCamera
-                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                sceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    // update persistedCamera regardless of whether we need to invoke currentOnCurrentViewpointCameraChanged
+                    persistedCamera = currentViewpointCamera
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let { currentViewpointCenterAndScale ->
+                        callback.invoke(currentViewpointCenterAndScale)
+                    }
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }
