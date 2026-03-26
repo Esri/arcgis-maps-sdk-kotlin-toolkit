@@ -444,20 +444,25 @@ private fun ViewpointHandler(
 
     LaunchedEffect(Unit) {
         // if there is a persisted viewpoint, restore it when the LocalSceneView enters the composition
+        // TODO: use Camera for persistence (like SceneView does) once issues with Camera matrix
+        //  are fixed for LSV (issues 3893 and 6878)
         persistedViewpoint?.let { localSceneView.setViewpoint(it) }
         launch {
             localSceneView.viewpointChanged.collect {
                 val currentViewpointCenterAndScale =
                     localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                 persistedViewpoint = currentViewpointCenterAndScale
-                currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
+
+                localSceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     currentViewpointCenterAndScale?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }
