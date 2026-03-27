@@ -21,8 +21,10 @@ package com.arcgismaps.toolkit.ar
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
+import com.arcgismaps.analysis.interactive.Analysis
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.view.AnalysisViewStatus
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -292,6 +294,18 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? =
         sceneViewProxy.getLayerViewState(layer)
+
+    /**
+     * Retrieves the analysis' status in the view.
+     *
+     * @param analysis An analysis object to get the view status for.
+     * @return a valid [AnalysisViewStatus] or null if the view doesn't contain the given analysis
+     * or this proxy's WorldScaleSceneView is not part of the composition
+     * @since 300.0.0
+     */
+    public fun getAnalysisViewStatus(analysis: Analysis): AnalysisViewStatus? {
+        return sceneViewProxy.getAnalysisViewStatus(analysis)
+    }
 
     /**
      * Converts a location in map coordinates to a point in screen coordinates relative to the upper-left corner of the WorldScaleSceneView.
