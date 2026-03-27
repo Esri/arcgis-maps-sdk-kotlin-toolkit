@@ -286,8 +286,8 @@ public class WorldScaleSceneViewProxy internal constructor(internal val sceneVie
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's WorldScaleSceneView is not
-     * part of the composition
+     * @return the [LayerViewState] of the provided layer, or null if the view doesn't contain the
+     * given layer or this proxy's WorldScaleSceneView is not part of the composition
      * @since 200.7.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? =

@@ -304,8 +304,8 @@ public class FlyoverSceneViewProxy internal constructor(internal val sceneViewPr
      * Retrieve the layer's [LayerViewState].
      *
      * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's FlyoverSceneView is not
-     * part of the composition
+     * @return the [LayerViewState] of the provided layer, or null if the view doesn't contain the
+     * given layer or this proxy's FlyoverSceneView is not part of the composition
      * @since 200.8.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? =
