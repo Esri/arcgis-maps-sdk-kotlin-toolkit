@@ -165,10 +165,7 @@ class GeoViewModel : ViewModel() {
                 viewModelScope.launch {
                     _point.value =
                         localSceneViewProxy.screenToLocation(singleTapConfirmedEvent.screenCoordinate)
-                            .getOrNull()?.let {
-                                // get the highest resolution elevation for the tapped point
-                                localScene.baseSurface.applyElevation(it).getOrNull() as Point?
-                            }
+                            .getOrNull()
                 }
             }
         }
