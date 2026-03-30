@@ -62,10 +62,10 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.ArErrorType
 import com.arcgismaps.toolkit.ar.internal.CalibrationState
 import com.arcgismaps.toolkit.ar.internal.GeospatialTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.WorldScaleCameraController
-import com.arcgismaps.toolkit.ar.internal.ArErrorType
 import com.arcgismaps.toolkit.ar.internal.WorldTrackingCameraController
 import com.arcgismaps.toolkit.ar.internal.rememberArCoreInstalled
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
@@ -288,6 +288,8 @@ public fun WorldScaleSceneView(
  * WorldScaleSceneView has changed.
  * @param onLayerViewStateChanged lambda invoked when the WorldScaleSceneView's layer view state is
  * changed.
+ * @param onAnalysisViewStatusChanged lambda invoked when the WorldScaleSceneView's analysis view
+ * status is changed.
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the
  * WorldScaleSceneView.
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the
@@ -339,6 +341,7 @@ public fun WorldScaleSceneView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -518,6 +521,7 @@ public fun WorldScaleSceneView(
             onNavigationChanged = onNavigationChanged,
             onSpatialReferenceChanged = onSpatialReferenceChanged,
             onLayerViewStateChanged = onLayerViewStateChanged,
+            onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
             onInteractingChanged = onInteractingChanged,
             onCurrentViewpointCameraChanged = {
                 worldScaleSceneViewProxy.setCurrentCamera(it)

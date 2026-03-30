@@ -227,6 +227,7 @@ public fun FlyoverSceneView(
  * @param onNavigationChanged lambda invoked when the navigation status of the FlyoverSceneView has changed.
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the FlyoverSceneView has changed.
  * @param onLayerViewStateChanged lambda invoked when the FlyoverSceneView's layer view state is changed.
+ * @param onAnalysisViewStatusChanged lambda invoked when the FlyoverSceneView's analysis view status is changed.
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the FlyoverSceneView.
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the FlyoverSceneView has changed.
  * @param onRotate lambda invoked when a user performs a rotation gesture on the FlyoverSceneView.
@@ -271,6 +272,7 @@ public fun FlyoverSceneView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -382,6 +384,7 @@ public fun FlyoverSceneView(
             onNavigationChanged = onNavigationChanged,
             onSpatialReferenceChanged = onSpatialReferenceChanged,
             onLayerViewStateChanged = onLayerViewStateChanged,
+            onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
             onInteractingChanged = onInteractingChanged,
             onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
             onRotate = onRotate,
