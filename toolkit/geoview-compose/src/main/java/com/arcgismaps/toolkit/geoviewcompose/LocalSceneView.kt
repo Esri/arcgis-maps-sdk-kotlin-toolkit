@@ -33,7 +33,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -61,7 +60,6 @@ import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -173,11 +171,9 @@ public fun LocalSceneView(
     val localSceneView = remember {
         LocalSceneView(context)
     }
-    val contentFocusRequester = remember(canFocus) { FocusRequester() }
-    val a11yCoordinator = remember(canFocus) {
-        GeoViewA11yCoordinator(localSceneView, canFocus, contentFocusRequester)
-    }
-    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
+    val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, canFocus) }
+    LaunchedEffect(canFocus) { localSceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    val isGeoViewFocusable by localSceneViewScope.a11yCoordinator.isGeoViewFocusable
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
@@ -196,7 +192,6 @@ public fun LocalSceneView(
             }
         )
 
-        val localSceneViewScope = remember(canFocus) { LocalSceneViewScope(localSceneView, a11yCoordinator) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
         // Invoke the content lambda only when the LocalSceneView is ready
@@ -439,5 +434,5 @@ private fun ViewpointHandler(
  * @since 300.0.0
  */
 public class LocalSceneViewScope internal constructor(
-    localSceneView: LocalSceneView, a11yCoordinator: GeoViewA11yCoordinator
-) : GeoViewScope(localSceneView, a11yCoordinator)
+    localSceneView: LocalSceneView, canFocus: Boolean
+) : GeoViewScope(localSceneView, canFocus)

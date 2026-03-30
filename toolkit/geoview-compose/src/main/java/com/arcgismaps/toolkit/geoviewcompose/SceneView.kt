@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -72,7 +71,6 @@ import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
-import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -346,11 +344,9 @@ public fun SceneView(
     val sceneView = remember {
         SceneView(context)
     }
-    val contentFocusRequester = remember(canFocus) { FocusRequester() }
-    val a11yCoordinator = remember(canFocus) {
-        GeoViewA11yCoordinator(sceneView, canFocus, contentFocusRequester)
-    }
-    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
+    val sceneViewScope = remember { SceneViewScope(sceneView, canFocus) }
+    LaunchedEffect(canFocus) { sceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    val isGeoViewFocusable by sceneViewScope.a11yCoordinator.isGeoViewFocusable
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
@@ -401,7 +397,6 @@ public fun SceneView(
                 it.cameraController = cameraController
             })
 
-        val sceneViewScope = remember(canFocus) { SceneViewScope(sceneView, a11yCoordinator) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
@@ -679,8 +674,8 @@ private fun ViewpointHandler(
  * @since 200.5.0
  */
 public class SceneViewScope internal constructor(
-    sceneView: SceneView, a11yCoordinator: GeoViewA11yCoordinator
-) : GeoViewScope(sceneView, a11yCoordinator)
+    sceneView: SceneView, canFocus: Boolean
+) : GeoViewScope(sceneView, canFocus)
 
 /**
  * Contains default values for the SceneView.

@@ -104,19 +104,14 @@ import kotlin.math.sin
  *
  * @since 200.5.0
  */
-public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
+public sealed class GeoViewScope protected constructor(private val geoView: GeoView, canFocus: Boolean) {
 
     /**
      * Coordinator for managing mutually exclusive accessibility focus from GeoView and its trailing lambda content.
      * Initialized with null for backwards compatibility with the top level constructor.
      * @since 300.0.0
      */
-    internal var a11yCoordinator: GeoViewA11yCoordinator? = null
-
-    protected constructor(
-        geoView: GeoView,
-        a11yCoordinator: GeoViewA11yCoordinator
-    ) : this(geoView) { this.a11yCoordinator = a11yCoordinator }
+    internal val a11yCoordinator: GeoViewA11yCoordinator = GeoViewA11yCoordinator(geoView, canFocus)
 
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
@@ -449,12 +444,10 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                             }
                     ) {
                         content.invoke(this)
-                        a11yCoordinator?.let { coordinator ->
-                            DisposableEffect(coordinator) {
-                                coordinator.onContentComposed()
-                                onDispose {
-                                    coordinator.onContentDisposed()
-                                }
+                        DisposableEffect(Unit) {
+                            a11yCoordinator.onContentComposed()
+                            onDispose {
+                                a11yCoordinator.onContentDisposed()
                             }
                         }
                     }
@@ -472,13 +465,24 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * If no preferred content focus target is provided, focus falls back to the Callout container.
      * This modifier only has an effect when the GeoView composable's `canFocus` parameter is true.
      *
+     * Example:
+     * ```kotlin
+     * MapView(arcGISMap = map){
+     *     Callout(location = point) {
+     *         Text(
+     *             modifier = Modifier.preferredContentFocusTarget(),
+     *             text = "Location: ${point.x}, ${point.y}"
+     *         )
+     *     }
+     * }
+     * ```
+     *
      * @since 300.0.0
      */
     public fun Modifier.preferredContentFocusTarget(): Modifier {
-        val coordinator = a11yCoordinator
-        return if (coordinator?.canFocus == true) {
+        return if (a11yCoordinator.canFocus) {
             this
-                .focusRequester(coordinator.preferredTargetFocusRequester)
+                .focusRequester(a11yCoordinator.preferredTargetFocusRequester)
                 .focusable()
         } else {
             this
@@ -488,8 +492,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * Optional accessibility focus modifier configurations applied to the Callout container
      * using the [a11yCoordinator].
      */
-    private fun Modifier.optionalA11yFocusable(coordinator: GeoViewA11yCoordinator?): Modifier {
-        return if (coordinator?.canFocus == true) {
+    private fun Modifier.optionalA11yFocusable(coordinator: GeoViewA11yCoordinator): Modifier {
+        return if (coordinator.canFocus) {
             this
                 .focusRequester(coordinator.contentFocusRequester)
                 .focusable()

@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -71,7 +70,6 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
-import com.arcgismaps.toolkit.geoviewcompose.internal.GeoViewA11yCoordinator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -331,11 +329,9 @@ public fun MapView(
     val mapView = remember {
         MapView(context)
     }
-    val contentFocusRequester = remember(canFocus) { FocusRequester() }
-    val a11yCoordinator = remember(canFocus) {
-        GeoViewA11yCoordinator(mapView, canFocus, contentFocusRequester)
-    }
-    val isGeoViewFocusable by a11yCoordinator.isGeoViewFocusable
+    val mapViewScope = remember { MapViewScope(mapView, canFocus) }
+    LaunchedEffect(canFocus) { mapViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    val isGeoViewFocusable by mapViewScope.a11yCoordinator.isGeoViewFocusable
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -375,8 +371,6 @@ public fun MapView(
                     }
                 }
             })
-
-        val mapViewScope = remember(canFocus) { MapViewScope(mapView, a11yCoordinator) }
 
         val isMapViewReady = mapView.rememberIsReady()
         if (isMapViewReady.value) {
@@ -711,8 +705,8 @@ public inline fun rememberLocationDisplay(
  * @since 200.5.0
  */
 public class MapViewScope internal constructor(
-    mapView: MapView, a11yCoordinator: GeoViewA11yCoordinator
-) : GeoViewScope(mapView, a11yCoordinator)
+    mapView: MapView, canFocus: Boolean
+) : GeoViewScope(mapView, canFocus)
 
 /**
  * Contains default values for the composable MapView.

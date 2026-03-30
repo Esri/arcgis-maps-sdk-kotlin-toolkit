@@ -34,22 +34,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * @param geoView The GeoView whose accessibility configuration is being managed.
  * @param canFocus User provided property to set underlying focus behavior.
- * @param contentFocusRequester FocusRequester used by trailing lambda content to request focus.
  *
  * @since 300.0.0
  */
 @Stable
 internal class GeoViewA11yCoordinator(
     internal val geoView: View,
-    internal val canFocus: Boolean,
-    internal val contentFocusRequester: FocusRequester
+    internal var canFocus: Boolean
 ) {
-
-    init {
-        // Set focus right away so initial compose AndroidView "focus interop" is set up correctly.
-        geoView.isFocusable = canFocus
-    }
-
     /**
      * Tracks whether content from the related GeoViewScope is currently being displayed.
      * Used to drive focus away from GeoView and into content when displayed.
@@ -63,11 +55,33 @@ internal class GeoViewA11yCoordinator(
     internal val preferredTargetFocusRequester = FocusRequester()
 
     /**
+     * The default container element for accessibility focus when content is displayed,
+     * for example the Callout container.
+     */
+    internal val contentFocusRequester = FocusRequester()
+
+    /**
      * The main boolean condition to determine if the GeoView (not trailing content)
      * should be focusable and interact with screen readers.
      */
     private val _isGeoViewFocusable = mutableStateOf(canFocus && !isContentBeingDisplayed.get())
     internal val isGeoViewFocusable: State<Boolean> = _isGeoViewFocusable
+
+    init {
+        // Set focus right away so initial compose AndroidView "focus interop" is set up correctly.
+        geoView.isFocusable = canFocus
+    }
+
+    /**
+     * Sync the user provided canFocus property to the internal state
+     * and update GeoView focusable state accordingly.
+     */
+    internal fun syncCanFocus(newCanFocus: Boolean) {
+        canFocus = newCanFocus
+        // If content is being displayed, GeoView should not be focusable.
+        _isGeoViewFocusable.value = canFocus && !isContentBeingDisplayed.get()
+    }
+
 
     /**
      * Used by GeoViewScope to notify here that trailing content has entered the composition.
