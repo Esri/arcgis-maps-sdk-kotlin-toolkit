@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.screens
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,13 +26,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,11 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.computeWindowSizeClass
-import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.material3.ModalBottomSheet
@@ -147,64 +138,6 @@ private fun AddActionSheet(
             }
         }
     }
-}
-
-@Composable
-private fun AddActionMenu(
-    onDismissRequest: () -> Unit,
-    onSelectFromMap: () -> Unit,
-    onSelectFromNetworkDataSource: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    DropdownMenu(
-        expanded = true,
-        onDismissRequest = onDismissRequest,
-        modifier = modifier,
-        offset = DpOffset(0.dp, (-15).dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        DropdownMenuItem(
-            text = {
-                Text(
-                    text = stringResource(R.string.on_map),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            },
-            leadingIcon = {
-                Icon(Icons.Outlined.Map, contentDescription = "On Map")
-            },
-            enabled = false,
-            onClick = onSelectFromMap,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-        DropdownMenuItem(
-            text = {
-                Text(
-                    text = stringResource(R.string.from_network_data_source),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.database_24px),
-                    contentDescription = "From Network Data Source"
-                )
-            },
-            onClick = onSelectFromNetworkDataSource,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-    }
-}
-
-internal fun getWindowSize(context: Context): WindowSizeClass {
-    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-    val width = metrics.bounds.width()
-    val height = metrics.bounds.height()
-    val density = context.resources.displayMetrics.density
-    return WindowSizeClass.Companion.BREAKPOINTS_V1.computeWindowSizeClass(
-        widthDp = width / density,
-        heightDp = height / density
-    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
