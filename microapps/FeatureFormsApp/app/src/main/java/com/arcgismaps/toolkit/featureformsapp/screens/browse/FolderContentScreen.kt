@@ -46,14 +46,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.preferences.core.edit
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arcgismaps.toolkit.featureformsapp.data.CURRENT_FOLDER
 import com.arcgismaps.toolkit.featureformsapp.data.datastore
 import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("DEPRECATION")
 fun FolderContentScreen(
     viewModel: FolderContentViewModel = hiltViewModel(),
     onItemSelected: () -> Unit,

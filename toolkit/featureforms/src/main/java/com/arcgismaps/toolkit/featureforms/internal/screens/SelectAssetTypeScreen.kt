@@ -104,6 +104,12 @@ internal fun SelectAssetTypeScreen(
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         },
+                        supportingContent = {
+                            Text(
+                                text = assetType.assetGroup.name,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        },
                         colors = ListItemDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.surfaceBright,
                         )

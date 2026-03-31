@@ -152,6 +152,7 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectAssociatedFeatureScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$SelectNetworkSourceScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$UtilityAssociationDetailsScreenKt",
+        "com.arcgismaps.toolkit.featureforms.internal.screens.ComposableSingletons\$FeaturesFilterScreenKt",
         "com.arcgismaps.toolkit.featureforms.internal.utils.ComposableSingletons\$SearchBarKt"
     )
     ignoredClasses.addAll(composableSingletons)
@@ -176,6 +177,7 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(libs.mockk.android)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
