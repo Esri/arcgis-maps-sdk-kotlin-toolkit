@@ -123,7 +123,7 @@ internal class GeoViewA11yCoordinator(
         _isGeoViewFocusable.value = true
         // After AndroidView post, send accessibility focus from content lambda back to GeoView.
         geoView.post {
-            // Update isFocusable attribute in case if post was called before mutable state triggered an `update`.
+            // Update isFocusable attribute in case if post was called before mutable state _isGeoViewFocusable triggered an `update`.
             geoView.isFocusable = true
             geoView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, null)
         }
