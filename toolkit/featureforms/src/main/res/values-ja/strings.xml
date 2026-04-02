@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">フォームには検証エラーがあります</string>
     <string name="the_form_has_edits">フォームは編集されています</string>
     <string name="do_you_want_to_save_your_changes">変更を保存しますか？</string>
-    <string name="no_associations_found">関連付けが見つかりません</string>
+    <string name="no_associations_found">関連付けはありません。</string>
     <string name="terminal">ターミナル</string>
     <string name="terminal_with_value">ターミナル: %1$s</string>
+    <string name="content_visible">コンテンツ表示</string>
+    <string name="percent_along">割合</string>
     <string name="from_element">始点エレメント</string>
     <string name="to_element">終点エレメント</string>
     <string name="association_type">関連付けタイプ</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">表示コンテンツ</string>
     <string name="content">コンテンツ</string>
+    <string name="containment_visible_value">表示: %1$s</string>
+    <string name="from_network_data_source">ネットワーク データ ソースから</string>
+    <string name="on_map">マップ上</string>
+    <string name="network_data_source">ネットワーク データ ソース</string>
+    <string name="available_asset_types">利用可能なアセット タイプ</string>
+    <string name="count">数 %1$d</string>
+    <string name="new_association">新しい関連付け</string>
+    <string name="add">追加</string>
+    <string name="failed_to_create_association">関連付けの作成に失敗しました。 %1$s</string>
+    <string name="available_features">%1$d 使用可能なフィーチャ</string>
+    <string name="loading2">読み込んでいます...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">保存する前に修正が必要な %1$d エラーがあります。</item>
         <item quantity="one">保存する前に修正が必要な %1$d エラーがあります。</item>
@@ -142,4 +155,11 @@
         <item quantity="many">保存する前に修正が必要な %1$d エラーがあります</item>
         <item quantity="other">保存する前に修正が必要な %1$d エラーがあります</item>
     </plurals>
+    <string name="search_features">フィーチャの検索</string>
+    <string name="choose_to_add">選択して追加</string>
+    <string name="no_features_found">フィーチャが見つかりません</string>
+    <string name="refine_your_search_tip">検索条件を絞り込むか、別のネットワーク ソースを選択してください。</string>
+    <string name="select_terminal">ターミナルの選択</string>
+    <string name="show_on_map">マップに表示</string>
+    <string name="more_information">追加情報</string>
 </resources>

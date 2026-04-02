@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formulir memiliki kesalahan validasi</string>
     <string name="the_form_has_edits">Formulir memiliki editan</string>
     <string name="do_you_want_to_save_your_changes">Apakah Anda ingin menyimpan perubahan Anda?</string>
-    <string name="no_associations_found">Tidak ditemukan asosiasi</string>
+    <string name="no_associations_found">Tidak ada asosiasi yang dapat ditampilkan</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Konten Dapat Dilihat</string>
+    <string name="percent_along">Persen Sepanjang</string>
     <string name="from_element">Dari Elemen</string>
     <string name="to_element">Ke Elemen</string>
     <string name="association_type">Jenis Asosiasi</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Konten yang Terlihat</string>
     <string name="content">Konten</string>
+    <string name="containment_visible_value">Terlihat: %1$s</string>
+    <string name="from_network_data_source">Dari Sumber Data Jaringan</string>
+    <string name="on_map">Di Peta</string>
+    <string name="network_data_source">Sumber Data Jaringan</string>
+    <string name="available_asset_types">Jenis Aset yang Tersedia</string>
+    <string name="count">Jumlah %1$d</string>
+    <string name="new_association">Asosiasi Baru</string>
+    <string name="add">Tambahkan</string>
+    <string name="failed_to_create_association">Gagal membuat asosiasi. %1$s</string>
+    <string name="available_features">%1$d Fitur yang Tersedia</string>
+    <string name="loading2">Memuat..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
         <item quantity="one">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
         <item quantity="other">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
     </plurals>
+    <string name="search_features">Cari fitur</string>
+    <string name="choose_to_add">Pilih untuk ditambahkan</string>
+    <string name="no_features_found">Fitur tidak ditemukan</string>
+    <string name="refine_your_search_tip">Perbaiki pencarian Anda atau pilih Sumber Jaringan yang berbeda.</string>
+    <string name="select_terminal">Pilih Terminal</string>
+    <string name="show_on_map">Tampilkan di Peta</string>
+    <string name="more_information">Informasi Selengkapnya</string>
 </resources>

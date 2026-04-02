@@ -457,19 +457,6 @@ internal class ModalBottomSheetProperties(
         shouldDismissOnBackPress = shouldDismissOnBackPress
     )
 
-    @Deprecated(
-        message = "'isFocusable' param is no longer used. Use constructor without this parameter.",
-        level = DeprecationLevel.WARNING,
-        replaceWith =
-            ReplaceWith("ModalBottomSheetProperties(securePolicy, shouldDismissOnBackPress)")
-    )
-    @Suppress("UNUSED_PARAMETER")
-    constructor(
-        securePolicy: SecureFlagPolicy,
-        isFocusable: Boolean,
-        shouldDismissOnBackPress: Boolean,
-    ) : this(securePolicy, shouldDismissOnBackPress)
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ModalBottomSheetProperties) return false
@@ -491,30 +478,6 @@ internal object ModalBottomSheetDefaults {
 
     /** Properties used to customize the behavior of a [ModalBottomSheet]. */
     val properties = ModalBottomSheetProperties()
-
-    /**
-     * Properties used to customize the behavior of a [ModalBottomSheet].
-     *
-     * @param securePolicy Policy for setting [WindowManager.LayoutParams.FLAG_SECURE] on the bottom
-     *   sheet's window.
-     * @param isFocusable Whether the modal bottom sheet is focusable. When true, the modal bottom
-     *   sheet will receive IME events and key presses, such as when the back button is pressed.
-     * @param shouldDismissOnBackPress Whether the modal bottom sheet can be dismissed by pressing
-     *   the back button. If true, pressing the back button will call onDismissRequest. Note that
-     *   [isFocusable] must be set to true in order to receive key events such as the back button -
-     *   if the modal bottom sheet is not focusable then this property does nothing.
-     */
-    @Deprecated(
-        level = DeprecationLevel.WARNING,
-        message = "'isFocusable' param is no longer used. Use value without this parameter.",
-        replaceWith = ReplaceWith("properties")
-    )
-    @Suppress("UNUSED_PARAMETER")
-    fun properties(
-        securePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
-        isFocusable: Boolean = true,
-        shouldDismissOnBackPress: Boolean = true
-    ) = ModalBottomSheetProperties(securePolicy, shouldDismissOnBackPress)
 }
 
 
@@ -562,61 +525,6 @@ private fun Scrim(color: Color, onDismissRequest: () -> Unit, visible: Boolean) 
         }
     }
 }
-
-@Composable
-@Deprecated(
-    level = DeprecationLevel.HIDDEN,
-    message = "Use constructor with contentWindowInsets parameter.",
-    replaceWith =
-        ReplaceWith(
-            "ModalBottomSheet(" +
-                    "onDismissRequest," +
-                    "modifier," +
-                    "sheetState," +
-                    "sheetMaxWidth," +
-                    "shape," +
-                    "containerColor," +
-                    "contentColor," +
-                    "tonalElevation," +
-                    "scrimColor," +
-                    "dragHandle," +
-                    "{ windowInsets }," +
-                    "properties," +
-                    "content," +
-                    ")"
-        )
-)
-
-internal fun ModalBottomSheet(
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    sheetState: SheetState = rememberModalBottomSheetState(),
-    sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
-    shape: Shape = BottomSheetDefaults.ExpandedShape,
-    containerColor: Color = BottomSheetDefaults.ContainerColor,
-    contentColor: Color = contentColorFor(containerColor),
-    tonalElevation: Dp = 0.dp,
-    scrimColor: Color = BottomSheetDefaults.ScrimColor,
-    dragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
-    windowInsets: WindowInsets = BottomSheetDefaults.windowInsets,
-    properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties,
-    content: @Composable ColumnScope.() -> Unit,
-) =
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        modifier = modifier,
-        sheetState = sheetState,
-        sheetMaxWidth = sheetMaxWidth,
-        shape = shape,
-        containerColor = containerColor,
-        contentColor = contentColor,
-        tonalElevation = tonalElevation,
-        scrimColor = scrimColor,
-        dragHandle = dragHandle,
-        contentWindowInsets = { windowInsets },
-        properties = properties,
-        content = content,
-    )
 
 // Fork of androidx.compose.ui.window.AndroidDialog_androidKt.Dialog
 // Added predictiveBackProgress param to pass into BottomSheetDialogWrapper.

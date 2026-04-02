@@ -67,6 +67,7 @@ import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
+import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
 
 private const val KEY_PREF_ACCEPTED_PRIVACY_INFO = "ACCEPTED_PRIVACY_INFO"
 
@@ -147,7 +148,7 @@ fun MainScreen() {
                 }
             ) {
                 identifiedBuilding?.let {
-                    Callout(it.location) {
+                    Callout(location = it.location, leaderPosition = LeaderPosition.Automatic) {
                         Text("Building ID: ${it.feature.attributes["OBJECTID"]}")
                     }
                 }

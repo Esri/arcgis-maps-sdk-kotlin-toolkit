@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formda doğrulama hataları var.</string>
     <string name="the_form_has_edits">Formda düzenlemeler var.</string>
     <string name="do_you_want_to_save_your_changes">Değişikliklerinizi kaydetmek istiyor musunuz?</string>
-    <string name="no_associations_found">İlişkilendirme bulunamadı</string>
+    <string name="no_associations_found">Gösterilecek ilişkilendirme yok</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">İçerik Görünür</string>
+    <string name="percent_along">Boyunca Yüzde</string>
     <string name="from_element">Kaynak Öge</string>
     <string name="to_element">Hedef Öge</string>
     <string name="association_type">İlişkilendirme Türü</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Görünür İçerik</string>
     <string name="content">İçerik</string>
+    <string name="containment_visible_value">Görünür: %1$s</string>
+    <string name="from_network_data_source">Ağ Veri Kaynağından</string>
+    <string name="on_map">Harita üzerinde</string>
+    <string name="network_data_source">Ağ Veri Kaynağı</string>
+    <string name="available_asset_types">Kullanılabilir Varlık Türleri</string>
+    <string name="count">Sayı %1$d</string>
+    <string name="new_association">Yeni İlişkilendirme</string>
+    <string name="add">Ekle</string>
+    <string name="failed_to_create_association">İlişkilendirme oluşturulamadı. %1$s</string>
+    <string name="available_features">%1$d Kullanılabilir Detay</string>
+    <string name="loading2">Yükleniyor...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var.</item>
         <item quantity="one">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
         <item quantity="other">Kaydetmeden önce düzeltilmesi gereken %1$d hatanız var</item>
     </plurals>
+    <string name="search_features">Detay ara</string>
+    <string name="choose_to_add">Eklemeyi seç</string>
+    <string name="no_features_found">Detay bulunamadı</string>
+    <string name="refine_your_search_tip">Aramanızı daraltın veya farklı bir Ağ Kaynağı seçin.</string>
+    <string name="select_terminal">Terminal seç</string>
+    <string name="show_on_map">Harita üzerinde göster</string>
+    <string name="more_information">Daha Fazla Bilgi</string>
 </resources>

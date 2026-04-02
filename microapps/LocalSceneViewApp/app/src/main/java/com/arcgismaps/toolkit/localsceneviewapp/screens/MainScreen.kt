@@ -19,8 +19,14 @@
 package com.arcgismaps.toolkit.localsceneviewapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Point
@@ -39,7 +45,12 @@ fun MainScreen() {
 
     val camera = remember {
         Camera(
-            Point(19455578.6821, -5056336.2227, 1699.3366, SpatialReference.webMercator()),
+            locationPoint = Point(
+                19455578.6821,
+                -5056336.2227,
+                1699.3366,
+                SpatialReference.webMercator()
+            ),
             heading = 338.7410,
             pitch = 40.3763,
             roll = 0.0,
@@ -56,8 +67,8 @@ fun MainScreen() {
 
     val arcGISScene = remember {
         ArcGISScene(
-            SceneViewingMode.Local,
-            BasemapStyle.ArcGISTopographic,
+            viewingMode = SceneViewingMode.Local,
+            basemapStyle = BasemapStyle.ArcGISTopographic
         ).apply {
             operationalLayers.add(sceneLayer)
             baseSurface.elevationSources.add(elevationSource)
@@ -77,8 +88,30 @@ fun MainScreen() {
         }
     }
 
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var criticalError: Throwable? by remember { mutableStateOf(null) }
+
     LocalSceneView(
-        arcGISScene,
-        modifier = Modifier.fillMaxSize()
+        scene = arcGISScene,
+        modifier = Modifier.fillMaxSize(),
+        onCriticalErrorChanged = { throwable ->
+            throwable?.let {
+                showErrorDialog = true
+                criticalError = throwable
+            }
+        }
     )
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text(text = "Critical Error") },
+            text = { Text(text = criticalError?.message.toString()) },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }

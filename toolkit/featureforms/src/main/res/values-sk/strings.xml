@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formulár má validačné chyby</string>
     <string name="the_form_has_edits">Formulár má úpravy</string>
     <string name="do_you_want_to_save_your_changes">Chcete uložiť svoje zmeny?</string>
-    <string name="no_associations_found">Neboli nájdené žiadne asociácie</string>
+    <string name="no_associations_found">Žiadne asociácie na zobrazenie</string>
     <string name="terminal">Terminál</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="content_visible">Viditeľný obsah</string>
+    <string name="percent_along">Percento pozdĺž</string>
     <string name="from_element">Z element</string>
     <string name="to_element">Do element</string>
     <string name="association_type">Typ asociácie</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Viditeľný obsah</string>
     <string name="content">Obsah</string>
+    <string name="containment_visible_value">Viditeľné: %1$s</string>
+    <string name="from_network_data_source">Zo sieťového dátového zdroja</string>
+    <string name="on_map">V mape</string>
+    <string name="network_data_source">Sieťový dátový zdroj</string>
+    <string name="available_asset_types">Dostupné typy prostriedkov</string>
+    <string name="count">Počet %1$d</string>
+    <string name="new_association">Nová asociácia</string>
+    <string name="add">Pridať</string>
+    <string name="failed_to_create_association">Nepodarilo sa vytvoriť asociáciu. %1$s</string>
+    <string name="available_features">%1$d Dostupné prvky</string>
+    <string name="loading2">Načítava sa...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Máte %1$d chýb, ktoré musia byť pred uložením opravené.</item>
         <item quantity="one">Máte %1$d chybu, ktorá musí byť pred uložením opravená.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
         <item quantity="other">Máte %1$d chýb, ktoré musia byť pred uložením opravené</item>
     </plurals>
+    <string name="search_features">Vyhľadať prvky</string>
+    <string name="choose_to_add">Vybrať na pridanie</string>
+    <string name="no_features_found">Neboli nájdené žiadne prvky</string>
+    <string name="refine_your_search_tip">Spresnite vyhľadávanie alebo vyberte iný sieťový zdroj.</string>
+    <string name="select_terminal">Vybrať terminál</string>
+    <string name="show_on_map">Zobraziť na mape</string>
+    <string name="more_information">Viac informácií</string>
 </resources>

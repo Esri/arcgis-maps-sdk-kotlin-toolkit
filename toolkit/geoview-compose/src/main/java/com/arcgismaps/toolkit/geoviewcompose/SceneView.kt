@@ -58,6 +58,7 @@ import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.ImageOverlay
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -210,7 +211,7 @@ public fun SceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus = true,
+        canFocus = false,
         content = content
     )
 }
@@ -277,6 +278,7 @@ public fun SceneView(
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
+ * @param onAnalysisViewStatusChanged lambda invoked when the composable SceneView's analysis view status is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -288,8 +290,12 @@ public fun SceneView(
  * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
  * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
  * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
@@ -325,6 +331,7 @@ public fun SceneView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -336,8 +343,10 @@ public fun SceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -437,6 +446,7 @@ public fun SceneView(
         onNavigationChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
+        onAnalysisViewStatusChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -447,9 +457,11 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
+        onInteractiveZooming,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged
     )
 
     ViewpointHandler(
@@ -471,6 +483,7 @@ private fun SceneViewEventHandler(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -481,14 +494,17 @@ private fun SceneViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?
 ) {
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
+    val currentOnAnalysisViewStatusChanged by rememberUpdatedState(onAnalysisViewStatusChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -499,9 +515,11 @@ private fun SceneViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -522,6 +540,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
+            }
+        }
+        launch {
+            sceneView.analysisViewStatusChanged.collect { currentAnalysisViewStatus ->
+                currentOnAnalysisViewStatusChanged?.invoke(currentAnalysisViewStatus)
             }
         }
         launch(Dispatchers.Main.immediate) {
@@ -574,6 +597,11 @@ private fun SceneViewEventHandler(
                 currentOnPan?.invoke(panChangeEvent)
             }
         }
+        launch(Dispatchers.Main.immediate) {
+            sceneView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
+            }
+        }
         launch {
             sceneView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
@@ -587,6 +615,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            sceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
             }
         }
     }
@@ -653,18 +686,20 @@ private fun ViewpointHandler(
         persistedCamera?.let { sceneView.setViewpointCamera(it) }
         launch {
             sceneView.viewpointChanged.collect {
-                val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
-                persistedCamera = currentViewpointCamera
-                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                sceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    // update persistedCamera regardless of whether we need to invoke currentOnCurrentViewpointCameraChanged
+                    persistedCamera = currentViewpointCamera
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let { currentViewpointCenterAndScale ->
+                        callback.invoke(currentViewpointCenterAndScale)
+                    }
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }

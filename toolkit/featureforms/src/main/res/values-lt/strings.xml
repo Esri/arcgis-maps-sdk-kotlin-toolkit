@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formoje yra tikrinimo klaidų</string>
     <string name="the_form_has_edits">Formoje yra pakeitimų</string>
     <string name="do_you_want_to_save_your_changes">Ar norite išsaugoti pakeitimus?</string>
-    <string name="no_associations_found">Susiejimų nerasta</string>
+    <string name="no_associations_found">Nėra rodytinų susiejimų</string>
     <string name="terminal">Terminalas</string>
     <string name="terminal_with_value">Terminalas: %1$s</string>
+    <string name="content_visible">Turinys matomas</string>
+    <string name="percent_along">Proc. palei</string>
     <string name="from_element">Iš elemento</string>
     <string name="to_element">Į elementą</string>
     <string name="association_type">Susiejimo tipas</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Matomas turinys</string>
     <string name="content">Turinys</string>
+    <string name="containment_visible_value">Matoma: %1$s</string>
+    <string name="from_network_data_source">Iš tinklo duomenų šaltinio</string>
+    <string name="on_map">Žemėlapyje</string>
+    <string name="network_data_source">Tinklo duomenų šaltinis</string>
+    <string name="available_asset_types">Prieinamų išteklių tipai</string>
+    <string name="count">Skaičiuoti %1$d</string>
+    <string name="new_association">Naujas susiejimas</string>
+    <string name="add">Pridėti</string>
+    <string name="failed_to_create_association">Nepavyko sukurti susiejimo. %1$s</string>
+    <string name="available_features">%1$d galimi elementai</string>
+    <string name="loading2">Įkeliama...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant.</item>
         <item quantity="one">Turite %1$d klaidą, kurią būtina ištaisyti prieš išsaugant.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
         <item quantity="other">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
     </plurals>
+    <string name="search_features">Ieškoti elementų</string>
+    <string name="choose_to_add">Pasirinkti norint pridėti</string>
+    <string name="no_features_found">Elementų nerasta</string>
+    <string name="refine_your_search_tip">Patikslinkite paiešką arba pasirinkite kitą tinklo šaltinį.</string>
+    <string name="select_terminal">Pasirinkti terminalą</string>
+    <string name="show_on_map">Rodyti žemėlapyje</string>
+    <string name="more_information">Daugiau informacijos</string>
 </resources>

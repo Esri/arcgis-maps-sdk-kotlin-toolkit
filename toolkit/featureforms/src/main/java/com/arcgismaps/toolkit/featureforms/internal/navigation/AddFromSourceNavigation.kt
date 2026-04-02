@@ -35,6 +35,7 @@ import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.AddAssociationFromSourceViewModel
 import com.arcgismaps.toolkit.featureforms.internal.components.utilitynetwork.UtilityAssociationsElementState
 import com.arcgismaps.toolkit.featureforms.internal.screens.CreateAssociationScreen
+import com.arcgismaps.toolkit.featureforms.internal.screens.FeaturesFilterScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssetTypeScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectAssociatedFeatureScreen
 import com.arcgismaps.toolkit.featureforms.internal.screens.SelectNetworkSourceScreen
@@ -129,6 +130,7 @@ internal fun NavGraphBuilder.selectAssetTypeDestination(
 internal fun NavGraphBuilder.selectFeatureDestination(
     onBackPressed: (NavBackStackEntry) -> Unit,
     onFeatureCandidateSelected: (NavBackStackEntry) -> Unit,
+    onFilter: (NavBackStackEntry) -> Unit,
     onFeatureCandidateLocateRequest: (ArcGISFeature) -> Unit,
     onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry,
     onNavigationEvent: (FeatureFormNavigationRoute) -> Unit
@@ -145,6 +147,9 @@ internal fun NavGraphBuilder.selectFeatureDestination(
             },
             onFeatureCandidateSelected = {
                 onFeatureCandidateSelected(backStackEntry)
+            },
+            onFilter = {
+                onFilter(backStackEntry)
             },
             onFeatureCandidateLocateRequest = onFeatureCandidateLocateRequest,
             modifier = Modifier.fillMaxSize()
@@ -208,6 +213,29 @@ internal fun NavGraphBuilder.createAssociationDestination(
     }
 }
 
+internal fun NavGraphBuilder.featureAttributesFilterDestination(
+    onBackPressed: (NavBackStackEntry) -> Unit,
+    onGetParentEntry: (NavBackStackEntry) -> NavBackStackEntry
+) {
+    composable<AddFromSourceNavRoute.FeatureAttributesFilter>(
+        enterTransition = { slideInVertically { h -> h } },
+        exitTransition = { fadeOut() },
+        popEnterTransition = { fadeIn() },
+        popExitTransition = { slideOutVertically { h -> h } }
+    ) { backStackEntry ->
+        val parent = remember(backStackEntry) {
+            onGetParentEntry(backStackEntry)
+        }
+        val viewModel: AddAssociationFromSourceViewModel = viewModel(parent)
+        FeaturesFilterScreen(
+            viewModel = viewModel,
+            onBackPressed = {
+                onBackPressed(backStackEntry)
+            }
+        )
+    }
+}
+
 internal fun NavHostController.navigateToAddUNAssociationFromSource(
     backStackEntry: NavBackStackEntry,
     stateId: Int
@@ -235,5 +263,12 @@ internal fun NavHostController.navigateToCreateAssociation(
     backStackEntry: NavBackStackEntry
 ) {
     val newRoute = AddFromSourceNavRoute.CreateAssociation
+    navigateSafely(backStackEntry, newRoute)
+}
+
+internal fun NavHostController.navigateToFeatureAttributesFilter(
+    backStackEntry: NavBackStackEntry
+) {
+    val newRoute = AddFromSourceNavRoute.FeatureAttributesFilter
     navigateSafely(backStackEntry, newRoute)
 }

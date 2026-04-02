@@ -51,6 +51,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LocalSceneView
 import com.arcgismaps.mapping.view.LocalSceneViewInteractionOptions
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -130,9 +131,17 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable LocalSceneView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable LocalSceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable LocalSceneView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ *  on the composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
- * is changed
+ * changes
  * @param canFocus pass true if the LocalSceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the LocalSceneView composable has no effect.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * LocalSceneView changes
+ * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
+ * LocalSceneView changes
+ * @param onWarningsChanged lambda invoked when the warning status of the composable LocalSceneView
+ * is changed
  * @param content the content of the composable LocalSceneView
  *
  * @since 300.0.0
@@ -163,8 +172,12 @@ public fun LocalSceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
+    onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -221,30 +234,34 @@ public fun LocalSceneView(
     }
 
     LocalSceneViewEventHandler(
-        localSceneView,
-        onNavigationChanged,
-        onSpatialReferenceChanged,
-        onLayerViewStateChanged,
-        onInteractingChanged,
-        onRotate,
-        onScale,
-        onUp,
-        onDown,
-        onSingleTapConfirmed,
-        onDoubleTap,
-        onLongPress,
-        onTwoPointerTap,
-        onPan,
-        onDrawStatusChanged,
-        onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        localSceneView = localSceneView,
+        onNavigationChanged = onNavigationChanged,
+        onSpatialReferenceChanged = onSpatialReferenceChanged,
+        onLayerViewStateChanged = onLayerViewStateChanged,
+        onInteractingChanged = onInteractingChanged,
+        onRotate = onRotate,
+        onScale = onScale,
+        onUp = onUp,
+        onDown = onDown,
+        onSingleTapConfirmed = onSingleTapConfirmed,
+        onDoubleTap = onDoubleTap,
+        onLongPress = onLongPress,
+        onTwoPointerTap = onTwoPointerTap,
+        onPan = onPan,
+        onInteractiveZooming = onInteractiveZooming,
+        onDrawStatusChanged = onDrawStatusChanged,
+        onAttributionTextChanged = onAttributionTextChanged,
+        onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged = onGeoModelErrorChanged,
+        onCriticalErrorChanged = onCriticalErrorChanged,
+        onWarningsChanged = onWarningsChanged
     )
 
     ViewpointHandler(
-        localSceneView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
-        onCurrentViewpointCameraChanged
+        localSceneView = localSceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
 
@@ -269,9 +286,13 @@ private fun LocalSceneViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?,
+    onCriticalErrorChanged: ((Throwable?) -> Unit)?,
+    onWarningsChanged: ((List<Throwable>) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -286,9 +307,13 @@ private fun LocalSceneViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanged by rememberUpdatedState(onGeoModelErrorChanged)
+    val currentOnCriticalErrorChanged by rememberUpdatedState(onCriticalErrorChanged)
+    val currentOnWarningsChanged by rememberUpdatedState(onWarningsChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -356,6 +381,11 @@ private fun LocalSceneViewEventHandler(
                 currentOnPan?.invoke(panChangeEvent)
             }
         }
+        launch(Dispatchers.Main.immediate) {
+            localSceneView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
+            }
+        }
         launch {
             localSceneView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
@@ -369,6 +399,21 @@ private fun LocalSceneViewEventHandler(
         launch {
             localSceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            localSceneView.geoModelError.collect {
+                currentOnGeoModelErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.criticalError.collect {
+                currentOnCriticalErrorChanged?.invoke(it)
+            }
+        }
+        launch {
+            localSceneView.warnings.collect {
+                currentOnWarningsChanged?.invoke(it)
             }
         }
     }
@@ -411,20 +456,25 @@ private fun ViewpointHandler(
 
     LaunchedEffect(Unit) {
         // if there is a persisted viewpoint, restore it when the LocalSceneView enters the composition
+        // TODO: use Camera for persistence (like SceneView does) once issues with Camera matrix
+        //  are fixed for LSV (issues 3893 and 6878)
         persistedViewpoint?.let { localSceneView.setViewpoint(it) }
         launch {
             localSceneView.viewpointChanged.collect {
                 val currentViewpointCenterAndScale =
                     localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                 persistedViewpoint = currentViewpointCenterAndScale
-                currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
+
+                localSceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     currentViewpointCenterAndScale?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }

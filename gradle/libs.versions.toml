@@ -21,7 +21,7 @@ datastorePreferences = "1.2.0"
 dokka = "2.0.0"
 hilt = "2.57.2"
 junit = "4.13.2"
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 ksp = "2.3.4"
 media3Exoplayer = "1.9.0"
 minSdk = "28"
@@ -38,6 +38,7 @@ playServicesLocation = "21.3.0"
 gmazzo = "2.4.7"
 gradleSecrets = "2.0.1"
 workVersion = "2.11.0"
+arcgismapsTestdataSync = "1.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -96,6 +97,9 @@ dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", 
 arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspresso" }
+# Dependencies of the included build-logic-internal
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+arcgismaps-testdata-sync-gradle-plugin = { group = "com.esri.gradle-plugins.testdata.sync", name = "com.esri.gradle-plugins.testdata.sync.gradle.plugin", version.ref = "arcgismapsTestdataSync" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -109,6 +113,9 @@ gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradl
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", version.ref = "gmazzo" }
+arcgismaps-testdata-sync = { id = "com.esri.gradle-plugins.testdata.sync", version.ref = "arcgismapsTestdataSync" }
+# Plugins defined by the project build-logic
+android-integration-testing = { id = "android-integration-testing" }
 
 [bundles]
 camerax = [

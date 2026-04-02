@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">表格發生驗證錯誤</string>
     <string name="the_form_has_edits">表格具有編輯內容</string>
     <string name="do_you_want_to_save_your_changes">是否要儲存變更?</string>
-    <string name="no_associations_found">找不到關聯</string>
+    <string name="no_associations_found">沒有關聯可供顯示</string>
     <string name="terminal">終端機</string>
     <string name="terminal_with_value">終端機 : %1$s</string>
+    <string name="content_visible">可見內容</string>
+    <string name="percent_along">沿線百分比</string>
     <string name="from_element">從元素</string>
     <string name="to_element">至元素</string>
     <string name="association_type">關聯類型</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">可見內容</string>
     <string name="content">內容</string>
+    <string name="containment_visible_value">可見: %1$s</string>
+    <string name="from_network_data_source">從網路資料來源</string>
+    <string name="on_map">地圖上</string>
+    <string name="network_data_source">網路資料來源</string>
+    <string name="available_asset_types">可用資產類型</string>
+    <string name="count">計數 %1$d</string>
+    <string name="new_association">新建關聯</string>
+    <string name="add">新增</string>
+    <string name="failed_to_create_association">建立關聯失敗。%1$s</string>
+    <string name="available_features">%1$d 個可用圖徵</string>
+    <string name="loading2">正在載入...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">您有 %1$d 個錯誤必須在儲存前修正。</item>
         <item quantity="one">您有 %1$d 個錯誤必須在儲存前修正。</item>
@@ -142,4 +155,11 @@
         <item quantity="many">您有 %1$d 個錯誤必須在儲存前修正</item>
         <item quantity="other">您有 %1$d 個錯誤必須在儲存前修正</item>
     </plurals>
+    <string name="search_features">搜尋圖徵</string>
+    <string name="choose_to_add">選擇以新增</string>
+    <string name="no_features_found">找不到圖徵</string>
+    <string name="refine_your_search_tip">縮小您的搜尋範圍或選擇不同的網路來源。</string>
+    <string name="select_terminal">選擇終端機</string>
+    <string name="show_on_map">在地圖上顯示</string>
+    <string name="more_information">更多資訊</string>
 </resources>

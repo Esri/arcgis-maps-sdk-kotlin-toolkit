@@ -250,6 +250,34 @@ special styling.
 
 <img src="screenshots/utility_associations.png" width="250"/>
 
+#### Adding Associations
+
+When the `UtilityAssociationsFormElement` is configured to allow association editing (as indicated by the `isEditable` property), users can add a new association by tapping **Add Association**.
+
+<img src="screenshots/add_associations.png" width="250"/>
+
+This starts a guided workflow:
+
+1. Select the destination network source.
+2. Select a `UtilityAssetType`.
+3. Select the target feature from the list of candidates returned for the chosen `UtilityAssetType`.
+
+To help users find the correct feature, the candidate list supports attribute-based filtering during the selection step. Tap the **Filter** icon in the top-right corner to narrow down results.
+
+<img src="screenshots/attribute_filtering.png" width="250"/>
+
+Each candidate row also exposes the `onShowOnMapRequest` action. Apps can use this callback to highlight or zoom to the candidate feature on the map, helping users visually confirm they’ve selected the correct feature.
+
+The final step is to review the association details, set any additional properties, and then confirm the add operation.
+
+<img src="screenshots/create_association.png" width="250"/>
+
+After the association is added, it appears in the associations list for the selected network source.
+
+#### Delete Associations
+
+If the `UtilityAssociationsFormElement` is configured to allow editing associations, users can delete an existing association by swiping left on the association item in the list or using the `Remove` option under the overflow menu for the association item. A confirmation dialog is shown before deleting the association.
+
 ## Theming and Customization
 
 `FeatureForm` uses the material3 theming system. These styles and colors are customizable through the `FeatureForms` composable function's public API. The following `colors` and `typography` are used by the respective fields.

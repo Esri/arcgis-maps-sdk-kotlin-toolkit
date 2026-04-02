@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">В этой форме есть ошибки проверки</string>
     <string name="the_form_has_edits">В этой форме есть изменения</string>
     <string name="do_you_want_to_save_your_changes">Вы хотите сохранить внесенные изменения?</string>
-    <string name="no_associations_found">Связи не найдены</string>
+    <string name="no_associations_found">Нет связей для отображения</string>
     <string name="terminal">Терминал</string>
     <string name="terminal_with_value">Терминал : %1$s</string>
+    <string name="content_visible">Видимое содержание</string>
+    <string name="percent_along">Процент вдоль</string>
     <string name="from_element">Элемент От</string>
     <string name="to_element">Элемент До</string>
     <string name="association_type">Тип связи</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Видимое содержание</string>
     <string name="content">Ресурсы</string>
+    <string name="containment_visible_value">Видимый: %1$s</string>
+    <string name="from_network_data_source">Из источника сетевых данных</string>
+    <string name="on_map">На карте</string>
+    <string name="network_data_source">Источник сетевых данных</string>
+    <string name="available_asset_types">Доступные типы оборудования</string>
+    <string name="count">Количество %1$d</string>
+    <string name="new_association">Новая связь</string>
+    <string name="add">Добавить</string>
+    <string name="failed_to_create_association">Не удалось создать связь. %1$s</string>
+    <string name="available_features">Доступные объекты %1$d</string>
+    <string name="loading2">Загрузка...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
         <item quantity="one">У вас возникла %1$d ошибка, которую необходимо исправить перед сохранением.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
         <item quantity="other">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
     </plurals>
+    <string name="search_features">Поиск объектов</string>
+    <string name="choose_to_add">Выбрать для добавления</string>
+    <string name="no_features_found">Объекты не найдены.</string>
+    <string name="refine_your_search_tip">Уточните поиск или выберите другой источник сети.</string>
+    <string name="select_terminal">Выбрать терминал</string>
+    <string name="show_on_map">Показать на карте</string>
+    <string name="more_information">Дополнительные сведения</string>
 </resources>

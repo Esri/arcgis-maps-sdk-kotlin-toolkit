@@ -520,15 +520,23 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         offset: Offset,
         rotateOffsetWithGeoView: Boolean
     ): ScreenCoordinate? {
+        if (location.isEmpty) {
+            return null
+        }
+
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
             is MapView -> geoView.locationToScreen(location).takeIf {
                 !it.x.isNaN() && !it.y.isNaN()
             }
+
             is SceneView -> geoView.locationToScreen(location)?.takeIf {
                 it.visibility == SceneLocationVisibility.Visible
             }?.screenPoint
-            is LocalSceneView -> TODO("Pending implementation support")
+
+            is LocalSceneView -> geoView.locationToScreen(location)?.takeIf {
+                it.visibility == SceneLocationVisibility.Visible
+            }?.screenPoint
         }
         return locationToScreen?.let { screenCoordinate ->
             if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
@@ -838,9 +846,10 @@ internal class LeaderPointOffset internal constructor(
 }
 
 private fun GeoView.rotation(): Double = when (this) {
-    is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
+    is SceneView, is LocalSceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation
+        ?: 0.0
+
     is MapView -> mapRotation.value
-    is LocalSceneView -> TODO("Pending implementation support")
 }
 
 /**

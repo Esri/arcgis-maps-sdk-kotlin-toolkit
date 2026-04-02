@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Obrazac ima greške u validaciji</string>
     <string name="the_form_has_edits">Obrazac sadrži uređivanja</string>
     <string name="do_you_want_to_save_your_changes">Da li želite da sačuvate svoje promene?</string>
-    <string name="no_associations_found">Nije pronađeno nijedno povezivanje</string>
+    <string name="no_associations_found">Nema povezivanja za prikazivanje</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Vidljivi sadržaj</string>
+    <string name="percent_along">Procenat duž</string>
     <string name="from_element">Iz elementa</string>
     <string name="to_element">U element</string>
     <string name="association_type">Tip povezivanja</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Vidljivi sadržaj</string>
     <string name="content">Sadržaj</string>
+    <string name="containment_visible_value">Vidljivo: %1$s</string>
+    <string name="from_network_data_source">Iz mrežnog izvora podataka</string>
+    <string name="on_map">Na mapi</string>
+    <string name="network_data_source">Mrežni izvor podataka</string>
+    <string name="available_asset_types">Dostupni tipovi resursa</string>
+    <string name="count">Broj %1$d</string>
+    <string name="new_association">Novo povezivanje</string>
+    <string name="add">Dodaj</string>
+    <string name="failed_to_create_association">Nije uspelo kreiranje asocijacije. %1$s</string>
+    <string name="available_features">%1$d dostupni geoobjekti</string>
+    <string name="loading2">Učitavanje...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="one">Imate %1$d grešku koja mora da bude ispravljena pre čuvanja.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="other">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
     </plurals>
+    <string name="search_features">Pretražite geoobjekte</string>
+    <string name="choose_to_add">Izaberite da biste dodali</string>
+    <string name="no_features_found">Nije pronađen nijedan geoobjekat</string>
+    <string name="refine_your_search_tip">Precizirajte svoju pretragu ili izaberite drugi mrežni izvor.</string>
+    <string name="select_terminal">Izaberite terminal</string>
+    <string name="show_on_map">Prikaži na mapi</string>
+    <string name="more_information">Više informacija</string>
 </resources>

@@ -48,6 +48,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -57,6 +58,7 @@ import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.ImageOverlay
+import com.arcgismaps.mapping.view.InteractiveZoomingChangeEvent
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
@@ -120,7 +122,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView changes
  * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
@@ -130,7 +132,8 @@ import kotlinx.coroutines.launch
  * @since 200.7.0
  */
 @Deprecated(
-    message = "Use the MapView function with `canFocus` instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use the MapView function with `onGeoModelError` and `canFocus` instead. This deprecated function " +
+            "remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -177,7 +180,6 @@ public fun MapView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
-    //Just call through the version with canFocus
     MapView(
         arcGISMap = arcGISMap,
         modifier = modifier,
@@ -219,7 +221,8 @@ public fun MapView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus = true,
+        canFocus = false,
+        onGeoModelErrorChanged = null,
         content = content
     )
 }
@@ -238,6 +241,7 @@ public fun MapView(
  * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param imageOverlays image overlays for displaying images in the composable MapView
+ * @param analysisOverlays analysis overlays that render the analysis results on the composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -260,6 +264,7 @@ public fun MapView(
  * @param onUnitsPerDipChanged lambda invoked when the Units per DIP of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable MapView's layer view state is changed
+ * @param onAnalysisViewStatusChanged lambda invoked when the composable MapView's analysis view status is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -270,8 +275,12 @@ public fun MapView(
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
+ * on the composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
  * @param canFocus pass true if the MapView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the MapView composable has no effect.
+ * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
+ * mapView changes
  * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
@@ -290,6 +299,7 @@ public fun MapView(
     viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
@@ -311,6 +321,7 @@ public fun MapView(
     onUnitsPerDipChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -321,8 +332,10 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     canFocus: Boolean = true,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -365,6 +378,12 @@ public fun MapView(
                     it.graphicsOverlays.apply {
                         clear()
                         addAll(graphicsOverlays)
+                    }
+                }
+                if (it.analysisOverlays != analysisOverlays) {
+                    it.analysisOverlays.apply {
+                        clear()
+                        addAll(analysisOverlays)
                     }
                 }
                 if (it.imageOverlays != imageOverlays) {
@@ -418,6 +437,7 @@ public fun MapView(
         onUnitsPerDipChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
+        onAnalysisViewStatusChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -428,9 +448,11 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
+        onInteractiveZooming,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        onGeoModelErrorChanged
     )
 
     ViewpointHandler(
@@ -455,6 +477,7 @@ private fun MapViewEventHandler(
     onUnitsPerDipChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -465,9 +488,11 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
-    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    onGeoModelErrorChanged: ((Throwable?) -> Unit)?
 ) {
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -485,10 +510,13 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnInteractiveZooming by rememberUpdatedState(onInteractiveZooming)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
+    val currentOnAnalysisViewStatusChanged by rememberUpdatedState(onAnalysisViewStatusChanged)
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
+    val currentOnGeoModelErrorChanges by rememberUpdatedState(onGeoModelErrorChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -499,6 +527,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
+            }
+        }
+        launch {
+            mapView.analysisViewStatusChanged.collect { currentAnalysisViewStatus ->
+                currentOnAnalysisViewStatusChanged?.invoke(currentAnalysisViewStatus)
             }
         }
         launch {
@@ -572,6 +605,11 @@ private fun MapViewEventHandler(
                 currentOnPan?.invoke(panChangeEvent)
             }
         }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onInteractiveZooming.collect { interactiveZoomingEvent ->
+                currentOnInteractiveZooming?.invoke(interactiveZoomingEvent)
+            }
+        }
         launch {
             mapView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
@@ -585,6 +623,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+        launch {
+            mapView.geoModelError.collect {
+                currentOnGeoModelErrorChanges?.invoke(it)
             }
         }
     }

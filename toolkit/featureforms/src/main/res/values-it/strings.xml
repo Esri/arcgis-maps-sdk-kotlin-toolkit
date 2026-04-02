@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Il modulo ha errori di validazione</string>
     <string name="the_form_has_edits">Il modulo ha modifiche</string>
     <string name="do_you_want_to_save_your_changes">Salvare le modifiche?</string>
-    <string name="no_associations_found">Associazioni non trovate</string>
+    <string name="no_associations_found">Nessuna associazione da mostrare</string>
     <string name="terminal">Terminale</string>
     <string name="terminal_with_value">Terminale: %1$s</string>
+    <string name="content_visible">Contenuto visibile</string>
+    <string name="percent_along">Percentuale lungo</string>
     <string name="from_element">Da elemento</string>
     <string name="to_element">A elemento</string>
     <string name="association_type">Tipo di associazione</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Contenuto visibile</string>
     <string name="content">Contenuto</string>
+    <string name="containment_visible_value">Visibile: %1$s</string>
+    <string name="from_network_data_source">Da origine dati rete</string>
+    <string name="on_map">Sulla mappa</string>
+    <string name="network_data_source">Origine dati rete</string>
+    <string name="available_asset_types">Tipi di risorsa disponibili</string>
+    <string name="count">Conteggio %1$d</string>
+    <string name="new_association">Nuova associazione</string>
+    <string name="add">Aggiungi</string>
+    <string name="failed_to_create_association">Impossibile creare l\'associazione. %1$s</string>
+    <string name="available_features">Feature disponibili %1$d</string>
+    <string name="loading2">Caricamento in corso...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Si sono verificati %1$d errori che devono essere risolti prima di salvare.</item>
         <item quantity="one">Si è verificato %1$d errore che deve essere risolto prima di salvare.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
         <item quantity="other">Si sono verificati %1$d errori che devono essere risolti prima di salvare</item>
     </plurals>
+    <string name="search_features">Cerca feature</string>
+    <string name="choose_to_add">Scegliere di aggiungere</string>
+    <string name="no_features_found">Nessuna feature trovata</string>
+    <string name="refine_your_search_tip">Affina la ricerca o scegli un\'origine di rete diversa.</string>
+    <string name="select_terminal">Seleziona terminale</string>
+    <string name="show_on_map">Mostra sulla mappa</string>
+    <string name="more_information">Ulteriori informazioni</string>
 </resources>

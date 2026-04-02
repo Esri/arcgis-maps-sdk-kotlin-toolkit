@@ -121,9 +121,11 @@
     <string name="the_form_has_validation_errors">Skjemaet har valideringsfeil</string>
     <string name="the_form_has_edits">Skjemaet har redigeringer</string>
     <string name="do_you_want_to_save_your_changes">Vil du lagre endringene?</string>
-    <string name="no_associations_found">Finner ingen tilknytninger</string>
+    <string name="no_associations_found">Ingen tilknytninger å vise</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Innhold synlig</string>
+    <string name="percent_along">Prosent langs</string>
     <string name="from_element">Fra element</string>
     <string name="to_element">Til element</string>
     <string name="association_type">Tilknytningstype</string>
@@ -134,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Synlig innhold</string>
     <string name="content">Innhold</string>
+    <string name="containment_visible_value">Synlig: %1$s</string>
+    <string name="from_network_data_source">Fra nettverksdatakilde</string>
+    <string name="on_map">På kart</string>
+    <string name="network_data_source">Nettverksdatakilde</string>
+    <string name="available_asset_types">Tilgjengelige ressurstyper</string>
+    <string name="count">Antall %1$d</string>
+    <string name="new_association">Ny tilknytning</string>
+    <string name="add">Legg til</string>
+    <string name="failed_to_create_association">Kan ikke opprette tilknytning. %1$s</string>
+    <string name="available_features">%1$d tilgjengelige geoobjekter</string>
+    <string name="loading2">Laster inn …</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Du har %1$d feil som må utbedres før lagring.</item>
         <item quantity="one">Du har %1$d feil som må utbedres før lagring.</item>
@@ -142,4 +155,11 @@
         <item quantity="many">Du har %1$d feil som må utbedres før lagring.</item>
         <item quantity="other">Du har %1$d feil som må utbedres før lagring.</item>
     </plurals>
+    <string name="search_features">Søk i geoobjektene</string>
+    <string name="choose_to_add">Velg for å legge til</string>
+    <string name="no_features_found">Finner ingen geoobjekter</string>
+    <string name="refine_your_search_tip">Avgrens søket eller velg en annen nettverkskilde.</string>
+    <string name="select_terminal">Velg terminal</string>
+    <string name="show_on_map">Vis på kart</string>
+    <string name="more_information">Mer informasjon</string>
 </resources>
