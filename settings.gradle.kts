@@ -17,12 +17,69 @@
  */
 
 pluginManagement {
+    // Set toolkitTestDir here because pluginManagement is evaluated before the rest of the
+    // settings.gradle.kts and build.gradle.kts files, so the variables defined in those files are not accessible here.
+    val toolkitTestDir = settingsDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests"
+
+    gradle.beforeProject {
+        extra.set("toolkitTestDir", toolkitTestDir)
+    }
+
+    // Include build-logic-internal for internal developers. It must be included before
+    // build-logic because build-logic contains placeholder plugins that are replaced by
+    // the real implementations in build-logic-internal. If build-logic is included first,
+    // the placeholder plugins will be used and the real implementations won’t be applied.
+    if (file(toolkitTestDir).exists()){
+        // This should only be included for internal developers because it depends on
+        // internally published plugins that are not accessible to external developers.
+        includeBuild("build-logic-internal")
+    }
+    includeBuild("build-logic")
     repositories {
+        // the variables are duplicated here because the pluginManagement block is evaluated before
+        // the rest of the settings.gradle.kts, so it can't access the variables defined in the
+        // dependencyResolutionManagement block below.
+        // This is a known limitation of Gradle's settings script evaluation order.
+        val localProperties = java.util.Properties().apply {
+            val localPropertiesFile = file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
+            }
+        }
+
+        val artifactoryUrl: String =
+            providers.gradleProperty("artifactoryUrl").orNull
+                ?: localProperties.getProperty("artifactoryUrl")
+                ?: ""
+
+        val artifactoryUsername: String =
+            providers.gradleProperty("artifactoryUsername").orNull
+                ?: localProperties.getProperty("artifactoryUsername")
+                ?: ""
+
+        val artifactoryPassword: String =
+            providers.gradleProperty("artifactoryPassword").orNull
+                ?: localProperties.getProperty("artifactoryPassword")
+                ?: ""
+
+        if (!artifactoryUrl.isBlank()) {
+            maven {
+                url = java.net.URI(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
+            }
+        }
         gradlePluginPortal()
         google()
         mavenCentral()
     }
 }
+
+// For finalBuilds ignore the build number and pick up the released version of the SDK dependency
+val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
+    .run { this == "true" }
 
 val localProperties = java.util.Properties().apply {
     val localPropertiesFile = file("local.properties")
@@ -93,15 +150,26 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("arcgis") {
-            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").withoutVersion()
-        }
-    }
-}
+            val versionAndBuild = if (finalBuild) {
+                logger.warn(
+                    "Requested release candidate for the SDK dependency $sdkVersionNumber"
+                )
+                sdkVersionNumber
+            } else {
+                if (sdkBuildNumber.isBlank()) {
+                    logger.warn("Maps SDK dependency: $sdkVersionNumber")
+                    sdkVersionNumber
+                } else {
+                    logger.warn("Maps SDK dependency: $sdkVersionNumber-$sdkBuildNumber")
+                    "$sdkVersionNumber-$sdkBuildNumber"
+                }
+            }
 
-// Use local ArcGIS Maps SDK via a composite build.
-includeBuild("../kotlin/android-api") {
-    dependencySubstitution {
-        substitute(module("com.esri:arcgis-maps-kotlin")).using(project(":arcgis-maps-kotlin"))
+            version("mapsSdk", versionAndBuild)
+            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
+            library("mapsSdkTestFixtures", "com.esri", "arcgis-maps-kotlin-test-fixtures")
+                .versionRef("mapsSdk")
+        }
     }
 }
 
