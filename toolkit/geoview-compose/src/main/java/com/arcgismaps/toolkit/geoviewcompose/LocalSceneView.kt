@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -172,7 +173,9 @@ public fun LocalSceneView(
         LocalSceneView(context)
     }
     val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, canFocus) }
-    LaunchedEffect(canFocus) { localSceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    if (canFocus != localSceneViewScope.a11yCoordinator.canFocus) {
+        SideEffect { localSceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
     val isGeoViewFocusable by localSceneViewScope.a11yCoordinator.isGeoViewFocusable
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some

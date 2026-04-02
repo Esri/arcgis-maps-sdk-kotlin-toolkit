@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -330,7 +331,9 @@ public fun MapView(
         MapView(context)
     }
     val mapViewScope = remember { MapViewScope(mapView, canFocus) }
-    LaunchedEffect(canFocus) { mapViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    if (canFocus != mapViewScope.a11yCoordinator.canFocus) {
+        SideEffect { mapViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
     val isGeoViewFocusable by mapViewScope.a11yCoordinator.isGeoViewFocusable
     val layoutDirection = LocalLayoutDirection.current
 

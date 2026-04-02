@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -345,7 +346,9 @@ public fun SceneView(
         SceneView(context)
     }
     val sceneViewScope = remember { SceneViewScope(sceneView, canFocus) }
-    LaunchedEffect(canFocus) { sceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    if (canFocus != sceneViewScope.a11yCoordinator.canFocus) {
+        SideEffect { sceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
     val isGeoViewFocusable by sceneViewScope.a11yCoordinator.isGeoViewFocusable
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
