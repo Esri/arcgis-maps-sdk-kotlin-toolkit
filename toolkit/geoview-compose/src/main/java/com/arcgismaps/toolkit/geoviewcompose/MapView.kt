@@ -17,12 +17,14 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -217,7 +219,7 @@ public fun MapView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
-        canFocus = false,
+        canFocus = true,
         content = content
     )
 }
@@ -320,7 +322,7 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = false,
+    canFocus: Boolean = true,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -328,10 +330,11 @@ public fun MapView(
     val mapView = remember {
         MapView(context)
     }
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    mapView.isFocusable = canFocus
-    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
-    mapView.isFocusedByDefault = true
+    val mapViewScope = remember { MapViewScope(mapView, canFocus) }
+    if (canFocus != mapViewScope.a11yCoordinator.canFocus) {
+        SideEffect { mapViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
+    val isGeoViewFocusable by mapViewScope.a11yCoordinator.isGeoViewFocusable
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
@@ -342,10 +345,12 @@ public fun MapView(
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.isFocusable = isGeoViewFocusable
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
@@ -356,8 +361,6 @@ public fun MapView(
                 it.backgroundGrid = backgroundGrid
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.setTimeExtent(timeExtent)
-                it.isFocusable = canFocus
-                it.isFocusedByDefault = true // TODO: remove when #7178 is complete
                 if (it.graphicsOverlays != graphicsOverlays) {
                     it.graphicsOverlays.apply {
                         clear()
@@ -372,9 +375,7 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember { MapViewScope(mapView) }
         val isMapViewReady = mapView.rememberIsReady()
-
         if (isMapViewReady.value) {
             content?.let {
                 mapViewScope.it()
@@ -706,7 +707,9 @@ public inline fun rememberLocationDisplay(
  *
  * @since 200.5.0
  */
-public class MapViewScope internal constructor(mapView: MapView) : GeoViewScope(mapView)
+public class MapViewScope internal constructor(
+    mapView: MapView, canFocus: Boolean
+) : GeoViewScope(mapView, canFocus)
 
 /**
  * Contains default values for the composable MapView.

@@ -18,11 +18,13 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,14 +38,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
-
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -163,7 +164,7 @@ public fun LocalSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    canFocus: Boolean = false,
+    canFocus: Boolean = true,
     content: (@Composable LocalSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -171,31 +172,29 @@ public fun LocalSceneView(
     val localSceneView = remember {
         LocalSceneView(context)
     }
-
-    // set focus right away so the compose AndroidView "focus interop" is set up correctly.
-    localSceneView.isFocusable = canFocus
-    // TODO: remove when https://devtopia.esri.com/runtime/kotlin/issues/7178 is complete
-    localSceneView.isFocusedByDefault = canFocus
-
+    val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, canFocus) }
+    if (canFocus != localSceneViewScope.a11yCoordinator.canFocus) {
+        SideEffect { localSceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
+    val isGeoViewFocusable by localSceneViewScope.a11yCoordinator.isGeoViewFocusable
     Box(modifier = modifier.clipToBounds()) {
         // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
         @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
                 it.scene = scene
+                it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
-                it.isFocusable = canFocus
-                it.isFocusedByDefault = canFocus // TODO: remove when #7178 is complete
             }
         )
 
-        val localSceneViewScope = remember { LocalSceneViewScope(localSceneView) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
         // Invoke the content lambda only when the LocalSceneView is ready
@@ -437,5 +436,6 @@ private fun ViewpointHandler(
  *
  * @since 300.0.0
  */
-public class LocalSceneViewScope internal constructor(localSceneView: LocalSceneView) :
-    GeoViewScope(localSceneView)
+public class LocalSceneViewScope internal constructor(
+    localSceneView: LocalSceneView, canFocus: Boolean
+) : GeoViewScope(localSceneView, canFocus)
