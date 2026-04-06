@@ -186,7 +186,7 @@ private fun PopupBody(
                 }
             }
         }
-        if (popupStateData.popup.editSummary.isNotEmpty()) {
+        if (popupStateData.popup.getEditSummary().isNotEmpty()) {
             item {
                 Column(
                     modifier = Modifier
@@ -196,7 +196,7 @@ private fun PopupBody(
                 ) {
                     HorizontalDivider()
                     Text(
-                        text = popupStateData.popup.editSummary,
+                        text = popupStateData.popup.getEditSummary(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     HorizontalDivider()
