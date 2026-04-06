@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.MediaPopupElement
+import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.PopupState
@@ -186,7 +187,8 @@ private fun PopupBody(
                 }
             }
         }
-        if (popupStateData.popup.getEditSummary().isNotEmpty()) {
+        val editSummary = getEditSummary(popupStateData.popup)
+        if (editSummary.isNotEmpty()) {
             item {
                 Column(
                     modifier = Modifier
@@ -196,7 +198,7 @@ private fun PopupBody(
                 ) {
                     HorizontalDivider()
                     Text(
-                        text = popupStateData.popup.getEditSummary(),
+                        text = editSummary,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     HorizontalDivider()
@@ -206,6 +208,12 @@ private fun PopupBody(
     }
 }
 
+private fun getEditSummary(popup: Popup): String =
+    try {
+        popup.getEditSummary()
+    } catch(_: Exception) {
+        ""
+    }
 
 @Composable
 internal fun InitializingExpressions(
