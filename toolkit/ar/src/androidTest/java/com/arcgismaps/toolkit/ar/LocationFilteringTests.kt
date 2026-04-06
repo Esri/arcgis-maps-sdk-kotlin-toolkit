@@ -96,6 +96,32 @@ class LocationFilteringTests {
         )
         assertThat(shouldUpdateCamera(recentLocationWithNoAccuracy, nullIslandEGM96Vertical)).isFalse()
 
+        val recentLocationWithNoHorizontalAccuracy = Location.create(
+            nullIslandWgs84,
+            Double.NaN,
+            1.0,
+            0.0,
+            0.0,
+            false,
+            Instant.now().minusMillis(50)
+        )
+        assertThat(
+            shouldUpdateCamera(recentLocationWithNoHorizontalAccuracy, nullIslandEGM96Vertical)
+        ).isFalse()
+
+        val recentLocationWithNoVerticalAccuracy = Location.create(
+            nullIslandWgs84,
+            1.0,
+            Double.NaN,
+            0.0,
+            0.0,
+            false,
+            Instant.now().minusMillis(50)
+        )
+        assertThat(
+            shouldUpdateCamera(recentLocationWithNoVerticalAccuracy, nullIslandEGM96Vertical)
+        ).isFalse()
+
         val recentLocationWithBadAccuracy = Location.create(
             nullIslandWgs84,
             10.0,
@@ -110,5 +136,9 @@ class LocationFilteringTests {
         val recentLocationFarFarAway =
             Location.create(farFarAwayWgs84, 1.0, 1.0, 0.0, 0.0, true, Instant.now())
         assertThat(shouldUpdateCamera(recentLocationFarFarAway, nullIslandEGM96Vertical)).isTrue()
+
+        val recentLocationFarFarAwayWithNoSpeed =
+            Location.create(farFarAwayWgs84, 1.0, 1.0, Double.NaN, 0.0, true, Instant.now())
+        assertThat(shouldUpdateCamera(recentLocationFarFarAwayWithNoSpeed, nullIslandEGM96Vertical)).isTrue()
     }
 }
