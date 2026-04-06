@@ -188,7 +188,7 @@ private fun PopupBody(
             }
         }
         val editSummary = getEditSummary(popupStateData.popup)
-        if (editSummary.isNotEmpty()) {
+        if (!editSummary.isNullOrEmpty()) {
             item {
                 Column(
                     modifier = Modifier
@@ -208,11 +208,11 @@ private fun PopupBody(
     }
 }
 
-private fun getEditSummary(popup: Popup): String =
+private fun getEditSummary(popup: Popup): String? =
     try {
         popup.getEditSummary()
     } catch(_: Exception) {
-        ""
+        null
     }
 
 @Composable
