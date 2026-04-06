@@ -18,11 +18,13 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,14 +38,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
-
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.Basemap
-import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.floor.FloorAware
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -134,6 +135,7 @@ import kotlinx.coroutines.launch
  *  on the composable LocalSceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable LocalSceneView
  * changes
+ * @param canFocus pass true if the LocalSceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the LocalSceneView composable has no effect.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * LocalSceneView changes
  * @param onCriticalErrorChanged lambda invoked when the critical error state of the composable
@@ -172,6 +174,7 @@ public fun LocalSceneView(
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     onCriticalErrorChanged: ((Throwable?) -> Unit)? = null,
     onWarningsChanged: ((List<Throwable>) -> Unit)? = null,
@@ -179,23 +182,32 @@ public fun LocalSceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val localSceneView = remember { LocalSceneView(context) }
-
+    val localSceneView = remember {
+        LocalSceneView(context)
+    }
+    val localSceneViewScope = remember { LocalSceneViewScope(localSceneView, canFocus) }
+    if (canFocus != localSceneViewScope.a11yCoordinator.canFocus) {
+        SideEffect { localSceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
+    val isGeoViewFocusable by localSceneViewScope.a11yCoordinator.isGeoViewFocusable
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "LocalSceneView" },
             factory = { localSceneView },
             update = {
                 it.scene = scene
+                it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = interactionOptions
                 it.isAttributionBarVisible = isAttributionBarVisible
                 it.selectionProperties = selectionProperties
             }
         )
 
-        val localSceneViewScope = remember { LocalSceneViewScope(localSceneView) }
         val isLocalSceneViewReady = localSceneView.rememberIsReady()
 
         // Invoke the content lambda only when the LocalSceneView is ready
@@ -444,20 +456,25 @@ private fun ViewpointHandler(
 
     LaunchedEffect(Unit) {
         // if there is a persisted viewpoint, restore it when the LocalSceneView enters the composition
+        // TODO: use Camera for persistence (like SceneView does) once issues with Camera matrix
+        //  are fixed for LSV (issues 3893 and 6878)
         persistedViewpoint?.let { localSceneView.setViewpoint(it) }
         launch {
             localSceneView.viewpointChanged.collect {
                 val currentViewpointCenterAndScale =
                     localSceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                 persistedViewpoint = currentViewpointCenterAndScale
-                currentOnCurrentViewpointCameraChanged?.invoke(localSceneView.getCurrentViewpointCamera())
+
+                localSceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     currentViewpointCenterAndScale?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    localSceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }
@@ -469,5 +486,6 @@ private fun ViewpointHandler(
  *
  * @since 300.0.0
  */
-public class LocalSceneViewScope internal constructor(localSceneView: LocalSceneView) :
-    GeoViewScope(localSceneView)
+public class LocalSceneViewScope internal constructor(
+    localSceneView: LocalSceneView, canFocus: Boolean
+) : GeoViewScope(localSceneView, canFocus)

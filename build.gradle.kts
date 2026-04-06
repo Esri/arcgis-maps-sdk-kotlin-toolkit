@@ -85,7 +85,7 @@ buildscript {
                 check(project.hasProperty("versionNumber"))
                 check(project.hasProperty("buildNumber"))
                 project.logger.info("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
-            } catch (t: Throwable) {
+            } catch (_: Throwable) {
                 // The buildnum file is not there. ignore it and log a warning.
                 project.logger.warn("the buildnum.txt file is missing or not readable")
                 project.extra.set("versionNumber", "0.0.0")

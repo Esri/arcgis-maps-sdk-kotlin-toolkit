@@ -81,6 +81,7 @@ dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
+    implementation(project(":offline"))
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt

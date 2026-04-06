@@ -16,23 +16,13 @@
 
 package com.arcgismaps.toolkit.featureformsapp.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.EaseInOutExpo
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -79,7 +69,6 @@ sealed class NavigationRoute {
 }
 
 @Composable
-@Suppress("DEPRECATION")
 fun AppNavigation(
     navController: NavHostController,
     navigator: Navigator,
@@ -196,10 +185,10 @@ fun AppNavigation(
             popEnterTransition = { fadeIn() },
             popExitTransition = { slideOutHorizontally { h -> h } }
         ) {
-            MapScreen {
-                // navigate back on back pressed
-                navController.popBackStack()
-            }
+            MapScreen (
+                mapViewModel = hiltViewModel(),
+                onBackPressed = navController::popBackStack
+            )
         }
     }
 }

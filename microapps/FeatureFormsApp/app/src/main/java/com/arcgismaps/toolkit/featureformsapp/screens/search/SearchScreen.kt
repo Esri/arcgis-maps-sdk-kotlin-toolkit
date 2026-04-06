@@ -51,14 +51,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.browse.MapListItem
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("DEPRECATION")
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onItemSelected: () -> Unit,

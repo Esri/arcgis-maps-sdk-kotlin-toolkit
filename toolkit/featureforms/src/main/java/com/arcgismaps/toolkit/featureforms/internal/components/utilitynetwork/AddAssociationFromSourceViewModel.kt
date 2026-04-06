@@ -26,12 +26,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.arcgismaps.data.ArcGISFeatureTable
+import com.arcgismaps.data.FeatureTable
+import com.arcgismaps.data.Field
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.QueryParameters
+import com.arcgismaps.data.SubtypeSubtable
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FeatureFormSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureOptions
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.SubtypeSublayer
+import com.arcgismaps.toolkit.featureforms.internal.utils.isNumeric
+import com.arcgismaps.utilitynetworks.UtilityAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityAssetType
 import com.arcgismaps.utilitynetworks.UtilityAssociationResult
 import com.arcgismaps.utilitynetworks.UtilityAssociationsFilter
@@ -40,6 +50,7 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTerminalConfiguration
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -154,21 +165,38 @@ internal class AddAssociationFromSourceViewModel(
     )
 
     /**
-     * A flow that emits a list of [UtilityAssetType]s based on the current search text.
+     * A flow that emits a list of [UtilityAssetType]s from the currently selected source, ordered by
+     * asset group name. This should be used as the source of truth for the list of asset types to
+     * ensure consistent ordering.
      */
-    val filteredAssetTypes: StateFlow<List<UtilityAssetType>> = snapshotFlow {
-        assetTypesFilterText to selectedSource
-    }.map { (text, _) ->
-        return@map if (text.isNotEmpty()) {
-            filterAssetTypes(text)
-        } else {
-            _selectedSource.value?.assetTypes ?: emptyList()
-        }
+    private val orderedAssetTypes: StateFlow<List<UtilityAssetType>> = snapshotFlow {
+        _selectedSource.value
+    }.map {
+        it?.assetTypes?.orderByAssetGroup() ?: emptyList()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
-        initialValue = _selectedSource.value?.assetTypes ?: emptyList()
+        initialValue = _selectedSource.value?.assetTypes?.orderByAssetGroup() ?: emptyList()
     )
+
+    /**
+     * A flow that emits a list of [UtilityAssetType]s based on the current search text.
+     */
+    val filteredAssetTypes: StateFlow<List<UtilityAssetType>> = orderedAssetTypes
+        .combine(snapshotFlow { assetTypesFilterText }) { assetTypes, text ->
+            if (text.isNotEmpty()) {
+                assetTypes.filter { assetType ->
+                    assetType.name.contains(text, ignoreCase = true)
+                }
+            } else {
+                assetTypes
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(1000),
+            initialValue = orderedAssetTypes.value
+        )
 
     /**
      * A flow that emits a [FeatureCandidatesUiState] based on the current search text.
@@ -232,6 +260,31 @@ internal class AddAssociationFromSourceViewModel(
         get() = _isSearchingForCandidates.value
 
     /**
+     * Backing list for [fields].
+     */
+    private val _fields = mutableStateOf<List<Field>>(emptyList())
+
+    /**
+     * A list of fields for the current source that can be used for attribute filtering.
+     */
+    val fields: List<Field>
+        get() = _fields.value
+
+    /**
+     * Manages the state of attribute filters applied to the feature candidates.
+     */
+    var attributeFilterStateManager = FilterStateManager(onApplyFilter = ::applyAttributeFilters)
+        private set
+
+    private var _areAttributeFiltersApplied: MutableState<Boolean> = mutableStateOf(false)
+
+    /**
+     * Indicates whether any attribute filters are currently applied to the feature candidates.
+     */
+    val areAttributeFiltersApplied: Boolean
+        get() = _areAttributeFiltersApplied.value
+
+    /**
      * Indicates whether the ViewModel is currently fetching the next page of feature candidates.
      * This is used to prevent multiple simultaneous fetches.
      */
@@ -259,17 +312,26 @@ internal class AddAssociationFromSourceViewModel(
                     source.queryFeatures(
                         assetType = assetType
                     ).onSuccess { result ->
+                        _fields.value = source.getFields(assetType.assetGroup)
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             candidates = result.candidates,
                             nextQueryParams = result.nextQueryParams
                         )
                     }.onFailure { error ->
+                        // Clear fields on error
+                        _fields.value = emptyList()
                         _featureCandidatesUiState.value = FeatureCandidatesUiState(
                             isLoading = false,
                             error = error
                         )
                     }
+                    // Create a new filter state manager for the new source/asset type
+                    attributeFilterStateManager = FilterStateManager(
+                        onApplyFilter = ::applyAttributeFilters
+                    )
+                    // Reset whether filters are applied
+                    _areAttributeFiltersApplied.value = false
                 }
             }
         }
@@ -283,17 +345,6 @@ internal class AddAssociationFromSourceViewModel(
         return _featureSources.value.filter { featureSource ->
             featureSource.name.contains(filterString, ignoreCase = true)
         }
-    }
-
-    /**
-     * Filters the list of [UtilityAssetType] objects from the currently selected source based on
-     * the provided [filterString], returning only those whose names contain the filter string
-     * (case-insensitive).
-     */
-    private fun filterAssetTypes(filterString: String): List<UtilityAssetType> {
-        return _selectedSource.value?.assetTypes?.filter { assetType ->
-            assetType.name.contains(filterString, ignoreCase = true)
-        } ?: emptyList()
     }
 
     /**
@@ -575,6 +626,37 @@ internal class AddAssociationFromSourceViewModel(
         }
     }
 
+    private suspend fun applyAttributeFilters(whereClause: String): Result<Unit> {
+        val source = _selectedSource.value ?: return Result.failure(
+            IllegalStateException("No source selected")
+        )
+        val assetType = _selectedAssetType.value ?: return Result.failure(
+            IllegalStateException("No asset type selected")
+        )
+        val queryParams = QueryParameters().apply {
+            this.whereClause = whereClause
+        }
+        val result = source.queryFeatures(
+            assetType = assetType,
+            parameters = queryParams
+        ).onSuccess { result ->
+            _featureCandidatesUiState.value = FeatureCandidatesUiState(
+                isLoading = false,
+                candidates = result.candidates,
+                nextQueryParams = result.nextQueryParams
+            )
+            // Update whether filters are applied based on where clause being non-empty
+            _areAttributeFiltersApplied.value = whereClause.isNotEmpty()
+        }
+        return if (result.isSuccess) {
+            Result.success(Unit)
+        } else {
+            Result.failure(
+                result.exceptionOrNull() ?: Exception("Unknown error")
+            )
+        }
+    }
+
     companion object {
         fun Factory(
             featureForm: FeatureForm,
@@ -635,13 +717,6 @@ internal data class FeatureCandidatesUiState(
 )
 
 /**
- * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
- */
-internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
-    return this?.terminals?.find { it.terminalId == id }
-}
-
-/**
  * Holds information about an association endpoint, including its name and optional terminal
  * configuration.
  */
@@ -649,3 +724,115 @@ private data class AssociationEndpoint(
     val name: String,
     val terminalConfiguration: UtilityTerminalConfiguration? = null
 )
+
+/**
+ * Returns the [UtilityTerminal] with the specified [id] from the [UtilityTerminalConfiguration].
+ */
+internal fun UtilityTerminalConfiguration?.getTerminalById(id: Int): UtilityTerminal? {
+    return this?.terminals?.find { it.terminalId == id }
+}
+
+/**
+ * Returns a list of supported [Field]s for the given source based on the [FeatureFormSource] it
+ * represents, taking into account any subtype field overrides if applicable.
+ *
+ * @param assetGroup The [UtilityAssetGroup] used to determine the subtype.
+ * @return A list of supported [Field]s for the source and subtype, or an empty list if the source
+ * type is not recognized or if there are no supported fields.
+ */
+private fun UtilityAssociationFeatureSource.getFields(assetGroup: UtilityAssetGroup): List<Field> {
+    return when (val source = featureFormSource) {
+        is FeatureLayer -> (source.featureTable as? ArcGISFeatureTable)?.getSupportedFields(
+            subTypeCode = assetGroup.code
+        )
+
+        is FeatureTable -> (source as? ArcGISFeatureTable)?.getSupportedFields(
+            subTypeCode = assetGroup.code
+        )
+
+        is SubtypeSublayer -> source.subtype.fieldOverrides.filterSupportedFields()
+        is SubtypeSubtable -> source.subtype.fieldOverrides.filterSupportedFields()
+        else -> null
+    } ?: emptyList()
+}
+
+/**
+ * Returns a list of supported [Field]s on the [ArcGISFeatureTable] for the given [subTypeCode], or
+ * all supported fields if the provided [subTypeCode] does not match any subtype in the table.
+ *
+ * @param subTypeCode An optional subtype code used to determine if there are specific field
+ * overrides for that subtype.
+ * @return A list of supported [Field]s.
+ */
+private fun ArcGISFeatureTable.getSupportedFields(subTypeCode: Any?): List<Field> {
+    val subtype = featureSubtypes.find {
+        it.code == subTypeCode
+    }
+    return subtype?.fieldOverrides?.filterSupportedFields() ?: fields.filterSupportedFields()
+}
+
+/**
+ * Filters the list of [Field]s to include only those that are supported for use in attribute
+ * filtering.
+ */
+private fun List<Field>.filterSupportedFields(): List<Field> {
+    return filter { field ->
+        (field.fieldType == FieldType.Text ||
+            field.fieldType == FieldType.Oid ||
+            field.fieldType.isNumeric ||
+            field.fieldType == FieldType.Date ||
+            field.fieldType == FieldType.DateOnly) &&
+            !field.name.equals("ASSETGROUP", ignoreCase = true) &&
+            !field.name.equals("ASSETTYPE", ignoreCase = true)
+    }
+}
+
+/**
+ * Returns a new list of [UtilityAssetType] sorted by their asset group name, ignoring case, while
+ * maintaining the original order for asset types with the same name. Note that this function assumes
+ * that the input list is already ordered by asset type name.
+ *
+ * @return A list of [UtilityAssetType] sorted by asset group name within each asset type name.
+ */
+internal fun List<UtilityAssetType>.orderByAssetGroup(): List<UtilityAssetType> {
+    // Create a mutable copy of the list if it's not already mutable, so we can sort in place.
+    val reorderedList = this as? MutableList<UtilityAssetType> ?: this.toMutableList()
+
+    /**
+     * Sorts the reorderedList from [fromIndex] to [toIndexInclusive] (inclusive) in place by the
+     * name of the asset group, ignoring case.
+     */
+    fun sortSubList(fromIndex: Int, toIndexInclusive: Int) {
+        if (toIndexInclusive > fromIndex) {
+            reorderedList.subList(fromIndex, toIndexInclusive + 1).sortWith(
+                compareBy(String.CASE_INSENSITIVE_ORDER) {
+                    it.assetGroup.name
+                }
+            )
+        }
+    }
+
+    var l = 0
+    var r = 0
+    reorderedList.forEachIndexed { index, item ->
+        // Skip the first item since there's no "last" item to compare to.
+        if (index == 0) return@forEachIndexed
+        val last = reorderedList[index - 1]
+        // If the asset type name is the same as the last one, move r forward to continue the run
+        // of same names.
+        if (item.name.equals(last.name, ignoreCase = true)) {
+            r++
+        } else {
+            // If the name is different, we might have ended a chain of same names, so sort this
+            // sublist in place by asset group name
+            sortSubList(l, r)
+            // Move both l and r to the current index to start a new chain.
+            l = index
+            r = index
+        }
+    }
+
+    // Sort trailing run, if any.
+    sortSubList(l, r)
+    return reorderedList
+}

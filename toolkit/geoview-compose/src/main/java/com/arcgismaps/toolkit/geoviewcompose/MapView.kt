@@ -17,12 +17,14 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,7 +132,7 @@ import kotlinx.coroutines.launch
  * @since 200.7.0
  */
 @Deprecated(
-    message = "Use the MapView function with `onGeoModelError` instead. This deprecated function " +
+    message = "Use the MapView function with `onGeoModelError` and `canFocus` instead. This deprecated function " +
             "remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
@@ -219,6 +221,7 @@ public fun MapView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = false,
         onGeoModelErrorChanged = null,
         content = content
     )
@@ -275,6 +278,7 @@ public fun MapView(
  * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
  * on the composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param canFocus pass true if the MapView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the MapView composable has no effect.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * mapView changes
  * @param content the content of the composable MapView
@@ -330,24 +334,36 @@ public fun MapView(
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    val mapView = remember {
+        MapView(context)
+    }
+    val mapViewScope = remember { MapViewScope(mapView, canFocus) }
+    if (canFocus != mapViewScope.a11yCoordinator.canFocus) {
+        SideEffect { mapViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
+    val isGeoViewFocusable by mapViewScope.a11yCoordinator.isGeoViewFocusable
     val layoutDirection = LocalLayoutDirection.current
 
     // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(isGeoViewFocusable)
                 .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.isFocusable = isGeoViewFocusable
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
@@ -378,9 +394,7 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember { MapViewScope(mapView) }
         val isMapViewReady = mapView.rememberIsReady()
-
         if (isMapViewReady.value) {
             content?.let {
                 mapViewScope.it()
@@ -736,7 +750,9 @@ public inline fun rememberLocationDisplay(
  *
  * @since 200.5.0
  */
-public class MapViewScope internal constructor(mapView: MapView) : GeoViewScope(mapView)
+public class MapViewScope internal constructor(
+    mapView: MapView, canFocus: Boolean
+) : GeoViewScope(mapView, canFocus)
 
 /**
  * Contains default values for the composable MapView.

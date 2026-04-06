@@ -17,11 +17,13 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -125,7 +127,7 @@ import java.time.Instant
  * @since 200.4.0
  */
 @Deprecated(
-    message = "Use the SceneView function with `grid` instead. This deprecated function remains to maintain binary compatibility",
+    message = "Use the SceneView function with `grid` and `canFocus` instead. This deprecated function remains to maintain binary compatibility",
     level = DeprecationLevel.HIDDEN,
 )
 @Composable
@@ -209,6 +211,7 @@ public fun SceneView(
         onTwoPointerTap = onTwoPointerTap,
         onPan = onPan,
         onDrawStatusChanged = onDrawStatusChanged,
+        canFocus = false,
         content = content
     )
 }
@@ -290,6 +293,7 @@ public fun SceneView(
  * @param onInteractiveZooming lambda invoked when a user performs a pinch or double-tap-drag gesture
  *  on the composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param canFocus pass true if the SceneView should receive focus. Note that specifying a modifier property `Modifier.focusProperties { canFocus = true/false }` on the SceneView composable has no effect.
  * @param onGeoModelErrorChanged lambda invoked when the GeoModel error state of the composable
  * LocalSceneView changes
  * @param content the content of the composable SceneView
@@ -341,21 +345,34 @@ public fun SceneView(
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onInteractiveZooming: ((InteractiveZoomingChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    canFocus: Boolean = true,
     onGeoModelErrorChanged: ((Throwable?) -> Unit)? = null,
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember { SceneView(context) }
-
+    val sceneView = remember {
+        SceneView(context)
+    }
+    val sceneViewScope = remember { SceneViewScope(sceneView, canFocus) }
+    if (canFocus != sceneViewScope.a11yCoordinator.canFocus) {
+        SideEffect { sceneViewScope.a11yCoordinator.syncCanFocus(canFocus) }
+    }
+    val isGeoViewFocusable by sceneViewScope.a11yCoordinator.isGeoViewFocusable
     // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
     // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
+        // kotlin 2.3.0 bug https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8600/Calling-a-androidx.compose.ui.UiComposable-composable-function-where-a-UI-Composable-composable-was-expected-with-some
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         AndroidView(
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
+            modifier = Modifier
+                .fillMaxSize()
+                .focusable(isGeoViewFocusable)
+                .semantics { contentDescription = "SceneView" },
             factory = { sceneView },
             update = {
                 it.scene = arcGISScene
+                it.isFocusable = isGeoViewFocusable
                 it.interactionOptions = sceneViewInteractionOptions
                 it.labeling = viewLabelProperties
                 it.selectionProperties = selectionProperties
@@ -392,7 +409,6 @@ public fun SceneView(
                 it.cameraController = cameraController
             })
 
-        val sceneViewScope = remember { SceneViewScope(sceneView) }
         val isSceneViewReady = sceneView.rememberIsReady()
         val isManualRenderingEnabled = sceneViewProxy?.isManualRenderingEnabled ?: false
 
@@ -455,6 +471,7 @@ public fun SceneView(
         onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
     )
 }
+
 
 /**
  * Sets up the callbacks for all the view-based [sceneView] events.
@@ -669,18 +686,20 @@ private fun ViewpointHandler(
         persistedCamera?.let { sceneView.setViewpointCamera(it) }
         launch {
             sceneView.viewpointChanged.collect {
-                val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
-                persistedCamera = currentViewpointCamera
-                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                sceneView.getCurrentViewpointCamera()?.let { currentViewpointCamera ->
+                    // update persistedCamera regardless of whether we need to invoke currentOnCurrentViewpointCameraChanged
+                    persistedCamera = currentViewpointCamera
+                    currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let { currentViewpointCenterAndScale ->
+                        callback.invoke(currentViewpointCenterAndScale)
+                    }
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint =
-                        sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    currentViewpoint?.let(callback)
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let { currentViewpointBoundingGeometry ->
+                        callback.invoke(currentViewpointBoundingGeometry)
+                    }
                 }
             }
         }
@@ -692,7 +711,9 @@ private fun ViewpointHandler(
  *
  * @since 200.5.0
  */
-public class SceneViewScope internal constructor(sceneView: SceneView) : GeoViewScope(sceneView)
+public class SceneViewScope internal constructor(
+    sceneView: SceneView, canFocus: Boolean
+) : GeoViewScope(sceneView, canFocus)
 
 /**
  * Contains default values for the SceneView.

@@ -259,6 +259,7 @@ public fun TableTopSceneView(
  * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed.
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed.
  * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed.
+ * @param onAnalysisViewStatusChanged lambda invoked when the TableTopSceneView's analysis view status is changed.
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView.
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed.
  * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView.
@@ -304,6 +305,7 @@ public fun TableTopSceneView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onAnalysisViewStatusChanged: ((GeoView.GeoViewAnalysisViewStatusChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -447,6 +449,7 @@ public fun TableTopSceneView(
                 onNavigationChanged = onNavigationChanged,
                 onSpatialReferenceChanged = onSpatialReferenceChanged,
                 onLayerViewStateChanged = onLayerViewStateChanged,
+                onAnalysisViewStatusChanged = onAnalysisViewStatusChanged,
                 onInteractingChanged = onInteractingChanged,
                 onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
                 onRotate = onRotate,

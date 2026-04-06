@@ -52,16 +52,6 @@ public sealed class GeoViewProxy(className: String) {
      */
     private var geoView: GeoView? = null
 
-    /**
-     * Sets the [geoView] parameter on this operator. This should be called by the composable component
-     * when it enters the composition and set to null when it is disposed.
-     *
-     * @since 200.4.0
-     */
-    protected fun setGeoView(geoView: GeoView?) {
-        this.geoView = geoView
-    }
-
     protected val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
 
@@ -85,6 +75,16 @@ public sealed class GeoViewProxy(className: String) {
      */
     public val isWrapAroundEnabled: Boolean?
         get() = geoView?.isWrapAroundEnabled
+
+    /**
+     * Sets the [geoView] parameter on this operator. This should be called by the composable component
+     * when it enters the composition and set to null when it is disposed.
+     *
+     * @since 200.4.0
+     */
+    protected fun setGeoView(geoView: GeoView?) {
+        this.geoView = geoView
+    }
 
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.

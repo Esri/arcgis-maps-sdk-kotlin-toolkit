@@ -19,6 +19,8 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime
 
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -79,6 +81,46 @@ internal fun Instant.formattedDateTime(includeTime: Boolean): String {
         DateTimeFormatter.ofPattern("MMM dd, yyyy")
     }
     return atZone(TimeZone.getDefault().toZoneId()).format(formatter)
+}
+
+/**
+ * Formats an Instant in SQL‑92 / RFC‑3339 compliant syntax for the current timezone as required
+ * for date and date only queries.
+ *
+ * @param includeTime format the time if true
+ * @return a string formatted for the value in epoch milliseconds
+ * @since 300.0.0
+ */
+internal fun Instant.formattedDateTimeForQuery(includeTime: Boolean): String {
+    val formatter = if (includeTime) {
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    } else {
+        DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    }
+    return atZone(TimeZone.getDefault().toZoneId()).format(formatter)
+}
+
+/**
+ * Parses a string to an Instant
+ *
+ * @param includeTime whether the time component is included in the string
+ * @return the parsed Instant or null if the string is blank
+ * @since 300.0.0
+ */
+internal fun String.toInstant(includeTime: Boolean): Instant? {
+    if (this.isBlank())
+        return null
+    val formatter = if (includeTime) {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a")
+    } else {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy")
+    }
+    return try {
+        val localDate = LocalDate.parse(this, formatter)
+        localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+    } catch (e: Exception) {
+        null
+    }
 }
 
 /**
