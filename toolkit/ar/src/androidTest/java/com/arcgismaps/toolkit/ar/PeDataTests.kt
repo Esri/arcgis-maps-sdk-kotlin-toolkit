@@ -45,7 +45,7 @@ class PeDataTests {
     @Before
     fun setup() {
         initialPeDirectory = TransformationCatalog.projectionEngineDirectory
-        TransformationCatalog.projectionEngineDirectory = ""
+        TransformationCatalog.setProjectionEngineDirectory("")
         if (gridFile.exists()) {
             gridFile.delete()
         }
@@ -54,7 +54,7 @@ class PeDataTests {
     @After
     fun tearDown() {
         // restore initial state
-        TransformationCatalog.projectionEngineDirectory = initialPeDirectory
+        TransformationCatalog.setProjectionEngineDirectory(initialPeDirectory!!)
     }
 
     /**
@@ -101,7 +101,7 @@ class PeDataTests {
         assertThat(TransformationCatalog.projectionEngineDirectory).isEmpty()
         assertThat(gridFile.exists()).isFalse()
         val somePath = InstrumentationRegistry.getInstrumentation().context.getExternalFilesDir(null)?.canonicalPath
-        TransformationCatalog.projectionEngineDirectory = somePath
+        TransformationCatalog.setProjectionEngineDirectory(somePath!!)
 
         val context = InstrumentationRegistry.getInstrumentation().context
         assertThat(PeData.configure(context).isSuccess).isTrue()

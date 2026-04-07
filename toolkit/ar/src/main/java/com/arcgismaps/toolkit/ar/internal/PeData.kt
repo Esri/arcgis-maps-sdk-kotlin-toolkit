@@ -72,7 +72,7 @@ internal object PeData {
 
             if (result.isSuccess) {
                 // set the projection engine directory
-                TransformationCatalog.projectionEngineDirectory = destinationPath
+                TransformationCatalog.setProjectionEngineDirectory(destinationPath)
             }
             result
         }
