@@ -60,7 +60,6 @@ buildscript {
     project.extra.set("artifactoryUrl", artifactoryUrl)
     project.extra.set("artifactoryUsername", artifactoryUsername)
     project.extra.set("artifactoryPassword", artifactoryPassword)
-    project.extra.set("toolkitTestDir", projectDir.absolutePath.removeSuffix("arcgis-maps-sdk-kotlin-toolkit") + "/kotlin/toolkit-tests")
 
     val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
         .run { this == "true" }
@@ -86,7 +85,7 @@ buildscript {
                 check(project.hasProperty("versionNumber"))
                 check(project.hasProperty("buildNumber"))
                 project.logger.info("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
-            } catch (t: Throwable) {
+            } catch (_: Throwable) {
                 // The buildnum file is not there. ignore it and log a warning.
                 project.logger.warn("the buildnum.txt file is missing or not readable")
                 project.extra.set("versionNumber", "0.0.0")

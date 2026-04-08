@@ -20,6 +20,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationSearching
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,7 +56,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -83,8 +91,9 @@ import com.arcgismaps.utilitynetworks.UtilityElement
 @Composable
 internal fun UtilityAssociationGroupResult(
     groupResult: MutableGroupResult,
-    isEditable : Boolean,
+    isEditable: Boolean,
     isNavigationEnabled: Boolean,
+    onAssociatedFeatureLocateRequest: (ArcGISFeature) -> Unit,
     onItemClick: (Int) -> Unit,
     onDetailsClick: (Int) -> Unit,
     onDelete: (Boolean) -> Unit,
@@ -119,6 +128,9 @@ internal fun UtilityAssociationGroupResult(
                         onDelete = {
                             groupResult.delete(info.association)
                             onDelete(groupResult.associationResults.isEmpty())
+                        },
+                        onLocateRequest = {
+                            onAssociatedFeatureLocateRequest(info.associatedFeature)
                         },
                         modifier = Modifier.animateItem()
                     )
@@ -159,9 +171,13 @@ private fun AssociationItem(
     onClick: () -> Unit,
     onDetailsClick: () -> Unit,
     onDelete: () -> Unit,
+    onLocateRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+    var showMenu by rememberSaveable {
         mutableStateOf(false)
     }
     val density = LocalDensity.current
@@ -173,17 +189,6 @@ private fun AssociationItem(
     val swipeToDismissBoxState = remember(association) {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
-            density = density,
-            confirmValueChange = { value ->
-                if (value == SwipeToDismissBoxValue.EndToStart) {
-                    showDeleteDialog = true
-                    // Set a pending value instead of confirming the value change directly. There
-                    // is a bug/limitation in SwipeToDismissBox that causes the swipe behavior to
-                    // not work after the first swipe, if we confirm the value change directly here.
-                    pendingSwipeValue = value
-                }
-                false
-            },
             positionalThreshold = {
                 with(density) { 56.dp.toPx() }
             }
@@ -270,7 +275,16 @@ private fun AssociationItem(
         },
         modifier = modifier
             .clickable(enabled = enabled, onClick = onClick)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        onDismiss = { value ->
+            // Show the delete confirmation dialog when a swipe to delete is performed.
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                showDeleteDialog = true
+                // The actual swipe value will be set in a LaunchedEffect when the user confirms the
+                // deletion.
+                pendingSwipeValue = value
+            }
+        }
     ) {
         Row(
             modifier = Modifier
@@ -322,9 +336,31 @@ private fun AssociationItem(
                     )
                 }
             }
-            // Details button
-            IconButton(onClick = onDetailsClick) {
-                Icon(Icons.Default.MoreHoriz, contentDescription = "details")
+            Box {
+                // Details button
+                IconButton(onClick = {
+                    showMenu = true
+                }) {
+                    Icon(Icons.Default.MoreHoriz, contentDescription = "more information")
+                }
+                OptionsMenu(
+                    editable = isEditable,
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    isOnLocateEnabled = associatedFeature.geometry != null,
+                    onLocate = {
+                        showMenu = false
+                        onLocateRequest()
+                    },
+                    onMoreInfo = {
+                        showMenu = false
+                        onDetailsClick()
+                    },
+                    onRemove = {
+                        showMenu = false
+                        showDeleteDialog = true
+                    }
+                )
             }
         }
     }
@@ -332,8 +368,10 @@ private fun AssociationItem(
         // Confirmation dialog to delete the association
         RemoveAssociationConfirmationDialog(
             onDismiss = {
-                showDeleteDialog = false
-                pendingSwipeValue = SwipeToDismissBoxValue.Settled
+                Snapshot.withMutableSnapshot {
+                    showDeleteDialog = false
+                    pendingSwipeValue = SwipeToDismissBoxValue.Settled
+                }
             },
             onRemove = {
                 showDeleteDialog = false
@@ -391,5 +429,63 @@ internal fun UtilityAssociation.getIcon(): Painter? {
         }
 
         else -> null
+    }
+}
+
+@Composable
+private fun OptionsMenu(
+    editable: Boolean,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    isOnLocateEnabled: Boolean,
+    onLocate: () -> Unit,
+    onMoreInfo: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        shape = RoundedCornerShape(15.dp)
+    ) {
+        if (isOnLocateEnabled) {
+            DropdownMenuItem(
+                text = {
+                    Text(text = stringResource(R.string.show_on_map))
+                },
+                onClick = onLocate,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.LocationSearching,
+                        contentDescription = "locate feature"
+                    )
+                }
+            )
+        }
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(R.string.more_information))
+            },
+            onClick = onMoreInfo,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "association details"
+                )
+            }
+        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(R.string.remove))
+            },
+            onClick = onRemove,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "delete association"
+                )
+            },
+            enabled = editable
+        )
     }
 }

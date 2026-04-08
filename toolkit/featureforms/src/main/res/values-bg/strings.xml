@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Датата трябва да е %1$s или преди</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Въведена дата</string>
-    <string name="ff_date_input_headline_description">Въведена дата: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Датата не отговаря на очаквания модел: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Датата не е разрешена: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Датата е извън очаквания диапазон от години %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Дата</string>
-    <string name="ff_date_input_no_input_description">Няма</string>
-    <string name="ff_date_input_title">Изберете дата</string>
-    <string name="ff_date_picker_headline">"Избрана дата"</string>
-    <string name="ff_date_picker_headline_description">Текущ избор: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Навигирайте до година %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Няма</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Превъртете, за да се покажат по-ранни години</string>
-    <string name="ff_date_picker_scroll_to_later_years">Превъртете, за да се покажат по-късни години</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Преминете към режим на въвеждане на календар</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Плъзнете, за да изберете година, или докоснете, за да преминете обратно към избор на ден"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Преминете към режим на въвеждане на текст</string>
-    <string name="ff_date_picker_switch_to_next_month">"Променете на следващия месец"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Променете на предходния месец"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Преминете към избор на година"</string>
-    <string name="ff_date_picker_title">"Изберете дата"</string>
-    <string name="ff_date_picker_today_description">Днес</string>
-    <string name="ff_date_picker_year_picker_pane_title">Видим избор на година</string>
-    <string name="ff_date_range_input_invalid_range_input">Въвеждане на невалиден диапазон от дати</string>
-    <string name="ff_date_range_input_title">Въведете дати</string>
-    <string name="ff_date_range_picker_day_in_range">В диапазона</string>
-    <string name="ff_date_range_picker_end_headline">Крайна дата</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Превъртете, за да се покаже следващият месец</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Превъртете, за да се покаже предходният месец</string>
-    <string name="ff_date_range_picker_start_headline">Начална дата</string>
-    <string name="ff_date_range_picker_title">Изберете дати</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Преди обяд</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Формулярът съдържа грешки при валидиране</string>
     <string name="the_form_has_edits">Формулярът съдържа редакции</string>
     <string name="do_you_want_to_save_your_changes">Искате ли да запишете промените си?</string>
-    <string name="no_associations_found">Няма намерени асоциации</string>
+    <string name="no_associations_found">Няма асоциации за показване</string>
     <string name="terminal">Терминал</string>
     <string name="terminal_with_value">Терминал: %1$s</string>
+    <string name="content_visible">Съдържанието е видимо</string>
+    <string name="percent_along">Процент по протежение</string>
     <string name="from_element">От елемент</string>
     <string name="to_element">Към елемент</string>
     <string name="association_type">Тип свързване</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Видимо съдържание</string>
     <string name="content">Съдържание</string>
+    <string name="containment_visible_value">Видим: %1$s</string>
+    <string name="from_network_data_source">От мрежовия източник на данни</string>
+    <string name="on_map">На картата</string>
+    <string name="network_data_source">Мрежови източник на данни</string>
+    <string name="available_asset_types">Налични типове активи</string>
+    <string name="count">Брой %1$d</string>
+    <string name="new_association">Ново асоцииране</string>
+    <string name="add">Добавяне</string>
+    <string name="failed_to_create_association">Неуспешно създаване на асоциация. %1$s</string>
+    <string name="available_features">%1$d Налични обекти</string>
+    <string name="loading2">Зареждане..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Имате грешки %1$d, които трябва да бъдат поправени преди запазване.</item>
         <item quantity="one">Имате грешка %1$d, която трябва да бъде поправена преди запазване.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
         <item quantity="other">Имате грешки %1$d, които трябва да бъдат поправени преди запазване</item>
     </plurals>
+    <string name="search_features">Търсене на обекти</string>
+    <string name="choose_to_add">Избор на добавяне</string>
+    <string name="no_features_found">Не са намерени обекти</string>
+    <string name="refine_your_search_tip">Прецизирайте търсенето си или изберете друг източник на мрежа.</string>
+    <string name="select_terminal">Избор на терминал</string>
+    <string name="show_on_map">Показване на картата</string>
+    <string name="more_information">Повече информация</string>
 </resources>

@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Data trebuie să fie la sau înainte de %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Data intrării</string>
-    <string name="ff_date_input_headline_description">Data intrării: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Data nu corespunde cu modelul preconizat: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data nu este permisă: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data este în afara intervalului anual preconizat %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Dată</string>
-    <string name="ff_date_input_no_input_description">Niciunul</string>
-    <string name="ff_date_input_title">Selectare dată</string>
-    <string name="ff_date_picker_headline">„Data selectată”</string>
-    <string name="ff_date_picker_headline_description">Selecția curentă: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigați la anul %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Niciunul</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Derulați pentru afișarea anilor anteriori</string>
-    <string name="ff_date_picker_scroll_to_later_years">Derulați pentru afișarea anilor ulteriori</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Comutați la modul de introducere în calendar</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        „Glisați pentru a selecta un an sau atingeți pentru a comuta înapoi la selectarea unei zile”
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Comutați la modul de introducere text</string>
-    <string name="ff_date_picker_switch_to_next_month">„Schimbați la luna următoare”</string>
-    <string name="ff_date_picker_switch_to_previous_month">„Schimbați la luna anterioară”</string>
-    <string name="ff_date_picker_switch_to_year_selection">„Comutați la selectarea unui an”</string>
-    <string name="ff_date_picker_title">„Selectare dată”</string>
-    <string name="ff_date_picker_today_description">Astăzi</string>
-    <string name="ff_date_picker_year_picker_pane_title">Selector an vizibil</string>
-    <string name="ff_date_range_input_invalid_range_input">Introducere interval dată nevalid</string>
-    <string name="ff_date_range_input_title">Intrare date</string>
-    <string name="ff_date_range_picker_day_in_range">În interval</string>
-    <string name="ff_date_range_picker_end_headline">Data terminării</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Derulați pentru a afișa luna următoare</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Derulați pentru a afișa luna anterioară</string>
-    <string name="ff_date_range_picker_start_headline">Data începerii</string>
-    <string name="ff_date_range_picker_title">Selectare date</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formularul are erori de validare</string>
     <string name="the_form_has_edits">Formularul conține editări</string>
     <string name="do_you_want_to_save_your_changes">Doriți să salvați modificările?</string>
-    <string name="no_associations_found">Nu s-au găsit asocieri</string>
+    <string name="no_associations_found">Nu există asocieri de afișat.</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Conținut vizibil</string>
+    <string name="percent_along">Procent de-a lungul</string>
     <string name="from_element">Din element</string>
     <string name="to_element">La element</string>
     <string name="association_type">Tip asociere</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Conținut vizibil</string>
     <string name="content">Conținut</string>
+    <string name="containment_visible_value">Vizibil: %1$s</string>
+    <string name="from_network_data_source">Din sursa de date de rețea</string>
+    <string name="on_map">Pe hartă</string>
+    <string name="network_data_source">Sursă de date de rețea</string>
+    <string name="available_asset_types">Tipuri de active disponibile</string>
+    <string name="count">Număr %1$d</string>
+    <string name="new_association">Asociere nouă</string>
+    <string name="add">Adăugare</string>
+    <string name="failed_to_create_association">Eșec creare asociere. %1$s</string>
+    <string name="available_features">%1$d Obiecte spațiale disponibile</string>
+    <string name="loading2">Se încarcă...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Aveți %1$d erori care trebuie remediate înainte de a salva.</item>
         <item quantity="one">Aveți %1$d eroare care trebuie remediată înainte de a salva.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
         <item quantity="other">Aveți %1$d erori care trebuie remediate înainte de a salva</item>
     </plurals>
+    <string name="search_features">Căutare obiecte spațiale</string>
+    <string name="choose_to_add">Alegeți pentru a adăuga</string>
+    <string name="no_features_found">Nu au fost găsite obiecte spațiale</string>
+    <string name="refine_your_search_tip">Rafinați căutarea sau alegeți o altă sursă de rețea.</string>
+    <string name="select_terminal">Selectați terminalul</string>
+    <string name="show_on_map">Afișare pe hartă</string>
+    <string name="more_information">Informații suplimentare</string>
 </resources>

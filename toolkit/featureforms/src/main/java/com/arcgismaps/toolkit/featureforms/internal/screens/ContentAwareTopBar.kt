@@ -80,8 +80,8 @@ import kotlinx.coroutines.launch
  * @param hasBackStack Indicates if there is a previous route in the navigation stack.
  * @param showFormActions Indicates if the form actions (save, discard) should be shown.
  * @param showCloseIcon Indicates if the close icon should be displayed.
- * @param onSaveForm The callback to invoke when the save button is clicked. It takes the current
- * [FeatureForm] and a boolean indicating if the save is followed by a navigation action.
+ * @param onSaveForm The callback to invoke when the save button is clicked. It provides a boolean
+ * indicating if the save is followed by a navigation action.
  * @param onDiscardForm The callback to invoke when the discard button is clicked. It takes a boolean
  * indicating if the discard is followed by a navigation action.
  * @param onDismissRequest The callback to invoke when the close button is clicked. If the form has
@@ -96,7 +96,7 @@ internal fun ContentAwareTopBar(
     showFormActions: Boolean,
     showCloseIcon: Boolean,
     isNavigationEnabled: Boolean,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
@@ -169,7 +169,7 @@ internal fun ContentAwareTopBar(
                 },
                 onSave = {
                     scope.launch {
-                        onSaveForm(formData.featureForm, false)
+                        onSaveForm(false)
                     }
                 },
                 onDiscard = {
@@ -196,7 +196,7 @@ internal fun ContentAwareTopBar(
                         // Check if the pending action is to navigate back, since NavigateToAssociation
                         // is not triggered by the top bar
                         val willNavigate = pendingNavigationAction == NavigationAction.NavigateBack
-                        onSaveForm(formData.featureForm, willNavigate).onSuccess {
+                        onSaveForm(willNavigate).onSuccess {
                             // Execute the pending navigation action after saving
                             onNavigationAction(pendingNavigationAction, false)
                         }

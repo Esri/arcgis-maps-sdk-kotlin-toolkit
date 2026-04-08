@@ -60,7 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arcgismaps.portal.PortalFolder
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R

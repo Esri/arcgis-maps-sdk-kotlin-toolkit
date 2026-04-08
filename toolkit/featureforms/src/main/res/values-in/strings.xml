@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Tanggal harus pada atau sebelum %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Tanggal yang dimasukkan</string>
-    <string name="ff_date_input_headline_description">Tanggal yang dimasukkan: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Tanggal tidak sesuai dengan pola yang diharapkan: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Tanggal tidak diizinkan: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Tanggal di luar rentang tahun yang diharapkan %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Tanggal</string>
-    <string name="ff_date_input_no_input_description">Tidak Ada</string>
-    <string name="ff_date_input_title">Pilih tanggal</string>
-    <string name="ff_date_picker_headline">"Tanggal yang dipillih"</string>
-    <string name="ff_date_picker_headline_description">Pilihan saat ini: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Navigasikan ke tahun %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Tidak Ada</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Gulir untuk menampilkan tahun-tahun sebelumnya</string>
-    <string name="ff_date_picker_scroll_to_later_years">Gulir untuk menampilkan tahun-tahun berikutnya</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Beralih ke mode input kalender</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Geser untuk memilih tahun, atau ketuk untuk kembali memilih hari"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Beralih ke mode input teks</string>
-    <string name="ff_date_picker_switch_to_next_month">"Ubah ke bulan berikutnya"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Ubah ke bulan sebelumnya"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Beralih ke memilih tahun"</string>
-    <string name="ff_date_picker_title">"Pilih tanggal"</string>
-    <string name="ff_date_picker_today_description">Hari ini</string>
-    <string name="ff_date_picker_year_picker_pane_title">Pemilih tahun terlihat</string>
-    <string name="ff_date_range_input_invalid_range_input">Input rentang tanggal tidak valid</string>
-    <string name="ff_date_range_input_title">Masukkan tanggal</string>
-    <string name="ff_date_range_picker_day_in_range">Dalam rentang</string>
-    <string name="ff_date_range_picker_end_headline">Tanggal akhir</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Gulir untuk menampilkan bulan berikutnya</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Gulir untuk menampilkan bulan sebelumnya</string>
-    <string name="ff_date_range_picker_start_headline">Tanggal mulai</string>
-    <string name="ff_date_range_picker_title">Pilih tanggal</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formulir memiliki kesalahan validasi</string>
     <string name="the_form_has_edits">Formulir memiliki editan</string>
     <string name="do_you_want_to_save_your_changes">Apakah Anda ingin menyimpan perubahan Anda?</string>
-    <string name="no_associations_found">Tidak ditemukan asosiasi</string>
+    <string name="no_associations_found">Tidak ada asosiasi yang dapat ditampilkan</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Konten Dapat Dilihat</string>
+    <string name="percent_along">Persen Sepanjang</string>
     <string name="from_element">Dari Elemen</string>
     <string name="to_element">Ke Elemen</string>
     <string name="association_type">Jenis Asosiasi</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Konten yang Terlihat</string>
     <string name="content">Konten</string>
+    <string name="containment_visible_value">Terlihat: %1$s</string>
+    <string name="from_network_data_source">Dari Sumber Data Jaringan</string>
+    <string name="on_map">Di Peta</string>
+    <string name="network_data_source">Sumber Data Jaringan</string>
+    <string name="available_asset_types">Jenis Aset yang Tersedia</string>
+    <string name="count">Jumlah %1$d</string>
+    <string name="new_association">Asosiasi Baru</string>
+    <string name="add">Tambahkan</string>
+    <string name="failed_to_create_association">Gagal membuat asosiasi. %1$s</string>
+    <string name="available_features">%1$d Fitur yang Tersedia</string>
+    <string name="loading2">Memuat..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
         <item quantity="one">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
         <item quantity="other">Anda memiliki %1$d kesalahan yang harus diperbaiki sebelum menyimpan</item>
     </plurals>
+    <string name="search_features">Cari fitur</string>
+    <string name="choose_to_add">Pilih untuk ditambahkan</string>
+    <string name="no_features_found">Fitur tidak ditemukan</string>
+    <string name="refine_your_search_tip">Perbaiki pencarian Anda atau pilih Sumber Jaringan yang berbeda.</string>
+    <string name="select_terminal">Pilih Terminal</string>
+    <string name="show_on_map">Tampilkan di Peta</string>
+    <string name="more_information">Informasi Selengkapnya</string>
 </resources>

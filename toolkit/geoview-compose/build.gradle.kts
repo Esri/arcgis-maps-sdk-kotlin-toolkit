@@ -21,8 +21,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    alias(libs.plugins.android.integration.testing)
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
 kotlin {
     jvmToolchain(17)
 }
@@ -33,7 +35,7 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-
+        testApplicationId = "com.arcgismaps.toolkit.geoviewcompose.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -73,6 +75,21 @@ android {
             // This is the default variant.
         }
     }
+
+    val toolkitTests = project.findProperty("toolkitTestDir") as String
+    sourceSets.getByName("androidTest") {
+        var file = file("$toolkitTests/${project.name}/androidTest")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
+
+    sourceSets.getByName("test") {
+        var file = file("$toolkitTests/${project.name}/test")
+        if (file.exists()) {
+            java.setSrcDirs(java.srcDirs.plus(file))
+        }
+    }
 }
 
 dependencies {
@@ -85,4 +102,9 @@ dependencies {
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
+
+    // Include only if internal tests are required
+    if (file(project.findProperty("toolkitTestDir") as String).exists()) {
+        androidTestImplementation(arcgis.mapsSdkTestFixtures)
+    }
 }

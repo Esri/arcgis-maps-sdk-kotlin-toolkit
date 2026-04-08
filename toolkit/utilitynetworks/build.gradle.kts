@@ -33,6 +33,7 @@ kotlin {
     jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 
@@ -113,10 +114,10 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
+    implementation(libs.bundles.icons)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.navigation)
-    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -293,7 +293,9 @@ public sealed class FeatureFormNavigationRoute {
  * system's back action can be used to navigate back to the previous [FeatureForm] screen. The
  * [FeatureFormState.activeFeatureForm] will be updated when the user navigates forward or back
  * through the associations. If there are any edits on the current [FeatureForm], the user will be
- * prompted to save or discard the edits before navigating to the next [FeatureForm].
+ * prompted to save or discard the edits before navigating to the next [FeatureForm]. [UtilityAssociation]s
+ * can also be created or deleted when the [UtilityAssociationsFormElement.isEditable] property is
+ * true.
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
@@ -366,13 +368,14 @@ public fun FeatureForm(
     val focusManager = LocalFocusManager.current
 
     // A function that provides the action to save edits on the form
-    suspend fun saveForm(form: FeatureForm, willNavigate: Boolean): Result<Unit> {
+    suspend fun saveForm(state: FeatureFormState, willNavigate: Boolean): Result<Unit> {
+        val form = state.getActiveFormStateData().featureForm
         focusManager.clearFocus()
         // Check for validation errors
         val errorCount = form.validationErrors.value.entries.count()
         return if (errorCount == 0) {
             // Finish editing the form if there are no validation errors
-            form.finishEditing().onSuccess {
+            state.saveEdits().onSuccess {
                 // Send a saved edits event if the save was successful
                 val event = FeatureFormEditingEvent.SavedEdits(form, willNavigate)
                 onEditingEvent(event)
@@ -419,7 +422,9 @@ public fun FeatureForm(
                 ContentAwareTopBar(
                     backStackEntry = entry,
                     state = state,
-                    onSaveForm = ::saveForm,
+                    onSaveForm = { willNavigate ->
+                        saveForm(state, willNavigate)
+                    },
                     onDiscardForm = ::discardForm,
                     onDismissRequest = onDismiss,
                     hasBackStack = hasBackStack,
@@ -441,7 +446,9 @@ public fun FeatureForm(
                 state = state,
                 isNavigationEnabled = isNavigationEnabled,
                 validationErrorVisibility = validationErrorVisibility,
-                onSaveForm = ::saveForm,
+                onSaveForm = { willNavigate ->
+                    saveForm(state, willNavigate)
+                },
                 onDiscardForm = ::discardForm,
                 onBarcodeButtonClick = onBarcodeButtonClick,
                 onShowOnMapRequest = onShowOnMapRequest,

@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
-import com.arcgismaps.analysis.LocationViewshed
+import com.arcgismaps.analysis.interactive.ExploratoryLocationViewshed
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
@@ -50,8 +50,8 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 
 /**
  * Displays a composable [SceneView] with an [AnalysisOverlay] and a [GraphicsOverlay].
- * The [AnalysisOverlay] is used to display a [LocationViewshed] and the [GraphicsOverlay]
- * is used to display a [Graphic] at the location for the observer of the [LocationViewshed]. Using
+ * The [AnalysisOverlay] is used to display a [ExploratoryLocationViewshed] and the [GraphicsOverlay]
+ * is used to display a [Graphic] at the location for the observer of the [ExploratoryLocationViewshed]. Using
  * the [Switch] in the [TopAppBar] the [AnalysisOverlay] can be toggled on and off.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +79,7 @@ fun MainScreen() {
     val cameraController = remember { OrbitLocationCameraController(initLocation, 5000.0) }
 
     val viewshed = remember {
-        LocationViewshed(
+        ExploratoryLocationViewshed(
             initLocation,
             82.0,
             60.0,

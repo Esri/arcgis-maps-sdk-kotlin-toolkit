@@ -19,38 +19,19 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
+import android.content.Context
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
-import com.arcgismaps.httpcore.authentication.AuthenticationManager
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
-import com.arcgismaps.httpcore.authentication.OAuthUserCredential
-import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import androidx.core.net.toUri
-
-/**
- * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
- * and [AuthenticationManager.networkCredentialStore].
- *
- * @since 200.2.0
- */
-@Deprecated(
-    message = "since 200.8.0. Use AuthenticatorState.signOut() instead as it provides support for IAP sign out.",
-    replaceWith = ReplaceWith("AuthenticatorState.signOut()")
-)
-public suspend fun AuthenticationManager.signOut() {
-    arcGISCredentialStore.getCredentials().forEach {
-        if (it is OAuthUserCredential) {
-            it.revokeToken()
-        }
-    }
-    arcGISCredentialStore.removeAll()
-    networkCredentialStore.removeAll()
-}
 
 /**
  * Launches the custom tabs activity with the provided browser authentication challenge.
  *
  * This method determines the appropriate URL and whether to use a private web browser session based on the type of
  * [BrowserAuthenticationChallenge] provided. It supports OAuth user sign-in, IAP sign-in, and IAP sign-out challenges.
+ *
+ * Additionally, if the device does not have a default browser that supports Custom Tabs, it cancels the authentication
+ * challenge with a [CustomTabsNotFoundException].
  *
  * @receiver an [Activity] used to launch the [CustomTabsIntent].
  * @param pendingBrowserAuthenticationChallenge the [BrowserAuthenticationChallenge] containing the necessary information
@@ -59,13 +40,25 @@ public suspend fun AuthenticationManager.signOut() {
  * @since 200.8.0
  */
 public fun Activity.launchCustomTabs(pendingBrowserAuthenticationChallenge: BrowserAuthenticationChallenge) {
-    val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
-        is BrowserAuthenticationChallenge.OAuthUserSignIn ->
-            pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
-        is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
-        is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+    if (!canDefaultBrowserLaunchCustomTabs()) {
+        val exception = CustomTabsNotFoundException()
+        when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignIn ->
+                pendingBrowserAuthenticationChallenge.iapSignIn.cancel(exception)
+            is BrowserAuthenticationChallenge.IapSignOut ->
+                pendingBrowserAuthenticationChallenge.iapSignOut.cancel(exception)
+        }
+    } else {
+        val (url, preferPrivateWebBrowserSession) = when (pendingBrowserAuthenticationChallenge) {
+            is BrowserAuthenticationChallenge.OAuthUserSignIn ->
+                pendingBrowserAuthenticationChallenge.oAuthUserSignIn.authorizeUrl to pendingBrowserAuthenticationChallenge.oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+            is BrowserAuthenticationChallenge.IapSignIn -> pendingBrowserAuthenticationChallenge.iapSignIn.authorizeUrl to false
+            is BrowserAuthenticationChallenge.IapSignOut -> pendingBrowserAuthenticationChallenge.iapSignOut.signOutUrl to false
+        }
+        launchCustomTabs(url, preferPrivateWebBrowserSession)
     }
-    launchCustomTabs(url, preferPrivateWebBrowserSession)
 }
 
 
@@ -85,3 +78,12 @@ internal fun Activity.launchCustomTabs(authorizeUrl: String, preferPrivateWebBro
         }
     }.build().launchUrl(this, authorizeUrl.toUri())
 }
+
+/**
+ * Checks if the device has a default browser that supports Custom Tabs.
+ *
+ * @return true if a default browser that supports Custom Tabs is found, false otherwise.
+ * @since 300.0.0
+ */
+internal fun Context.canDefaultBrowserLaunchCustomTabs(): Boolean =
+    CustomTabsClient.getPackageName(this, emptyList())?.isNotEmpty() ?: false

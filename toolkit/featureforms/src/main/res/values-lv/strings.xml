@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datumam jāsakrīt vai jābūt pirms %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ievadīšanas datums</string>
-    <string name="ff_date_input_headline_description">Ievadīšanas datums: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datums neatbilst paredzētajam modelim: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datums nav atļauts: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datums ārpus paredzētā gadu diapazona: %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Datums</string>
-    <string name="ff_date_input_no_input_description">Nav</string>
-    <string name="ff_date_input_title">Atlasīt datumu</string>
-    <string name="ff_date_picker_headline">"Atlasītais datums"</string>
-    <string name="ff_date_picker_headline_description">Pašreizējā atlase: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Pāriet uz gadu %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Nav</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Ritiniet, lai parādītu iepriekšējos gadus</string>
-    <string name="ff_date_picker_scroll_to_later_years">Ritiniet, lai parādītu vēlākos gadus</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Pārslēgt uz kalendāra ievades režīmu</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Pavelciet, lai izvēlētos gadu, vai pieskarieties, lai pārslēgtu atpakaļ uz dienas atlasi"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Pārslēgt uz teksta ievades režīmu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Mainīt uz nākamo mēnesi"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Mainīt uz iepriekšējo mēnesi"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Pārslēgt uz gada atlasi"</string>
-    <string name="ff_date_picker_title">"Atlasīt datumu"</string>
-    <string name="ff_date_picker_today_description">Šodien</string>
-    <string name="ff_date_picker_year_picker_pane_title">Redzams gada atlasītājs</string>
-    <string name="ff_date_range_input_invalid_range_input">Nederīga datumu diapazona ievade</string>
-    <string name="ff_date_range_input_title">Ievadiet datumus</string>
-    <string name="ff_date_range_picker_day_in_range">Diapazonā</string>
-    <string name="ff_date_range_picker_end_headline">Beigu datums</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Ritiniet, lai parādītu nākamo mēnesi</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Ritiniet, lai parādītu iepriekšējo mēnesi</string>
-    <string name="ff_date_range_picker_start_headline">Sākuma datums</string>
-    <string name="ff_date_range_picker_title">Atlasīt datumus</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Šai veidlapai ir validācijas kļūdas</string>
     <string name="the_form_has_edits">Veidlapā ir izmaiņas</string>
     <string name="do_you_want_to_save_your_changes">Vai vēlaties saglabāt izmaiņas?</string>
-    <string name="no_associations_found">Netika atrasta neviena asociācija</string>
+    <string name="no_associations_found">Nav parādāmu saistību</string>
     <string name="terminal">Terminālis</string>
     <string name="terminal_with_value">Terminālis: %1$s</string>
+    <string name="content_visible">Saturs redzams</string>
+    <string name="percent_along">Procentuālā pozīcija</string>
     <string name="from_element">No elementa</string>
     <string name="to_element">Uz elementu</string>
     <string name="association_type">Saistības veids</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Redzamais saturs</string>
     <string name="content">Saturs</string>
+    <string name="containment_visible_value">Redzams: %1$s</string>
+    <string name="from_network_data_source">No tīkla datu avota</string>
+    <string name="on_map">Uz kartes</string>
+    <string name="network_data_source">Tīmekļa datu avots</string>
+    <string name="available_asset_types">Pieejamie līdzekļu veidi</string>
+    <string name="count">Skaits%1$d</string>
+    <string name="new_association">Jaunā saistība</string>
+    <string name="add">Pievienot</string>
+    <string name="failed_to_create_association">Neizdevās izveidot saistību. %1$s</string>
+    <string name="available_features">%1$d Pieejamie elementi</string>
+    <string name="loading2">Ielādē..</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
         <item quantity="one">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
         <item quantity="other">Jums ir %1$d kļūdas, kas ir jāizlabo pirms saglabāšanas</item>
     </plurals>
+    <string name="search_features">Meklēt elementus</string>
+    <string name="choose_to_add">Izvēlēties, lai pievienotu</string>
+    <string name="no_features_found">Elementi nav atrasti</string>
+    <string name="refine_your_search_tip">Precizējiet meklēšanu vai izvēlēties citu tīkla avotu.</string>
+    <string name="select_terminal">Izvēlēties termināli</string>
+    <string name="show_on_map">Rādīt kartē</string>
+    <string name="more_information">Papildinformācija</string>
 </resources>

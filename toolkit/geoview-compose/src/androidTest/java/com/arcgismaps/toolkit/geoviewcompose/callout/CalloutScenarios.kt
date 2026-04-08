@@ -31,7 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
@@ -111,19 +111,19 @@ class CalloutScenarios {
             content = {
                 Callout(location = initialPoint) {
                     Text(
-                        modifier = Modifier.semantics { contentDescription = "CALLOUT#1" },
+                        modifier = Modifier.semantics { testTag = "CALLOUT#1" },
                         text = "I am Callout #1"
                     )
                 }
                 Callout(location = initialPoint) {
                     Text(
-                        modifier = Modifier.semantics { contentDescription = "CALLOUT#2" },
+                        modifier = Modifier.semantics { testTag = "CALLOUT#2" },
                         text = "I am Callout #2"
                     )
                 }
                 Callout(location = initialPoint) {
                     Text(
-                        modifier = Modifier.semantics { contentDescription = "CALLOUT#3" },
+                        modifier = Modifier.semantics { testTag = "CALLOUT#3" },
                         text = "I am Callout #3"
                     )
                 }
@@ -145,14 +145,14 @@ class CalloutScenarios {
                     if (isShowingFirstCallout) {
                         Callout(location = initialPoint) {
                             Text(
-                                modifier = Modifier.semantics { contentDescription = "CALLOUT#1" },
+                                modifier = Modifier.semantics { testTag = "CALLOUT#1" },
                                 text = "I am Callout #1"
                             )
                         }
                     } else {
                         Callout(location = secondaryPoint) {
                             Text(
-                                modifier = Modifier.semantics { contentDescription = "CALLOUT#2" },
+                                modifier = Modifier.semantics { testTag = "CALLOUT#2" },
                                 text = "I am Callout #2"
                             )
                         }

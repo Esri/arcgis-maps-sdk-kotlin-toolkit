@@ -17,13 +17,17 @@
 package com.arcgismaps.toolkit.popup.internal.screens
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.MediaPopupElement
+import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.mapping.popup.UtilityAssociationsPopupElement
 import com.arcgismaps.toolkit.popup.PopupState
@@ -182,9 +187,33 @@ private fun PopupBody(
                 }
             }
         }
+        val editSummary = getEditSummary(popupStateData.popup)
+        if (!editSummary.isNullOrEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    HorizontalDivider()
+                    Text(
+                        text = editSummary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    HorizontalDivider()
+                }
+            }
+        }
     }
 }
 
+private fun getEditSummary(popup: Popup): String? =
+    try {
+        popup.getEditSummary()
+    } catch(_: Exception) {
+        null
+    }
 
 @Composable
 internal fun InitializingExpressions(

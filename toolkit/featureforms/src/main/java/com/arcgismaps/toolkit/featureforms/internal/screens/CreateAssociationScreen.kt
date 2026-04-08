@@ -82,7 +82,7 @@ internal fun CreateAssociationScreen(
     }
     var percentAlong by rememberSaveable(associationOptions) {
         val initialValue = if (associationOptions?.isPercentAlongValid == true) {
-            0f
+            0.0
         } else {
             null
         }
@@ -249,7 +249,7 @@ internal fun CreateAssociationScreen(
                     item {
                         Card(modifier = Modifier.padding(24.dp)) {
                             PercentAlongControl(
-                                fraction = percentAlong ?: 0f,
+                                initialFraction = percentAlong ?: 0.0,
                                 enabled = true,
                                 onValueChanged = { fraction ->
                                     percentAlong = fraction

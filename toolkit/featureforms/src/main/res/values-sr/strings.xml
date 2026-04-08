@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum mora biti na dan ili ranije %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Uneseni datum</string>
-    <string name="ff_date_input_headline_description">Uneseni datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum ne odgovara očekivanom obascu: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nije dozvoljen: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum izvan očekivanog opsega godina %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Ništa</string>
-    <string name="ff_date_input_title">Izaberite datum</string>
-    <string name="ff_date_picker_headline">"Izabani datum"</string>
-    <string name="ff_date_picker_headline_description">Trenutni odabir: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Pređite na godinu %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Ništa</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Listajte za prikaz ranijih godina</string>
-    <string name="ff_date_picker_scroll_to_later_years">Listajte za prikaz kasnijih godina</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Prebacite se na režim unosa kalendara</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Prevucite za odabir godine ili dodirnite da biste se vratili na izbor dana "
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Prebacite se na režim unosa teksta</string>
-    <string name="ff_date_picker_switch_to_next_month">"Prebaci na sledeći mesec"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Prebaci na prethodni mesec"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Prebaci se na izbor godine"</string>
-    <string name="ff_date_picker_title">"Izaberi datum"</string>
-    <string name="ff_date_picker_today_description">Danas</string>
-    <string name="ff_date_picker_year_picker_pane_title">Vidljiv birač godine</string>
-    <string name="ff_date_range_input_invalid_range_input">Nevažeći unos opsega datuma</string>
-    <string name="ff_date_range_input_title">Unesi datume</string>
-    <string name="ff_date_range_picker_day_in_range">U opsegu</string>
-    <string name="ff_date_range_picker_end_headline">Datum završetka</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Listajte za prikaz narednog meseca</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Listajte za prikaz prethodnog meseca</string>
-    <string name="ff_date_range_picker_start_headline">Datum početka</string>
-    <string name="ff_date_range_picker_title">Izaberite datume</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">Prepodne</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Obrazac ima greške u validaciji</string>
     <string name="the_form_has_edits">Obrazac sadrži uređivanja</string>
     <string name="do_you_want_to_save_your_changes">Da li želite da sačuvate svoje promene?</string>
-    <string name="no_associations_found">Nije pronađeno nijedno povezivanje</string>
+    <string name="no_associations_found">Nema povezivanja za prikazivanje</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal : %1$s</string>
+    <string name="content_visible">Vidljivi sadržaj</string>
+    <string name="percent_along">Procenat duž</string>
     <string name="from_element">Iz elementa</string>
     <string name="to_element">U element</string>
     <string name="association_type">Tip povezivanja</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Vidljivi sadržaj</string>
     <string name="content">Sadržaj</string>
+    <string name="containment_visible_value">Vidljivo: %1$s</string>
+    <string name="from_network_data_source">Iz mrežnog izvora podataka</string>
+    <string name="on_map">Na mapi</string>
+    <string name="network_data_source">Mrežni izvor podataka</string>
+    <string name="available_asset_types">Dostupni tipovi resursa</string>
+    <string name="count">Broj %1$d</string>
+    <string name="new_association">Novo povezivanje</string>
+    <string name="add">Dodaj</string>
+    <string name="failed_to_create_association">Nije uspelo kreiranje asocijacije. %1$s</string>
+    <string name="available_features">%1$d dostupni geoobjekti</string>
+    <string name="loading2">Učitavanje...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="one">Imate %1$d grešku koja mora da bude ispravljena pre čuvanja.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
         <item quantity="other">Imate %1$d grešaka koje moraju da budu ispravljene pre čuvanja.</item>
     </plurals>
+    <string name="search_features">Pretražite geoobjekte</string>
+    <string name="choose_to_add">Izaberite da biste dodali</string>
+    <string name="no_features_found">Nije pronađen nijedan geoobjekat</string>
+    <string name="refine_your_search_tip">Precizirajte svoju pretragu ili izaberite drugi mrežni izvor.</string>
+    <string name="select_terminal">Izaberite terminal</string>
+    <string name="show_on_map">Prikaži na mapi</string>
+    <string name="more_information">Više informacija</string>
 </resources>

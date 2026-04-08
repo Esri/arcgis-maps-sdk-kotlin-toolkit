@@ -73,6 +73,7 @@ import androidx.core.text.HtmlCompat
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import com.arcgismaps.toolkit.geoviewcompose.LeaderPosition
+import com.arcgismaps.toolkit.geoviewcompose.LocalSceneView
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
@@ -118,42 +119,65 @@ fun TapLocationScreen(
             }
         }
     ) { contentPadding ->
-        if (geoViewType == GeoViewType.MapViewType) {
-            MapView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                arcGISMap = viewModel.arcGISMap,
-                mapViewProxy = viewModel.mapViewProxy,
-                graphicsOverlays = listOf(tapLocationGraphicsOverlay),
-                onSingleTapConfirmed = viewModel::setPoint,
-                content = {
-                    GeoViewScopeContent(
-                        mapPoint = point,
-                        calloutVisibleState = calloutVisibleState,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    )
-                }
-            )
-        } else {
-            SceneView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                arcGISScene = viewModel.arcGISScene,
-                sceneViewProxy = viewModel.sceneViewProxy,
-                graphicsOverlays = listOf(tapLocationGraphicsOverlay),
-                onSingleTapConfirmed = viewModel::setPoint,
-                content = {
-                    GeoViewScopeContent(
-                        mapPoint = point,
-                        calloutVisibleState = calloutVisibleState,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    )
-                }
-            )
+        when (geoViewType) {
+            is GeoViewType.MapViewType -> {
+                MapView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    arcGISMap = viewModel.arcGISMap,
+                    mapViewProxy = viewModel.mapViewProxy,
+                    graphicsOverlays = listOf(tapLocationGraphicsOverlay),
+                    onSingleTapConfirmed = viewModel::setPoint,
+                    content = {
+                        GeoViewScopeContent(
+                            mapPoint = point,
+                            calloutVisibleState = calloutVisibleState,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
+                        )
+                    }
+                )
+            }
+
+            is GeoViewType.SceneViewType -> {
+                SceneView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    arcGISScene = viewModel.arcGISScene,
+                    sceneViewProxy = viewModel.sceneViewProxy,
+                    graphicsOverlays = listOf(tapLocationGraphicsOverlay),
+                    onSingleTapConfirmed = viewModel::setPoint,
+                    content = {
+                        GeoViewScopeContent(
+                            mapPoint = point,
+                            calloutVisibleState = calloutVisibleState,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
+                        )
+                    }
+                )
+            }
+
+            is GeoViewType.LocalSceneViewType -> {
+                LocalSceneView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    scene = viewModel.localScene,
+                    localSceneViewProxy = viewModel.localSceneViewProxy,
+                    onSingleTapConfirmed = viewModel::setPoint,
+                    content = {
+                        GeoViewScopeContent(
+                            mapPoint = point,
+                            calloutVisibleState = calloutVisibleState,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
+                        )
+                    }
+                )
+            }
         }
 
         if (showBottomSheet) {
@@ -164,13 +188,24 @@ fun TapLocationScreen(
             ) {
                 Box(Modifier.navigationBarsPadding()) {
                     CalloutOptions(
-                        isGeoViewMapView = geoViewType == GeoViewType.MapViewType,
+                        selectedType = geoViewType,
                         calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
                         mapPoint = point,
                         onOffsetChange = { viewModel.setOffset(it) },
-                        onGeoViewToggled = { viewModel.toggleGeoView() },
+                        onGeoViewToggled = {
+                            viewModel.toggleGeoView(
+                                when (it) {
+                                    0 -> GeoViewType.MapViewType
+                                    1 -> GeoViewType.SceneViewType
+                                    2 -> GeoViewType.LocalSceneViewType
+                                    else -> {
+                                        GeoViewType.SceneViewType
+                                    }
+                                }
+                            )
+                        },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                         onClearMapPointRequest = { viewModel.clearPoint() },
                         onCalloutOffsetRotationToggled = {
@@ -249,40 +284,49 @@ fun HtmlText(modifier: Modifier = Modifier, html: String, htmlFlag: Int, textCol
  */
 @Composable
 fun CalloutOptions(
-    isGeoViewMapView: Boolean,
+    selectedType: GeoViewType,
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
     mapPoint: Point?,
-    onGeoViewToggled: () -> Unit,
+    onGeoViewToggled: (Int) -> Unit,
     onVisibilityToggled: () -> Unit,
     onOffsetChange: (Offset) -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
     onClearMapPointRequest: () -> Unit,
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "Select GeoView")
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Select GeoView")
             SingleChoiceSegmentedButtonRow {
                 SegmentedButton(
-                    onClick = onGeoViewToggled,
-                    selected = isGeoViewMapView,
+                    onClick = { onGeoViewToggled(0) },
+                    selected = GeoViewType.MapViewType == selectedType,
                     label = { Text("MapView") },
                     shape = SegmentedButtonDefaults.itemShape(
                         index = 0,
-                        count = 2
+                        count = 3
                     )
                 )
                 SegmentedButton(
-                    onClick = onGeoViewToggled,
-                    selected = !isGeoViewMapView,
+                    onClick = { onGeoViewToggled(1) },
+                    selected = GeoViewType.SceneViewType == selectedType,
                     label = { Text("SceneView") },
                     shape = SegmentedButtonDefaults.itemShape(
                         index = 1,
-                        count = 2
+                        count = 3
+                    )
+                )
+                SegmentedButton(
+                    onClick = { onGeoViewToggled(2) },
+                    selected = GeoViewType.LocalSceneViewType == selectedType,
+                    label = { Text("LocalSceneView") },
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = 2,
+                        count = 3
                     )
                 )
             }

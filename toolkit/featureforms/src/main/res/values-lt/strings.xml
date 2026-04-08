@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Data turi būti %1$s arba ankstesnė</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Įvesta data</string>
-    <string name="ff_date_input_headline_description">Įvesta data: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Neatitinka numatytos struktūros: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Data neleidžiama: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Data nepatenka į numatytą intervalą %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Data</string>
-    <string name="ff_date_input_no_input_description">Nėra</string>
-    <string name="ff_date_input_title">Pasirinkti datą</string>
-    <string name="ff_date_picker_headline">"Pasirinkta data"</string>
-    <string name="ff_date_picker_headline_description">Dabartinis pasirinkimas: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Eiti į %1$s metus</string>
-    <string name="ff_date_picker_no_selection_description">Nėra</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Paslinkite, jei norite peržiūrėti praėjusius metus</string>
-    <string name="ff_date_picker_scroll_to_later_years">Paslinkite, jei norite peržiūrėti metus ateityje</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Perjungti į kalendoriaus įvesties režimą</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Braukite, jei norite pasirinkti metus, arba palieskite, jei norite grįžti prie dienos pasirinkimo"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Perjungti į teksto įvesties režimą</string>
-    <string name="ff_date_picker_switch_to_next_month">"Pakeisti į kitą mėnesį"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Pakeisti į ankstesnį mėnesį"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Perjungti į metų pasirinkimą"</string>
-    <string name="ff_date_picker_title">"Pasirinkti datą"</string>
-    <string name="ff_date_picker_today_description">Šiandien</string>
-    <string name="ff_date_picker_year_picker_pane_title">Matomas metų parinkiklis</string>
-    <string name="ff_date_range_input_invalid_range_input">Negalima datų intervalo įvestis</string>
-    <string name="ff_date_range_input_title">Įvesti datas</string>
-    <string name="ff_date_range_picker_day_in_range">Patenka į intervalą</string>
-    <string name="ff_date_range_picker_end_headline">Pabaigos data</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Paslinkite, jei norite peržiūrėti kitą mėnesį</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Paslinkite, jei norite peržiūrėti ankstesnį mėnesį</string>
-    <string name="ff_date_range_picker_start_headline">Pradžios data</string>
-    <string name="ff_date_range_picker_title">Pasirinkti datas</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">priešpiet</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formoje yra tikrinimo klaidų</string>
     <string name="the_form_has_edits">Formoje yra pakeitimų</string>
     <string name="do_you_want_to_save_your_changes">Ar norite išsaugoti pakeitimus?</string>
-    <string name="no_associations_found">Susiejimų nerasta</string>
+    <string name="no_associations_found">Nėra rodytinų susiejimų</string>
     <string name="terminal">Terminalas</string>
     <string name="terminal_with_value">Terminalas: %1$s</string>
+    <string name="content_visible">Turinys matomas</string>
+    <string name="percent_along">Proc. palei</string>
     <string name="from_element">Iš elemento</string>
     <string name="to_element">Į elementą</string>
     <string name="association_type">Susiejimo tipas</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Matomas turinys</string>
     <string name="content">Turinys</string>
+    <string name="containment_visible_value">Matoma: %1$s</string>
+    <string name="from_network_data_source">Iš tinklo duomenų šaltinio</string>
+    <string name="on_map">Žemėlapyje</string>
+    <string name="network_data_source">Tinklo duomenų šaltinis</string>
+    <string name="available_asset_types">Prieinamų išteklių tipai</string>
+    <string name="count">Skaičiuoti %1$d</string>
+    <string name="new_association">Naujas susiejimas</string>
+    <string name="add">Pridėti</string>
+    <string name="failed_to_create_association">Nepavyko sukurti susiejimo. %1$s</string>
+    <string name="available_features">%1$d galimi elementai</string>
+    <string name="loading2">Įkeliama...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant.</item>
         <item quantity="one">Turite %1$d klaidą, kurią būtina ištaisyti prieš išsaugant.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
         <item quantity="other">Turite %1$d klaidas (-ų), kurias būtina ištaisyti prieš išsaugant</item>
     </plurals>
+    <string name="search_features">Ieškoti elementų</string>
+    <string name="choose_to_add">Pasirinkti norint pridėti</string>
+    <string name="no_features_found">Elementų nerasta</string>
+    <string name="refine_your_search_tip">Patikslinkite paiešką arba pasirinkite kitą tinklo šaltinį.</string>
+    <string name="select_terminal">Pasirinkti terminalą</string>
+    <string name="show_on_map">Rodyti žemėlapyje</string>
+    <string name="more_information">Daugiau informacijos</string>
 </resources>

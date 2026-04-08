@@ -105,15 +105,18 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
+    implementation(libs.bundles.icons)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
-    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 
     // uiautomator
     androidTestImplementation(libs.androidx.uiautomator)
+    // espresso intents
+    androidTestImplementation(libs.androidx.espresso.intents)
+    // mockk for android tests
     androidTestImplementation(libs.mockk.android)
 }

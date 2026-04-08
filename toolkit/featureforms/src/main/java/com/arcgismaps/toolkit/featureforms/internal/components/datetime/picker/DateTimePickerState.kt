@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker
 
+import androidx.compose.material3.SelectableDates
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +27,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.UtcDateTime.Companion.createFromPickerValues
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toZonedDateTime
@@ -119,7 +121,7 @@ internal class UtcDateTime private constructor(
 /**
  * State for [DateTimePicker]. Use factory [DateTimePicker()] to create an instance.
  */
-internal interface DateTimePickerState {
+internal interface DateTimePickerState : SelectableDates {
     
     /**
      * Minimum date time allowed. This should be null if no range restriction is needed.
@@ -200,13 +202,6 @@ internal interface DateTimePickerState {
      * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateTimeValidator(timeStamp: Long): Boolean
-    
-    /**
-     * Validates if the UTC date of the [timeStamp] is between the dates of the given datetime ranges [minDateTime]
-     * and [maxDateTime] if they were provided. Returns true if the validation was successful, otherwise false
-     * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
-     */
-    fun dateValidator(timeStamp: Long): Boolean
 
     /**
      * Sets the [dateTime]'s time value to the current time instant in local time.
@@ -273,24 +268,6 @@ private class DateTimePickerStateImpl(
             utcDateTime <= it
         } ?: true
     }
-    
-    override fun dateValidator(timeStamp: Long): Boolean {
-        // the date validator is invoked by the date picker,
-        // which operates in milliseconds that are offset from UTC
-        // To compare it to min and max, the input must be converted
-        // to UTC.
-        val utcDate = UtcDateTime.create(timeStamp.minus(timeStamp.defaultTimeZoneOffset)).date!!
-        val minDate = UtcDateTime.create(minDateTime?.toEpochMilli()).date
-        val maxDate = UtcDateTime.create(maxDateTime?.toEpochMilli()).date
-
-        return minDate?.let { min ->
-            maxDate?.let { max ->
-                utcDate in min..max
-            } ?: (utcDate >= min)
-        } ?: maxDate?.let {
-            utcDate <= it
-        } ?: true
-    }
 
     override fun now() {
         val now = Instant.now().toEpochMilli().toZonedDateTime()
@@ -308,6 +285,33 @@ private class DateTimePickerStateImpl(
             hour,
             minute
         )
+    }
+
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        // The isSelectableDate is invoked by the date picker with the specific date in utc millis
+        // To compare it to min and max, they must be converted to utc millis as well.
+        val minDate = UtcDateTime.create(minDateTime?.toEpochMilli()).date
+        val maxDate = UtcDateTime.create(maxDateTime?.toEpochMilli()).date
+
+        return when {
+            minDate != null && maxDate != null -> {
+                utcTimeMillis in minDate..maxDate
+            }
+
+            minDate != null -> {
+                utcTimeMillis >= minDate
+            }
+
+            maxDate != null -> {
+                utcTimeMillis <= maxDate
+            }
+
+            else -> true
+        }
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return true
     }
 }
 

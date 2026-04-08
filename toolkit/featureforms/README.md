@@ -17,7 +17,7 @@ The `FeatureForm` is a composable that can render a `FeatureForm` object with a 
 - Provides a DateTime picker and a picker for coded-value field types.
 - Shows Validation errors for any fields with errors.
 - Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
-- Supports viewing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
+- Supports viewing and editing Utility Network Associations and navigating to associated features. See [section](#utility-associations-and-navigation) for more info.
 - Follows material 3 design system.
 
 ## Usage
@@ -113,7 +113,7 @@ Beginning with version 200.8.0, when edits are present in the `FeatureForm`, an 
 
 A new `onEditingEvent` callback of type `FeatureFormEditingEvent` is introduced which is invoked when the user performs the "Save" or "Discard" action. This event can be used to perform any additional tasks such as rolling back changes on "Discard" or applying edits to the service on "Save". The [microapp](../../microapps/FeatureFormsApp) uses this mechanism.
 
-### Utility Associations and Navigation
+### Utility Associations
 
 The `FeatureForm` composable, introduced in version 200.8.0, leverages the `FeatureFormState` class to support the `UtilityAssociationsFormElement`. This enhancement enables more advanced workflows such as viewing utility network associations for the feature being edited and navigating to and editing associated features.
 
@@ -124,6 +124,12 @@ If the user taps on an association and there are no edits in the current `Featur
 During navigation, the `FeatureFormState.activeFeatureForm` observable property is updated with the new `FeatureForm` instance as the user moves forward or backward through associations.
 
 If edits exist in the current `FeatureForm`, a dialog prompts the user to save or discard changes before proceeding to the next or previous `FeatureForm`. Navigation can be disabled using the `isNavigationEnabled: Boolean` parameter.
+
+When viewing or adding utility associations, the `onShowOnMapRequest` event can be used to highlight the feature on the map. The callback fires on the user’s action and passes the spatial `ArcGISFeature` for the selected association or the candidate feature in the add-association workflow.
+
+### Navigation Events
+
+To monitor navigation events when users interact with utility associations, the `onNavigationEvent` event can be utilized. This callback provides insights into navigation actions along with associated metadata, allowing developers to implement custom behavior. 
 
 ### Permissions
 
@@ -243,6 +249,34 @@ special styling.
 #### Final page shows the utility associations for the selected network source
 
 <img src="screenshots/utility_associations.png" width="250"/>
+
+#### Adding Associations
+
+When the `UtilityAssociationsFormElement` is configured to allow association editing (as indicated by the `isEditable` property), users can add a new association by tapping **Add Association**.
+
+<img src="screenshots/add_associations.png" width="250"/>
+
+This starts a guided workflow:
+
+1. Select the destination network source.
+2. Select a `UtilityAssetType`.
+3. Select the target feature from the list of candidates returned for the chosen `UtilityAssetType`.
+
+To help users find the correct feature, the candidate list supports attribute-based filtering during the selection step. Tap the **Filter** icon in the top-right corner to narrow down results.
+
+<img src="screenshots/attribute_filtering.png" width="250"/>
+
+Each candidate row also exposes the `onShowOnMapRequest` action. Apps can use this callback to highlight or zoom to the candidate feature on the map, helping users visually confirm they’ve selected the correct feature.
+
+The final step is to review the association details, set any additional properties, and then confirm the add operation.
+
+<img src="screenshots/create_association.png" width="250"/>
+
+After the association is added, it appears in the associations list for the selected network source.
+
+#### Delete Associations
+
+If the `UtilityAssociationsFormElement` is configured to allow editing associations, users can delete an existing association by swiping left on the association item in the list or using the `Remove` option under the overflow menu for the association item. A confirmation dialog is shown before deleting the association.
 
 ## Theming and Customization
 

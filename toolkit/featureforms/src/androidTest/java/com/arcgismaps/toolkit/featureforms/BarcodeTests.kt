@@ -102,12 +102,12 @@ class BarcodeTests : FeatureFormTestRunner(
         // Check the custom barcode click action is triggered
         assertThat(fieldFormElement).isNotNull()
         assertThat(fieldFormElement!!.label).isEqualTo("Barcode")
-        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
-        val barcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(fieldFormElement.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val barcodeScannerFormInput = fieldFormElement.input as BarcodeScannerFormInput
         assertThat(barcodeScannerFormInput.maxLength).isEqualTo(50)
         // set a value to the barcode field
         var barcodeValue = "0123456789"
-        fieldFormElement!!.updateValue(barcodeValue)
+        fieldFormElement.updateValue(barcodeValue)
         firstBarcodeElement.assertEditableTextEquals(barcodeValue)
 
         val secondBarcodeElement = composeTestRule.onNodeWithText("Model Number")
@@ -119,13 +119,13 @@ class BarcodeTests : FeatureFormTestRunner(
         secondScanIcon.performClick()
         // Check the custom barcode click action is triggered
         assertThat(fieldFormElement).isNotNull()
-        assertThat(fieldFormElement!!.label).isEqualTo("Model Number")
-        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
-        val secondBarcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(fieldFormElement.label).isEqualTo("Model Number")
+        assertThat(fieldFormElement.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val secondBarcodeScannerFormInput = fieldFormElement.input as BarcodeScannerFormInput
         assertThat(secondBarcodeScannerFormInput.maxLength).isEqualTo(10)
         // set a value to the barcode field
         barcodeValue = "9876543210"
-        fieldFormElement!!.updateValue(barcodeValue)
+        fieldFormElement.updateValue(barcodeValue)
         secondBarcodeElement.assertEditableTextEquals(barcodeValue)
     }
 
@@ -161,12 +161,12 @@ class BarcodeTests : FeatureFormTestRunner(
         // Check the custom barcode click action is triggered
         assertThat(fieldFormElement).isNotNull()
         assertThat(fieldFormElement!!.label).isEqualTo("Barcode in Group")
-        assertThat(fieldFormElement!!.input).isInstanceOf(BarcodeScannerFormInput::class.java)
-        val barcodeScannerFormInput = fieldFormElement!!.input as BarcodeScannerFormInput
+        assertThat(fieldFormElement.input).isInstanceOf(BarcodeScannerFormInput::class.java)
+        val barcodeScannerFormInput = fieldFormElement.input as BarcodeScannerFormInput
         assertThat(barcodeScannerFormInput.maxLength).isEqualTo(25)
         assertThat(barcodeScannerFormInput.minLength).isEqualTo(10)
         val barcodeValue = "0123456789"
-        fieldFormElement!!.updateValue(barcodeValue)
+        fieldFormElement.updateValue(barcodeValue)
         barcodeElement.assertEditableTextEquals(barcodeValue)
     }
 

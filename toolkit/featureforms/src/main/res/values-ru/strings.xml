@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Дата должна быть %1$s или ранее</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Введенная дата</string>
-    <string name="ff_date_input_headline_description">Введенная дата: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Дата не соответствует ожидаемому шаблону: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Недопустимая дата: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Дата не попадает в ожидаемый диапазон лет %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Дата</string>
-    <string name="ff_date_input_no_input_description">Нет</string>
-    <string name="ff_date_input_title">Выбрать дату</string>
-    <string name="ff_date_picker_headline">"Выбранная дата"</string>
-    <string name="ff_date_picker_headline_description">Текущая выборка: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Перейти к году %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Нет</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Прокрутите, чтобы просмотреть предыдущие годы</string>
-    <string name="ff_date_picker_scroll_to_later_years">Прокрутите, чтобы просмотреть следующие годы</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Переключиться в режим ввода календаря</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Проведите пальцем, чтобы выбрать год, или коснитесь, чтобы вернуться к выбору дня"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Переключиться в режим ввода текста</string>
-    <string name="ff_date_picker_switch_to_next_month">"Перейти к следующему месяцу"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Перейти к предыдущему месяцу"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Переключиться на выбор года"</string>
-    <string name="ff_date_picker_title">"Выбрать дату"</string>
-    <string name="ff_date_picker_today_description">Сегодня</string>
-    <string name="ff_date_picker_year_picker_pane_title">Видимый выбор года</string>
-    <string name="ff_date_range_input_invalid_range_input">Введен некорректный диапазон дат</string>
-    <string name="ff_date_range_input_title">Ввести даты</string>
-    <string name="ff_date_range_picker_day_in_range">В диапазоне</string>
-    <string name="ff_date_range_picker_end_headline">Дата окончания</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Прокрутить, чтобы отобразился следующий месяц</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Прокрутить, чтобы отобразился предыдущий месяц</string>
-    <string name="ff_date_range_picker_start_headline">Дата начала</string>
-    <string name="ff_date_range_picker_title">Выбрать даты</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">В этой форме есть ошибки проверки</string>
     <string name="the_form_has_edits">В этой форме есть изменения</string>
     <string name="do_you_want_to_save_your_changes">Вы хотите сохранить внесенные изменения?</string>
-    <string name="no_associations_found">Связи не найдены</string>
+    <string name="no_associations_found">Нет связей для отображения</string>
     <string name="terminal">Терминал</string>
     <string name="terminal_with_value">Терминал : %1$s</string>
+    <string name="content_visible">Видимое содержание</string>
+    <string name="percent_along">Процент вдоль</string>
     <string name="from_element">Элемент От</string>
     <string name="to_element">Элемент До</string>
     <string name="association_type">Тип связи</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Видимое содержание</string>
     <string name="content">Ресурсы</string>
+    <string name="containment_visible_value">Видимый: %1$s</string>
+    <string name="from_network_data_source">Из источника сетевых данных</string>
+    <string name="on_map">На карте</string>
+    <string name="network_data_source">Источник сетевых данных</string>
+    <string name="available_asset_types">Доступные типы оборудования</string>
+    <string name="count">Количество %1$d</string>
+    <string name="new_association">Новая связь</string>
+    <string name="add">Добавить</string>
+    <string name="failed_to_create_association">Не удалось создать связь. %1$s</string>
+    <string name="available_features">Доступные объекты %1$d</string>
+    <string name="loading2">Загрузка...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
         <item quantity="one">У вас возникла %1$d ошибка, которую необходимо исправить перед сохранением.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
         <item quantity="other">У вас возникло %1$d ошибок, которые необходимо исправить перед сохранением.</item>
     </plurals>
+    <string name="search_features">Поиск объектов</string>
+    <string name="choose_to_add">Выбрать для добавления</string>
+    <string name="no_features_found">Объекты не найдены.</string>
+    <string name="refine_your_search_tip">Уточните поиск или выберите другой источник сети.</string>
+    <string name="select_terminal">Выбрать терминал</string>
+    <string name="show_on_map">Показать на карте</string>
+    <string name="more_information">Дополнительные сведения</string>
 </resources>

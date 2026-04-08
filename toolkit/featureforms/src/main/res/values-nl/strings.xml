@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum moet op of voor %1$s liggen</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ingevoerde datum</string>
-    <string name="ff_date_input_headline_description">Ingevoerde datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum komt niet overeen met verwacht patroon: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum niet toegestaan: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum ligt buiten verwacht jarenbereik %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Geen</string>
-    <string name="ff_date_input_title">Datum selecteren</string>
-    <string name="ff_date_picker_headline">"Geselecteerd date"</string>
-    <string name="ff_date_picker_headline_description">Huidige selectie: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ga naar jaar %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Geen</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Scrollen om eerdere jaren weer te geven</string>
-    <string name="ff_date_picker_scroll_to_later_years">Scrollen om latere jaren weer te geven</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Overschakelen naar kalenderinvoermodus</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Veeg om een jaar te selecteren of tik om terug te gaan om een dag te selecteren"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Overschakelen op tekstinvoermodus</string>
-    <string name="ff_date_picker_switch_to_next_month">"Veranderen in volgende maand"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Veranderen in vorige maand"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Overschakelen op selecteren van een jaar"</string>
-    <string name="ff_date_picker_title">"Datum selecteren"</string>
-    <string name="ff_date_picker_today_description">Vandaag</string>
-    <string name="ff_date_picker_year_picker_pane_title">Jaarkiezer zichtbaar</string>
-    <string name="ff_date_range_input_invalid_range_input">Invoer heeft ongeldig datumbereik</string>
-    <string name="ff_date_range_input_title">Datums invoeren</string>
-    <string name="ff_date_range_picker_day_in_range">Binnen bereik</string>
-    <string name="ff_date_range_picker_end_headline">Einddatum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Scrollen om de volgende maand weer te geven</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Scrollen om de vorige maand weer te geven</string>
-    <string name="ff_date_range_picker_start_headline">Begindatum</string>
-    <string name="ff_date_range_picker_title">Datums selecteren</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Validatie van het formulier levert fouten op.</string>
     <string name="the_form_has_edits">Het formulier is bewerkt</string>
     <string name="do_you_want_to_save_your_changes">Wilt u uw wijzigingen opslaan?</string>
-    <string name="no_associations_found">Kan geen associaties vinden</string>
+    <string name="no_associations_found">Er zijn geen associaties die u kunt weergeven</string>
     <string name="terminal">Terminal</string>
     <string name="terminal_with_value">Terminal: %1$s</string>
+    <string name="content_visible">Content zichtbaar</string>
+    <string name="percent_along">Percentage langs</string>
     <string name="from_element">Van element</string>
     <string name="to_element">Naar element</string>
     <string name="association_type">Type associatie</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Zichtbare content</string>
     <string name="content">Content</string>
+    <string name="containment_visible_value">Zichtbaar: %1$s</string>
+    <string name="from_network_data_source">Van netwerk-gegevensbron</string>
+    <string name="on_map">Op kaart</string>
+    <string name="network_data_source">Netwerk-gegevensbron</string>
+    <string name="available_asset_types">Beschikbare assettypes</string>
+    <string name="count">Aantal %1$d</string>
+    <string name="new_association">Nieuwe associatie</string>
+    <string name="add">Toevoegen</string>
+    <string name="failed_to_create_association">Kan associatie niet maken. %1$s</string>
+    <string name="available_features">%1$d beschikbare objecten</string>
+    <string name="loading2">Bezig met laden...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat.</item>
         <item quantity="one">Er is %1$d fout die moet worden hersteld voordat u opslaat.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat</item>
         <item quantity="other">Er zijn %1$d fouten die moeten worden hersteld voordat u opslaat</item>
     </plurals>
+    <string name="search_features">Objecten zoeken</string>
+    <string name="choose_to_add">Kiezen om toe te voegen</string>
+    <string name="no_features_found">Kan geen objecten vinden</string>
+    <string name="refine_your_search_tip">Verfijn uw zoekactie of kies een andere netwerkbron.</string>
+    <string name="select_terminal">Terminal selecteren</string>
+    <string name="show_on_map">Weergeven op kaart</string>
+    <string name="more_information">Meer informatie</string>
 </resources>

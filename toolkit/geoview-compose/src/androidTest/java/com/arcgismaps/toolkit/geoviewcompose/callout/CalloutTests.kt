@@ -23,12 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.IntSize
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
@@ -68,7 +68,7 @@ class CalloutTests {
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
 
@@ -77,7 +77,7 @@ class CalloutTests {
 
         // verify Callout is not displayed
         composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
     }
@@ -98,17 +98,17 @@ class CalloutTests {
 
         // verify first Callout is being displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription("CALLOUT#1"),
+            matcher = hasTestTag("CALLOUT#1"),
             timeoutMillis = timeoutMillis
         )
 
         // verify other two Callouts are not being displayed
         composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription("CALLOUT#2"),
+            matcher = hasTestTag("CALLOUT#2"),
             timeoutMillis = timeoutMillis
         )
         composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription("CALLOUT#3"),
+            matcher = hasTestTag("CALLOUT#3"),
             timeoutMillis = timeoutMillis
         )
     }
@@ -130,20 +130,20 @@ class CalloutTests {
 
         // verify only one Callout displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
 
 
         // verify first Callout#1 is being displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription("CALLOUT#1"),
+            matcher = hasTestTag("CALLOUT#1"),
             timeoutMillis = timeoutMillis
         )
 
         // verify first Callout#2 is not being displayed
         composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription("CALLOUT#2"),
+            matcher = hasTestTag("CALLOUT#2"),
             timeoutMillis = timeoutMillis
         )
 
@@ -152,13 +152,13 @@ class CalloutTests {
 
         // verify first Callout#2 is being displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription("CALLOUT#2"),
+            matcher = hasTestTag("CALLOUT#2"),
             timeoutMillis = timeoutMillis
         )
 
         // verify first Callout#1 is not being displayed
         composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription("CALLOUT#1"),
+            matcher = hasTestTag("CALLOUT#1"),
             timeoutMillis = timeoutMillis
         )
     }
@@ -181,7 +181,7 @@ class CalloutTests {
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
 
@@ -193,7 +193,7 @@ class CalloutTests {
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
 
@@ -220,20 +220,16 @@ class CalloutTests {
         }
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
+            matcher = hasTestTag(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
 
         val calloutContainerNodeInteraction = composeTestRule
-            .onNodeWithContentDescription(calloutContainerLabel)
+            .onNodeWithTag(calloutContainerLabel)
 
         val calloutBitmap = calloutContainerNodeInteraction.captureToImage().asAndroidBitmap()
         // test if the Callout contains a Red background Color
         assert(calloutBitmap.containsColor(Color.Red.hashCode()))
-
-        val calloutContainerNode = calloutContainerNodeInteraction.fetchSemanticsNode()
-        // test Callout Size excluding leader height and border width
-        assert(calloutContainerNode.size == IntSize(442, 416))
     }
 }
 

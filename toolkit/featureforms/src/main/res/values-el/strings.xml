@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Η ημερομηνία πρέπει να είναι στις ή πριν από τις %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Καταχωρημένη ημερομηνία</string>
-    <string name="ff_date_input_headline_description">Καταχωρημένη ημερομηνία: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Η ημερομηνία δεν συμφωνεί με το αναμενόμενο πρότυπο: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Η ημερομηνία δεν επιτρέπεται: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Η ημερομηνία δεν εμπίπτει στο αναμενόμενο εύρος τιμών για το έτος %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">Ημερομηνία</string>
-    <string name="ff_date_input_no_input_description">Καθόλου</string>
-    <string name="ff_date_input_title">Επιλογή ημερομηνίας</string>
-    <string name="ff_date_picker_headline">"Επιλεγμένη ημερομηνία"</string>
-    <string name="ff_date_picker_headline_description">Τρέχουσα επιλογή: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Πλοήγηση στο έτος %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Καθόλου</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Κυλήστε για να εμφανιστούν τα προηγούμενα έτη</string>
-    <string name="ff_date_picker_scroll_to_later_years">Κυλήστε για να εμφανιστούν τα μεταγενέστερα έτη</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Αλλαγή σε λειτουργία εισαγωγής ημερολογίου</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Αλλαγή για επιλογή ενός έτους ή πάτημα για επιστροφή για επιλογή μίας ημέρας"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Αλλαγή σε λειτουργία εισαγωγής κειμένου</string>
-    <string name="ff_date_picker_switch_to_next_month">"Αλλαγή στον επόμενο μήνα"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Αλλαγή στον προηγούμενο μήνα"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Αλλαγή στην επιλογή ενός έτους"</string>
-    <string name="ff_date_picker_title">"Επιλογή ημερομηνίας"</string>
-    <string name="ff_date_picker_today_description">Σήμερα</string>
-    <string name="ff_date_picker_year_picker_pane_title">Ορατός επιλογέας έτους</string>
-    <string name="ff_date_range_input_invalid_range_input">Μη έγκυρη εισαγωγή εύρους τιμών ημερομηνίας</string>
-    <string name="ff_date_range_input_title">Καταχώριση ημερομηνιών</string>
-    <string name="ff_date_range_picker_day_in_range">Εντός του εύρους τιμών</string>
-    <string name="ff_date_range_picker_end_headline">Ημ/νία λήξης</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Κυλήστε για να εμφανιστεί ο επόμενος μήνας</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Κυλήστε για να εμφανιστεί ο προηγούμενος μήνας</string>
-    <string name="ff_date_range_picker_start_headline">Ημ/νία έναρξης</string>
-    <string name="ff_date_range_picker_title">Επιλογή ημερομηνιών</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">π.μ.</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Η φόρμα έχει σφάλματα επικύρωσης</string>
     <string name="the_form_has_edits">Η φόρμα περιέχει αλλαγές</string>
     <string name="do_you_want_to_save_your_changes">Θέλετε να αποθηκεύσετε τις αλλαγές σας;</string>
-    <string name="no_associations_found">Δεν βρέθηκαν συσχετίσεις</string>
+    <string name="no_associations_found">Δεν υπάρχουν συσχετίσεις προς εμφάνιση</string>
     <string name="terminal">Τερματικό</string>
     <string name="terminal_with_value">Τερματικό : %1$s</string>
+    <string name="content_visible">Ορατό περιεχόμενο</string>
+    <string name="percent_along">Ποσοστό κατά μήκος</string>
     <string name="from_element">Από στοιχείο</string>
     <string name="to_element">Προς στοιχείο</string>
     <string name="association_type">Τύπος συσχέτισης</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Ορατό περιεχόμενο</string>
     <string name="content">Περιεχόμενο</string>
+    <string name="containment_visible_value">Ορατό: %1$s</string>
+    <string name="from_network_data_source">Από πηγή δεδομένων δικτύου</string>
+    <string name="on_map">Στον χάρτη</string>
+    <string name="network_data_source">Πηγή δεδομένων δικτύου</string>
+    <string name="available_asset_types">Διαθέσιμοι τύποι περιουσιακών στοιχείων</string>
+    <string name="count">Πλήθος %1$d</string>
+    <string name="new_association">Νέα συσχέτιση</string>
+    <string name="add">Προσθήκη</string>
+    <string name="failed_to_create_association">Αποτυχία δημιουργίας συσχέτισης. %1$s</string>
+    <string name="available_features">Διαθέσιμα στοιχεία: %1$d</string>
+    <string name="loading2">Φόρτωση...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση.</item>
         <item quantity="one">Έχετε %1$d σφάλμα που πρέπει να διορθώσετε πριν από την αποθήκευση.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση</item>
         <item quantity="other">Έχετε %1$d σφάλματα που πρέπει να διορθώσετε πριν από την αποθήκευση</item>
     </plurals>
+    <string name="search_features">Αναζήτηση στοιχείων</string>
+    <string name="choose_to_add">Επιλέξτε για προσθήκη</string>
+    <string name="no_features_found">Δεν βρέθηκαν στοιχεία</string>
+    <string name="refine_your_search_tip">Περιορίστε την αναζήτησή σας ή επιλέξτε διαφορετική πηγή δικτύου.</string>
+    <string name="select_terminal">Επιλέξτε τερματικό</string>
+    <string name="show_on_map">Εμφάνιση στον χάρτη</string>
+    <string name="more_information">Περισσότερες πληροφορίες</string>
 </resources>

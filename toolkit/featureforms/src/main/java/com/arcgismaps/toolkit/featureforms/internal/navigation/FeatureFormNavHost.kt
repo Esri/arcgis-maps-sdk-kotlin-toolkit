@@ -28,7 +28,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.FeatureFormNavigationRoute
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
@@ -40,7 +39,7 @@ internal fun FeatureFormNavHost(
     state: FeatureFormState,
     isNavigationEnabled: Boolean,
     validationErrorVisibility: ValidationErrorVisibility,
-    onSaveForm: suspend (FeatureForm, Boolean) -> Result<Unit>,
+    onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onBarcodeButtonClick: ((FieldFormElement) -> Unit)?,
     onShowOnMapRequest: (ArcGISFeature) -> Unit,
@@ -66,7 +65,7 @@ internal fun FeatureFormNavHost(
         )
 
         associationsFilterResultDestination(
-            onGroupSelected =  navController::navigateToUNAssociationGroupResult,
+            onGroupSelected = navController::navigateToUNAssociationGroupResult,
             onAddFromSourceClick = navController::navigateToAddUNAssociationFromSource,
             onNavigationEvent = onNavigationEvent,
             state = state
@@ -78,9 +77,10 @@ internal fun FeatureFormNavHost(
             onDiscard = onDiscardForm,
             isNavigationEnabled = isNavigationEnabled,
             onNavigateToAssociation = navController::navigateToUNAssociationDetails,
-            onNavigateToFeature =  state::navigateTo,
+            onNavigateToFeature = state::navigateTo,
             onNavigationEvent = onNavigationEvent,
-            onBack =  state::popBackStack,
+            onAssociatedFeatureLocateRequest = onShowOnMapRequest,
+            onBack = state::popBackStack,
         )
 
         associationDetailsDestination(
@@ -122,7 +122,10 @@ internal fun FeatureFormNavHost(
             selectFeatureDestination(
                 onBackPressed = state::popBackStack,
                 onFeatureCandidateSelected = { backStackEntry ->
-                  navController.navigateToCreateAssociation(backStackEntry)
+                    navController.navigateToCreateAssociation(backStackEntry)
+                },
+                onFilter = { backStackEntry ->
+                    navController.navigateToFeatureAttributesFilter(backStackEntry)
                 },
                 onFeatureCandidateLocateRequest = onShowOnMapRequest,
                 onGetParentEntry = {
@@ -140,6 +143,13 @@ internal fun FeatureFormNavHost(
                     navController.getBackStackEntry(it.destination.parent!!.id)
                 },
                 onNavigationEvent = onNavigationEvent
+            )
+
+            featureAttributesFilterDestination(
+                onBackPressed = state::popBackStack,
+                onGetParentEntry = {
+                    navController.getBackStackEntry(it.destination.parent!!.id)
+                }
             )
         }
     }

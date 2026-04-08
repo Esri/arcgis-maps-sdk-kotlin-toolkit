@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">日期不得晚于 %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">已输入日期</string>
-    <string name="ff_date_input_headline_description">已输入日期：%1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">日期与预期模式不匹配：%1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">无效日期：%1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        日期超出预期年份范围 %1$s - %2$s
-    </string>
-    <string name="ff_date_input_label">日期</string>
-    <string name="ff_date_input_no_input_description">无</string>
-    <string name="ff_date_input_title">选择日期</string>
-    <string name="ff_date_picker_headline">“已选日期”</string>
-    <string name="ff_date_picker_headline_description">当前选择：%1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">转至 %1$s 年</string>
-    <string name="ff_date_picker_no_selection_description">无</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">滚动查看较早年份</string>
-    <string name="ff_date_picker_scroll_to_later_years">滚动查看较晚年份</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">切换到日历输入模式</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        “滑动选择年份，或点击后切换到选择日期”
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">切换到文本输入模式</string>
-    <string name="ff_date_picker_switch_to_next_month">“更改为下个月”</string>
-    <string name="ff_date_picker_switch_to_previous_month">“更改为上个月”</string>
-    <string name="ff_date_picker_switch_to_year_selection">“切换到选择年份”</string>
-    <string name="ff_date_picker_title">“选择日期”</string>
-    <string name="ff_date_picker_today_description">今天</string>
-    <string name="ff_date_picker_year_picker_pane_title">年份选择器可见</string>
-    <string name="ff_date_range_input_invalid_range_input">日期范围无效输入</string>
-    <string name="ff_date_range_input_title">输入日期</string>
-    <string name="ff_date_range_picker_day_in_range">范围内</string>
-    <string name="ff_date_range_picker_end_headline">结束日期</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">滚动显示下个月</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">滚动显示上个月</string>
-    <string name="ff_date_range_picker_start_headline">开始日期</string>
-    <string name="ff_date_range_picker_title">选择日期</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">AM</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">表单存在验证错误。</string>
     <string name="the_form_has_edits">表单包含编辑内容</string>
     <string name="do_you_want_to_save_your_changes">是否要保存这些更改?</string>
-    <string name="no_associations_found">未找到任何关联</string>
+    <string name="no_associations_found">无可显示的关联</string>
     <string name="terminal">终端</string>
     <string name="terminal_with_value">终端：%1$s</string>
+    <string name="content_visible">内容可见</string>
+    <string name="percent_along">延伸百分比</string>
     <string name="from_element">自元素</string>
     <string name="to_element">至元素</string>
     <string name="association_type">关联类型</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">可见内容</string>
     <string name="content">内容</string>
+    <string name="containment_visible_value">可见：%1$s</string>
+    <string name="from_network_data_source">从网络数据源</string>
+    <string name="on_map">在地图上</string>
+    <string name="network_data_source">网络数据源</string>
+    <string name="available_asset_types">可用资产类型</string>
+    <string name="count">计数 %1$d</string>
+    <string name="new_association">新建关联</string>
+    <string name="add">添加</string>
+    <string name="failed_to_create_association">创建关联失败。%1$s</string>
+    <string name="available_features">%1$d 可用要素</string>
+    <string name="loading2">正在加载...</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">您有 %1$d 个错误必须在保存之前修复。</item>
         <item quantity="one">您有 %1$d 个错误必须在保存之前修复。</item>
@@ -177,4 +155,11 @@
         <item quantity="many">您有 %1$d 个错误必须在保存之前修复</item>
         <item quantity="other">您有 %1$d 个错误必须在保存之前修复</item>
     </plurals>
+    <string name="search_features">搜索要素</string>
+    <string name="choose_to_add">选择以添加</string>
+    <string name="no_features_found">未找到要素</string>
+    <string name="refine_your_search_tip">请细化您的搜索条件或选择其他网络源。</string>
+    <string name="select_terminal">选择终端</string>
+    <string name="show_on_map">在地图上显示</string>
+    <string name="more_information">更多信息</string>
 </resources>

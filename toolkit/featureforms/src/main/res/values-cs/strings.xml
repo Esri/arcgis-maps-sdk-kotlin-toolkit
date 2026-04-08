@@ -73,41 +73,6 @@
     <string name="max_datetime_helper_text">Datum musí být %1$s nebo dřívější</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Zadané datum</string>
-    <string name="ff_date_input_headline_description">Zadané datum: %1$s</string>
-    <string name="ff_date_input_invalid_for_pattern">Datum neodpovídá očekávanému vzorci: %1$s</string>
-    <string name="ff_date_input_invalid_not_allowed">Datum nepovoleno: %1$s</string>
-    <string name="ff_date_input_invalid_year_range">
-        Datum mimo očekávaný rozsah let %1$s–%2$s
-    </string>
-    <string name="ff_date_input_label">Datum</string>
-    <string name="ff_date_input_no_input_description">Žádný</string>
-    <string name="ff_date_input_title">Vyberte datum</string>
-    <string name="ff_date_picker_headline">"Vybrané datum"</string>
-    <string name="ff_date_picker_headline_description">Aktuální výběr: %1$s</string>
-    <string name="ff_date_picker_navigate_to_year_description">Přejít na rok %1$s</string>
-    <string name="ff_date_picker_no_selection_description">Žádný</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Posunout a zobrazit předešlé roky</string>
-    <string name="ff_date_picker_scroll_to_later_years">Posunout a zobrazit následující roky</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Přepnout do režimu zadávání kalendáře</string>
-    <string name="ff_date_picker_switch_to_day_selection">
-        "Posunutím vyberte rok nebo klepnutím přepněte zpět na výběr dne"
-    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Přepnout do režimu zadávání textu</string>
-    <string name="ff_date_picker_switch_to_next_month">"Změnit na další měsíc"</string>
-    <string name="ff_date_picker_switch_to_previous_month">"Změnit na předchozí měsíc"</string>
-    <string name="ff_date_picker_switch_to_year_selection">"Přepnout na výběr roku"</string>
-    <string name="ff_date_picker_title">"Vybrat datum"</string>
-    <string name="ff_date_picker_today_description">Dnes</string>
-    <string name="ff_date_picker_year_picker_pane_title">Výběr roku viditelný</string>
-    <string name="ff_date_range_input_invalid_range_input">Neplatné zadání rozsahu dat</string>
-    <string name="ff_date_range_input_title">Zadejte data</string>
-    <string name="ff_date_range_picker_day_in_range">V rozsahu</string>
-    <string name="ff_date_range_picker_end_headline">Koncové datum</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Posunout a zobrazit další měsíc</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Posunout a zobrazit předchozí měsíc</string>
-    <string name="ff_date_range_picker_start_headline">Počáteční datum</string>
-    <string name="ff_date_range_picker_title">Vyberte data</string>
 
     <!-- Time Picker string values -->
     <string name="ff_time_picker_am">dopoledne</string>
@@ -156,9 +121,11 @@
     <string name="the_form_has_validation_errors">Formulář má chyby ověření</string>
     <string name="the_form_has_edits">Formulář má úpravy</string>
     <string name="do_you_want_to_save_your_changes">Chcete uložit své změny?</string>
-    <string name="no_associations_found">Nebyly nalezeny žádné vazby</string>
+    <string name="no_associations_found">Žádné vazby k zobrazení</string>
     <string name="terminal">Vývod</string>
     <string name="terminal_with_value">Terminál: %1$s</string>
+    <string name="content_visible">Viditelný obsah</string>
+    <string name="percent_along">Procento podél</string>
     <string name="from_element">Od prvku</string>
     <string name="to_element">K prvku</string>
     <string name="association_type">Typ vazby</string>
@@ -169,6 +136,17 @@
     <string name="percent_along_edge">%1$d %%</string>
     <string name="visible_content">Viditelný obsah</string>
     <string name="content">Obsah</string>
+    <string name="containment_visible_value">Viditelné: %1$s</string>
+    <string name="from_network_data_source">Ze síťového zdroje dat</string>
+    <string name="on_map">Na mapě</string>
+    <string name="network_data_source">Síťový zdroj dat</string>
+    <string name="available_asset_types">Dostupné typy prvků</string>
+    <string name="count">Počet %1$d</string>
+    <string name="new_association">Nová vazba</string>
+    <string name="add">Přidat</string>
+    <string name="failed_to_create_association">Nepodařilo se vytvořitt vazbu. %1$s</string>
+    <string name="available_features">Dostupné prvky: %1$d</string>
+    <string name="loading2">Načítání…</string>
     <plurals name="you_have_errors_that_must_be_fixed_before_saving">
         <item quantity="zero">Máte chyby (celkem %1$d), které je před uložením nutné opravit.</item>
         <item quantity="one">Máte %1$d chybu, kterou je před uložením nutné opravit.</item>
@@ -177,4 +155,11 @@
         <item quantity="many">Máte chyby (celkem %1$d), které je před uložením nutné opravit</item>
         <item quantity="other">Máte chyby (celkem %1$d), které je před uložením nutné opravit</item>
     </plurals>
+    <string name="search_features">Vyhledat prvky</string>
+    <string name="choose_to_add">Vyberte, co chcete přidat</string>
+    <string name="no_features_found">Nebyly nalezeny žádné prvky</string>
+    <string name="refine_your_search_tip">Upřesněte své hledání nebo vyberte jiný síťový zdroj.</string>
+    <string name="select_terminal">Vyberte terminál</string>
+    <string name="show_on_map">Zobrazit na mapě</string>
+    <string name="more_information">Více informací</string>
 </resources>

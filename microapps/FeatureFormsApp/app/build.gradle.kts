@@ -32,6 +32,9 @@ secrets {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
 }
 
 android {
@@ -78,6 +81,7 @@ dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
+    implementation(project(":offline"))
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt
@@ -86,7 +90,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     // room
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     ksp(libs.room.compiler)
     // jetpack window manager
@@ -100,6 +103,7 @@ dependencies {
     implementation(libs.coil3.compose)
     // compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.activity.compose)
