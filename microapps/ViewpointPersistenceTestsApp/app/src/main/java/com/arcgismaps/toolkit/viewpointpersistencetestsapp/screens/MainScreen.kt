@@ -45,7 +45,8 @@ fun MainScreen() {
         composable("TC2_TwoMapViews") { TC2TwoMapViews() }
         composable("TC3_TwoScreens") { TC3TwoScreens() }
         composable("TC4_SceneView") { TC4SceneView() }
-        composable("TC5_AnimatedViewpoint") { TC5AnimatedViewpoint() }
+        composable("TC5_LocalSceneView") { TC5LocalSceneView() }
+        composable("TC6_AnimatedViewpoint") { TC6AnimatedViewpoint() }
     }
 }
 
@@ -90,8 +91,13 @@ fun SelectionScreen(navController: NavHostController) {
                 }
             }
             item {
-                ScreenSelectionItem(text = "TC 5: Animated Viewpoint") {
-                    navController.navigate("TC5_AnimatedViewpoint")
+                ScreenSelectionItem(text = "TC 5: LocalSceneView") {
+                    navController.navigate("TC5_LocalSceneView")
+                }
+            }
+            item {
+                ScreenSelectionItem(text = "TC 6: Animated Viewpoint") {
+                    navController.navigate("TC6_AnimatedViewpoint")
                 }
             }
         }

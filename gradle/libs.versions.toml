@@ -39,6 +39,7 @@ gmazzo = "2.4.7"
 gradleSecrets = "2.0.1"
 workVersion = "2.11.0"
 arcgismapsTestdataSync = "1.0"
+materialIcons = "1.3.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -52,6 +53,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui"}
 androidx-compose-material3 = { module = "androidx.compose.material3:material3"}
+androidx-compose-material-icons = { module = "androidx.compose.material:material-icons-core", name = "icons", version.ref = "materialIcons" }
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics"}
 androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4"}

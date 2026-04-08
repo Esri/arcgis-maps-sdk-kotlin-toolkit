@@ -51,12 +51,9 @@ android {
             //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    kotlin {
+        jvmToolchain(17)
     }
 
     buildFeatures {
@@ -80,6 +77,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.navigation)
+    implementation(libs.androidx.compose.material.icons)
     testImplementation(libs.bundles.unitTest)
     debugImplementation(libs.bundles.debug)
 }

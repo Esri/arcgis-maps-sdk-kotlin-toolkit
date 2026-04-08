@@ -25,13 +25,13 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TC5AnimatedViewpoint() {
+fun TC6AnimatedViewpoint() {
     val mapViewProxy = remember { MapViewProxy() }
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "TC5: Animated Viewpoint") },
+                title = { Text(text = "TC6: Animated Viewpoint") },
                 actions = {
                     IconButton(onClick = {
                         coroutineScope.launch {
