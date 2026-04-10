@@ -100,7 +100,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
- * The receiver class of the MapView/SceneView content lambda.
+ * The receiver class of the MapView/SceneView/LocalSceneView content lambda.
  *
  * @since 200.5.0
  */

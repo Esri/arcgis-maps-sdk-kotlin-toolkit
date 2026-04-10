@@ -22,7 +22,7 @@ MapView(
 
 ### Respond to User Input
 
-The composable `MapView` and `SceneView` expose gesture events as lambda callback parameters:
+The composable `MapView`, `SceneView`, and `LocalSceneView` exposes gesture events as lambda callback parameters:
 
 ```kotlin
 val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
@@ -118,7 +118,7 @@ An example of how to identify features and graphics is available in the [MapView
 
 ### Display a Callout
 
-To display a Callout, use the `content` lambda parameter of the `MapView` or `SceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L216) composable function: 
+To display a Callout, use the `content` lambda parameter of the `MapView`, `SceneView`, or `LocalSceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L216) composable function: 
 
 ```kotlin
 MapView(
@@ -236,7 +236,7 @@ in the project.
 
 ### Other Examples:
 
-Other microapps that demonstrate various workflows with the composable `MapView`,`SceneView` and `LocalSceneView` are available:
+Other microapps that demonstrate various workflows with the composable `MapView`,`SceneView`, and `LocalSceneView` are available:
 
 - [MapView Geometry Editor App](../../microapps/MapViewGeometryEditorApp/README.md) demonstrates the use of `GeometryEditor` and `GraphicsOverlay`
 - [MapView Insets App](../../microapps/MapViewInsetsApp/README.md) demonstrates the use of `Insets`
