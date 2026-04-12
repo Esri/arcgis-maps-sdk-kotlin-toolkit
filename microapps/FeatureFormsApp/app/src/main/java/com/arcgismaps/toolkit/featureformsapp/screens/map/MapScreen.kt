@@ -626,6 +626,13 @@ fun MessageDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
+            if (message.actionText != null) {
+                Button(onClick = message.action) {
+                    Text(text = message.actionText)
+                }
+            }
+        },
+        dismissButton = {
             Button(onClick = onDismissRequest) {
                 Text(text = stringResource(R.string.okay))
             }
