@@ -732,6 +732,9 @@ class MapViewModel @Inject constructor(
             if (uiState.value is UIState.Editing) {
                 val featureFormState = (uiState.value as UIState.Editing).featureFormState
                 featureFormState.activeFeatureForm.feature.refresh()
+                // discard edits needed to reset the state of the form including its attachments and
+                // associations to match the refreshed feature
+                featureFormState.discardEdits()
             }
             _uiMessage.value = UIMessage(
                 kind = UIMessage.Kind.Success,
