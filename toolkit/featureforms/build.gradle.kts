@@ -174,6 +174,8 @@ dependencies {
     implementation(libs.bundles.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
+    implementation("com.google.mlkit:genai-speech-recognition:1.0.0-alpha1")
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.bundles.unitTest)

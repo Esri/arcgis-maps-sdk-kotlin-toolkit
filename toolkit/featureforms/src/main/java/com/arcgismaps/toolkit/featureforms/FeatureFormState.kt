@@ -63,6 +63,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.Switch
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.SwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.mlkit.FeatureFormPrompt
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElementState
@@ -146,6 +147,7 @@ public class FeatureFormState private constructor(
         store.addLast(formStateData)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             formStateData.evaluateExpressions()
+            val prompt = FeatureFormPrompt(featureForm)
         }
     }
 

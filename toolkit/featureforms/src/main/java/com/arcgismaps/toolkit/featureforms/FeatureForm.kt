@@ -20,20 +20,29 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.Manifest
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -56,6 +65,7 @@ import com.arcgismaps.mapping.featureforms.UtilityAssociationsFormElement
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureCandidate
 import com.arcgismaps.mapping.featureforms.UtilityAssociationFeatureSource
 import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.voice.VoiceToForm
 import com.arcgismaps.toolkit.featureforms.internal.navigation.FeatureFormNavHost
 import com.arcgismaps.toolkit.featureforms.internal.screens.ContentAwareTopBar
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -418,26 +428,38 @@ public fun FeatureForm(
             val hasBackStack = remember(backStackEntry) {
                 navController.previousBackStackEntry != null
             }
+            var showVoiceInput by rememberSaveable { mutableStateOf(false) }
             backStackEntry?.let { entry ->
-                ContentAwareTopBar(
-                    backStackEntry = entry,
-                    state = state,
-                    onSaveForm = { willNavigate ->
-                        saveForm(state, willNavigate)
-                    },
-                    onDiscardForm = ::discardForm,
-                    onDismissRequest = onDismiss,
-                    hasBackStack = hasBackStack,
-                    showFormActions = showFormActions,
-                    showCloseIcon = showCloseIcon,
-                    isNavigationEnabled = isNavigationEnabled,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (hasBackStack) 8.dp else 16.dp
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ContentAwareTopBar(
+                        backStackEntry = entry,
+                        state = state,
+                        onSaveForm = { willNavigate ->
+                            saveForm(state, willNavigate)
+                        },
+                        onDiscardForm = ::discardForm,
+                        onDismissRequest = onDismiss,
+                        onVoice = {
+                            showVoiceInput = true
+                        },
+                        hasBackStack = hasBackStack,
+                        showFormActions = showFormActions,
+                        showCloseIcon = showCloseIcon,
+                        isNavigationEnabled = isNavigationEnabled,
+                        modifier = Modifier
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = if (hasBackStack) 8.dp else 16.dp
+                            )
+                            .fillMaxWidth(),
+                    )
+                    AnimatedVisibility(showVoiceInput) {
+                        VoiceToForm(
+                            onDismiss = { showVoiceInput = false },
+                            modifier = Modifier.padding(16.dp).fillMaxWidth()
                         )
-                        .fillMaxWidth(),
-                )
+                    }
+                }
             }
         },
         content = {
@@ -455,6 +477,19 @@ public fun FeatureForm(
                 onNavigationEvent = onNavigationEvent,
                 modifier = Modifier.fillMaxSize()
             )
+        },
+        overlay = {
+//            var showVoiceInput by rememberSaveable { mutableStateOf(false) }
+//            FloatingActionButton(
+//                onClick = {
+//                    showVoiceInput = true
+//                }
+//            ) {
+//                Icon(Icons.Default.Mic, contentDescription = "Voice input")
+//            }
+//            if (showVoiceInput) {
+//                VoiceToForm()
+//            }
         },
         modifier = modifier,
         colorScheme = colorScheme,
@@ -474,6 +509,7 @@ public fun FeatureForm(
 internal fun FeatureFormLayout(
     topBar: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
+    overlay: @Composable BoxScope.() -> Unit = {},
     modifier: Modifier = Modifier,
     colorScheme: FeatureFormColorScheme,
     typography: FeatureFormTypography
@@ -482,9 +518,12 @@ internal fun FeatureFormLayout(
         colorScheme = colorScheme,
         typography = typography
     ) {
-        Column(modifier = modifier) {
-            topBar()
-            content()
+        Box(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                topBar()
+                content()
+            }
+            overlay()
         }
     }
 }

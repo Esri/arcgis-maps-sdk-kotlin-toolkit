@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -99,6 +100,7 @@ internal fun ContentAwareTopBar(
     onSaveForm: suspend (Boolean) -> Result<Unit>,
     onDiscardForm: suspend (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
+    onVoice: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val formData = remember(backStackEntry) { state.getActiveFormStateData() }
@@ -160,6 +162,7 @@ internal fun ContentAwareTopBar(
                 hasEdits = if (showFormActions) hasEdits else false,
                 showCloseIcon = showCloseIcon,
                 showBackIcon = hasBackStack,
+                showVoiceIcon = backStackEntry.destination.hasRoute<NavigationRoute.Form>(),
                 isNavigationEnabled = navigationEnabled,
                 onBackPressed = {
                     onBackAction(backStackEntry)
@@ -177,6 +180,7 @@ internal fun ContentAwareTopBar(
                         onDiscardForm(false)
                     }
                 },
+                onVoice = onVoice,
                 modifier = modifier
             )
             InitializingExpressions(
@@ -309,11 +313,13 @@ private fun FeatureFormTitle(
     hasEdits: Boolean,
     showCloseIcon: Boolean,
     showBackIcon: Boolean,
+    showVoiceIcon: Boolean,
     isNavigationEnabled: Boolean,
     onBackPressed: () -> Unit,
     onClose: () -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
+    onVoice: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -355,6 +361,14 @@ private fun FeatureFormTitle(
                     Text(
                         text = "Unsaved Changes",
                         style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            if (showVoiceIcon) {
+                IconButton(onClick = onVoice) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = "Voice input"
                     )
                 }
             }
@@ -423,11 +437,13 @@ private fun FeatureFormTitlePreview() {
         hasEdits = true,
         showCloseIcon = true,
         showBackIcon = false,
+        showVoiceIcon = true,
         isNavigationEnabled = true,
         onBackPressed = {},
         onClose = {},
         onSave = {},
         onDiscard = {},
+        onVoice = {},
         modifier = Modifier.padding(8.dp)
     )
 }
