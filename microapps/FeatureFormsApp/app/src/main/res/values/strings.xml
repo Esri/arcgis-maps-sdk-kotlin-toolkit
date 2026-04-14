@@ -80,4 +80,7 @@
     <string name="map_is_in_sync_with_service">The Map is in sync with the service</string>
     <string name="failed_to_sync_with_the_service">Failed to sync with the service</string>
     <string name="failed_to_create_sync_parameters">Failed to create sync parameters</string>
+    <string name="undo_all_edits">Undo all edits</string>
+    <string name="failed_to_rollback_edits">Failed to rollback local edits</string>
+    <string name="edits_rolled_back">All local edits have been rolled back</string>
 </resources>
